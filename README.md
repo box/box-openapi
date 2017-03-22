@@ -133,6 +133,26 @@ It needs to be changed as below.
 var defaultClient = Box20Api.ApiClient.instance;
 ```
 
+For uploading a file to work, the callApi method in ApiClient.js needs to be changed. The line that needs to be modified looks like
+```
+if (this.isFileParam(_formParams[key])) {
+    // file field
+    request.attach(key, _formParams[key]);
+} else {
+    request.field(key, _formParams[key]);
+}
+```
+
+It needs to be changed as below.
+
+```
+if (this.isFileParam(_formParams[key]) || key === 'file') {
+    // file field
+    request.attach(key, _formParams[key]);
+} else {
+    request.field(key, _formParams[key]);
+}
+```
 Copyright and License
 ---------------------
 
