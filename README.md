@@ -51,7 +51,7 @@ java -jar swagger-codegen-cli.jar generate -i ${box-openapi}/box-v2-api.upload.o
 
 ### C#
 
-C# client generation produces the default package structure same as Java. That leads to the same issue of conflict of classes. For C Sharp, the custom packages need to be given differently.
+C# client generation produces the default package structure same as Java. That leads to the same issue of conflict of classes. For C#, the custom packages need to be given differently.
 
 Box Authorization API specification: Example for creating the custom package io.swagger.authorization is as follows.
 
