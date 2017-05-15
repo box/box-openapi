@@ -3,7 +3,7 @@
 Box Open API specification
 ==========================
 
-The Box Open API specificaton for interacting with the
+The Box Open API specification for interacting with the
 [Box Content API](https://developers.box.com/docs/).
 
 Quickstart
