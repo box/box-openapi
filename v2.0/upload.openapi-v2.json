@@ -147,7 +147,8 @@
             "file_version_retention",
             "legal_hold_policy",
             "legal_hold_policy_assignment",
-            "legal_hold"
+            "legal_hold",
+            "upload_session"
           ]
         }
       }
@@ -539,6 +540,177 @@
           }
         }
       ]
+    },
+    "UploadSessionEndpoints": {
+      "type": "object",
+      "description": "URLs for all other possible calls to this session.",
+      "properties": {
+        "upload_part": {
+          "type": "string",
+          "description": "The URL for upload part API."
+        },
+        "commit": {
+          "type": "string",
+          "description": "The URL for commit API."
+        },
+        "abort": {
+          "type": "string",
+          "description": "The URL for abort API."
+        },
+        "list_parts": {
+          "type": "string",
+          "description": "The URL for list parts API."
+        },
+        "status": {
+          "type": "string",
+          "description": "The URL for status API."
+        },
+        "log_event": {
+          "type": "string",
+          "description": "The URL for log event API."
+        }
+      }
+    },
+    "UploadSession": {
+      "type": "object",
+      "description": "Upload Session.",
+      "allOf": [
+        {
+          "$ref": "#/definitions/Reference"
+        },
+        {
+          "properties": {
+            "session_expires_at": {
+              "type": "string",
+              "format": "date-time",
+              "description": "UTC Time in RFC 3339 date timeformat: 2016-04-17T09:12:36-00:00."
+            },
+            "part_size": {
+              "type": "integer",
+              "format": "int64",
+              "description": "The part size in bytes that must be used for all parts of this session. Only the last part is allowed to be of a smaller size."
+            },
+            "total_parts": {
+              "type": "integer",
+              "format": "int32",
+              "description": "The total number of parts expected in this session, as determined by the file size and part size."
+            },
+            "num_parts_processed": {
+              "type": "integer",
+              "format": "int32",
+              "description": "Tracks Box’s progress in processing all the parts that have been uploaded. Always equal to 0 when creating new upload session. In other cases, this will be the number of parts that have been processed by server. When all parts have been uploaded, but Commit API returned 202, you can check this value == total_parts to check if file was uploaded."
+            },
+            "session_endpoints": {
+              "$ref": "#/definitions/UploadSessionEndpoints"
+            }
+          }
+        }
+      ]
+    },
+    "FileUploadSessionRequest": {
+      "type": "object",
+      "properties": {
+        "folder_id": {
+          "description" : "The ID of the folder that will contain the new file",
+          "type" : "string"
+        },
+        "file_size": {
+          "description" : "The total number of bytes in the file to be uploaded",
+          "type" : "integer",
+          "format": "int64"
+        },
+        "file_name": {
+          "description" : "Name of new file",
+          "type" : "string"
+        }
+      }
+    },
+    "VersionUploadSessionRequest": {
+      "type": "object",
+      "properties": {
+        "file_size": {
+          "description" : "The total number of bytes in the file to be uploaded",
+          "type" : "integer",
+          "format": "int64"
+        },
+        "file_name": {
+          "description" : "Name of new file",
+          "type" : "string"
+        }
+      }
+    },
+    "UploadPartResponse": {
+      "type": "object",
+      "properties": {
+        "part": {
+          "$ref": "#/definitions/Part"
+        }
+      }
+    },
+    "Part": {
+      "type": "object",
+      "properties": {
+        "part_id": {
+          "type": "string"
+        },
+        "offset": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "size": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "sha1": {
+          "type": "string"
+        }
+      }
+    },
+    "PartList": {
+      "type": "object",
+      "properties": {
+        "entries": {
+          "description": "An array of parts",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Part"
+          }
+        },
+        "offset": {
+          "description": "The 0-based offset of the first entry in this set. This will be the same as the offset query parameter.",
+          "type": "integer",
+          "format": "int32"
+        },
+        "limit": {
+          "description": "The limit that was used for these entries. This will be the same as the limit query parameter unless that value exceeded the maximum value allowed.",
+          "type": "integer",
+          "format": "int32"
+        },
+        "total_count": {
+          "description": "This will always be equal to the number of expected parts in the session (i.e. ceiling(file size / part size)).",
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
+    "CommitRequest": {
+      "type": "object",
+      "properties": {
+        "parts": {
+          "description": "An arrayof Part objects. MUST be ordered by offset.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Part"
+          }
+        },
+        "attributes": {
+          "description": "Optional. An array of attributes to set on the created file. See https://box-content.readme.io/reference#file-object",
+          "type": "object",
+          "additionalProperties": {
+            "type": "object"
+          }
+        }
+      }
     }
   },
   "paths": {
@@ -647,6 +819,428 @@
             "description": "The upload would be successful",
             "schema": {
               "$ref": "#/definitions/FileList"
+            }
+          }
+        }
+      }
+    },
+    "/files/upload_sessions": {
+      "post": {
+        "tags": [
+          "SuperchargedUpload"
+        ],
+        "operationId": "createUploadSession",
+        "summary": "Create File Upload Session",
+        "description": "Use the Uploads API to create a new session to upload a new file.",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/FileUploadSessionRequest"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "File upload error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "201": {
+            "description": "The upload session creation would be successful",
+            "schema": {
+              "$ref": "#/definitions/UploadSession"
+            }
+          },
+          "409": {
+            "description": "Name collision occurs.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "412": {
+            "description": "Preconditioned failed.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "413": {
+            "description": "Request entity too large.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "400": {
+            "description": "Bad request. See response body for details.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/files/{FILE_ID}/upload_sessions": {
+      "post": {
+        "tags": [
+          "SuperchargedUpload"
+        ],
+        "operationId": "createUploadSessionNewVersion",
+        "summary": "Create File Upload Session",
+        "description": "Use the Uploads API to create a new session to upload a new version of existing file.",
+        "parameters": [
+          {
+            "name": "FILE_ID",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/VersionUploadSessionRequest"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "File upload error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "201": {
+            "description": "The upload session creation would be successful",
+            "schema": {
+              "$ref": "#/definitions/UploadSession"
+            }
+          },
+          "409": {
+            "description": "Name collision occurs. See response body for details.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "412": {
+            "description": "Preconditioned failed. See response body for details.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "413": {
+            "description": "Request entity too large. See response body for details.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "400": {
+            "description": "Bad request. See response body for details.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/files/upload_sessions/{SESSION_ID}": {
+      "get": {
+        "tags": [
+          "SuperchargedUpload"
+        ],
+        "operationId": "getUploadSession",
+        "summary": "Upload Session Details",
+        "description": "Return the information about this session.",
+        "parameters": [
+          {
+            "name": "SESSION_ID",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Get upload session error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "200": {
+            "description": "Get would be successful",
+            "schema": {
+              "$ref": "#/definitions/UploadSession"
+            }
+          },
+          "400": {
+            "description": "Bad request. See response body for details.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "SuperchargedUpload"
+        ],
+        "operationId": "uploadPart",
+        "summary": "Upload Part",
+        "description": "Upload a part of the file to this session.",
+        "consumes": [
+          "application/octet-stream"
+        ],
+        "parameters": [
+          {
+            "name": "SESSION_ID",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "Digest",
+            "description": "The message digest of the partbody, formatted as specified by RFC 3230. The usage is sha=BASE64_ENCODED_DIGEST. Currently only SHA-1 is supported.As per RFC 3230, the output from SHA-1 algorithm must be Base64 encoded.",
+            "in": "header",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "Content-Range",
+            "description": "Byte range of part within overall file. E.g: bytes 8388608-16777215/445856194. It must not overlap with the range of a part already uploaded to this session.",
+            "in": "header",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "bytes",
+            "description": "Part bytes",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "byte"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Part upload error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "200": {
+            "description": "Part upload would be successful",
+            "schema": {
+              "$ref": "#/definitions/UploadPartResponse"
+            }
+          },
+          "409": {
+            "description": "Part conflict. See response body for details.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "412": {
+            "description": "Preconditioned failed. See response body for details.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "416": {
+            "description": "Request range bit satisfiable. See response body for details.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "400": {
+            "description": "Bad request. See response body for details.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "SuperchargedUpload"
+        ],
+        "operationId": "abortUploadSession",
+        "summary": "Abort Upload Session",
+        "description": "Abort the upload session and discard all data uploaded. This cannot be reversed.",
+        "parameters": [
+          {
+            "name": "SESSION_ID",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Get upload session error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "204": {
+            "description": "Abort would be successful"
+          },
+          "400": {
+            "description": "Bad request. See response body for details.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/files/upload_sessions/{SESSION_ID}/parts": {
+      "get": {
+        "tags": [
+          "SuperchargedUpload"
+        ],
+        "operationId": "listParts",
+        "summary": "List Parts",
+        "description": "Return the list of parts uploaded so far for this session.",
+        "parameters": [
+          {
+            "name": "SESSION_ID",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "offset",
+            "description": "Zero-based index of first part to return. Defaults to zero, if not specified.",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "limit",
+            "description": "How many parts to return. Defaults to 1000 if not specified, which is also the maximum value allowed.",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Upload commit error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "200": {
+            "description": "List would be successful",
+            "schema": {
+              "$ref": "#/definitions/PartList"
+            }
+          },
+          "400": {
+            "description": "Bad request. See response body for details.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/files/upload_sessions/{SESSION_ID}/commit": {
+      "post": {
+        "tags": [
+          "SuperchargedUpload"
+        ],
+        "operationId": "commitUploadSession",
+        "summary": "Commit Upload",
+        "description": "Create a Box file comprised of the uploaded parts.",
+        "parameters": [
+          {
+            "name": "SESSION_ID",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "Digest",
+            "description": "The message digest of the file, formatted as specified by RFC 3230. The usage is sha=BASE64_ENCODED_DIGEST. Currently only SHA-1 is supported.As per RFC 3230, the output from SHA-1 algorithm must be Base64 encoded.",
+            "in": "header",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "If-Match",
+            "description": "This is in the ‘etag’ field of the file object. See https://developer.box.com/v2.0/reference#if-match",
+            "in": "header",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "If-Non-Match",
+            "description": "This is in the ‘etag’ field of the file object. See https://developer.box.com/v2.0/reference#if-match",
+            "in": "header",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": "true",
+            "schema": {
+              "$ref": "#/definitions/CommitRequest"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Part upload error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "201": {
+            "description": "The file has been committed successfully",
+            "schema": {
+              "$ref": "#/definitions/FileList"
+            }
+          },
+          "202": {
+            "description": "All parts have been uploaded but not yet processed. Use Get Upload Session API to get more information about the progress of processing the parts. Retry commit afterwards",
+            "headers": {
+              "Retry-After": {
+                "description": "Indicates the number of seconds the client should wait before attempting their commit request again.",
+                "type": "integer"
+              }
+            }
+          },
+          "409": {
+            "description": "There is already a file with the same name in the target folder.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "412": {
+            "description": "The If-Match condition failed.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "413": {
+            "description": "Request entity too large. See response body for details.",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "400": {
+            "description": "Bad request. See response body for details.",
+            "schema": {
+              "$ref": "#/definitions/Error"
             }
           }
         }
