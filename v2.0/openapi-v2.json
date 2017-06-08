@@ -1241,11 +1241,7 @@
         },
         "scope": {
           "type": "string",
-          "description": "The scope of the object.",
-          "enum": [
-            "enterprise",
-            "global"
-          ]
+          "description": "The scope of the object."
         },
         "displayName": {
           "type": "string",
@@ -1287,8 +1283,8 @@
       "title": "Metadata Object",
       "description": "Metadata can be used for many purposes. Enterprises may want to have a better way to organize their digital assets for their marketing teams or developers may want to provide advanced content functionality such as facilitating workflows or approvals. Metadata is also visible in the Box Web Application. To learn more, please visit the help documentation.\nTemplates\nMetadata that belongs to a file/folder is grouped by templates. Templates allow the metadata service to provide a multitude of services, such as pre-defining sets of key:value pairs or schema enforcement on specific fields. For example, a marketingCollateral template may define where and when specific marketing content should be used. You can also see the representation of the template in the Box web application while navigating to a file preview. Currently, metadata associated with folders does not show in the web application.\nEach file/folder can have multiple distinct template instances associated with it, such as a marketingCollateral and retentionPolicy template instances. Template instances are also grouped by scopes. Currently, the only scopes support are enterprise and global. Enterprise scopes are defined on a per enterprises basis, whereas global scopes are Box application-wide. Attribute order within template instances is not guaranteed.\nCurrently, there are four attributes supported by templates: string, enum, float, and  date (RFC 3339).\n\nGlobal Properties Template\nIn addition to enterprise scoped templates, every file on Box has access to the global properties template. The Properties template is a bucket of free form key:value string pairs, with no additional schema associated with it. Properties are ideal for scenarios where applications want to write metadata to file objects in a flexible way, without pre-defined template structure.\nProperties follow all the conventions of standard templates, except for being located at a different endpoint. All requests made to the properties template must be made to /files/{file_id}/metadata/global/properties.",
       "type": "object",
-      "additionalProperties": {
-        "type": "object"
+      "example": {
+        "test": "testvalue"
       }
     },
     "MetadataList": {
@@ -2445,8 +2441,11 @@
             "enum": [
               "addEnumOption",
               "addField",
+              "editEnumOption",
               "editField",
               "editTemplate",
+              "removeEnumOption",
+              "removeField",
               "reorderEnumOptions",
               "reorderFields"
             ]
@@ -2474,7 +2473,16 @@
             "description": "For operations that affect multiple enum options, the keys of the enum options to be affected."
           }
         }
-      }
+      },
+      "example": [
+        {
+          "op":"editField",
+          "fieldKey":"test",
+          "data":{
+            "description":"Test"
+          }
+        }
+      ]
     },
     "UpdateMetadata": {
       "type": "array",
@@ -2510,7 +2518,14 @@
             "description": "Required for move or copy. The path that designates the source key, in the format of a JSON-Pointer, formatted in the same way as path. Used in conjunction with path: from specifies the source, path specifies the destination."
           }
         }
-      }
+      },
+      "example": [
+        {
+          "op": "replace",
+          "path": "/test",
+          "value": "changedvalue"
+        }
+      ]
     },
     "CreateLegalHoldPolicyAssignment": {
       "type": "object",
@@ -5434,7 +5449,7 @@
           }
         ],
         "responses": {
-          "200": {
+          "201": {
             "description": "The schema representing the metadata template created.",
             "schema": {
               "$ref": "#/definitions/MetadataTemplate"
@@ -5994,7 +6009,7 @@
         }
       }
     },
-    "/files/{FILE_ID}/metadata/": {
+    "/files/{FILE_ID}/metadata": {
       "get": {
         "tags": [
           "Metadata"
@@ -6170,7 +6185,7 @@
           }
         ],
         "responses": {
-          "200": {
+          "201": {
             "description": "An instance of the template that includes key:value pairs defined by a user or application.",
             "schema": {
               "$ref": "#/definitions/Metadata"
@@ -6501,7 +6516,7 @@
           }
         ],
         "responses": {
-          "200": {
+          "201": {
             "description": "An instance of the template that includes key:value pairs defined by a user or application.",
             "schema": {
               "$ref": "#/definitions/Metadata"

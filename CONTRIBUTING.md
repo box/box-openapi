@@ -34,7 +34,7 @@ Before making any changes to the specification, please file an issue stating the
 problem you want to solve or the feature you want to implement. This allows us
 to give you feedback before you make any changes. There may be a known
 limitation that can't be addressed, or a bug that has already been fixed in a
-different way. Theissue allows us to communicate and figure out if it's worth
+different way. The issue allows us to communicate and figure out if it's worth
 your time for the project.
 
 ### Step 2: Fork this repository in GitHub
