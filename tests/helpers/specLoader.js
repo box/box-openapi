@@ -1,31 +1,33 @@
 const fs = require('fs')
-const glob = require('glob')
+const { Resolver } = require("@stoplight/json-ref-resolver")
+
+// Initialize our custom resolver of the specification
+const resolver = new Resolver({
+  readers: {
+    file: {
+      // Translate paths to the right path
+      read(uri) {
+        return JSON.parse(fs.readFileSync(`./v2.0/${uri.path()}`))
+      }
+    }
+  }
+})
 
 /**
- * Reads in all specification filenames
- */
-const loadFileNames = () => {
-  return glob.sync('./v2.0/*.openapi.json')
-}
-
-/**
- * Reads in a file by name
- * 
- * @param {String} fileName 
- */
-const read = (fileName) => {
-  return JSON.parse(fs.readFileSync(fileName))
-}
-
-/**
- * A loader for reading specifications from file
+ * A loader for reading the API specification from file and merging it into one file
  */
 class SpecLoader {
-  loadSpecifications() {
-    let fileNames = loadFileNames()
-    return fileNames.map(fileName => {
-      return { fileName, content: read(fileName) }
-    })
+  async loadSpecification() {
+    const root = JSON.parse(fs.readFileSync('./v2.0/openapi.json'))
+    return await resolver.resolve(root).then(resolved => resolved.result)
+  }
+
+  async writeSpecification() {
+    const specification = await this.loadSpecification()
+    if (!fs.existsSync('build')){
+      fs.mkdirSync('build');
+    }
+    fs.writeFileSync('./build/openapi.json', JSON.stringify(specification, null, 2))
   }
 }
 

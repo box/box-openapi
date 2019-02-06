@@ -1,17 +1,15 @@
 // Load all specifications
 const loader = require('./helpers/specLoader')
-const specifications = loader.loadSpecifications()
 
-test('Expect there to be at least one specification', () => {
-  expect(specifications).not.toBeNull()
-  expect(specifications.length).not.toBe(0)
+let specification = null
+beforeAll(async () => {
+  specification = await loader.loadSpecification()
 })
 
-specifications.forEach(({ fileName, content }) => {
-  test(`Validating specification: ${fileName}`, () => {
-    expect(content).toBeValidSpecification()
-  })
+test('Expect the API specification to be loaded', async () => {
+  expect(specification).not.toBeNull()
 })
 
-  
-
+test('Expect the API specification to be valid', () => {
+  expect(specification).toBeValidSpecification()
+})
