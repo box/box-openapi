@@ -1,5 +1,6 @@
 const fs = require('fs')
 const { Resolver } = require("@stoplight/json-ref-resolver")
+const yaml = require('js-yaml')
 
 // Initialize our custom resolver of the specification
 const resolver = new Resolver({
@@ -7,7 +8,10 @@ const resolver = new Resolver({
     file: {
       // Translate paths to the right path
       read(uri) {
-        return JSON.parse(fs.readFileSync(`./v2.0/${uri.path()}`))
+        const path = uri.path()
+        const content = fs.readFileSync(`./v2.0/${path}`)
+        if (path.endsWith('.json')) { return JSON.parse(content) }
+        else if (path.endsWith('.yml')) { return yaml.load(content) }
       }
     }
   }
