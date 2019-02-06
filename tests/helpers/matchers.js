@@ -45,10 +45,10 @@ expect.extend({
     const message = results.map(({ severity, message, summary, path }) => {
       // Colorize the identifier according to severity
       const colorizer = severity == 50 ? colors.yellow : colors.green
-      console.log(path)
       let identifier = path.join(".")
       if (path.join(".").length === 0) { identifier = 'root' }
       identifier = colorizer(identifier)
+      
       const explanation = colors.grey(`(${summary})`)
 
       return `${identifier} ${message} ${explanation}`
