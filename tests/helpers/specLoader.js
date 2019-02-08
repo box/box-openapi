@@ -26,12 +26,12 @@ class SpecLoader {
     return await resolver.resolve(root).then(resolved => resolved.result)
   }
 
-  async writeSpecification() {
+  async writeSpecification(target = 'build') {
     const specification = await this.loadSpecification()
-    if (!fs.existsSync('build')){
-      fs.mkdirSync('build');
+    if (!fs.existsSync(target)){
+      fs.mkdirSync(target);
     }
-    fs.writeFileSync('./build/openapi.json', JSON.stringify(specification, null, 2))
+    fs.writeFileSync(`./${target}/openapi.json`, JSON.stringify(specification, null, 2))
   }
 }
 

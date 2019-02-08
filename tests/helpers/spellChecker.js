@@ -1,4 +1,10 @@
-let checker = require('spellchecker')
+const checker = require('spellchecker')
+const fs = require('fs')
+const yaml = require('js-yaml')
+
+// Extend the dictionary with our own accepted words
+const acceptedWords = fs.readFileSync('./v2.0/dictionary/accepted_words.yml')
+checker.add(yaml.load(acceptedWords))
 
 /** 
  * Extracts all titles and descriptions from a specification
