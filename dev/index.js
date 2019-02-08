@@ -6,5 +6,6 @@ SwaggerUI({
   dom_id: '#swagger-ui',
   docExpansion: 'full',
   deepLinking: true,
-  displayOperationId: true
+  displayOperationId: true,
+  maxDisplayedTags: 1
 })

@@ -3,7 +3,7 @@ let colors = require('colors/safe')
 
 // Import the validator and spell checker
 const spectral = require('./validator')
-const spellChecker = require('./spellchecker')
+const spellChecker = require('./spellChecker')
 
 expect.extend({
   // Extend expect to spell check the specification file
