@@ -1,11 +1,11 @@
-# Box Open API specification
+# Box OpenAPI 3.0 specification
 
 > This branch is a work in progress.
 
-The Box OpenAPI 3 Specification (OAS3) for interacting with the
+The Box OpenAPI 3.0 Specification (OAS3) for interacting with the
 [Box Platform API](https://developers.box.com/).
 
-This repository only contains the raw source for the specification. For a combined and resolved version, please check the [full specification](https://opensource.box.com/box-openapi/openapi.json).
+This repository contains the raw source for the specification. For a combined, resolved version please check this [fully build specification](https://opensource.box.com/box-openapi/openapi.json).
 
 ## Development
 
