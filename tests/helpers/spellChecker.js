@@ -14,10 +14,11 @@ words.forEach(checker.add)
 const extract = (item, corpus=[], parents=[]) => {
   Object.keys(item).forEach(key => {
     // Loop every item
-    const value = item[key]
+    let value = item[key]
     
     // Extract every description and title with String values and add them to the list
     if (['description', 'title'].includes(key) && typeof(value) === 'string') {
+      value = value.replace(/\s+/g, ' ')
       let path = [...parents, key].join('.')
       corpus.push({ path, value })
     // Otherwise, check if the item is an object and recursively continue searching

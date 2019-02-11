@@ -3,11 +3,10 @@ let colors = require('colors/safe')
 
 // Import the validator and spell checker
 const spectral = require('./validator')
-const spellChecker = require('./spellChecker')
 
 expect.extend({
   // Extend expect to spell check the specification file
-  toPassSpellChecks(content) {
+  toPassSpellChecks(content, spellChecker) {
     const results = spellChecker.check(content)
     const pass = results.length === 0
 
@@ -16,8 +15,12 @@ expect.extend({
       // Colorize the identifier according to severity
       const identifier = colors.green(path)
       let text = value
-      checks.forEach(({start, end }) => {
-        text = `${text.substr(0, start)}${colors.yellow(text.substr(start, end-start))}${text.substr(end)}`
+      let offset = 0
+      checks.forEach(({ start, end }) => {
+        let length = end-start
+        text = `${text.substr(0, offset+start)}${colors.yellow(text.substr(offset+start, length))}${text.substr(offset+end)}`
+        // increment offet because coloring adds 10 character points
+        offset += 10
       })
       return `${identifier}: ${text}`
     }).join('\n')

@@ -13,6 +13,12 @@ This repository contains the raw source for the specification. For a combined, r
 
 This project requires Node for testing, linting, and compilation.
 
+It also needs Hunspell for spell checking to be installed, as this is what is used when running on Travis.
+
+```sh
+brew install hunspell
+```
+
 ### Local Development
 
 To work on the source, install the dependencies, start the local web server, and watch for changes.
