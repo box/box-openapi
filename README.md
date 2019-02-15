@@ -13,10 +13,12 @@ This repository contains the raw source for the specification. For a combined, r
 
 This project requires Node for testing, linting, and compilation.
 
-It also needs Hunspell for spell checking to be installed, as this is what is used when running on Travis.
+It also needs `hunspell` for spell checking to be installed, as this is what is used when running on Travis.
+
+Additionally, we use `yamllint` to lint the yaml files.
 
 ```sh
-brew install hunspell
+brew install hunspell yamllint
 ```
 
 ### Local Development
