@@ -34,6 +34,24 @@ npm start
 
 This will open a Swagger UI preview.
 
+### How To: Edit Resources
+
+Request and response resources are located in `/v2.0/resources/` and are written
+in Yaml.
+
+Run `npm start` to start the dev server and test watcher, or just run `npm run watch`
+to run the tests and linter. 
+
+Resources are automatically linted by `yamllinter`. Resources are not automatically 
+included into the spec, and will need to be added to `v2.0/resources/_index.json`
+before they are tested.
+
+Please make sure:
+
+* Every resource parameter has a type (and optional format) -[see OAS3 spec](https://swagger.io/docs/specification/data-models/data-types/)
+* Every resource parameter has a description and example
+* Every resource parameter passes yaml linting
+* Every resource parameter is seperated by a new line to improve readability
 
 ## Copyright and License
 

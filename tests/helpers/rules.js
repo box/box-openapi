@@ -29,10 +29,26 @@ module.exports = {
         }
       },
       ensure_operation_id_format: {
-        summary: 'Ensure th[e operation ID matches the path and verb',
+        summary: 'Ensure the operation ID matches the path and verb',
         given: '$.paths[*][*]',
         then: {
           function: 'validateOperationIdFormat'
+        }
+      },
+      ensure_parameters_example: {
+        summary: 'Ensures every parameter has an example',
+        given: '$.paths[*][*].parameters[*]',
+        then: {
+          field: 'example',
+          function: 'truthy'
+        }
+      }, 
+      ensure_properties_example: {
+        summary: 'Ensures every property has an example',
+        given: '$.components.schemas[*].properties[*]',
+        then: {
+          field: 'example',
+          function: 'truthy'
         }
       } 
     } 
