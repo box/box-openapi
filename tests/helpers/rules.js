@@ -1,7 +1,20 @@
+/**
+ * Verify that the operationId is as expected.
+ * 
+ * @param {object} endpoint The endpoint to verify
+ * @param {object} options The options passed into this validator
+ * @param {object} object.given JSON path for this object
+ */
 const validateOperationIdFormat = (endpoint, options, { given }) => {
+  // remove the first element
   given.shift()
-  const id = given.reverse().join('').replace(/\//g, '_')
+  // create the ID
+  const id = given.reverse()
+                  .join('')
+                  .replace(/\//g, '_')
+                  .replace(/{.*}/g, 'id')
 
+  // check that the ID is as expected
   if (id != endpoint.operationId) {
     return [
       { message: `Expected operationId to equal ${id}`}

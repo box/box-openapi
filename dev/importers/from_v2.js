@@ -73,7 +73,8 @@ const exportPaths = (spec) => {
 const importPaths = async (fileName) => {
   let oldSpec = readSpec(fileName)
   let newSpec = await convertSpec(oldSpec)
-  exportPaths(newSpec)
+  console.log(newSpec)
+  // exportPaths(newSpec)
 }
 
 const run = async () => {
