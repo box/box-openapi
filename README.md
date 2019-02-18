@@ -34,24 +34,36 @@ npm start
 
 This will open a Swagger UI preview.
 
-### How To: Edit Resources
+### How To: Add a resource
 
-Request and response resources are located in `/v2.0/resources/` and are written
-in Yaml.
+Request and response resources are located in the 
+`/v2.0/resources/` folder. They are written in [YAML](https://en.wikipedia.org/wiki/YAML).
 
-Run `npm start` to start the dev server and test watcher, or just run `npm run watch`
-to run the tests and linter. 
+Before editing any fules, run `npm start` to start the dev server, Swagger UI
+and tests watcher. Alternatively, just run `npm run watch` to run automatically
+watch and run the linter and tests.
 
-Resources are automatically linted by `yamllinter`. Resources are not automatically 
-included into the spec, and will need to be added to `v2.0/resources/_index.json`
-before they are tested.
+Resources are automatically linted by `yamllinter`, ensuring that they are valid
+YAML. Resources are not automatically included into the spec, as
+you will need to explicitly add then to the `v2.0/resources/_index.json` file.
+
+Once resources have been added to this file, they are automatically tested
+to ensure they are valid OpenAPI Specification 3.0, as well spell checking, and 
+some other tests.
+
+#### Tips & Tricks
 
 Please make sure:
 
-* Every resource parameter has a type (and optional format) -[see OAS3 spec](https://swagger.io/docs/specification/data-models/data-types/)
+* Every resource parameter has a type (and optional format)
 * Every resource parameter has a description and example
-* Every resource parameter passes yaml linting
+* Every resource parameter passes the YAML linter
 * Every resource parameter is seperated by a new line to improve readability
+
+Some useful resources:
+
+* [OpenAPI Specification 3.0 (OAS3)](https://swagger.io/specification/)
+* [OAS3 data types](https://swagger.io/docs/specification/data-models/data-types/)
 
 ## Copyright and License
 

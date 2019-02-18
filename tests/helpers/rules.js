@@ -9,6 +9,17 @@ const validateOperationIdFormat = (endpoint, options, { given }) => {
   }
 }
 
+const ensureReferencesResolved = (item) => {
+  if (typeof(item) === 'object' && '$ref' in item) {
+    let ref = item['$ref']
+    if (!typeof(ref) === 'string' || !ref.startsWith('#/')) {
+      return [
+        { message: `Expected all file references to be resolved - ${ref}`}
+      ]
+    } 
+  }
+}
+
 module.exports = {
   boxRules: () => {
     return {
@@ -50,6 +61,13 @@ module.exports = {
           field: 'example',
           function: 'truthy'
         }
+      },
+      ensure_references_resolved: {
+        summary: 'Ensures every file reference has been resolved',
+        given: '$..*',
+        then: {
+          function: 'ensureReferencesResolved'
+        }
       } 
     } 
   },
@@ -57,6 +75,7 @@ module.exports = {
   boxFunctions: () => {
     return {
       validateOperationIdFormat: validateOperationIdFormat,
+      ensureReferencesResolved: ensureReferencesResolved
     }
   }
 }
