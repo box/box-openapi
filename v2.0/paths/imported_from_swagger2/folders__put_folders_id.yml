@@ -1,0 +1,197 @@
+---
+tags:
+  - Folders
+operationId: put_folders_id
+summary: 'Update Folder, Create Shared Link, Create or Delete'
+description: |-
+  Used to update information about the folder. To move a folder, update the ID
+  of its parent. To enable an email address that can be used to upload files to
+  this folder, update the folder_upload_email attribute. An optional If-Match
+  header can be included to ensure that client only updates the folder if it
+  knows about the latest version.
+
+
+  Used to create a shared link for this particular folder. Please see here for
+  more information on the permissions available for shared links. In order to
+  get default shared link status, set it to an empty access level, i.e.
+  {"shared_link": {}}. In order to disable a shared link, send this same type of
+  PUT request with the value of shared_link set to null, i.e. {"shared_link":
+  null}
+
+
+  To add or remove an item from a collection, you do a PUT on that item and
+  change the list of collections it belongs to. Philosophically, this is similar
+  to the way “move” operations work on files and folders: you do a PUT on the
+  item and change its parent. It’s the same idea with collections, except you’re
+  changing which collection(s) the item belongs to instead of the folder it
+  belongs to. Currently the only collection available is the favorites
+  collection, and you’ll need to know it’s ID for the user that is making the
+  API call, since every user has a different favorites collection_id.
+
+  The Add/Remove API handling will check all ids passed in before performing any
+  add/removal operations. If any collection ids are malformed or do not exist in
+  the user’s account, the API call will throw a 400. Only if all of the
+  collection ids are valid will the adds and removals be carried out.
+parameters:
+  - name: FOLDER_ID
+    in: path
+    required: true
+    schema:
+      type: string
+  - name: fields
+    description: Attribute(s) to include in the response
+    in: query
+    required: false
+    schema:
+      type: string
+  - name: If-Match
+    description: This is in the ‘etag’ field of the folder object.
+    in: header
+    required: false
+    schema:
+      type: string
+requestBody:
+  $ref: '#/components/requestBodies/Folder'
+responses:
+  '200':
+    description: The updated folder
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/Folder'
+        examples:
+          response:
+            value:
+              type: folder
+              id: '11446498'
+              sequence_id: '1'
+              etag: '1'
+              name: New Folder Name!
+              created_at: '2012-12-12T10:53:43-08:00'
+              modified_at: '2012-12-12T11:15:04-08:00'
+              description: Some pictures I took
+              size: 629644
+              path_collection:
+                total_count: 1
+                entries:
+                  - type: folder
+                    id: '0'
+                    name: All Files
+              created_by:
+                type: user
+                id: '17738362'
+                name: sean rose
+                login: sean@box.com
+              modified_by:
+                type: user
+                id: '17738362'
+                name: sean rose
+                login: sean@box.com
+              owned_by:
+                type: user
+                id: '17738362'
+                name: sean rose
+                login: sean@box.com
+              shared_link:
+                url: 'https://www.box.com/s/vspke7y05sb214wjokpk'
+                is_password_enabled: false
+                download_count: 0
+                preview_count: 0
+                access: open
+                permissions:
+                  can_download: true
+                  can_preview: true
+              folder_upload_email:
+                access: open
+                email: upload.Picture.k13sdz1@u.box.com
+              parent:
+                type: folder
+                id: '0'
+                name: All Files
+              item_status: active
+              item_collection:
+                total_count: 1
+                entries:
+                  - type: file
+                    id: '5000948880'
+                    sequence_id: '3'
+                    etag: '3'
+                    sha1: 134b65991ed521fcfe4724b7d814ab8ded5185dc
+                    name: tigers.jpeg
+                offset: 0
+                limit: 100
+  '201':
+    description: |-
+      When 'collections' is specified in body the folder is moved into
+      collection with the ID
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/Folder'
+        examples:
+          response:
+            value:
+              type: folder
+              id: '11446498'
+              sequence_id: '1'
+              etag: '1'
+              name: New Folder Name!
+              created_at: '2012-12-12T10:53:43-08:00'
+              modified_at: '2012-12-12T11:15:04-08:00'
+              description: Some pictures I took
+              size: 629644
+              path_collection:
+                total_count: 1
+                entries:
+                  - type: folder
+                    id: '0'
+                    name: All Files
+              created_by:
+                type: user
+                id: '17738362'
+                name: sean rose
+                login: sean@box.com
+              modified_by:
+                type: user
+                id: '17738362'
+                name: sean rose
+                login: sean@box.com
+              owned_by:
+                type: user
+                id: '17738362'
+                name: sean rose
+                login: sean@box.com
+              shared_link:
+                url: 'https://www.box.com/s/vspke7y05sb214wjokpk'
+                is_password_enabled: false
+                download_count: 0
+                preview_count: 0
+                access: open
+                permissions:
+                  can_download: true
+                  can_preview: true
+              folder_upload_email:
+                access: open
+                email: upload.Picture.k13sdz1@u.box.com
+              parent:
+                type: folder
+                id: '0'
+                name: All Files
+              item_status: active
+              item_collection:
+                total_count: 1
+                entries:
+                  - type: file
+                    id: '5000948880'
+                    sequence_id: '3'
+                    etag: '3'
+                    sha1: 134b65991ed521fcfe4724b7d814ab8ded5185dc
+                    name: tigers.jpeg
+                offset: 0
+                limit: 100
+  default:
+    description: Update Folder info error
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/Error'

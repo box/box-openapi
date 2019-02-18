@@ -1,0 +1,73 @@
+---
+tags:
+  - Metadata
+operationId: put_files_id
+summary: Update Metadata on File
+description: |-
+  Used to update the template instance. The request body must follow the
+  JSON-Patch specification, which is represented as a JSON array of operation
+  objects (see examples for more details). Updates can be either add, replace,
+  remove , test, move, or copy. The template instance can only be updated if the
+  template instance already exists. When editing metadata, only values that
+  adhere to the metadata template schema will be accepted.
+
+  The update is applied atomically. If any errors occur during the application
+  of the update operations, the metadata instance remains unchanged.
+parameters:
+  - name: FILE_ID
+    in: path
+    required: true
+    schema:
+      type: string
+  - name: SCOPE
+    in: path
+    required: true
+    schema:
+      type: string
+  - name: TEMPLATE
+    in: path
+    required: true
+    schema:
+      type: string
+requestBody:
+  $ref: '#/components/requestBodies/UpdateMetadata'
+responses:
+  '200':
+    description: |-
+      An instance of the template that includes key:value pairs defined by a
+      user or application.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/Metadata'
+        examples:
+          response:
+            value:
+              audience1: internal
+              documentType: Q1 plans
+              status: inactive
+              author: Jones
+              $type: marketingCollateral-d086c908-2498-4d3e-8a1f-01e82bfc2abe
+              $parent: file_5010739061
+              $id: 2094c584-68e1-475c-a581-534a4609594e
+              $version: 1
+              $typeVersion: 0
+              editor: Jones
+              previousState: proposal
+              currentState: reviewed
+              $template: marketingCollateral
+              $scope: enterprise_12345
+  '404':
+    description: |-
+      If there is no template instance present, a 404 HTTP status code of
+      not_found will be returned.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/Error'
+  default:
+    description: Update file metadata error
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/Error'

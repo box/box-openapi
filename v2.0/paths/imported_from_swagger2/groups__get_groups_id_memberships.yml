@@ -1,0 +1,81 @@
+---
+tags:
+  - Groups
+operationId: get_groups_id_memberships
+summary: Get Memberships for Group
+description: |-
+  Retrieves all of the members for a given group if the requesting user has
+  access (see Group Object member_viewability_level).
+parameters:
+  - name: GROUP_ID
+    in: path
+    required: true
+    schema:
+      type: string
+  - name: fields
+    description: Attribute(s) to include in the response
+    in: query
+    required: false
+    schema:
+      type: string
+  - name: limit
+    description: |-
+      The maximum number of items to return in a page. The default is 100 and
+      the max is 1000.
+    in: query
+    required: false
+    schema:
+      type: integer
+      format: int64
+  - name: offset
+    description: The item at which to begin the response.
+    in: query
+    required: false
+    schema:
+      type: integer
+      format: int64
+responses:
+  '200':
+    description: |-
+      A collection of group membership objects will be returned upon success.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/GroupMembershipList'
+        examples:
+          response:
+            value:
+              total_count: 2
+              entries:
+                - type: group_membership
+                  id: '1560354'
+                  user:
+                    type: user
+                    id: '13130906'
+                    name: Alice
+                    login: alice@gmail.com
+                  group:
+                    type: group
+                    id: '119720'
+                    name: family
+                  role: member
+                - type: group_membership
+                  id: '1560356'
+                  user:
+                    type: user
+                    id: '192633962'
+                    name: rabbit
+                    login: rabbit@gmail.com
+                  group:
+                    type: group
+                    id: '119720'
+                    name: family
+                  role: member
+              offset: 0
+              limit: 100
+  default:
+    description: Group Group membership error
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/Error'

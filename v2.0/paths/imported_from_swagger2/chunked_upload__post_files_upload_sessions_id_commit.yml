@@ -1,0 +1,93 @@
+---
+tags:
+  - ChunkedUpload
+operationId: post_files_upload_sessions_id_commit
+summary: Commit Upload
+description: Create a Box file comprised of the uploaded parts.
+parameters:
+  - name: SESSION_ID
+    in: path
+    required: true
+    schema:
+      type: string
+  - name: Digest
+    description: |-
+      The message digest of the file, formatted as specified by RFC 3230. The
+      usage is sha=BASE64_ENCODED_DIGEST. Currently only SHA-1 is supported.As
+      per RFC 3230, the output from SHA-1 algorithm must be Base64 encoded.
+    in: header
+    required: true
+    schema:
+      type: string
+  - name: If-Match
+    description: |-
+      This is in the ‘etag’ field of the file object. See
+      https://developer.box.com/v2.0/reference#if-match
+    in: header
+    required: false
+    schema:
+      type: string
+  - name: If-Non-Match
+    description: |-
+      This is in the ‘etag’ field of the file object. See
+      https://developer.box.com/v2.0/reference#if-match
+    in: header
+    required: false
+    schema:
+      type: string
+requestBody:
+  content:
+    application/json:
+      schema:
+        $ref: '#/components/schemas/CommitRequest'
+  required: true
+responses:
+  '201':
+    description: The file has been committed successfully
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/FileList'
+  '202':
+    description: |-
+      All parts have been uploaded but not yet processed. Use Get Upload Session
+      API to get more information about the progress of processing the parts.
+      Retry commit afterwards
+    headers:
+      Retry-After:
+        description: |-
+          Indicates the number of seconds the client should wait before
+          attempting their commit request again.
+        schema:
+          type: integer
+  '400':
+    description: Bad request. See response body for details.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/Error'
+  '409':
+    description: |-
+      There is already a file with the same name in the target folder.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/Error'
+  '412':
+    description: The If-Match condition failed.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/Error'
+  '413':
+    description: Request entity too large. See response body for details.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/Error'
+  default:
+    description: Part upload error
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/Error'

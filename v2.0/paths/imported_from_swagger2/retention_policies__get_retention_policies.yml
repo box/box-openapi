@@ -1,0 +1,69 @@
+---
+tags:
+  - Retention Policies
+operationId: get_retention_policies
+summary: Get Retention Policies
+description: Retrieves all of the retention policies for the given enterprise.
+parameters:
+  - name: policy_name
+    description: |-
+      A name to filter the retention policies by. A trailing partial match
+      search is performed.
+    in: query
+    required: false
+    schema:
+      type: string
+  - name: policy_type
+    description: A policy type to filter the retention policies by.
+    in: query
+    required: false
+    schema:
+      type: string
+      enum:
+        - finite
+        - indefinite
+  - name: created_by_user_id
+    description: A user id to filter the retention policies by.
+    in: query
+    required: false
+    schema:
+      type: string
+responses:
+  '200':
+    description: |-
+      Returns the list of all retention policies for the enterprise. If query
+      parameters are given, only the retention policies that match the query
+      parameters are returned.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/RetentionPolicyList'
+        examples:
+          response:
+            value:
+              entries:
+                - type: retention_policy
+                  id: '123456789'
+                  name: TaxDocuments
+  '400':
+    description: |-
+      If a bad “policy_type” is given, a 400 HTTP status code of bad_request is
+      returned.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/Error'
+  '404':
+    description: |-
+      If the user specified in the “created_by_user_id” does not exist, a 404
+      HTTP status code of not_found is returned.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/Error'
+  default:
+    description: Get Retention policies error
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/Error'

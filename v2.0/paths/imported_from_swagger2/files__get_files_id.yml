@@ -1,0 +1,108 @@
+---
+tags:
+  - Files
+operationId: get_files_id
+summary: Get Thumbnail
+description: |-
+  Retrieves a thumbnail, or smaller image representation, of this file. Sizes of
+  32x32,64x64, 128x128, and 256x256 can be returned in the .png format and sizes
+  of 32x32, 94x94, 160x160, and 320x320 can be returned in the .jpg format.
+  Thumbnails can be generated for the image and video file formats listed here.
+parameters:
+  - name: FILE_ID
+    in: path
+    required: true
+    schema:
+      type: string
+  - name: EXTENSION
+    description: 'The preview format, e.g. png or jpg'
+    in: path
+    required: true
+    schema:
+      type: string
+  - name: min_height
+    description: The minimum height of the thumbnail
+    in: query
+    required: false
+    schema:
+      type: integer
+      format: int64
+  - name: min_width
+    description: The minimum width of the thumbnail
+    in: query
+    required: false
+    schema:
+      type: integer
+      format: int64
+  - name: max_height
+    description: The maximum height of the thumbnail
+    in: query
+    required: false
+    schema:
+      type: integer
+      format: int64
+  - name: max_width
+    description: The maximum width of the thumbnail
+    in: query
+    required: false
+    schema:
+      type: integer
+      format: int64
+responses:
+  '200':
+    description: |-
+      If the thumbnail is available, a 200 OK response will be returned with the
+      contents of the thumbnail in the body.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/BoxFile'
+  '202':
+    description: |-
+      If the thumbnail isn’t available yet, a 202 Accepted HTTP status will be
+      returned, including a Location header pointing to a placeholder graphic
+      that can be used until the thumbnail is returned.
+    headers:
+      Retry-After:
+        description: |-
+          The time in seconds after which the thumbnail will be available. Your
+          application should only attempt to get the thumbnail again after
+          Retry-After time.
+        schema:
+          type: integer
+          format: int64
+      Location:
+        description: |-
+          Pointing to a placeholder graphic that can be used until the thumbnail
+          is returned.
+        schema:
+          type: string
+          format: url
+  '302':
+    description: |-
+      If Box can’t generate a thumbnail for this file type, a 302 Found response
+      will be returned, redirecting to a placeholder graphic in the requested
+      size for this particular file type, e.g. this for a CSV file).
+  '400':
+    description: |-
+      If there are any bad parameters sent in, a standard 400 Bad Request will
+      be returned.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/Error'
+  '404':
+    description: |-
+      If Box is unable to generate a thumbnail for this particular file, a 404
+      Not Found response will be returned with a code of
+      preview_cannot_be_generated.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/Error'
+  default:
+    description: Get thumbnail error
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/Error'

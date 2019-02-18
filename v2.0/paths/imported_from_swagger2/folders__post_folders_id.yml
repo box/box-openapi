@@ -1,0 +1,102 @@
+---
+tags:
+  - Folders
+operationId: post_folders_id
+summary: Restore Folder
+description: |-
+  Restores an item that has been moved to the trash. Default behavior is to
+  restore the item to the folder it was in before it was moved to the trash. If
+  that parent folder no longer exists or if there is now an item with the same
+  name in that parent folder, the new parent folder and/or new name will need to
+  be included in the request.
+parameters:
+  - name: FOLDER_ID
+    in: path
+    required: true
+    schema:
+      type: string
+  - name: fields
+    description: Attribute(s) to include in the response
+    in: query
+    required: false
+    schema:
+      type: string
+requestBody:
+  $ref: '#/components/requestBodies/Folder'
+responses:
+  '201':
+    description: |-
+      The full item will be returned with a 201 Created status. By default it is
+      restored to the parent folder it was in before it was trashed.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/Folder'
+        examples:
+          response:
+            value:
+              type: folder
+              id: '588970022'
+              sequence_id: '2'
+              etag: '2'
+              name: heloo world
+              created_at: '2013-01-15T16:15:27-08:00'
+              modified_at: '2013-02-07T13:26:00-08:00'
+              description: ''
+              size: 0
+              path_collection:
+                total_count: 1
+                entries:
+                  - type: folder
+                    id: '0'
+                    name: All Files
+              created_by:
+                type: user
+                id: '181757341'
+                name: sean test
+                login: sean+test@box.com
+              modified_by:
+                type: user
+                id: '181757341'
+                name: sean test
+                login: sean+test@box.com
+              content_created_at: '2013-01-15T16:15:27-08:00'
+              content_modified_at: '2013-02-07T13:26:00-08:00'
+              owned_by:
+                type: user
+                id: '181757341'
+                name: sean test
+                login: sean+test@box.com
+              parent:
+                type: folder
+                id: '0'
+                name: All Files
+              item_status: active
+  '403':
+    description: |-
+      The user doesn’t have access to the folder the item is being restored to
+      or the user doesn’t have permission to restore items from the trash
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/Error'
+  '405':
+    description: The item is not in the trash
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/Error'
+  '409':
+    description: |-
+      There is an item with the same name in the folder the item is being
+      restored to
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/Error'
+  default:
+    description: Restore folder operation error
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/Error'

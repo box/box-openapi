@@ -1,0 +1,57 @@
+---
+tags:
+  - Files
+operationId: get_files_id_content
+summary: Download File
+description: |-
+  Retrieves the actual data of the file. An optional version parameter can be
+  set to download a previous version of the file.
+parameters:
+  - name: FILE_ID
+    in: path
+    required: true
+    schema:
+      type: string
+  - name: Range
+    description: |-
+      The range value in bytes. Format should be
+      bytes={start_range}-{end_range}
+    in: header
+    required: false
+    schema:
+      type: string
+  - name: version
+    description: The ID specific version of this file to download.
+    in: query
+    required: false
+    schema:
+      type: string
+  - name: BoxApi
+    description: |-
+      The shared link for this item. Format should be
+      hared_link=SHARED_LINK
+    in: header
+    required: false
+    schema:
+      type: string
+responses:
+  '202':
+    description: |-
+      If the file is not ready to be downloaded (i.e. in the case where the file
+      was uploaded immediately before the download request), a response with an
+      HTTP status of 202 Accepted will be returned with a Retry-After header
+      indicating the time in seconds after which the file will be available for
+      the client to download.
+  '302':
+    description: |-
+      If the file is available to be downloaded, the response will be a 302
+      Found to a URL at dl.boxcloud.com. The dl.boxcloud.com URL is not
+      persistent. Clients will need to follow the redirect in order to actually
+      download the file. The raw data of the file is returned unless the file ID
+      is invalid or the user does not have access to it.
+  default:
+    description: Download file error
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/Error'

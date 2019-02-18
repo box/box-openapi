@@ -1,6 +1,6 @@
 /**
- * A super ugly script for creating yaml files from the Objects
- * from a README export
+ * A crude script for creating resource yaml files from the 
+ * Objects from a README.io export
  */
 const glob = require("glob")
 const fs = require('fs')
@@ -59,7 +59,7 @@ const objectType = (object, fileName) => {
 }
 
 const write = (type, object) => {
-  fs.writeFileSync(`./dev/scripts/objects/${type}.yml`, yaml.dump(object))
+  fs.writeFileSync(`./dev/importers/assets/${type}.yml`, yaml.dump(object))
 }
 
 const processFile = (fileName) => {
@@ -73,7 +73,7 @@ const processFile = (fileName) => {
 }
 
 const run = async () => {
-  let fileNames = glob.sync("./dev/scripts/objects/*.md")
+  let fileNames = glob.sync("./dev/importers/assets/*.md")
   fileNames.forEach(processFile)
 }
 

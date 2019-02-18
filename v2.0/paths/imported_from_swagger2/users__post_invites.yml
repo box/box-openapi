@@ -1,0 +1,62 @@
+---
+tags:
+  - Users
+operationId: post_invites
+summary: Invite User
+description: |-
+  Invites an existing user to join an Enterprise. The existing user can not be
+  part of another Enterprise and must already have a Box account. Once invited,
+  the user will receive an email and prompt to accept the invitation within the
+  Box web application. This method requires the "Manage An Enterprise" scope for
+  the enterprise, which can be enabled within your developer console.
+parameters:
+  - name: fields
+    description: Attribute(s) to include in the response
+    in: query
+    required: false
+    schema:
+      type: string
+requestBody:
+  content:
+    application/json:
+      schema:
+        $ref: '#/components/schemas/InviteUser'
+  required: true
+responses:
+  '200':
+    description: |-
+      A new invite object will be returned if successful. The status of the
+      invite can also be queried by retrieving the invite object. This can be
+      done by making a GET request to /invites/{invite_id}.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/Invite'
+        examples:
+          response:
+            value:
+              type: invite
+              id: '238632'
+              invited_to:
+                type: enterprise
+                id: '42500'
+                name: Blosser Account
+              actionable_by:
+                type: user
+                id: '229667663'
+                name: Lleyton Hewitt
+                login: freeuser@box.com
+              invited_by:
+                type: user
+                id: '10523870'
+                name: Ted Blosser
+                login: ted@box.com
+              status: pending
+              created_at: '2014-12-23T12:55:53-08:00'
+              modified_at: '2014-12-23T12:55:53-08:00'
+  default:
+    description: Create Web link error
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/Error'

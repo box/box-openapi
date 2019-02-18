@@ -1,0 +1,73 @@
+---
+tags:
+  - Devices
+operationId: get_enterprises_id_device_pinners
+summary: Get Enterprise Device Pins
+description: |-
+  Gets all the device pins within a given enterprise. Must be an enterprise
+  admin with the manage enterprise scope to make this call.
+parameters:
+  - name: ENTERPRISE_ID
+    in: path
+    required: true
+    schema:
+      type: string
+  - name: marker
+    description: |-
+      Needs not be passed or can be empty for first invocation of the API. Use
+      the one returned in response for each subsequent call.
+    in: query
+    required: false
+    schema:
+      type: string
+  - name: limit
+    description: Default value is 100. Max value is 10000
+    in: query
+    required: false
+    schema:
+      type: string
+  - name: direction
+    description: |-
+      Default is "asc". Valid values are asc, desc. Case in-sensitive, ASC/DESC
+      works just fine.
+    in: query
+    required: false
+    schema:
+      type: string
+responses:
+  '200':
+    description: Returns a list of device pins for a given enterprise.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/DevicePinnerList'
+        examples:
+          response:
+            value:
+              entries:
+                - type: device_pinner
+                  id: '788804'
+                  owned_by:
+                    type: user
+                    id: '222276603'
+                    name: Ted Blosser
+                    login: ted+boxworks2@box.com
+                  product_name: iPad
+                - type: device_pinner
+                  id: '1003086'
+                  owned_by:
+                    type: user
+                    id: '222276603'
+                    name: Ted Blosser
+                    login: ted+boxworks2@box.com
+                  product_name: iPhone
+              limit: 100
+              order:
+                - by: id
+                  direction: ASC
+  default:
+    description: Get device pinners for an enterprise error
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/Error'

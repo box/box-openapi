@@ -1,0 +1,57 @@
+---
+tags:
+  - Folders
+operationId: get_folders_id_items
+summary: Get Folder’s Items
+description: |-
+  Retrieves the files and/or folders contained within this folder without any
+  other metadata about the folder. Any attribute in the full files or folders
+  objects can be passed in with the fields parameter to get specific attributes,
+  and only those specific attributes back; otherwise, the mini format is
+  returned for each item by default. Multiple attributes can be passed in
+  separated by commas e.g. fields=name,created_at. Paginated results can be
+  retrieved using the limit and offset parameters.
+parameters:
+  - name: FOLDER_ID
+    in: path
+    required: true
+    schema:
+      type: string
+  - name: fields
+    description: Attribute(s) to include in the response
+    in: query
+    required: false
+    schema:
+      type: string
+  - name: limit
+    description: |-
+      The maximum number of items to return in a page. The default is 100 and
+      the max is 1000.
+    in: query
+    required: false
+    schema:
+      type: integer
+      format: int64
+  - name: offset
+    description: |-
+      The offset at which to begin the response. An offset of value of 0 will
+      start at the beginning of the folder-listing. Note: If there are hidden
+      items in your previous response, your next offset should be = offset +
+      limit, not the # of records you received back. The default is 0.
+    in: query
+    required: false
+    schema:
+      type: string
+responses:
+  '200':
+    description: A collection of items contained in the folder is returned.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ItemReferenceList'
+  default:
+    description: Get Folder items error
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/Error'

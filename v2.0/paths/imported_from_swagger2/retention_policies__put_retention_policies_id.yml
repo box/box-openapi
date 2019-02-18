@@ -1,0 +1,61 @@
+---
+tags:
+  - Retention Policies
+operationId: put_retention_policies_id
+summary: Update Retention Policy
+description: Used to update a retention policy.
+parameters:
+  - name: POLICY_ID
+    in: path
+    required: true
+    schema:
+      type: string
+requestBody:
+  $ref: '#/components/requestBodies/RetentionPolicy'
+responses:
+  '200':
+    description: |-
+      An updated retention policy object will be returned upon success.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/RetentionPolicy'
+        examples:
+          response:
+            value:
+              type: retention_policy
+              id: '123456789'
+              policy_name: Tax Documents
+              policy_type: finite
+              retention_length: 365
+              disposition_action: remove_retention
+              status: active
+              created_by:
+                type: user
+                id: '11993747'
+                name: Sean
+                login: sean@box.com
+              created_at: '2015-05-01T11:12:54-07:00'
+              modified_at: '2015-06-08T11:11:50-07:00'
+  '400':
+    description: |-
+      If an incorrect “disposition_action” is specified for an indefinite
+      policy, a 400 HTTP status code of bad_request will be returned.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/Error'
+  '409':
+    description: |-
+      If a retention policy with the given name already exists, a 409 HTTP
+      status code of conflict will be returned.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/Error'
+  default:
+    description: Update Retention policy error
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/Error'

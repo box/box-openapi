@@ -1,0 +1,61 @@
+---
+title: Retention Policy Object
+description: |-
+  A retention policy blocks permanent deletion of content for a specified
+  amount of time. Admins can create retention policies and then later assign
+  them to specific folders or their entire enterprise.  To use this feature,
+  you must have the manage retention policies scope enabled for your API key
+  via your application management console. For more information about retention
+  policies, please visit our help documentation.
+type: object
+allOf:
+  - $ref: '#/components/schemas/RetentionPolicyReference'
+  - properties:
+      policy_type:
+        type: string
+        description: |-
+          The type of the retention policy. A retention policy type can either
+          be finite, where a specific amount of time to retain the content is
+          known upfront, or indefinite, where the amount of time to retain the
+          content is still unknown.
+        enum:
+          - finite
+          - indefinite
+      retention_length:
+        type: integer
+        format: int64
+        description: |-
+          The length of the retention policy. This length specifies the duration
+          in days that the retention policy will beactive for after being
+          assigned to content.
+      disposition_action:
+        type: string
+        description: |-
+          The disposition action of the retention policy. This actioncan be
+          permanently_delete, which will cause the content retained by the
+          policy to be permanently deleted, or remove_retention, which will lift
+          the retention policy from the content, allowing it to be deleted by
+          users, once the retention policy time period has passed.
+        enum:
+          - permanently_delete
+          - remove_retention
+      status:
+        type: string
+        description: |-
+          The status of a retention policy. The status of a policy will be
+          active, unless explicitly retired by an administrator, in which case
+          the status will be retired. Once a policyhas been retired, it cannot
+          become active again.
+        enum:
+          - active
+          - retired
+      created_by:
+        $ref: '#/components/schemas/UserReference'
+      created_at:
+        type: string
+        format: date-time
+        description: The time that the retention policy was created.
+      modified_at:
+        type: string
+        format: date-time
+        description: The time that the retention policy was last modified.

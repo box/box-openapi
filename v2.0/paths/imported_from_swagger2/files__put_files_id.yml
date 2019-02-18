@@ -1,0 +1,109 @@
+---
+tags:
+  - Files
+operationId: put_files_id
+summary: 'Update File Info, Lock and Unlock, Create Shared Link'
+description: |-
+  Used to update individual or multiple fields in the file object, including
+  renaming the file, changing its description, and creating a shared link for
+  the file. To move a file, change the ID of its parent folder. An optional
+  If-Match header can be included to prevent race conditions.
+
+
+  To lock and unlock files, you execute a PUT operation on the /files/{file id}
+  endpoint and set or clear the lock properties on the file.
+
+
+  Used to create a shared link for this particular file. Please see here for
+  more information on the permissions available for shared links. In order to
+  get default shared link status, set it to an empty access level, i.e.
+  {"shared_link": {}}. In order to disable a shared link, send this same type of
+  PUT request with the value of shared_link set to null, i.e. {"shared_link":
+  null}
+parameters:
+  - name: FILE_ID
+    in: path
+    required: true
+    schema:
+      type: string
+  - name: If-Match
+    description: |-
+      The etag of the file can be included as an ‘If-Match’ header to prevent
+      race conditions.
+    in: header
+    required: false
+    schema:
+      type: string
+requestBody:
+  $ref: '#/components/requestBodies/BoxFile'
+responses:
+  '200':
+    description: |-
+      A full file object is returned if the ID is valid and if the user has
+      access to the file.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/BoxFile'
+        examples:
+          response:
+            value:
+              type: file
+              id: '5000948880'
+              sequence_id: '3'
+              etag: '3'
+              sha1: 134b65991ed521fcfe4724b7d814ab8ded5185dc
+              name: new name.jpg
+              description: a picture of tigers
+              size: 629644
+              path_collection:
+                total_count: 2
+                entries:
+                  - type: folder
+                    id: '0'
+                    name: All Files
+                  - type: folder
+                    id: '11446498'
+                    sequence_id: '1'
+                    etag: '1'
+                    name: Pictures
+              created_at: '2012-12-12T10:55:30-08:00'
+              modified_at: '2012-12-12T11:04:26-08:00'
+              created_by:
+                type: user
+                id: '17738362'
+                name: sean rose
+                login: sean@box.com
+              modified_by:
+                type: user
+                id: '17738362'
+                name: sean rose
+                login: sean@box.com
+              owned_by:
+                type: user
+                id: '17738362'
+                name: sean rose
+                login: sean@box.com
+              shared_link:
+                url: 'https://www.box.com/s/rh935iit6ewrmw0unyul'
+                download_url: 'https://www.box.com/shared/static/abcd123.jpeg'
+                is_password_enabled: false
+                download_count: 0
+                preview_count: 0
+                access: open
+                permissions:
+                  can_download: true
+                  can_preview: true
+              parent:
+                type: folder
+                id: '11446498'
+                sequence_id: '1'
+                etag: '1'
+                name: Pictures
+              item_status: active
+  default:
+    description: Update file info error
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/Error'

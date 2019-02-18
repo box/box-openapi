@@ -1,0 +1,126 @@
+---
+tags:
+  - Events
+operationId: get_events
+summary: 'User Events, Enterprise Events'
+description: |-
+  Use this to get events for a given user. A chunk of event objects is returned
+  for the user based on the parameters passed in. Parameters indicating how many
+  chunks are left as well as the next stream_position are also returned.
+
+
+  To retrieve Enterprise Events specify 'stream_type=admin_logs'. Retrieves up
+  to a year' events for all users in an enterprise. Upper and lower bounds as
+  well as filters can be applied to the results.
+parameters:
+  - name: stream_position
+    description: |-
+      The location in the event stream at which you want to start receiving
+      events. Can specify special case ‘now’ to get 0 events and the latest
+      stream position for initialization.
+    in: query
+    required: false
+    schema:
+      type: string
+  - name: stream_type
+    description: |-
+      Limits the type of events returned: all: returns everything, changes:
+      returns tree changes, sync: returns tree changes only for sync folders
+    in: query
+    required: false
+    schema:
+      type: string
+      enum:
+        - all
+        - changes
+        - sync
+        - admin_logs
+  - name: limit
+    description: Limits the number of events returned
+    in: query
+    required: false
+    schema:
+      type: integer
+      format: int64
+  - name: event_type
+    description: A comma-separated list of events to filter by
+    in: query
+    required: false
+    schema:
+      type: string
+  - name: created_after
+    description: A lower bound on the timestamp of the events returned
+    in: query
+    required: false
+    schema:
+      type: string
+      format: date-time
+  - name: created_before
+    description: An upper bound on the timestamp of the events returned
+    in: query
+    required: false
+    schema:
+      type: string
+      format: date-time
+responses:
+  '200':
+    description: |-
+      A collection of events is returned. See the above table for descriptions
+      of the event types.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/EventList'
+        examples:
+          response:
+            value:
+              chunk_size: 1
+              next_stream_position: 1348790499819
+              entries:
+                - type: event
+                  event_id: f82c3ba03e41f7e8a7608363cc6c0390183c3f83
+                  created_by:
+                    type: user
+                    id: '17738362'
+                    name: sean rose
+                    login: sean@box.com
+                  created_at: '2012-12-12T10:53:43-08:00'
+                  recorded_at: '2012-12-12T10:53:48-08:00'
+                  event_type: ITEM_CREATE
+                  session_id: 70090280850c8d2a1933c1
+                  source:
+                    type: folder
+                    id: '11446498'
+                    sequence_id: '0'
+                    etag: '0'
+                    name: Pictures
+                    created_at: '2012-12-12T10:53:43-08:00'
+                    modified_at: '2012-12-12T10:53:43-08:00'
+                    size: 0
+                    created_by:
+                      type: user
+                      id: '17738362'
+                      name: sean rose
+                      login: sean@box.com
+                    modified_by:
+                      type: user
+                      id: '17738362'
+                      name: sean rose
+                      login: sean@box.com
+                    owned_by:
+                      type: user
+                      id: '17738362'
+                      name: sean rose
+                      login: sean@box.com
+                    parent:
+                      type: folder
+                      id: '0'
+                      name: All Files
+                    item_status: active
+                    synced: false
+  default:
+    description: Get events error
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/Error'
