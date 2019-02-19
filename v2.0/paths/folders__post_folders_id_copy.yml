@@ -1,0 +1,72 @@
+---
+operationId: post_folders_id_copy
+
+summary: Copy Folder
+
+description: |-
+  Used to create a copy of a folder in another folder. The original version of
+  the folder will not be altered.
+
+tags:
+  - Folders
+
+parameters:
+  - name: folder_id
+    description: The ID of the folder to copy
+    example: "123456"
+    in: path
+    required: true
+    schema:
+      type: string
+
+  - name: fields
+    description: Attribute(s) to include in the response
+    example: "id,name"
+    in: query
+    required: false
+    schema:
+      type: string
+
+requestBody:
+  content:
+    application/json:
+      schema:
+        properties:
+          name:
+            type: string
+            description: An optional new name for the folder
+            example: New Folder
+
+          parent:
+            type: object
+            properties:
+              id:
+                type: string
+                description: The ID of the destination folder
+                example: "11446498"
+
+responses:
+  '201':
+    description: |-
+      A full folder object is returned if the ID is valid and if the update is
+      successful.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/Folder'
+
+  '409':
+    description: |-
+      If the intended destination folder is the same, as this will cause a name
+      collision.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/Error'
+
+  default:
+    description: Copy folder operation error
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/Error'

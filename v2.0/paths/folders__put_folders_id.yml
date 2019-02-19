@@ -1,0 +1,209 @@
+---
+operationId: put_folders_id
+
+summary: Update Folder, Create Shared Link, Create or Delete
+
+description: |-
+  Used to update information about the folder. To move a folder, update the ID
+  of its parent. To enable an email address that can be used to upload files to
+  this folder, update the folder_upload_email attribute. An optional If-Match
+  header can be included to ensure that client only updates the folder if it
+  knows about the latest version.
+
+
+  Used to create a shared link for this particular folder. Please see here for
+  more information on the permissions available for shared links. In order to
+  get default shared link status, set it to an empty access level, i.e.
+  `{"shared_link": {}}`. In order to disable a shared link, send this same type
+  of `PUT` request with the value of shared_link set to null, i.e.
+  `{"shared_link": null}`
+
+
+  To add or remove an item from a collection, you do a PUT on that item and
+  change the list of collections it belongs to. Philosophically, this is similar
+  to the way "move" operations work on files and folders - you do a `PUT` on the
+  item and change its parent. It’s the same idea with collections, except you’re
+  changing which collection(s) the item belongs to instead of the folder it
+  belongs to. Currently the only collection available is the favorites
+  collection, and you’ll need to know it’s ID for the user that is making the
+  API call, since every user has a different favorites collection_id.
+
+  The Add/Remove API handling will check all ids passed in before performing any
+  add/removal operations. If any collection ids are malformed or do not exist in
+  the user’s account, the API call will throw a 400. Only if all of the
+  collection ids are valid will the adds and removals be carried out.
+
+tags:
+  - Folders
+
+parameters:
+  - name: folder_id
+    example: "123456"
+    description: |-
+      The ID of the folder to update. The root folder of a Box account is
+      always represented by the id "0".
+    in: path
+    required: true
+    schema:
+      type: string
+
+  - name: fields
+    description: Attribute(s) to include in the response
+    in: query
+    example: "id,name"
+    schema:
+      type: string
+
+  - name: If-Match
+    description: This is in the `etag` field of the folder object.
+    example: "1"
+    in: header
+    required: false
+    schema:
+      type: string
+
+requestBody:
+  content:
+    application/json:
+      schema:
+        properties:
+          name:
+            type: string
+            description: The desired name for the folder
+            example: New Folder
+
+          description:
+            type: string
+            description: The description of the folder.
+            example: Some pictures I took
+
+          sync_state:
+            type: string
+            description: |-
+              Whether Box Sync clients will sync this folder. Values
+              of `synced` or` not_synced` can be sent.
+            enum:
+              - synced
+              - not_synced
+
+          can_non_owners_invite:
+            type: boolean
+            example: true
+            description: |-
+              If this parameter is set to false, only folder owners and
+              co-owners can send collaborator invites
+
+          is_collaboration_restricted_to_enterprise:
+            type: boolean
+            example: true
+            description: |-
+              Whether to restrict future collaborations to within the
+              enterprise. Does not affect existing collaborations.
+
+          parent:
+            type: object
+            properties:
+              id:
+                type: string
+                description: The ID of the parent folder
+                example: "11446498"
+
+          shared_link:
+            type: object
+            properties:
+              access:
+                type: string
+                description: |-
+                  The level of access. Can be `open` ("People with the link"),
+                  `company` ("People in your company"), or `collaborators`
+                  ("People in this folder").
+
+                  If you omit this field then the access level will be set to
+                  the default access level specified by the enterprise admin.
+                enum:
+                  - open
+                  - company
+                  - collaborators
+                example: open
+
+              password:
+                type: string
+                description: |-
+                  The password required to access the shared link. Set to null
+                  to remove the password.
+                example: "do-not-use-this-password"
+
+              unshared_at:
+                type: string
+                format: date-time
+                example: "2012-12-12T10:53:43-08:00"
+                description: |-
+                  The date-time that this link will become disabled. This field
+                  can only be set by users with paid accounts.
+
+              permissions:
+                type: object
+                properties:
+                  can_download:
+                    type: boolean
+                    example: true
+                    description: |-
+                      Whether the shared link allows downloads. For shared links
+                      on folders, this also applies to any items in the folder.
+                      Can only be set with access levels `open` and `company`
+                      (not `collaborators`).
+
+          folder_upload_email:
+            type: object
+            properties:
+              access:
+                type: string
+                example: open
+                description: |-
+                  Can be `open` or `collaborators`
+
+          owned_by:
+            type: object
+            properties:
+              id:
+                type: string
+                example: "123456"
+                description: |-
+                  The ID of the user (should be your own user ID)
+
+          tags:
+            type: array
+            example:
+              - approved
+            items:
+              type: string
+            description: |-
+              The tags to attach this folder. To add/remove a tag to/from a
+              folder, you can first get the folder’s current tags, then modify
+              the list as required. Finally, set the folder’s entire list of
+              tags.
+
+
+responses:
+  '200':
+    description: The updated folder
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/Folder'
+
+  '201':
+    description: |-
+      When 'collections' is specified in body the folder is moved into
+      collection with the ID
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/Folder'
+
+  default:
+    description: Update Folder info error
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/Error'
