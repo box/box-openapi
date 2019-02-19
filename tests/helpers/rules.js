@@ -16,20 +16,85 @@ const validateOperationIdFormat = (endpoint, options, { given }) => {
 
   // check that the ID is as expected
   if (id != endpoint.operationId) {
-    return [
-      { message: `Expected operationId to equal ${id}`}
-    ]
+    return [{ message: `Expected operationId to equal ${id}`}]
   }
 }
 
+/**
+ * Check if all path references are resolved
+ * 
+ * @param {Object} item the item that might have unresolved
+ * references
+ */
 const ensureReferencesResolved = (item) => {
-  if (typeof(item) === 'object' && '$ref' in item) {
+  // check if this item is an object and has a $ref
+  if (item && typeof(item) === 'object' && '$ref' in item) {
+    // fetch the reference
     let ref = item['$ref']
+    // if the reference is a string, and doesn't start with 
+    // a local pointer, it hasn't been resolved
     if (!typeof(ref) === 'string' || !ref.startsWith('#/')) {
       return [
         { message: `Expected all file references to be resolved - ${ref}`}
       ]
     } 
+  }
+}
+
+/**
+ * Expect all local references to exist
+ * 
+ * @param {object} item The item to check references for
+ * @param {object} context The context, including the full specification
+ */
+const ensureLocalReferencesExist = (item, _, __, context) => {
+  // check if this item has a reference
+  if (item && typeof(item) === 'object' && '$ref' in item) {
+    let ref = item['$ref']
+    let spec = context.resolved
+
+    // check that the reference is a local reference
+    if (typeof(ref) === 'string' && ref.startsWith('#/')) {
+      // check that the reference exists
+      let parts = ref.split('/')
+      if (!spec[parts[1]][parts[2]][parts[3]]) {
+        return [
+          { message: `Expected reference to exist - ${ref}`}
+        ]
+      }
+    }
+  }
+}
+
+/**
+ * Ensures references are in the right syntax
+ * 
+ * @param {object} item the item to ensure references for
+ */
+const ensureReferencesFormat = (item) => {
+  if (item && typeof(item) === 'object' && '$ref' in item) {
+    let ref = item['$ref']
+
+    if (!ref.startsWith('./') && !ref.startsWith('#/')) {
+      return [
+        { message: `Expected reference to be a file ("./filename") or local ("#/components/etc") - ${ref}`}
+      ]
+    }
+  }
+}
+
+/**
+ * Ensure examples exist for simple values
+ * 
+ * @param {object} item the item to ensure examples for
+ */
+const ensureSimpleExample = (item, _opts, paths) => {
+  if (item.type !== 'object' && item.type !== 'array' && !item.example) {
+    return [
+      {
+        message: `${paths.target ? paths.target.join('.') : 'property'} is not truthy`,
+      }
+    ]
   }
 }
 
@@ -71,8 +136,7 @@ module.exports = {
         summary: 'Ensures every property has an example',
         given: '$.components.schemas[*].properties[*]',
         then: {
-          field: 'example',
-          function: 'truthy'
+          function: 'ensureSimpleExample'
         }
       },
       ensure_references_resolved: {
@@ -81,6 +145,20 @@ module.exports = {
         then: {
           function: 'ensureReferencesResolved'
         }
+      },
+      ensure_references_exist: {
+        summary: 'Ensures every local reference exists',
+        given: '$..*',
+        then: {
+          function: 'ensureLocalReferencesExist'
+        }
+      },
+      ensure_references_format: {
+        summary: 'Ensures every reference is local or a file reference',
+        given: '$..*',
+        then: {
+          function: 'ensureReferencesFormat'
+        }
       } 
     } 
   },
@@ -88,7 +166,10 @@ module.exports = {
   boxFunctions: () => {
     return {
       validateOperationIdFormat: validateOperationIdFormat,
-      ensureReferencesResolved: ensureReferencesResolved
+      ensureReferencesResolved: ensureReferencesResolved,
+      ensureLocalReferencesExist: ensureLocalReferencesExist,
+      ensureReferencesFormat: ensureReferencesFormat,
+      ensureSimpleExample: ensureSimpleExample
     }
   }
 }

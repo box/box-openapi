@@ -1,0 +1,148 @@
+---
+allOf:
+  - $ref: '#/components/schemas/Folder--Mini'
+  - properties:
+      created_at:
+        type: string
+        format: date-time
+        description: |-
+          The time the folder was created.  May be `null` for some folders such
+          as root or trash.
+        example: "2012-12-12T10:53:43-08:00"
+
+      description:
+        type: string
+        description: The description of the folder. The limit is 256 characters.
+        example: "Some pictures I took"
+
+      size:
+        type: integer
+        description: |-
+          The folder size in bytes. Be careful parsing this integer, it can
+          easily go into [exponent notation](http://en.wikipedia.org/wiki/\
+          Double-precision_floating-point_format).
+        example: 629644
+
+      path_collection:
+        type: array
+        description: The path of folders to this folder, starting at the root
+        items:
+          $ref: '#/components/schemas/Folder--Mini'
+
+      created_by:
+        type: object
+        description: The user who created this folder
+        properties:
+          oneOf:
+            $ref: '#/components/schemas/User--Mini'
+
+      modified_by:
+        type: object
+        description: The user who last modified this folder.
+        properties:
+          oneOf:
+            $ref: '#/components/schemas/User--Mini'
+
+      trashed_at:
+        type: string
+        format: date-time
+        description: |-
+          The time the folder or its contents were put in the trash. May be
+          `null` for some folders such as root or trash.
+        example: "2012-12-12T10:53:43-08:00"
+
+      purged_at:
+        type: string
+        format: date-time
+        description: |-
+          The time the folder or its contents will be purged from the trash. May
+          be `null` for some folders such as root or trash.
+        example: "2012-12-12T10:53:43-08:00"
+
+      content_created_at:
+        type: string
+        format: date-time
+        description: |-
+          The time the folder or its contents were originally created (according
+          to the uploader).  May be `null` for some folders such as root or
+          trash.
+        example: "2012-12-12T10:53:43-08:00"
+
+      content_modified_at:
+        type: string
+        format: date-time
+        description: |-
+          The time the folder or its contents were last modified (according to
+          the uploader).  May be `null` for some folders such as root or trash.
+        example: "2012-12-12T10:53:43-08:00"
+
+      expires_at:
+        type: string
+        format: date-time
+        description: |-
+          When the folder will automatically be deleted, i.e. expired. This
+          attribute cannot be set.
+        example: "2012-12-12T10:53:43-08:00"
+
+      owned_by:
+        type: object
+        description: The user who owns this folder.
+        properties:
+          oneOf:
+            $ref: '#/components/schemas/User--Mini'
+
+      shared_link:
+        type: object
+        description: |-
+          The shared link object for this file. Will be
+          `null` if no shared link has been created.
+        properties:
+          oneOf:
+            $ref: '#/components/schemas/SharedLink'
+
+      folder_upload_email:
+        type: object
+        properties:
+          access:
+            description: |-
+              The access level for which the email was created.
+            type: string
+            enum:
+              - open
+              - company
+              - collaborators
+          email:
+            description: |-
+              The upload email address for this folder. `null` if not set.
+            type: string
+            format: email
+
+      parent:
+        type: object
+        description: |-
+          The folder that contains this folder.
+
+          May be `null` for folders such as root, trash and child folders whose
+          parent is inaccessible.
+        properties:
+          oneOf:
+            $ref: '#/components/schemas/Folder--Mini'
+
+      item_status:
+        type: string
+        description: |-
+          Whether this item is deleted or not. Values include `active`,
+          `trashed` if the item has been moved to the trash, and
+          `deleted` if the item has been permanently deleted.
+        enum:
+          - active
+          - trashed
+          - deleted
+        example: "active"
+
+      item_collection:
+        type: array
+        items:
+          $ref: '#/components/schemas/Item--Mini'
+        description: |-
+          A collection of mini file and folder objects contained in this folder.

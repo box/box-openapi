@@ -12,6 +12,7 @@ words.forEach(checker.add)
  * Extracts all titles and descriptions from a specification
  */
 const extract = (item, corpus=[], parents=[]) => {
+  if (!item) { return corpus }
   Object.keys(item).forEach(key => {
     // Loop every item
     let value = item[key]

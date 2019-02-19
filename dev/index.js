@@ -5,8 +5,6 @@ SwaggerUI({
   oauth2RedirectUrl: window.location.href+"auth.html",
   url: "openapi.json",
   dom_id: '#swagger-ui',
-  docExpansion: 'full',
   deepLinking: true,
-  displayOperationId: true,
-  maxDisplayedTags: 1
+  displayOperationId: true
 })
