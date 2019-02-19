@@ -89,7 +89,12 @@ const ensureReferencesFormat = (item) => {
  * @param {object} item the item to ensure examples for
  */
 const ensureSimpleExample = (item, _opts, paths) => {
-  if (item.type !== 'object' && item.type !== 'array' && !item.example) {
+  if (item.type === 'object' || 
+      item.type === 'array' || 
+      item.allOf !== undefined ) { return }
+  
+  if (!item.example) {
+    console.log(item)
     return [
       {
         message: `${paths.target ? paths.target.join('.') : 'property'} is not truthy`,
@@ -111,7 +116,7 @@ module.exports = {
       },
       ensure_parameters_description: {
         summary: 'Ensures every parameter has a description',
-        given: '$.paths[*][*].parameters[*]',
+        given: '$..*.parameters[*]',
         then: {
           field: 'description',
           function: 'truthy'
@@ -126,7 +131,7 @@ module.exports = {
       },
       ensure_parameters_example: {
         summary: 'Ensures every parameter has an example',
-        given: '$.paths[*][*].parameters[*]',
+        given: '$..*.parameters[*]',
         then: {
           field: 'example',
           function: 'truthy'
@@ -134,7 +139,7 @@ module.exports = {
       }, 
       ensure_properties_example: {
         summary: 'Ensures every property has an example',
-        given: '$.components.schemas[*].properties[*]',
+        given: '$..*.properties[*]',
         then: {
           function: 'ensureSimpleExample'
         }
