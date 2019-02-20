@@ -1,40 +1,93 @@
 ---
-properties:
-  type:
-    type: string
-    example: file
-    description: |-
-      The type of object returned.
-    enum:
-      - file
+allOf:
+  - $ref: '#/components/schemas/File--Standard'
+  - properties:
+      version_number:
+        type: string
+        example: 1
+        description: The version number of this file
 
-  id:
-    type: string
-    example: 5391641209
-    description: |-
-      The Box ID for this file
+      comment_count:
+        type: integer
+        example: 10
+        description: The number of comments on this file
 
-  name:
-    type: string
-    example: example.txt
-    description: |-
-      The name of this file
+      permissions:
+        allOf:
+          - description: |-
+              An object containing the permissions that the current user has
+              for this item
+          - $ref: '#/components/schemas/Permissions'
 
-  sequence_id:
-    type: "string"
-    example: "0"
-    description: |-
-      A unique ID for use with the `/events` endpoint
+      tags:
+        type: array
+        example:
+          - approved
+        items:
+          type: string
+        description: All tags applied to this folder.
 
-  etag:
-    type: "string"
-    example: "3"
-    description: |-
-      The entity tag of this file object. Used with `If-Match` headers.
+      lock:
+        allOf:
+          - description: |-
+              The lock held on this file. If there is no lock, this can either
+              be `null` or have a timestamp in the past.
+          - $ref: '#/components/schemas/Lock'
 
-  sha1:
-    type: string
-    format: hash
-    example: 85136C79CBF9FE36BB9D05D0639C70C265C18D37
-    description: |-
-      The SHA1 hash of the file.
+      extension:
+        type: string
+        example: png
+        description: |-
+          Indicates the suffix, when available, on the file. By default,
+          set to an empty string. The suffix usually indicates the encoding
+          (file format) of the file contents or usage.
+
+      is_package:
+        type: boolean
+        example: true
+        description: |-
+          Whether the file is a package. Used for Mac Packages used by iWorks.
+
+      expiring_embed_link:
+        type: string
+        example: https://app.box.com/preview/expiring_embed/gvoct6FE!
+        description: |-
+          An expiring URL for an embedded preview session in an iframe.
+          This URL will expire after 60 seconds and the session will
+          expire after 60 minutes.
+
+      watermark_info:
+        allOf:
+          - type: object
+          - description: Information about the watermarking on this file
+          - $ref: '#/components/schemas/WatermarkInfo'
+
+      allowed_invitee_roles:
+        type: array
+        description: |-
+          Folder [collaboration](#collaboration-object) roles allowed by the
+          enterprise administrator.
+        items:
+          type: string
+
+      is_externally_owned:
+        type: boolean
+        example: true
+        description: |-
+          Whether this file is owned by a user outside of the enterprise.
+
+      has_collaborations:
+        type: boolean
+        example: true
+        description: Whether this file has any collaborators.
+
+      metadata:
+        type: object
+        description: The scope of the metadata
+        example: global
+        additionalProperties:
+          type: object
+          description: The template name for the metadata
+          example: properties
+          additionalProperties:
+            $ref: "#/components/schemas/ItemMetadata"

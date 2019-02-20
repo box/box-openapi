@@ -94,7 +94,6 @@ const ensureSimpleExample = (item, _opts, paths) => {
       item.allOf !== undefined ) { return }
   
   if (!item.example) {
-    console.log(item)
     return [
       {
         message: `${paths.target ? paths.target.join('.') : 'property'} is not truthy`,
