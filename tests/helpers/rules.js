@@ -124,10 +124,18 @@ module.exports = {
   boxRules: () => {
     return {
       ensure_operations_summary: {
-        summary: 'Ensures every resource has a summary',
+        summary: 'Ensures every endpoint has a summary',
         given: '$.paths[*][*]',
         then: {
           field: 'summary',
+          function: 'truthy'
+        }
+      },
+      ensure_resource_description: {
+        summary: 'Ensures every resource has a description',
+        given: '$.components.schemas[*]',
+        then: {
+          field: 'description',
           function: 'truthy'
         }
       },
