@@ -21,6 +21,24 @@ const validateOperationIdFormat = (endpoint, options, { given }) => {
 }
 
 /**
+ * Check that every resource has one and only one tag, and that 
+ * that tag matches a resource
+ * 
+ * @param {object} item The item to check tags for
+ * @param {object} context The context, including the full specification
+ */
+const validateOperationTag = (item, _, __, context) => {
+  let spec = context.resolved
+
+  if (!item.tags) { return [{ message: `Expected a tag`}] }
+  else if (!(Array.isArray(item.tags))) { return [{ message: `Expected tags to be an array`}] }
+  else if (item.tags.length != 1) { return [{ message: `Expected there to be one tag`}] }
+  else if (item.tags[0] !== 'Authorization' && !spec.components.schemas[item.tags[0]]) { 
+    return [{ message: `Expected tag to be a named resource (${item.tags[0]})`}] 
+  }
+}
+
+/**
  * Check if all path references are resolved
  * 
  * @param {Object} item the item that might have unresolved
@@ -128,6 +146,13 @@ module.exports = {
           function: 'validateOperationIdFormat'
         }
       },
+      ensure_operaton_tag: {
+        summary: 'Ensure the operation tag matches is single and matches a resource',
+        given: '$.paths[*][*]',
+        then: {
+          function: 'validateOperationTag'
+        }
+      },
       ensure_parameters_example: {
         summary: 'Ensures every parameter has an example',
         given: '$..*.parameters[*]',
@@ -173,7 +198,8 @@ module.exports = {
       ensureReferencesResolved: ensureReferencesResolved,
       ensureLocalReferencesExist: ensureLocalReferencesExist,
       ensureReferencesFormat: ensureReferencesFormat,
-      ensureSimpleExample: ensureSimpleExample
+      ensureSimpleExample: ensureSimpleExample,
+      validateOperationTag: validateOperationTag
     }
   }
 }
