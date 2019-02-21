@@ -109,6 +109,7 @@ const ensureReferencesFormat = (item) => {
 const ensureSimpleExample = (item, _opts, paths) => {
   if (item.type === 'object' || 
       item.type === 'array' || 
+      item['$ref'] !== undefined ||
       item.allOf !== undefined ) { return }
   
   if (!item.example) {
