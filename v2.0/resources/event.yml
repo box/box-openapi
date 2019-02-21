@@ -1,0 +1,57 @@
+---
+description: |-
+  The description of an event that happened within Box
+
+properties:
+  type:
+    description: "`event`"
+    type: string
+    example: event
+
+  event_id:
+    type: string
+    example: f82c3ba03e41f7e8a7608363cc6c0390183c3f83
+    description: |-
+      The ID of the event object. You can use this to detect duplicate events
+
+  created_by:
+    allOf:
+      - $ref: '#/components/schemas/User--Mini'
+      - description: |-
+          The user that performed the action represented by the event.
+          Some events may be performed by users not logged into Box.
+          In that case, not all attributes of the object are populated and the
+          event is attributed to a unknown user (`user_id = 2`)
+
+  event_type:
+    allOf:
+      - $ref: '#/components/schemas/EventType'
+      - description: The event type that triggered this event
+
+  session_id:
+    type: string
+    example: 70090280850c8d2a1933c1
+    description: |-
+      The session of the user that performed the action. Not all events will
+      populate this attribute.
+
+  source:
+    type: object
+    allOf:
+      - oneOf:
+          - $ref: '#/components/schemas/File--Standard'
+          - $ref: '#/components/schemas/Folder--Standard'
+          - $ref: '#/components/schemas/Comment'
+      - description: |-
+          The object that triggered this event
+
+  additional_details:
+    type: object
+    example: {}
+    description: |-
+      This object provides additional information about the event if available.
+
+      This can include how a user performed an event as well as additional
+      information to correlate an event to external Keysafe logs. Not all events
+      have an additional_details object.  This object is only available in the
+      Enterprise Events.
