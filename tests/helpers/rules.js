@@ -120,6 +120,28 @@ const ensureSimpleExample = (item, _opts, paths) => {
   }
 }
 
+const ensureAllofOrder = (item) => {
+  let keys = item.map(row => Object.keys(row)[0])
+  
+  if (keys.includes("$ref") && keys[0] !== "$ref") {
+    return [
+      {
+        message: `$ref needs to be first item in allOf set`
+      }
+    ]
+  }
+
+  let excessKeys = keys && ["$ref", "description"]
+  
+  if (keys["$ref"] && excessKeys.length > 0) {
+    return [
+      {
+        message: `Unexpected items under allOf: ${excessKeys}`
+      }
+    ]
+  }
+}
+
 module.exports = {
   boxRules: () => {
     return {
@@ -196,6 +218,13 @@ module.exports = {
         then: {
           function: 'ensureReferencesFormat'
         }
+      },
+      ensure_allof_order: {
+        summary: 'Ensures references are first in an allOf situation',
+        given: '$..*.allOf',
+        then: {
+          function: 'ensureAllofOrder'
+        }
       } 
     } 
   },
@@ -207,7 +236,8 @@ module.exports = {
       ensureLocalReferencesExist: ensureLocalReferencesExist,
       ensureReferencesFormat: ensureReferencesFormat,
       ensureSimpleExample: ensureSimpleExample,
-      validateOperationTag: validateOperationTag
+      validateOperationTag: validateOperationTag,
+      ensureAllofOrder: ensureAllofOrder
     }
   }
 }
