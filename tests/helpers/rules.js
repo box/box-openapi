@@ -122,15 +122,44 @@ const ensureSimpleExample = (item, _opts, paths) => {
 }
 
 /**
- * Ensure allOfs start with a $ref
+ * Ensure descriptions exist for simple values
+ * 
+ * @param {object} item the item to ensure descriptions for
  */
-const ensureAllofOrder = (item) => {
+const ensureSimpleDescription = (item, _opts, paths) => {
+  if (item.type === 'object' || 
+      item.type === 'array' || 
+      item['$ref'] !== undefined ||
+      item.allOf !== undefined ) { return }
+  
+  if (!item.description) {
+    return [
+      {
+        message: `${paths.target ? paths.target.join('.') : 'property'} is not truthy`,
+      }
+    ]
+  }
+}
+
+
+/**
+ * Ensure allOfs start with a $ref 
+ */
+const ensureAllofOrder = (item, _, paths) => {
   let keys = item.map(row => Object.keys(row)[0])
   
   if (keys.includes("$ref") && keys[0] !== "$ref") {
     return [
       {
         message: `$ref needs to be first item in allOf set`
+      }
+    ]
+  }
+
+  if (keys.includes("$ref") && keys[1] !== "description" && keys[1] !== "properties") {
+    return [
+      {
+        message: `description or properties needs to be second item in allOf set`
       }
     ]
   }
@@ -217,6 +246,13 @@ module.exports = {
           function: 'truthy'
         }
       }, 
+      ensure_properties_description: {
+        summary: 'Ensures every basic property has an description',
+        given: '$..*.properties[*]',
+        then: {
+          function: 'ensureSimpleDescription'
+        }
+      },
       ensure_properties_example: {
         summary: 'Ensures every property has an example',
         given: '$..*.properties[*]',
@@ -271,7 +307,8 @@ module.exports = {
       ensureSimpleExample: ensureSimpleExample,
       validateOperationTag: validateOperationTag,
       ensureAllofOrder: ensureAllofOrder,
-      ensureItemsOfBasicTypeOrReference: ensureItemsOfBasicTypeOrReference
+      ensureItemsOfBasicTypeOrReference: ensureItemsOfBasicTypeOrReference,
+      ensureSimpleDescription: ensureSimpleDescription
     }
   }
 }
