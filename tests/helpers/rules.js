@@ -121,6 +121,9 @@ const ensureSimpleExample = (item, _opts, paths) => {
   }
 }
 
+/**
+ * Ensure allOfs start with a $ref
+ */
 const ensureAllofOrder = (item) => {
   let keys = item.map(row => Object.keys(row)[0])
   
@@ -138,6 +141,28 @@ const ensureAllofOrder = (item) => {
     return [
       {
         message: `Unexpected items under allOf: ${excessKeys}`
+      }
+    ]
+  }
+}
+
+/**
+ * Ensure all items in a property are of a basic type
+ * or reference object
+ */
+const ensureItemsOfBasicTypeOrReference = (items) => {
+  let keys = Object.keys(items)
+  if (keys.length > 1) {
+    return [
+      {
+        message: `Items can only contain one entry, "type" or "$ref". Found ${keys}`
+      }
+    ]
+  }
+  else if (!keys.includes("type") && !keys.includes("$ref")) {
+    return [
+      {
+        message: `Items should contain "type" or "$ref" key. Found ${keys}`
       }
     ]
   }
@@ -226,6 +251,13 @@ module.exports = {
         then: {
           function: 'ensureAllofOrder'
         }
+      },
+      ensure_items_are_basic_or_reference: {
+        summary: 'Ensures items are either basic types or references',
+        given: '$..*.items',
+        then: {
+          function: 'ensureItemsOfBasicTypeOrReference'
+        }
       } 
     } 
   },
@@ -238,7 +270,8 @@ module.exports = {
       ensureReferencesFormat: ensureReferencesFormat,
       ensureSimpleExample: ensureSimpleExample,
       validateOperationTag: validateOperationTag,
-      ensureAllofOrder: ensureAllofOrder
+      ensureAllofOrder: ensureAllofOrder,
+      ensureItemsOfBasicTypeOrReference: ensureItemsOfBasicTypeOrReference
     }
   }
 }
