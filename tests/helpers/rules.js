@@ -106,7 +106,7 @@ const ensureReferencesFormat = (item) => {
  * 
  * @param {object} item the item to ensure examples for
  */
-const ensureSimpleExample = (item, _opts, paths) => {
+const ensurePropertiesExample = (item, _opts, paths) => {
   if (item.type === 'object' || 
       item.type === 'array' || 
       item['$ref'] !== undefined ||
@@ -197,6 +197,23 @@ const ensureItemsOfBasicTypeOrReference = (items) => {
   }
 }
 
+/**
+ * Ensures that all examples are simple primitives
+ */
+const ensureSimpleExample = (example) => {
+  let exampleType = typeof example
+  let exampleConstructor = example.constructor
+  let validTypes = ['string', 'number', 'boolean']
+
+  if (!validTypes.includes(exampleType) && exampleConstructor !== Array) {
+    return [
+      {
+        message: `Examples should be strings, numbers, or booleans only. Found ${exampleType}`
+      }
+    ]
+  }
+}
+
 module.exports = {
   boxRules: () => {
     return {
@@ -257,6 +274,13 @@ module.exports = {
         summary: 'Ensures every property has an example',
         given: '$..*.properties[*]',
         then: {
+          function: 'ensurePropertiesExample'
+        }
+      },
+      ensure_simple_example: {
+        summary: 'Ensures every example is just a number, string, or boolean',
+        given: '$..*.example',
+        then: {
           function: 'ensureSimpleExample'
         }
       },
@@ -304,11 +328,12 @@ module.exports = {
       ensureReferencesResolved: ensureReferencesResolved,
       ensureLocalReferencesExist: ensureLocalReferencesExist,
       ensureReferencesFormat: ensureReferencesFormat,
-      ensureSimpleExample: ensureSimpleExample,
+      ensurePropertiesExample: ensurePropertiesExample,
       validateOperationTag: validateOperationTag,
       ensureAllofOrder: ensureAllofOrder,
       ensureItemsOfBasicTypeOrReference: ensureItemsOfBasicTypeOrReference,
-      ensureSimpleDescription: ensureSimpleDescription
+      ensureSimpleDescription: ensureSimpleDescription,
+      ensureSimpleExample: ensureSimpleExample,
     }
   }
 }
