@@ -1,4 +1,77 @@
 ---
+operationId: post_folders_id_copy
+
+summary: Copy a folder
+
+description: |-
+  Creates a copy of a folder in another folder. The original folder will
+  not be changed.
+
+tags:
+  - Folder
+
+parameters:
+  - name: folder_id
+    description: |-
+      The ID of the folder to copy
+    example: "123456"
+    in: path
+    required: true
+    schema:
+      type: string
+
+  - name: fields
+    description: |-
+      A comma-separated list of folder attributes to include in the
+      response. This can be used to request fields that are not normally
+      returned in a standard response.
+    example: "id,name"
+    in: query
+    required: false
+    schema:
+      type: string
+
+requestBody:
+  content:
+    application/json:
+      schema:
+        required:
+          - parent
+        properties:
+          name:
+            type: string
+            description: |-
+              An optional different name for the new folder
+            example: New Folder
+
+          parent:
+            type: object
+            required:
+              - id
+            properties:
+              id:
+                type: string
+                required: true
+                description: |-
+                  The ID of the destination folder
+                example: "11446498"
+
+responses:
+  '201':
+    description: |-
+      Returns a standard folder object.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/Folder'
+
+  default:
+    description: A client error
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
+---
 operationId: put_folders_id
 
 summary: Update a folder
@@ -175,7 +248,7 @@ requestBody:
 
               To add or remove a tag, retrieve the folder’s current tags,
               modify them, and then update them using this field.
-              
+
            collections:
               type: array
               items:
@@ -186,7 +259,7 @@ requestBody:
                     type: string
                     description: The ID of the collection
                     example: "123"
-                
+
 
 responses:
   '200':
@@ -195,15 +268,6 @@ responses:
       application/json:
         schema:
           $ref: '#/components/schemas/Folder--Standard'
-
-  '201':
-    description: |-
-      When 'collections' is specified in  body the folder is moved into
-      collection with the ID
-    content:
-      application/json:
-        schema:
-          $ref: '#/components/schemas/Folder'
 
   default:
     description: A client error
