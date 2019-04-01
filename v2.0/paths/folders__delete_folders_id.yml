@@ -1,13 +1,10 @@
 ---
 operationId: delete_folders_id
 
-summary: Delete Folder
+summary: Delete a folder
 
 description: |-
-  Used to delete a folder. A recursive parameter must be included in order to
-  delete folders that have items inside of them. An optional If-Match header can
-  be included to ensure that client only deletes the folder if it knows about
-  the latest version.
+  Permantently delete a folder. This can normally not be undone.
 
 tags:
   - Folder
@@ -15,8 +12,7 @@ tags:
 parameters:
   - name: folder_id
     description: |-
-      The ID of the folder to delete. The root folder of a Box account is
-      always represented by the id "0".
+      The ID of the folder to delete.
     in: path
     required: true
     example: "123456"
@@ -24,7 +20,9 @@ parameters:
       type: string
 
   - name: recursive
-    description: Whether to delete this folder if it has items inside of it.
+    description: |-
+      Delete a folder that is not empty by recursively deleting the 
+      folder and all of its content.
     in: query
     required: false
     example: true
@@ -32,7 +30,9 @@ parameters:
       type: boolean
 
   - name: If-Match
-    description: This is in the `etag` field of the folder object.
+    description: |-
+      Ensure a folder is only deleted if its `etag` matches the 
+      `etag` passed in this header.
     in: header
     required: false
     example: 1
@@ -42,19 +42,10 @@ parameters:
 responses:
   '204':
     description: |-
-      An empty 204 response will be returned upon successful deletion.
-
-  '400':
-    description: |-
-      An error is thrown if the folder is not empty and the ‘recursive’
-      parameter is not included.
-    content:
-      application/json:
-        schema:
-          $ref: '#/components/schemas/ClientError'
+      Returns an empty response when the folder is successfully deleted.
 
   default:
-    description: Delete folder operation error
+    description: A client error
     content:
       application/json:
         schema:
