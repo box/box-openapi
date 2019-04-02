@@ -1,0 +1,137 @@
+---
+operationId: get_files_id_thumbnail_id
+
+summary: Retrieve a file thumbnail
+
+description: |-
+  Retrieves a thumbnail, or smaller image representation, of a file.
+
+  Sizes of `32x32`,`64x64`, `128x128`, and `256x256` can be returned in
+  the `.png` format and sizes of `32x32`, `94x94`, `160x160`, and `320x320`
+  can be returned in the `.jpg` format.
+
+  Thumbnails can be generated for the image and video file formats listed
+  [here](http://community.box.com/t5/Managing-Your-Content/What-file-types\
+  -are-supported-by-Box-s-Content-Preview/ta-p/327).
+
+tags:
+  - File
+
+parameters:
+  - $ref: "../attributes/file_id.yml"
+
+  - name: extension
+    description:
+      The file format for the thumbnail
+    in: path
+    required: true
+    example: "png"
+    schema:
+      type: string
+      enum:
+        - png
+        - jpg
+
+  - name: min_height
+    description: The minimum height of the thumbnail
+    in: query
+    example: 32
+    schema:
+      type: integer
+      format: int64
+
+  - name: min_width
+    description: The minimum width of the thumbnail
+    in: query
+    example: 32
+    schema:
+      type: integer
+      format: int64
+
+  - name: max_height
+    description: The maximum height of the thumbnail
+    in: query
+    required: false
+    example: 32
+    schema:
+      type: integer
+      format: int64
+
+  - name: max_width
+    description: The maximum width of the thumbnail
+    in: query
+    required: false
+    example: 32
+    schema:
+      type: integer
+      format: int64
+
+responses:
+  200:
+    description: |-
+      When a thumbnail can be created the response will return with the
+      contents of the thumbnail in the body
+    content:
+      image/png:
+        schema:
+          type: string
+          format: binary
+          description: The thumbnail
+      image/jpg:
+        schema:
+          type: string
+          format: binary
+          description: The thumbnail
+
+  202:
+    description: |-
+      If the thumbnail is not available yet, a `Location` header
+      pointing to a placeholder graphic will be returned.
+    headers:
+      Retry-After:
+        description: |-
+          The time in seconds after which the thumbnail will be available.
+
+          Your application  only attempt to get the thumbnail again after
+          this time.
+        schema:
+          type: integer
+          format: int64
+
+      Location:
+        description: |-
+          A pointer to a placeholder graphic that can be used until the
+          thumbnail has been generated.
+        schema:
+          type: string
+          format: url
+
+  302:
+    description: |-
+      If Box is unable to generate a thumbnail for this file type, a `Location`
+      header pointing to a placeholder graphic for this file type will be
+      returned.
+    headers:
+      Location:
+        description: |-
+          A pointer to a placeholder graphic that can be used for this
+          file type.
+        schema:
+          type: string
+          format: url
+
+  404:
+    description: |-
+      If Box is unable to generate a thumbnail for this particular file, `404`
+      will be returned with a code of `preview_cannot_be_generated`.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
+
+  default:
+    description: A client error
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'

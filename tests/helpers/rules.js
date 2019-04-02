@@ -12,7 +12,8 @@ const validateOperationIdFormat = (endpoint, options, { given }) => {
   const id = given.reverse()
                   .join('')
                   .replace(/\//g, '_')
-                  .replace(/{.*}/g, 'id')
+                  .replace(/{[A-Za-z_]*}/g, 'id')
+                  .replace(/\.id/g, '_id')
 
   // check that the ID is as expected
   if (id != endpoint.operationId) {
