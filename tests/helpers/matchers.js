@@ -6,15 +6,15 @@ const spectral = require('./validator')
 
 expect.extend({
   // Extend expect to spell check the specification file
-  toPassSpellChecks(content, spellChecker) {
-    const results = spellChecker.check(content)
+  async toPassSpellChecks(content, spellChecker) {
+    const results = await spellChecker.check(content)
     const pass = results.length === 0
 
     // Map the result to a user-friendly message
-    const message = results.map(({ path, value, checks }) => {
+    const message = results.map(({ path, plain_value, checks }) => {
       // Colorize the identifier according to severity
       const identifier = colors.green(path)
-      let text = value
+      let text = plain_value
       let offset = 0
       checks.forEach(({ start, end }) => {
         let length = end-start

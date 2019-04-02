@@ -1,12 +1,13 @@
 const checker = require('spellchecker')
 const fs = require('fs')
 const yaml = require('js-yaml')
+const strip = require('remark-plain-text')
+const remark = require('remark')
 
 // Extend the dictionary with our own accepted words
 const acceptedWords = fs.readFileSync('./v2.0/dictionary/accepted_words.yml')
 let words = yaml.load(acceptedWords)
 words.forEach(checker.add)
-
 
 /** 
  * Extracts all titles and descriptions from a specification
@@ -34,19 +35,25 @@ const extract = (item, corpus=[], parents=[]) => {
  * Checks the spelling for an item
  * @param {Object} item the item to check
  */
-const check = (item) => {
-  item.checks = checker.checkSpelling(item.value)
-  return item 
+const check = async (item) => {
+  return new Promise((resolve, reject) => {
+    remark().use(strip).process(item.value, (error, result) => {
+      if (error) { reject(error) }
+      item.plain_value = String(result).replace(/\n/g, " ").trim()
+      item.checks = checker.checkSpelling(item.plain_value)
+      resolve(item)
+    })
+  })
 }
 
 /**
  * Spell checks a file's titles and descriptions
  */
 class SpellChecker {
-  check(specification) {
-    return extract(specification)
-           .map(item => check(item))
-           .filter(item => item.checks.length > 0)
+  async check(specification) {
+    let parts = extract(specification)
+    let checks = await Promise.all(parts.map(check))
+    return checks.filter(item => item.checks.length > 0)
   }
 }
 
