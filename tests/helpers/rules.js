@@ -206,7 +206,7 @@ const ensureSimpleExample = (example) => {
   let exampleConstructor = example.constructor
   let validTypes = ['string', 'number', 'boolean']
 
-  if (!validTypes.includes(exampleType) && exampleConstructor !== Array) {
+  if (!validTypes.includes(exampleType)) {
     return [
       {
         message: `Examples should be strings, numbers, or booleans only. Found ${exampleType}`
