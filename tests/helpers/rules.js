@@ -203,7 +203,6 @@ const ensureItemsOfBasicTypeOrReference = (items) => {
  */
 const ensureSimpleExample = (example) => {
   let exampleType = typeof example
-  let exampleConstructor = example.constructor
   let validTypes = ['string', 'number', 'boolean']
 
   if (!validTypes.includes(exampleType)) {
@@ -212,6 +211,26 @@ const ensureSimpleExample = (example) => {
         message: `Examples should be strings, numbers, or booleans only. Found ${exampleType}`
       }
     ]
+  }
+}
+
+/**
+ * Ensures all local references are in an allOf
+ */
+const ensureLocalReferencesInAllOf = (item, _, paths) => {
+  if (item['$ref'] && item['$ref'].startsWith('#/')) {
+    if (paths && paths.target) {
+      let parent = paths.target[paths.target.length-1]
+      let grandparent = paths.target[paths.target.length-2]
+
+      if (parent !== 'items' && grandparent !== 'allOf') {
+        return [
+          {
+            message: `Local references should be contained within an allOf`
+          }
+        ]
+      }
+    }
   }
 }
 
@@ -313,6 +332,13 @@ module.exports = {
           function: 'ensureAllofOrder'
         }
       },
+      ensure_local_refernces_within_allof: {
+        summary: 'Ensures local references are always in an allOf',
+        given: '$.paths..*.properties..*',
+        then: {
+          function: 'ensureLocalReferencesInAllOf'
+        }
+      },
       ensure_items_are_basic_or_reference: {
         summary: 'Ensures items are either basic types or references',
         given: '$..*.items',
@@ -335,6 +361,7 @@ module.exports = {
       ensureItemsOfBasicTypeOrReference: ensureItemsOfBasicTypeOrReference,
       ensureSimpleDescription: ensureSimpleDescription,
       ensureSimpleExample: ensureSimpleExample,
+      ensureLocalReferencesInAllOf: ensureLocalReferencesInAllOf
     }
   }
 }
