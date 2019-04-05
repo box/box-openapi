@@ -203,9 +203,10 @@ const ensureItemsOfBasicTypeOrReference = (items) => {
  */
 const ensureSimpleExample = (example) => {
   let exampleType = typeof example
+  let exampleConstructor = example.constructor
   let validTypes = ['string', 'number', 'boolean']
 
-  if (!validTypes.includes(exampleType)) {
+  if (!validTypes.includes(exampleType) && exampleConstructor !== Array) {
     return [
       {
         message: `Examples should be strings, numbers, or booleans only. Found ${exampleType}`
@@ -231,6 +232,19 @@ const ensureLocalReferencesInAllOf = (item, _, paths) => {
         ]
       }
     }
+  }
+}
+
+/**
+ * Ensures all arrays have item types
+ */
+const ensureAllArraysHaveItemTypes = (param) => {
+  if (param.type === 'array' && !(param.items && (param.items.type || param.items['$ref']))) {
+    return [
+      {
+        message: `All properties and params of type array need an item type or $ref`
+      }
+    ]
   }
 }
 
@@ -345,6 +359,20 @@ module.exports = {
         then: {
           function: 'ensureItemsOfBasicTypeOrReference'
         }
+      },
+      ensure_arrays_have_item_type: {
+        summary: 'Ensures all arrays have an item type',
+        given: '$..*.properties[*]',
+        then: {
+          function: 'ensureAllArraysHaveItemTypes'
+        }
+      },
+      ensure_arrays_have_item_type: {
+        summary: 'Ensures all arrays have an item type',
+        given: '$..*.parameters[*]',
+        then: {
+          function: 'ensureAllArraysHaveItemTypes'
+        }
       } 
     } 
   },
@@ -361,7 +389,8 @@ module.exports = {
       ensureItemsOfBasicTypeOrReference: ensureItemsOfBasicTypeOrReference,
       ensureSimpleDescription: ensureSimpleDescription,
       ensureSimpleExample: ensureSimpleExample,
-      ensureLocalReferencesInAllOf: ensureLocalReferencesInAllOf
+      ensureLocalReferencesInAllOf: ensureLocalReferencesInAllOf,
+      ensureAllArraysHaveItemTypes: ensureAllArraysHaveItemTypes
     }
   }
 }
