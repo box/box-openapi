@@ -34,8 +34,8 @@ const validateOperationTag = (item, _, __, context) => {
   if (!item.tags) { return [{ message: `Expected a tag`}] }
   else if (!(Array.isArray(item.tags))) { return [{ message: `Expected tags to be an array`}] }
   else if (item.tags.length != 1) { return [{ message: `Expected there to be one tag`}] }
-  else if (item.tags[0] !== 'Authorization' && !spec.components.schemas[item.tags[0]]) { 
-    return [{ message: `Expected tag to be a named resource (${item.tags[0]})`}] 
+  else if (!spec.tags.map(({ name }) => name).includes(item.tags[0])) { 
+    return [{ message: `Expected tag to be a referenced in root tags object (${item.tags[0]})`}] 
   }
 }
 
