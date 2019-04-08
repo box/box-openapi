@@ -356,6 +356,14 @@ module.exports = {
           field: 'x-box-reference-category',
           function: 'truthy'
         }
+      },
+      ensure_every_resource_has_a_name: {
+        summary: 'Ensures every endpoint belongs to a reference category',
+        given: '$.components.schemas[*]',
+        then: {
+          field: 'x-box-resource-id',
+          function: 'truthy'
+        }
       } 
     } 
   },
