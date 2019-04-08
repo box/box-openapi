@@ -230,6 +230,24 @@ const ensureAllArraysHaveItemTypes = (param) => {
   }
 }
 
+/**	
+ * Check that every item x-box-reference-category matches the ID of a tag	
+ * 	
+ * @param {object} item The item to check x-box-reference-category for	
+ * @param {object} context The context, including the full specification	
+ */	
+const ensureReferenceCategoryValid = (item, _, __, context) => {	
+  let spec = context.resolved	
+
+  let id = item['x-box-reference-category']
+  let match = !spec.tags.map((tag) => tag['x-box-reference-category']).includes(id)
+
+  if (id && match) { 	
+    return [{ message: `Expected x-box-reference-category to match a similar ID in the root tags object (${item['x-box-reference-category']})`}] 	
+  }	
+}	
+
+
 module.exports = {
   boxRules: () => {
     return {
@@ -357,14 +375,36 @@ module.exports = {
           function: 'truthy'
         }
       },
-      ensure_every_resource_has_a_name: {
+      ensure_every_resource_has_a_resource_id: {
         summary: 'Ensures every endpoint belongs to a reference category',
         given: '$.components.schemas[*]',
         then: {
           field: 'x-box-resource-id',
           function: 'truthy'
         }
-      } 
+      }, 
+      ensure_every_tag_has_a_group_id: {
+        summary: 'Ensures every endpoint belongs to a reference category',
+        given: '$.tags[*]',
+        then: {
+          field: 'x-box-reference-category',
+          function: 'truthy'
+        }
+      },
+      ensure_path_reference_categories_exists: {
+        summary: 'Ensures a endpoint reference category ID is defined in the tags',
+        given: '$.paths[*][*]',
+        then: {
+          function: 'ensureReferenceCategoryValid'
+        }
+      },
+      ensure_resource_reference_categories_exists: {
+        summary: 'Ensures a resource reference category ID can be found in the tags',
+        given: '$.components.schemas[*]',
+        then: {
+          function: 'ensureReferenceCategoryValid',
+        }
+      }
     } 
   },
 
@@ -380,7 +420,8 @@ module.exports = {
       ensureSimpleDescription: ensureSimpleDescription,
       ensureSimpleExample: ensureSimpleExample,
       ensureLocalReferencesInAllOf: ensureLocalReferencesInAllOf,
-      ensureAllArraysHaveItemTypes: ensureAllArraysHaveItemTypes
+      ensureAllArraysHaveItemTypes: ensureAllArraysHaveItemTypes,
+      ensureReferenceCategoryValid: ensureReferenceCategoryValid
     }
   }
 }
