@@ -237,7 +237,7 @@ const ensureReferenceCategoryValid = (item, _, __, context) => {
 /**
  * Ensure that the example matches the listed type
  */
-const ensureExampleMatchesType = ({ type, example }) => {
+const ensureExampleMatchesType = ({ type, example, additionalProperties, ...rest }) => {
   // only run if an example is present
   if (type && example) {
     // determine the example type and constructor
@@ -246,6 +246,10 @@ const ensureExampleMatchesType = ({ type, example }) => {
 
     // if the example type is number, make it match for integer as well
     if (exampleTypes[0] === 'number') { exampleTypes.push('integer') }
+
+    // if there are additionalProperties, then this is a key:value pair 
+    // and the example should be a string
+    if (additionalProperties) { type = 'string' }
 
     // throw an error if none of the types or constructors match
     if (!exampleTypes.includes(type) && type !== exampleConstructor) {
@@ -307,6 +311,13 @@ module.exports = {
       ensure_properties_example: {
         summary: 'Ensures every property has an example',
         given: '$..*.properties[*]',
+        then: {
+          function: 'ensurePropertiesExample'
+        }
+      },
+      ensure_additional_properties_example: {
+        summary: 'Ensures every property has an example',
+        given: '$..*.additionalProperties',
         then: {
           function: 'ensurePropertiesExample'
         }
@@ -408,6 +419,13 @@ module.exports = {
       ensure_property_examples_match_type: {
         summary: 'Ensures a property\'s example matches its type',
         given: '$..*.properties[*]',
+        then: {
+          function: 'ensureExampleMatchesType'
+        }
+      },
+      ensure_additional_property_examples_match_type: {
+        summary: 'Ensures a property\'s example matches its type',
+        given: '$..*.additionalProperties[*]',
         then: {
           function: 'ensureExampleMatchesType'
         }
