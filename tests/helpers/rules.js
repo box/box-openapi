@@ -89,9 +89,11 @@ const ensureReferencesFormat = (item) => {
  * 
  * @param {object} item the item to ensure examples for
  */
-const ensurePropertiesExample = (item, _opts, paths) => {
-  if (item.type === 'object' || 
-      item.type === 'array' || 
+const ensurePropertiesExample = (item, _opts, paths) => {  
+  if (
+      paths.target.includes('example') ||
+      item.type === 'object' || 
+      (item.type === 'array' && item.items.type !== 'string') || 
       item['$ref'] !== undefined ||
       item.allOf !== undefined ) { return }
   
@@ -110,7 +112,9 @@ const ensurePropertiesExample = (item, _opts, paths) => {
  * @param {object} item the item to ensure descriptions for
  */
 const ensureSimpleDescription = (item, _opts, paths) => {
-  if (item.type === 'object' || 
+  if (
+      paths.target.includes('example') ||
+      item.type === 'object' || 
       item.type === 'array' || 
       item['$ref'] !== undefined ||
       item.allOf !== undefined ) { return }
@@ -181,23 +185,6 @@ const ensureItemsOfBasicTypeOrReference = (items) => {
 }
 
 /**
- * Ensures that all examples are simple primitives
- */
-const ensureSimpleExample = (example) => {
-  let exampleType = typeof example
-  let exampleConstructor = example.constructor
-  let validTypes = ['string', 'number', 'boolean']
-
-  if (!validTypes.includes(exampleType) && exampleConstructor !== Array) {
-    return [
-      {
-        message: `Examples should be strings, numbers, or booleans only. Found ${exampleType}`
-      }
-    ]
-  }
-}
-
-/**
  * Ensures all local references are in an allOf
  */
 const ensureLocalReferencesInAllOf = (item, _, paths) => {
@@ -246,6 +233,26 @@ const ensureReferenceCategoryValid = (item, _, __, context) => {
     return [{ message: `Expected x-box-reference-category to match a similar ID in the root tags object (${item['x-box-reference-category']})`}] 	
   }	
 }	
+
+/**
+ * Ensure that the example matches the listed type
+ */
+const ensureExampleMatchesType = ({ type, example }) => {
+  // only run if an example is present
+  if (type && example) {
+    // determine the example type and constructor
+    let exampleTypes = [typeof example]
+    let exampleConstructor =  example.constructor.name.toLowerCase()
+
+    // if the example type is number, make it match for integer as well
+    if (exampleTypes[0] === 'number') { exampleTypes.push('integer') }
+
+    // throw an error if none of the types or constructors match
+    if (!exampleTypes.includes(type) && type !== exampleConstructor) {
+      return [{ message: `Expected example to match type ${type}, instead found ${exampleTypes[0]}`}]
+    }
+  }
+}
 
 
 module.exports = {
@@ -302,13 +309,6 @@ module.exports = {
         given: '$..*.properties[*]',
         then: {
           function: 'ensurePropertiesExample'
-        }
-      },
-      ensure_simple_example: {
-        summary: 'Ensures every example is just a number, string, or boolean',
-        given: '$..*.example',
-        then: {
-          function: 'ensureSimpleExample'
         }
       },
       ensure_references_resolved: {
@@ -404,6 +404,13 @@ module.exports = {
         then: {
           function: 'ensureReferenceCategoryValid',
         }
+      },
+      ensure_property_examples_match_type: {
+        summary: 'Ensures a property\'s example matches its type',
+        given: '$..*.properties[*]',
+        then: {
+          function: 'ensureExampleMatchesType'
+        }
       }
     } 
   },
@@ -418,10 +425,10 @@ module.exports = {
       ensureAllofOrder: ensureAllofOrder,
       ensureItemsOfBasicTypeOrReference: ensureItemsOfBasicTypeOrReference,
       ensureSimpleDescription: ensureSimpleDescription,
-      ensureSimpleExample: ensureSimpleExample,
       ensureLocalReferencesInAllOf: ensureLocalReferencesInAllOf,
       ensureAllArraysHaveItemTypes: ensureAllArraysHaveItemTypes,
-      ensureReferenceCategoryValid: ensureReferenceCategoryValid
+      ensureReferenceCategoryValid: ensureReferenceCategoryValid,
+      ensureExampleMatchesType: ensureExampleMatchesType
     }
   }
 }
