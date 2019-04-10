@@ -16,6 +16,6 @@ afterAll(() => {
   expect(process.env.LANG).toBe(systemLang)
 })
 
-test('Expect titles and descriptions to pass spell checks', () => {
-  expect(specification).toPassSpellChecks(spellChecker)
+test('Expect titles and descriptions to pass spell checks', async () => {
+  await expect(specification).toPassSpellChecks(spellChecker)
 })
