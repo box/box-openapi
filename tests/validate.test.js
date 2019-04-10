@@ -10,6 +10,6 @@ test('Expect the API specification to be loaded', async () => {
   expect(specification).not.toBeNull()
 })
 
-test('Expect the API specification to be valid', () => {
-  expect(specification).toBeValidSpecification()
+test('Expect the API specification to be valid', async () => {
+  await expect(specification).toBeValidSpecification()
 })

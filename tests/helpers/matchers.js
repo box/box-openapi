@@ -40,9 +40,9 @@ expect.extend({
   },
 
   // Extend expect to use Spectral to validate the spec files
-  toBeValidSpecification(content) {
+  async toBeValidSpecification(content) {
     // Use spectral to validate the content
-    const { results } = spectral.run(content, { resolvedTarget: content })
+    const results = await spectral.run(content, { resolvedTarget: content })
 
     // Map the result to a user-friendly message
     const message = results.map(({ severity, message, summary, path }) => {
