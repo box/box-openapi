@@ -1,0 +1,85 @@
+---
+operationId: get_files_id_content
+
+summary: Download a file
+
+tags:
+  - Files
+
+x-box-reference-category: files
+
+description: |-
+  Returns the contents of a file in binary format.
+
+parameters:
+  - $ref: '../attributes/file_id.yml'
+
+  - name: Range
+    description: |-
+      The byte range of the content to download.
+
+      The format `{start_byte}-{end_byte}` can be used to specify
+      what section of the file to download.
+    in: header
+    required: false
+    schema:
+      type: string
+
+  - name: BoxApi
+    description: |-
+      The URL and password to for a file that has
+      been shared using a shared link, as this file would otherwise
+      not be accessible to the user.
+
+      Use the format `shared_link=SHARED_LINK_URL` or if a password was set
+      use `shared_link=[link]&shared_link_password=[password]`
+    in: header
+    required: false
+    schema:
+      type: string
+
+  - name: version
+    description:
+      The file version to download
+    in: query
+    required: false
+    schema:
+      type: string
+
+responses:
+  202:
+    description: |-
+      If the file is not ready to be downloaded yet `Retry-After` header will
+      be returned indicating the time in seconds after which the file will
+      be available for the client to download.
+
+      This response can occur when the file was uploaded immediately before the
+      download request.
+    headers:
+      Retry-After:
+        description: |-
+          The time in seconds after which to retry the download
+        schema:
+          type: integer
+
+  302:
+    description: |-
+      If the file is available to be downloaded the response will include a
+      `Location` header for the file on `dl.boxcloud.com`.
+
+      The `dl.boxcloud.com` URL is not persistent and clients will need
+      to follow the redirect in order to actually download the file.
+    headers:
+      Location:
+        description: |-
+          A pointer to the download URL
+        schema:
+          type: string
+          format: url
+
+  default:
+    description: Download file error
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
