@@ -58,7 +58,7 @@ Please make sure:
 * Every resource parameter has a type (and optional format)
 * Every resource parameter has a description and example
 * Every resource parameter passes the YAML linter
-* Every resource parameter is seperated by a new line to improve readability
+* Every resource parameter is separated by a new line to improve readability
 
 Some useful resources:
 
@@ -89,7 +89,7 @@ Please make sure:
 * Every endpoint parameter has a type (and optional format)
 * Every endpoint parameter has a description and example
 * To always return a reference to a resource
-* Every parameter is seperated by a new line to improve readability
+* Every parameter is separated by a new line to improve readability
 
 Some useful resources:
 

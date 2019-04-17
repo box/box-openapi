@@ -237,7 +237,7 @@ const ensureReferenceCategoryValid = (item, _, __, context) => {
 /**
  * Ensure that the example matches the listed type
  */
-const ensureExampleMatchesType = ({ type, example, additionalProperties, ...rest }) => {
+const ensureExampleMatchesType = ({ type, example, additionalProperties }) => {
   // only run if an example is present
   if (type && example) {
     // determine the example type and constructor
@@ -248,8 +248,8 @@ const ensureExampleMatchesType = ({ type, example, additionalProperties, ...rest
     if (exampleTypes[0] === 'number') { exampleTypes.push('integer') }
 
     // if there are additionalProperties, then this is a key:value pair 
-    // and the example should be a string
-    if (additionalProperties) { type = 'string' }
+    // and the example should be an object
+    if (additionalProperties) { type = 'object' }
 
     // throw an error if none of the types or constructors match
     if (!exampleTypes.includes(type) && type !== exampleConstructor) {
