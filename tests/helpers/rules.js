@@ -258,6 +258,19 @@ const ensureExampleMatchesType = ({ type, example, additionalProperties, ...rest
   }
 }
 
+/**
+ * Ensure a property is falsy
+ */
+const falsy = (value, _, path) => {
+  if (!!value) {
+    return [
+      {
+        message: `${path.target ? path.target.join('.') : 'property'} is not falsy`
+      },
+    ];
+  }
+}
+
 
 module.exports = {
   boxRules: () => {
@@ -429,6 +442,14 @@ module.exports = {
         then: {
           function: 'ensureExampleMatchesType'
         }
+      },
+      ensure_only_simple_responses: {
+        summary: 'Ensures response is either blank or references to an object',
+        given: '$.paths[*][*].responses[*].content[*].schema',
+        then: {
+          field: 'properties',
+          function: 'falsy'
+        }
       }
     } 
   },
@@ -446,7 +467,8 @@ module.exports = {
       ensureLocalReferencesInAllOf: ensureLocalReferencesInAllOf,
       ensureAllArraysHaveItemTypes: ensureAllArraysHaveItemTypes,
       ensureReferenceCategoryValid: ensureReferenceCategoryValid,
-      ensureExampleMatchesType: ensureExampleMatchesType
+      ensureExampleMatchesType: ensureExampleMatchesType,
+      falsy: falsy
     }
   }
 }
