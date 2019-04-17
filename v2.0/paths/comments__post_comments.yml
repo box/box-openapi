@@ -1,0 +1,83 @@
+---
+operationId: post_comments
+
+tags:
+  - Comments
+
+x-box-reference-category: comments
+
+summary: Create a comment
+
+description: |-
+  Adds a comment comment by the user to a specific file, or
+  as a reply to an other comment.
+
+parameters:
+  - $ref: '../attributes/fields.yml'
+
+requestBody:
+  content:
+    application/json:
+      schema:
+        required:
+          - message
+        properties:
+          message:
+            type: string
+            description: |-
+              The text of the comment.
+
+              To mention a user, user the `tagged_message`
+              parameter instead.
+            example: "Review completed!"
+
+          tagged_message:
+            type: string
+            description: |-
+              The text of the comment, including `@[user_id:name]`
+              somewhere in the message to mention another user, which
+              will send them an email notification, letting them know
+              they’ve been mentioned.
+
+              The `user_id` is the target user's ID, where the `name`
+              can be any custom phrase. In the Box UI this name will
+              link to the user's profile.
+
+              If you are not mentioning another user, use`message`
+              instead.
+            example: "@[1234:John] Review completed!"
+
+
+          item:
+            type: object
+            description: |-
+              The item to attach the comment to.
+            required:
+              - id
+              - type
+            properties:
+              id:
+                type: string
+                description: The ID of the item
+                example: "11446498"
+
+              type:
+                type: string
+                description:
+                  The type of the item that this comment will be placed on.
+                example: file
+                enum:
+                  - file
+                  - comment
+
+responses:
+  '201':
+    description: |-
+      Returns the newly created comment object.
+
+      [Some fields are optional](#comment) and need to be explicitly
+      requested using the [fields](#post-comments--request--fields) parameter.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/Comment'
