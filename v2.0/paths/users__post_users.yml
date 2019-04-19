@@ -1,0 +1,150 @@
+---
+operationId: post_users
+
+summary: Create a user
+
+tags:
+  - Users
+
+x-box-reference-category: users
+
+description: |-
+  Creates a new managed user in an enterprise. This endpoint
+  is only available to users and applications with the right
+  admin permissions.
+
+parameters:
+  - $ref: '../attributes/fields.yml'
+
+requestBody:
+  content:
+    application/json:
+      schema:
+        required:
+          - name
+        properties:
+          name:
+            type: string
+            description: The name of the user
+            example: Aaron Levie
+            maxLength: 50
+
+          login:
+            type: string
+            description: |-
+              The email address the user uses to log in
+
+              Required, unless `is_platform_access_only`
+              is set to `true`.
+            example: boss@box.com
+
+          is_platform_access_only:
+            type: boolean
+            example: true
+            description: |-
+              Specifies that the user is an app user.
+
+          role:
+            type: string
+            enum:
+              - coadmin
+              - user
+            description: The user’s enterprise role
+            example: user
+
+          language:
+            type: string
+            format: ISO639-1-BOX
+            description: |-
+              The language of the user, formatted in modified version of the
+              [ISO 639-1][1] format.
+
+              [1]: https://developer.box.com/docs/api-language-codes
+            example: en
+
+          is_sync_enabled:
+            type: boolean
+            description: Whether the user can use Box Sync
+            example: true
+
+          job_title:
+            type: string
+            description: The user’s job title
+            maxLength: 100
+            example: CEO
+
+          phone:
+            type: string
+            description: The user’s phone number
+            maxLength: 100
+            example: "6509241374"
+
+          address:
+            type: string
+            description: The user’s address
+            maxLength: 255
+            example: 900 Jefferson Ave, Redwood City, CA 94063
+
+          space_amount:
+            type: integer
+            description: The user’s total available space in bytes
+            example: 11345156112
+
+          tracking_codes:
+            type: array
+            description: An array of key/value pairs set by the user’s admin
+            example:
+              - "code1: 12345"
+            items:
+              type: string
+
+          can_see_managed_users:
+            type: boolean
+            example: true
+            description: |-
+              Whether the user can see other enterprise users in their
+              contact list
+
+          timezone:
+            type: string
+            format: timezone
+            description: The user's timezone
+            example: Africa/Bujumbura
+
+          is_external_collab_restricted:
+            type: boolean
+            example: true
+            description: |-
+              Whether the user is allowed to collaborate with users outside her
+              enterprise
+
+          is_exempt_from_device_limits:
+            type: boolean
+            example: true
+            description: |-
+              Whether to exempt the user from enterprise device limits
+
+          is_exempt_from_login_verification:
+            type: boolean
+            example: true
+            description: |-
+              Whether the user must use two-factor authentication
+
+          status:
+            type: string
+            enum:
+              - active
+              - inactive
+              - cannot_delete_edit
+              - cannot_delete_edit_upload
+            description: The user's account status
+            example: active
+
+responses:
+  201:
+    description: |-
+      Returns a user object for the newly created user.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/User'

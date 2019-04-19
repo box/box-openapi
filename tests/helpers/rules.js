@@ -95,6 +95,7 @@ const ensurePropertiesExample = (item, _opts, paths) => {
       item.type === 'object' || 
       (item.type === 'array' && item.items.type !== 'string') || 
       item['$ref'] !== undefined ||
+      item.example === null ||
       item.allOf !== undefined ) { return }
   
   if (!item.example) {
@@ -188,7 +189,7 @@ const ensureItemsOfBasicTypeOrReference = (items) => {
  * Ensures all local references are in an allOf
  */
 const ensureLocalReferencesInAllOf = (item, _, paths) => {
-  if (item['$ref'] && item['$ref'].startsWith('#/')) {
+  if (item && item['$ref'] && item['$ref'].startsWith('#/')) {
     if (paths && paths.target) {
       let parent = paths.target[paths.target.length-1]
       let grandparent = paths.target[paths.target.length-2]

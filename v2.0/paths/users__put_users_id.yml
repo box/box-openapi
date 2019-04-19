@@ -1,0 +1,155 @@
+---
+operationId: put_users_id
+
+summary: Update a user
+
+tags:
+  - Users
+
+x-box-reference-category: users
+
+description: |-
+  Updates a managed user in an enterprise. This endpoint
+  is only available to users and applications with the right
+  admin permissions.
+
+parameters:
+  - $ref: '../attributes/user_id.yml'
+  - $ref: '../attributes/fields.yml'
+
+requestBody:
+  content:
+    application/json:
+      schema:
+        properties:
+          enterprise:
+            type: string
+            example: null
+            description: |-
+              Set this to `null` to roll the user out of the enterprise
+              and make them a free user
+
+          notify:
+            type: boolean
+            example: true
+            description: |-
+              Whether the user should receive an email when they
+              are rolled out of an enterprise
+
+          name:
+            type: string
+            description: The name of the user
+            example: Aaron Levie
+            maxLength: 50
+
+          login:
+            type: string
+            description: |-
+              The email address the user uses to log in
+            example: boss@box.com
+
+          role:
+            type: string
+            enum:
+              - coadmin
+              - user
+            description: The user’s enterprise role
+            example: user
+
+          language:
+            type: string
+            format: ISO639-1-BOX
+            description: |-
+              The language of the user, formatted in modified version of the
+              [ISO 639-1][1] format.
+
+              [1]: https://developer.box.com/docs/api-language-codes
+            example: en
+
+          is_sync_enabled:
+            type: boolean
+            description: Whether the user can use Box Sync
+            example: true
+
+          job_title:
+            type: string
+            description: The user’s job title
+            maxLength: 100
+            example: CEO
+
+          phone:
+            type: string
+            description: The user’s phone number
+            maxLength: 100
+            example: "6509241374"
+
+          address:
+            type: string
+            description: The user’s address
+            maxLength: 255
+            example: 900 Jefferson Ave, Redwood City, CA 94063
+
+          tracking_codes:
+            type: array
+            description: An array of key/value pairs set by the user’s admin
+            example:
+              - "code1: 12345"
+            items:
+              type: string
+
+          can_see_managed_users:
+            type: boolean
+            example: true
+            description: |-
+              Whether the user can see other enterprise users in their
+              contact list
+
+          timezone:
+            type: string
+            format: timezone
+            description: The user's timezone
+            example: Africa/Bujumbura
+
+          is_external_collab_restricted:
+            type: boolean
+            example: true
+            description: |-
+              Whether the user is allowed to collaborate with users outside her
+              enterprise
+
+          is_exempt_from_device_limits:
+            type: boolean
+            example: true
+            description: |-
+              Whether to exempt the user from enterprise device limits
+
+          is_exempt_from_login_verification:
+            type: boolean
+            example: true
+            description: |-
+              Whether the user must use two-factor authentication
+
+          is_password_reset_required:
+            type: boolean
+            example: true
+            description: |-
+              Whether the user is required to reset their password
+
+          status:
+            type: string
+            enum:
+              - active
+              - inactive
+              - cannot_delete_edit
+              - cannot_delete_edit_upload
+            description: The user's account status
+            example: active
+
+responses:
+  200:
+    description: |-
+      Returns the updated user object.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/User'
