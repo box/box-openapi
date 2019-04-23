@@ -1,0 +1,108 @@
+---
+operationId: post_legal_hold_policies
+
+summary: Create legal hold policy
+
+tags:
+  - Legal Hold Policies
+
+x-box-reference-category: legal_hold_policies
+
+description: |-
+  Create a new legal hold policy.
+
+requestBody:
+  content:
+    application/json:
+      schema:
+        required:
+          - policy_name
+        properties:
+          policy_name:
+            description: |-
+              The name of the policy.
+            example: "Sales Policy"
+            type: string
+            maxLength: 254
+
+          description:
+            description: |-
+              A description for the policy.
+            example: "A custom policy for the sales team"
+            type: string
+            maxLength: 500
+
+          filter_started_at:
+            description: |-
+              The filter start date.
+
+              When this policy is applied using a `custodian` legal
+              hold assignments, it will only apply to file versions
+              created or uploaded inside of the
+              date range. Other assignment types, such as folders and
+              files, will ignore the date filter.
+
+              Required if `is_ongoing` is set to `false`.
+            example: "2012-12-12T10:53:43-08:00"
+            type: string
+            maxLength: 500
+            format: date-time
+
+          filter_ended_at:
+            description: |-
+              The filter end date.
+
+              When this policy is applied using a `custodian` legal
+              hold assignments, it will only apply to file versions
+              created or uploaded inside of the
+              date range. Other assignment types, such as folders and
+              files, will ignore the date filter.
+
+              Required if `is_ongoing` is set to `false`.
+            example: "2012-12-18T10:53:43-08:00"
+            type: string
+            maxLength: 500
+            format: date-time
+
+          is_ongoing:
+            description: |-
+              Wether new assignments under this policy should
+              continue applying to files even after initialization.
+
+              When this policy is applied using a legal hold assignment,
+              it will continue applying the policy to any new file versions
+              even after it has been applied.
+
+              For example, if a legal hold assignment is placed on a user
+              today, and that user uploads a file tomorrow, that file will
+              get held. This will continue until the policy is retired.
+
+              Required if no filter dates are set.
+            example: true
+            type: boolean
+
+responses:
+  201:
+    description: |-
+      Returns a new legal hold policy object.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/LegalHoldPolicy'
+
+  400:
+    description: |-
+      Returns an error if required parameters are missing,
+      or neither `is_ongoing` or filter dates are specified.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/LegalHoldPolicy'
+
+  409:
+    description: |-
+      Returns an error if a policy with this name already exists.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
