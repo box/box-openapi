@@ -1,0 +1,85 @@
+---
+operationId: post_group_memberships
+
+summary: Create group membership
+
+tags:
+  - Groups
+
+x-box-reference-category: groups
+
+description: |-
+  Adds a user to a group.
+
+parameters:
+  - $ref: '../attributes/fields.yml'
+
+requestBody:
+  content:
+    application/json:
+      schema:
+        required:
+          - user
+          - group
+        properties:
+          user:
+            type: object
+            description: |-
+              The user to add to the group.
+            required:
+              - id
+            properties:
+              id:
+                type: string
+                description: |-
+                  The ID of the user to add to the group
+                example: "1434325"
+
+          group:
+            type: object
+            description: |-
+              The group to add the user to.
+            required:
+              - id
+            properties:
+              id:
+                type: string
+                description: |-
+                  The ID of the group to add the user to
+                example: "4545523"
+
+          role:
+            type: string
+            example: member
+            description: The role of the user in the group.
+            enum:
+              - member
+              - admin
+
+          configurable_permissions:
+            type: object
+            example:
+              can_run_reports: false
+            description: |-
+              Custom configuration for the permissions an admin
+              if a group will receive. This option has no effect
+              on members with a role of `member`.
+
+              Setting these permissions overwrites the default
+              access levels of an admin.
+
+              Specifying a value of "null" for this object will disable
+              all configurable permissions. Specifying permissions will set
+              them accordingly, omitted permissions will be enabled by default.
+            additionalProperties:
+              type: boolean
+              example: true
+
+responses:
+  201:
+    description: |-
+      Returns a new group membership object.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/GroupMembership'
