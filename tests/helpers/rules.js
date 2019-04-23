@@ -272,6 +272,24 @@ const falsy = (value, _, path) => {
   }
 }
 
+/**
+ * Ensure that all resource IDs are unique
+ */
+const ensureResourceIdUnique = (items) => {
+  let ids = Object.entries(items).map(([_, value]) => value['x-box-resource-id'])
+  let uniques = [...new Set(ids)]
+
+
+  if (ids.length !== uniques.length) {
+    let matches = ids.filter((x, index) => ids.indexOf(x) !== index);
+
+    return [
+      {
+        message: `Duplicate x-box-resource-id: ${matches}`
+      },
+    ];
+  }
+}
 
 module.exports = {
   boxRules: () => {
@@ -451,6 +469,13 @@ module.exports = {
           field: 'properties',
           function: 'falsy'
         }
+      },
+      ensure_resource_id_unique: {
+        summary: 'Ensures a property\'s example matches its type',
+        given: '$.components.schemas',
+        then: {
+          function: 'ensureResourceIdUnique'
+        }
       }
     } 
   },
@@ -469,7 +494,8 @@ module.exports = {
       ensureAllArraysHaveItemTypes: ensureAllArraysHaveItemTypes,
       ensureReferenceCategoryValid: ensureReferenceCategoryValid,
       ensureExampleMatchesType: ensureExampleMatchesType,
-      falsy: falsy
+      falsy: falsy,
+      ensureResourceIdUnique: ensureResourceIdUnique
     }
   }
 }
