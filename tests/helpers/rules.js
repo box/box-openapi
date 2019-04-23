@@ -93,6 +93,7 @@ const ensurePropertiesExample = (item, _opts, paths) => {
   if (
       paths.target.includes('example') ||
       item.type === 'object' || 
+      item.format === 'binary' || 
       (item.type === 'array' && item.items.type !== 'string') || 
       item['$ref'] !== undefined ||
       item.example === null ||
