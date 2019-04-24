@@ -1,0 +1,74 @@
+---
+operationId: post_files_id
+
+summary: Restore a file
+
+tags:
+  - Trash
+  - Files
+
+x-box-reference-category: trash
+
+description: |-
+  Restores an file that has been moved to the trash.
+
+parameters:
+  - $ref: '../attributes/file_id.yml'
+  - $ref: '../attributes/fields.yml'
+
+requestBody:
+  content:
+    application/json:
+      schema:
+        properties:
+          name:
+            description: |-
+              An optional new name for the file.
+            example: "Restored.docx"
+            type: string
+
+          parent:
+            allOf:
+              - $ref: "#/components/schemas/Parent"
+              - description: |-
+                  The optional parent folder to restore the file to.
+
+                  Use this if the original parent folder no longer
+                  exists, or the user no longer has access to the
+                  original parent folder.
+
+responses:
+  201:
+    description: |-
+      Returns a file object when the file has been restored.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/File'
+
+  403:
+    description: |-
+      Returns an error if the user doesn’t have access to the folder
+      the file is being restored to, or the user doesn’t have permission
+      to restore files from the trash.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
+
+  404:
+    description: |-
+      Returns an error if the file is not in the trash.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
+
+  409:
+    description: |-
+      Returns an error if there is an file with the same name
+      in the folder the file is being restored to.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
