@@ -1,5 +1,10 @@
 const path = require('path')
 
+/**
+ * Dev server configuration for running and 
+ * compiling the specification in development, 
+ * as well as running Swagger UI.
+ */
 module.exports = {
   mode: 'development',
   // input

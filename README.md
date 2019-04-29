@@ -1,11 +1,23 @@
 # Box OpenAPI 3.0 specification
 
-> This branch is a work in progress.
+[![Build Status](https://travis-ci.com/box/box-openapi.svg?branch=master)](https://travis-ci.com/box/box-openapi)
+[![Project Status](https://opensource.box.com/badges/active.svg)](http://opensource.box.com/badges)
 
-The Box OpenAPI 3.0 Specification (OAS3) for interacting with the
+
+The Box OpenAPI 3.0 Specification (OAS3) for the
 [Box Platform API](https://developers.box.com/).
 
-This repository contains the raw source for the specification. For a combined, resolved version please check this [fully build specification](https://opensource.box.com/box-openapi/openapi.json).
+This repository contains the raw source for the specification. For a combined, resolved version please have a look at this [fully build specification](https://opensource.box.com/box-openapi/openapi.json).
+
+## Usage & License
+
+This specification is provided under the [Apache License 2.0](LICENSE) license.
+
+As this project is a work in progress no rights can be derived from 
+this specification and it may change without warning.
+
+Currently the only recognised downstream dependency of this specification is 
+the new Box developer documentation available on [Box.dev](https://box.dev).
 
 ## Development
 
@@ -21,6 +33,12 @@ Additionally, we use `yamllint` to lint the yaml files.
 brew install hunspell yamllint
 ```
 
+Finally, this project depends on Yarn, the Node package manager.
+
+```sh
+npm install -g yarn
+```
+
 ### Local Development
 
 To work on the source, install the dependencies, start the local web server, and watch for changes.
@@ -28,18 +46,19 @@ To work on the source, install the dependencies, start the local web server, and
 ```bash
 git clone git@github.com:box/box-openapi.git
 cd box-openapi
-npm install
-npm start
+yarn install
+yarn start
 ```
 
-This will open a Swagger UI preview.
+This will open a Swagger UI preview on [localhost:8080/](http://localhost:8080/),
+watch for changes, and automatically run the linter, spell checker, and all other tests.
 
 ### How To: Add a resource
 
 Request and response resources are located in the
 `/v2.0/resources/` folder. They are written in [YAML](https://en.wikipedia.org/wiki/YAML).
 
-Before editing any fules, run `npm start` to start the dev server, Swagger UI
+Before editing any fules, run `yarn start` to start the dev server, Swagger UI
 and tests watcher. Alternatively, just run `npm run watch` to run automatically
 watch and run the linter and tests.
 
@@ -135,8 +154,11 @@ properties:
 This is a bit longer than the alternative syntax (not shown here) but allows for
 specifying a description specific to this nesting.
 
-## Copyright and License
+### Known issues
 
-Copyright 2019 Box, Inc. All rights reserved.
-
-Licensed under the [Apache License](LICENSE).
+1. As Hunspell uses a different dictionary on development than on Travis the results 
+   will vary. As such, Travis spell checks might fail where they pass on a Mac. Inspect
+   the errors and add any missing words to the `accepted_words.yml`.
+2. You may see many warnings or erors when a reference doesn't resolve properly. Make
+   sure to see if there's an unresolved specification before paying attention to other 
+   warnings.

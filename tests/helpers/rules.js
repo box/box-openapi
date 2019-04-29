@@ -1,39 +1,39 @@
 /**
- * Verify that the operationId is as expected.
- * 
- * @param {object} endpoint The endpoint to verify
- * @param {object} options The options passed into this validator
- * @param {object} object.given JSON path for this object
+ * A list of custom rules for our specification
  */
-const validateOperationIdFormat = (endpoint, options, { given }) => {
-  // remove the first element
+
+/**
+ * Ensure that the operationId matches the expected value
+ * for the path in question
+ */
+const validateOperationIdFormat = (endpoint, _, { given }) => {
+  // remove the first element from the path
   given.shift()
-  // create the ID
+  // create the expected ID
   const id = given.reverse()
                   .join('')
                   .replace(/\//g, '_')
                   .replace(/{[A-Za-z_]*}/g, 'id')
                   .replace(/\.id/g, '_id')
 
-  // check that the ID is as expected
+  // check the expected ID against the operationId
   if (id != endpoint.operationId) {
     return [{ message: `Expected operationId to equal ${id}`}]
   }
 }
 
 /**
- * Check if all path references are resolved
- * 
- * @param {Object} item the item that might have unresolved
- * references
+ * Ensure that all references have been resolved for 
+ * an item
  */
 const ensureReferencesResolved = (item) => {
   // check if this item is an object and has a $ref
+  // and then get the reference
   if (item && typeof(item) === 'object' && '$ref' in item) {
-    // fetch the reference
     let ref = item['$ref']
-    // if the reference is a string, and doesn't start with 
-    // a local pointer, it hasn't been resolved
+    // if the reference is a string, and doesn't point to
+    // a resource defined in this spec (#/) then it hasn't 
+    // been resolved
     if (!typeof(ref) === 'string' || !ref.startsWith('#/')) {
       return [
         { message: `Expected all file references to be resolved - ${ref}`}
@@ -43,22 +43,24 @@ const ensureReferencesResolved = (item) => {
 }
 
 /**
- * Expect all local references to exist
- * 
- * @param {object} item The item to check references for
- * @param {object} context The context, including the full specification
+ * Ensure all local references to exist
  */
 const ensureLocalReferencesExist = (item, _, __, context) => {
-  // check if this item has a reference
+  // check if this item is an object and has a $ref
+  // and then get the reference
   if (item && typeof(item) === 'object' && '$ref' in item) {
     let ref = item['$ref']
+
+    // extract the resolved spec
     let spec = context.resolved
 
     // check that the reference is a local reference
     if (typeof(ref) === 'string' && ref.startsWith('#/')) {
-      // check that the reference exists
+      // check that the path for the reference exists
       let parts = ref.split('/')
-      if (!spec[parts[1]][parts[2]][parts[3]]) {
+      let match = spec[parts[1]][parts[2]][parts[3]]
+      // throw an error if it does not exist
+      if (!match) {
         return [
           { message: `Expected reference to exist - ${ref}`}
         ]
@@ -68,14 +70,15 @@ const ensureLocalReferencesExist = (item, _, __, context) => {
 }
 
 /**
- * Ensures references are in the right syntax
- * 
- * @param {object} item the item to ensure references for
+ * Ensures that references follow the right syntax
  */
 const ensureReferencesFormat = (item) => {
+  // check if this item is an object and has a $ref
+  // and then get the reference
   if (item && typeof(item) === 'object' && '$ref' in item) {
     let ref = item['$ref']
 
+    // ensure we only use local references or file references
     if (!ref.startsWith('./') && !ref.startsWith('#/')) {
       return [
         { message: `Expected reference to be a file ("./filename") or local ("#/components/etc") - ${ref}`}
@@ -85,20 +88,27 @@ const ensureReferencesFormat = (item) => {
 }
 
 /**
- * Ensure examples exist for simple values
- * 
- * @param {object} item the item to ensure examples for
+ * Ensure that examples exist for paramters/properties of
+ * basic values
  */
-const ensurePropertiesExample = (item, _opts, paths) => {  
+const ensurePropertiesExample = (item, _, paths) => {  
   if (
+      // skip if this is an example
       paths.target.includes('example') ||
+      // objects are not basic values
       item.type === 'object' || 
+      // binary values are not basic values
       item.format === 'binary' || 
+      // arrays can be skipped unless they are string arrays
       (item.type === 'array' && item.items.type !== 'string') || 
+      // skip if the property as a reference
       item['$ref'] !== undefined ||
-      item.example === null ||
-      item.allOf !== undefined ) { return }
+      item.allOf !== undefined ||
+      // allow an explicit example value of null
+      item.example === null ) { return }
   
+  // if the item does not have an example
+  // throw an error
   if (!item.example) {
     return [
       {
@@ -109,18 +119,21 @@ const ensurePropertiesExample = (item, _opts, paths) => {
 }
 
 /**
- * Ensure descriptions exist for simple values
- * 
- * @param {object} item the item to ensure descriptions for
+ * Ensure that descriptions exist for simple values
  */
-const ensureSimpleDescription = (item, _opts, paths) => {
+const ensureSimpleDescription = (item, _, paths) => {
   if (
+      // skip if this is an example
       paths.target.includes('example') ||
+      // skip if this is an object or array
       item.type === 'object' || 
       item.type === 'array' || 
+      // skip if this has a reference
       item['$ref'] !== undefined ||
       item.allOf !== undefined ) { return }
   
+  // if the item does not have an decription
+  // throw an error
   if (!item.description) {
     return [
       {
@@ -132,11 +145,15 @@ const ensureSimpleDescription = (item, _opts, paths) => {
 
 
 /**
- * Ensure allOfs start with a $ref 
+ * Ensure allOfs start with a $ref and then a description,
+ * in that order
  */
-const ensureAllofOrder = (item, _, paths) => {
+const ensureAllofOrder = (item) => {
+  // get the keys for an item
   let keys = item.map(row => Object.keys(row)[0])
   
+  // if the item contains a reference, ensure it's 
+  // the first item
   if (keys.includes("$ref") && keys[0] !== "$ref") {
     return [
       {
@@ -145,6 +162,9 @@ const ensureAllofOrder = (item, _, paths) => {
     ]
   }
 
+  // if the item contains a reference, ensure the description is
+  // the second item, unless the second option is a direct
+  // list of properties
   if (keys.includes("$ref") && keys[1] !== "description" && keys[1] !== "properties") {
     return [
       {
@@ -153,8 +173,8 @@ const ensureAllofOrder = (item, _, paths) => {
     ]
   }
 
+  // Check of there are any keys we did not expect
   let excessKeys = keys && ["$ref", "description"]
-  
   if (keys["$ref"] && excessKeys.length > 0) {
     return [
       {
@@ -165,11 +185,14 @@ const ensureAllofOrder = (item, _, paths) => {
 }
 
 /**
- * Ensure all items in a property are of a basic type
+ * Ensure all array items in a property are of a basic type
  * or reference object
  */
 const ensureItemsOfBasicTypeOrReference = (items) => {
+  // get the keys of the items list
   let keys = Object.keys(items)
+
+  // if we have more than one key, throw an error
   if (keys.length > 1) {
     return [
       {
@@ -177,6 +200,7 @@ const ensureItemsOfBasicTypeOrReference = (items) => {
       }
     ]
   }
+  // if we have one key, ensure it's a type or a reference
   else if (!keys.includes("type") && !keys.includes("$ref")) {
     return [
       {
@@ -190,12 +214,16 @@ const ensureItemsOfBasicTypeOrReference = (items) => {
  * Ensures all local references are in an allOf
  */
 const ensureLocalReferencesInAllOf = (item, _, paths) => {
+  // check if the item is a local reference
   if (item && item['$ref'] && item['$ref'].startsWith('#/')) {
+    // ensure the parent path is provided
     if (paths && paths.target) {
+      // get the parent and grandparent item names of this item
       let parent = paths.target[paths.target.length-1]
       let grandparent = paths.target[paths.target.length-2]
 
-      if (parent !== 'items' && grandparent !== 'allOf') {
+      // allow references in items and allOfs only
+      if (!(parent === 'items' || grandparent === 'allOf')) {
         return [
           {
             message: `Local references should be contained within an allOf`
@@ -210,7 +238,10 @@ const ensureLocalReferencesInAllOf = (item, _, paths) => {
  * Ensures all arrays have item types
  */
 const ensureAllArraysHaveItemTypes = (param) => {
-  if (param.type === 'array' && !(param.items && (param.items.type || param.items['$ref']))) {
+  // check if the param is an array
+  if (param.type === 'array' && 
+    // if the param has items, ensure it has a type or a ref
+    !(param.items && (param.items.type || param.items['$ref']))) {
     return [
       {
         message: `All properties and params of type array need an item type or $ref`
@@ -221,16 +252,17 @@ const ensureAllArraysHaveItemTypes = (param) => {
 
 /**	
  * Check that every item x-box-reference-category matches the ID of a tag	
- * 	
- * @param {object} item The item to check x-box-reference-category for	
- * @param {object} context The context, including the full specification	
  */	
 const ensureReferenceCategoryValid = (item, _, __, context) => {	
+  // get the entire spec
   let spec = context.resolved	
 
+  // get the reference category
   let id = item['x-box-reference-category']
+  // ensure the reference category matches a category in the tags of the specification
   let match = !spec.tags.map((tag) => tag['x-box-reference-category']).includes(id)
 
+  // ensure an ID was found and that it matches a caegory§
   if (id && match) { 	
     return [{ message: `Expected x-box-reference-category to match a similar ID in the root tags object (${item['x-box-reference-category']})`}] 	
   }	
@@ -264,34 +296,39 @@ const ensureExampleMatchesType = ({ type, example, additionalProperties }) => {
  * Ensure a property is falsy
  */
 const falsy = (value, _, path) => {
-  if (!!value) {
-    return [
-      {
-        message: `${path.target ? path.target.join('.') : 'property'} is not falsy`
-      },
-    ];
-  }
+  if (!!value) { return [
+    {
+      message: `${path.target ? path.target.join('.') : 'property'} is not falsy`
+    },
+  ]}
 }
 
 /**
- * Ensure that all resource IDs are unique
+ * Ensure that all resourceId's are unique within a list
  */
 const ensureResourceIdUnique = (items) => {
+  // get all the resourceIds
   let ids = Object.entries(items).map(([_, value]) => value['x-box-resource-id'])
+  // determine a unique set
   let uniques = [...new Set(ids)]
 
-
+  // if the unique set does not have the same length
+  // as the whole set, throw an error
   if (ids.length !== uniques.length) {
+    // determine the items that are double
     let matches = ids.filter((x, index) => ids.indexOf(x) !== index);
 
     return [
       {
         message: `Duplicate x-box-resource-id: ${matches}`
       },
-    ];
+    ]
   }
 }
 
+/**
+ * Define the list of rules
+ */
 module.exports = {
   boxRules: () => {
     return {
@@ -481,6 +518,9 @@ module.exports = {
     } 
   },
 
+  /**
+   * Export the custom functions
+   */
   boxFunctions: () => {
     return {
       validateOperationIdFormat: validateOperationIdFormat,
