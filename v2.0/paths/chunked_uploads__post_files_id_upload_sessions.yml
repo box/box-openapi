@@ -1,0 +1,58 @@
+---
+operationId: post_files_id_upload_sessions
+
+summary: Create upload session for existing file
+
+tags:
+  - Chunked Uploads
+
+x-box-reference-category: chunked_uploads
+
+description:
+  Creates an upload session for an existing file.
+
+servers:
+  - url: https://upload.box.com/api/2.0
+    description: |-
+      Server for file uploads
+
+parameters:
+  - $ref: '../attributes/file_id.yml'
+
+requestBody:
+  content:
+    application/json:
+      schema:
+        required:
+          - file_size
+        properties:
+          file_size:
+            description: |-
+              The total number of bytes of the file to be uploaded
+            example: 104857600
+            type: integer
+            format: int64
+
+          file_name:
+            description: The optional new name of new file
+            example: "Project.mov"
+            type: string
+
+
+responses:
+  201:
+    description: |-
+      Returns a new upload session.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/UploadSession'
+
+  409:
+    description: |-
+      Returns an error if the file already exists,
+      or the account has run out of disk space.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'

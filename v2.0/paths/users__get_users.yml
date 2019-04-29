@@ -1,0 +1,57 @@
+---
+operationId: get_users
+
+x-box-reference-category: users
+
+summary: List enterprise users
+
+tags:
+  - Users
+
+description: |-
+  Returns a list of all users for the Enterprise along with their user_id,
+  public_name, and login.
+
+  The application and the authenticated user need to
+  have the permission to look up users in the entire
+  enterprise.
+
+parameters:
+  - name: filter_term
+    description: |-
+      Limits the results to only users who's `name` or
+      `login` start with the search term.
+
+      For externally managed users, the search term needs
+      to completely match in order to find the user.
+    in: query
+    required: false
+    example: "john"
+    schema:
+      type: string
+
+  - name: user_type
+    description: |-
+      Limits the results to the kind  of user specified.
+    in: query
+    required: false
+    example: managed
+    schema:
+      type: string
+      enum:
+        - all
+        - external
+        - managed
+
+  - $ref: '../attributes/fields.yml'
+  - $ref: '../attributes/item_offset.yml'
+  - $ref: '../attributes/item_limit.yml'
+
+responses:
+  200:
+    description: |-
+      Returns all of the users in the enterprise.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/Users'

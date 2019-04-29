@@ -1,0 +1,111 @@
+---
+operationId: post_retention_policies
+
+summary: Create retention policy
+
+tags:
+  - Retention Policies
+
+x-box-reference-category: retention_policies
+
+description: |-
+  Creates a retention policy.
+
+requestBody:
+  content:
+    application/json:
+      schema:
+        required:
+          - policy_name
+          - policy_type
+          - disposition_action
+        properties:
+          policy_name:
+            type: string
+            description: The name for the retention policy
+            example: Some Policy Name
+
+          policy_type:
+            type: string
+            example: finite
+            description: |-
+              The type of the retention policy. A retention
+              policy type can either be `finite`, where a
+              specific amount of time to retain the content is known
+              upfront, or `indefinite`, where the amount of time
+              to retain the content is still unknown.
+            enum:
+              - finite
+              - indefinite
+
+          disposition_action:
+            type: string
+            example: permanently_delete
+            description: |-
+              The disposition action of the retention policy.
+              This action can be `permanently_delete`, which
+              will cause the content retained by the policy
+              to be permanently deleted, or `remove_retention`,
+              which will lift the retention policy from the content,
+              allowing it to be deleted by users,
+              once the retention policy time period has passed.
+            enum:
+              - permanently_delete
+              - remove_retention
+
+          retention_length:
+            type: string
+            format: int32
+            example: "0"
+            description: |-
+              The length of the retention policy. This length
+              specifies the duration in days that the retention
+              policy will be active for after being assigned to
+              content.  If the policy has A `policy_type` of
+              `indefinite`, the `retention_length` will also be
+              `indefinite`.
+
+          can_owner_extend_retention:
+            type: boolean
+            example: true
+            description: |-
+              Whether the owner of a file will be allowed to
+              extend the retention.
+
+          are_owners_notified:
+            type: boolean
+            example: true
+            description: |-
+              Whether owner and co-owners of a file are notified
+              when the policy nears expiration.
+
+          custom_notification_recipients:
+            type: array
+            items:
+              $ref: "#/components/schemas/NotifiedUser"
+
+responses:
+  200:
+    description: |-
+      Returns a new retention policy object.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/RetentionPolicy'
+
+  400:
+    description: |-
+      Returns a `bad_request` error with the `retention_length` was
+      specified for a `infinite` retention policy, or an incorrect
+      `disposition_action` was set.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
+  409:
+    description: |-
+      Returns an error if a retention policy with the given name already exists
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'

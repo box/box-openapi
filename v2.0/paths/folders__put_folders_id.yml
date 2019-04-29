@@ -1,0 +1,90 @@
+---
+operationId: put_folders_id
+
+summary: Update a folder
+
+description: |-
+  Updates a folder. This can be also be used to move the folder,
+  create shared links, update collaborations, and more.
+
+tags:
+  - Folders
+
+x-box-reference-category: folders
+
+parameters:
+  - $ref: '../attributes/folder_id.yml'
+  - $ref: '../attributes/fields.yml'
+  - $ref: '../attributes/if_match.yml'
+
+requestBody:
+  content:
+    application/json:
+      schema:
+        properties:
+          name:
+            type: string
+            description: |-
+              The new name for the folder
+            example: New Folder
+
+          description:
+            $ref: "../attributes/folder__description.yml"
+
+          sync_state:
+            $ref: "../attributes/folder__sync_state.yml"
+
+          can_non_owners_invite:
+            $ref: "../attributes/folder__can_non_owners_invite.yml"
+
+          is_collaboration_restricted_to_enterprise:
+            $ref:
+              "../attributes/folder__is_collaboration_restricted_to_enterprise.yml"
+
+          parent:
+            allOf:
+              - $ref: "#/components/schemas/Parent"
+              - description: |-
+                  The parent folder for this folder. Use this to move the folder
+                  or to restore it out of the trash.
+
+          shared_link:
+            allOf:
+              - $ref: "#/components/schemas/SharedLink--Writable"
+              - description: |-
+                  Enables the creation of a shared link for this folder
+
+          folder_upload_email:
+            allOf:
+              - $ref: "#/components/schemas/FolderUploadEmail"
+              - description: |-
+                  Enables an email address for users to upload
+                  files directly to the folder
+
+          owned_by:
+            allOf:
+              - $ref: "#/components/schemas/Owner"
+              - description: The user that owns this folder
+
+          tags:
+            $ref: "../attributes/tags.yml"
+
+          collections:
+            type: array
+            description: |-
+              The collections this folder belongs to.
+            items:
+              $ref: "#/components/schemas/Parent"
+
+responses:
+  200:
+    description: |-
+      Returns a folder object for the updated folder
+
+      [Some fields are optional](#folder) and need to be explicitly
+      requested using the [fields](#put-folders-id--request--fields)
+      parameter.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/Folder'

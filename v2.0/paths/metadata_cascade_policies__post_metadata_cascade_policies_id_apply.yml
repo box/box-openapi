@@ -1,0 +1,58 @@
+---
+operationId: post_metadata_cascade_policies_id_apply
+
+summary: Force apply cascade policy
+
+tags:
+  - Metadata Cascade (Beta)
+
+x-box-reference-category: metadata_cascade_policies
+
+description: |-
+  If a policy already exists on a folder, this will apply that policy
+  to all existing files and sub-folders within the target folder.
+
+parameters:
+  - name: metadata_cascade_policy_id
+    required: true
+    in: path
+    schema:
+      type: string
+    description: The ID of the cascade policy.
+    example: "21312"
+
+requestBody:
+  content:
+    application/json:
+      schema:
+        required:
+          - conflict_resolution
+        properties:
+          conflict_resolution:
+            type: string
+            enum:
+              - none
+              - overwrite
+            description: |-
+              The desired behavior for conflict-resolution if a template already
+              exists on a given file or folder.
+
+              * `none` will preserve the existing value on the file
+              * `overwrite` will force-apply the templates values over
+                any existing values.
+            example: "overwrite"
+
+responses:
+  202:
+    description: |-
+      Returns the metadata cascade policy when the policy has been
+      applied.
+
+      The metadata cascade operation will be kicked off asynchronously.
+      The API call will return right away but before the cascade operation
+      is complete. There is currently no way to check for when this
+      operation has finished.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/MetadataCascadePolicy'

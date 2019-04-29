@@ -1,0 +1,63 @@
+---
+operationId: put_files_upload_sessions_id
+
+summary: Upload a part
+
+tags:
+  - Chunked Uploads
+
+x-box-reference-category: chunked_uploads
+
+description:
+  Updates a chunk of an upload session for a file.
+
+servers:
+  - url: https://upload.box.com/api/2.0
+    description: |-
+      Server for file uploads
+
+parameters:
+  - $ref: '../attributes/upload_session_id.yml'
+  - $ref: '../attributes/digest.yml'
+  - $ref: '../attributes/content_range.yml'
+
+requestBody:
+  content:
+    application/octet-stream:
+      schema:
+        type: string
+        format: binary
+
+responses:
+  200:
+    description: |-
+      Chunk has been uploaded successfully.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/UploadPart'
+
+  409:
+    description: |-
+      Returns an error if the chunk conflicts with another
+      chunk previously uploaded.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
+  412:
+    description: |-
+      Returns an error if a precondition failed.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
+
+  416:
+    description: |-
+      Returns an error if the content range does not match a specified range
+      for the session.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'

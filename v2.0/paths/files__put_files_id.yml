@@ -1,0 +1,73 @@
+---
+operationId: put_files_id
+
+summary: Update a file
+
+tags:
+  - Files
+
+x-box-reference-category: files
+
+description: |-
+  Updates a file. This can be used to rename or move a file,
+  create a shared link, or lock a file.
+
+parameters:
+  - $ref: '../attributes/file_id.yml'
+  - $ref: '../attributes/fields.yml'
+  - $ref: '../attributes/if_match.yml'
+
+requestBody:
+  content:
+    application/json:
+      schema:
+        properties:
+          name:
+            type: string
+            description: |-
+              The new name for the file
+            example: NewFile.txt
+
+          description:
+            $ref: "../attributes/file__description.yml"
+
+          parent:
+            allOf:
+              - $ref: "#/components/schemas/Parent"
+              - description: |-
+                  The parent folder for this file. Use this to move the file
+                  or to restore it out of the trash.
+
+          shared_link:
+            allOf:
+              - $ref: "#/components/schemas/SharedLink--Writable"
+              - description: |-
+                  Enables the creation of a shared link for this file
+
+          lock:
+            allOf:
+              - $ref: "#/components/schemas/Lock--Writable"
+              - description: |-
+                  Creates a lock on a file. Set to `null` to unlock a file
+
+          permissions:
+            allOf:
+              - $ref: "#/components/schemas/Permissions--Writable"
+              - description: |-
+                  Describes if a file can be downloaded and by who.
+
+          tags:
+            $ref: "../attributes/tags.yml"
+
+responses:
+  200:
+    description: |-
+      Returns a file object.
+
+      [Some fields are optional](#file) and need to be explicitly
+      requested using the [fields](#get-files-id--request--fields)
+      parameter.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/File'

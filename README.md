@@ -1,171 +1,168 @@
-[![Project Status](http://opensource.box.com/badges/active.svg)](http://opensource.box.com/badges)
+# Box OpenAPI 3.0 Specification
 
-Box Open API specification
-==========================
+[![Build Status](https://travis-ci.com/box/box-openapi.svg?branch=master)](https://travis-ci.com/box/box-openapi)
+[![Project Status](https://opensource.box.com/badges/active.svg)](http://opensource.box.com/badges)
 
-The Box Open API specification for interacting with the
-[Box Content API](https://developers.box.com/docs/).
 
-Quickstart
-----------
+The Box OpenAPI 3.0 Specification (OAS3) for the
+[Box Platform API](https://developers.box.com/).
 
-The specifications can be obtained by cloning GitHub repository.
+This repository contains the raw source for the specification. For a combined, resolved version please have a look at this [fully build specification](https://opensource.box.com/box-openapi/openapi.json).
 
-```
-git clone https://github.com/box/box-openapi.git
-```
+## Usage & License
 
-Swagger Codegen
----------------
+This specification is provided under the [Apache License 2.0](LICENSE) license.
 
-The [Swagger Codegen project](https://github.com/swagger-api/swagger-codegen) helps generation of API clients libraries given the Open API specification file. It also generates the documentation automatically.
+As this project is a work in progress no rights can be derived from 
+this specification and it may change without warning.
 
-### Java
+Currently the only recognised downstream dependency of this specification is 
+the new Box developer documentation available on [Box.dev](https://box.dev).
 
-The Codegen tool generates the default package structure as io.swagger.client for all the specifications. For accessing the Box Content API, all the four specifications may be used. In that case, we will have conflicts of the classes. Therefore, we have to give custom packages for generating client code for each specification.
+## Development
 
-Box Authorization API specification: Example for creating the custom package io.swagger.authorization.client is as follows.
+### Prerequisites
 
-```
-java -jar swagger-codegen-cli.jar generate -i ${box-openapi}/box-v2-api.authorization.openapi-v2.json -l java -o ${java-client-home}/java-auth --api-package io.swagger.authorization.client
-``` 
+This project requires Node for testing, linting, and compilation.
 
-Box OAuth2 Token API specification: Example for creating the custom package io.swagger.token.client is as follows.
-```
-java -jar swagger-codegen-cli.jar generate -i ${box-openapi}/box-v2-api.token.openapi-v2.json -l java -o ${java-client-home}/java-token --api-package io.swagger.token.client
+It also needs `hunspell` for spell checking to be installed, as this is what is used when running on Travis.
 
+Additionally, we use `yamllint` to lint the yaml files.
+
+```sh
+brew install hunspell yamllint
 ```
 
-Box 2.0 API specification: Example for creating the custom package io.swagger.v2api.client is as follows.
+Finally, this project depends on Yarn, the Node package manager.
 
-```
-java -jar swagger-codegen-cli.jar generate -i ${box-openapi}/box-v2-api.openapi-v2.json -l java -o ${java-client-home}/java-v2api --api-package io.swagger.v2api.client
-```
-
-Box upload API specification: Example for creating the custom package io.swagger.upload.client is as follows.
-
-```
-java -jar swagger-codegen-cli.jar generate -i ${box-openapi}/box-v2-api.upload.openapi-v2.json -l java -o ${java-client-home}/java-upload --api-package io.swagger.upload.client
-
+```sh
+npm install -g yarn
 ```
 
-### C#
+### Local Development
 
-C# client generation produces the default package structure same as Java. That leads to the same issue of conflict of classes. For C#, the custom packages need to be given differently.
+To work on the source, install the dependencies, start the local web server, and watch for changes.
 
-Box Authorization API specification: Example for creating the custom package io.swagger.authorization is as follows.
-
-```
-Lets create a config.json file with the following content.
-{
-  "packageName": "io.swagger.authorization"
-}
-
-Then, the client code can be generated as follows.
-java -jar swagger-codegen-cli.jar generate -i ${box-openapi}/box-v2-api.authorization.openapi-v2.json -l csharp -o ${csharp-client-home}/csharp-auth -c ./config.json
+```bash
+git clone git@github.com:box/box-openapi.git
+cd box-openapi
+yarn install
+yarn start
 ```
 
-Box OAuth2 Token API specification: Example for cerating the custom package io.swagger.token is as follows.
+This will open a Swagger UI preview on [localhost:8080/](http://localhost:8080/),
+watch for changes, and automatically run the linter, spell checker, and all other tests.
 
+### How To: Add a resource
+
+Request and response resources are located in the
+`/v2.0/resources/` folder. They are written in [YAML](https://en.wikipedia.org/wiki/YAML).
+
+Before editing any fules, run `yarn start` to start the dev server, Swagger UI
+and tests watcher. Alternatively, just run `npm run watch` to run automatically
+watch and run the linter and tests.
+
+Resources are automatically linted by `yamllinter`, ensuring that they are valid
+YAML. Resources are not automatically included into the spec, as
+you will need to explicitly add them to the `v2.0/resources/_index.json` file.
+
+Once resources have been added to this file, they are automatically tested
+to ensure they are valid OpenAPI Specification 3.0, as well spell checking, and
+some other tests.
+
+#### Tips & Tricks
+
+Please make sure:
+
+* Every resource parameter has a type (and optional format)
+* Every resource parameter has a description and example
+* Every resource parameter passes the YAML linter
+* Every resource parameter is separated by a new line to improve readability
+
+Some useful resources:
+
+* [OpenAPI Specification 3.0 (OAS3)](https://swagger.io/specification/)
+* [OAS3 data types](https://swagger.io/docs/specification/data-models/data-types/)
+
+### How To: Add an endpoint
+
+Endpoints are located in the
+`/v2.0/paths/` folder. They are written in [YAML](https://en.wikipedia.org/wiki/YAML).
+
+Before editing any fules, run `npm start` to start the dev server, Swagger UI
+and tests watcher. Alternatively, just run `npm run watch` to run automatically
+watch and run the linter and tests.
+
+Endpoints are automatically linted by `yamllinter`, ensuring that they are valid
+YAML. Resources are not automatically included into the spec, as
+you will need to explicitly add them to the `v2.0/paths/_index.json` file.
+
+Once paths have been added to this file, they are automatically tested
+to ensure they are valid OpenAPI Specification 3.0, as well spell checking, and
+some other tests.
+
+#### Tips & Tricks
+
+Please make sure:
+
+* Every endpoint parameter has a type (and optional format)
+* Every endpoint parameter has a description and example
+* To always return a reference to a resource
+* Every parameter is separated by a new line to improve readability
+
+Some useful resources:
+
+* [OpenAPI Specification 3.0 (OAS3)](https://swagger.io/specification/)
+* [OAS3 data types](https://swagger.io/docs/specification/data-models/data-types/)
+
+### How to: Use OAS3 inheritance for resources
+
+OpenAPI allows for inheritance of resources as follows:
+
+```yaml
+# in foo.yml
+---
+properties:
+  field1:
+    type: string
+    description: Field 1
+    example: "field1"
+
+# in bar.yml
+allOf:
+  - $ref: "#/components/schemas/Foo"
+  - properties:
+      field2:
+        type: string
+        description: Field 2
+        example: "field2"
 ```
-Lets create a config.json file with the following content.
-{
-  "packageName": "io.swagger.token"
-}
 
-Then, the client code can be generated as follows.
-java -jar swagger-codegen-cli.jar generate -i ${box-openapi}/box-v2-api.token.openapi-v2.json -l csharp -o ${csharp-client-home}/csharp-token -c ./config.json
+### How to: Nest resources
+
+Nesting objects is achieved as follows.
+
+```yml
+# in item.yml
+properties:
+  parent:
+    allOf:
+      - description: The parent item
+      - $ref: '#/components/schemas/Item'
 ```
 
-Box 2.0 API specification: Example for creating the custom package io.swagger.v2api is as follows.
+This is a bit longer than the alternative syntax (not shown here) but allows for
+specifying a description specific to this nesting.
 
-```
-Lets create a config.json file with the following content.
-{
-  "packageName": "io.swagger.upload"
-}
+### Known issues
 
-Then, the client code can be generated as follows.
-java -jar swagger-codegen-cli.jar generate -i ${box-openapi}/box-v2-api.upload.openapi-v2.json -l csharp -o ${csharp-client-home}/csharp-upload -c ./config.json
-```
+1. As Hunspell uses a different dictionary on development than on Travis the results 
+   will vary. As such, Travis spell checks might fail where they pass on a Mac. Inspect
+   the errors and add any missing words to the `accepted_words.yml`.
+2. You may see many warnings or erors when a reference doesn't resolve properly. Make
+   sure to see if there's an unresolved specification before paying attention to other 
+   warnings.
 
+# Swagger 2.0
 
-Troubleshooting
----------------
-
-Some of the known issues with using Codegen project with the Box specification files.
-
-### Java
-
-RFC-3339 valid date values requires the following change in the Java client code generated by the Codegen project.
-
-Go to ${JAVA-CLIENT-HOME}/src/main/java/com/swagger/client/JSON.java file. The following inner class can be found.
-
-```
-class LocalDateTypeAdapter extends TypeAdapter<LocalDate> {
-
-    private final DateTimeFormatter formatter = ISODateTimeFormat.date();
-    
-    ...
-
-}
-```
-Change the formatter attribute initializtion as follows.
-
-class LocalDateTypeAdapter extends TypeAdapter<LocalDate> {
-
-    private final DateTimeFormatter formatter = ISODateTimeFormat.dateOptionalTimeParser();
-
-    ...
-}
-
-### Javascript
-
-Document generated for the Javascript client has a bug. It generates the statement for retrieving the default client.
-
-```
-var defaultClient = Box20Api.ApiClient.default;
-```
-
-It needs to be changed as below.
-
-```
-var defaultClient = Box20Api.ApiClient.instance;
-```
-
-For uploading a file to work, the callApi method in ApiClient.js needs to be changed. The line that needs to be modified looks like
-```
-if (this.isFileParam(_formParams[key])) {
-    // file field
-    request.attach(key, _formParams[key]);
-} else {
-    request.field(key, _formParams[key]);
-}
-```
-
-It needs to be changed as below.
-
-```
-if (this.isFileParam(_formParams[key]) || key === 'file') {
-    // file field
-    request.attach(key, _formParams[key]);
-} else {
-    request.field(key, _formParams[key]);
-}
-```
-Copyright and License
----------------------
-
-Copyright 2017 Box, Inc. All rights reserved.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-   http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+The older and incomplete Swagger 2.0 specification is stil available on the [Swagger 2.0](https://github.com/box/box-openapi/tree/swagger_2.0) branch.

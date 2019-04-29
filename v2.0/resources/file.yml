@@ -1,0 +1,150 @@
+---
+x-box-resource-display-name: File
+
+x-box-resource-id: file
+
+description: |-
+  A full representation of a file, as can be returned from any
+  file API endpoints by default
+
+x-box-reference-category: files
+
+allOf:
+  - $ref: '#/components/schemas/File--Standard'
+  - properties:
+      version_number:
+        type: string
+        example: "1"
+        description: The version number of this file
+
+      comment_count:
+        type: integer
+        example: 10
+        description: The number of comments on this file
+
+      permissions:
+        allOf:
+          - $ref: '#/components/schemas/Permissions'
+          - description: |-
+              An object containing the permissions that the current user has
+              for this item
+
+      tags:
+        type: array
+        example:
+          - draft
+          - needs_review
+        items:
+          type: string
+        description: All tags applied to this folder.
+
+      lock:
+        allOf:
+          - $ref: '#/components/schemas/Lock'
+          - description: |-
+              The lock held on this file. If there is no lock, this can either
+              be `null` or have a timestamp in the past.
+
+      extension:
+        type: string
+        example: png
+        description: |-
+          Indicates the suffix, when available, on the file. By default,
+          set to an empty string. The suffix usually indicates the encoding
+          (file format) of the file contents or usage.
+
+      is_package:
+        type: boolean
+        example: true
+        description: |-
+          Whether the file is a package. Used for Mac Packages used by iWorks.
+
+      expiring_embed_link:
+        type: string
+        example: https://app.box.com/preview/expiring_embed/gvoct6FE!
+        description: |-
+          Requesting this field creates an expiring URL for an
+          embedded preview session in an iframe.
+
+          This URL will expire after 60 seconds and the session will
+          expire after 60 minutes.
+
+      watermark_info:
+        allOf:
+          - $ref: '#/components/schemas/WatermarkInfo'
+          - description: Information about the watermarking on this file
+
+      allowed_invitee_roles:
+        type: array
+        description: |-
+          Folder [collaboration](#collaboration-object) roles allowed by the
+          enterprise administrator.
+        items:
+          type: string
+        example:
+          - open
+        enum:
+          - open
+          - company
+          - collaborators
+
+      is_externally_owned:
+        type: boolean
+        example: true
+        description: |-
+          Whether this file is owned by a user outside of the enterprise.
+
+      has_collaborations:
+        type: boolean
+        example: true
+        description: Whether this file has any collaborators.
+
+      metadata:
+        type: object
+        description: |-
+          A list of key-value pairs of metadata objects within their
+          scopes.
+
+          To access the metadata for a file, first use the
+          [Metadata](#metadata) endpoints to determine
+          the metadata templates available to your enterprise.
+
+          The use the [Retrieve File](#get-file-id) endpoint with
+          the `fields` query parameter to get the metadata by ID. The
+          ID for the metadata template will be in the format
+          `metadata.<scope>.<templatename>`, for example
+          `fields=metadata.global.properties`.
+
+        example:
+          global:
+            marketingCollateral:
+              $canEdit: true
+              $id: 01234500-12f1-1234-aa12-b1d234cb567e
+              $parent: folder_59449484661
+              $scope: enterprise_27335
+              $template: blueprintTemplate
+              $type: blueprintTemplate-6bcba49f-ca6d-4d2a-a758-57fe6edf44d0
+              $typeVersion: 2
+              $version: 1
+
+        enum:
+          - global
+          - enteprise_<:enterprise_id>
+
+        additionalProperties:
+          type: object
+          description: |-
+            The name of the metadata template
+
+          example:
+            marketingCollateral:
+              $canEdit: true
+              $id: 01234500-12f1-1234-aa12-b1d234cb567e
+              $parent: folder_59449484661
+              $scope: enterprise_27335
+              $template: blueprintTemplate
+              $type: blueprintTemplate-6bcba49f-ca6d-4d2a-a758-57fe6edf44d0
+              $typeVersion: 2
+              $version: 1
+          additionalProperties:
+            $ref: "#/components/schemas/Metadata"

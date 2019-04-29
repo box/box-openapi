@@ -1,0 +1,76 @@
+---
+operationId: put_retention_policies_id
+
+summary: Update retention policy
+
+tags:
+  - Retention Policies
+
+x-box-reference-category: retention_policies
+
+description: |-
+  Updates a retention policy.
+
+parameters:
+  - $ref: '../attributes/retention_policy_id.yml'
+
+requestBody:
+  content:
+    application/json:
+      schema:
+        properties:
+          policy_name:
+            type: string
+            description: The name for the retention policy
+            example: Some Policy Name
+
+          disposition_action:
+            type: string
+            example: permanently_delete
+            description: |-
+              The disposition action of the retention policy.
+              This action can be `permanently_delete`, which
+              will cause the content retained by the policy
+              to be permanently deleted, or `remove_retention`,
+              which will lift the retention policy from the content,
+              allowing it to be deleted by users,
+              once the retention policy time period has passed.
+            enum:
+              - permanently_delete
+              - remove_retention
+
+          status:
+            type: string
+            example: retired
+            description: |-
+              Used to retire a retention policy.
+
+              If not retiring a policy, do not include this parameter
+              or set it to `null`.
+            enum:
+              - retired
+
+responses:
+  200:
+    description: |-
+      Returns the updated retention policy object.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/RetentionPolicy'
+
+  400:
+    description: |-
+      Returns a `bad_request` if an incorrect
+      `disposition_action` was set.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
+  409:
+    description: |-
+      Returns an error if a retention policy with the given name already exists
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'

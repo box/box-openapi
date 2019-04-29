@@ -1,0 +1,104 @@
+---
+operationId: post_collaborations
+
+tags:
+  - Collaborations
+
+x-box-reference-category: collaborations
+
+summary: Create collaboration
+
+description: |-
+  Adds a collaboration for a single user or a single group to a file
+  or folder.
+
+  Collaborations can be created using email address, user IDs, or a
+  group IDs.
+
+  If a collaboration is being created with a group, access to
+  this endpoint is dependent on the group's ability to be invited.
+
+
+parameters:
+  - $ref: '../attributes/fields.yml'
+  - $ref: '../attributes/notify.yml'
+
+requestBody:
+  content:
+    application/json:
+      schema:
+        required:
+          - item
+          - accessible_by
+          - role
+        properties:
+          item:
+            type: object
+            description: |-
+              The item to attach the comment to.
+            required:
+              - id
+              - type
+            properties:
+              type:
+                type: string
+                description: |-
+                  The type of the item that this collaboration will be
+                  granted access to
+                example: file
+                enum:
+                  - file
+                  - folder
+              id:
+                type: string
+                description: |-
+                  The ID of the item that will be granted access to
+                example: "11446498"
+
+          accessible_by:
+            type: object
+            description: |-
+              The user or group to give access to the item.
+            required:
+              - type
+            properties:
+              type:
+                type: string
+                description: |-
+                  The type of collaborator to invite.
+                example: user
+                enum:
+                  - user
+                  - group
+              id:
+                type: string
+                description: |-
+                  The ID of the user or group.
+
+                  Alternatively, use `login` to specify a user by email
+                  address.
+                example: "23522323"
+
+              login:
+                type: string
+                description: |-
+                  The email address of the user to grant access to the item.
+
+                  Alternatively, use `id` to specify a user by user ID.
+                example: "john@example.com"
+
+          role:
+            $ref: '../attributes/collaboration_role.yml'
+
+          can_view_path:
+            $ref: '../attributes/collaboration_can_view_path.yml'
+
+responses:
+  201:
+    description: |-
+      Returns a new collaboration object.
+
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/Collaboration'

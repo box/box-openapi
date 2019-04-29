@@ -1,0 +1,59 @@
+---
+operationId: put_folders_id_metadata_id_id
+
+summary: Update folder metadata
+
+tags:
+  - File & Folder Metadata
+
+x-box-reference-category: metadata
+
+description: |-
+  Updates a piece of metadata on a folder based.
+
+  The metadata instance can only be updated if the instance
+  already exists. When editing metadata, only values that adhere to the
+  metadata template schema will be accepted.
+
+  The update is applied atomically. If any errors occur during the
+  application of the operations, the metadata instance remains unchanged.
+
+parameters:
+  - $ref: '../attributes/folder_id.yml'
+  - $ref: '../attributes/metadata_scope.yml'
+  - $ref: '../attributes/metadata_template_key.yml'
+
+requestBody:
+  content:
+    application/json:
+      schema:
+        description: |-
+          A [JSON-Patch](https://tools.ietf.org/html/rfc6902)
+          specification for the changes to make to the metadata.
+          The changes are represented as a JSON array of
+          operation objects.
+
+        type: array
+
+        items:
+          $ref: '#/components/schemas/MetadataPatchItem'
+
+responses:
+  200:
+    description: |-
+      Returns the updated metadata template instance, with the
+      custom template data included.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/Metadata'
+
+  409:
+    description: |-
+      If the piece of metadata already exists, a conflict error
+      will be returned. The metadata can then instead be updated with the
+      `put` method.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'

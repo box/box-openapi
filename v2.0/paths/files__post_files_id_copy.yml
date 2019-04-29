@@ -1,0 +1,61 @@
+---
+operationId: post_files_id_copy
+
+summary: Copy a file
+
+description: |-
+  Creates a copy of a file.
+
+tags:
+  - Files
+
+x-box-reference-category: files
+
+parameters:
+  - $ref: '../attributes/file_id.yml'
+  - $ref: '../attributes/fields.yml'
+
+requestBody:
+  content:
+    application/json:
+      schema:
+        required:
+          - parent
+
+        properties:
+          name:
+            type: string
+            description: |-
+              An optional different name for the new file.
+
+              Names can only contain basic, printable
+              ASCII characters, without any slashes or
+              trailing spaces.
+
+              Bot `.` and `..` are protected names.
+            example: FileCopy.txt
+            maxLength: 255
+
+          version:
+            type: string
+            description: |-
+              An optional ID of the specific file version you want to copy
+            example: "0"
+
+          parent:
+            allOf:
+              - $ref: "#/components/schemas/Parent"
+              - description: The parent folder
+
+responses:
+  201:
+    description: |-
+      Returns a new file object representing the copied file.
+
+      [Some fields are optional](#file) and need to be explicitly
+      requested using the [fields](#post-files-id-copy--request--fields)
+      parameter.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/File'

@@ -1,0 +1,101 @@
+---
+operationId: get_authorize
+
+summary: |-
+  Authorize a user
+
+description: |-
+  Authorize a user by sending them through the [Box](https://box.com)
+  website and request their permission to act on their behalf.
+
+  This is the first step when authenticating a user using
+  OAuth 2.0. To request a user's authorization to use the Box APIs
+  on their behalf you will need to send a user to the URL with this
+  format.
+
+tags:
+  - Authorization
+
+x-box-reference-category: authorization
+
+security: []
+
+servers:
+  - url: https://account.box.com/api/oauth2
+    description: |-
+      Server for client-side authentication
+
+parameters:
+  - name: response_type
+    description: |-
+      The string value `"code"` is the only current value we support
+      for the OAuth2 grant type.
+    in: query
+    example: 5idyGSFuf54zrvKm
+    required: true
+    schema:
+      type: string
+      format: token
+      enum:
+        - code
+
+  - name: client_id
+    description: |-
+      The Client ID of the application that is requesting to authenticate
+      the user. To get the Client ID for your application, log in to your
+      Box developer console and click the **Edit Application** link for
+      the application you're working with. In the OAuth2 Parameters section
+      of the configuration page, find the item labeled **client_id**. The
+      text of that item is your application's Client ID.
+    in: query
+    example: ly1nj6n11vionaie65emwzk575hnnmrk
+    required: true
+    schema:
+      type: string
+
+  - name: redirect_uri
+    description: |-
+      The URL to which Box redirects the browser after the user has granted
+      or rejected the application permission. This URL must match the
+      redirect URL in the configuration of your application. It must be a
+      valid HTTPS URL and it needs to be able to handle the redirection to
+      complete the next step in the OAuth2 flow.
+    in: query
+    example: http://example.com/auth/callback
+    required: true
+    schema:
+      type: string
+      format: url
+
+  - name: state
+    description: |-
+      A custom string of your choice. Box will pass the same string to
+      the redirect URL when authentication is complete. This parameter
+      can be used to identify a user on redirect, as well as protect
+      against hijacked sessions and other attacks.
+    in: query
+    example: my_state
+    required: false
+    schema:
+      type: string
+
+  - name: scope
+    description: |-
+      A comma-separated list of application scopes you'd like to
+      authenticate the user for. This defaults to all the scopes configured
+      for the application in its configuration page.
+    in: query
+    example: admin_readwrite
+    required: false
+    schema:
+      type: string
+
+responses:
+  200:
+    description: |-
+      Does not return any data, but rather should be used in the browser.
+    content:
+      text/html:
+        schema:
+          type: string
+          format: html

@@ -1,0 +1,108 @@
+---
+operationId: get_events
+
+summary: 'Get user and enterprise events'
+
+tags:
+  - Events
+
+x-box-reference-category: events
+
+description: |-
+  Returns up to a year of past events for a given user
+  or for the entire enterprise.
+
+  By default this returns events for the authenticated user. To retrieve
+  events for the entire enterprise, set the `stream_type` to `admin_logs`.
+  The user making the API call will need to have admin privileges, and
+  the application will need to have the permission to access the event feed
+  to get the enterprise event feed.
+
+parameters:
+  - name: stream_type
+    description: |-
+      Defines the type of events that are returned
+
+      * `all` returns everything for a user and is the default
+      * `changes` returns events that may cause file tree changes
+        such as file updates or collaborations.
+      * `sync` is similar to `changes` but only applies to synced folders
+      * `admin_logs` returns all events for an entire enterprise and
+        requires the user making the API call to have admin permissions.
+    in: query
+    example: all
+    schema:
+      type: string
+      default: all
+      enum:
+        - all
+        - changes
+        - sync
+        - admin_logs
+
+  - name: stream_position
+    description: |-
+      The location in the event stream to start receiving events from.
+
+      * `now` will return an empty list events and
+      the latest stream position for initialization.
+      * `0` or `null` will return all events.
+    example: "1348790499819"
+    in: query
+    schema:
+      type: string
+
+  - name: limit
+    description: |-
+      Limits the number of events returned
+    in: query
+    example: 50
+    schema:
+      type: integer
+      format: int64
+      default: 100
+      maximum: 500
+
+  - name: event_type
+    description: |-
+      A comma-separated list of events to filter by.
+    in: query
+    example: ADD_LOGIN_ACTIVITY_DEVICE
+    schema:
+      type: array
+      items:
+        $ref: "#/components/schemas/EventType"
+
+  - name: created_after
+    description: |-
+      The lower bound date and time to return events for.
+    in: query
+    example: "2012-12-12T10:53:43-08:00"
+    schema:
+      type: string
+      format: date-time
+
+  - name: created_before
+    description: |-
+      The upper bound date and time to return events for.
+    in: query
+    required: false
+    example: "2013-12-12T10:53:43-08:00"
+    schema:
+      type: string
+      format: date-time
+
+responses:
+  200:
+    description: |-
+      Returns a list of event objects.
+
+      Events objects are returned in pages, with each page (chunk)
+      including a list of event objects. The response also includes a
+      `chunk_size` parameter indicating how many
+      chunks are left, as well as the next `stream_position` that can be
+      queried.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/Events'

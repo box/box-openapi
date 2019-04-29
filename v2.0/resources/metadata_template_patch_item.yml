@@ -1,0 +1,117 @@
+---
+x-box-resource-display-name: Metadata Template Patch Item
+
+x-box-resource-id: metadata-template-patch-item
+
+type: 'object'
+
+description: |-
+  A patch operation for the
+  changes to make to the metadata template.
+
+  The possible operations are as follows.
+
+  * `addEnumOption` Adds an enum option at the
+    end of the enum option list for the specified ``fieldKey`.
+
+    Example `{"op":"addEnumOption","fieldKey":"category",
+    "data":{"key":"New Option"}}`
+
+  * `addField` Adds a field at the end of the field list
+    for the template.
+
+    Example `{"op":"addField","data":{"displayName":"Category",
+    "key":"category","hidden":false,"type":"string"}}`.
+
+  * `editTemplate` Allows for editing the base properties
+    of a template, mainly the `displayName` and `hidden`
+    properties.
+
+    Example `{"op":"editTemplate","data":{"displayName":"Client"}}`.
+
+  * `reorderEnumOptions` Reorders the enum option list to
+    match the requested enum option list.
+
+    Example `{"op":"reorderEnumOptions","fieldKey":"category",
+    "enumOptionKeys":["option2","option1","option3"]}`
+
+  * `reorderFields`  Reorders the field list to match the requested
+    field list
+
+    Example `{"op":"reorderFields","fieldKeys":["field2","field1","field3"]}`
+
+  The following changes can affect existing instances of this template.
+
+  * `editField` Edits any number of the base properties of a field, mainly
+    the `displayName`, `hidden`, `description`, and `key` properties.
+
+    If the key is changed, existing values of the specified field are
+    migrated to the new key. Search indexes are updated, which can take
+    time depending on how many files are affected by the change.
+
+    Example `{"op":"editField","fieldKey":"category",
+    "data":{"displayName":"Customer Group"}}`
+
+  * `editEnumOption` Edits one of the options of an enum field.
+
+    Example `{"op":"editEnumOption","fieldKey":"years","enumOptionKey":"2011",
+    "data":{"key":"2020"}}`
+
+  * `removeEnumOption` Removes the specified enum option from the
+    specified enum field.
+
+    Example `{"op":"removeEnumOption","fieldKey":"years",
+    "enumOptionKey":"2011"}`
+
+  * `removeField` Removes the specified field from the template.
+
+    Example `{"op":"removeField","fieldKey":"brand"}`
+
+properties:
+  op:
+    type: string
+    example: "addEnumOption"
+    enum:
+      - addEnumOption
+      - addField
+      - editTemplate
+      - reorderEnumOptions
+      - reorderFields
+      - editField
+      - editEnumOption
+      - removeEnumOption
+      - removeField
+    description: |-
+      The operation type to perform on the template.
+
+  data:
+    description: |-
+      The data for the operation. Can vary depending on the operation.
+    example:
+      displayName: "New name"
+    additionalProperties:
+      type: string
+      example: "New name"
+
+  fieldKeys:
+    type: array
+    items:
+      type: string
+    example:
+      - category
+      - name
+    description: |-
+      For operations that affect multiple fields, the keys of the
+      fields to be affected.
+
+  enumOptionKeys:
+    description: |-
+      For operations that affect multiple enum options,
+      the keys of the enum options to be affected.
+    type: array
+    items:
+      type: string
+    example:
+      - option1
+      - option2
+      - option3

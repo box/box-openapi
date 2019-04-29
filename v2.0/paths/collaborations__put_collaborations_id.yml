@@ -1,0 +1,60 @@
+---
+operationId: put_collaborations_id
+
+tags:
+  - Collaborations
+
+x-box-reference-category: collaborations
+
+summary: Update collaboration
+
+description: |-
+  Updates a collaboration.
+
+  Can be used to change the owner of an item, or to
+  accept collaboration invites.
+
+parameters:
+  - $ref: '../attributes/collaboration_id.yml'
+  - $ref: '../attributes/fields.yml'
+
+requestBody:
+  content:
+    application/json:
+      schema:
+        properties:
+          role:
+            $ref: '../attributes/collaboration_role.yml'
+
+          can_view_path:
+            $ref: '../attributes/collaboration_can_view_path.yml'
+
+          status:
+            type: string
+            description: |-
+              Set the status of a `pending` collaboration invitation,
+              effectively accepting, or rejecting the invite.
+            example: accepted
+            enum:
+              - pending
+              - accepted
+              - rejected
+
+responses:
+  200:
+    description:
+      Returns an updated collaboration object unless the owner has changed.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/Collaboration'
+
+  204:
+    description: |-
+      If the role is changed to `owner`, the collaboration is deleted
+      and a new collaboration is created. The previous `owner` of
+      the old collaboration will be a `co-owner` on the new collaboration.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/Collaboration'

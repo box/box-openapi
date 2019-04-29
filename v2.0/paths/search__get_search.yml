@@ -1,0 +1,211 @@
+---
+operationId: get_search
+
+summary: Search for content
+
+tags:
+  - Search
+
+x-box-reference-category: search
+
+description: |-
+  Searches for items that are available to the user or an entire enterprise.
+
+parameters:
+  - name: query
+    description: |-
+      The string to search for. This query is matched against item names,
+      descriptions, text content of files, and various other fields of
+      the different item types.
+    in: query
+    required: true
+    example: sales
+    schema:
+      type: string
+
+  - name: scope
+    description: |-
+      Limits search results to a user scope.
+
+      Defaults to `user_content` which limits the search to content
+      available to the current user
+
+      Setting this to `enterprise_content` widens the search to content
+      available to the entire enterprise. To enable this scope for an
+      administrator, please reach out to support.
+    in: query
+    required: false
+    schema:
+      type: string
+      enum:
+        - user_content
+        - enterprise_content
+    example: user_content
+
+  - name: file_extensions
+    description: |-
+      Limits search results to a comma-separated list of
+      file extensions.
+    example: pdf,png,gif
+    in: query
+    required: false
+    schema:
+      type: string
+
+  - name: created_at_range
+    description: |-
+      Limits search results to items created within
+      a given date range.
+
+      Date ranges are defined as comma separated RFC3339
+      timestamps.
+
+      If the she start date is omitted (`",[end_date]"`) the
+      earliest known date will be used as the start date instead.
+
+      If the end date is omitted (`"[start_date],"`) the current
+      date will be used as the end date instead.
+    example: "2014-05-15T13:35:01-07:00,2014-05-17T13:35:01-07:00"
+    in: query
+    required: false
+    schema:
+      type: string
+
+  - name: updated_at_range
+    description: |-
+      Limits search results to items updated within
+      a given date range.
+
+      Date ranges are defined as comma separated RFC3339
+      timestamps.
+
+      If the she start date is omitted (`",[end_date]"`) the
+      earliest known date will be used as the start date instead.
+
+      If the end date is omitted (`"[start_date],"`) the current
+      date will be used as the end date instead.
+    example: "2014-05-15T13:35:01-07:00,2014-05-17T13:35:01-07:00"
+    in: query
+    required: false
+    schema:
+      type: string
+
+  - name: size_range
+    description: |-
+      Limits search results to items within a given file size
+      range.
+
+      File size ranges are defined as comma separated byte sizes.
+
+      The upper and lower bound can be omitted to create open ranges.
+    example: "1000000,5000000"
+    in: query
+    required: false
+    schema:
+      type: string
+
+  - name: owner_user_ids
+    description: |-
+      Limits search results to items owned
+      by the given list of owners.
+
+      Owners are defined as a comma separated list of user IDs.
+    example: "123422,23532,3241212"
+    in: query
+    required: false
+    schema:
+      type: string
+
+  - name: ancestor_folder_ids
+    description: |-
+      Limits search results to items within the given
+      list of folders.
+
+      Folders are defined as a comma separated lists
+      of folder IDs.
+
+      Search results will also include items within subfolders.
+    example: "4535234,234123235,2654345"
+    in: query
+    required: false
+    schema:
+      type: string
+
+  - name: content_types
+    description: |-
+      Limits search results to items with the given
+      content types.
+
+      Content types are defined as a comma separated lists
+      of Box recognized content types.
+
+      Available content types are:
+
+      * `name`
+      * `description`
+      * `file_content`
+      * `comments`
+      * `tags
+
+    in: query
+    example: "name,description"
+    required: false
+    schema:
+      type: string
+
+  - name: type
+    description: |-
+      Limits search results to items of this type.
+    example: file
+    in: query
+    required: false
+    schema:
+      type: string
+      enum:
+        - file
+        - folder
+        - web_link
+
+  - name: trash_content
+    description: |-
+      Controls if search results include the trash.
+
+      Defaults to `non_trashed_only`
+    in: query
+    required: false
+    example: non_trashed_only
+    schema:
+      type: string
+      enum:
+        - non_trashed_only
+        - trashed_only
+
+  - name: mdfilters
+    description: |-
+      Limits search results to items that match the
+      metadata template name and content.
+    in: query
+    required: false
+    example:
+      - scope: enterprise
+        templateKey: marketingCollateral
+        filters:
+          documentType: datasheet
+    schema:
+      type: array
+      items:
+        $ref: "#/components/schemas/MetadataFilter"
+
+  - $ref: '../attributes/fields.yml'
+  - $ref: '../attributes/item_offset.yml'
+  - $ref: '../attributes/item_limit.yml'
+
+responses:
+  200:
+    description: |-
+      Returns a collection of search results. If there are no matching
+      search results, the `entries` array will be empty.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/Items'

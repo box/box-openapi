@@ -1,0 +1,92 @@
+---
+operationId: post_files_upload_sessions_id_commit
+
+summary: Commit upload session
+
+tags:
+  - Chunked Uploads
+
+x-box-reference-category: chunked_uploads
+
+servers:
+  - url: https://upload.box.com/api/2.0
+    description: |-
+      Server for file uploads
+
+description: |-
+  Close an upload session and create a file from the
+  uploaded chunks.
+
+parameters:
+  - $ref: '../attributes/upload_session_id.yml'
+  - name: Digest
+    description: |-
+      The [RFC3230][1] message digest of the whole file.
+
+      Only SHA-1 is supported. The SHA-1 digest must be Base64
+      encoded. The format of this header is as
+      `sha=BASE64_ENCODED_DIGEST`.
+
+      [1]: https://tools.ietf.org/html/rfc3230
+    in: header
+    example: sha=fpRyg5eVQletdZqEKaFlqwBXJzM=
+    required: true
+    schema:
+      type: string
+
+  - $ref: '../attributes/if_match.yml'
+  - $ref: '../attributes/if_none_match.yml'
+
+requestBody:
+  content:
+    application/json:
+      schema:
+        required:
+          - parts
+        properties:
+          parts:
+            type: array
+            items:
+              $ref: "#/components/schemas/UploadPart--Mini"
+
+responses:
+  201:
+    description: |-
+      Returns the file object in a list.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/Files'
+
+  202:
+    description: |-
+      Returns when all chunks have been uploaded but not yet processed.
+
+      Inspect the upload session to get more information about the
+      progress of processing the chunks, then retry committing the file
+      when all chunks have processed.
+    headers:
+      Retry-After:
+        description: |-
+          Indicates the number of seconds the client should wait before
+          attempting their commit request again.
+        schema:
+          type: integer
+
+
+  409:
+    description: |-
+      Returns an error if there is already a file with the same name
+      in the target folder.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
+
+  412:
+    description: |-
+      Returns an error if the `If-Match` or `If-None-Match` conditions fail.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
