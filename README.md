@@ -1,4 +1,4 @@
-# Box OpenAPI 3.0 specification
+# Box OpenAPI 3.0 Specification
 
 [![Build Status](https://travis-ci.com/box/box-openapi.svg?branch=master)](https://travis-ci.com/box/box-openapi)
 [![Project Status](https://opensource.box.com/badges/active.svg)](http://opensource.box.com/badges)
