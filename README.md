@@ -162,3 +162,7 @@ specifying a description specific to this nesting.
 2. You may see many warnings or erors when a reference doesn't resolve properly. Make
    sure to see if there's an unresolved specification before paying attention to other 
    warnings.
+
+# Swagger 2.0
+
+The older and incomplete Swagger 2.0 specification is stil available on the [Swagger 2.0](https://github.com/box/box-openapi/tree/swagger_2.0) branch.
