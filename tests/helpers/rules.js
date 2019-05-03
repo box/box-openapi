@@ -193,7 +193,7 @@ const ensureItemsOfBasicTypeOrReference = (items) => {
   let keys = Object.keys(items)
 
   // if we have more than one key, throw an error
-  if (keys.length > 1) {
+  if (keys.length > 1 && items.type !== 'string') {
     return [
       {
         message: `Items can only contain one entry, "type" or "$ref". Found ${keys}`
@@ -326,6 +326,16 @@ const ensureResourceIdUnique = (items) => {
   }
 }
 
+const ensureResourcesAreObjects = (item) => {
+  if (!(item.type === undefined || item.type === 'object')) {
+    return [
+      {
+        message: `Core resources must be objects. Found ${item.type} instead. Use attributes instead.`
+      },
+    ]
+  }
+}
+
 /**
  * Define the list of rules
  */
@@ -406,13 +416,13 @@ module.exports = {
           function: 'ensureLocalReferencesExist'
         }
       },
-      ensure_references_format: {
-        summary: 'Ensures every reference is local or a file reference',
-        given: '$..*',
-        then: {
-          function: 'ensureReferencesFormat'
-        }
-      },
+      // ensure_references_format: {
+      //   summary: 'Ensures every reference is local or a file reference',
+      //   given: '$..*',
+      //   then: {
+      //     function: 'ensureReferencesFormat'
+      //   }
+      // },
       ensure_allof_order: {
         summary: 'Ensures references are first in an allOf situation',
         given: '$..*.allOf',
@@ -461,6 +471,14 @@ module.exports = {
         given: '$.components.schemas[*]',
         then: {
           field: 'x-box-resource-id',
+          function: 'truthy'
+        }
+      }, 
+      ensure_every_resource_has_a_title: {
+        summary: 'Ensures every endpoint has a title',
+        given: '$.components.schemas[*]',
+        then: {
+          field: 'title',
           function: 'truthy'
         }
       }, 
@@ -514,6 +532,13 @@ module.exports = {
         then: {
           function: 'ensureResourceIdUnique'
         }
+      },
+      ensure_resources_are_objects: {
+        summary: 'Ensures all basic resources are objects',
+        given: '$.components.schemas[*]',
+        then: {
+          function: 'ensureResourcesAreObjects'
+        }
       }
     } 
   },
@@ -536,7 +561,8 @@ module.exports = {
       ensureReferenceCategoryValid: ensureReferenceCategoryValid,
       ensureExampleMatchesType: ensureExampleMatchesType,
       falsy: falsy,
-      ensureResourceIdUnique: ensureResourceIdUnique
+      ensureResourceIdUnique: ensureResourceIdUnique,
+      ensureResourcesAreObjects: ensureResourcesAreObjects
     }
   }
 }

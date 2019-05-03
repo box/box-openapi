@@ -1,0 +1,58 @@
+---
+operationId: put_group_memberships_id
+
+summary: Update user's membership
+
+tags:
+  - Groups
+
+x-box-reference-category: memberships
+
+description: |-
+  Updates a user's group membership.
+
+parameters:
+  - $ref: '../attributes/group_membership_id.yml'
+  - $ref: '../attributes/fields.yml'
+
+requestBody:
+  content:
+    application/json:
+      schema:
+        properties:
+          role:
+            type: string
+            example: member
+            description: The role of the user in the group.
+            enum:
+              - member
+              - admin
+
+          configurable_permissions:
+            type: object
+            example:
+              can_run_reports: false
+            description: |-
+              Custom configuration for the permissions an admin
+              if a group will receive. This option has no effect
+              on members with a role of `member`.
+
+              Setting these permissions overwrites the default
+              access levels of an admin.
+
+              Specifying a value of "null" for this object will disable
+              all configurable permissions. Specifying permissions will set
+              them accordingly, omitted permissions will be enabled by default.
+            additionalProperties:
+              type: boolean
+              description: A key value pair of custom permissions.
+              example: true
+
+responses:
+  200:
+    description: |-
+      Returns a new group membership object.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/GroupMembership'

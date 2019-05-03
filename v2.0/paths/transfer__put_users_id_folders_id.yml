@@ -1,0 +1,64 @@
+---
+operationId: put_users_id_folders_id
+
+x-box-reference-category: transfer
+
+summary: Transfer owned folders
+
+tags:
+  - Users
+
+description: |-
+  Move all of the items owned by a user into a
+  new folder in another user’s account.
+
+  Only the root folder (`0`) can be transferred.
+
+  Folders can only be moved across users by users with administrative
+  permissions.
+
+  This call will be performed synchronously which might lead to a slow response
+  when the source user has a large number of items in all of its folders.
+
+  If the destination path has a metadata cascade policy attached to any of
+  the parent folders, a metadata cascade operation will be kicked off
+  asynchronously.
+
+  There is currently no way to check for when this operation is finished.
+
+parameters:
+  - $ref: '../attributes/user_id.yml'
+  - $ref: '../attributes/folder_id.yml'
+  - $ref: '../attributes/fields.yml'
+  - $ref: '../attributes/notify.yml'
+
+requestBody:
+  content:
+    application/json:
+      schema:
+        required:
+          - owned_by
+        properties:
+          enterprise:
+            type: object
+            description: |-
+              The user who the folder will be transferred to
+            required:
+              - id
+            properties:
+              id:
+                type: string
+                example: "1232234"
+                description: |-
+                  The ID of the user who the folder will be
+                  transferred to
+
+responses:
+  200:
+    description: |-
+      Returns the information for the newly created
+      destination folder.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/Folder'
