@@ -70,24 +70,6 @@ const ensureLocalReferencesExist = (item, _, __, context) => {
 }
 
 /**
- * Ensures that references follow the right syntax
- */
-const ensureReferencesFormat = (item) => {
-  // check if this item is an object and has a $ref
-  // and then get the reference
-  if (item && typeof(item) === 'object' && '$ref' in item) {
-    let ref = item['$ref']
-
-    // ensure we only use local references or file references
-    if (!ref.startsWith('./') && !ref.startsWith('#/')) {
-      return [
-        { message: `Expected reference to be a file ("./filename") or local ("#/components/etc") - ${ref}`}
-      ]
-    }
-  }
-}
-
-/**
  * Ensure that examples exist for paramters/properties of
  * basic values
  */
@@ -416,13 +398,6 @@ module.exports = {
           function: 'ensureLocalReferencesExist'
         }
       },
-      // ensure_references_format: {
-      //   summary: 'Ensures every reference is local or a file reference',
-      //   given: '$..*',
-      //   then: {
-      //     function: 'ensureReferencesFormat'
-      //   }
-      // },
       ensure_allof_order: {
         summary: 'Ensures references are first in an allOf situation',
         given: '$..*.allOf',
@@ -533,11 +508,12 @@ module.exports = {
           function: 'ensureResourceIdUnique'
         }
       },
-      ensure_resources_are_objects: {
-        summary: 'Ensures all basic resources are objects',
-        given: '$.components.schemas[*]',
+      ensure_response_descriptions: {
+        summary: 'Ensures responses have descriptions',
+        given: '$.paths[*][*].responses[*]',
         then: {
-          function: 'ensureResourcesAreObjects'
+          field: 'description',
+          function: 'truthy'
         }
       }
     } 
@@ -551,7 +527,6 @@ module.exports = {
       validateOperationIdFormat: validateOperationIdFormat,
       ensureReferencesResolved: ensureReferencesResolved,
       ensureLocalReferencesExist: ensureLocalReferencesExist,
-      ensureReferencesFormat: ensureReferencesFormat,
       ensurePropertiesExample: ensurePropertiesExample,
       ensureAllofOrder: ensureAllofOrder,
       ensureItemsOfBasicTypeOrReference: ensureItemsOfBasicTypeOrReference,
