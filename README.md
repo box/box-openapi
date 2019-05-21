@@ -7,7 +7,7 @@
 The Box OpenAPI 3.0 Specification (OAS3) for the
 [Box Platform API](https://developers.box.com/).
 
-This repository contains the raw source for the specification. For a combined, resolved version please have a look at this [fully build specification](https://opensource.box.com/box-openapi/openapi.json).
+This repository contains the raw source for the specification. For a combined, resolved version please have a look at this [fully build specification](https://raw.githubusercontent.com/box/box-openapi/en/openapi.json).
 
 ## Usage & License
 
