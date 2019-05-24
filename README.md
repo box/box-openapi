@@ -163,6 +163,13 @@ specifying a description specific to this nesting.
    sure to see if there's an unresolved specification before paying attention to other 
    warnings.
 
+## Deployment of compiled source
+
+The Yaml files are automatically tested and compiled using [Travis CI](https://travis-ci.com/box/box-openapi/builds/113026758). The compiled 
+JSON specification is then published to the `en` branch here on GitHub. 
+
+For a combined, resolved version please have a look at this [fully build specification](https://opensource.box.com/box-openapi/openapi.json).
+
 # Swagger 2.0
 
 The older and incomplete Swagger 2.0 specification is stil available on the [Swagger 2.0](https://github.com/box/box-openapi/tree/swagger_2.0) branch.
