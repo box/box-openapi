@@ -1,7 +1,7 @@
 # Box OpenAPI 3.0 Specification
 
 [![Build Status](https://travis-ci.com/box/box-openapi.svg?branch=master)](https://travis-ci.com/box/box-openapi)
-[![Project Status](https://opensource.box.com/badges/active.svg)](http://opensource.box.com/badges)
+[![Project Status](https://opensource.box.com/badges/active.svg)](http://opensource.box.com/badges) [![Greenkeeper badge](https://badges.greenkeeper.io/box/box-openapi.svg)](https://greenkeeper.io/)
 
 
 The Box OpenAPI 3.0 Specification (OAS3) for the
