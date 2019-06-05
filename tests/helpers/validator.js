@@ -7,12 +7,13 @@ const spectral = new Spectral()
 
 // Remove the valid-example rule from Spectral's
 // rules, as we have our own
-const myOas3Rules = rules()
-delete myOas3Rules['valid-example']
+rules().then(myOas3Rules => {
+  delete myOas3Rules['valid-example']
+  spectral.addRules(myOas3Rules)
+})
 
 // Add default OAS3 rules and our own
 spectral.addFunctions(oas3Functions())
-spectral.addRules(myOas3Rules)
 spectral.addFunctions(boxFunctions())
 spectral.addRules(boxRules())
 
