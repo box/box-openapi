@@ -1,13 +1,13 @@
 // Initialize Spectral
 const { Spectral } = require('@stoplight/spectral')
-const { oas3Functions, oas3Rules } = require('@stoplight/spectral/rulesets/oas3')
+const { oas3Functions, rules } = require('@stoplight/spectral/rulesets/oas3')
 const { boxFunctions, boxRules } = require('./rules')
 
 const spectral = new Spectral()
 
 // Remove the valid-example rule from Spectral's
 // rules, as we have our own
-const myOas3Rules = oas3Rules()
+const myOas3Rules = rules()
 delete myOas3Rules['valid-example']
 
 // Add default OAS3 rules and our own
