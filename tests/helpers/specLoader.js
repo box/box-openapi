@@ -8,12 +8,12 @@ const yaml = require('js-yaml')
  * 
  */
 const resolver = new Resolver({
-  readers: {
+  resolvers: {
     file: {
       /**
        * Translates custom URIs to objects
        */
-      read(uri) {
+      resolve(uri) {
         // get the content at the path
         const path = uri.path()
         const content = fs.readFileSync(`./v2.0/${path}`)
