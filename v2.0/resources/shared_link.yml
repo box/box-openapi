@@ -2,101 +2,145 @@
 title: Shared Link
 
 x-box-resource-id: shared_link
+x-box-sanitized: true
 
 description: |-
-  Shared links provide direct, read-only access to files or folder on Box
-  using a URL. Shared links with open access level allow anyone with the URL
+  Shared links provide direct, read-only access to files or folder on Box.
+
+  Shared links with open access level allow anyone with the URL
   to access the item, while shared links with company or collaborators access
-  levels can only be accessed by appropriate authenticated Box users.
+  levels can only be accessed by appropriately authenticated Box users.
 
 properties:
   url:
     type: string
+    format: url
     description: |-
-      The URL to access the item on Box.  If entered in a browser, this URL will
-      display the item in Box's preview UI.  If a custom URL is set this field
-      will return the custom URL, but the original URL will also continue to
-      work.
+      The URL that can be used to access the item on Box.
+
+      This URL will display the item in Box's preview UI where the file
+      can be downloaded if allowed.
+
+      This URL will continue to work even when a custom `vanity_url`
+      has been set for this shared link.
     example: https://www.box.com/s/vspke7y05sb214wjokpk
+    nullable: false
 
   download_url:
     type: string
+    format: url
     description: |-
-      The "direct Link" URL to download the item. This URL can be used in
+      A URl that can be used to download the file. This URL can be used in
       a browser to download the file. This URL includes the file
       extension so that the file will be saved with the right file type.
+
+      This property will be `null` for folders.
     example: https://www.box.com/shared/static/rh935iit6ewrmw0unyul.jpeg
+    nullable: true
 
   vanity_url:
     type: string
+    format: url
     description: |-
       The "Custom URL" that can also be used to preview the item on Box.  Custom
       URLs can only be created or modified in the Box Web application.
     example: https://acme.app.box.com/v/my_url/
+    nullable: true
 
   access:
     type: string
     description: |-
-      The access level specified when the shared link was created. Can be `open`
-      ("People with the link"), `company` ("People in your company"), or
-      `collaborators` ("People in this folder").  When creating a shared link,
-      if you omit this field then the access level will be set to the default
-      access level specified by the enterprise admin.
+      The access level for this shared link.
+
+      * `open` - provides access to this item to anyone with this link
+      * `company` - only provides access to this item to people the same company
+      * `collaborators` - only provides access to this item to people who are
+         collaborators on this item
+
+      If this field is omitted when creating the shared link, the access level
+      will be set to the default access level specified by the enterprise admin.
     enum:
       - open
       - company
       - collaborators
     example: open
+    nullable: false
 
   effective_access:
     type: string
     description: |-
-      The effective access level for the shared link.  This can be lower than
-      the value in the `access` field if the enterprise settings restrict the
-      allowed access levels.
+      The effective access level for the shared link. This can be a more
+      restrictive access level than the value in the `access` field when the
+      enterprise settings restrict the allowed access levels.
     enum:
       - open
       - company
       - collaborators
     example: company
+    nullable: false
+
+  effective_permission:
+    type: string
+    description: |-
+      The effective permissions for this shared link.
+    enum:
+      - can_download
+      - can_preview
+    example: can_download
+    nullable: false
 
   unshared_at:
     type: string
     format: "yyyymmddThhmmss+|-hhmm"
     description: |-
-      The date/time that this link will become disabled. This field can only be
+      The date and time when this link will be disabled. This field can only be
       set by users with paid accounts.
     example: "2018-04-13T13:53:23-07:00"
+    nullable: true
 
   is_password_enabled:
     type: boolean
-    description: Whether the shared link has a password set
+    description: |-
+      Defines if the shared link requires a password to access the item.
     example: true
+    nullable: false
 
   permissions:
     type: object
+    description: |-
+      Defines if this link allows a user to preview and download an item.
     properties:
       can_download:
         type: boolean
         example: true
+        nullable: false
         description: |-
-          Whether the shared link allows downloads.  For shared links on
-          folders, this also applies to any items in the folder. Can only be set
-          with access levels `open` and `company` (not `collaborators`).
+          Defines if the shared link allows for the item to be downloaded. For
+          shared links on folders, this also applies to any items in the folder.
+
+          This value can be set to `true` when the effective access level is
+          set to `open` or `company`, not `collaborators`.
 
       can_preview:
         type: boolean
         example: true
+        nullable: false
         description: |-
-          Whether the shared link allows previewing.  Always `true`.  For shared
-          links on folders, this also applies to any items in the folder.
+          Defines if the shared link allows for the item to be previewed.
+
+          This value is always `true`. For shared links on folders this also
+          applies to any items in the folder.
 
   download_count:
     type: integer
     example: 3
-    description: The number of times the item has been downloaded
+    description: |-
+      The number of times this item has been downloaded.
+    nullable: false
 
   preview_count:
     type: integer
     example: 3
-    description: The number of times the item has been previewed
+    description: |-
+      The number of times this item has been previewed.
+    nullable: false

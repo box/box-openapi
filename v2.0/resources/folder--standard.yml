@@ -3,12 +3,12 @@ title: Folder (Standard)
 
 x-box-resource-id: folder--standard
 x-box-reference-category: null
+x-box-reference-hide: true
+x-box-sanitized: true
 
 description: |-
   A standard representation of a folder, as returned from any
   folder API endpoints by default
-
-x-box-reference-hide: true
 
 allOf:
   - $ref: '#/components/schemas/Folder--Mini'
@@ -18,14 +18,28 @@ allOf:
         type: string
         format: "yyyymmddThhmmss+|-hhmm"
         description: |-
-          The time the folder was created. May be `null` for some folders such
-          as root or trash.
+          The date and time when the folder was created. This value may
+          be `null` for some folders such as the root folder or the trash
+          folder.
         example: "2012-12-12T10:53:43-08:00"
+        nullable: true
+
+      modified_at:
+        x-box-field-variant: 1
+        type: string
+        format: "yyyymmddThhmmss+|-hhmm"
+        description: |-
+          The date and time when the folder was last updated. This value may
+          be `null` for some folders such as the root folder or the trash
+          folder.
+        example: "2012-12-12T10:53:43-08:00"
+        nullable: true
 
       description:
         allOf:
           - $ref: "../attributes/folder__description.yml"
           - x-box-field-variant: 1
+          - nullable: false
 
       size:
         x-box-field-variant: 1
@@ -34,30 +48,33 @@ allOf:
         description: |-
           The folder size in bytes.
 
-          Be careful parsing this integer as it can easily
-          go into exponent notation.
+          Be careful parsing this integer as its
+          value can get very large.
         example: 629644
+        nullable: false
 
       path_collection:
-        x-box-field-variant: 1
-        type: array
-        description: |-
-          The tree of folders that this folder is contained in,
-          starting at the root.
-        items:
-          $ref: '#/components/schemas/Folder--Mini'
+        allOf:
+          - $ref: '#/components/schemas/PathCollection'
+          - description: |-
+              The tree of folders that this folder is contained in,
+              starting at the root.
+          - x-box-field-variant: 1
+          - nullable: false
 
       created_by:
         allOf:
           - $ref: '#/components/schemas/User--Mini'
           - description: The user who created this folder
           - x-box-field-variant: 1
+          - nullable: false
 
       modified_by:
         allOf:
           - $ref: '#/components/schemas/User--Mini'
           - description: The user who last modified this folder.
           - x-box-field-variant: 1
+          - nullable: false
 
       trashed_at:
         x-box-field-variant: 1
@@ -66,31 +83,35 @@ allOf:
         description: |-
           The time at which this folder was put in the trash.
         example: "2012-12-12T10:53:43-08:00"
+        nullable: true
 
       purged_at:
         x-box-field-variant: 1
         type: string
         format: "yyyymmddThhmmss+|-hhmm"
         description: |-
-          The time at which this folder will be purged from the trash.
+          The time at which this folder is expected to be purged
+          from the trash.
         example: "2012-12-12T10:53:43-08:00"
+        nullable: true
 
       content_created_at:
         x-box-field-variant: 1
         type: string
         format: "yyyymmddThhmmss+|-hhmm"
+        nullable: true
         description: |-
-          The time at which this folder was originally created according
-          to the uploader.
+          The date and time at which this folder was originally
+          created.
         example: "2012-12-12T10:53:43-08:00"
 
       content_modified_at:
         x-box-field-variant: 1
         type: string
         format: "yyyymmddThhmmss+|-hhmm"
+        nullable: true
         description: |-
-          The time the folder or its contents were last modified according to
-          the uploader.
+          The date and time at which this folder was last updated.
         example: "2012-12-12T10:53:43-08:00"
 
       expires_at:
@@ -106,58 +127,65 @@ allOf:
           - $ref: '#/components/schemas/User--Mini'
           - description: The user who owns this folder.
           - x-box-field-variant: 1
+          - nullable: false
 
       shared_link:
         allOf:
           - $ref: '#/components/schemas/SharedLink'
           - description: |-
-              The shared link object for this folder. Will be
-              `null` if no shared link has been created.
+              The shared link for this folder. This will be
+              `null` if no shared link has been created for this
+              folder.
           - x-box-field-variant: 1
+        nullable: true
 
       folder_upload_email:
         x-box-field-variant: 1
         type: object
+        nullable: true
         properties:
           access:
             $ref: "../attributes/folder_upload_email__access.yml"
 
           email:
             description: |-
-              The upload email address for this folder. This will be
-              `null` if not enabled.
+              The optional upload email address for this folder.
             type: string
             format: email
-            example: upload.Picture.k13sdz1@u.box.com
+            example: upload.Contracts.asd7asd@u.box.com
+            nullable: false
 
       parent:
         allOf:
           - $ref: '#/components/schemas/Folder--Mini'
           - description: |-
-              The direct parent folder that this folder is located within.
+              The optional folder that this folder is located within.
 
-              May be `null` for folders such as root, trash and child folders
-              whose parent is inaccessible.
+              This value may be `null` for some folders such as the
+              root folder or the trash folder.
           - x-box-field-variant: 1
+          - nullable: true
 
       item_status:
         x-box-field-variant: 1
         type: string
         description: |-
-          Whether this item is deleted or not.
+          Defines if this item has been deleted or not.
 
-          Values include `active` if the item has not been trashed,
-          `trashed` if the item has been moved to the trash, and
-          `deleted` if the item has been permanently deleted.
+          * `active` when the item has is not in the trash
+          * `trashed` when the item has been moved to the trash but not deleted
+          * `deleted` when the item has been permanently deleted.
         enum:
           - active
           - trashed
           - deleted
+        nullable: false
         example: "active"
 
       item_collection:
         x-box-field-variant: 1
         type: array
+        nullable: false
         items:
           $ref: '#/components/schemas/Item'
         description: |-
