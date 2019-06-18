@@ -3,6 +3,7 @@ title: Folder
 
 x-box-resource-id: folder
 x-box-has-field-variants: true
+x-box-sanitized: true
 
 description: |-
   A full representation of a folder, as can be returned from any
@@ -28,10 +29,10 @@ allOf:
 
       permissions:
         allOf:
-          - $ref: '#/components/schemas/Permissions'
+          - $ref: '#/components/schemas/FolderPermissions'
           - description: |-
-              The permissions that the current user has
-              for this folder.
+              Describes the permissions that the current user has
+              for this folder
           - x-box-field-variant: 2
           - nullable: false
 
@@ -39,24 +40,29 @@ allOf:
         allOf:
           - $ref: "../attributes/tags.yml"
           - x-box-field-variant: 2
+          - nullable: false
 
       can_non_owners_invite:
         allOf:
           - $ref: "../attributes/folder__can_non_owners_invite.yml"
           - x-box-field-variant: 2
+          - nullable: false
 
       is_externally_owned:
         x-box-field-variant: 2
         type: boolean
         example: true
+        nullable: false
         description: |-
-          If this folder is owned by a user outside of the enterprise.
+          Specifies if this folder is owned by a user outside of the
+          authenticated enterprise.
 
       is_collaboration_restricted_to_enterprise:
         allOf:
           - $ref:
               "../attributes/folder__is_collaboration_restricted_to_enterprise.yml"
           - x-box-field-variant: 2
+          - nullable: false
 
       allowed_shared_link_access_levels:
         x-box-field-variant: 2
@@ -69,27 +75,38 @@ allOf:
           - open
           - company
           - collaborators
+        nullable: false
         description: |-
-          The default access level settings for shared links as set
-          by the administrator.
+          A list of access levels for shared that are available
+          for this folder.
+
+          For some folders, like the root folder, this will always
+          be an empty list as sharing is not allowed at that level.
 
       allowed_invitee_roles:
         x-box-field-variant: 2
         type: array
         example:
           - open
+        nullable: false
         enum:
-          - open
-          - company
-          - collaborators
+          - viewer
+          - editor
+          - previewer
+          - uploader
+          - previewer uploader
+          - co-owner
+          - viewer uploader
         description: |-
-          The types of collaborations that have been allowed by the
-          enterprise administrator.
+          A list of the types of roles that user can be invited at
+          when sharing this folder.
         items:
           type: string
 
       watermark_info:
         allOf:
           - $ref: '#/components/schemas/WatermarkInfo'
-          - description: Information about the watermarking on this folder
+          - description: |-
+              Details about the watermark applied to this folder
           - x-box-field-variant: 2
+          - nullable: false
