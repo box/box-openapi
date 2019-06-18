@@ -687,7 +687,7 @@
                       },
                       "content_modified_at": {
                         "type": "string",
-                        "format": "yyyymmddThhmmss+|-hhmm",
+                        "format": "date-time",
                         "example": "2012-12-12T10:53:43-08:00",
                         "description": "Defines the time the file was last modified at.\n\nIf not set, the upload time will be used."
                       }
@@ -858,13 +858,13 @@
                       },
                       "content_created_at": {
                         "type": "string",
-                        "format": "yyyymmddThhmmss+|-hhmm",
+                        "format": "date-time",
                         "example": "2012-12-12T10:53:43-08:00",
                         "description": "Defines the time the file was originally created at.\n\nIf not set, the upload time will be used."
                       },
                       "content_modified_at": {
                         "type": "string",
-                        "format": "yyyymmddThhmmss+|-hhmm",
+                        "format": "date-time",
                         "example": "2012-12-12T10:53:43-08:00",
                         "description": "Defines the time the file was last modified at.\n\nIf not set, the upload time will be used."
                       }
@@ -3032,7 +3032,8 @@
           "Files"
         ],
         "x-box-reference-category": "folders",
-        "description": "Retrieves a page of files, folders, web links, and other items contained\nwithin the specified folder.\n\nTo request more information about the folder, use the\n[Retrieve a folder](#get-folders-id-items) endpoint.",
+        "x-box-sanitized": true,
+        "description": "Retrieves a page of files, folders, web links, and other items contained\nwithin a specified folder.\n\nTo request more information about the folder, use the\n[Retrieve a folder](#get-folders-id) endpoint.",
         "parameters": [
           {
             "name": "folder_id",
@@ -3061,7 +3062,7 @@
           },
           {
             "name": "usemarker",
-            "description": "Specifies whether to use marker-based or offset-based paging. Only one\npagination method can be used at a time.\n\nMarker-based paging is the preferred method for this endpoint, though if\nnot specified, this endpoint defaults to using offset-based paging.",
+            "description": "Specifies whether to use marker-based pagination instead of\noffset-based pagination. Only one pagination method can\nbe used at a time.\n\nBy setting this value to true, the API will return a `marker` field\nthat can be passed as a parameter to this endpoint to get the next\npage of the response.",
             "in": "query",
             "required": false,
             "example": true,
@@ -3083,13 +3084,12 @@
           },
           {
             "name": "marker",
-            "description": "The position marker at which to begin the response.",
+            "description": "The position marker at which to begin the response.\n\nThis requires `usemarker` to be set to true.",
             "in": "query",
             "required": false,
-            "example": 1234,
+            "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
             "schema": {
-              "type": "integer",
-              "format": "int64"
+              "type": "string"
             }
           },
           {
@@ -3107,7 +3107,7 @@
           },
           {
             "name": "sort",
-            "description": "Defines the second item attribute that items\nare sorted by.\n\nItems are always sorted by their `type` first, with\nfolders listed before files and web links.\n\nThis parameter is not supported for marker-based pagination\non the root folder with ID `0`.",
+            "description": "Defines the second attribute that items\nare sorted by.\n\nItems are always sorted by their `type` first, with\nfolders listed before files, and files listed\nbefore web links.\n\nThis parameter is not supported for marker-based pagination\non the root folder with ID `0`.",
             "in": "query",
             "required": false,
             "example": 1000,
@@ -3123,7 +3123,7 @@
           },
           {
             "name": "direction",
-            "description": "The sorting direction",
+            "description": "The direction to sort items in.",
             "in": "query",
             "required": false,
             "example": "ASC",
@@ -3143,6 +3143,26 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Items"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Returned if the folder is not found, or the user does not\nhave access to the folder.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Returned if the `folder_id` is not in a recognized format.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
                 }
               }
             }
@@ -4258,13 +4278,12 @@
         "parameters": [
           {
             "name": "marker",
-            "description": "The position marker at which to begin the response.",
+            "description": "The position marker at which to begin the response.\n\nThis requires `usemarker` to be set to true.",
             "in": "query",
             "required": false,
-            "example": 1234,
+            "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
             "schema": {
-              "type": "integer",
-              "format": "int64"
+              "type": "string"
             }
           },
           {
@@ -4377,13 +4396,12 @@
           },
           {
             "name": "marker",
-            "description": "The position marker at which to begin the response.",
+            "description": "The position marker at which to begin the response.\n\nThis requires `usemarker` to be set to true.",
             "in": "query",
             "required": false,
-            "example": 1234,
+            "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
             "schema": {
-              "type": "integer",
-              "format": "int64"
+              "type": "string"
             }
           },
           {
@@ -5462,7 +5480,7 @@
                   },
                   "due_at": {
                     "type": "string",
-                    "format": "yyyymmddThhmmss+|-hhmm",
+                    "format": "date-time",
                     "description": "When the task is due",
                     "example": "2012-12-12T10:53:43-08:00"
                   }
@@ -5563,7 +5581,7 @@
                   },
                   "due_at": {
                     "type": "string",
-                    "format": "yyyymmddThhmmss+|-hhmm",
+                    "format": "date-time",
                     "description": "When the task is due",
                     "example": "2012-12-12T10:53:43-08:00"
                   }
@@ -7979,13 +7997,12 @@
         "parameters": [
           {
             "name": "marker",
-            "description": "The position marker at which to begin the response.",
+            "description": "The position marker at which to begin the response.\n\nThis requires `usemarker` to be set to true.",
             "in": "query",
             "required": false,
-            "example": 1234,
+            "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
             "schema": {
-              "type": "integer",
-              "format": "int64"
+              "type": "string"
             }
           },
           {
@@ -8747,7 +8764,7 @@
             "example": "2012-12-12T10:53:43-08:00",
             "schema": {
               "type": "string",
-              "format": "yyyymmddThhmmss+|-hhmm"
+              "format": "date-time"
             }
           },
           {
@@ -8758,7 +8775,7 @@
             "example": "2013-12-12T10:53:43-08:00",
             "schema": {
               "type": "string",
-              "format": "yyyymmddThhmmss+|-hhmm"
+              "format": "date-time"
             }
           }
         ],
@@ -8953,13 +8970,12 @@
           },
           {
             "name": "marker",
-            "description": "The position marker at which to begin the response.",
+            "description": "The position marker at which to begin the response.\n\nThis requires `usemarker` to be set to true.",
             "in": "query",
             "required": false,
-            "example": 1234,
+            "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
             "schema": {
-              "type": "integer",
-              "format": "int64"
+              "type": "string"
             }
           }
         ],
@@ -9313,13 +9329,12 @@
           },
           {
             "name": "marker",
-            "description": "The position marker at which to begin the response.",
+            "description": "The position marker at which to begin the response.\n\nThis requires `usemarker` to be set to true.",
             "in": "query",
             "required": false,
-            "example": 1234,
+            "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
             "schema": {
-              "type": "integer",
-              "format": "int64"
+              "type": "string"
             }
           },
           {
@@ -9528,13 +9543,12 @@
           },
           {
             "name": "marker",
-            "description": "The position marker at which to begin the response.",
+            "description": "The position marker at which to begin the response.\n\nThis requires `usemarker` to be set to true.",
             "in": "query",
             "required": false,
-            "example": 1234,
+            "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
             "schema": {
-              "type": "integer",
-              "format": "int64"
+              "type": "string"
             }
           },
           {
@@ -9597,14 +9611,14 @@
                     "example": "2012-12-12T10:53:43-08:00",
                     "type": "string",
                     "maxLength": 500,
-                    "format": "yyyymmddThhmmss+|-hhmm"
+                    "format": "date-time"
                   },
                   "filter_ended_at": {
                     "description": "The filter end date.\n\nWhen this policy is applied using a `custodian` legal\nhold assignments, it will only apply to file versions\ncreated or uploaded inside of the\ndate range. Other assignment types, such as folders and\nfiles, will ignore the date filter.\n\nRequired if `is_ongoing` is set to `false`.",
                     "example": "2012-12-18T10:53:43-08:00",
                     "type": "string",
                     "maxLength": 500,
-                    "format": "yyyymmddThhmmss+|-hhmm"
+                    "format": "date-time"
                   },
                   "is_ongoing": {
                     "description": "Whether new assignments under this policy should\ncontinue applying to files even after initialization.\n\nWhen this policy is applied using a legal hold assignment,\nit will continue applying the policy to any new file versions\neven after it has been applied.\n\nFor example, if a legal hold assignment is placed on a user\ntoday, and that user uploads a file tomorrow, that file will\nget held. This will continue until the policy is retired.\n\nRequired if no filter dates are set.",
@@ -9828,13 +9842,12 @@
           },
           {
             "name": "marker",
-            "description": "The position marker at which to begin the response.",
+            "description": "The position marker at which to begin the response.\n\nThis requires `usemarker` to be set to true.",
             "in": "query",
             "required": false,
-            "example": 1234,
+            "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
             "schema": {
-              "type": "integer",
-              "format": "int64"
+              "type": "string"
             }
           },
           {
@@ -10116,13 +10129,12 @@
           },
           {
             "name": "marker",
-            "description": "The position marker at which to begin the response.",
+            "description": "The position marker at which to begin the response.\n\nThis requires `usemarker` to be set to true.",
             "in": "query",
             "required": false,
-            "example": 1234,
+            "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
             "schema": {
-              "type": "integer",
-              "format": "int64"
+              "type": "string"
             }
           }
         ],
@@ -10197,13 +10209,12 @@
           },
           {
             "name": "marker",
-            "description": "The position marker at which to begin the response.",
+            "description": "The position marker at which to begin the response.\n\nThis requires `usemarker` to be set to true.",
             "in": "query",
             "required": false,
-            "example": 1234,
+            "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
             "schema": {
-              "type": "integer",
-              "format": "int64"
+              "type": "string"
             }
           },
           {
@@ -10317,13 +10328,12 @@
           },
           {
             "name": "marker",
-            "description": "The position marker at which to begin the response.",
+            "description": "The position marker at which to begin the response.\n\nThis requires `usemarker` to be set to true.",
             "in": "query",
             "required": false,
-            "example": 1234,
+            "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
             "schema": {
-              "type": "integer",
-              "format": "int64"
+              "type": "string"
             }
           },
           {
@@ -10341,7 +10351,7 @@
           },
           {
             "name": "direction",
-            "description": "The sorting direction",
+            "description": "The direction to sort items in.",
             "in": "query",
             "required": false,
             "example": "ASC",
@@ -10760,13 +10770,12 @@
         "parameters": [
           {
             "name": "marker",
-            "description": "The position marker at which to begin the response.",
+            "description": "The position marker at which to begin the response.\n\nThis requires `usemarker` to be set to true.",
             "in": "query",
             "required": false,
-            "example": 1234,
+            "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
             "schema": {
-              "type": "integer",
-              "format": "int64"
+              "type": "string"
             }
           },
           {
@@ -10920,13 +10929,12 @@
         "parameters": [
           {
             "name": "marker",
-            "description": "The position marker at which to begin the response.",
+            "description": "The position marker at which to begin the response.\n\nThis requires `usemarker` to be set to true.",
             "in": "query",
             "required": false,
-            "example": 1234,
+            "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
             "schema": {
-              "type": "integer",
-              "format": "int64"
+              "type": "string"
             }
           },
           {
@@ -11092,13 +11100,12 @@
           },
           {
             "name": "marker",
-            "description": "The position marker at which to begin the response.",
+            "description": "The position marker at which to begin the response.\n\nThis requires `usemarker` to be set to true.",
             "in": "query",
             "required": false,
-            "example": 1234,
+            "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
             "schema": {
-              "type": "integer",
-              "format": "int64"
+              "type": "string"
             }
           },
           {
@@ -11176,13 +11183,12 @@
         "parameters": [
           {
             "name": "marker",
-            "description": "The position marker at which to begin the response.",
+            "description": "The position marker at which to begin the response.\n\nThis requires `usemarker` to be set to true.",
             "in": "query",
             "required": false,
-            "example": 1234,
+            "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
             "schema": {
-              "type": "integer",
-              "format": "int64"
+              "type": "string"
             }
           },
           {
@@ -11682,7 +11688,7 @@
               },
               "expires_at": {
                 "type": "string",
-                "format": "yyyymmddThhmmss+|-hhmm",
+                "format": "date-time",
                 "example": "2012-12-12T10:53:43-08:00",
                 "description": "When the collaboration will expire"
               },
@@ -11703,7 +11709,7 @@
               },
               "acknowledged_at": {
                 "type": "string",
-                "format": "yyyymmddThhmmss+|-hhmm",
+                "format": "date-time",
                 "example": "2012-12-12T10:53:43-08:00",
                 "description": "When the `status` of the collaboration object changed to\n`accepted` or `rejected`"
               },
@@ -11719,13 +11725,13 @@
               },
               "created_at": {
                 "type": "string",
-                "format": "yyyymmddThhmmss+|-hhmm",
+                "format": "date-time",
                 "example": "2012-12-12T10:53:43-08:00",
                 "description": "When the collaboration object was created"
               },
               "modified_at": {
                 "type": "string",
-                "format": "yyyymmddThhmmss+|-hhmm",
+                "format": "date-time",
                 "example": "2012-12-12T10:53:43-08:00",
                 "description": "When the collaboration object was last modified"
               },
@@ -11810,7 +11816,7 @@
               },
               "created_at": {
                 "type": "string",
-                "format": "yyyymmddThhmmss+|-hhmm",
+                "format": "date-time",
                 "description": "The time the whitelist entry was created",
                 "example": "2012-12-12T10:53:43-08:00"
               }
@@ -11880,13 +11886,13 @@
               },
               "created_at": {
                 "type": "string",
-                "format": "yyyymmddThhmmss+|-hhmm",
+                "format": "date-time",
                 "description": "The time the entry was created",
                 "example": "2012-12-12T10:53:43-08:00"
               },
               "modified_at": {
                 "type": "string",
-                "format": "yyyymmddThhmmss+|-hhmm",
+                "format": "date-time",
                 "description": "The time the entry was modified",
                 "example": "2012-12-12T10:53:43-08:00"
               }
@@ -12068,14 +12074,14 @@
               "created_at": {
                 "x-box-field-variant": 1,
                 "type": "string",
-                "format": "yyyymmddThhmmss+|-hhmm",
+                "format": "date-time",
                 "description": "The time this comment was created",
                 "example": "2012-12-12T10:53:43-08:00"
               },
               "modified_at": {
                 "x-box-field-variant": 1,
                 "type": "string",
-                "format": "yyyymmddThhmmss+|-hhmm",
+                "format": "date-time",
                 "description": "The time this comment was last modified",
                 "example": "2012-12-12T10:53:43-08:00"
               },
@@ -12171,13 +12177,13 @@
               },
               "created_at": {
                 "type": "string",
-                "format": "yyyymmddThhmmss+|-hhmm",
+                "format": "date-time",
                 "description": "The time the device pin was created",
                 "example": "2012-12-12T10:53:43-08:00"
               },
               "modified_at": {
                 "type": "string",
-                "format": "yyyymmddThhmmss+|-hhmm",
+                "format": "date-time",
                 "description": "The time the device pin was modified",
                 "example": "2012-12-12T10:53:43-08:00"
               }
@@ -12710,7 +12716,7 @@
                 "type": "string",
                 "description": "The description of the file",
                 "maxLength": 256,
-                "example": "Some pictures I took"
+                "example": "Contract for Q1 renewal"
               },
               "size": {
                 "x-box-field-variant": 1,
@@ -12729,49 +12735,49 @@
               "created_at": {
                 "x-box-field-variant": 1,
                 "type": "string",
-                "format": "yyyymmddThhmmss+|-hhmm",
+                "format": "date-time",
                 "description": "When this file was upload to Box’s servers",
                 "example": "2012-12-12T10:53:43-08:00"
               },
               "modified_at": {
                 "x-box-field-variant": 1,
                 "type": "string",
-                "format": "yyyymmddThhmmss+|-hhmm",
+                "format": "date-time",
                 "description": "When this file was last updated on the Box servers",
                 "example": "2012-12-12T10:53:43-08:00"
               },
               "trashed_at": {
                 "x-box-field-variant": 1,
                 "type": "string",
-                "format": "yyyymmddThhmmss+|-hhmm",
+                "format": "date-time",
                 "description": "When this file was last moved to the trash",
                 "example": "2012-12-12T10:53:43-08:00"
               },
               "purged_at": {
                 "x-box-field-variant": 1,
                 "type": "string",
-                "format": "yyyymmddThhmmss+|-hhmm",
+                "format": "date-time",
                 "description": "When this file will be permanently deleted",
                 "example": "2012-12-12T10:53:43-08:00"
               },
               "content_created_at": {
                 "x-box-field-variant": 1,
                 "type": "string",
-                "format": "yyyymmddThhmmss+|-hhmm",
+                "format": "date-time",
                 "description": "When this file was created originally",
                 "example": "2012-12-12T10:53:43-08:00"
               },
               "content_modified_at": {
                 "x-box-field-variant": 1,
                 "type": "string",
-                "format": "yyyymmddThhmmss+|-hhmm",
+                "format": "date-time",
                 "description": "When this file was last updated",
                 "example": "2012-12-12T10:53:43-08:00"
               },
               "expires_at": {
                 "x-box-field-variant": 1,
                 "type": "string",
-                "format": "yyyymmddThhmmss+|-hhmm",
+                "format": "date-time",
                 "description": "When the file will automatically be deleted",
                 "example": "2012-12-12T10:53:43-08:00"
               },
@@ -12888,7 +12894,7 @@
               "name": {
                 "type": "string",
                 "description": "The name of the file",
-                "example": "Pictures"
+                "example": "Contract.png"
               }
             }
           }
@@ -13005,13 +13011,13 @@
               },
               "created_at": {
                 "type": "string",
-                "format": "yyyymmddThhmmss+|-hhmm",
+                "format": "date-time",
                 "description": "When the file version object was created",
                 "example": "2012-12-12T10:53:43-08:00"
               },
               "modified_at": {
                 "type": "string",
-                "format": "yyyymmddThhmmss+|-hhmm",
+                "format": "date-time",
                 "description": "When the file version object was last updated",
                 "example": "2012-12-12T10:53:43-08:00"
               },
@@ -13028,13 +13034,13 @@
               "trashed_at": {
                 "type": "string",
                 "description": "When the file version object was trashed.",
-                "format": "yyyymmddThhmmss+|-hhmm",
+                "format": "date-time",
                 "example": "2012-12-12T10:53:43-08:00"
               },
               "purged_at": {
                 "type": "string",
                 "description": "When the file version object was purged.",
-                "format": "yyyymmddThhmmss+|-hhmm",
+                "format": "date-time",
                 "example": "2012-12-12T10:53:43-08:00"
               }
             }
@@ -13138,7 +13144,7 @@
               },
               "deleted_at": {
                 "type": "string",
-                "format": "yyyymmddThhmmss+|-hhmm",
+                "format": "date-time",
                 "description": "Time that this File-Version-Legal-Hold was\ndeleted.",
                 "example": "2012-12-12T10:53:43-08:00"
               }
@@ -13208,13 +13214,13 @@
               },
               "applied_at": {
                 "type": "string",
-                "format": "yyyymmddThhmmss+|-hhmm",
+                "format": "date-time",
                 "description": "When this file version retention object was\ncreated",
                 "example": "2012-12-12T10:53:43-08:00"
               },
               "disposition_at": {
                 "type": "string",
-                "format": "yyyymmddThhmmss+|-hhmm",
+                "format": "date-time",
                 "description": "When the retention period expires on this file\nversion retention",
                 "example": "2012-12-12T10:53:43-08:00"
               },
@@ -13437,7 +13443,7 @@
               "created_at": {
                 "x-box-field-variant": 1,
                 "type": "string",
-                "format": "yyyymmddThhmmss+|-hhmm",
+                "format": "date-time",
                 "description": "The date and time when the folder was created. This value may\nbe `null` for some folders such as the root folder or the trash\nfolder.",
                 "example": "2012-12-12T10:53:43-08:00",
                 "nullable": true
@@ -13445,7 +13451,7 @@
               "modified_at": {
                 "x-box-field-variant": 1,
                 "type": "string",
-                "format": "yyyymmddThhmmss+|-hhmm",
+                "format": "date-time",
                 "description": "The date and time when the folder was last updated. This value may\nbe `null` for some folders such as the root folder or the trash\nfolder.",
                 "example": "2012-12-12T10:53:43-08:00",
                 "nullable": true
@@ -13526,7 +13532,7 @@
               "trashed_at": {
                 "x-box-field-variant": 1,
                 "type": "string",
-                "format": "yyyymmddThhmmss+|-hhmm",
+                "format": "date-time",
                 "description": "The time at which this folder was put in the trash.",
                 "example": "2012-12-12T10:53:43-08:00",
                 "nullable": true
@@ -13534,7 +13540,7 @@
               "purged_at": {
                 "x-box-field-variant": 1,
                 "type": "string",
-                "format": "yyyymmddThhmmss+|-hhmm",
+                "format": "date-time",
                 "description": "The time at which this folder is expected to be purged\nfrom the trash.",
                 "example": "2012-12-12T10:53:43-08:00",
                 "nullable": true
@@ -13542,7 +13548,7 @@
               "content_created_at": {
                 "x-box-field-variant": 1,
                 "type": "string",
-                "format": "yyyymmddThhmmss+|-hhmm",
+                "format": "date-time",
                 "nullable": true,
                 "description": "The date and time at which this folder was originally\ncreated.",
                 "example": "2012-12-12T10:53:43-08:00"
@@ -13550,7 +13556,7 @@
               "content_modified_at": {
                 "x-box-field-variant": 1,
                 "type": "string",
-                "format": "yyyymmddThhmmss+|-hhmm",
+                "format": "date-time",
                 "nullable": true,
                 "description": "The date and time at which this folder was last updated.",
                 "example": "2012-12-12T10:53:43-08:00"
@@ -13558,7 +13564,7 @@
               "expires_at": {
                 "x-box-field-variant": 1,
                 "type": "string",
-                "format": "yyyymmddThhmmss+|-hhmm",
+                "format": "date-time",
                 "description": "The time and which the folder will be automatically be deleted.",
                 "example": "2012-12-12T10:53:43-08:00"
               },
@@ -13645,13 +13651,20 @@
                 "example": "active"
               },
               "item_collection": {
-                "x-box-field-variant": 1,
-                "type": "array",
-                "nullable": false,
-                "items": {
-                  "$ref": "#/components/schemas/Item"
-                },
-                "description": "A collection of mini file and folder objects contained in this folder."
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/Items"
+                  },
+                  {
+                    "description": "A page of the items that are in the folder."
+                  },
+                  {
+                    "x-box-field-variant": 1
+                  },
+                  {
+                    "nullable": false
+                  }
+                ]
               }
             }
           }
@@ -13832,14 +13845,14 @@
               "created_at": {
                 "x-box-field-variant": 1,
                 "type": "string",
-                "format": "yyyymmddThhmmss+|-hhmm",
+                "format": "date-time",
                 "description": "When the group object was created",
                 "example": "2012-12-12T10:53:43-08:00"
               },
               "modified_at": {
                 "x-box-field-variant": 1,
                 "type": "string",
-                "format": "yyyymmddThhmmss+|-hhmm",
+                "format": "date-time",
                 "description": "When the group object was last modified",
                 "example": "2012-12-12T10:53:43-08:00"
               }
@@ -13926,13 +13939,13 @@
               },
               "created_at": {
                 "type": "string",
-                "format": "yyyymmddThhmmss+|-hhmm",
+                "format": "date-time",
                 "description": "The time this membership was created.",
                 "example": "2012-12-12T10:53:43-08:00"
               },
               "modified_at": {
                 "type": "string",
-                "format": "yyyymmddThhmmss+|-hhmm",
+                "format": "date-time",
                 "description": "The time this membership was last modified.",
                 "example": "2012-12-12T10:53:43-08:00"
               }
@@ -13996,13 +14009,13 @@
               },
               "created_at": {
                 "type": "string",
-                "format": "yyyymmddThhmmss+|-hhmm",
+                "format": "date-time",
                 "description": "When the invite was created",
                 "example": "2012-12-12T10:53:43-08:00"
               },
               "modified_at": {
                 "type": "string",
-                "format": "yyyymmddThhmmss+|-hhmm",
+                "format": "date-time",
                 "description": "When the invite was modified.",
                 "example": "2012-12-12T10:53:43-08:00"
               }
@@ -14047,9 +14060,9 @@
       },
       "Items": {
         "title": "Items",
-        "x-box-resource-id": "items",
+        "x-box-resource-id": "item_collection",
         "x-box-reference-category": "folders",
-        "description": "A list of generic mini representations of a file, folder, user or enterprise",
+        "description": "A list of files, folders, and web links in\ntheir mini representation.",
         "allOf": [
           {
             "$ref": "#/components/schemas/Pagination"
@@ -14057,9 +14070,20 @@
           {
             "properties": {
               "entries": {
+                "description": "The items in this collection.",
                 "type": "array",
                 "items": {
-                  "$ref": "#/components/schemas/Item"
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/File--Mini"
+                    },
+                    {
+                      "$ref": "#/components/schemas/Folder--Mini"
+                    },
+                    {
+                      "$ref": "#/components/schemas/WebLink--Mini"
+                    }
+                  ]
                 }
               }
             }
@@ -14122,31 +14146,31 @@
               },
               "created_at": {
                 "type": "string",
-                "format": "yyyymmddThhmmss+|-hhmm",
+                "format": "date-time",
                 "description": "When the legal hold policy object was created",
                 "example": "2012-12-12T10:53:43-08:00"
               },
               "modified_at": {
                 "type": "string",
-                "format": "yyyymmddThhmmss+|-hhmm",
+                "format": "date-time",
                 "description": "When the legal hold policy object was modified.\nDoes not update when assignments are added or removed.",
                 "example": "2012-12-12T10:53:43-08:00"
               },
               "deleted_at": {
                 "type": "string",
-                "format": "yyyymmddThhmmss+|-hhmm",
+                "format": "date-time",
                 "description": "When the policy release request was sent. (Because\nit can take time for a policy to fully delete, this\nisn't quite the same time that the policy is fully deleted).\n\nIf `null`, the policy was not deleted.",
                 "example": "2012-12-12T10:53:43-08:00"
               },
               "filter_started_at": {
                 "type": "string",
-                "format": "yyyymmddThhmmss+|-hhmm",
+                "format": "date-time",
                 "description": "User-specified, optional date filter applies to\nCustodian assignments only",
                 "example": "2012-12-12T10:53:43-08:00"
               },
               "filter_ended_at": {
                 "type": "string",
-                "format": "yyyymmddThhmmss+|-hhmm",
+                "format": "date-time",
                 "description": "User-specified, optional date filter applies to\nCustodian assignments only",
                 "example": "2012-12-12T10:53:43-08:00"
               },
@@ -14255,13 +14279,13 @@
               },
               "assigned_at": {
                 "type": "string",
-                "format": "yyyymmddThhmmss+|-hhmm",
+                "format": "date-time",
                 "description": "When the legal hold policy assignment object was\ncreated",
                 "example": "2012-12-12T10:53:43-08:00"
               },
               "deleted_at": {
                 "type": "string",
-                "format": "yyyymmddThhmmss+|-hhmm",
+                "format": "date-time",
                 "description": "When the assignment release request was sent.\n(Because it can take time for an assignment to fully\ndelete, this isn't quite the same time that the\nassignment is fully deleted). If null, Assignment\nwas not deleted.",
                 "example": "2012-12-12T10:53:43-08:00"
               }
@@ -14320,13 +14344,13 @@
               },
               "created_at": {
                 "type": "string",
-                "format": "yyyymmddThhmmss+|-hhmm",
+                "format": "date-time",
                 "example": "2012-12-12T10:53:43-08:00",
                 "description": "The time this lock was created at"
               },
               "expired_at": {
                 "type": "string",
-                "format": "yyyymmddThhmmss+|-hhmm",
+                "format": "date-time",
                 "example": "2012-12-12T10:53:43-08:00",
                 "description": "The time this lock is to expire at, which might be in the past"
               },
@@ -14359,7 +14383,7 @@
           },
           "expires_at": {
             "type": "string",
-            "format": "yyyymmddThhmmss+|-hhmm",
+            "format": "date-time",
             "example": "2012-12-12T10:53:43-08:00",
             "description": "The time at which the lock expires"
           },
@@ -14832,7 +14856,7 @@
           },
           "created_at": {
             "type": "string",
-            "format": "yyyymmddThhmmss+|-hhmm",
+            "format": "date-time",
             "description": "The time the card was created at",
             "example": "2012-12-12T10:53:43-08:00"
           },
@@ -15101,7 +15125,7 @@
         }
       },
       "PathCollection": {
-        "title": "Folders",
+        "title": "Path Collection",
         "x-box-resource-id": "path_collection",
         "x-box-reference-category": "folders",
         "x-box-sanitized": true,
@@ -15271,7 +15295,7 @@
           },
           "interacted_at": {
             "type": "string",
-            "format": "yyyymmddThhmmss+|-hhmm",
+            "format": "date-time",
             "description": "The time of the most recent interaction.",
             "example": "2018-04-13T13:53:23-07:00"
           },
@@ -15371,13 +15395,13 @@
               },
               "created_at": {
                 "type": "string",
-                "format": "yyyymmddThhmmss+|-hhmm",
+                "format": "date-time",
                 "description": "When the retention policy object was created",
                 "example": "2012-12-12T10:53:43-08:00"
               },
               "modified_at": {
                 "type": "string",
-                "format": "yyyymmddThhmmss+|-hhmm",
+                "format": "date-time",
                 "description": "When the retention policy object was last modified",
                 "example": "2012-12-12T10:53:43-08:00"
               }
@@ -15484,7 +15508,7 @@
               },
               "assigned_at": {
                 "type": "string",
-                "format": "yyyymmddThhmmss+|-hhmm",
+                "format": "date-time",
                 "description": "When the retention policy assignment object was\ncreated",
                 "example": "2012-12-12T10:53:43-08:00"
               }
@@ -15612,7 +15636,7 @@
           },
           "unshared_at": {
             "type": "string",
-            "format": "yyyymmddThhmmss+|-hhmm",
+            "format": "date-time",
             "description": "The date and time when this link will be disabled. This field can only be\nset by users with paid accounts.",
             "example": "2018-04-13T13:53:23-07:00",
             "nullable": true
@@ -15679,7 +15703,7 @@
           },
           "unshared_at": {
             "type": "string",
-            "format": "yyyymmddThhmmss+|-hhmm",
+            "format": "date-time",
             "example": "2012-12-12T10:53:43-08:00",
             "description": "The timestamp at which this shared link will\nbe disabled. This field can only be set by\nusers with paid accounts."
           },
@@ -15806,7 +15830,7 @@
               },
               "created_at": {
                 "type": "string",
-                "format": "yyyymmddThhmmss+|-hhmm",
+                "format": "date-time",
                 "description": "The time this invocation was created.",
                 "example": "2012-12-12T10:53:43-08:00"
               },
@@ -16000,7 +16024,7 @@
               },
               "due_at": {
                 "type": "string",
-                "format": "yyyymmddThhmmss+|-hhmm",
+                "format": "date-time",
                 "description": "When the task is due",
                 "example": "2012-12-12T10:53:43-08:00"
               },
@@ -16044,7 +16068,7 @@
               },
               "created_at": {
                 "type": "string",
-                "format": "yyyymmddThhmmss+|-hhmm",
+                "format": "date-time",
                 "description": "When the task object was created",
                 "example": "2012-12-12T10:53:43-08:00"
               }
@@ -16118,19 +16142,19 @@
               },
               "completed_at": {
                 "type": "string",
-                "format": "yyyymmddThhmmss+|-hhmm",
+                "format": "date-time",
                 "description": "The date at which this task assignment was\ncompleted",
                 "example": "2012-12-12T10:53:43-08:00"
               },
               "assigned_at": {
                 "type": "string",
-                "format": "yyyymmddThhmmss+|-hhmm",
+                "format": "date-time",
                 "description": "The date at which this task assignment was\nassigned",
                 "example": "2012-12-12T10:53:43-08:00"
               },
               "reminded_at": {
                 "type": "string",
-                "format": "yyyymmddThhmmss+|-hhmm",
+                "format": "date-time",
                 "description": "The date at which this task assignment was\nreminded",
                 "example": "2012-12-12T10:53:43-08:00"
               },
@@ -16227,13 +16251,13 @@
               },
               "created_at": {
                 "type": "string",
-                "format": "yyyymmddThhmmss+|-hhmm",
+                "format": "date-time",
                 "description": "When the legal item was created",
                 "example": "2012-12-12T10:53:43-08:00"
               },
               "modified_at": {
                 "type": "string",
-                "format": "yyyymmddThhmmss+|-hhmm",
+                "format": "date-time",
                 "description": "When the legal item was modified.",
                 "example": "2012-12-12T10:53:43-08:00"
               }
@@ -16330,13 +16354,13 @@
               },
               "created_at": {
                 "type": "string",
-                "format": "yyyymmddThhmmss+|-hhmm",
+                "format": "date-time",
                 "description": "When the legal item was created",
                 "example": "2012-12-12T10:53:43-08:00"
               },
               "modified_at": {
                 "type": "string",
-                "format": "yyyymmddThhmmss+|-hhmm",
+                "format": "date-time",
                 "description": "When the legal item was modified.",
                 "example": "2012-12-12T10:53:43-08:00"
               }
@@ -16567,7 +16591,7 @@
               "session_expires_at": {
                 "description": "The date and time when this session expires.",
                 "type": "string",
-                "format": "yyyymmddThhmmss+|-hhmm",
+                "format": "date-time",
                 "example": "2012-12-12T10:53:43-08:00"
               },
               "part_size": {
@@ -16759,14 +16783,14 @@
               "created_at": {
                 "x-box-field-variant": 1,
                 "type": "string",
-                "format": "yyyymmddThhmmss+|-hhmm",
+                "format": "date-time",
                 "description": "When the user object was created",
                 "example": "2012-12-12T10:53:43-08:00"
               },
               "modified_at": {
                 "x-box-field-variant": 1,
                 "type": "string",
-                "format": "yyyymmddThhmmss+|-hhmm",
+                "format": "date-time",
                 "description": "When the user object was last modified",
                 "example": "2012-12-12T10:53:43-08:00"
               },
@@ -16894,13 +16918,13 @@
             "properties": {
               "created_at": {
                 "type": "string",
-                "format": "yyyymmddThhmmss+|-hhmm",
+                "format": "date-time",
                 "description": "When this watermark was created",
                 "example": "2012-12-12T10:53:43-08:00"
               },
               "modified_at": {
                 "type": "string",
-                "format": "yyyymmddThhmmss+|-hhmm",
+                "format": "date-time",
                 "description": "When this task was modified",
                 "example": "2012-12-12T10:53:43-08:00"
               }
@@ -16972,7 +16996,7 @@
               },
               "created_at": {
                 "type": "string",
-                "format": "yyyymmddThhmmss+|-hhmm",
+                "format": "date-time",
                 "description": "A timestamp identifying the time that\nthe webhook was created.",
                 "example": "2012-12-12T10:53:43-08:00"
               },
@@ -17097,7 +17121,7 @@
               },
               "created_at": {
                 "type": "string",
-                "format": "yyyymmddThhmmss+|-hhmm",
+                "format": "date-time",
                 "description": "A timestamp identifying the time that\nthe webhook event was triggered.",
                 "example": "2012-12-12T10:53:43-08:00"
               },
@@ -17178,20 +17202,13 @@
         "x-box-resource-id": "web_link",
         "description": "Web links are objects that point to URLs. These objects\nare also known as bookmarks within the Box web application.\n\nWeb link objects are treated similarly to file objects,\nthey will also support most actions that apply to regular files.",
         "x-box-reference-category": "web_links",
+        "x-box-has-field-variants": true,
         "allOf": [
           {
-            "$ref": "#/components/schemas/Item"
+            "$ref": "#/components/schemas/WebLink--Mini"
           },
           {
             "properties": {
-              "type": {
-                "type": "string",
-                "description": "`web_link`",
-                "example": "web_link",
-                "enum": [
-                  "web_link"
-                ]
-              },
               "parent": {
                 "allOf": [
                   {
@@ -17199,20 +17216,20 @@
                   },
                   {
                     "description": "The parent object the web link belongs to"
+                  },
+                  {
+                    "x-box-field-variant": 2
                   }
                 ]
-              },
-              "url": {
-                "type": "string",
-                "example": "https://www.example.com/example/1234",
-                "description": "The URL this web link points to"
               },
               "description": {
                 "type": "string",
                 "example": "Example page",
+                "x-box-field-variant": 2,
                 "description": "The description accompanying the web link. This is\nvisible within the Box web application."
               },
               "path_collection": {
+                "x-box-field-variant": 2,
                 "type": "array",
                 "description": "The path of folders to this link, starting at the root",
                 "items": {
@@ -17220,28 +17237,32 @@
                 }
               },
               "created_at": {
+                "x-box-field-variant": 2,
                 "type": "string",
-                "format": "yyyymmddThhmmss+|-hhmm",
+                "format": "date-time",
                 "description": "When this file was created on Box’s servers.",
                 "example": "2012-12-12T10:53:43-08:00"
               },
               "modified_at": {
+                "x-box-field-variant": 2,
                 "type": "string",
-                "format": "yyyymmddThhmmss+|-hhmm",
+                "format": "date-time",
                 "description": "When this file was last updated on the Box\nservers.",
                 "example": "2012-12-12T10:53:43-08:00"
               },
               "trashed_at": {
                 "type": "string",
-                "format": "yyyymmddThhmmss+|-hhmm",
+                "format": "date-time",
                 "description": "When this file was last moved to the trash.",
-                "example": "2012-12-12T10:53:43-08:00"
+                "example": "2012-12-12T10:53:43-08:00",
+                "x-box-field-variant": 2
               },
               "purged_at": {
                 "type": "string",
-                "format": "yyyymmddThhmmss+|-hhmm",
+                "format": "date-time",
                 "description": "When this file will be permanently deleted.",
-                "example": "2012-12-12T10:53:43-08:00"
+                "example": "2012-12-12T10:53:43-08:00",
+                "x-box-field-variant": 2
               },
               "created_by": {
                 "allOf": [
@@ -17250,6 +17271,9 @@
                   },
                   {
                     "description": "The user who created this web link"
+                  },
+                  {
+                    "x-box-field-variant": 2
                   }
                 ]
               },
@@ -17260,6 +17284,9 @@
                   },
                   {
                     "description": "The user who last modified this web link"
+                  },
+                  {
+                    "x-box-field-variant": 2
                   }
                 ]
               },
@@ -17270,6 +17297,9 @@
                   },
                   {
                     "description": "The user who owns this web link"
+                  },
+                  {
+                    "x-box-field-variant": 2
                   }
                 ]
               },
@@ -17280,6 +17310,9 @@
                   },
                   {
                     "description": "The shared link object for this item. Will be\n`null` if no shared link has been created."
+                  },
+                  {
+                    "x-box-field-variant": 2
                   }
                 ]
               },
@@ -17291,7 +17324,51 @@
                   "trashed",
                   "deleted"
                 ],
-                "description": "Whether this item is deleted or not. Values include `active`,\n`trashed` if the file has been moved to the trash, and `deleted` if\nthe file has been permanently deleted"
+                "description": "Whether this item is deleted or not. Values include `active`,\n`trashed` if the file has been moved to the trash, and `deleted` if\nthe file has been permanently deleted",
+                "x-box-field-variant": 2
+              }
+            }
+          }
+        ]
+      },
+      "WebLink--Mini": {
+        "title": "Web Link (Mini)",
+        "x-box-resource-id": "web_link--mini",
+        "description": "Web links are objects that point to URLs. These objects\nare also known as bookmarks within the Box web application.\n\nWeb link objects are treated similarly to file objects,\nthey will also support most actions that apply to regular files.",
+        "x-box-reference-category": "web_links",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Item"
+          },
+          {
+            "properties": {
+              "url": {
+                "type": "string",
+                "example": "https://www.example.com/example/1234",
+                "description": "The URL this web link points to"
+              },
+              "type": {
+                "type": "string",
+                "description": "`web_link`",
+                "example": "web_link",
+                "enum": [
+                  "web_link"
+                ]
+              },
+              "sequence_id": {
+                "type": "string",
+                "example": "1",
+                "description": "A unique ID for use with the /events endpoint"
+              },
+              "etag": {
+                "type": "string",
+                "example": "1",
+                "description": "The entity tag of this web link. Used with `If-Match`\nheaders."
+              },
+              "name": {
+                "type": "string",
+                "description": "The name of the web link",
+                "example": "My Bookmark"
               }
             }
           }
