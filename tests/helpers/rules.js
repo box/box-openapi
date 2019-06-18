@@ -183,7 +183,7 @@ const ensureItemsOfBasicTypeOrReference = (items) => {
     ]
   }
   // if we have one key, ensure it's a type or a reference
-  else if (!keys.includes("type") && !keys.includes("$ref")) {
+  else if (!keys.includes("type") && !keys.includes("$ref") && !keys.includes("oneOf")) {
     return [
       {
         message: `Items should contain "type" or "$ref" key. Found ${keys}`

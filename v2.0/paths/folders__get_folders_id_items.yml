@@ -8,13 +8,14 @@ tags:
   - Files
 
 x-box-reference-category: folders
+x-box-sanitized: true
 
 description: |-
   Retrieves a page of files, folders, web links, and other items contained
-  within the specified folder.
+  within a specified folder.
 
   To request more information about the folder, use the
-  [Retrieve a folder](#get-folders-id-items) endpoint.
+  [Retrieve a folder](#get-folders-id) endpoint.
 
 parameters:
   - $ref: '../attributes/folder_id.yml'
@@ -26,11 +27,12 @@ parameters:
 
   - name: sort
     description: |-
-      Defines the second item attribute that items
+      Defines the second attribute that items
       are sorted by.
 
       Items are always sorted by their `type` first, with
-      folders listed before files and web links.
+      folders listed before files, and files listed
+      before web links.
 
       This parameter is not supported for marker-based pagination
       on the root folder with ID `0`.
@@ -54,3 +56,20 @@ responses:
       application/json:
         schema:
           $ref: '#/components/schemas/Items'
+
+  404:
+    description: |-
+      Returned if the folder is not found, or the user does not
+      have access to the folder.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
+
+  405:
+    description: |-
+      Returned if the `folder_id` is not in a recognized format.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
