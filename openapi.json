@@ -2887,7 +2887,8 @@
                     "description": "Specifies if the user has marked Box Drive or their mobile apps\nto sync this folder to their device.",
                     "enum": [
                       "synced",
-                      "not_synced"
+                      "not_synced",
+                      "partially_synced"
                     ]
                   },
                   "can_non_owners_invite": {
@@ -11652,9 +11653,10 @@
                     "$ref": "#/components/schemas/Item"
                   },
                   {
-                    "description": "The file or folder that access is granted to"
+                    "description": "The file or folder to which access is granted. The field is\n`null` when the collaboration `status` is `pending`."
                   }
-                ]
+                ],
+                "nullable": true
               },
               "accessible_by": {
                 "allOf": [
@@ -11668,6 +11670,7 @@
               },
               "invite_email": {
                 "type": "string",
+                "nullable": true,
                 "example": "john@example.com",
                 "description": "The email address used to invite an unregistered collaborator, if\nthey are not a registered user."
               },
@@ -11679,7 +11682,7 @@
                   "viewer",
                   "previewer",
                   "uploader",
-                  "preview uploader",
+                  "previewer uploader",
                   "viewer uploader",
                   "co-owner",
                   "owner"
@@ -11688,9 +11691,10 @@
               },
               "expires_at": {
                 "type": "string",
+                "nullable": true,
                 "format": "date-time",
                 "example": "2012-12-12T10:53:43-08:00",
-                "description": "When the collaboration will expire"
+                "description": "When the collaboration will expire, or `null` if no expiration\ndate is set."
               },
               "can_view_path": {
                 "type": "boolean",
@@ -11735,15 +11739,63 @@
                 "example": "2012-12-12T10:53:43-08:00",
                 "description": "When the collaboration object was last modified"
               },
-              "acceptance_requirements": {
-                "allOf": [
-                  {
-                    "$ref": "#/components/schemas/TermsOfService--Mini"
+              "acceptance_requirements_status": {
+                "type": "object",
+                "properties": {
+                  "terms_of_service_requirement": {
+                    "type": "object",
+                    "properties": {
+                      "is_accepted": {
+                        "type": "boolean",
+                        "nullable": true,
+                        "example": true,
+                        "description": "Whether or not the terms of service have been accepted.  The\nfield is `null` when there is no terms of service required."
+                      },
+                      "terms_of_service": {
+                        "allOf": [
+                          {
+                            "$ref": "#/components/schemas/TermsOfService--Mini"
+                          },
+                          {
+                            "description": "The terms of service that must be accepted before the\ncollaboration can be accepted. The field is `null` when\nthere is no terms of service required."
+                          }
+                        ]
+                      }
+                    }
                   },
-                  {
-                    "description": "The terms of service for the collaboration"
+                  "strong_password_requirement": {
+                    "type": "object",
+                    "properties": {
+                      "enterprise_has_strong_password_required_for_external_users": {
+                        "type": "boolean",
+                        "example": true,
+                        "description": "Whether or not the enterprise that owns the content requires\na strong password to collaborate on the content."
+                      },
+                      "user_has_strong_password": {
+                        "type": "boolean",
+                        "nullable": true,
+                        "example": true,
+                        "description": "Whether or not the user has a strong password set for their\naccount. The field is `null` when a strong password is not\nrequired."
+                      }
+                    }
+                  },
+                  "two_factor_authentication_requirement": {
+                    "type": "object",
+                    "properties": {
+                      "enterprise_has_two_factor_auth_enabled": {
+                        "type": "boolean",
+                        "example": true,
+                        "description": "Whether or not the enterprise that owns the content requires\ntwo-factor authentication to be enabled in order to\ncollaborate on the content."
+                      },
+                      "user_has_two_factor_authentication_enabled": {
+                        "type": "boolean",
+                        "nullable": true,
+                        "example": true,
+                        "description": "Whether or not the user has two-factor authentication\nenabled. The field is `null` when two-factor\nauthentication is not required."
+                      }
+                    }
                   }
-                ]
+                }
               }
             }
           }
@@ -11998,7 +12050,7 @@
                 "x-box-field-variant": 2,
                 "type": "string",
                 "example": "@[1234567:Aaron Levie] these tigers are cool!",
-                "description": "The string representing the comment text with\n@mentions included. @mention format is @[id:username]\nwhere `id` is user's Box ID an username is\ntheir display name."
+                "description": "The string representing the comment text with\n@mentions included. @mention format is @[id:username]\nwhere `id` is user's Box ID and `username` is\ntheir display name."
               }
             }
           }
@@ -12088,7 +12140,7 @@
               "item": {
                 "allOf": [
                   {
-                    "$ref": "#/components/schemas/Item"
+                    "$ref": "#/components/schemas/Reference"
                   },
                   {
                     "description": "The object this comment was placed on"
@@ -12564,7 +12616,8 @@
                   {
                     "x-box-field-variant": 2
                   }
-                ]
+                ],
+                "nullable": true
               },
               "extension": {
                 "x-box-field-variant": 2,
@@ -12750,6 +12803,7 @@
                 "x-box-field-variant": 1,
                 "type": "string",
                 "format": "date-time",
+                "nullable": true,
                 "description": "When this file was last moved to the trash",
                 "example": "2012-12-12T10:53:43-08:00"
               },
@@ -12757,6 +12811,7 @@
                 "x-box-field-variant": 1,
                 "type": "string",
                 "format": "date-time",
+                "nullable": true,
                 "description": "When this file will be permanently deleted",
                 "example": "2012-12-12T10:53:43-08:00"
               },
@@ -12778,6 +12833,7 @@
                 "x-box-field-variant": 1,
                 "type": "string",
                 "format": "date-time",
+                "nullable": true,
                 "description": "When the file will automatically be deleted",
                 "example": "2012-12-12T10:53:43-08:00"
               },
@@ -12831,7 +12887,8 @@
                   {
                     "x-box-field-variant": 1
                   }
-                ]
+                ],
+                "nullable": true
               },
               "parent": {
                 "allOf": [
@@ -13035,12 +13092,14 @@
                 "type": "string",
                 "description": "When the file version object was trashed.",
                 "format": "date-time",
+                "nullable": true,
                 "example": "2012-12-12T10:53:43-08:00"
               },
               "purged_at": {
                 "type": "string",
-                "description": "When the file version object was purged.",
+                "description": "When the file version object will be permanently deleted.",
                 "format": "date-time",
+                "nullable": true,
                 "example": "2012-12-12T10:53:43-08:00"
               }
             }
@@ -13281,7 +13340,8 @@
                     "description": "Specifies if the user has marked Box Drive or their mobile apps\nto sync this folder to their device.",
                     "enum": [
                       "synced",
-                      "not_synced"
+                      "not_synced",
+                      "partially_synced"
                     ]
                   },
                   {
@@ -13394,13 +13454,13 @@
                 ],
                 "nullable": false,
                 "enum": [
-                  "viewer",
                   "editor",
+                  "viewer",
                   "previewer",
                   "uploader",
                   "previewer uploader",
-                  "co-owner",
-                  "viewer uploader"
+                  "viewer uploader",
+                  "co-owner"
                 ],
                 "description": "A list of the types of roles that user can be invited at\nwhen sharing this folder.",
                 "items": {
@@ -13444,9 +13504,9 @@
                 "x-box-field-variant": 1,
                 "type": "string",
                 "format": "date-time",
+                "nullable": true,
                 "description": "The date and time when the folder was created. This value may\nbe `null` for some folders such as the root folder or the trash\nfolder.",
-                "example": "2012-12-12T10:53:43-08:00",
-                "nullable": true
+                "example": "2012-12-12T10:53:43-08:00"
               },
               "modified_at": {
                 "x-box-field-variant": 1,
@@ -13541,7 +13601,7 @@
                 "x-box-field-variant": 1,
                 "type": "string",
                 "format": "date-time",
-                "description": "The time at which this folder is expected to be purged\nfrom the trash.",
+                "description": "The time at which this folder is expected to be purged\nfrom the trash.\nThe time at which this folder will be permanently deleted.",
                 "example": "2012-12-12T10:53:43-08:00",
                 "nullable": true
               },
@@ -13565,6 +13625,7 @@
                 "x-box-field-variant": 1,
                 "type": "string",
                 "format": "date-time",
+                "nullable": true,
                 "description": "The time and which the folder will be automatically be deleted.",
                 "example": "2012-12-12T10:53:43-08:00"
               },
@@ -13632,11 +13693,9 @@
                   },
                   {
                     "x-box-field-variant": 1
-                  },
-                  {
-                    "nullable": true
                   }
-                ]
+                ],
+                "nullable": true
               },
               "item_status": {
                 "x-box-field-variant": 1,
@@ -13664,7 +13723,8 @@
                   {
                     "nullable": false
                   }
-                ]
+                ],
+                "x-box-field-variant": 1
               }
             }
           }
@@ -13694,15 +13754,15 @@
               },
               "sequence_id": {
                 "type": "string",
+                "nullable": true,
                 "example": "1",
-                "description": "A unique identifier that can be used in combination\nwith the `/events` endpoint. May be `null` for\nsome folders such as the root folder and trash folder.",
-                "nullable": true
+                "description": "A unique identifier that can be used in combination\nwith the `/events` endpoint. May be `null` for\nsome folders such as the root folder and trash folder."
               },
               "etag": {
                 "type": "string",
+                "nullable": true,
                 "example": "1",
-                "description": "The HTTP etag of this folder. This can be used within some API\nendpoints in the `If-Match` and `If-None-Match` headers to only\nperform changes on the folder if (no) changes have happened.",
-                "nullable": true
+                "description": "The HTTP etag of this folder. This can be used within some API\nendpoints in the `If-Match` and `If-None-Match` headers to only\nperform changes on the folder if (no) changes have happened."
               },
               "name": {
                 "type": "string",
@@ -13767,7 +13827,7 @@
               "provenance": {
                 "x-box-field-variant": 2,
                 "type": "string",
-                "description": "Keeps track of which external source this group is\ncoming from (e.g. \"Active Directory\", \"Google Groups\",\n\"Facebook Groups\").  Setting this will\nalso prevent Box users from editing the group name\nand its members directly via the Box web application.\nThis is desirable for one-way  syncing of groups.",
+                "description": "Keeps track of which external source this group is\ncoming from (e.g. \"Active Directory\", \"Google Groups\",\n\"Facebook Groups\").  Setting this will\nalso prevent Box users from editing the group name\nand its members directly via the Box web application.\nThis is desirable for one-way syncing of groups.",
                 "maxLength": 255,
                 "example": "Active Directory"
               },
@@ -13884,6 +13944,15 @@
                 "type": "string",
                 "description": "The name of the group",
                 "example": "Support"
+              },
+              "group_type": {
+                "type": "string",
+                "description": "The type of the group.",
+                "example": "managed_group",
+                "enum": [
+                  "managed_group",
+                  "all_users_group"
+                ]
               }
             }
           }
@@ -16505,6 +16574,31 @@
           }
         }
       },
+      "TrackingCode": {
+        "title": "Tracking Code",
+        "x-box-resource-id": "tracking_code",
+        "description": "Custom tracking code for a user.",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "`tracking_code`",
+            "example": "tracking_code",
+            "enum": [
+              "tracking_code"
+            ]
+          },
+          "name": {
+            "type": "string",
+            "description": "The name of the tracking code, which must be preconfigured in\nthe Admin Console",
+            "example": "department"
+          },
+          "value": {
+            "type": "string",
+            "description": "The value of the tracking code",
+            "example": "Sales"
+          }
+        }
+      },
       "UploadPart": {
         "title": "Upload Part",
         "x-box-resource-id": "upload_part",
@@ -16671,11 +16765,8 @@
                 "x-box-field-variant": 2,
                 "type": "array",
                 "description": "An array of key/value pairs set by the user’s admin",
-                "example": [
-                  "code1: 12345"
-                ],
                 "items": {
-                  "type": "string"
+                  "$ref": "#/components/schemas/TrackingCode"
                 }
               },
               "can_see_managed_users": {
@@ -16730,12 +16821,12 @@
                 "example": [
                   "important"
                 ],
-                "description": "Tags for all files and folders owned by the user. Values returned\nwill  only contain tags that were set by the requester."
+                "description": "Tags for all files and folders owned by the user. Values returned\nwill only contain tags that were set by the requester."
               },
               "hostname": {
                 "x-box-field-variant": 2,
                 "type": "string",
-                "example": "https://example.com/",
+                "example": "https://example.app.box.com/",
                 "description": "The root (protocol, subdomain, domain) of any links that need to be\ngenerated for the user"
               },
               "is_platform_access_only": {
@@ -16743,6 +16834,12 @@
                 "type": "boolean",
                 "example": true,
                 "description": "Whether the user is an App User"
+              },
+              "external_app_user_id": {
+                "x-box-field-variant": 2,
+                "type": "string",
+                "example": "my-app-user",
+                "description": "An external identifier for an app user, which can be used to look up\nthe user."
               }
             }
           }
@@ -17212,7 +17309,7 @@
               "parent": {
                 "allOf": [
                   {
-                    "$ref": "#/components/schemas/Item"
+                    "$ref": "#/components/schemas/Folder--Mini"
                   },
                   {
                     "description": "The parent object the web link belongs to"
@@ -17253,6 +17350,7 @@
               "trashed_at": {
                 "type": "string",
                 "format": "date-time",
+                "nullable": true,
                 "description": "When this file was last moved to the trash.",
                 "example": "2012-12-12T10:53:43-08:00",
                 "x-box-field-variant": 2
@@ -17260,6 +17358,7 @@
               "purged_at": {
                 "type": "string",
                 "format": "date-time",
+                "nullable": true,
                 "description": "When this file will be permanently deleted.",
                 "example": "2012-12-12T10:53:43-08:00",
                 "x-box-field-variant": 2
@@ -17313,6 +17412,9 @@
                   },
                   {
                     "x-box-field-variant": 2
+                  },
+                  {
+                    "nullable": true
                   }
                 ]
               },
