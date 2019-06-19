@@ -23,7 +23,7 @@ const validateOperationIdFormat = (endpoint, _, { given }) => {
 }
 
 /**
- * Ensure that all references have been resolved for 
+ * Ensure that all references have been resolved for
  * an item
  */
 const ensureReferencesResolved = (item) => {
@@ -32,13 +32,13 @@ const ensureReferencesResolved = (item) => {
   if (item && typeof(item) === 'object' && '$ref' in item) {
     let ref = item['$ref']
     // if the reference is a string, and doesn't point to
-    // a resource defined in this spec (#/) then it hasn't 
+    // a resource defined in this spec (#/) then it hasn't
     // been resolved
     if (!typeof(ref) === 'string' || !ref.startsWith('#/')) {
       return [
         { message: `Expected all file references to be resolved - ${ref}`}
       ]
-    } 
+    }
   }
 }
 
@@ -73,22 +73,22 @@ const ensureLocalReferencesExist = (item, _, __, context) => {
  * Ensure that examples exist for paramters/properties of
  * basic values
  */
-const ensurePropertiesExample = (item, _, paths) => {  
+const ensurePropertiesExample = (item, _, paths) => {
   if (
       // skip if this is an example
       paths.target.includes('example') ||
       // objects are not basic values
-      item.type === 'object' || 
+      item.type === 'object' ||
       // binary values are not basic values
-      item.format === 'binary' || 
+      item.format === 'binary' ||
       // arrays can be skipped unless they are string arrays
-      (item.type === 'array' && item.items.type !== 'string') || 
+      (item.type === 'array' && item.items.type !== 'string') ||
       // skip if the property as a reference
       item['$ref'] !== undefined ||
       item.allOf !== undefined ||
       // allow an explicit example value of null
       item.example === null ) { return }
-  
+
   // if the item does not have an example
   // throw an error
   if (!item.example) {
@@ -108,12 +108,12 @@ const ensureSimpleDescription = (item, _, paths) => {
       // skip if this is an example
       paths.target.includes('example') ||
       // skip if this is an object or array
-      item.type === 'object' || 
-      item.type === 'array' || 
+      item.type === 'object' ||
+      item.type === 'array' ||
       // skip if this has a reference
       item['$ref'] !== undefined ||
       item.allOf !== undefined ) { return }
-  
+
   // if the item does not have an decription
   // throw an error
   if (!item.description) {
@@ -133,8 +133,8 @@ const ensureSimpleDescription = (item, _, paths) => {
 const ensureAllofOrder = (item) => {
   // get the keys for an item
   let keys = item.map(row => Object.keys(row)[0])
-  
-  // if the item contains a reference, ensure it's 
+
+  // if the item contains a reference, ensure it's
   // the first item
   if (keys.includes("$ref") && keys[0] !== "$ref") {
     return [
@@ -221,7 +221,7 @@ const ensureLocalReferencesInAllOf = (item, _, paths) => {
  */
 const ensureAllArraysHaveItemTypes = (param) => {
   // check if the param is an array
-  if (param.type === 'array' && 
+  if (param.type === 'array' &&
     // if the param has items, ensure it has a type or a ref
     !(param.items && (param.items.type || param.items['$ref']))) {
     return [
@@ -232,12 +232,12 @@ const ensureAllArraysHaveItemTypes = (param) => {
   }
 }
 
-/**	
- * Check that every item x-box-reference-category matches the ID of a tag	
- */	
-const ensureReferenceCategoryValid = (item, _, __, context) => {	
+/**
+ * Check that every item x-box-reference-category matches the ID of a tag
+ */
+const ensureReferenceCategoryValid = (item, _, __, context) => {
   // get the entire spec
-  let spec = context.resolved	
+  let spec = context.resolved
 
   // get the reference category
   let id = item['x-box-reference-category']
@@ -245,10 +245,10 @@ const ensureReferenceCategoryValid = (item, _, __, context) => {
   let match = !spec.tags.map((tag) => tag['x-box-reference-category']).includes(id)
 
   // ensure an ID was found and that it matches a caegory§
-  if (id && match) { 	
-    return [{ message: `Expected x-box-reference-category to match a similar ID in the root tags object (${item['x-box-reference-category']})`}] 	
-  }	
-}	
+  if (id && match) {
+    return [{ message: `Expected x-box-reference-category to match a similar ID in the root tags object (${item['x-box-reference-category']})`}]
+  }
+}
 
 /**
  * Ensure that the example matches the listed type
@@ -263,7 +263,7 @@ const ensureExampleMatchesType = ({ type, example, additionalProperties }) => {
     // if the example type is number, make it match for integer as well
     if (exampleTypes[0] === 'number') { exampleTypes.push('integer') }
 
-    // if there are additionalProperties, then this is a key:value pair 
+    // if there are additionalProperties, then this is a key:value pair
     // and the example should be an object
     if (additionalProperties) { type = 'object' }
 
@@ -362,7 +362,7 @@ module.exports = {
           field: 'example',
           function: 'truthy'
         }
-      }, 
+      },
       ensure_properties_description: {
         summary: 'Ensures every basic property has an description',
         given: '$..*.properties[*]',
@@ -448,7 +448,7 @@ module.exports = {
           field: 'x-box-resource-id',
           function: 'truthy'
         }
-      }, 
+      },
       ensure_every_resource_has_a_title: {
         summary: 'Ensures every endpoint has a title',
         given: '$.components.schemas[*]',
@@ -456,7 +456,7 @@ module.exports = {
           field: 'title',
           function: 'truthy'
         }
-      }, 
+      },
       ensure_every_tag_has_a_group_id: {
         summary: 'Ensures every endpoint belongs to a reference category',
         given: '$.tags[*]',
@@ -516,7 +516,7 @@ module.exports = {
           function: 'truthy'
         }
       }
-    } 
+    }
   },
 
   /**

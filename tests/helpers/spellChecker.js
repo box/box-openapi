@@ -9,7 +9,7 @@ const acceptedWords = fs.readFileSync('./v2.0/dictionary/accepted_words.yml')
 let words = yaml.load(acceptedWords)
 words.forEach(checker.add)
 
-/** 
+/**
  * Extracts all titles and descriptions from a specification
  */
 const extract = (item, corpus=[], parents=[]) => {
@@ -17,7 +17,7 @@ const extract = (item, corpus=[], parents=[]) => {
   Object.keys(item).forEach(key => {
     // Loop every item
     let value = item[key]
-    
+
     // Extract every description and title with String values and add them to the list
     if (['description', 'title'].includes(key) && typeof(value) === 'string') {
       value = value.replace(/\s+/g, ' ')

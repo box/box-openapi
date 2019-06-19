@@ -25,7 +25,9 @@ allOf:
         allOf:
           - $ref: '#/components/schemas/Item'
           - description: |-
-              The file or folder that access is granted to
+              The file or folder to which access is granted. The field is
+              `null` when the collaboration `status` is `pending`.
+        nullable: true
 
       accessible_by:
         allOf:
@@ -34,6 +36,7 @@ allOf:
 
       invite_email:
         type: string
+        nullable: true
         example: john@example.com
         description: |-
           The email address used to invite an unregistered collaborator, if
@@ -47,7 +50,7 @@ allOf:
           - viewer
           - previewer
           - uploader
-          - preview uploader
+          - previewer uploader
           - viewer uploader
           - co-owner
           - owner
@@ -56,9 +59,12 @@ allOf:
 
       expires_at:
         type: string
+        nullable: true
         format: date-time
         example: "2012-12-12T10:53:43-08:00"
-        description: When the collaboration will expire
+        description: |-
+          When the collaboration will expire, or `null` if no expiration
+          date is set.
 
       can_view_path:
         type: boolean
@@ -105,7 +111,63 @@ allOf:
         example: "2012-12-12T10:53:43-08:00"
         description: When the collaboration object was last modified
 
-      acceptance_requirements:
-        allOf:
-          - $ref: '#/components/schemas/TermsOfService--Mini'
-          - description: The terms of service for the collaboration
+      acceptance_requirements_status:
+        type: object
+        properties:
+          terms_of_service_requirement:
+            type: object
+            properties:
+              is_accepted:
+                type: boolean
+                nullable: true
+                example: true
+                description: |-
+                  Whether or not the terms of service have been accepted.  The
+                  field is `null` when there is no terms of service required.
+
+              terms_of_service:
+                allOf:
+                  - $ref: '#/components/schemas/TermsOfService--Mini'
+                  - description: |-
+                      The terms of service that must be accepted before the
+                      collaboration can be accepted. The field is `null` when
+                      there is no terms of service required.
+
+          strong_password_requirement:
+            type: object
+            properties:
+              enterprise_has_strong_password_required_for_external_users:
+                type: boolean
+                example: true
+                description: |-
+                  Whether or not the enterprise that owns the content requires
+                  a strong password to collaborate on the content.
+
+              user_has_strong_password:
+                type: boolean
+                nullable: true
+                example: true
+                description: |-
+                  Whether or not the user has a strong password set for their
+                  account. The field is `null` when a strong password is not
+                  required.
+
+          two_factor_authentication_requirement:
+            type: object
+            properties:
+              enterprise_has_two_factor_auth_enabled:
+                type: boolean
+                example: true
+                description: |-
+                  Whether or not the enterprise that owns the content requires
+                  two-factor authentication to be enabled in order to
+                  collaborate on the content.
+
+              user_has_two_factor_authentication_enabled:
+                type: boolean
+                nullable: true
+                example: true
+                description: |-
+                  Whether or not the user has two-factor authentication
+                  enabled. The field is `null` when two-factor
+                  authentication is not required.
