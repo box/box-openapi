@@ -1412,7 +1412,7 @@
       "post": {
         "operationId": "post_files_id_copy",
         "summary": "Copy a file",
-        "description": "Creates a copy of a file.",
+        "description": "Creates a copy of a file.\n\nDuring this operation, part of the file tree will be locked, mainly\nthe source folder and all of its descendants, as well as the destination\nfolder.\n\nFor the duration of the operation, no other move, copy, delete, or restore\noperation can performed on any of the locked folders. Most importantly, this\nmeans that the same folder can not be copied to two different parts of the\nfolder tree at the same time.",
         "tags": [
           "Files"
         ],
@@ -1484,6 +1484,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/File"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "* `operation_blocked_temporary`: Returned if either of the destination\n  or source folders is locked due to another move, copy, delete or\n  restore operation in process.\n\n  The operation can be retried at a later point.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
                 }
               }
             }
@@ -2653,11 +2663,11 @@
         "x-box-reference-category": "folders",
         "x-box-enable-explorer": true,
         "x-box-sanitized": true,
-        "description": "Retrieves details for a folder, including the first 100 entries\nin the folder.",
+        "description": "Retrieves details for a folder, including the first 100 entries\nin the folder.\n\nTo fetch more items within the folder, please use the\n[Get items in a folder](#get-folders-id-items) endpoint.",
         "parameters": [
           {
             "name": "folder_id",
-            "description": "The unique identifier of the folder.\n\nThe root folder of a Box account is\nalways represented by the ID `0`.",
+            "description": "The unique identifier that represent a folder.\n\nThe ID for any folder can be determined\nby visiting this folder in the web application\nand copying the ID from the URL. For example,\nfor the url `https://*.app.box.com/folder/123`\nthe `folder_id` is `123`.\n\nThe root folder of a Box account is\nalways represented by the ID `0`.",
             "example": "0",
             "in": "path",
             "required": true,
@@ -2683,11 +2693,21 @@
         ],
         "responses": {
           "200": {
-            "description": "Returns a folder, including the first 100 entries in the folder.\n\n[Some fields are optional](#folder) and need to be explicitly\nrequested using the [fields](#get_folders_id-fields)\nparameter.",
+            "description": "Returns a folder, including the first 100 entries in the folder.\n\nTo fetch more items within the folder, please use the\n[Get items in a folder](#get-folders-id-items) endpoint.\n\n[Some fields are optional](#folder) and need to be explicitly\nrequested using the [fields](#get_folders_id-fields)\nparameter.",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Folder"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Returned when the access token provided in the `Authorization` header\nis not recognized or not provided.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
                 }
               }
             }
@@ -2722,11 +2742,11 @@
           "Folders"
         ],
         "x-box-reference-category": "trashed_folders",
-        "description": "Restores an folder that has been moved to the trash.",
+        "description": "Restores a folder that has been moved to the trash.\n\nDuring this operation, part of the file tree will be locked, mainly\nthe source folder and all of its descendants, as well as the destination\nfolder.\n\nFor the duration of the operation, no other move, copy, delete, or restore\noperation can performed on any of the locked folders.",
         "parameters": [
           {
             "name": "folder_id",
-            "description": "The unique identifier of the folder.\n\nThe root folder of a Box account is\nalways represented by the ID `0`.",
+            "description": "The unique identifier that represent a folder.\n\nThe ID for any folder can be determined\nby visiting this folder in the web application\nand copying the ID from the URL. For example,\nfor the url `https://*.app.box.com/folder/123`\nthe `folder_id` is `123`.\n\nThe root folder of a Box account is\nalways represented by the ID `0`.",
             "example": "0",
             "in": "path",
             "required": true,
@@ -2807,7 +2827,7 @@
             }
           },
           "409": {
-            "description": "Returns an error if there is an folder with the same name\nin the folder the folder is being restored to.",
+            "description": "* Returned an error if there is a folder with the same name\n  in the destination folder.\n\n* `operation_blocked_temporary`: Returned if either of the destination\n  or source folders is locked due to another move, copy, delete or\n  restore operation in process.\n\n  The operation can be retried at a later point.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2821,7 +2841,7 @@
       "put": {
         "operationId": "put_folders_id",
         "summary": "Update a folder",
-        "description": "Updates a folder. This can be also be used to move the folder,\ncreate shared links, update collaborations, and more.",
+        "description": "Updates a folder. This can be also be used to move the folder,\ncreate shared links, update collaborations, and more.\n\nWhen moving a folder, part of the file tree will be locked, mainly\nthe source folder and all of its descendants, as well as the destination\nfolder.\n\nFor the duration of the move, no other move, copy, delete, or restore\noperation can performed on any of the locked folders.",
         "tags": [
           "Folders"
         ],
@@ -2829,7 +2849,7 @@
         "parameters": [
           {
             "name": "folder_id",
-            "description": "The unique identifier of the folder.\n\nThe root folder of a Box account is\nalways represented by the ID `0`.",
+            "description": "The unique identifier that represent a folder.\n\nThe ID for any folder can be determined\nby visiting this folder in the web application\nand copying the ID from the URL. For example,\nfor the url `https://*.app.box.com/folder/123`\nthe `folder_id` is `123`.\n\nThe root folder of a Box account is\nalways represented by the ID `0`.",
             "example": "0",
             "in": "path",
             "required": true,
@@ -2973,13 +2993,23 @@
                 }
               }
             }
+          },
+          "409": {
+            "description": "* `operation_blocked_temporary`: Returned if either of the destination\n  or source folders is locked due to another move, copy, delete or\n  restore operation in process.\n\n  The operation can be retried at a later point.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
           }
         }
       },
       "delete": {
         "operationId": "delete_folders_id",
         "summary": "Delete a folder",
-        "description": "Deletes a folder, either permanently or by moving it to\nthe trash.\n\nThe the enterprise settings determine whether the item will\nbe permanently deleted from Box or moved to the trash.",
+        "description": "Deletes a folder, either permanently or by moving it to\nthe trash.\n\nThe the enterprise settings determine whether the item will\nbe permanently deleted from Box or moved to the trash.\n\nDuring this operation, part of the file tree will be locked, mainly\nthe source folder and all of its descendants.\n\nFor the duration of the operation, no other move, copy, delete, or restore\noperation can performed on any of the locked folders.",
         "tags": [
           "Folders"
         ],
@@ -2987,7 +3017,7 @@
         "parameters": [
           {
             "name": "folder_id",
-            "description": "The unique identifier of the folder.\n\nThe root folder of a Box account is\nalways represented by the ID `0`.",
+            "description": "The unique identifier that represent a folder.\n\nThe ID for any folder can be determined\nby visiting this folder in the web application\nand copying the ID from the URL. For example,\nfor the url `https://*.app.box.com/folder/123`\nthe `folder_id` is `123`.\n\nThe root folder of a Box account is\nalways represented by the ID `0`.",
             "example": "0",
             "in": "path",
             "required": true,
@@ -3020,6 +3050,16 @@
         "responses": {
           "204": {
             "description": "Returns an empty response when the folder is successfully deleted\nor moved to the trash."
+          },
+          "409": {
+            "description": "* `operation_blocked_temporary`: Returned if either of the destination\n  or source folders is locked due to another move, copy, delete or\n  restore operation in process.\n\n  The operation can be retried at a later point.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
           }
         }
       }
@@ -3034,11 +3074,11 @@
         ],
         "x-box-reference-category": "folders",
         "x-box-sanitized": true,
-        "description": "Retrieves a page of files, folders, web links, and other items contained\nwithin a specified folder.\n\nTo request more information about the folder, use the\n[Retrieve a folder](#get-folders-id) endpoint.",
+        "description": "Retrieves a page of items in a folder. These items can be files,\nfolders, and web links.\n\nTo request more information about the folder itself, like its size,\nplease use the [Get a folder](#get-folders-id) endpoint instead.",
         "parameters": [
           {
             "name": "folder_id",
-            "description": "The unique identifier of the folder.\n\nThe root folder of a Box account is\nalways represented by the ID `0`.",
+            "description": "The unique identifier that represent a folder.\n\nThe ID for any folder can be determined\nby visiting this folder in the web application\nand copying the ID from the URL. For example,\nfor the url `https://*.app.box.com/folder/123`\nthe `folder_id` is `123`.\n\nThe root folder of a Box account is\nalways represented by the ID `0`.",
             "example": "0",
             "in": "path",
             "required": true,
@@ -3108,7 +3148,7 @@
           },
           {
             "name": "sort",
-            "description": "Defines the second attribute that items\nare sorted by.\n\nItems are always sorted by their `type` first, with\nfolders listed before files, and files listed\nbefore web links.\n\nThis parameter is not supported for marker-based pagination\non the root folder with ID `0`.",
+            "description": "Defines the **second** attribute by which items\nare sorted.\n\nItems are always sorted by their `type` first, with\nfolders listed before files, and files listed\nbefore web links.\n\nThis parameter is not supported for marker-based pagination\non the root folder (the folder with an ID of `0`).",
             "in": "query",
             "required": false,
             "example": 1000,
@@ -3139,11 +3179,21 @@
         ],
         "responses": {
           "200": {
-            "description": "A collection of items contained in the folder.",
+            "description": "Returns a collection of files, folders, and web links contained in a folder.",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Items"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Returned when the access token provided in the `Authorization` header\nis not recognized or not provided.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
                 }
               }
             }
@@ -3247,7 +3297,7 @@
         "parameters": [
           {
             "name": "folder_id",
-            "description": "The unique identifier of the folder.\n\nThe root folder of a Box account is\nalways represented by the ID `0`.",
+            "description": "The unique identifier that represent a folder.\n\nThe ID for any folder can be determined\nby visiting this folder in the web application\nand copying the ID from the URL. For example,\nfor the url `https://*.app.box.com/folder/123`\nthe `folder_id` is `123`.\n\nThe root folder of a Box account is\nalways represented by the ID `0`.",
             "example": "0",
             "in": "path",
             "required": true,
@@ -3281,7 +3331,7 @@
                 "properties": {
                   "name": {
                     "type": "string",
-                    "description": "An optional different name for the new folder",
+                    "description": "An optional new name for the copied folder.",
                     "example": "New Folder"
                   },
                   "parent": {
@@ -3326,7 +3376,7 @@
         "parameters": [
           {
             "name": "folder_id",
-            "description": "The unique identifier of the folder.\n\nThe root folder of a Box account is\nalways represented by the ID `0`.",
+            "description": "The unique identifier that represent a folder.\n\nThe ID for any folder can be determined\nby visiting this folder in the web application\nand copying the ID from the URL. For example,\nfor the url `https://*.app.box.com/folder/123`\nthe `folder_id` is `123`.\n\nThe root folder of a Box account is\nalways represented by the ID `0`.",
             "example": "0",
             "in": "path",
             "required": true,
@@ -3402,7 +3452,7 @@
         "parameters": [
           {
             "name": "folder_id",
-            "description": "The unique identifier of the folder.\n\nThe root folder of a Box account is\nalways represented by the ID `0`.",
+            "description": "The unique identifier that represent a folder.\n\nThe ID for any folder can be determined\nby visiting this folder in the web application\nand copying the ID from the URL. For example,\nfor the url `https://*.app.box.com/folder/123`\nthe `folder_id` is `123`.\n\nThe root folder of a Box account is\nalways represented by the ID `0`.",
             "example": "0",
             "in": "path",
             "required": true,
@@ -3461,7 +3511,7 @@
         "parameters": [
           {
             "name": "folder_id",
-            "description": "The unique identifier of the folder.\n\nThe root folder of a Box account is\nalways represented by the ID `0`.",
+            "description": "The unique identifier that represent a folder.\n\nThe ID for any folder can be determined\nby visiting this folder in the web application\nand copying the ID from the URL. For example,\nfor the url `https://*.app.box.com/folder/123`\nthe `folder_id` is `123`.\n\nThe root folder of a Box account is\nalways represented by the ID `0`.",
             "example": "0",
             "in": "path",
             "required": true,
@@ -3500,7 +3550,7 @@
         "parameters": [
           {
             "name": "folder_id",
-            "description": "The unique identifier of the folder.\n\nThe root folder of a Box account is\nalways represented by the ID `0`.",
+            "description": "The unique identifier that represent a folder.\n\nThe ID for any folder can be determined\nby visiting this folder in the web application\nand copying the ID from the URL. For example,\nfor the url `https://*.app.box.com/folder/123`\nthe `folder_id` is `123`.\n\nThe root folder of a Box account is\nalways represented by the ID `0`.",
             "example": "0",
             "in": "path",
             "required": true,
@@ -3536,7 +3586,7 @@
         "parameters": [
           {
             "name": "folder_id",
-            "description": "The unique identifier of the folder.\n\nThe root folder of a Box account is\nalways represented by the ID `0`.",
+            "description": "The unique identifier that represent a folder.\n\nThe ID for any folder can be determined\nby visiting this folder in the web application\nand copying the ID from the URL. For example,\nfor the url `https://*.app.box.com/folder/123`\nthe `folder_id` is `123`.\n\nThe root folder of a Box account is\nalways represented by the ID `0`.",
             "example": "0",
             "in": "path",
             "required": true,
@@ -3604,7 +3654,7 @@
         "parameters": [
           {
             "name": "folder_id",
-            "description": "The unique identifier of the folder.\n\nThe root folder of a Box account is\nalways represented by the ID `0`.",
+            "description": "The unique identifier that represent a folder.\n\nThe ID for any folder can be determined\nby visiting this folder in the web application\nand copying the ID from the URL. For example,\nfor the url `https://*.app.box.com/folder/123`\nthe `folder_id` is `123`.\n\nThe root folder of a Box account is\nalways represented by the ID `0`.",
             "example": "0",
             "in": "path",
             "required": true,
@@ -3688,7 +3738,7 @@
         "parameters": [
           {
             "name": "folder_id",
-            "description": "The unique identifier of the folder.\n\nThe root folder of a Box account is\nalways represented by the ID `0`.",
+            "description": "The unique identifier that represent a folder.\n\nThe ID for any folder can be determined\nby visiting this folder in the web application\nand copying the ID from the URL. For example,\nfor the url `https://*.app.box.com/folder/123`\nthe `folder_id` is `123`.\n\nThe root folder of a Box account is\nalways represented by the ID `0`.",
             "example": "0",
             "in": "path",
             "required": true,
@@ -3769,7 +3819,7 @@
         "parameters": [
           {
             "name": "folder_id",
-            "description": "The unique identifier of the folder.\n\nThe root folder of a Box account is\nalways represented by the ID `0`.",
+            "description": "The unique identifier that represent a folder.\n\nThe ID for any folder can be determined\nby visiting this folder in the web application\nand copying the ID from the URL. For example,\nfor the url `https://*.app.box.com/folder/123`\nthe `folder_id` is `123`.\n\nThe root folder of a Box account is\nalways represented by the ID `0`.",
             "example": "0",
             "in": "path",
             "required": true,
@@ -3887,7 +3937,7 @@
         "parameters": [
           {
             "name": "folder_id",
-            "description": "The unique identifier of the folder.\n\nThe root folder of a Box account is\nalways represented by the ID `0`.",
+            "description": "The unique identifier that represent a folder.\n\nThe ID for any folder can be determined\nby visiting this folder in the web application\nand copying the ID from the URL. For example,\nfor the url `https://*.app.box.com/folder/123`\nthe `folder_id` is `123`.\n\nThe root folder of a Box account is\nalways represented by the ID `0`.",
             "example": "0",
             "in": "path",
             "required": true,
@@ -3931,7 +3981,7 @@
         "parameters": [
           {
             "name": "folder_id",
-            "description": "The unique identifier of the folder.\n\nThe root folder of a Box account is\nalways represented by the ID `0`.",
+            "description": "The unique identifier that represent a folder.\n\nThe ID for any folder can be determined\nby visiting this folder in the web application\nand copying the ID from the URL. For example,\nfor the url `https://*.app.box.com/folder/123`\nthe `folder_id` is `123`.\n\nThe root folder of a Box account is\nalways represented by the ID `0`.",
             "example": "0",
             "in": "path",
             "required": true,
@@ -4005,7 +4055,7 @@
         "parameters": [
           {
             "name": "folder_id",
-            "description": "The unique identifier of the folder.\n\nThe root folder of a Box account is\nalways represented by the ID `0`.",
+            "description": "The unique identifier that represent a folder.\n\nThe ID for any folder can be determined\nby visiting this folder in the web application\nand copying the ID from the URL. For example,\nfor the url `https://*.app.box.com/folder/123`\nthe `folder_id` is `123`.\n\nThe root folder of a Box account is\nalways represented by the ID `0`.",
             "example": "0",
             "in": "path",
             "required": true,
@@ -6892,7 +6942,7 @@
           },
           {
             "name": "folder_id",
-            "description": "The unique identifier of the folder.\n\nThe root folder of a Box account is\nalways represented by the ID `0`.",
+            "description": "The unique identifier that represent a folder.\n\nThe ID for any folder can be determined\nby visiting this folder in the web application\nand copying the ID from the URL. For example,\nfor the url `https://*.app.box.com/folder/123`\nthe `folder_id` is `123`.\n\nThe root folder of a Box account is\nalways represented by the ID `0`.",
             "example": "0",
             "in": "path",
             "required": true,
@@ -17535,7 +17585,8 @@
     {
       "name": "Folders",
       "x-box-reference-category": "folders",
-      "x-box-reference-parent-category": "basics"
+      "x-box-reference-parent-category": "basics",
+      "x-box-reference-description": "Folders represent a collection of files, web links,\nand other folders. They are a key building block when\nusing Box Platform.\n\nFolders also contain metadata about itself, including\nwho owns the folder, when it was created, and when it was\nlast modified."
     },
     {
       "name": "Files",
