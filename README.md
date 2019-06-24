@@ -16,7 +16,7 @@ This specification is provided under the [Apache License 2.0](LICENSE) license.
 As this project is a work in progress no rights can be derived from 
 this specification and it may change without warning.
 
-Currently the only recognised downstream dependency of this specification is 
+Currently the only recognized downstream dependency of this specification is 
 the new Box developer documentation available on [Box.dev](https://box.dev).
 
 ## Development
