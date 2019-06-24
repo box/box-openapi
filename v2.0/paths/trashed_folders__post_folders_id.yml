@@ -10,7 +10,14 @@ tags:
 x-box-reference-category: trashed_folders
 
 description: |-
-  Restores an folder that has been moved to the trash.
+  Restores a folder that has been moved to the trash.
+
+  During this operation, part of the file tree will be locked, mainly
+  the source folder and all of its descendants, as well as the destination
+  folder.
+
+  For the duration of the operation, no other move, copy, delete, or restore
+  operation can performed on any of the locked folders.
 
 parameters:
   - $ref: '../attributes/folder_id.yml'
@@ -67,8 +74,14 @@ responses:
 
   409:
     description: |-
-      Returns an error if there is an folder with the same name
-      in the folder the folder is being restored to.
+      * Returned an error if there is a folder with the same name
+        in the destination folder.
+
+      * `operation_blocked_temporary`: Returned if either of the destination
+        or source folders is locked due to another move, copy, delete or
+        restore operation in process.
+
+        The operation can be retried at a later point.
     content:
       application/json:
         schema:

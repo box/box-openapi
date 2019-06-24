@@ -10,6 +10,11 @@ description: |-
   The the enterprise settings determine whether the item will
   be permanently deleted from Box or moved to the trash.
 
+  During this operation, part of the file tree will be locked, mainly
+  the source folder and all of its descendants.
+
+  For the duration of the operation, no other move, copy, delete, or restore
+  operation can performed on any of the locked folders.
 tags:
   - Folders
 
@@ -35,3 +40,15 @@ responses:
     description: |-
       Returns an empty response when the folder is successfully deleted
       or moved to the trash.
+
+  409:
+    description: |-
+      * `operation_blocked_temporary`: Returned if either of the destination
+        or source folders is locked due to another move, copy, delete or
+        restore operation in process.
+
+        The operation can be retried at a later point.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'

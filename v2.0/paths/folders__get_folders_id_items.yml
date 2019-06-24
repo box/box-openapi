@@ -11,11 +11,11 @@ x-box-reference-category: folders
 x-box-sanitized: true
 
 description: |-
-  Retrieves a page of files, folders, web links, and other items contained
-  within a specified folder.
+  Retrieves a page of items in a folder. These items can be files,
+  folders, and web links.
 
-  To request more information about the folder, use the
-  [Retrieve a folder](#get-folders-id) endpoint.
+  To request more information about the folder itself, like its size,
+  please use the [Get a folder](#get-folders-id) endpoint instead.
 
 parameters:
   - $ref: '../attributes/folder_id.yml'
@@ -27,15 +27,15 @@ parameters:
 
   - name: sort
     description: |-
-      Defines the second attribute that items
-      are sorted by.
+      Defines the **second** attribute by which items
+      are sorted.
 
       Items are always sorted by their `type` first, with
       folders listed before files, and files listed
       before web links.
 
       This parameter is not supported for marker-based pagination
-      on the root folder with ID `0`.
+      on the root folder (the folder with an ID of `0`).
     in: query
     required: false
     example: 1000
@@ -51,11 +51,22 @@ parameters:
 
 responses:
   200:
-    description: A collection of items contained in the folder.
+    description:
+      Returns a collection of files, folders, and web links
+      contained in a folder.
     content:
       application/json:
         schema:
           $ref: '#/components/schemas/Items'
+
+  403:
+    description: |-
+      Returned when the access token provided in the `Authorization` header
+      is not recognized or not provided.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
 
   404:
     description: |-

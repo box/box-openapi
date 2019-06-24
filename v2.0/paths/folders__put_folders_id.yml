@@ -7,6 +7,13 @@ description: |-
   Updates a folder. This can be also be used to move the folder,
   create shared links, update collaborations, and more.
 
+  When moving a folder, part of the file tree will be locked, mainly
+  the source folder and all of its descendants, as well as the destination
+  folder.
+
+  For the duration of the move, no other move, copy, delete, or restore
+  operation can performed on any of the locked folders.
+
 tags:
   - Folders
 
@@ -88,3 +95,15 @@ responses:
       application/json:
         schema:
           $ref: '#/components/schemas/Folder'
+
+  409:
+    description: |-
+      * `operation_blocked_temporary`: Returned if either of the destination
+        or source folders is locked due to another move, copy, delete or
+        restore operation in process.
+
+        The operation can be retried at a later point.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
