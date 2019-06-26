@@ -147,7 +147,7 @@ const ensureAllofOrder = (item) => {
   // if the item contains a reference, ensure the description is
   // the second item, unless the second option is a direct
   // list of properties
-  if (keys.includes("$ref") && keys[1] !== "description" && keys[1] !== "properties") {
+  if (keys.includes("$ref") && keys[1] !== "description" && keys[1] !== "properties" && keys[1] !== "x-box-reference-hide") {
     return [
       {
         message: `description or properties needs to be second item in allOf set`
