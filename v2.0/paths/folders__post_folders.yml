@@ -22,12 +22,23 @@ requestBody:
           name:
             type: string
             description: |-
-              The name for the new folder
+              The name for the new folder.
+
+              There are some restrictions to the file name. Names containing
+              non-printable ASCII characters, forward and backward slashes
+              (`/`, `\`), as well as names with trailing spaces are
+              prohibited.
+
+              Additionally, the special names `.` and `..` are
+              not allowed either.
             example: New Folder
+            maxLength: 255
+            minLength: 1
           parent:
             allOf:
               - $ref: "#/components/schemas/Parent"
-              - description: The parent folder
+              - description: |-
+                  The parent folder to create the new folder within.
 
 responses:
   201:
@@ -35,8 +46,46 @@ responses:
       Returns a folder object.
 
       [Some fields are optional](#folder) and need to be explicitly
-      requested using the [fields](#post-folders--request--fields) parameter.
+      requested using the [fields](##post_folders-fields) parameter.
     content:
       application/json:
         schema:
           $ref: '#/components/schemas/Folder'
+
+  400:
+    description: |-
+      Returns an error if some of the parameters are missing or
+      invalid.
+
+      * `bad_request` when a parameter is missing.
+      * `item_name_too_long` when the folder name is too long.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
+
+  404:
+    description: |-
+      Returns an error if the parent folder could not be found,
+      or the authenticated user does not have access to the parent
+      folder.
+
+      * `not_found` when the authenticated user does not have access
+        to the parent folder
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
+
+  409:
+    description: |-
+      Returns an error if a folder by this name already exists,
+      or of the parent folder is locked.
+
+      * `item_name_in_use` when a folder with the same name already
+        exists.
+
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
