@@ -8,6 +8,19 @@ description: |-
 
   The original folder will not be changed.
 
+  # Asynchronous copying
+
+  If the folder being copied contains up to 500 items the copy will
+  happen synchronously with the API call. The call will not return until
+  the copy operation has completed.
+
+  If the folder contains more than 500 items the copy operation will be
+  executed asynchronously and the API call will return directly yet before
+  the copy operation has completed. We currently have no API to check when
+  a copy operation has finished.
+
+  # Folder locking
+
   During this operation, part of the file tree will be locked, mainly
   the source folder and all of its descendants, as well as the destination
   folder.
@@ -17,14 +30,39 @@ description: |-
   means that the same folder can not be copied to two different parts of the
   folder tree at the same time.
 
+  # Metadata
+
+  If the destination folder has a metadata cascade policy attached to any of the
+  parent folders a metadata cascade operation will be kicked off asynchronously.
+
+  We currently have no API to check when this operation has finished.
+
 tags:
   - Folders
 
 x-box-reference-category: folders
 
 parameters:
-  - $ref: '../attributes/folder_id.yml'
+  - name: folder_id
+    description: |-
+      The unique identifier of the folder to copy.
+
+      The ID for any folder can be determined
+      by visiting this folder in the web application
+      and copying the ID from the URL. For example,
+      for the url `https://*.app.box.com/folder/123`
+      the `folder_id` is `123`.
+
+      The root folder with the ID `0` can not be copied.
+    example: "0"
+    in: path
+    required: true
+    schema:
+      type: string
+      nullable: false
+
   - $ref: '../attributes/fields.yml'
+
 
 requestBody:
   content:
@@ -37,12 +75,23 @@ requestBody:
             type: string
             description: |-
               An optional new name for the copied folder.
+
+              There are some restrictions to the file name. Names containing
+              non-printable ASCII characters, forward and backward slashes
+              (`/`, `\`), as well as names with trailing spaces are
+              prohibited.
+
+              Additionally, the special names `.` and `..` are
+              not allowed either.
             example: New Folder
+            maxLength: 255
+            minLength: 1
 
           parent:
             allOf:
               - $ref: "#/components/schemas/Parent"
-              - description: The parent folder
+              - description: |-
+                  The destination folder to copy the folder to.
 
 responses:
   201:
@@ -56,3 +105,50 @@ responses:
       application/json:
         schema:
           $ref: '#/components/schemas/Folder'
+
+  400:
+    description: |-
+      Returns an error if some of the parameters are missing or
+      invalid.
+
+      * `bad_request` when a parameter is missing.
+      * `item_name_too_long` when the new folder name is too long.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
+
+  404:
+    description: |-
+      Returns an error if either the source or destination folder
+      could not be found, or the authenticated user does not
+      have access to either folders.
+
+      * `not_found` when the authenticated user does not have access
+        to the parent folder
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
+
+  409:
+    description: |-
+      Returns an error if a folder by this name already exists
+      in the destination folder, or if the destination folder
+      is locked.
+
+      * `item_name_in_use` when a folder with the same name already
+        exists.
+
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
+
+  500:
+    description: |-
+      Returns an error when trying to copy the root folder.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
