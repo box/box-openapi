@@ -2752,7 +2752,7 @@
           "Folders"
         ],
         "x-box-reference-category": "trashed_folders",
-        "description": "Restores a folder that has been moved to the trash.\n\nDuring this operation, part of the file tree will be locked, mainly\nthe source folder and all of its descendants, as well as the destination\nfolder.\n\nFor the duration of the operation, no other move, copy, delete, or restore\noperation can performed on any of the locked folders.",
+        "description": "Restores a folder that has been moved to the trash.\n\n# Folder locking\n\nDuring this operation, part of the file tree will be locked, mainly\nthe source folder and all of its descendants, as well as the destination\nfolder.\n\nFor the duration of the operation, no other move, copy, delete, or restore\noperation can performed on any of the locked folders.",
         "parameters": [
           {
             "name": "folder_id",
@@ -2851,7 +2851,7 @@
       "put": {
         "operationId": "put_folders_id",
         "summary": "Update a folder",
-        "description": "Updates a folder. This can be also be used to move the folder,\ncreate shared links, update collaborations, and more.\n\nWhen moving a folder, part of the file tree will be locked, mainly\nthe source folder and all of its descendants, as well as the destination\nfolder.\n\nFor the duration of the move, no other move, copy, delete, or restore\noperation can performed on any of the locked folders.",
+        "description": "Updates a folder. This can be also be used to move the folder,\ncreate shared links, update collaborations, and more.\n\n# Folder locking\n\nWhen moving a folder, part of the file tree will be locked, mainly\nthe source folder and all of its descendants, as well as the destination\nfolder.\n\nFor the duration of the move, no other move, copy, delete, or restore\noperation can performed on any of the locked folders.",
         "tags": [
           "Folders"
         ],
@@ -3019,7 +3019,7 @@
       "delete": {
         "operationId": "delete_folders_id",
         "summary": "Delete a folder",
-        "description": "Deletes a folder, either permanently or by moving it to\nthe trash.\n\nThe the enterprise settings determine whether the item will\nbe permanently deleted from Box or moved to the trash.\n\nDuring this operation, part of the file tree will be locked, mainly\nthe source folder and all of its descendants.\n\nFor the duration of the operation, no other move, copy, delete, or restore\noperation can performed on any of the locked folders.",
+        "description": "Deletes a folder, either permanently or by moving it to\nthe trash.\n\n# Folder locking\n\nThe the enterprise settings determine whether the item will\nbe permanently deleted from Box or moved to the trash.\n\nDuring this operation, part of the file tree will be locked, mainly\nthe source folder and all of its descendants.\n\nFor the duration of the operation, no other move, copy, delete, or restore\noperation can performed on any of the locked folders.",
         "tags": [
           "Folders"
         ],
@@ -3263,8 +3263,10 @@
                 "properties": {
                   "name": {
                     "type": "string",
-                    "description": "The name for the new folder",
-                    "example": "New Folder"
+                    "description": "The name for the new folder.\n\nThere are some restrictions to the file name. Names containing\nnon-printable ASCII characters, forward and backward slashes\n(`/`, `\\`), as well as names with trailing spaces are\nprohibited.\n\nAdditionally, the special names `.` and `..` are\nnot allowed either.",
+                    "example": "New Folder",
+                    "maxLength": 255,
+                    "minLength": 1
                   },
                   "parent": {
                     "allOf": [
@@ -3272,7 +3274,7 @@
                         "$ref": "#/components/schemas/Parent"
                       },
                       {
-                        "description": "The parent folder"
+                        "description": "The parent folder to create the new folder within."
                       }
                     ]
                   }
@@ -3283,11 +3285,41 @@
         },
         "responses": {
           "201": {
-            "description": "Returns a folder object.\n\n[Some fields are optional](#folder) and need to be explicitly\nrequested using the [fields](#post-folders--request--fields) parameter.",
+            "description": "Returns a folder object.\n\n[Some fields are optional](#folder) and need to be explicitly\nrequested using the [fields](##post_folders-fields) parameter.",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Folder"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Returns an error if some of the parameters are missing or\ninvalid.\n\n* `bad_request` when a parameter is missing.\n* `item_name_too_long` when the folder name is too long.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Returns an error if the parent folder could not be found,\nor the authenticated user does not have access to the parent\nfolder.\n\n* `not_found` when the authenticated user does not have access\n  to the parent folder",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Returns an error if a folder by this name already exists,\nor if the parent folder is locked.\n\n* `item_name_in_use` when a folder with the same name already\n  exists.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
                 }
               }
             }
@@ -3299,7 +3331,7 @@
       "post": {
         "operationId": "post_folders_id_copy",
         "summary": "Copy a folder",
-        "description": "Creates a copy of a folder within a destination folder.\n\nThe original folder will not be changed.\n\nDuring this operation, part of the file tree will be locked, mainly\nthe source folder and all of its descendants, as well as the destination\nfolder.\n\nFor the duration of the operation, no other move, copy, delete, or restore\noperation can performed on any of the locked folders. Most importantly, this\nmeans that the same folder can not be copied to two different parts of the\nfolder tree at the same time.",
+        "description": "Creates a copy of a folder within a destination folder.\n\nThe original folder will not be changed.\n\n# Asynchronous copying\n\nIf the folder being copied contains up to 500 items the copy will\nhappen synchronously with the API call. The call will not return until\nthe copy operation has completed.\n\nIf the folder contains more than 500 items the copy operation will be\nexecuted asynchronously and the API call will return directly yet before\nthe copy operation has completed. We currently have no API to check when\na copy operation has finished.\n\n# Folder locking\n\nDuring this operation, part of the file tree will be locked, mainly\nthe source folder and all of its descendants, as well as the destination\nfolder.\n\nFor the duration of the operation, no other move, copy, delete, or restore\noperation can performed on any of the locked folders. Most importantly, this\nmeans that the same folder can not be copied to two different parts of the\nfolder tree at the same time.\n\n# Metadata\n\nIf the destination folder has a metadata cascade policy attached to any of the\nparent folders a metadata cascade operation will be kicked off asynchronously.\n\nWe currently have no API to check when this operation has finished.",
         "tags": [
           "Folders"
         ],
@@ -3307,7 +3339,7 @@
         "parameters": [
           {
             "name": "folder_id",
-            "description": "The unique identifier that represent a folder.\n\nThe ID for any folder can be determined\nby visiting this folder in the web application\nand copying the ID from the URL. For example,\nfor the url `https://*.app.box.com/folder/123`\nthe `folder_id` is `123`.\n\nThe root folder of a Box account is\nalways represented by the ID `0`.",
+            "description": "The unique identifier of the folder to copy.\n\nThe ID for any folder can be determined\nby visiting this folder in the web application\nand copying the ID from the URL. For example,\nfor the url `https://*.app.box.com/folder/123`\nthe `folder_id` is `123`.\n\nThe root folder with the ID `0` can not be copied.",
             "example": "0",
             "in": "path",
             "required": true,
@@ -3341,8 +3373,10 @@
                 "properties": {
                   "name": {
                     "type": "string",
-                    "description": "An optional new name for the copied folder.",
-                    "example": "New Folder"
+                    "description": "An optional new name for the copied folder.\n\nThere are some restrictions to the file name. Names containing\nnon-printable ASCII characters, forward and backward slashes\n(`/`, `\\`), as well as names with trailing spaces are\nprohibited.\n\nAdditionally, the special names `.` and `..` are\nnot allowed either.",
+                    "example": "New Folder",
+                    "maxLength": 255,
+                    "minLength": 1
                   },
                   "parent": {
                     "allOf": [
@@ -3350,7 +3384,7 @@
                         "$ref": "#/components/schemas/Parent"
                       },
                       {
-                        "description": "The parent folder"
+                        "description": "The destination folder to copy the folder to."
                       }
                     ]
                   }
@@ -3366,6 +3400,46 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Folder"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Returns an error if some of the parameters are missing or\ninvalid.\n\n* `bad_request` when a parameter is missing.\n* `item_name_too_long` when the new folder name is too long.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Returns an error if either the source or destination folder\ncould not be found, or the authenticated user does not\nhave access to either folders.\n\n* `not_found` when the authenticated user does not have access\n  to the parent folder",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Returns an error if a folder by this name already exists\nin the destination folder, or if the destination folder\nis locked.\n\n* `item_name_in_use` when a folder with the same name already\n  exists.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Returns an error when trying to copy the root folder.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
                 }
               }
             }
