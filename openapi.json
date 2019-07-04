@@ -3240,6 +3240,7 @@
           "Folders"
         ],
         "x-box-reference-category": "folders",
+        "x-box-enable-explorer": true,
         "description": "Creates a new empty folder within the specified parent folder.",
         "parameters": [
           {
@@ -3261,6 +3262,10 @@
           "content": {
             "application/json": {
               "schema": {
+                "required": [
+                  "name",
+                  "parent"
+                ],
                 "properties": {
                   "name": {
                     "type": "string",
@@ -3270,14 +3275,18 @@
                     "minLength": 1
                   },
                   "parent": {
-                    "allOf": [
-                      {
-                        "$ref": "#/components/schemas/Parent"
-                      },
-                      {
-                        "description": "The parent folder to create the new folder within."
+                    "type": "object",
+                    "description": "The parent folder to create the new folder within.",
+                    "required": [
+                      "id"
+                    ],
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "description": "The ID of parent folder",
+                        "example": "0"
                       }
-                    ]
+                    }
                   }
                 }
               }
@@ -3332,11 +3341,12 @@
       "post": {
         "operationId": "post_folders_id_copy",
         "summary": "Copy a folder",
+        "x-box-enable-explorer": true,
+        "x-box-reference-category": "folders",
         "description": "Creates a copy of a folder within a destination folder.\n\nThe original folder will not be changed.\n\n# Asynchronous copying\n\nIf the folder being copied contains up to 500 items the copy will\nhappen synchronously with the API call. The call will not return until\nthe copy operation has completed.\n\nIf the folder contains more than 500 items the copy operation will be\nexecuted asynchronously and the API call will return directly yet before\nthe copy operation has completed. We currently have no API to check when\na copy operation has finished.\n\n# Folder locking\n\nDuring this operation, part of the file tree will be locked, mainly\nthe source folder and all of its descendants, as well as the destination\nfolder.\n\nFor the duration of the operation, no other move, copy, delete, or restore\noperation can performed on any of the locked folders. Most importantly, this\nmeans that the same folder can not be copied to two different parts of the\nfolder tree at the same time.\n\n# Metadata\n\nIf the destination folder has a metadata cascade policy attached to any of the\nparent folders a metadata cascade operation will be kicked off asynchronously.\n\nWe currently have no API to check when this operation has finished.",
         "tags": [
           "Folders"
         ],
-        "x-box-reference-category": "folders",
         "parameters": [
           {
             "name": "folder_id",
@@ -3380,14 +3390,18 @@
                     "minLength": 1
                   },
                   "parent": {
-                    "allOf": [
-                      {
-                        "$ref": "#/components/schemas/Parent"
-                      },
-                      {
-                        "description": "The destination folder to copy the folder to."
+                    "type": "object",
+                    "description": "The destination folder to copy the folder to.",
+                    "required": [
+                      "id"
+                    ],
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "description": "The ID of parent folder",
+                        "example": "0"
                       }
-                    ]
+                    }
                   }
                 }
               }
