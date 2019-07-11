@@ -1,20 +1,23 @@
 // Initialize Spectral
 const { Spectral } = require('@stoplight/spectral')
-const { oas3Functions, rules } = require('@stoplight/spectral/rulesets/oas3')
+const { oas3Functions, rules } = require('@stoplight/spectral/dist/rulesets/oas3')
 const { boxFunctions, boxRules } = require('./rules')
 
-const spectral = new Spectral()
+module.exports = class Validator {
+  async spectral(spec) {
+    const spectral = new Spectral()
 
-// Remove the valid-example rule from Spectral's
-// rules, as we have our own
-rules().then(myOas3Rules => {
-  delete myOas3Rules['valid-example']
-  spectral.addRules(myOas3Rules)
-})
+    let oas3Rules = await rules()
 
-// Add default OAS3 rules and our own
-spectral.addFunctions(oas3Functions())
-spectral.addFunctions(boxFunctions())
-spectral.addRules(boxRules())
-
-module.exports = spectral
+    // Remove the valid-example rule from Spectral's
+    // rules, as we have our own
+    delete oas3Rules['valid-example']
+    await spectral.addFunctions(oas3Functions())
+    await spectral.addRules(oas3Rules)
+  
+    // Add default OAS3 rules and our own
+    await spectral.addFunctions(boxFunctions(spec))
+    await spectral.addRules(boxRules)
+    return spectral
+  }
+}

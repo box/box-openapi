@@ -88,7 +88,7 @@ const ensurePropertiesExample = (item, _, paths) => {
       item.allOf !== undefined ||
       // allow an explicit example value of null
       item.example === null ) { return }
-
+  
   // if the item does not have an example
   // throw an error
   if (!item.example) {
@@ -175,7 +175,7 @@ const ensureItemsOfBasicTypeOrReference = (items) => {
   let keys = Object.keys(items)
 
   // if we have more than one key, throw an error
-  if (keys.length > 1 && items.type !== 'string') {
+  if (keys.length > 1 && items.type !== 'string' && !keys.includes("x-box-resource-id")) {
     return [
       {
         message: `Items can only contain one entry, "type" or "$ref". Found ${keys}`
@@ -183,7 +183,7 @@ const ensureItemsOfBasicTypeOrReference = (items) => {
     ]
   }
   // if we have one key, ensure it's a type or a reference
-  else if (!keys.includes("type") && !keys.includes("$ref") && !keys.includes("oneOf")) {
+  else if (!keys.includes("type") && !keys.includes("$ref") && !keys.includes("oneOf") && !keys.includes("x-box-resource-id")) {
     return [
       {
         message: `Items should contain "type" or "$ref" key. Found ${keys}`
@@ -223,7 +223,7 @@ const ensureAllArraysHaveItemTypes = (param) => {
   // check if the param is an array
   if (param.type === 'array' &&
     // if the param has items, ensure it has a type or a ref
-    !(param.items && (param.items.type || param.items['$ref']))) {
+    !(param.items && (param.items.type || param.items['$ref'] || param.items['x-box-reference-id']))) {
     return [
       {
         message: `All properties and params of type array need an item type or $ref`
@@ -235,15 +235,13 @@ const ensureAllArraysHaveItemTypes = (param) => {
 /**
  * Check that every item x-box-reference-category matches the ID of a tag
  */
-const ensureReferenceCategoryValid = (item, _, __, context) => {
-  // get the entire spec
-  let spec = context.resolved
-
+const ensureReferenceCategoryValid = (spec) => (item) => {  
   // get the reference category
   let id = item['x-box-reference-category']
+
   // ensure the reference category matches a category in the tags of the specification
   let match = !spec.tags.map((tag) => tag['x-box-reference-category']).includes(id)
-
+  
   // ensure an ID was found and that it matches a caegory§
   if (id && match) {
     return [{ message: `Expected x-box-reference-category to match a similar ID in the root tags object (${item['x-box-reference-category']})`}]
@@ -315,6 +313,16 @@ const ensureResourcesAreObjects = (item) => {
         message: `Core resources must be objects. Found ${item.type} instead. Use attributes instead.`
       },
     ]
+  } 
+}
+
+const ensureExampleSimpleResponseType = (schema) => {
+  if (schema['x-box-resource-id'] === undefined && schema.type !== 'string') {
+    return [
+      {
+        message: `Responses need to be of a plain type or reference a resource`
+      },
+    ]
   }
 }
 
@@ -322,199 +330,196 @@ const ensureResourcesAreObjects = (item) => {
  * Define the list of rules
  */
 module.exports = {
-  boxRules: () => {
-    return {
-      ensure_operations_summary: {
-        summary: 'Ensures every endpoint has a summary',
-        given: '$.paths[*][*]',
-        then: {
-          field: 'summary',
-          function: 'truthy'
-        }
-      },
-      ensure_resource_description: {
-        summary: 'Ensures every resource has a description',
-        given: '$.components.schemas[*]',
-        then: {
-          field: 'description',
-          function: 'truthy'
-        }
-      },
-      ensure_parameters_description: {
-        summary: 'Ensures every parameter has a description',
-        given: '$..*.parameters[*]',
-        then: {
-          field: 'description',
-          function: 'truthy'
-        }
-      },
-      ensure_operation_id_format: {
-        summary: 'Ensure the operation ID matches the path and verb',
-        given: '$.paths[*][*]',
-        then: {
-          function: 'validateOperationIdFormat'
-        }
-      },
-      ensure_parameters_example: {
-        summary: 'Ensures every parameter has an example',
-        given: '$..*.parameters[*]',
-        then: {
-          field: 'example',
-          function: 'truthy'
-        }
-      },
-      ensure_properties_description: {
-        summary: 'Ensures every basic property has an description',
-        given: '$..*.properties[*]',
-        then: {
-          function: 'ensureSimpleDescription'
-        }
-      },
-      ensure_properties_example: {
-        summary: 'Ensures every property has an example',
-        given: '$..*.properties[*]',
-        then: {
-          function: 'ensurePropertiesExample'
-        }
-      },
-      ensure_additional_properties_example: {
-        summary: 'Ensures every property has an example',
-        given: '$..*.additionalProperties',
-        then: {
-          function: 'ensurePropertiesExample'
-        }
-      },
-      ensure_references_resolved: {
-        summary: 'Ensures every file reference has been resolved',
-        given: '$..*',
-        then: {
-          function: 'ensureReferencesResolved'
-        }
-      },
-      ensure_references_exist: {
-        summary: 'Ensures every local reference exists',
-        given: '$..*',
-        then: {
-          function: 'ensureLocalReferencesExist'
-        }
-      },
-      ensure_allof_order: {
-        summary: 'Ensures references are first in an allOf situation',
-        given: '$..*.allOf',
-        then: {
-          function: 'ensureAllofOrder'
-        }
-      },
-      ensure_local_refernces_within_allof: {
-        summary: 'Ensures local references are always in an allOf',
-        given: '$.paths..*.properties..*',
-        then: {
-          function: 'ensureLocalReferencesInAllOf'
-        }
-      },
-      ensure_items_are_basic_or_reference: {
-        summary: 'Ensures items are either basic types or references',
-        given: '$..*.items',
-        then: {
-          function: 'ensureItemsOfBasicTypeOrReference'
-        }
-      },
-      ensure_arrays_have_item_type: {
-        summary: 'Ensures all arrays have an item type',
-        given: '$..*.properties[*]',
-        then: {
-          function: 'ensureAllArraysHaveItemTypes'
-        }
-      },
-      ensure_arrays_have_item_type: {
-        summary: 'Ensures all arrays have an item type',
-        given: '$..*.parameters[*]',
-        then: {
-          function: 'ensureAllArraysHaveItemTypes'
-        }
-      },
-      ensure_every_endpoint_has_a_reference_group: {
-        summary: 'Ensures every endpoint belongs to a reference category',
-        given: '$.paths[*][*]',
-        then: {
-          field: 'x-box-reference-category',
-          function: 'truthy'
-        }
-      },
-      ensure_every_resource_has_a_resource_id: {
-        summary: 'Ensures every endpoint belongs to a reference category',
-        given: '$.components.schemas[*]',
-        then: {
-          field: 'x-box-resource-id',
-          function: 'truthy'
-        }
-      },
-      ensure_every_resource_has_a_title: {
-        summary: 'Ensures every endpoint has a title',
-        given: '$.components.schemas[*]',
-        then: {
-          field: 'title',
-          function: 'truthy'
-        }
-      },
-      ensure_every_tag_has_a_group_id: {
-        summary: 'Ensures every endpoint belongs to a reference category',
-        given: '$.tags[*]',
-        then: {
-          field: 'x-box-reference-category',
-          function: 'truthy'
-        }
-      },
-      ensure_path_reference_categories_exists: {
-        summary: 'Ensures a endpoint reference category ID is defined in the tags',
-        given: '$.paths[*][*]',
-        then: {
-          function: 'ensureReferenceCategoryValid'
-        }
-      },
-      ensure_resource_reference_categories_exists: {
-        summary: 'Ensures a resource reference category ID can be found in the tags',
-        given: '$.components.schemas[*]',
-        then: {
-          function: 'ensureReferenceCategoryValid',
-        }
-      },
-      ensure_property_examples_match_type: {
-        summary: 'Ensures a property\'s example matches its type',
-        given: '$..*.properties[*]',
-        then: {
-          function: 'ensureExampleMatchesType'
-        }
-      },
-      ensure_additional_property_examples_match_type: {
-        summary: 'Ensures a property\'s example matches its type',
-        given: '$..*.additionalProperties[*]',
-        then: {
-          function: 'ensureExampleMatchesType'
-        }
-      },
-      ensure_only_simple_responses: {
-        summary: 'Ensures response is either blank or references to an object',
-        given: '$.paths[*][*].responses[*].content[*].schema',
-        then: {
-          field: 'properties',
-          function: 'falsy'
-        }
-      },
-      ensure_resource_id_unique: {
-        summary: 'Ensures a property\'s example matches its type',
-        given: '$.components.schemas',
-        then: {
-          function: 'ensureResourceIdUnique'
-        }
-      },
-      ensure_response_descriptions: {
-        summary: 'Ensures responses have descriptions',
-        given: '$.paths[*][*].responses[*]',
-        then: {
-          field: 'description',
-          function: 'truthy'
-        }
+  boxRules: {
+    ensure_operations_summary: {
+      summary: 'Ensures every endpoint has a summary',
+      given: '$.paths[*][*]',
+      then: {
+        field: 'summary',
+        function: 'truthy'
+      }
+    },
+    ensure_resource_description: {
+      summary: 'Ensures every resource has a description',
+      given: '$.components.schemas[*]',
+      then: {
+        field: 'description',
+        function: 'truthy'
+      }
+    },
+    ensure_parameters_description: {
+      summary: 'Ensures every parameter has a description',
+      given: '$..*.parameters[*]',
+      then: {
+        field: 'description',
+        function: 'truthy'
+      }
+    },
+    ensure_operation_id_format: {
+      summary: 'Ensure the operation ID matches the path and verb',
+      given: '$.paths[*][*]',
+      then: {
+        function: 'validateOperationIdFormat'
+      }
+    },
+    ensure_parameters_example: {
+      summary: 'Ensures every parameter has an example',
+      given: '$..*.parameters[*]',
+      then: {
+        field: 'example',
+        function: 'truthy'
+      }
+    },
+    ensure_properties_description: {
+      summary: 'Ensures every basic property has an description',
+      given: '$..*.properties[*]',
+      then: {
+        function: 'ensureSimpleDescription'
+      }
+    },
+    ensure_properties_example: {
+      summary: 'Ensures every property has an example',
+      given: '$..*.properties[*]',
+      then: {
+        function: 'ensurePropertiesExample'
+      }
+    },
+    ensure_additional_properties_example: {
+      summary: 'Ensures every property has an example',
+      given: '$..*.additionalProperties',
+      then: {
+        function: 'ensurePropertiesExample'
+      }
+    },
+    ensure_references_resolved: {
+      summary: 'Ensures every file reference has been resolved',
+      given: '$..*',
+      then: {
+        function: 'ensureReferencesResolved'
+      }
+    },
+    ensure_references_exist: {
+      summary: 'Ensures every local reference exists',
+      given: '$..*',
+      then: {
+        function: 'ensureLocalReferencesExist'
+      }
+    },
+    ensure_allof_order: {
+      summary: 'Ensures references are first in an allOf situation',
+      given: '$..*.allOf',
+      then: {
+        function: 'ensureAllofOrder'
+      }
+    },
+    ensure_local_refernces_within_allof: {
+      summary: 'Ensures local references are always in an allOf',
+      given: '$.paths..*.properties..*',
+      then: {
+        function: 'ensureLocalReferencesInAllOf'
+      }
+    },
+    ensure_items_are_basic_or_reference: {
+      summary: 'Ensures items are either basic types or references',
+      given: '$..*.items',
+      then: {
+        function: 'ensureItemsOfBasicTypeOrReference'
+      }
+    },
+    ensure_arrays_have_item_type: {
+      summary: 'Ensures all arrays have an item type',
+      given: '$..*.properties[*]',
+      then: {
+        function: 'ensureAllArraysHaveItemTypes'
+      }
+    },
+    ensure_arrays_have_item_type: {
+      summary: 'Ensures all arrays have an item type',
+      given: '$..*.parameters[*]',
+      then: {
+        function: 'ensureAllArraysHaveItemTypes'
+      }
+    },
+    ensure_every_endpoint_has_a_reference_group: {
+      summary: 'Ensures every endpoint belongs to a reference category',
+      given: '$.paths[*][*]',
+      then: {
+        field: 'x-box-reference-category',
+        function: 'truthy'
+      }
+    },
+    ensure_every_resource_has_a_resource_id: {
+      summary: 'Ensures every endpoint belongs to a reference category',
+      given: '$.components.schemas[*]',
+      then: {
+        field: 'x-box-resource-id',
+        function: 'truthy'
+      }
+    },
+    ensure_every_resource_has_a_title: {
+      summary: 'Ensures every endpoint has a title',
+      given: '$.components.schemas[*]',
+      then: {
+        field: 'title',
+        function: 'truthy'
+      }
+    },
+    ensure_every_tag_has_a_group_id: {
+      summary: 'Ensures every endpoint belongs to a reference category',
+      given: '$.tags[*]',
+      then: {
+        field: 'x-box-reference-category',
+        function: 'truthy'
+      }
+    },
+    ensure_path_reference_categories_exists: {
+      summary: 'Ensures a endpoint reference category ID is defined in the tags',
+      given: '$.paths[*][*]',
+      then: {
+        function: 'ensureReferenceCategoryValid'
+      }
+    },
+    ensure_resource_reference_categories_exists: {
+      summary: 'Ensures a resource reference category ID can be found in the tags',
+      given: '$.components.schemas[*]',
+      then: {
+        function: 'ensureReferenceCategoryValid',
+      }
+    },
+    ensure_property_examples_match_type: {
+      summary: 'Ensures a property\'s example matches its type',
+      given: '$..*.properties[*]',
+      then: {
+        function: 'ensureExampleMatchesType'
+      }
+    },
+    ensure_additional_property_examples_match_type: {
+      summary: 'Ensures a property\'s example matches its type',
+      given: '$..*.additionalProperties[*]',
+      then: {
+        function: 'ensureExampleMatchesType'
+      }
+    },
+    ensure_only_simple_responses: {
+      summary: 'Ensures response is either blank or references to an object',
+      given: '$.paths[*][*].responses[*].content[*].schema',
+      then: {
+        function: 'ensureExampleSimpleResponseType'
+      }
+    },
+    ensure_resource_id_unique: {
+      summary: 'Ensures a property\'s example matches its type',
+      given: '$.components.schemas',
+      then: {
+        function: 'ensureResourceIdUnique'
+      }
+    },
+    ensure_response_descriptions: {
+      summary: 'Ensures responses have descriptions',
+      given: '$.paths[*][*].responses[*]',
+      then: {
+        field: 'description',
+        function: 'truthy'
       }
     }
   },
@@ -522,7 +527,7 @@ module.exports = {
   /**
    * Export the custom functions
    */
-  boxFunctions: () => {
+  boxFunctions: (spec) => {
     return {
       validateOperationIdFormat: validateOperationIdFormat,
       ensureReferencesResolved: ensureReferencesResolved,
@@ -533,11 +538,12 @@ module.exports = {
       ensureSimpleDescription: ensureSimpleDescription,
       ensureLocalReferencesInAllOf: ensureLocalReferencesInAllOf,
       ensureAllArraysHaveItemTypes: ensureAllArraysHaveItemTypes,
-      ensureReferenceCategoryValid: ensureReferenceCategoryValid,
+      ensureReferenceCategoryValid: ensureReferenceCategoryValid(spec),
       ensureExampleMatchesType: ensureExampleMatchesType,
       falsy: falsy,
       ensureResourceIdUnique: ensureResourceIdUnique,
-      ensureResourcesAreObjects: ensureResourcesAreObjects
+      ensureResourcesAreObjects: ensureResourcesAreObjects,
+      ensureExampleSimpleResponseType: ensureExampleSimpleResponseType
     }
   }
 }

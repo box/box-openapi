@@ -2,7 +2,7 @@
 let colors = require('colors/safe')
 
 // Import the validator and spell checker
-const spectral = require('./validator')
+const Validator = require('./validator')
 
 /**
  * Extends Jest with a spellchecker and a 
@@ -46,6 +46,7 @@ expect.extend({
   // Extend expect to use Spectral to validate the spec files
   async toBeValidSpecification(content) {
     // Use spectral to validate the content
+    const spectral = await (new Validator()).spectral(content)
     const results = await spectral.run(content, { resolvedTarget: content })
 
     // Map the result to a user-friendly message
