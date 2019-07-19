@@ -1,6 +1,5 @@
 const fs = require('fs-extra')
 const { URL } = require('url')
-const { Resolver } = require('@stoplight/json-ref-resolver')
 const jp = require('jsonpath')
 
 class SwaggerConverter {
@@ -13,8 +12,6 @@ class SwaggerConverter {
     if (!fs.existsSync(openapiFilename)) { return }
 
     let openapi = JSON.parse(fs.readFileSync(openapiFilename))
-    let resolved = await new Resolver().resolve(openapi)
-    openapi = resolved.result
 
     if (!fs.existsSync(`${folder}`)) { fs.mkdirpSync(`${folder}`)}
 
@@ -41,7 +38,7 @@ class Swagger {
     this.serverUrl = baseUrl
     this.defaultServerUrl = this.openapi.servers[0].url
 
-    return {
+    let swagger = {
       swagger: '2.0',
       info: this.openapi.info,
       host:  new URL(this.serverUrl).host,
@@ -53,6 +50,24 @@ class Swagger {
       securityDefinitions: this.securityDefinitions(),
       security: this.openapi.security
     }
+
+    swagger.definitions = {}
+    while (Object.keys(swagger.definitions).length <  Object.keys(this.resolveReferences(swagger)).length) {
+      swagger.definitions = this.resolveReferences(swagger)
+    }
+
+    this.deleteOneOf(swagger)
+    this.deleteAllAttributes(swagger, 'example')
+    this.deleteAllAttributes(swagger, 'explode')
+    this.deleteAllAttributes(swagger, 'nullable')
+    this.deleteAllAttributes(swagger, 'x-box-resource-id')
+    this.deleteAllAttributes(swagger, 'x-box-field-variant')
+    this.deleteAllAttributes(swagger, 'x-box-reference-category')
+    this.deleteAllAttributes(swagger, 'x-box-reference-hide')
+    this.deleteAllAttributes(swagger, 'x-box-sanitized')
+    this.deleteAllAttributes(swagger, 'x-box-has-field-variants')
+
+    return swagger
   }
 
   securityDefinitions() {
@@ -71,7 +86,6 @@ class Swagger {
     let paths = { ...this.openapi.paths }
     paths = this.filterPaths(paths)
     paths = this.mapPaths(paths)
-    this.deleteOneOf(paths)
     this.simplifyQueryItems(paths)
     return paths
   }
@@ -115,10 +129,6 @@ class Swagger {
     endpoint = this.removeVendorAttributes(endpoint)
     endpoint.parameters = this.parameters(endpoint)
     endpoint.responses = this.responses(endpoint.responses)
-
-    this.deleteAllAttributes(endpoint, 'example')
-    this.deleteAllAttributes(endpoint, 'explode')
-    this.deleteAllAttributes(endpoint, 'nullable')
 
     return endpoint
   }
@@ -223,7 +233,7 @@ class Swagger {
   } 
 
   deleteAllAttributes(object, key) {
-    const paths = jp.paths(object, `$..${key}`)
+    const paths = jp.paths(object, `$..["${key}"]`)
     paths.forEach(path => {
       path.pop()
       jp.apply(object, jp.stringify(path), (value) => {
@@ -254,6 +264,23 @@ class Swagger {
         return value
       })
     })
+  }
+
+  resolveReferences(swagger) {
+    const paths = jp.paths(swagger, `$..["$ref"]`)
+
+    paths.forEach(path => {
+      path.pop()
+      jp.apply(swagger, jp.stringify(path), (value) => {
+        let key = value['$ref'].split('schemas/')[1]
+        if (!key) { return value }
+        swagger.definitions[key] = this.openapi.components.schemas[key]
+        value['$ref'] = value['$ref'].replace('#/components/schemas/', '#/definitions/')
+        return value
+      })
+    })
+
+    return swagger.definitions
   }
 }
 
