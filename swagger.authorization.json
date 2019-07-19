@@ -40,297 +40,17 @@
           "200": {
             "description": "Returns a new Access Token that can be used to make authenticated\nAPI calls by passing along the token in a authorization header as\nfollows `Authorization: Bearer <Token>`.",
             "schema": {
-              "title": "Access Token",
-              "x-box-resource-id": "access_token",
-              "description": "A token that can be used to make authenticated API calls.",
-              "x-box-reference-category": "authorization",
-              "type": "object",
-              "allOf": [
-                {
-                  "title": "Access Token Mini",
-                  "x-box-resource-id": "access_token--mini",
-                  "description": "The basics of an access token",
-                  "x-box-reference-hide": true,
-                  "type": "object",
-                  "properties": {
-                    "access_token": {
-                      "type": "string",
-                      "format": "token",
-                      "description": "The requested access token."
-                    },
-                    "expires_in": {
-                      "type": "integer",
-                      "format": "int64",
-                      "description": "The time in seconds in seconds by which this token will expire."
-                    },
-                    "token_type": {
-                      "type": "string",
-                      "enum": [
-                        "bearer"
-                      ],
-                      "description": "The type of access token returned."
-                    },
-                    "restricted_to": {
-                      "type": "array",
-                      "description": "The permissions that this access token permits,\nproviding a list of resources (files, folders, etc)\nand the scopes permitted for each of those resources.",
-                      "items": {
-                        "title": "File Scope",
-                        "x-box-resource-id": "file_scope",
-                        "description": "A relation between a file and the scopes for which the file can be accessed",
-                        "properties": {
-                          "scope": {
-                            "type": "string",
-                            "description": "The file scopes for the file access",
-                            "enum": [
-                              "annotation_edit",
-                              "annotation_view_all",
-                              "annotation_view_self",
-                              "base_explorer",
-                              "base_picker",
-                              "base_preview",
-                              "base_upload",
-                              "item_delete",
-                              "item_download",
-                              "item_preview",
-                              "item_rename",
-                              "item_share",
-                              null
-                            ]
-                          },
-                          "object": {
-                            "allOf": [
-                              {
-                                "title": "File (Mini)",
-                                "x-box-resource-id": "file--mini",
-                                "x-box-reference-category": null,
-                                "description": "A mini representation of a file, used when\nnested under another resource.",
-                                "x-box-reference-hide": true,
-                                "allOf": [
-                                  {
-                                    "title": "Item",
-                                    "x-box-resource-id": "item_reference",
-                                    "x-box-reference-category": "shared_links",
-                                    "description": "A generic mini representation of a file, folder, user or enterprise",
-                                    "allOf": [
-                                      {
-                                        "title": "Reference",
-                                        "x-box-resource-id": "reference",
-                                        "x-box-sanitized": true,
-                                        "description": "The bare basic reference for an object",
-                                        "properties": {
-                                          "id": {
-                                            "type": "string",
-                                            "description": "The unique identifier for this object"
-                                          }
-                                        }
-                                      },
-                                      {
-                                        "properties": {
-                                          "type": {
-                                            "description": "The type of this item",
-                                            "type": "string"
-                                          },
-                                          "sequence_id": {
-                                            "type": "string",
-                                            "description": "A unique ID for use with the `/events` endpoint. May be `null` for\nsome items, such as root or trash."
-                                          },
-                                          "etag": {
-                                            "type": "string",
-                                            "description": "The entity tag of this item. Used with If-Match headers.\nMay be `null` for some folders such as root or trash."
-                                          },
-                                          "name": {
-                                            "type": "string",
-                                            "description": "The name of the item."
-                                          }
-                                        }
-                                      }
-                                    ]
-                                  },
-                                  {
-                                    "properties": {
-                                      "type": {
-                                        "type": "string",
-                                        "description": "`file`",
-                                        "enum": [
-                                          "file"
-                                        ]
-                                      },
-                                      "sequence_id": {
-                                        "type": "string",
-                                        "description": "A unique ID for use with the /events endpoint"
-                                      },
-                                      "etag": {
-                                        "type": "string",
-                                        "description": "The entity tag of this file object. Used with `If-Match`\nheaders."
-                                      },
-                                      "name": {
-                                        "type": "string",
-                                        "description": "The name of the file"
-                                      }
-                                    }
-                                  }
-                                ]
-                              },
-                              {
-                                "description": "The file for which the file can be accessed"
-                              }
-                            ]
-                          }
-                        }
-                      }
-                    }
-                  }
-                },
-                {
-                  "x-box-reference-hide": false
-                },
-                {
-                  "properties": {
-                    "refresh_token": {
-                      "type": "string",
-                      "format": "token",
-                      "description": "The refresh token for this access token, which can be used\nto request a new access token when the current one expires."
-                    },
-                    "issued_token_type": {
-                      "type": "string",
-                      "format": "urn",
-                      "enum": [
-                        "urn:ietf:params:oauth:token-type:access_token"
-                      ],
-                      "description": "The type of downscoped access token returned. This is only\nreturned if an access token has been downscoped."
-                    }
-                  }
-                }
-              ]
+              "$ref": "#/definitions/AccessToken"
             }
           },
           "400": {
             "description": "An authentication error.",
             "schema": {
-              "title": "OAuth2 Error",
-              "x-box-resource-id": "oauth2_error",
-              "x-box-reference-category": "authorization",
-              "description": "An OAuth2 error",
-              "properties": {
-                "error": {
-                  "type": "string",
-                  "description": "The type of the error returned."
-                },
-                "error_description": {
-                  "type": "string",
-                  "description": "The type of the error returned."
-                }
-              }
+              "$ref": "#/definitions/OAuth2Error"
             }
           }
         },
-        "parameters": [
-          {
-            "type": "string",
-            "format": "urn",
-            "description": "The type of request being made, either using a client-side obtained\nauthorization code, a refresh token, a JWT assertion, or another access\ntoken for the purpose of downscoping a token.",
-            "enum": [
-              "authorization_code",
-              "refresh_token",
-              "urn:ietf:params:oauth:grant-type:jwt-bearer",
-              "urn:ietf:params:oauth:grant-type:token-exchange"
-            ],
-            "name": "grant_type",
-            "in": "formData",
-            "required": true
-          },
-          {
-            "type": "string",
-            "description": "The Client ID of the application requesting an access token.\n\nUsed in combination with `authorization_code` or\n`urn:ietf:params:oauth:grant-type:jwt-bearer` as the `grant_type`.",
-            "name": "client_id",
-            "in": "formData",
-            "required": false
-          },
-          {
-            "type": "string",
-            "description": "The client secret of the application requesting an access token.\n\nUsed in combination with `authorization_code` or\n`urn:ietf:params:oauth:grant-type:jwt-bearer` as the `grant_type`.",
-            "name": "client_secret",
-            "in": "formData",
-            "required": false
-          },
-          {
-            "type": "string",
-            "format": "token",
-            "description": "The client-side authorization code passed to your application by\nBox in the browser redirect after the user has successfully\ngranted your application permission to make API calls on their\nbehalf.\n\nUsed in combination with `authorization_code` as the `grant_type`.",
-            "name": "code",
-            "in": "formData",
-            "required": false
-          },
-          {
-            "type": "string",
-            "format": "token",
-            "description": "A refresh token used to get a new access token with.\n\nUsed in combination with `refresh_token` as the `grant_type`.",
-            "name": "refresh_token",
-            "in": "formData",
-            "required": false
-          },
-          {
-            "type": "string",
-            "format": "jwt",
-            "description": "A JWT assertion for which to request a new access token.\n\nUsed in combination with `urn:ietf:params:oauth:grant-type:jwt-bearer`\nas the `grant_type`.",
-            "name": "assertion",
-            "in": "formData",
-            "required": false
-          },
-          {
-            "type": "string",
-            "format": "token",
-            "description": "The token to exchange for a downscoped token. This can be a regular\naccess token, a JWT assertion, or an app token.\n\nUsed in combination with `urn:ietf:params:oauth:grant-type:token-exchange`\nas the `grant_type`.",
-            "name": "subject_token",
-            "in": "formData",
-            "required": false
-          },
-          {
-            "type": "string",
-            "description": "The type of `subject_token` passed in.\n\nUsed in combination with `urn:ietf:params:oauth:grant-type:token-exchange`\nas the `grant_type`.",
-            "enum": [
-              "urn:ietf:params:oauth:token-type:access_token"
-            ],
-            "name": "subject_token_type",
-            "in": "formData",
-            "required": false
-          },
-          {
-            "type": "string",
-            "format": "token",
-            "description": "The actor token used to create an annotator token.\nThis is a JWT assertion.\n\nUsed in combination with `urn:ietf:params:oauth:grant-type:token-exchange`\nas the `grant_type`.",
-            "name": "actor_token",
-            "in": "formData",
-            "required": false
-          },
-          {
-            "type": "string",
-            "format": "urn",
-            "description": "The type of `actor_token` passed in.\n\nUsed in combination with `urn:ietf:params:oauth:grant-type:token-exchange`\nas the `grant_type`.",
-            "enum": [
-              "urn:ietf:params:oauth:token-type:id_token"
-            ],
-            "name": "actor_token_type",
-            "in": "formData",
-            "required": false
-          },
-          {
-            "type": "string",
-            "format": "space_delimited_list",
-            "description": "The space-delimited list of scopes that you want apply to the\nnew access token.\n\nThe `subject_token` will need to have all of these scopes or\nthe call will error with **401 Unauthorized**.",
-            "name": "scope",
-            "in": "formData",
-            "required": false
-          },
-          {
-            "type": "string",
-            "format": "url",
-            "description": "Full URL for the file that the token should be generated for.",
-            "name": "resource",
-            "in": "formData",
-            "required": false
-          }
-        ],
+        "parameters": [],
         "consumes": [
           "application/x-www-form-urlencoded"
         ]
@@ -352,47 +72,11 @@
           "400": {
             "description": "An authentication error.",
             "schema": {
-              "title": "OAuth2 Error",
-              "x-box-resource-id": "oauth2_error",
-              "x-box-reference-category": "authorization",
-              "description": "An OAuth2 error",
-              "properties": {
-                "error": {
-                  "type": "string",
-                  "description": "The type of the error returned."
-                },
-                "error_description": {
-                  "type": "string",
-                  "description": "The type of the error returned."
-                }
-              }
+              "$ref": "#/definitions/OAuth2Error"
             }
           }
         },
-        "parameters": [
-          {
-            "type": "string",
-            "description": "The Client ID of the application requesting to revoke the\naccess token.",
-            "name": "client_id",
-            "in": "formData",
-            "required": false
-          },
-          {
-            "type": "string",
-            "description": "The client secret of the application requesting to revoke\nan access token.",
-            "name": "client_secret",
-            "in": "formData",
-            "required": false
-          },
-          {
-            "type": "string",
-            "format": "token",
-            "description": "The access token to revoke.",
-            "name": "token",
-            "in": "formData",
-            "required": false
-          }
-        ],
+        "parameters": [],
         "consumes": [
           "application/x-www-form-urlencoded"
         ]
@@ -422,5 +106,186 @@
     {
       "OAuth2Security": []
     }
-  ]
+  ],
+  "definitions": {
+    "AccessToken": {
+      "title": "Access Token",
+      "description": "A token that can be used to make authenticated API calls.",
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/definitions/AccessToken--Mini"
+        },
+        {},
+        {
+          "properties": {
+            "refresh_token": {
+              "type": "string",
+              "format": "token",
+              "description": "The refresh token for this access token, which can be used\nto request a new access token when the current one expires."
+            },
+            "issued_token_type": {
+              "type": "string",
+              "format": "urn",
+              "enum": [
+                "urn:ietf:params:oauth:token-type:access_token"
+              ],
+              "description": "The type of downscoped access token returned. This is only\nreturned if an access token has been downscoped."
+            }
+          }
+        }
+      ]
+    },
+    "OAuth2Error": {
+      "title": "OAuth2 Error",
+      "description": "An OAuth2 error",
+      "properties": {
+        "error": {
+          "type": "string",
+          "description": "The type of the error returned."
+        },
+        "error_description": {
+          "type": "string",
+          "description": "The type of the error returned."
+        }
+      }
+    },
+    "AccessToken--Mini": {
+      "title": "Access Token Mini",
+      "description": "The basics of an access token",
+      "type": "object",
+      "properties": {
+        "access_token": {
+          "type": "string",
+          "format": "token",
+          "description": "The requested access token."
+        },
+        "expires_in": {
+          "type": "integer",
+          "format": "int64",
+          "description": "The time in seconds in seconds by which this token will expire."
+        },
+        "token_type": {
+          "type": "string",
+          "enum": [
+            "bearer"
+          ],
+          "description": "The type of access token returned."
+        },
+        "restricted_to": {
+          "type": "array",
+          "description": "The permissions that this access token permits,\nproviding a list of resources (files, folders, etc)\nand the scopes permitted for each of those resources.",
+          "items": {
+            "$ref": "#/definitions/FileScope"
+          }
+        }
+      }
+    },
+    "FileScope": {
+      "title": "File Scope",
+      "description": "A relation between a file and the scopes for which the file can be accessed",
+      "properties": {
+        "scope": {
+          "type": "string",
+          "description": "The file scopes for the file access",
+          "enum": [
+            "annotation_edit",
+            "annotation_view_all",
+            "annotation_view_self",
+            "base_explorer",
+            "base_picker",
+            "base_preview",
+            "base_upload",
+            "item_delete",
+            "item_download",
+            "item_preview",
+            "item_rename",
+            "item_share",
+            null
+          ]
+        },
+        "object": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/File--Mini"
+            },
+            {
+              "description": "The file for which the file can be accessed"
+            }
+          ]
+        }
+      }
+    },
+    "File--Mini": {
+      "title": "File (Mini)",
+      "description": "A mini representation of a file, used when\nnested under another resource.",
+      "allOf": [
+        {
+          "$ref": "#/definitions/Item"
+        },
+        {
+          "properties": {
+            "type": {
+              "type": "string",
+              "description": "`file`",
+              "enum": [
+                "file"
+              ]
+            },
+            "sequence_id": {
+              "type": "string",
+              "description": "A unique ID for use with the /events endpoint"
+            },
+            "etag": {
+              "type": "string",
+              "description": "The entity tag of this file object. Used with `If-Match`\nheaders."
+            },
+            "name": {
+              "type": "string",
+              "description": "The name of the file"
+            }
+          }
+        }
+      ]
+    },
+    "Item": {
+      "title": "Item",
+      "description": "A generic mini representation of a file, folder, user or enterprise",
+      "allOf": [
+        {
+          "$ref": "#/definitions/Reference"
+        },
+        {
+          "properties": {
+            "type": {
+              "description": "The type of this item",
+              "type": "string"
+            },
+            "sequence_id": {
+              "type": "string",
+              "description": "A unique ID for use with the `/events` endpoint. May be `null` for\nsome items, such as root or trash."
+            },
+            "etag": {
+              "type": "string",
+              "description": "The entity tag of this item. Used with If-Match headers.\nMay be `null` for some folders such as root or trash."
+            },
+            "name": {
+              "type": "string",
+              "description": "The name of the item."
+            }
+          }
+        }
+      ]
+    },
+    "Reference": {
+      "title": "Reference",
+      "description": "The bare basic reference for an object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The unique identifier for this object"
+        }
+      }
+    }
+  }
 }
