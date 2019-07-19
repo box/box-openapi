@@ -13,7 +13,8 @@ The `master` branch of this repository only contains the raw source for the spec
 [![OpenAPI (en)](https://img.shields.io/static/v1.svg?label=OpenAPI%203&message=Download&color=grey&labelColor=0361D4&style=for-the-badge&logoColor=white)](https://raw.githubusercontent.com/box/box-openapi/en/openapi.json)
 [![OpenAPI (en)](https://img.shields.io/static/v1.svg?label=OpenAPI%203&message=ダウンロード&color=grey&labelColor=0361D4&style=for-the-badge&logoColor=white)](https://raw.githubusercontent.com/box/box-openapi/jp/openapi.json)
 
-[![Swagger (en)](https://img.shields.io/static/v1.svg?label=Swagger%202&message=Legacy%20Download%20(Incomplete)&color=grey&labelColor=lightgrey&style=for-the-badge)](https://github.com/box/box-openapi/tree/swagger_2.0/v2.0)
+[![Swagger (en)](https://img.shields.io/static/v1.svg?label=Swagger%202&message=Backported&color=grey&labelColor=0361D4&style=for-the-badge)](https://github.com/box/box-openapi/tree/swagger-2.0)
+[![Swagger (en)](https://img.shields.io/static/v1.svg?label=Swagger%202&message=Legacy%20/%20Incomplete&color=grey&labelColor=lightgrey&style=for-the-badge)](https://github.com/box/box-openapi/tree/legacy-swagger-2.0/v2.0)
 
 ## Usage & License
 
