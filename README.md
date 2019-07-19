@@ -3,11 +3,17 @@
 [![Build Status](https://travis-ci.com/box/box-openapi.svg?branch=master)](https://travis-ci.com/box/box-openapi)
 [![Project Status](https://opensource.box.com/badges/active.svg)](http://opensource.box.com/badges) [![Greenkeeper badge](https://badges.greenkeeper.io/box/box-openapi.svg)](https://greenkeeper.io/)
 
-
-The Box OpenAPI 3.0 Specification (OAS3) for the
+This repository contains the build system for the Box OpenAPI 3.0 Specification (OAS3) of the
 [Box Platform API](https://developers.box.com/).
 
-This repository contains the raw source for the specification. For a combined, resolved version please have a look at this [fully build specification](https://opensource.box.com/box-openapi/openapi.json).
+## Downloads
+
+The `master` branch of this repository only contains the raw source for the specification. For a combined, resolved version please have a look at the following builds.
+
+[![OpenAPI (en)](https://img.shields.io/badge/Download-OpenAPI%203.0.2-brightgreen.svg)](https://raw.githubusercontent.com/box/box-openapi/en/openapi.json)
+[![OpenAPI (jp)](https://img.shields.io/badge/ダウンロード-OpenAPI%203.0.2-brightgreen.svg)](https://raw.githubusercontent.com/box/box-openapi/jp/openapi.json)
+
+[![Swagger (en)](https://img.shields.io/badge/Legacy%20/%20Incomplete-Swagger%202.0-yellow.svg)](https://github.com/box/box-openapi/tree/swagger_2.0/v2.0)
 
 ## Usage & License
 
