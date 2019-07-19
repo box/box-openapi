@@ -1,4 +1,4 @@
-const fs = require('fs')
+const fs = require('fs-extra')
 const { URL } = require('url')
 const { Resolver } = require('@stoplight/json-ref-resolver')
 const jp = require('jsonpath')
@@ -9,26 +9,26 @@ class SwaggerConverter {
    * to a Swagger 2.0 file
    */
   async writeSpecification(folder) {
-    const openapiFilename = `${folder}/openapi.json`
+    const openapiFilename = `build/openapi/openapi.json`
     if (!fs.existsSync(openapiFilename)) { return }
 
     let openapi = JSON.parse(fs.readFileSync(openapiFilename))
     let resolved = await new Resolver().resolve(openapi)
     openapi = resolved.result
 
-    if (!fs.existsSync(`${folder}/swagger`)) { fs.mkdirSync(`${folder}/swagger`)}
-    
+    if (!fs.existsSync(`${folder}`)) { fs.mkdirpSync(`${folder}`)}
+
     let sw1 = new Swagger(openapi).convert('https://api.box.com/2.0')
-    fs.writeFileSync(`${folder}/swagger/swagger.json`, JSON.stringify(sw1, null, 2))
+    fs.writeFileSync(`${folder}/swagger.json`, JSON.stringify(sw1, null, 2))
 
     let sw2 = new Swagger(openapi).convert('https://account.box.com/api/oauth2')
-    fs.writeFileSync(`${folder}/swagger/swagger.authentication.json`, JSON.stringify(sw2, null, 2))
+    fs.writeFileSync(`${folder}/swagger.authentication.json`, JSON.stringify(sw2, null, 2))
 
     const sw3 = new Swagger(openapi).convert('https://api.box.com')
-    fs.writeFileSync(`${folder}/swagger/swagger.authorization.json`, JSON.stringify(sw3, null, 2))
+    fs.writeFileSync(`${folder}/swagger.authorization.json`, JSON.stringify(sw3, null, 2))
 
     let sw4 = new Swagger(openapi).convert('https://upload.box.com/api/2.0')
-    fs.writeFileSync(`${folder}/swagger/swagger.uploads.json`, JSON.stringify(sw4, null, 2))
+    fs.writeFileSync(`${folder}/swagger.uploads.json`, JSON.stringify(sw4, null, 2))
   }
 }
 

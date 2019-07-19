@@ -1,4 +1,4 @@
-const fs = require('fs')
+const fs = require('fs-extra')
 const { Resolver } = require("@stoplight/json-ref-resolver")
 const yaml = require('js-yaml')
 
@@ -48,7 +48,7 @@ class SpecLoader {
 
     // ensure the folder exusts
     if (!fs.existsSync(target)){
-      fs.mkdirSync(target);
+      fs.mkdirpSync(target);
     }
 
     // Pretty print the specification, with a tab size of 2
