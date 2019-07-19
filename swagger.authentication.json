@@ -1,0 +1,117 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Box Platform 2.0 APIs",
+    "description": "The Box Content API gives you access to secure content management and content experience features for use in your own app. It strives to be RESTful and is organized around the main resources you’re familiar with from the Box web interface.",
+    "termsOfService": "https://cloud.app.box.com/s/rmwxu64h1ipr41u49w3bbuvbsa29wku9",
+    "contact": {
+      "name": "Box Developer Relations",
+      "url": "https://developer.box.com",
+      "email": "devrel@box.com"
+    },
+    "license": {
+      "name": "Apache 2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0"
+    },
+    "version": "2.0"
+  },
+  "host": "account.box.com",
+  "basePath": "/api/oauth2",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/authorize": {
+      "get": {
+        "operationId": "get_authorize",
+        "summary": "Authorize a user",
+        "description": "Authorize a user by sending them through the [Box](https://box.com)\nwebsite and request their permission to act on their behalf.\n\nThis is the first step when authenticating a user using\nOAuth 2.0. To request a user's authorization to use the Box APIs\non their behalf you will need to send a user to the URL with this\nformat.",
+        "tags": [
+          "Authorization"
+        ],
+        "security": [],
+        "parameters": [
+          {
+            "name": "response_type",
+            "description": "The type of response we'd like to receive.",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "format": "token",
+            "enum": [
+              "code"
+            ]
+          },
+          {
+            "name": "client_id",
+            "description": "The Client ID of the application that is requesting to authenticate\nthe user. To get the Client ID for your application, log in to your\nBox developer console and click the **Edit Application** link for\nthe application you're working with. In the OAuth2 Parameters section\nof the configuration page, find the item labeled **client_id**. The\ntext of that item is your application's Client ID.",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "redirect_uri",
+            "description": "The URL to which Box redirects the browser after the user has granted\nor rejected the application permission. This URL must match the\nredirect URL in the configuration of your application. It must be a\nvalid HTTPS URL and it needs to be able to handle the redirection to\ncomplete the next step in the OAuth2 flow.",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "format": "url"
+          },
+          {
+            "name": "state",
+            "description": "A custom string of your choice. Box will pass the same string to\nthe redirect URL when authentication is complete. This parameter\ncan be used to identify a user on redirect, as well as protect\nagainst hijacked sessions and other attacks.",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "scope",
+            "description": "A comma-separated list of application scopes you'd like to\nauthenticate the user for. This defaults to all the scopes configured\nfor the application in its configuration page.",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Does not return any data, but rather should be used in the browser.",
+            "schema": {
+              "type": "string",
+              "format": "html"
+            }
+          }
+        }
+      }
+    }
+  },
+  "securityDefinitions": {
+    "OAuth2Security": {
+      "type": "oauth2",
+      "flow": "accessCode",
+      "authorizationUrl": "https://account.box.com/api/oauth2/authorize",
+      "tokenUrl": "https://api.box.com/oauth2/token",
+      "scopes": {
+        "root_readonly": "Read all files and folders stored in Box",
+        "root_readwrite": "Read and write all files and folders stored in Box",
+        "manage_app_users": "Provision and manage app users",
+        "manage_managed_users": "Provision and manage managed users",
+        "manage_groups": "Manage an enterprise's groups",
+        "manage_webhook": "Create webhooks programmatically through the API",
+        "manage_enterprise_properties": "Manage enterprise properties",
+        "manage_data_retention": "Manage data retention polices",
+        "manage_legal_hold": "Manage Legal Holds"
+      }
+    }
+  },
+  "security": [
+    {
+      "OAuth2Security": []
+    }
+  ]
+}
