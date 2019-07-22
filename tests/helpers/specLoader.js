@@ -20,6 +20,7 @@ const resolver = new Resolver({
         // parse the path as yml or json if needed
         if (path.endsWith('.json')) { return JSON.parse(content) }
         else if (path.endsWith('.yml')) { return yaml.load(content) }
+        else if (path.endsWith('.md')) { return String(content) }
         else { throw new Error(`Could not find reference ${path}`) }
       }
     }
