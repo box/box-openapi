@@ -1516,7 +1516,7 @@
               "properties": {
                 "name": {
                   "type": "string",
-                  "description": "The new name for the folder"
+                  "description": "The optional new name for this folder."
                 },
                 "description": {
                   "type": "string",
@@ -1525,7 +1525,7 @@
                 },
                 "sync_state": {
                   "type": "string",
-                  "description": "Specifies if the user has marked Box Drive or their mobile apps\nto sync this folder to their device.",
+                  "description": "Specifies if Box Drive or any of the mobile apps\nshould sync this folder to the user's device.",
                   "enum": [
                     "synced",
                     "not_synced",
@@ -1536,19 +1536,15 @@
                   "type": "boolean",
                   "description": "Specifies if users who are not the owner\nof the folder can invite new collaborators to the folder."
                 },
-                "is_collaboration_restricted_to_enterprise": {
-                  "type": "boolean",
-                  "description": "Specifies if new invites to this folder are restricted to users\nwithin the enterprise. This does not affect existing\ncollaborations."
-                },
                 "parent": {
-                  "allOf": [
-                    {
-                      "$ref": "#/definitions/Parent"
-                    },
-                    {
-                      "description": "The parent folder for this folder. Use this to move the folder\nor to restore it out of the trash."
+                  "type": "object",
+                  "description": "The parent folder for this folder. Use this to move\nthe folder or to restore it out of the trash.",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "The ID of the new parent folder"
                     }
-                  ]
+                  }
                 },
                 "shared_link": {
                   "allOf": [
@@ -1566,7 +1562,7 @@
                       "$ref": "#/definitions/FolderUploadEmail"
                     },
                     {
-                      "description": "Enables an email address for users to upload\nfiles directly to the folder"
+                      "description": "Setting this object enables the upload email address.\n\nThis email address can be used by users to directly\nupload files directly to the folder via email.\n\nSetting the value to `null` will disable the email address."
                     }
                   ]
                 },
@@ -1576,7 +1572,7 @@
                       "$ref": "#/definitions/Owner"
                     },
                     {
-                      "description": "The user that owns this folder"
+                      "description": "Changes the user that owns this folder."
                     }
                   ]
                 },
@@ -1587,9 +1583,13 @@
                   },
                   "description": "The tags for this item.\n\nTo add or remove a tag, retrieve the item's current tags,\nmodify them, and then update this field."
                 },
+                "is_collaboration_restricted_to_enterprise": {
+                  "type": "boolean",
+                  "description": "Specifies if new invites to this folder are restricted to users\nwithin the enterprise. This does not affect existing\ncollaborations."
+                },
                 "collections": {
                   "type": "array",
-                  "description": "The collections this folder belongs to.",
+                  "description": "An array of collections to make this folder\na member of. Currently\nwe only support the `favorites` collection.\n\nTo get the ID for a collection, use the\n[List all collections][1] endpoint.\n\nPassing an empty array `[]` or `null` will remove\nthe folder from any collection.\n\n[1]: ../advanced-files-and-folders/#get-collections",
                   "items": {
                     "$ref": "#/definitions/Parent"
                   }
@@ -1600,13 +1600,25 @@
         ],
         "responses": {
           "200": {
-            "description": "Returns a folder object for the updated folder\n\n[Some fields are optional](#folder) and need to be explicitly\nrequested using the [fields](#put-folders-id--request--fields)\nparameter.",
+            "description": "Returns a folder object for the updated folder\n\n[Some fields are optional](#folder) and need to be explicitly\nrequested using the [fields](#put-folders-id--request--fields)\nparameter.\n\nThis call will return synchronously. This holds true even when\nmoving folders with a large a large number of items in all of its\ndescendants. For very large folders, this means the call could\ntake minutes or hours to return.",
             "schema": {
               "$ref": "#/definitions/Folder"
             }
           },
+          "400": {
+            "description": "Returns an error if some of the parameters are missing or\ninvalid.\n\n* `bad_request` when a parameter is missing or incorrect.\n* `item_name_too_long` when the folder name is too long.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "404": {
+            "description": "Returns an error if the parent folder could not be found,\nor the authenticated user does not have access to the parent\nfolder.\n\n* `not_found` when the authenticated user does not have access\n  to the parent folder",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
           "409": {
-            "description": "* `operation_blocked_temporary`: Returned if either of the destination\n  or source folders is locked due to another move, copy, delete or\n  restore operation in process.\n\n  The operation can be retried at a later point.",
+            "description": "* `operation_blocked_temporary`: Returned if either of the destination\n  or source folders is locked due to another move, copy, delete or\n  restore operation in process.\n\n  The operation can be retried at a later point.\n\n* `item_name_in_use`: Returned if a folder with the name\n  already exists in the parent folder.",
             "schema": {
               "$ref": "#/definitions/ClientError"
             }
@@ -1648,7 +1660,7 @@
             "description": "Returns an empty response when the folder is successfully deleted\nor moved to the trash."
           },
           "409": {
-            "description": "* `operation_blocked_temporary`: Returned if either of the destination\n  or source folders is locked due to another move, copy, delete or\n  restore operation in process.\n\n  The operation can be retried at a later point.",
+            "description": "* `folder_not_empty`: Returned if the folder is not empty. Use the\n  `recursive` query parameter to recursively delete the folder and\n  its contents.\n* `operation_blocked_temporary`: Returned if either of the destination\n  or source folders is locked due to another move, copy, delete or\n  restore operation in process.\n\n  The operation can be retried at a later point.",
             "schema": {
               "$ref": "#/definitions/ClientError"
             }
@@ -1815,6 +1827,25 @@
                       "description": "The ID of parent folder"
                     }
                   }
+                },
+                "folder_upload_email": {
+                  "allOf": [
+                    {
+                      "$ref": "#/definitions/FolderUploadEmail"
+                    },
+                    {
+                      "description": "Setting this object enables the upload email address.\n\nThis email address can be used by users to directly\nupload files directly to the folder via email."
+                    }
+                  ]
+                },
+                "sync_state": {
+                  "type": "string",
+                  "description": "Specifies if Box Drive or any of the mobile apps\nshould sync this folder to the user's device.",
+                  "enum": [
+                    "synced",
+                    "not_synced",
+                    "partially_synced"
+                  ]
                 }
               }
             }
@@ -1828,7 +1859,7 @@
             }
           },
           "400": {
-            "description": "Returns an error if some of the parameters are missing or\ninvalid.\n\n* `bad_request` when a parameter is missing.\n* `item_name_too_long` when the folder name is too long.",
+            "description": "Returns an error if some of the parameters are missing or\ninvalid.\n\n* `bad_request` when a parameter is missing or incorrect.\n* `item_name_too_long` when the folder name is too long.",
             "schema": {
               "$ref": "#/definitions/ClientError"
             }
@@ -1840,7 +1871,7 @@
             }
           },
           "409": {
-            "description": "Returns an error if a folder by this name already exists,\nor if the parent folder is locked.\n\n* `item_name_in_use` when a folder with the same name already\n  exists.",
+            "description": "* `operation_blocked_temporary`: Returned if either of the destination\n  or source folders is locked due to another move, copy, delete or\n  restore operation in process.\n\n  The operation can be retried at a later point.\n\n* `item_name_in_use`: Returned if a folder with the name\n  already exists in the parent folder.",
             "schema": {
               "$ref": "#/definitions/ClientError"
             }
@@ -8488,7 +8519,7 @@
         },
         "password": {
           "type": "string",
-          "description": "The password required to access the shared link. Set this to\n`null` to remove the password."
+          "description": "The password required to access the shared link. Set the\npassword to `null` to remove it.\n\nA password can only be set when `access` is set to `open`."
         },
         "unshared_at": {
           "type": "string",
@@ -8839,7 +8870,7 @@
               "allOf": [
                 {
                   "type": "string",
-                  "description": "Specifies if the user has marked Box Drive or their mobile apps\nto sync this folder to their device.",
+                  "description": "Specifies if Box Drive or any of the mobile apps\nshould sync this folder to the user's device.",
                   "enum": [
                     "synced",
                     "not_synced",
