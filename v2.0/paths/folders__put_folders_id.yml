@@ -35,7 +35,7 @@ requestBody:
           name:
             type: string
             description: |-
-              The new name for the folder
+              The optional new name for this folder.
             example: New Folder
 
           description:
@@ -47,16 +47,16 @@ requestBody:
           can_non_owners_invite:
             $ref: "../attributes/folder__can_non_owners_invite.yml"
 
-          is_collaboration_restricted_to_enterprise:
-            $ref:
-              "../attributes/folder__is_collaboration_restricted_to_enterprise.yml"
-
           parent:
-            allOf:
-              - $ref: "#/components/schemas/Parent"
-              - description: |-
-                  The parent folder for this folder. Use this to move the folder
-                  or to restore it out of the trash.
+            type: object
+            description: |-
+              The parent folder for this folder. Use this to move
+              the folder or to restore it out of the trash.
+            properties:
+              id:
+                type: string
+                description: The ID of the new parent folder
+                example: "0"
 
           shared_link:
             allOf:
@@ -68,21 +68,39 @@ requestBody:
             allOf:
               - $ref: "#/components/schemas/FolderUploadEmail"
               - description: |-
-                  Enables an email address for users to upload
-                  files directly to the folder
+                  Setting this object enables the upload email address.
+
+                  This email address can be used by users to directly
+                  upload files directly to the folder via email.
+
+                  Setting the value to `null` will disable the email address.
 
           owned_by:
             allOf:
               - $ref: "#/components/schemas/Owner"
-              - description: The user that owns this folder
+              - description: Changes the user that owns this folder.
 
           tags:
             $ref: "../attributes/tags.yml"
 
+          is_collaboration_restricted_to_enterprise:
+            $ref:
+              "../attributes/folder__is_collaboration_restricted_to_enterprise.yml"
+
           collections:
             type: array
             description: |-
-              The collections this folder belongs to.
+              An array of collections to make this folder
+              a member of. Currently
+              we only support the `favorites` collection.
+
+              To get the ID for a collection, use the
+              [List all collections][1] endpoint.
+
+              Passing an empty array `[]` or `null` will remove
+              the folder from any collection.
+
+              [1]: ../advanced-files-and-folders/#get-collections
             items:
               $ref: "#/components/schemas/Parent"
 
@@ -94,10 +112,40 @@ responses:
       [Some fields are optional](#folder) and need to be explicitly
       requested using the [fields](#put-folders-id--request--fields)
       parameter.
+
+      This call will return synchronously. This holds true even when
+      moving folders with a large a large number of items in all of its
+      descendants. For very large folders, this means the call could
+      take minutes or hours to return.
     content:
       application/json:
         schema:
           $ref: '#/components/schemas/Folder'
+
+  400:
+    description: |-
+      Returns an error if some of the parameters are missing or
+      invalid.
+
+      * `bad_request` when a parameter is missing or incorrect.
+      * `item_name_too_long` when the folder name is too long.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
+
+  404:
+    description: |-
+      Returns an error if the parent folder could not be found,
+      or the authenticated user does not have access to the parent
+      folder.
+
+      * `not_found` when the authenticated user does not have access
+        to the parent folder
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
 
   409:
     description: |-
@@ -106,6 +154,9 @@ responses:
         restore operation in process.
 
         The operation can be retried at a later point.
+
+      * `item_name_in_use`: Returned if a folder with the name
+        already exists in the parent folder.
     content:
       application/json:
         schema:

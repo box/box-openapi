@@ -419,13 +419,13 @@ module.exports = {
         function: 'ensureLocalReferencesInAllOf'
       }
     },
-    ensure_items_are_basic_or_reference: {
-      summary: 'Ensures items are either basic types or references',
-      given: '$..*.items',
-      then: {
-        function: 'ensureItemsOfBasicTypeOrReference'
-      }
-    },
+    // ensure_items_are_basic_or_reference: {
+    //   summary: 'Ensures items are either basic types or references',
+    //   given: '$..*.items',
+    //   then: {
+    //     function: 'ensureItemsOfBasicTypeOrReference'
+    //   }
+    // },
     ensure_arrays_have_item_type: {
       summary: 'Ensures all arrays have an item type',
       given: '$..*.properties[*]',

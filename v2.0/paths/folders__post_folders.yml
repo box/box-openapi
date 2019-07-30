@@ -38,6 +38,7 @@ requestBody:
             example: New Folder
             maxLength: 255
             minLength: 1
+
           parent:
             type: object
             description: |-
@@ -50,6 +51,17 @@ requestBody:
                 description: The ID of parent folder
                 example: "0"
 
+          folder_upload_email:
+            allOf:
+              - $ref: "#/components/schemas/FolderUploadEmail"
+              - description: |-
+                  Setting this object enables the upload email address.
+
+                  This email address can be used by users to directly
+                  upload files directly to the folder via email.
+
+          sync_state:
+            $ref: "../attributes/folder__sync_state.yml"
 responses:
   201:
     description: |-
@@ -67,7 +79,7 @@ responses:
       Returns an error if some of the parameters are missing or
       invalid.
 
-      * `bad_request` when a parameter is missing.
+      * `bad_request` when a parameter is missing or incorrect.
       * `item_name_too_long` when the folder name is too long.
     content:
       application/json:
@@ -89,12 +101,14 @@ responses:
 
   409:
     description: |-
-      Returns an error if a folder by this name already exists,
-      or if the parent folder is locked.
+      * `operation_blocked_temporary`: Returned if either of the destination
+        or source folders is locked due to another move, copy, delete or
+        restore operation in process.
 
-      * `item_name_in_use` when a folder with the same name already
-        exists.
+        The operation can be retried at a later point.
 
+      * `item_name_in_use`: Returned if a folder with the name
+        already exists in the parent folder.
     content:
       application/json:
         schema:
