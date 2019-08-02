@@ -56,7 +56,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Returns a file object.\n\n[Some fields are optional](#file) and need to be explicitly\nrequested using the [fields](#get-files-id--request--fields)\nparameter.",
+            "description": "Returns a file object.\n\n[Some fields are returned by default](#file) and need to be explicitly\nrequested using the [fields](#get-files-id--request--fields)\nparameter.",
             "schema": {
               "$ref": "#/definitions/File"
             }
@@ -230,7 +230,9 @@
                   "items": {
                     "type": "string"
                   },
-                  "description": "The tags for this item.\n\nTo add or remove a tag, retrieve the item's current tags,\nmodify them, and then update this field."
+                  "minItems": 1,
+                  "maxItems": 100,
+                  "description": "The tags for this item. These tags are shown in\nthe Box web app and mobile apps next to an item.\n\nTo add or remove a tag, retrieve the item's current tags,\nmodify them, and then update this field.\n\nThere is a limit of 100 tags per item, and 10,000\nunique tags per enterprise."
                 }
               }
             }
@@ -238,7 +240,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Returns a file object.\n\n[Some fields are optional](#file) and need to be explicitly\nrequested using the [fields](#get-files-id--request--fields)\nparameter.",
+            "description": "Returns a file object.\n\n[Some fields are returned by default](#file) and need to be explicitly\nrequested using the [fields](#get-files-id--request--fields)\nparameter.",
             "schema": {
               "$ref": "#/definitions/File"
             }
@@ -457,7 +459,7 @@
         ],
         "responses": {
           "201": {
-            "description": "Returns a new file object representing the copied file.\n\n[Some fields are optional](#file) and need to be explicitly\nrequested using the [fields](#post-files-id-copy--request--fields)\nparameter.",
+            "description": "Returns a new file object representing the copied file.\n\n[Some fields are returned by default](#file) and need to be explicitly\nrequested using the [fields](#post-files-id-copy--request--fields)\nparameter.",
             "schema": {
               "$ref": "#/definitions/File"
             }
@@ -888,7 +890,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Returns a file object.\n\n[Some fields are optional](#file) and need to be explicitly\nrequested using the [fields](#get-files-id-versions--request--fields)\nparameter.",
+            "description": "Returns a file object.\n\n[Some fields are returned by default](#file) and need to be explicitly\nrequested using the [fields](#get-files-id-versions--request--fields)\nparameter.",
             "schema": {
               "$ref": "#/definitions/File"
             }
@@ -1376,7 +1378,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Returns a folder, including the first 100 entries in the folder.\n\nTo fetch more items within the folder, please use the\n[Get items in a folder](#get-folders-id-items) endpoint.\n\n[Some fields are optional](#folder) and need to be explicitly\nrequested using the [fields](#get_folders_id-fields)\nparameter.",
+            "description": "Returns a folder, including the first 100 entries in the folder.\n\nTo fetch more items within the folder, please use the\n[Get items in a folder](#get-folders-id-items) endpoint.\n\n[Some fields are returned by default](#folder) and need to be explicitly\nrequested using the [fields](#get_folders_id-fields)\nparameter.",
             "schema": {
               "$ref": "#/definitions/Folder"
             }
@@ -1480,7 +1482,7 @@
       "put": {
         "operationId": "put_folders_id",
         "summary": "Update a folder",
-        "description": "Updates a folder. This can be also be used to move the folder,\ncreate shared links, update collaborations, and more.\n\n# Folder locking\n\nWhen moving a folder, part of the file tree will be locked, mainly\nthe source folder and all of its descendants, as well as the destination\nfolder.\n\nFor the duration of the move, no other move, copy, delete, or restore\noperation can performed on any of the locked folders.",
+        "description": "Updates a folder. This can be also be used to move the folder,\ncreate shared links, update collaborations, and more.\n\n# Folder locking\n\nWhen moving a folder, part of the file tree will be locked, mainly\nthe source folder and all of its descendants, as well as the destination\nfolder.\n\nFor the duration of the move, no other move, copy, delete, or restore\noperation can performed on any of the locked folders.\n\n# Timeout\n\nTimeout for this operation is 60 seconds. The operation will include\nafter a `HTTP 503` has been returned.",
         "tags": [
           "Folders"
         ],
@@ -1525,7 +1527,7 @@
                 },
                 "sync_state": {
                   "type": "string",
-                  "description": "Specifies if Box Drive or any of the mobile apps\nshould sync this folder to the user's device.",
+                  "description": "Specifies whether a folder should be synced to a\nuser's device or not. This is used by Box Sync\n(discontinued) and is not used by Box Drive.",
                   "enum": [
                     "synced",
                     "not_synced",
@@ -1552,7 +1554,7 @@
                       "$ref": "#/definitions/SharedLink--Writable"
                     },
                     {
-                      "description": "Enables the creation of a shared link for this folder"
+                      "description": "Enables the creation of a shared link for a folder."
                     }
                   ]
                 },
@@ -1581,7 +1583,9 @@
                   "items": {
                     "type": "string"
                   },
-                  "description": "The tags for this item.\n\nTo add or remove a tag, retrieve the item's current tags,\nmodify them, and then update this field."
+                  "minItems": 1,
+                  "maxItems": 100,
+                  "description": "The tags for this item. These tags are shown in\nthe Box web app and mobile apps next to an item.\n\nTo add or remove a tag, retrieve the item's current tags,\nmodify them, and then update this field.\n\nThere is a limit of 100 tags per item, and 10,000\nunique tags per enterprise."
                 },
                 "is_collaboration_restricted_to_enterprise": {
                   "type": "boolean",
@@ -1589,10 +1593,18 @@
                 },
                 "collections": {
                   "type": "array",
-                  "description": "An array of collections to make this folder\na member of. Currently\nwe only support the `favorites` collection.\n\nTo get the ID for a collection, use the\n[List all collections][1] endpoint.\n\nPassing an empty array `[]` or `null` will remove\nthe folder from any collection.\n\n[1]: ../advanced-files-and-folders/#get-collections",
+                  "description": "An array of collections to make this folder\na member of. Currently\nwe only support the `favorites` collection.\n\nTo get the ID for a collection, use the\n[List all collections][1] endpoint.\n\nPassing an empty array `[]` or `null` will remove\nthe folder from all collections.\n\n[1]: ../advanced-files-and-folders/#get-collections",
                   "items": {
                     "$ref": "#/definitions/Parent"
                   }
+                },
+                "can_non_owners_invite_collaborators": {
+                  "type": "boolean",
+                  "description": "Restricts collaborators who are not the owner of\nthis folder from inviting other users to this folder."
+                },
+                "can_non_owners_view_collaborators": {
+                  "type": "boolean",
+                  "description": "Restricts collaborators who are not the owner of\nthis folder from viewing other collaborations on\nthis folder.\n\nIt also restricts non-owners from inviting new\ncollaborators.\n\nWhen setting this field to `false`, it is required\nto also set `can_non_owners_invite_collaborators` to\n`false` if it has not already been set."
                 }
               }
             }
@@ -1600,25 +1612,37 @@
         ],
         "responses": {
           "200": {
-            "description": "Returns a folder object for the updated folder\n\n[Some fields are optional](#folder) and need to be explicitly\nrequested using the [fields](#put-folders-id--request--fields)\nparameter.\n\nThis call will return synchronously. This holds true even when\nmoving folders with a large a large number of items in all of its\ndescendants. For very large folders, this means the call could\ntake minutes or hours to return.",
+            "description": "Returns a folder object for the updated folder\n\n[Some fields are returned by default](#folder) and need to be explicitly\nrequested using the [fields](#put-folders-id--request--fields)\nparameter.\n\nThis call will return synchronously. This holds true even when\nmoving folders with a large a large number of items in all of its\ndescendants. For very large folders, this means the call could\ntake minutes or hours to return.",
             "schema": {
               "$ref": "#/definitions/Folder"
             }
           },
           "400": {
-            "description": "Returns an error if some of the parameters are missing or\ninvalid.\n\n* `bad_request` when a parameter is missing or incorrect.\n* `item_name_too_long` when the folder name is too long.",
+            "description": "Returns an error if some of the parameters are missing or\ninvalid.\n\n* `bad_request` when a parameter is missing or incorrect.\n* `item_name_too_long` when the folder name is too long.\n* `item_name_invalid` when the folder name contains\n  invalid characters.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "403": {
+            "description": "Returns an error if the user does not have the required\naccess to perform the action.\n\n* `access_denied_insufficient_permissions`: Returned when the\n  user does not have access to the folder or parent folder.\n\n* `insufficient_scope`: Returned an error if the application\n  does not have the right scope to update folders. Make source\n  your application has been configured to read and write all files\n  and folders stored in Box.\n\n* `forbidden`: Returned when the user is not allowed to perform this\n  action for other users. This can include trying to create a\n  Shared Link with a `company` access level on a free account.",
             "schema": {
               "$ref": "#/definitions/ClientError"
             }
           },
           "404": {
-            "description": "Returns an error if the parent folder could not be found,\nor the authenticated user does not have access to the parent\nfolder.\n\n* `not_found` when the authenticated user does not have access\n  to the parent folder",
+            "description": "Returns an error if the folder or parent folder could not be found,\nor the authenticated user does not have access to either folder.\n\n* `not_found` when the authenticated user does not have access\n  to the folder or parent folder.",
             "schema": {
               "$ref": "#/definitions/ClientError"
             }
           },
           "409": {
-            "description": "* `operation_blocked_temporary`: Returned if either of the destination\n  or source folders is locked due to another move, copy, delete or\n  restore operation in process.\n\n  The operation can be retried at a later point.\n\n* `item_name_in_use`: Returned if a folder with the name\n  already exists in the parent folder.",
+            "description": "* `operation_blocked_temporary`: Returned if either of the destination\n  or source folders is locked due to another move, copy, delete or\n  restore operation in progress.\n\n  The operation can be retried at a later point.\n\n* `item_name_in_use`: Returned if a folder with the name\n  already exists in the parent folder.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "503": {
+            "description": "Returns an error when the operation takes longer\nthan 60 seconds. The operation will continue after\nthis response has been returned.",
             "schema": {
               "$ref": "#/definitions/ClientError"
             }
@@ -1628,7 +1652,7 @@
       "delete": {
         "operationId": "delete_folders_id",
         "summary": "Delete a folder",
-        "description": "Deletes a folder, either permanently or by moving it to\nthe trash.\n\n# Folder locking\n\nThe the enterprise settings determine whether the item will\nbe permanently deleted from Box or moved to the trash.\n\nDuring this operation, part of the file tree will be locked, mainly\nthe source folder and all of its descendants.\n\nFor the duration of the operation, no other move, copy, delete, or restore\noperation can performed on any of the locked folders.",
+        "description": "Deletes a folder, either permanently or by moving it to\nthe trash.\n\n# Recursive deletion\n\nThis API returns an error if the folder is not empty. You\ncan use the `recursive` query parameter to force this\noperation to recursively delete the folder and all of its\ncontents.\n\n# Folder locking\n\nThe enterprise settings determine whether the folder will\nbe permanently deleted from Box or moved to the trash.\n\nDuring this operation, part of the file tree will be locked, mainly\nthe source folder and all of its descendants.\n\nFor the duration of the operation, no other move, copy, delete, or restore\noperation can performed on any of the locked folders.\n\n# Timeout\n\nTimeout for this operation is 60 seconds. The operation will include\nafter a `HTTP 503` has been returned.",
         "tags": [
           "Folders"
         ],
@@ -1659,8 +1683,26 @@
           "204": {
             "description": "Returns an empty response when the folder is successfully deleted\nor moved to the trash."
           },
+          "403": {
+            "description": "Returns an error if the user does not have the required\naccess to perform the action.\n\n* `access_denied_insufficient_permissions`: Returned when the\n  user does not have access to the folder.\n\n* `insufficient_scope`: Returned an error if the application\n  does not have the right scope to delete folders. Make source\n  your application has been configured to read and write all files\n  and folders stored in Box.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "404": {
+            "description": "Returns an error if the folder or could not be found,\nor the authenticated user does not have access to the folder.\n\n* `not_found` when the authenticated user does not have access\n  to the folder.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
           "409": {
-            "description": "* `folder_not_empty`: Returned if the folder is not empty. Use the\n  `recursive` query parameter to recursively delete the folder and\n  its contents.\n* `operation_blocked_temporary`: Returned if either of the destination\n  or source folders is locked due to another move, copy, delete or\n  restore operation in process.\n\n  The operation can be retried at a later point.",
+            "description": "* `folder_not_empty`: Returned if the folder is not empty. Use the\n  `recursive` query parameter to recursively delete the folder and\n  its contents.\n* `operation_blocked_temporary`: Returned if the folder\n  is locked due to another move, copy, delete or restore\n  operation in progress.\n\n  The operation can be retried at a later point.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "503": {
+            "description": "Returns an error when the operation takes longer\nthan 60 seconds. The operation will continue after\nthis response has been returned.",
             "schema": {
               "$ref": "#/definitions/ClientError"
             }
@@ -1840,7 +1882,7 @@
                 },
                 "sync_state": {
                   "type": "string",
-                  "description": "Specifies if Box Drive or any of the mobile apps\nshould sync this folder to the user's device.",
+                  "description": "Specifies whether a folder should be synced to a\nuser's device or not. This is used by Box Sync\n(discontinued) and is not used by Box Drive.",
                   "enum": [
                     "synced",
                     "not_synced",
@@ -1853,13 +1895,19 @@
         ],
         "responses": {
           "201": {
-            "description": "Returns a folder object.\n\n[Some fields are optional](#folder) and need to be explicitly\nrequested using the [fields](##post_folders-fields) parameter.",
+            "description": "Returns a folder object.\n\n[Some fields are returned by default](#folder) and need to be explicitly\nrequested using the [fields](##post_folders-fields) parameter.",
             "schema": {
               "$ref": "#/definitions/Folder"
             }
           },
           "400": {
-            "description": "Returns an error if some of the parameters are missing or\ninvalid.\n\n* `bad_request` when a parameter is missing or incorrect.\n* `item_name_too_long` when the folder name is too long.",
+            "description": "Returns an error if some of the parameters are missing or\ninvalid.\n\n* `bad_request` when a parameter is missing or incorrect.\n* `item_name_too_long` when the folder name is too long.\n* `item_name_invalid` when the folder name contains\n  invalid characters.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "403": {
+            "description": "Returns an error if the user does not have the required\naccess to perform the action. This might be because they\ndon't have access to the folder or parent folder, or because\nthe application does not have permission to write files and\nfolders.",
             "schema": {
               "$ref": "#/definitions/ClientError"
             }
@@ -1938,7 +1986,7 @@
         ],
         "responses": {
           "201": {
-            "description": "Returns a new folder object representing the copied folder.\n\n[Some fields are optional](#folder) and need to be explicitly\nrequested using the [fields](#post-folders-id-copy--request--fields)\nparameter.",
+            "description": "Returns a new folder object representing the copied folder.\n\n[Some fields are returned by default](#folder) and need to be explicitly\nrequested using the [fields](#post-folders-id-copy--request--fields)\nparameter.",
             "schema": {
               "$ref": "#/definitions/Folder"
             }
@@ -3118,7 +3166,7 @@
         ],
         "responses": {
           "201": {
-            "description": "Returns the newly created comment object.\n\n[Some fields are optional](#comment) and need to be explicitly\nrequested using the [fields](#post_comments--request--fields) parameter.",
+            "description": "Returns the newly created comment object.\n\n[Some fields are returned by default](#comment) and need to be explicitly\nrequested using the [fields](#post_comments--request--fields) parameter.",
             "schema": {
               "$ref": "#/definitions/Comment"
             }
@@ -4581,7 +4629,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Returns a single user object.\n\n[Some fields are optional](#user) and need to be explicitly\nrequested using the [fields](#get-users-id--request--fields)\nparameter.",
+            "description": "Returns a single user object.\n\n[Some fields are returned by default](#user) and need to be explicitly\nrequested using the [fields](#get-users-id--request--fields)\nparameter.",
             "schema": {
               "$ref": "#/definitions/User"
             }
@@ -8510,8 +8558,9 @@
       "properties": {
         "access": {
           "type": "string",
-          "description": "The level of access for the shared link. This can be\nrestricted to anyone with the link (`open`), only people\nwithin the company (`company`) and only those who\nhave been invited to the folder (`collaborators`).\n\nThis field defaults to default access level\nspecified by the enterprise admin.",
+          "description": "The level of access for the shared link. This can be\nrestricted to anyone with the link (`open`), only people\nwithin the company (`company`) and only those who\nhave been invited to the folder (`collaborators`).\n\nThis field defaults to the `default` access level,\nwhich is the access level as specified by the\nenterprise admin.\n\nThe `company` access level is only available to paid\naccounts.",
           "enum": [
+            "default",
             "open",
             "company",
             "collaborators"
@@ -8870,7 +8919,7 @@
               "allOf": [
                 {
                   "type": "string",
-                  "description": "Specifies if Box Drive or any of the mobile apps\nshould sync this folder to the user's device.",
+                  "description": "Specifies whether a folder should be synced to a\nuser's device or not. This is used by Box Sync\n(discontinued) and is not used by Box Drive.",
                   "enum": [
                     "synced",
                     "not_synced",
@@ -8903,7 +8952,9 @@
                   "items": {
                     "type": "string"
                   },
-                  "description": "The tags for this item.\n\nTo add or remove a tag, retrieve the item's current tags,\nmodify them, and then update this field."
+                  "minItems": 1,
+                  "maxItems": 100,
+                  "description": "The tags for this item. These tags are shown in\nthe Box web app and mobile apps next to an item.\n\nTo add or remove a tag, retrieve the item's current tags,\nmodify them, and then update this field.\n\nThere is a limit of 100 tags per item, and 10,000\nunique tags per enterprise."
                 },
                 {},
                 {}
@@ -8972,6 +9023,10 @@
                 {},
                 {}
               ]
+            },
+            "can_non_owners_view_collaborators": {
+              "type": "boolean",
+              "description": "Specifies if collaborators who are not owners\nof this folder are restricted from viewing other\ncollaborations on this folder.\n\nIt also restricts non-owners from inviting new\ncollaborators."
             }
           }
         }
@@ -8988,7 +9043,7 @@
             "open",
             "collaborators"
           ],
-          "description": "When this parameter has been set, users can email files\nto the email address that has been automatically\ncreated for this folder.\n\nTo create an email address, set this property either when\ncreating or updating the folder.\n\nWhen set to `collaborators`, only emails from registered email\naddresses for collaborators will be accepted. When set to `open`\nit will accept emails from any email address."
+          "description": "When this parameter has been set, users can email files\nto the email address that has been automatically\ncreated for this folder.\n\nTo create an email address, set this property either when\ncreating or updating the folder.\n\nWhen set to `collaborators`, only emails from registered email\naddresses for collaborators will be accepted. This includes\nany email aliases a user might have registered.\n\nWhen set to `open` it will accept emails from any email\naddress."
         }
       }
     },
@@ -11742,7 +11797,7 @@
                     "open",
                     "collaborators"
                   ],
-                  "description": "When this parameter has been set, users can email files\nto the email address that has been automatically\ncreated for this folder.\n\nTo create an email address, set this property either when\ncreating or updating the folder.\n\nWhen set to `collaborators`, only emails from registered email\naddresses for collaborators will be accepted. When set to `open`\nit will accept emails from any email address."
+                  "description": "When this parameter has been set, users can email files\nto the email address that has been automatically\ncreated for this folder.\n\nTo create an email address, set this property either when\ncreating or updating the folder.\n\nWhen set to `collaborators`, only emails from registered email\naddresses for collaborators will be accepted. This includes\nany email aliases a user might have registered.\n\nWhen set to `open` it will accept emails from any email\naddress."
                 },
                 "email": {
                   "description": "The optional upload email address for this folder.",
