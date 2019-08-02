@@ -17,10 +17,16 @@ description: |-
 
   For the duration of the operation, no other move, copy, delete, or restore
   operation can performed on any of the locked folders.
+
+  # Timeout
+
+  Timeout for this operation is 60 seconds. The operation will include
+  after a `HTTP 503` has been returned.
 tags:
   - Folders
 
 x-box-reference-category: folders
+x-box-sanitized: true
 
 parameters:
   - $ref: '../attributes/folder_id.yml'
@@ -43,6 +49,35 @@ responses:
       Returns an empty response when the folder is successfully deleted
       or moved to the trash.
 
+  403:
+    description: |-
+      Returns an error if the user does not have the required
+      access to perform the action.
+
+      * `access_denied_insufficient_permissions`: Returned when the
+        user does not have access to the folder.
+
+      * `insufficient_scope`: Returned an error if the application
+        does not have the right scope to delete folders. Make source
+        your application has been configured to read and write all files
+        and folders stored in Box.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
+
+  404:
+    description: |-
+      Returns an error if the folder or could not be found,
+      or the authenticated user does not have access to the folder.
+
+      * `not_found` when the authenticated user does not have access
+        to the folder.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
+
   409:
     description: |-
       * `folder_not_empty`: Returned if the folder is not empty. Use the
@@ -53,6 +88,16 @@ responses:
         restore operation in process.
 
         The operation can be retried at a later point.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
+
+  503:
+    description: |-
+      Returns an error when the operation takes longer
+      than 60 seconds. The operation will continue after
+      this response has been returned.
     content:
       application/json:
         schema:
