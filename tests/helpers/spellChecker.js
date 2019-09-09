@@ -1,13 +1,16 @@
-const checker = require('spellchecker')
-const fs = require('fs')
-const yaml = require('js-yaml')
+const { Spellchecker } = require('spellchecker')
+// const fs = require('fs')
+// const yaml = require('js-yaml')
 const strip = require('remark-plain-text')
 const remark = require('remark')
 
+const checker = new Spellchecker()
+checker.setDictionary('en-US', './dictionaries/en_US')
+
 // Extend the dictionary with our own accepted words
-const acceptedWords = fs.readFileSync('./v2.0/dictionary/accepted_words.yml')
-let words = yaml.load(acceptedWords)
-words.forEach(checker.add)
+// const acceptedWords = fs.readFileSync('./v2.0/dictionary/accepted_words.yml')
+// let words = yaml.load(acceptedWords)
+// words.forEach(checker.add)
 
 /**
  * Extracts all titles and descriptions from a specification
@@ -49,7 +52,7 @@ const check = async (item) => {
 /**
  * Spell checks a file's titles and descriptions
  */
-class SpellChecker {
+class BoxSpellChecker {
   async check(specification) {
     let parts = extract(specification)
     let checks = await Promise.all(parts.map(check))
@@ -57,4 +60,4 @@ class SpellChecker {
   }
 }
 
-module.exports = new SpellChecker()
+module.exports = new BoxSpellChecker()
