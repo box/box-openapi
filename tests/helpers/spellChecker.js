@@ -1,16 +1,14 @@
 const { Spellchecker } = require('spellchecker')
-// const fs = require('fs')
-// const yaml = require('js-yaml')
+const fs = require('fs')
 const strip = require('remark-plain-text')
 const remark = require('remark')
 
 const checker = new Spellchecker()
-checker.setDictionary('en-US', './dictionaries/en_US')
+checker.setDictionary('en-US', './v2.0/dictionary/en_US')
 
-// Extend the dictionary with our own accepted words
-// const acceptedWords = fs.readFileSync('./v2.0/dictionary/accepted_words.yml')
-// let words = yaml.load(acceptedWords)
-// words.forEach(checker.add)
+// Extend the dictionary with our own allowed words
+const allowed = String(fs.readFileSync('./v2.0/dictionary/allowed_words.txt')).split('\n')
+allowed.forEach(word => checker.add(word))
 
 /**
  * Extracts all titles and descriptions from a specification
