@@ -75,6 +75,7 @@ const ensureLocalReferencesExist = (item, _, __, context) => {
  */
 const ensurePropertiesExample = (item, _, paths) => {
   if (
+      paths.target.join('.').includes('properties.properties') ||
       // skip if this is an example
       paths.target.includes('example') ||
       // objects are not basic values
@@ -105,6 +106,7 @@ const ensurePropertiesExample = (item, _, paths) => {
  */
 const ensureSimpleDescription = (item, _, paths) => {
   if (
+      paths.target.join('.').includes('properties.properties') ||
       // skip if this is an example
       paths.target.includes('example') ||
       // skip if this is an object or array
@@ -116,6 +118,7 @@ const ensureSimpleDescription = (item, _, paths) => {
 
   // if the item does not have an decription
   // throw an error
+
   if (!item.description) {
     return [
       {
@@ -219,8 +222,9 @@ const ensureLocalReferencesInAllOf = (item, _, paths) => {
 /**
  * Ensures all arrays have item types
  */
-const ensureAllArraysHaveItemTypes = (param) => {
+const ensureAllArraysHaveItemTypes = (param, _, paths) => {
   // check if the param is an array
+  if (paths.target.join('.').includes('properties.properties')) { return }
   if (param.type === 'array' &&
     // if the param has items, ensure it has a type or a ref
     !(param.items && (param.items.type || param.items['$ref'] || param.items['x-box-reference-id']))) {
@@ -251,7 +255,9 @@ const ensureReferenceCategoryValid = (spec) => (item) => {
 /**
  * Ensure that the example matches the listed type
  */
-const ensureExampleMatchesType = ({ type, example, additionalProperties }) => {
+const ensureExampleMatchesType = ({ type, example, additionalProperties }, _, paths) => {
+  if (paths.target.join('.').includes('properties.properties')) { return }
+
   // only run if an example is present
   if (type && example) {
     // determine the example type and constructor
@@ -419,13 +425,6 @@ module.exports = {
         function: 'ensureLocalReferencesInAllOf'
       }
     },
-    // ensure_items_are_basic_or_reference: {
-    //   summary: 'Ensures items are either basic types or references',
-    //   given: '$..*.items',
-    //   then: {
-    //     function: 'ensureItemsOfBasicTypeOrReference'
-    //   }
-    // },
     ensure_arrays_have_item_type: {
       summary: 'Ensures all arrays have an item type',
       given: '$..*.properties[*]',

@@ -1,0 +1,116 @@
+---
+title: Representation
+
+x-box-resource-id: representation
+
+description: |-
+  A file representation
+
+properties:
+  content:
+    type: object
+    description: |-
+      An object containing the URL that can be used to actually fetch
+      the representation.
+    properties:
+      url_template:
+        type: string
+        example: |-
+          https://dl.boxcloud.com/api/2.0/internal_files/123/versions/\
+          345/representations/png_paged_2048x2048/content/{+asset_path}\?watermark_content\=4567
+        description: |-
+          The download URL that can be used to fetch the representation.
+          Make sure to make an authenticated API call to this endpoint.
+
+          This URL is a template and will require the `{+asset_path}` to
+          be replaced by a path. In general, for un-paged representations
+          it can be replaced by an empty string.
+
+          For paged representations, replace the `{+asset_path}` with the
+          page to request plus the extension for the file, for example
+          `1.pdf`.
+
+          When requesting the download URL the following additional
+          query params can be passed along.
+
+          * `set_content_disposition_type` - Sets the `Content-Disposition`
+            header in the API response with the specified disposition type
+            of either `inline` or `attachment`. If not supplied, the
+            `Content-Disposition` header is not included in the response.
+
+          * `set_content_disposition_filename` - Allows the application to
+            define the representation's file name used in the
+            `Content-Disposition` header.  If not defined, the filename
+            is derived from the source file name in Box combined with the
+            extension of the representation.
+
+  info:
+    type: object
+    description: |-
+      An object containing the URL that can be used to fetch more info
+      on this representation.
+    properties:
+      url:
+        type: string
+        example: |-
+          https://api.box.com/2.0/internal_files/123/versions/\
+          345/representations/png_paged_2048x2048
+        description: |-
+          The API URL that can be used to get more info on this file
+          representation. Make sure to make an authenticated API call
+          to this endpoint.
+
+  properties:
+    type: object
+    description: |-
+      An object containing the size and type of this presentation.
+    properties:
+      dimensions:
+        type: string
+        format: "<width>x<height>"
+        example: "2048x2048"
+        description: |-
+          The width by height size of this representation in pixels.
+
+      paged:
+        type: boolean
+        example: true
+        description: |-
+          Indicates if the representation is build up out of multiple pages
+
+      thumb:
+        type: boolean
+        example: true
+        description: |-
+          Indicates if the representation can be used as a thumbnail of the
+          file
+
+  representation:
+    type: string
+    example: png
+    description: |-
+      Indicates the file type of the returned representation.
+
+  status:
+    type: object
+    description: |-
+      An object containing the status of this representation.
+    properties:
+      state:
+        type: string
+        example: success
+        enum:
+          - success
+          - viewable
+          - pending
+          - none
+        description: |-
+          The status of the representation.
+
+          * `success` defines the representation as ready to be viewed.
+          * `viewable` defines a video to be ready for viewing.
+          * `pending` defines the representation as to be generated. Retry
+            this endpoint to re-check the status.
+          * `none` defines that the representation will be created when
+            requested. Request the URL defined in the `info` object to trigger
+            this generation.
