@@ -38,14 +38,14 @@
         "parameters": [
           {
             "name": "file_id",
-            "description": "The ID of the file.",
+            "description": "The unique identifier that represent a file.\n\nThe ID for any file can be determined\nby visiting a file in the web application\nand copying the ID from the URL. For example,\nfor the url `https://*.app.box.com/files/123`\nthe `file_id` is `123`.",
             "in": "path",
             "required": true,
             "type": "string"
           },
           {
             "name": "If-Match",
-            "description": "Ensure this item hasn't recently changed\nby ensuring the item's current `etag` matches the\n`etag` passed into this header.",
+            "description": "Ensures this item hasn't recently changed before\nmaking changes.\n\nPass in the item's last observed `etag` value\ninto this header and the endpoint will fail\nwith a `412 Precondition Failed` if it\nhas changed since.",
             "in": "header",
             "required": false,
             "type": "string"
@@ -73,6 +73,12 @@
             "description": "Returns the new file object in a list.",
             "schema": {
               "$ref": "#/definitions/Files"
+            }
+          },
+          "412": {
+            "description": "Returns an error when the `If-Match` header does not match\nthe current `etag` value of the file. This indicates that the file\nhas changed since it was last requested.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
             }
           }
         }
@@ -184,7 +190,7 @@
         "parameters": [
           {
             "name": "file_id",
-            "description": "The ID of the file.",
+            "description": "The unique identifier that represent a file.\n\nThe ID for any file can be determined\nby visiting a file in the web application\nand copying the ID from the URL. For example,\nfor the url `https://*.app.box.com/files/123`\nthe `file_id` is `123`.",
             "in": "path",
             "required": true,
             "type": "string"
@@ -403,14 +409,14 @@
           },
           {
             "name": "If-Match",
-            "description": "Ensure this item hasn't recently changed\nby ensuring the item's current `etag` matches the\n`etag` passed into this header.",
+            "description": "Ensures this item hasn't recently changed before\nmaking changes.\n\nPass in the item's last observed `etag` value\ninto this header and the endpoint will fail\nwith a `412 Precondition Failed` if it\nhas changed since.",
             "in": "header",
             "required": false,
             "type": "string"
           },
           {
             "name": "If-None-Match",
-            "description": "Ensures the changes are only applied if the\nitem's `etag` does not match the provided\n`etag`, ensuring that the item is only updated\nif the content has changed.",
+            "description": "Ensures an item is only returned if it has changed.\n\nPass in the item's last observed `etag` value\ninto this header and the endpoint will fail\nwith a `304 Not Modified` if the item has not\nchanged since.",
             "in": "header",
             "required": false,
             "type": "string"
@@ -696,11 +702,19 @@
               ]
             },
             "tags": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              },
-              "description": "All tags applied to this folder."
+              "allOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "minItems": 1,
+                  "maxItems": 100,
+                  "description": "The tags for this item. These tags are shown in\nthe Box web app and mobile apps next to an item.\n\nTo add or remove a tag, retrieve the item's current tags,\nmodify them, and then update this field.\n\nThere is a limit of 100 tags per item, and 10,000\nunique tags per enterprise."
+                },
+                {},
+                {}
+              ]
             },
             "lock": {
               "allOf": [
@@ -715,15 +729,22 @@
             },
             "extension": {
               "type": "string",
-              "description": "Indicates the suffix, when available, on the file. By default,\nset to an empty string. The suffix usually indicates the encoding\n(file format) of the file contents or usage."
+              "description": "Indicates the (optional) file extension for this file. By default,\nthis is set to an empty string."
             },
             "is_package": {
               "type": "boolean",
-              "description": "Whether the file is a package. Used for Mac Packages used by iWorks."
+              "description": "Indicates if the file is a package. Packages are commonly used\nby Mac Applications and can include iWork files."
             },
             "expiring_embed_link": {
-              "type": "string",
-              "description": "Requesting this field creates an expiring URL for an\nembedded preview session in an iframe.\n\nThis URL will expire after 60 seconds and the session will\nexpire after 60 minutes."
+              "allOf": [
+                {
+                  "$ref": "#/definitions/ExpiringEmbedLink"
+                },
+                {},
+                {
+                  "description": "Requesting this field creates an expiring Box Embed URL for an\nembedded preview session in an iframe.\n\nThis URL will expire after 60 seconds and the session will\nexpire after 60 minutes.\n\nNot all file types are supported for these embed URLs."
+                }
+              ]
             },
             "watermark_info": {
               "allOf": [
@@ -731,34 +752,38 @@
                   "$ref": "#/definitions/WatermarkInfo"
                 },
                 {
-                  "description": "Information about the watermarking on this file"
+                  "description": "Details about the watermark applied to this folder"
                 },
                 {}
               ]
             },
             "allowed_invitee_roles": {
               "type": "array",
-              "description": "Folder [collaboration](#collaboration-object) roles allowed by the\nenterprise administrator.",
+              "enum": [
+                "editor",
+                "viewer",
+                "previewer",
+                "uploader",
+                "previewer uploader",
+                "viewer uploader",
+                "co-owner"
+              ],
+              "description": "A list of the types of roles that user can be invited at\nwhen sharing this file.",
               "items": {
                 "type": "string"
-              },
-              "enum": [
-                "open",
-                "company",
-                "collaborators"
-              ]
+              }
             },
             "is_externally_owned": {
               "type": "boolean",
-              "description": "Whether this file is owned by a user outside of the enterprise."
+              "description": "Specifies if this folder is owned by a user outside of the\nauthenticated enterprise."
             },
             "has_collaborations": {
               "type": "boolean",
-              "description": "Whether this file has any collaborators."
+              "description": "Specifies if this folder has any other collaborators."
             },
             "metadata": {
               "type": "object",
-              "description": "A list of key-value pairs of metadata objects within their\nscopes.\n\nTo access the metadata for a file, first use the\n[Metadata](#metadata) endpoints to determine\nthe metadata templates available to your enterprise.\n\nThe use the [Retrieve File](#get-file-id) endpoint with\nthe `fields` query parameter to get the metadata by ID. The\nID for the metadata template will be in the format\n`metadata.<scope>.<templatename>`, for example\n`fields=metadata.global.properties`.",
+              "description": "A list of key-value pairs of metadata objects within their\nscopes.\n\nTo access the metadata for a file, first use the\nMetadata-endpoints to determine\nthe metadata templates available to your enterprise.\n\nThen use the `GET /files/:id` endpoint with\nthe `fields` query parameter to get the metadata by ID.\n\nThe ID for a metadata template will be in the format\n`metadata.<scope>.<templatename>`, for example\n`metadata.global.properties`.",
               "enum": [
                 "global",
                 "enteprise_<:enterprise_id>"
@@ -770,6 +795,22 @@
                   "$ref": "#/definitions/Metadata"
                 }
               }
+            },
+            "expires_at": {
+              "type": "string",
+              "format": "date-time",
+              "description": "When the file will automatically be deleted"
+            },
+            "representations": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/Representations"
+                },
+                {},
+                {
+                  "description": "A list of representations for a file that can be used to\ndisplay a placeholder of the file in your application. By default\nthis returns all representations and we recommend using the\n`X-Rep-Hints` header to further customize the desired\nrepresentations."
+                }
+              ]
             }
           }
         }
@@ -855,58 +896,58 @@
             "sha1": {
               "type": "string",
               "format": "digest",
-              "description": "The SHA1 hash of the file."
+              "description": "The SHA1 hash of the file. This can be used to compare the contents\nof a file on Box with a local file."
             },
             "description": {
               "type": "string",
-              "description": "The description of the file",
+              "description": "The optional description of this file",
               "maxLength": 256
             },
             "size": {
               "type": "integer",
-              "description": "The file size in bytes. Be careful parsing this integer, it can\neasily go into [exponent notation](http://en.wikipedia.org/wiki/\\\nDouble-precision_floating-point_format)."
+              "description": "The file size in bytes. Be careful parsing this integer, it can\neasily get very large and cause an integer overflow."
             },
             "path_collection": {
-              "type": "array",
-              "description": "The path of folders to this file, starting at the root",
-              "items": {
-                "$ref": "#/definitions/Folder--Mini"
-              }
+              "allOf": [
+                {
+                  "$ref": "#/definitions/PathCollection"
+                },
+                {
+                  "description": "The tree of folders that this file is contained in,\nstarting at the root."
+                },
+                {},
+                {}
+              ]
             },
             "created_at": {
               "type": "string",
               "format": "date-time",
-              "description": "When this file was upload to Box’s servers"
+              "description": "The date and time when the file was created on Box."
             },
             "modified_at": {
               "type": "string",
               "format": "date-time",
-              "description": "When this file was last updated on the Box servers"
+              "description": "The date and time when the folder was last updated on Box."
             },
             "trashed_at": {
               "type": "string",
               "format": "date-time",
-              "description": "When this file was last moved to the trash"
+              "description": "The time at which this file was put in the trash."
             },
             "purged_at": {
               "type": "string",
               "format": "date-time",
-              "description": "When this file will be permanently deleted"
+              "description": "The time at which this file is expected to be purged\nfrom the trash."
             },
             "content_created_at": {
               "type": "string",
               "format": "date-time",
-              "description": "When this file was created originally"
+              "description": "The date and time at which this file was originally\ncreated, which might be before it was uploaded to Box."
             },
             "content_modified_at": {
               "type": "string",
               "format": "date-time",
-              "description": "When this file was last updated"
-            },
-            "expires_at": {
-              "type": "string",
-              "format": "date-time",
-              "description": "When the file will automatically be deleted"
+              "description": "The date and time at which this folder was last updated,\nwhich might be before it was uploaded to Box."
             },
             "created_by": {
               "allOf": [
@@ -927,6 +968,7 @@
                 {
                   "description": "The user who last modified this file"
                 },
+                {},
                 {}
               ]
             },
@@ -938,6 +980,7 @@
                 {
                   "description": "The user who owns this file"
                 },
+                {},
                 {}
               ]
             },
@@ -947,8 +990,9 @@
                   "$ref": "#/definitions/SharedLink"
                 },
                 {
-                  "description": "The shared link object for this file. Will be\n`null` if no shared link has been created."
+                  "description": "The shared link for this file. This will be\n`null` if no shared link has been created for this\nfile."
                 },
+                {},
                 {}
               ]
             },
@@ -958,19 +1002,19 @@
                   "$ref": "#/definitions/Folder--Mini"
                 },
                 {
-                  "description": "The folder that contains this file."
+                  "description": "The folder that this file is located within."
                 },
                 {}
               ]
             },
             "item_status": {
               "type": "string",
+              "description": "Defines if this item has been deleted or not.\n\n* `active` when the item has is not in the trash\n* `trashed` when the item has been moved to the trash but not deleted\n* `deleted` when the item has been permanently deleted.",
               "enum": [
                 "active",
                 "trashed",
                 "deleted"
-              ],
-              "description": "Whether this item is deleted or not. Values include `active`,\n`trashed` if the file has been moved to the trash, and `deleted` if\nthe file has been permanently deleted"
+              ]
             }
           }
         }
@@ -1057,6 +1101,25 @@
         }
       ]
     },
+    "ExpiringEmbedLink": {
+      "title": "Expiring Embed Link",
+      "description": "An expiring Box Embed Link.",
+      "allOf": [
+        {
+          "$ref": "#/definitions/AccessToken--Mini"
+        },
+        {},
+        {
+          "properties": {
+            "url": {
+              "type": "string",
+              "format": "url",
+              "description": "The actual expiring embed URL for this file, constructed\nfrom the file ID and access tokens specified in this object."
+            }
+          }
+        }
+      ]
+    },
     "WatermarkInfo": {
       "title": "Watermark Info",
       "description": "Details about the watermark applied to this item",
@@ -1107,6 +1170,19 @@
         }
       }
     },
+    "Representations": {
+      "title": "Representations",
+      "description": "A list of file representations",
+      "properties": {
+        "entries": {
+          "type": "array",
+          "description": "A list of files",
+          "items": {
+            "$ref": "#/definitions/Representation"
+          }
+        }
+      }
+    },
     "PaginationOrder": {
       "title": "Pagination Order",
       "description": "The order in which a pagination is ordered",
@@ -1130,24 +1206,13 @@
       "description": "A mini representation of a file, used when\nnested under another resource.",
       "allOf": [
         {
-          "$ref": "#/definitions/Item"
+          "$ref": "#/definitions/File--Base"
         },
         {
           "properties": {
-            "type": {
-              "type": "string",
-              "description": "`file`",
-              "enum": [
-                "file"
-              ]
-            },
             "sequence_id": {
               "type": "string",
-              "description": "A unique ID for use with the /events endpoint"
-            },
-            "etag": {
-              "type": "string",
-              "description": "The entity tag of this file object. Used with `If-Match`\nheaders."
+              "description": "A unique identifier that can be used in combination\nwith the `/events` endpoint."
             },
             "name": {
               "type": "string",
@@ -1157,37 +1222,23 @@
         }
       ]
     },
-    "Folder--Mini": {
-      "title": "Folder (Mini)",
-      "description": "A mini representation of a file version, used when\nnested under another resource.",
-      "allOf": [
-        {
-          "$ref": "#/definitions/Item"
+    "PathCollection": {
+      "title": "Path Collection",
+      "description": "A list of parent folders for an item.",
+      "properties": {
+        "total_count": {
+          "description": "The number of folders in this list.",
+          "type": "integer",
+          "format": "int64"
         },
-        {
-          "properties": {
-            "type": {
-              "type": "string",
-              "description": "`folder`",
-              "enum": [
-                "folder"
-              ]
-            },
-            "sequence_id": {
-              "type": "string",
-              "description": "A unique identifier that can be used in combination\nwith the `/events` endpoint. May be `null` for\nsome folders such as the root folder and trash folder."
-            },
-            "etag": {
-              "type": "string",
-              "description": "The HTTP etag of this folder. This can be used within some API\nendpoints in the `If-Match` and `If-None-Match` headers to only\nperform changes on the folder if (no) changes have happened."
-            },
-            "name": {
-              "type": "string",
-              "description": "The name of the folder."
-            }
+        "entries": {
+          "type": "array",
+          "description": "The parent folders for this item",
+          "items": {
+            "$ref": "#/definitions/Folder--Mini"
           }
         }
-      ]
+      }
     },
     "User--Mini": {
       "title": "User (Mini)",
@@ -1297,6 +1348,27 @@
         }
       }
     },
+    "Folder--Mini": {
+      "title": "Folder (Mini)",
+      "description": "A mini representation of a file version, used when\nnested under another resource.",
+      "allOf": [
+        {
+          "$ref": "#/definitions/Folder--Base"
+        },
+        {
+          "properties": {
+            "sequence_id": {
+              "type": "string",
+              "description": "A unique identifier that can be used in combination\nwith the `/events` endpoint. May be `null` for\nsome folders such as the root folder and trash folder."
+            },
+            "name": {
+              "type": "string",
+              "description": "The name of the folder."
+            }
+          }
+        }
+      ]
+    },
     "Permissions": {
       "title": "Permissions",
       "description": "The permissions that the authenticated user has for an item.",
@@ -1327,34 +1399,178 @@
         }
       }
     },
-    "Item": {
-      "title": "Item",
-      "description": "A generic mini representation of a file, folder, user or enterprise",
-      "allOf": [
-        {
-          "$ref": "#/definitions/Reference"
+    "AccessToken--Mini": {
+      "title": "Access Token Mini",
+      "description": "The basics of an access token",
+      "type": "object",
+      "properties": {
+        "access_token": {
+          "type": "string",
+          "format": "token",
+          "description": "The requested access token."
         },
-        {
+        "expires_in": {
+          "type": "integer",
+          "format": "int64",
+          "description": "The time in seconds in seconds by which this token will expire."
+        },
+        "token_type": {
+          "type": "string",
+          "enum": [
+            "bearer"
+          ],
+          "description": "The type of access token returned."
+        },
+        "restricted_to": {
+          "type": "array",
+          "description": "The permissions that this access token permits,\nproviding a list of resources (files, folders, etc)\nand the scopes permitted for each of those resources.",
+          "items": {
+            "$ref": "#/definitions/FileScope"
+          }
+        }
+      }
+    },
+    "Representation": {
+      "title": "Representation",
+      "description": "A file representation",
+      "properties": {
+        "content": {
+          "type": "object",
+          "description": "An object containing the URL that can be used to actually fetch\nthe representation.",
           "properties": {
-            "type": {
-              "description": "The type of this item",
-              "type": "string"
-            },
-            "sequence_id": {
+            "url_template": {
               "type": "string",
-              "description": "A unique ID for use with the `/events` endpoint. May be `null` for\nsome items, such as root or trash."
-            },
-            "etag": {
+              "description": "The download URL that can be used to fetch the representation.\nMake sure to make an authenticated API call to this endpoint.\n\nThis URL is a template and will require the `{+asset_path}` to\nbe replaced by a path. In general, for unpaged representations\nit can be replaced by an empty string.\n\nFor paged representations, replace the `{+asset_path}` with the\npage to request plus the extension for the file, for example\n`1.pdf`.\n\nWhen requesting the download URL the following additional\nquery params can be passed along.\n\n* `set_content_disposition_type` - Sets the `Content-Disposition`\n  header in the API response with the specified disposition type\n  of either `inline` or `attachment`. If not supplied, the\n  `Content-Disposition` header is not included in the response.\n\n* `set_content_disposition_filename` - Allows the application to\n  define the representation's file name used in the\n  `Content-Disposition` header.  If not defined, the filename\n  is derived from the source file name in Box combined with the\n  extension of the representation."
+            }
+          }
+        },
+        "info": {
+          "type": "object",
+          "description": "An object containing the URL that can be used to fetch more info\non this representation.",
+          "properties": {
+            "url": {
               "type": "string",
-              "description": "The entity tag of this item. Used with If-Match headers.\nMay be `null` for some folders such as root or trash."
-            },
-            "name": {
+              "description": "The API URL that can be used to get more info on this file\nrepresentation. Make sure to make an authenticated API call\nto this endpoint."
+            }
+          }
+        },
+        "properties": {
+          "type": "object",
+          "description": "An object containing the size and type of this presentation.",
+          "properties": {
+            "dimensions": {
               "type": "string",
-              "description": "The name of the item."
+              "format": "<width>x<height>",
+              "description": "The width by height size of this representation in pixels."
+            },
+            "paged": {
+              "type": "boolean",
+              "description": "Indicates if the representation is build up out of multiple pages"
+            },
+            "thumb": {
+              "type": "boolean",
+              "description": "Indicates if the representation can be used as a thumbnail of the\nfile"
+            }
+          }
+        },
+        "representation": {
+          "type": "string",
+          "description": "Indicates the file type of the returned representation."
+        },
+        "status": {
+          "type": "object",
+          "description": "An object containing the status of this representation.",
+          "properties": {
+            "state": {
+              "type": "string",
+              "enum": [
+                "success",
+                "viewable",
+                "pending",
+                "none"
+              ],
+              "description": "The status of the representation.\n\n* `success` defines the representation as ready to be viewed.\n* `viewable` defines a video to be ready for viewing.\n* `pending` defines the representation as to be generated. Retry\n  this endpoint to re-check the status.\n* `none` defines that the representation will be created when\n  requested. Request the URL defined in the `info` object to trigger\n  this generation."
             }
           }
         }
-      ]
+      }
+    },
+    "File--Base": {
+      "title": "File (Base)",
+      "description": "The bare basic representation of a file, the minimal\namount of fields returned when using the `fields` query\nparameter.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The unique identifier that represent a file.\n\nThe ID for any file can be determined\nby visiting a file in the web application\nand copying the ID from the URL. For example,\nfor the url `https://*.app.box.com/files/123`\nthe `file_id` is `123`."
+        },
+        "etag": {
+          "type": "string",
+          "description": "The HTTP etag of this file. This can be used within some API\nendpoints in the `If-Match` and `If-None-Match` headers to only\nperform changes on the file if (no) changes have happened."
+        },
+        "type": {
+          "type": "string",
+          "description": "`file`",
+          "enum": [
+            "file"
+          ]
+        }
+      }
+    },
+    "Folder--Base": {
+      "title": "Folder (Base)",
+      "description": "The bare basic representation of a folder, the minimal\namount of fields returned when using the `fields` query\nparameter.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The unique identifier that represent a folder.\n\nThe ID for any folder can be determined\nby visiting a folder in the web application\nand copying the ID from the URL. For example,\nfor the url `https://*.app.box.com/folders/123`\nthe `folder_id` is `123`."
+        },
+        "etag": {
+          "type": "string",
+          "description": "The HTTP etag of this folder. This can be used within some API\nendpoints in the `If-Match` and `If-None-Match` headers to only\nperform changes on the folder if (no) changes have happened."
+        },
+        "type": {
+          "type": "string",
+          "description": "`folder`",
+          "enum": [
+            "folder"
+          ]
+        }
+      }
+    },
+    "FileScope": {
+      "title": "File Scope",
+      "description": "A relation between a file and the scopes for which the file can be accessed",
+      "properties": {
+        "scope": {
+          "type": "string",
+          "description": "The file scopes for the file access",
+          "enum": [
+            "annotation_edit",
+            "annotation_view_all",
+            "annotation_view_self",
+            "base_explorer",
+            "base_picker",
+            "base_preview",
+            "base_upload",
+            "item_delete",
+            "item_download",
+            "item_preview",
+            "item_rename",
+            "item_share",
+            null
+          ]
+        },
+        "object": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/File--Mini"
+            },
+            {
+              "description": "The file for which the file can be accessed"
+            }
+          ]
+        }
+      }
     }
   }
 }
