@@ -204,7 +204,7 @@
     "/files/{file_id}": {
       "get": {
         "operationId": "get_files_id",
-        "summary": "Get a file",
+        "summary": "Get file information",
         "tags": [
           "Files"
         ],
@@ -214,7 +214,7 @@
         "parameters": [
           {
             "name": "file_id",
-            "description": "The ID of the file.",
+            "description": "The unique identifier that represent a file.\n\nThe ID for any file can be determined\nby visiting a file in the web application\nand copying the ID from the URL. For example,\nfor the url `https://*.app.box.com/files/123`\nthe `file_id` is `123`.",
             "example": "12345",
             "in": "path",
             "required": true,
@@ -235,6 +235,27 @@
                 "type": "string"
               }
             }
+          },
+          {
+            "name": "If-None-Match",
+            "description": "Ensures an item is only returned if it has changed.\n\nPass in the item's last observed `etag` value\ninto this header and the endpoint will fail\nwith a `304 Not Modified` if the item has not\nchanged since.",
+            "in": "header",
+            "required": false,
+            "example": 1,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-Rep-Hints",
+            "description": "A header required to request specific `representations`\nof a file. Use this in combination with the `fields` query\nparameter to request a specific file representation.\n\nThe general format for these representations is\n`X-Rep-Hints: [...]` where `[...]` is one or many\nhints in the format `[fileType?query]`.\n\nFor example, to request a `png` representation in `32x32`\nas well as `94x94` pixel dimensions provide the following\nhints.\n\n`X-Rep-Hints: [jpg?dimensions=32x32][jpg?dimensions=94x94]`\n\nAdditionally, a `text` representation is available for all\ndocument file types in Box using the `[extracted_text]`\nrepresentation.\n\n`X-Rep-Hints: [extracted_text]`",
+            "example": "X-Rep-Hints: [pdf]",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "nullable": true
+            }
           }
         ],
         "responses": {
@@ -244,6 +265,49 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/File"
+                }
+              }
+            }
+          },
+          "304": {
+            "description": "Returns an empty response when the `If-None-Match` header matches\nthe current `etag` value of the folder. This indicates that the folder\nhas not changed since it was last requested."
+          },
+          "403": {
+            "description": "Returned when the access token provided in the `Authorization` header\nis not recognized or not provided.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Returned if the file is not found, or the user does not\nhave access to the file.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Returned if the `file_id` is not in a recognized format.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Returns an error if an action is performed on a file with an\nincorrect media type.\n\n* `unsupported_media_type` when requesting an `expiring_embed_link`\n  for a file that is not supported by Box Embed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
                 }
               }
             }
@@ -262,7 +326,7 @@
         "parameters": [
           {
             "name": "file_id",
-            "description": "The ID of the file.",
+            "description": "The unique identifier that represent a file.\n\nThe ID for any file can be determined\nby visiting a file in the web application\nand copying the ID from the URL. For example,\nfor the url `https://*.app.box.com/files/123`\nthe `file_id` is `123`.",
             "example": "12345",
             "in": "path",
             "required": true,
@@ -365,7 +429,7 @@
         "parameters": [
           {
             "name": "file_id",
-            "description": "The ID of the file.",
+            "description": "The unique identifier that represent a file.\n\nThe ID for any file can be determined\nby visiting a file in the web application\nand copying the ID from the URL. For example,\nfor the url `https://*.app.box.com/files/123`\nthe `file_id` is `123`.",
             "example": "12345",
             "in": "path",
             "required": true,
@@ -389,7 +453,7 @@
           },
           {
             "name": "If-Match",
-            "description": "Ensure this item hasn't recently changed\nby ensuring the item's current `etag` matches the\n`etag` passed into this header.",
+            "description": "Ensures this item hasn't recently changed before\nmaking changes.\n\nPass in the item's last observed `etag` value\ninto this header and the endpoint will fail\nwith a `412 Precondition Failed` if it\nhas changed since.",
             "in": "header",
             "required": false,
             "example": 1,
@@ -481,6 +545,16 @@
                 }
               }
             }
+          },
+          "412": {
+            "description": "Returns an error when the `If-Match` header does not match\nthe current `etag` value of the file. This indicates that the file\nhas changed since it was last requested.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
           }
         }
       },
@@ -495,7 +569,7 @@
         "parameters": [
           {
             "name": "file_id",
-            "description": "The ID of the file.",
+            "description": "The unique identifier that represent a file.\n\nThe ID for any file can be determined\nby visiting a file in the web application\nand copying the ID from the URL. For example,\nfor the url `https://*.app.box.com/files/123`\nthe `file_id` is `123`.",
             "example": "12345",
             "in": "path",
             "required": true,
@@ -505,7 +579,7 @@
           },
           {
             "name": "If-Match",
-            "description": "Ensure this item hasn't recently changed\nby ensuring the item's current `etag` matches the\n`etag` passed into this header.",
+            "description": "Ensures this item hasn't recently changed before\nmaking changes.\n\nPass in the item's last observed `etag` value\ninto this header and the endpoint will fail\nwith a `412 Precondition Failed` if it\nhas changed since.",
             "in": "header",
             "required": false,
             "example": 1,
@@ -519,7 +593,7 @@
             "description": "Returns an empty response when the file has been successfully\ndeleted."
           },
           "412": {
-            "description": "If the `If-Match` header was sent and the file has since changed, the\nAPI will return a `412 Precondition Failed` error.",
+            "description": "Returns an error when the `If-Match` header does not match\nthe current `etag` value of the file. This indicates that the file\nhas changed since it was last requested.",
             "content": {
               "application/json": {
                 "schema": {
@@ -543,7 +617,7 @@
         "parameters": [
           {
             "name": "file_id",
-            "description": "The ID of the file.",
+            "description": "The unique identifier that represent a file.\n\nThe ID for any file can be determined\nby visiting a file in the web application\nand copying the ID from the URL. For example,\nfor the url `https://*.app.box.com/files/123`\nthe `file_id` is `123`.",
             "example": "12345",
             "in": "path",
             "required": true,
@@ -625,7 +699,7 @@
         "parameters": [
           {
             "name": "file_id",
-            "description": "The ID of the file.",
+            "description": "The unique identifier that represent a file.\n\nThe ID for any file can be determined\nby visiting a file in the web application\nand copying the ID from the URL. For example,\nfor the url `https://*.app.box.com/files/123`\nthe `file_id` is `123`.",
             "example": "12345",
             "in": "path",
             "required": true,
@@ -635,7 +709,7 @@
           },
           {
             "name": "If-Match",
-            "description": "Ensure this item hasn't recently changed\nby ensuring the item's current `etag` matches the\n`etag` passed into this header.",
+            "description": "Ensures this item hasn't recently changed before\nmaking changes.\n\nPass in the item's last observed `etag` value\ninto this header and the endpoint will fail\nwith a `412 Precondition Failed` if it\nhas changed since.",
             "in": "header",
             "required": false,
             "example": 1,
@@ -714,6 +788,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Files"
+                }
+              }
+            }
+          },
+          "412": {
+            "description": "Returns an error when the `If-Match` header does not match\nthe current `etag` value of the file. This indicates that the file\nhas changed since it was last requested.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
                 }
               }
             }
@@ -996,7 +1080,7 @@
         "parameters": [
           {
             "name": "file_id",
-            "description": "The ID of the file.",
+            "description": "The unique identifier that represent a file.\n\nThe ID for any file can be determined\nby visiting a file in the web application\nand copying the ID from the URL. For example,\nfor the url `https://*.app.box.com/files/123`\nthe `file_id` is `123`.",
             "example": "12345",
             "in": "path",
             "required": true,
@@ -1329,7 +1413,7 @@
           },
           {
             "name": "If-Match",
-            "description": "Ensure this item hasn't recently changed\nby ensuring the item's current `etag` matches the\n`etag` passed into this header.",
+            "description": "Ensures this item hasn't recently changed before\nmaking changes.\n\nPass in the item's last observed `etag` value\ninto this header and the endpoint will fail\nwith a `412 Precondition Failed` if it\nhas changed since.",
             "in": "header",
             "required": false,
             "example": 1,
@@ -1339,7 +1423,7 @@
           },
           {
             "name": "If-None-Match",
-            "description": "Ensures the changes are only applied if the\nitem's `etag` does not match the provided\n`etag`, ensuring that the item is only updated\nif the content has changed.",
+            "description": "Ensures an item is only returned if it has changed.\n\nPass in the item's last observed `etag` value\ninto this header and the endpoint will fail\nwith a `304 Not Modified` if the item has not\nchanged since.",
             "in": "header",
             "required": false,
             "example": 1,
@@ -1425,7 +1509,7 @@
         "parameters": [
           {
             "name": "file_id",
-            "description": "The ID of the file.",
+            "description": "The unique identifier that represent a file.\n\nThe ID for any file can be determined\nby visiting a file in the web application\nand copying the ID from the URL. For example,\nfor the url `https://*.app.box.com/files/123`\nthe `file_id` is `123`.",
             "example": "12345",
             "in": "path",
             "required": true,
@@ -1514,7 +1598,7 @@
       "get": {
         "operationId": "get_files_id_thumbnail_id",
         "summary": "Get a file thumbnail",
-        "description": "Retrieves a thumbnail, or smaller image representation, of a file.\n\nSizes of `32x32`,`64x64`, `128x128`, and `256x256` can be returned in\nthe `.png` format and sizes of `32x32`, `94x94`, `160x160`, and `320x320`\ncan be returned in the `.jpg` format.\n\nThumbnails can be generated for the image and video file formats listed\n[found on our community site](http://community.box.com/t5/Managing-\\\nYour-Content/What-file-types-are-supported-by-Box-s-Content-Preview/\\\nta-p/327).",
+        "description": "Retrieves a thumbnail, or smaller image representation, of a file.\n\nSizes of `32x32`,`64x64`, `128x128`, and `256x256` can be returned in\nthe `.png` format and sizes of `32x32`, `94x94`, `160x160`, and `320x320`\ncan be returned in the `.jpg` format.\n\nThumbnails can be generated for the image and video file formats listed\n[found on our community site][1].\n\n[1]: https://community.box.com/t5/Migrating-and-Previewing-Content/File-Types-and-Fonts-Supported-in-Box-Content-Preview/ta-p/327",
         "tags": [
           "Files",
           "Thumbnails"
@@ -1523,7 +1607,7 @@
         "parameters": [
           {
             "name": "file_id",
-            "description": "The ID of the file.",
+            "description": "The unique identifier that represent a file.\n\nThe ID for any file can be determined\nby visiting a file in the web application\nand copying the ID from the URL. For example,\nfor the url `https://*.app.box.com/files/123`\nthe `file_id` is `123`.",
             "example": "12345",
             "in": "path",
             "required": true,
@@ -1552,7 +1636,8 @@
             "example": 32,
             "schema": {
               "type": "integer",
-              "format": "int64"
+              "minimum": 32,
+              "maximum": 320
             }
           },
           {
@@ -1562,7 +1647,8 @@
             "example": 32,
             "schema": {
               "type": "integer",
-              "format": "int64"
+              "minimum": 32,
+              "maximum": 320
             }
           },
           {
@@ -1570,10 +1656,11 @@
             "description": "The maximum height of the thumbnail",
             "in": "query",
             "required": false,
-            "example": 32,
+            "example": 320,
             "schema": {
               "type": "integer",
-              "format": "int64"
+              "minimum": 32,
+              "maximum": 320
             }
           },
           {
@@ -1581,10 +1668,11 @@
             "description": "The maximum width of the thumbnail",
             "in": "query",
             "required": false,
-            "example": 32,
+            "example": 320,
             "schema": {
               "type": "integer",
-              "format": "int64"
+              "minimum": 32,
+              "maximum": 320
             }
           }
         ],
@@ -1609,7 +1697,7 @@
             }
           },
           "202": {
-            "description": "If the thumbnail is not available yet, a `Location` header\npointing to a placeholder graphic will be returned.",
+            "description": "Sometimes generating a thumbnail can take a few seconds. In these\nsituations the API returns a `Location`-header pointing to a\nplaceholder graphic for this file type.\n\nThe placeholder graphic can be used in a user interface until the\nthumbnail generation has completed. The `Retry-After`-header indicates\nwhen to the thumbnail will be ready. At that time, retry this endpoint\nto retrieve the thumbnail.",
             "headers": {
               "Retry-After": {
                 "description": "The time in seconds after which the thumbnail will be available.\n\nYour application  only attempt to get the thumbnail again after\nthis time.",
@@ -1628,7 +1716,7 @@
             }
           },
           "302": {
-            "description": "If Box is unable to generate a thumbnail for this file type, a `Location`\nheader pointing to a placeholder graphic for this file type will be\nreturned.",
+            "description": "Returns an error when Box is not able to create a thumbnail for this\nfile type.\n\nInstead, a `Location`-header pointing to a placeholder graphic for\nthis file type will be returned.",
             "headers": {
               "Location": {
                 "description": "A pointer to a placeholder graphic that can be used for this\nfile type.",
@@ -1639,8 +1727,28 @@
               }
             }
           },
+          "400": {
+            "description": "Returns an error if some of the parameters are missing or\ninvalid.\n\n* `requested_preview_unavailable` - an invalid dimension was\n  requested. This will happen if the dimension requested is\n  larger or smaller than the available file sizes for the thumbnail\n  format, or when when any of the size constraints contradict\n  each other.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Returned when the access token provided in the `Authorization` header\nis not recognized or not provided.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
           "404": {
-            "description": "If Box is unable to generate a thumbnail for this particular file, `404`\nwill be returned with a code of `preview_cannot_be_generated`.",
+            "description": "Returned if the file is not found, or the user does not\nhave access to the file, or for additional reasons.\n\n* `preview_cannot_be_generated` - Box does not support thumbnails\n  for this type of file",
             "content": {
               "application/json": {
                 "schema": {
@@ -1665,7 +1773,7 @@
         "parameters": [
           {
             "name": "file_id",
-            "description": "The ID of the file.",
+            "description": "The unique identifier that represent a file.\n\nThe ID for any file can be determined\nby visiting a file in the web application\nand copying the ID from the URL. For example,\nfor the url `https://*.app.box.com/files/123`\nthe `file_id` is `123`.",
             "example": "12345",
             "in": "path",
             "required": true,
@@ -1740,7 +1848,7 @@
         "parameters": [
           {
             "name": "file_id",
-            "description": "The ID of the file.",
+            "description": "The unique identifier that represent a file.\n\nThe ID for any file can be determined\nby visiting a file in the web application\nand copying the ID from the URL. For example,\nfor the url `https://*.app.box.com/files/123`\nthe `file_id` is `123`.",
             "example": "12345",
             "in": "path",
             "required": true,
@@ -1815,7 +1923,7 @@
         "parameters": [
           {
             "name": "file_id",
-            "description": "The ID of the file.",
+            "description": "The unique identifier that represent a file.\n\nThe ID for any file can be determined\nby visiting a file in the web application\nand copying the ID from the URL. For example,\nfor the url `https://*.app.box.com/files/123`\nthe `file_id` is `123`.",
             "example": "12345",
             "in": "path",
             "required": true,
@@ -1861,7 +1969,7 @@
         "parameters": [
           {
             "name": "file_id",
-            "description": "The ID of the file.",
+            "description": "The unique identifier that represent a file.\n\nThe ID for any file can be determined\nby visiting a file in the web application\nand copying the ID from the URL. For example,\nfor the url `https://*.app.box.com/files/123`\nthe `file_id` is `123`.",
             "example": "12345",
             "in": "path",
             "required": true,
@@ -1919,7 +2027,7 @@
         "parameters": [
           {
             "name": "file_id",
-            "description": "The ID of the file.",
+            "description": "The unique identifier that represent a file.\n\nThe ID for any file can be determined\nby visiting a file in the web application\nand copying the ID from the URL. For example,\nfor the url `https://*.app.box.com/files/123`\nthe `file_id` is `123`.",
             "example": "12345",
             "in": "path",
             "required": true,
@@ -1958,7 +2066,7 @@
         "parameters": [
           {
             "name": "file_id",
-            "description": "The ID of the file.",
+            "description": "The unique identifier that represent a file.\n\nThe ID for any file can be determined\nby visiting a file in the web application\nand copying the ID from the URL. For example,\nfor the url `https://*.app.box.com/files/123`\nthe `file_id` is `123`.",
             "example": "12345",
             "in": "path",
             "required": true,
@@ -2033,7 +2141,7 @@
         "parameters": [
           {
             "name": "file_id",
-            "description": "The ID of the file.",
+            "description": "The unique identifier that represent a file.\n\nThe ID for any file can be determined\nby visiting a file in the web application\nand copying the ID from the URL. For example,\nfor the url `https://*.app.box.com/files/123`\nthe `file_id` is `123`.",
             "example": "12345",
             "in": "path",
             "required": true,
@@ -2091,7 +2199,7 @@
         "parameters": [
           {
             "name": "file_id",
-            "description": "The ID of the file.",
+            "description": "The unique identifier that represent a file.\n\nThe ID for any file can be determined\nby visiting a file in the web application\nand copying the ID from the URL. For example,\nfor the url `https://*.app.box.com/files/123`\nthe `file_id` is `123`.",
             "example": "12345",
             "in": "path",
             "required": true,
@@ -2111,7 +2219,7 @@
           },
           {
             "name": "If-Match",
-            "description": "Ensure this item hasn't recently changed\nby ensuring the item's current `etag` matches the\n`etag` passed into this header.",
+            "description": "Ensures this item hasn't recently changed before\nmaking changes.\n\nPass in the item's last observed `etag` value\ninto this header and the endpoint will fail\nwith a `412 Precondition Failed` if it\nhas changed since.",
             "in": "header",
             "required": false,
             "example": 1,
@@ -2140,7 +2248,7 @@
         "parameters": [
           {
             "name": "file_id",
-            "description": "The ID of the file.",
+            "description": "The unique identifier that represent a file.\n\nThe ID for any file can be determined\nby visiting a file in the web application\nand copying the ID from the URL. For example,\nfor the url `https://*.app.box.com/files/123`\nthe `file_id` is `123`.",
             "example": "12345",
             "in": "path",
             "required": true,
@@ -2213,7 +2321,7 @@
         "parameters": [
           {
             "name": "file_id",
-            "description": "The ID of the file.",
+            "description": "The unique identifier that represent a file.\n\nThe ID for any file can be determined\nby visiting a file in the web application\nand copying the ID from the URL. For example,\nfor the url `https://*.app.box.com/files/123`\nthe `file_id` is `123`.",
             "example": "12345",
             "in": "path",
             "required": true,
@@ -2248,7 +2356,7 @@
         "parameters": [
           {
             "name": "file_id",
-            "description": "The ID of the file.",
+            "description": "The unique identifier that represent a file.\n\nThe ID for any file can be determined\nby visiting a file in the web application\nand copying the ID from the URL. For example,\nfor the url `https://*.app.box.com/files/123`\nthe `file_id` is `123`.",
             "example": "12345",
             "in": "path",
             "required": true,
@@ -2315,7 +2423,7 @@
         "parameters": [
           {
             "name": "file_id",
-            "description": "The ID of the file.",
+            "description": "The unique identifier that represent a file.\n\nThe ID for any file can be determined\nby visiting a file in the web application\nand copying the ID from the URL. For example,\nfor the url `https://*.app.box.com/files/123`\nthe `file_id` is `123`.",
             "example": "12345",
             "in": "path",
             "required": true,
@@ -2398,7 +2506,7 @@
         "parameters": [
           {
             "name": "file_id",
-            "description": "The ID of the file.",
+            "description": "The unique identifier that represent a file.\n\nThe ID for any file can be determined\nby visiting a file in the web application\nand copying the ID from the URL. For example,\nfor the url `https://*.app.box.com/files/123`\nthe `file_id` is `123`.",
             "example": "12345",
             "in": "path",
             "required": true,
@@ -2478,7 +2586,7 @@
         "parameters": [
           {
             "name": "file_id",
-            "description": "The ID of the file.",
+            "description": "The unique identifier that represent a file.\n\nThe ID for any file can be determined\nby visiting a file in the web application\nand copying the ID from the URL. For example,\nfor the url `https://*.app.box.com/files/123`\nthe `file_id` is `123`.",
             "example": "12345",
             "in": "path",
             "required": true,
@@ -2530,7 +2638,7 @@
         "parameters": [
           {
             "name": "file_id",
-            "description": "The ID of the file.",
+            "description": "The unique identifier that represent a file.\n\nThe ID for any file can be determined\nby visiting a file in the web application\nand copying the ID from the URL. For example,\nfor the url `https://*.app.box.com/files/123`\nthe `file_id` is `123`.",
             "example": "12345",
             "in": "path",
             "required": true,
@@ -2573,7 +2681,7 @@
         "parameters": [
           {
             "name": "file_id",
-            "description": "The ID of the file.",
+            "description": "The unique identifier that represent a file.\n\nThe ID for any file can be determined\nby visiting a file in the web application\nand copying the ID from the URL. For example,\nfor the url `https://*.app.box.com/files/123`\nthe `file_id` is `123`.",
             "example": "12345",
             "in": "path",
             "required": true,
@@ -2646,7 +2754,7 @@
         "parameters": [
           {
             "name": "file_id",
-            "description": "The ID of the file.",
+            "description": "The unique identifier that represent a file.\n\nThe ID for any file can be determined\nby visiting a file in the web application\nand copying the ID from the URL. For example,\nfor the url `https://*.app.box.com/files/123`\nthe `file_id` is `123`.",
             "example": "12345",
             "in": "path",
             "required": true,
@@ -2675,7 +2783,7 @@
     "/folders/{folder_id}": {
       "get": {
         "operationId": "get_folders_id",
-        "summary": "Get a folder",
+        "summary": "Get folder information",
         "tags": [
           "Folders"
         ],
@@ -2708,6 +2816,16 @@
                 "type": "string"
               }
             }
+          },
+          {
+            "name": "If-None-Match",
+            "description": "Ensures an item is only returned if it has changed.\n\nPass in the item's last observed `etag` value\ninto this header and the endpoint will fail\nwith a `304 Not Modified` if the item has not\nchanged since.",
+            "in": "header",
+            "required": false,
+            "example": 1,
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -2720,6 +2838,9 @@
                 }
               }
             }
+          },
+          "304": {
+            "description": "Returns an empty response when the `If-None-Match` header matches\nthe current `etag` value of the folder. This indicates that the folder\nhas not changed since it was last requested."
           },
           "403": {
             "description": "Returned when the access token provided in the `Authorization` header\nis not recognized or not provided.",
@@ -2895,7 +3016,7 @@
           },
           {
             "name": "If-Match",
-            "description": "Ensure this item hasn't recently changed\nby ensuring the item's current `etag` matches the\n`etag` passed into this header.",
+            "description": "Ensures this item hasn't recently changed before\nmaking changes.\n\nPass in the item's last observed `etag` value\ninto this header and the endpoint will fail\nwith a `412 Precondition Failed` if it\nhas changed since.",
             "in": "header",
             "required": false,
             "example": 1,
@@ -3068,6 +3189,16 @@
               }
             }
           },
+          "412": {
+            "description": "Returns an error when the `If-Match` header does not match\nthe current `etag` value of the folder. This indicates that the\nfolder has changed since it was last requested.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
           "503": {
             "description": "Returns an error when the operation takes longer\nthan 60 seconds. The operation will continue after\nthis response has been returned.",
             "content": {
@@ -3102,6 +3233,16 @@
             }
           },
           {
+            "name": "If-Match",
+            "description": "Ensures this item hasn't recently changed before\nmaking changes.\n\nPass in the item's last observed `etag` value\ninto this header and the endpoint will fail\nwith a `412 Precondition Failed` if it\nhas changed since.",
+            "in": "header",
+            "required": false,
+            "example": 1,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "recursive",
             "description": "Delete a folder that is not empty by recursively deleting the\nfolder and all of its content.",
             "in": "query",
@@ -3109,16 +3250,6 @@
             "example": true,
             "schema": {
               "type": "boolean"
-            }
-          },
-          {
-            "name": "If-Match",
-            "description": "Ensure this item hasn't recently changed\nby ensuring the item's current `etag` matches the\n`etag` passed into this header.",
-            "in": "header",
-            "required": false,
-            "example": 1,
-            "schema": {
-              "type": "string"
             }
           }
         ],
@@ -3148,6 +3279,16 @@
           },
           "409": {
             "description": "* `folder_not_empty`: Returned if the folder is not empty. Use the\n  `recursive` query parameter to recursively delete the folder and\n  its contents.\n* `operation_blocked_temporary`: Returned if the folder\n  is locked due to another move, copy, delete or restore\n  operation in progress.\n\n  The operation can be retried at a later point.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "412": {
+            "description": "Returns an error when the `If-Match` header does not match\nthe current `etag` value of the folder. This indicates that the\nfolder has changed since it was last requested.",
             "content": {
               "application/json": {
                 "schema": {
@@ -3544,6 +3685,9 @@
                 }
               }
             }
+          },
+          "304": {
+            "description": "Returns an empty response when the `If-None-Match` header matches\nthe current `etag` value of the folder. This indicates that the folder\nhas not changed since it was last requested."
           },
           "400": {
             "description": "Returns an error if some of the parameters are missing or\ninvalid.\n\n* `bad_request` when a parameter is missing.\n* `item_name_too_long` when the new folder name is too long.",
@@ -6214,9 +6358,19 @@
         "description": "Return the file or folder represented by a shared link.\n\nShared items are any files or folders that are represented by a shared link,\nwhich can originate within the current enterprise or within another one.\n\nThis endpoint allows an application to retrieve information about a\nshared item when only given a shared link.",
         "parameters": [
           {
+            "name": "If-None-Match",
+            "description": "Ensures an item is only returned if it has changed.\n\nPass in the item's last observed `etag` value\ninto this header and the endpoint will fail\nwith a `304 Not Modified` if the item has not\nchanged since.",
+            "in": "header",
+            "required": false,
+            "example": 1,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "BoxApi",
             "description": "A header containing the shared link and optional password for the\nshared link.\n\nThe format for this header is as follows.\n\n`shared_link=[link]&shared_link_password=[password]`",
-            "example": "shared_link=https://cloud.box.com/shared/static/gjasdasjhasd&\\\nshared_link_password=letmein",
+            "example": "shared_link=https://cloud.box.com/shared/static/gjasdasjhasd&shared_link_password=letmein",
             "in": "header",
             "required": true,
             "schema": {
@@ -6234,6 +6388,9 @@
                 }
               }
             }
+          },
+          "304": {
+            "description": "Returns an empty response when the `If-None-Match` header matches\nthe current `etag` value of the folder. This indicates that the folder\nhas not changed since it was last requested."
           }
         }
       }
@@ -12388,7 +12545,7 @@
           {
             "properties": {
               "tagged_message": {
-                "x-box-field-variant": 2,
+                "x-box-field-variant": 3,
                 "type": "string",
                 "example": "@[1234567:Aaron Levie] these tigers are cool!",
                 "description": "The string representing the comment text with\n@mentions included. @mention format is @[id:username]\nwhere `id` is user's Box ID and `username` is\ntheir display name."
@@ -12431,7 +12588,7 @@
           {
             "properties": {
               "type": {
-                "x-box-field-variant": 1,
+                "x-box-field-variant": 0,
                 "type": "string",
                 "description": "`comment`",
                 "example": "comment",
@@ -12440,13 +12597,13 @@
                 ]
               },
               "is_reply_comment": {
-                "x-box-field-variant": 1,
+                "x-box-field-variant": 2,
                 "type": "boolean",
                 "description": "Whether or not this comment is a reply to another\ncomment",
                 "example": true
               },
               "message": {
-                "x-box-field-variant": 1,
+                "x-box-field-variant": 2,
                 "type": "string",
                 "example": "@Aaron Levie these tigers are cool!",
                 "description": "The text of the comment, as provided by the user"
@@ -12460,19 +12617,19 @@
                     "description": "A mini user object representing the author of the\ncomment"
                   },
                   {
-                    "x-box-field-variant": 1
+                    "x-box-field-variant": 2
                   }
                 ]
               },
               "created_at": {
-                "x-box-field-variant": 1,
+                "x-box-field-variant": 2,
                 "type": "string",
                 "format": "date-time",
                 "description": "The time this comment was created",
                 "example": "2012-12-12T10:53:43-08:00"
               },
               "modified_at": {
-                "x-box-field-variant": 1,
+                "x-box-field-variant": 2,
                 "type": "string",
                 "format": "date-time",
                 "description": "The time this comment was last modified",
@@ -12487,7 +12644,7 @@
                     "description": "The object this comment was placed on"
                   },
                   {
-                    "x-box-field-variant": 1
+                    "x-box-field-variant": 2
                   }
                 ]
               }
@@ -12894,10 +13051,34 @@
           }
         }
       },
+      "ExpiringEmbedLink": {
+        "title": "Expiring Embed Link",
+        "x-box-resource-id": "expiring_embed_link",
+        "description": "An expiring Box Embed Link.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AccessToken--Mini"
+          },
+          {
+            "x-box-reference-hide": false
+          },
+          {
+            "properties": {
+              "url": {
+                "type": "string",
+                "format": "url",
+                "example": "https://cloud.app.box.com/preview/expiring_embed/...",
+                "description": "The actual expiring embed URL for this file, constructed\nfrom the file ID and access tokens specified in this object."
+              }
+            }
+          }
+        ]
+      },
       "File": {
         "title": "File",
         "x-box-resource-id": "file",
         "x-box-has-field-variants": true,
+        "x-box-sanitized": true,
         "description": "A full representation of a file, as can be returned from any\nfile API endpoints by default",
         "x-box-reference-category": "files",
         "allOf": [
@@ -12910,13 +13091,13 @@
           {
             "properties": {
               "version_number": {
-                "x-box-field-variant": 2,
+                "x-box-field-variant": 3,
                 "type": "string",
                 "example": "1",
                 "description": "The version number of this file"
               },
               "comment_count": {
-                "x-box-field-variant": 2,
+                "x-box-field-variant": 3,
                 "type": "integer",
                 "example": 10,
                 "description": "The number of comments on this file"
@@ -12930,7 +13111,7 @@
                     "description": "Describes the permissions that the current user has\nfor this file."
                   },
                   {
-                    "x-box-field-variant": 2
+                    "x-box-field-variant": 3
                   },
                   {
                     "nullable": false
@@ -12938,16 +13119,26 @@
                 ]
               },
               "tags": {
-                "x-box-field-variant": 2,
-                "type": "array",
-                "example": [
-                  "draft",
-                  "needs_review"
-                ],
-                "items": {
-                  "type": "string"
-                },
-                "description": "All tags applied to this folder."
+                "allOf": [
+                  {
+                    "type": "array",
+                    "example": [
+                      "approved"
+                    ],
+                    "items": {
+                      "type": "string"
+                    },
+                    "minItems": 1,
+                    "maxItems": 100,
+                    "description": "The tags for this item. These tags are shown in\nthe Box web app and mobile apps next to an item.\n\nTo add or remove a tag, retrieve the item's current tags,\nmodify them, and then update this field.\n\nThere is a limit of 100 tags per item, and 10,000\nunique tags per enterprise."
+                  },
+                  {
+                    "x-box-field-variant": 2
+                  },
+                  {
+                    "nullable": false
+                  }
+                ]
               },
               "lock": {
                 "allOf": [
@@ -12958,28 +13149,35 @@
                     "description": "The lock held on this file. If there is no lock, this can either\nbe `null` or have a timestamp in the past."
                   },
                   {
-                    "x-box-field-variant": 2
+                    "x-box-field-variant": 3
                   }
                 ],
                 "nullable": true
               },
               "extension": {
-                "x-box-field-variant": 2,
+                "x-box-field-variant": 3,
                 "type": "string",
-                "example": "png",
-                "description": "Indicates the suffix, when available, on the file. By default,\nset to an empty string. The suffix usually indicates the encoding\n(file format) of the file contents or usage."
+                "example": "pdf",
+                "description": "Indicates the (optional) file extension for this file. By default,\nthis is set to an empty string."
               },
               "is_package": {
-                "x-box-field-variant": 2,
+                "x-box-field-variant": 3,
                 "type": "boolean",
                 "example": true,
-                "description": "Whether the file is a package. Used for Mac Packages used by iWorks."
+                "description": "Indicates if the file is a package. Packages are commonly used\nby Mac Applications and can include iWork files."
               },
               "expiring_embed_link": {
-                "x-box-field-variant": 2,
-                "type": "string",
-                "example": "https://app.box.com/preview/expiring_embed/gvoct6FE!",
-                "description": "Requesting this field creates an expiring URL for an\nembedded preview session in an iframe.\n\nThis URL will expire after 60 seconds and the session will\nexpire after 60 minutes."
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/ExpiringEmbedLink"
+                  },
+                  {
+                    "x-box-field-variant": 3
+                  },
+                  {
+                    "description": "Requesting this field creates an expiring Box Embed URL for an\nembedded preview session in an iframe.\n\nThis URL will expire after 60 seconds and the session will\nexpire after 60 minutes.\n\nNot all file types are supported for these embed URLs."
+                  }
+                ]
               },
               "watermark_info": {
                 "allOf": [
@@ -12987,45 +13185,52 @@
                     "$ref": "#/components/schemas/WatermarkInfo"
                   },
                   {
-                    "description": "Information about the watermarking on this file"
+                    "description": "Details about the watermark applied to this folder"
                   },
                   {
-                    "x-box-field-variant": 2
+                    "x-box-field-variant": 3
                   }
                 ]
               },
               "allowed_invitee_roles": {
                 "x-box-field-variant": 2,
                 "type": "array",
-                "description": "Folder [collaboration](#collaboration-object) roles allowed by the\nenterprise administrator.",
-                "items": {
-                  "type": "string"
-                },
                 "example": [
                   "open"
                 ],
+                "nullable": false,
                 "enum": [
-                  "open",
-                  "company",
-                  "collaborators"
-                ]
+                  "editor",
+                  "viewer",
+                  "previewer",
+                  "uploader",
+                  "previewer uploader",
+                  "viewer uploader",
+                  "co-owner"
+                ],
+                "description": "A list of the types of roles that user can be invited at\nwhen sharing this file.",
+                "items": {
+                  "type": "string"
+                }
               },
               "is_externally_owned": {
                 "x-box-field-variant": 2,
                 "type": "boolean",
                 "example": true,
-                "description": "Whether this file is owned by a user outside of the enterprise."
+                "nullable": false,
+                "description": "Specifies if this folder is owned by a user outside of the\nauthenticated enterprise."
               },
               "has_collaborations": {
                 "x-box-field-variant": 2,
                 "type": "boolean",
                 "example": true,
-                "description": "Whether this file has any collaborators."
+                "nullable": false,
+                "description": "Specifies if this folder has any other collaborators."
               },
               "metadata": {
-                "x-box-field-variant": 2,
+                "x-box-field-variant": 3,
                 "type": "object",
-                "description": "A list of key-value pairs of metadata objects within their\nscopes.\n\nTo access the metadata for a file, first use the\n[Metadata](#metadata) endpoints to determine\nthe metadata templates available to your enterprise.\n\nThe use the [Retrieve File](#get-file-id) endpoint with\nthe `fields` query parameter to get the metadata by ID. The\nID for the metadata template will be in the format\n`metadata.<scope>.<templatename>`, for example\n`fields=metadata.global.properties`.",
+                "description": "A list of key-value pairs of metadata objects within their\nscopes.\n\nTo access the metadata for a file, first use the\nMetadata-endpoints to determine\nthe metadata templates available to your enterprise.\n\nThen use the `GET /files/:id` endpoint with\nthe `fields` query parameter to get the metadata by ID.\n\nThe ID for a metadata template will be in the format\n`metadata.<scope>.<templatename>`, for example\n`metadata.global.properties`.",
                 "example": {
                   "global": {
                     "marketingCollateral": {
@@ -13063,6 +13268,27 @@
                     "$ref": "#/components/schemas/Metadata"
                   }
                 }
+              },
+              "expires_at": {
+                "x-box-field-variant": 3,
+                "type": "string",
+                "format": "date-time",
+                "nullable": true,
+                "description": "When the file will automatically be deleted",
+                "example": "2012-12-12T10:53:43-08:00"
+              },
+              "representations": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/Representations"
+                  },
+                  {
+                    "x-box-field-variant": 3
+                  },
+                  {
+                    "description": "A list of representations for a file that can be used to\ndisplay a placeholder of the file in your application. By default\nthis returns all representations and we recommend using the\n`X-Rep-Hints` header to further customize the desired\nrepresentations."
+                  }
+                ]
               }
             }
           }
@@ -13093,6 +13319,7 @@
         "title": "File (Standard)",
         "x-box-resource-id": "file--standard",
         "x-box-reference-category": null,
+        "x-box-sanitized": true,
         "description": "A standard representation of a file, as returned from any\nfile API endpoints by default",
         "x-box-reference-hide": true,
         "allOf": [
@@ -13102,83 +13329,90 @@
           {
             "properties": {
               "sha1": {
-                "x-box-field-variant": 1,
+                "x-box-field-variant": 2,
                 "type": "string",
                 "format": "digest",
+                "nullable": false,
                 "example": "85136C79CBF9FE36BB9D05D0639C70C265C18D37",
-                "description": "The SHA1 hash of the file."
+                "description": "The SHA1 hash of the file. This can be used to compare the contents\nof a file on Box with a local file."
               },
               "description": {
-                "x-box-field-variant": 1,
+                "x-box-field-variant": 2,
                 "type": "string",
-                "description": "The description of the file",
+                "nullable": false,
+                "description": "The optional description of this file",
                 "maxLength": 256,
                 "example": "Contract for Q1 renewal"
               },
               "size": {
-                "x-box-field-variant": 1,
+                "x-box-field-variant": 2,
                 "type": "integer",
-                "description": "The file size in bytes. Be careful parsing this integer, it can\neasily go into [exponent notation](http://en.wikipedia.org/wiki/\\\nDouble-precision_floating-point_format).",
+                "nullable": false,
+                "description": "The file size in bytes. Be careful parsing this integer, it can\neasily get very large and cause an integer overflow.",
                 "example": 629644
               },
               "path_collection": {
-                "x-box-field-variant": 1,
-                "type": "array",
-                "description": "The path of folders to this file, starting at the root",
-                "items": {
-                  "$ref": "#/components/schemas/Folder--Mini"
-                }
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/PathCollection"
+                  },
+                  {
+                    "description": "The tree of folders that this file is contained in,\nstarting at the root."
+                  },
+                  {
+                    "x-box-field-variant": 2
+                  },
+                  {
+                    "nullable": false
+                  }
+                ]
               },
               "created_at": {
-                "x-box-field-variant": 1,
+                "x-box-field-variant": 2,
                 "type": "string",
                 "format": "date-time",
-                "description": "When this file was upload to Box’s servers",
+                "nullable": false,
+                "description": "The date and time when the file was created on Box.",
                 "example": "2012-12-12T10:53:43-08:00"
               },
               "modified_at": {
-                "x-box-field-variant": 1,
+                "x-box-field-variant": 2,
                 "type": "string",
                 "format": "date-time",
-                "description": "When this file was last updated on the Box servers",
+                "nullable": false,
+                "description": "The date and time when the folder was last updated on Box.",
                 "example": "2012-12-12T10:53:43-08:00"
               },
               "trashed_at": {
-                "x-box-field-variant": 1,
+                "x-box-field-variant": 2,
                 "type": "string",
                 "format": "date-time",
                 "nullable": true,
-                "description": "When this file was last moved to the trash",
+                "description": "The time at which this file was put in the trash.",
                 "example": "2012-12-12T10:53:43-08:00"
               },
               "purged_at": {
-                "x-box-field-variant": 1,
+                "x-box-field-variant": 2,
                 "type": "string",
                 "format": "date-time",
                 "nullable": true,
-                "description": "When this file will be permanently deleted",
+                "description": "The time at which this file is expected to be purged\nfrom the trash.",
                 "example": "2012-12-12T10:53:43-08:00"
               },
               "content_created_at": {
-                "x-box-field-variant": 1,
-                "type": "string",
-                "format": "date-time",
-                "description": "When this file was created originally",
-                "example": "2012-12-12T10:53:43-08:00"
-              },
-              "content_modified_at": {
-                "x-box-field-variant": 1,
-                "type": "string",
-                "format": "date-time",
-                "description": "When this file was last updated",
-                "example": "2012-12-12T10:53:43-08:00"
-              },
-              "expires_at": {
-                "x-box-field-variant": 1,
+                "x-box-field-variant": 2,
                 "type": "string",
                 "format": "date-time",
                 "nullable": true,
-                "description": "When the file will automatically be deleted",
+                "description": "The date and time at which this file was originally\ncreated, which might be before it was uploaded to Box.",
+                "example": "2012-12-12T10:53:43-08:00"
+              },
+              "content_modified_at": {
+                "x-box-field-variant": 2,
+                "type": "string",
+                "format": "date-time",
+                "nullable": true,
+                "description": "The date and time at which this folder was last updated,\nwhich might be before it was uploaded to Box.",
                 "example": "2012-12-12T10:53:43-08:00"
               },
               "created_by": {
@@ -13190,7 +13424,7 @@
                     "description": "The user who created this file"
                   },
                   {
-                    "x-box-field-variant": 1
+                    "x-box-field-variant": 2
                   }
                 ]
               },
@@ -13203,7 +13437,10 @@
                     "description": "The user who last modified this file"
                   },
                   {
-                    "x-box-field-variant": 1
+                    "x-box-field-variant": 2
+                  },
+                  {
+                    "nullable": false
                   }
                 ]
               },
@@ -13216,7 +13453,10 @@
                     "description": "The user who owns this file"
                   },
                   {
-                    "x-box-field-variant": 1
+                    "x-box-field-variant": 2
+                  },
+                  {
+                    "nullable": false
                   }
                 ]
               },
@@ -13226,13 +13466,15 @@
                     "$ref": "#/components/schemas/SharedLink"
                   },
                   {
-                    "description": "The shared link object for this file. Will be\n`null` if no shared link has been created."
+                    "description": "The shared link for this file. This will be\n`null` if no shared link has been created for this\nfile."
                   },
                   {
-                    "x-box-field-variant": 1
+                    "x-box-field-variant": 2
+                  },
+                  {
+                    "nullable": true
                   }
-                ],
-                "nullable": true
+                ]
               },
               "parent": {
                 "allOf": [
@@ -13240,23 +13482,25 @@
                     "$ref": "#/components/schemas/Folder--Mini"
                   },
                   {
-                    "description": "The folder that contains this file."
+                    "description": "The folder that this file is located within."
                   },
                   {
-                    "x-box-field-variant": 1
+                    "x-box-field-variant": 2
                   }
-                ]
+                ],
+                "nullable": true
               },
               "item_status": {
-                "x-box-field-variant": 1,
+                "x-box-field-variant": 2,
                 "type": "string",
-                "example": "active",
+                "description": "Defines if this item has been deleted or not.\n\n* `active` when the item has is not in the trash\n* `trashed` when the item has been moved to the trash but not deleted\n* `deleted` when the item has been permanently deleted.",
                 "enum": [
                   "active",
                   "trashed",
                   "deleted"
                 ],
-                "description": "Whether this item is deleted or not. Values include `active`,\n`trashed` if the file has been moved to the trash, and `deleted` if\nthe file has been permanently deleted"
+                "nullable": false,
+                "example": "active"
               }
             }
           }
@@ -13266,40 +13510,60 @@
         "title": "File (Mini)",
         "x-box-resource-id": "file--mini",
         "x-box-reference-category": null,
+        "x-box-sanitized": true,
         "description": "A mini representation of a file, used when\nnested under another resource.",
         "x-box-reference-hide": true,
         "allOf": [
           {
-            "$ref": "#/components/schemas/Item"
+            "$ref": "#/components/schemas/File--Base"
           },
           {
             "properties": {
-              "type": {
-                "type": "string",
-                "description": "`file`",
-                "example": "file",
-                "enum": [
-                  "file"
-                ]
-              },
               "sequence_id": {
                 "type": "string",
                 "example": "1",
-                "description": "A unique ID for use with the /events endpoint"
-              },
-              "etag": {
-                "type": "string",
-                "example": "1",
-                "description": "The entity tag of this file object. Used with `If-Match`\nheaders."
+                "x-box-field-variant": 1,
+                "description": "A unique identifier that can be used in combination\nwith the `/events` endpoint."
               },
               "name": {
                 "type": "string",
+                "x-box-field-variant": 1,
                 "description": "The name of the file",
-                "example": "Contract.png"
+                "example": "Contract.pdf"
               }
             }
           }
         ]
+      },
+      "File--Base": {
+        "title": "File (Base)",
+        "x-box-resource-id": "file--base",
+        "x-box-sanitized": true,
+        "x-box-reference-hide": true,
+        "description": "The bare basic representation of a file, the minimal\namount of fields returned when using the `fields` query\nparameter.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "nullable": false,
+            "description": "The unique identifier that represent a file.\n\nThe ID for any file can be determined\nby visiting a file in the web application\nand copying the ID from the URL. For example,\nfor the url `https://*.app.box.com/files/123`\nthe `file_id` is `123`.",
+            "example": "12345"
+          },
+          "etag": {
+            "type": "string",
+            "example": "1",
+            "nullable": true,
+            "description": "The HTTP etag of this file. This can be used within some API\nendpoints in the `If-Match` and `If-None-Match` headers to only\nperform changes on the file if (no) changes have happened."
+          },
+          "type": {
+            "type": "string",
+            "description": "`file`",
+            "example": "file",
+            "enum": [
+              "file"
+            ],
+            "nullable": false
+          }
+        }
       },
       "FilePermissions": {
         "title": "File Permissions",
@@ -13695,12 +13959,12 @@
                     ]
                   },
                   {
-                    "x-box-field-variant": 2
+                    "x-box-field-variant": 3
                   }
                 ]
               },
               "has_collaborations": {
-                "x-box-field-variant": 2,
+                "x-box-field-variant": 3,
                 "type": "boolean",
                 "example": true,
                 "nullable": false,
@@ -13715,7 +13979,7 @@
                     "description": "Describes the permissions that the current user has\nfor this folder"
                   },
                   {
-                    "x-box-field-variant": 2
+                    "x-box-field-variant": 3
                   },
                   {
                     "nullable": false
@@ -13737,7 +14001,7 @@
                     "description": "The tags for this item. These tags are shown in\nthe Box web app and mobile apps next to an item.\n\nTo add or remove a tag, retrieve the item's current tags,\nmodify them, and then update this field.\n\nThere is a limit of 100 tags per item, and 10,000\nunique tags per enterprise."
                   },
                   {
-                    "x-box-field-variant": 2
+                    "x-box-field-variant": 3
                   },
                   {
                     "nullable": false
@@ -13752,7 +14016,7 @@
                     "description": "Specifies if users who are not the owner\nof the folder can invite new collaborators to the folder."
                   },
                   {
-                    "x-box-field-variant": 2
+                    "x-box-field-variant": 3
                   },
                   {
                     "nullable": false
@@ -13760,7 +14024,7 @@
                 ]
               },
               "is_externally_owned": {
-                "x-box-field-variant": 2,
+                "x-box-field-variant": 3,
                 "type": "boolean",
                 "example": true,
                 "nullable": false,
@@ -13774,7 +14038,7 @@
                     "description": "Specifies if new invites to this folder are restricted to users\nwithin the enterprise. This does not affect existing\ncollaborations."
                   },
                   {
-                    "x-box-field-variant": 2
+                    "x-box-field-variant": 3
                   },
                   {
                     "nullable": false
@@ -13782,7 +14046,7 @@
                 ]
               },
               "allowed_shared_link_access_levels": {
-                "x-box-field-variant": 2,
+                "x-box-field-variant": 3,
                 "type": "array",
                 "example": [
                   "open"
@@ -13799,7 +14063,7 @@
                 "description": "A list of access levels that are available\nfor this folder.\n\nFor some folders, like the root folder, this will always\nbe an empty list as sharing is not allowed at that level."
               },
               "allowed_invitee_roles": {
-                "x-box-field-variant": 2,
+                "x-box-field-variant": 3,
                 "type": "array",
                 "example": [
                   "open"
@@ -13828,7 +14092,7 @@
                     "description": "Details about the watermark applied to this folder"
                   },
                   {
-                    "x-box-field-variant": 2
+                    "x-box-field-variant": 3
                   },
                   {
                     "nullable": false
@@ -13836,7 +14100,7 @@
                 ]
               },
               "can_non_owners_view_collaborators": {
-                "x-box-field-variant": 2,
+                "x-box-field-variant": 3,
                 "type": "boolean",
                 "example": true,
                 "description": "Specifies if collaborators who are not owners\nof this folder are restricted from viewing other\ncollaborations on this folder.\n\nIt also restricts non-owners from inviting new\ncollaborators."
@@ -13859,7 +14123,7 @@
           {
             "properties": {
               "created_at": {
-                "x-box-field-variant": 1,
+                "x-box-field-variant": 2,
                 "type": "string",
                 "format": "date-time",
                 "nullable": true,
@@ -13867,7 +14131,7 @@
                 "example": "2012-12-12T10:53:43-08:00"
               },
               "modified_at": {
-                "x-box-field-variant": 1,
+                "x-box-field-variant": 2,
                 "type": "string",
                 "format": "date-time",
                 "description": "The date and time when the folder was last updated. This value may\nbe `null` for some folders such as the root folder or the trash\nfolder.",
@@ -13884,7 +14148,7 @@
                     "nullable": false
                   },
                   {
-                    "x-box-field-variant": 1
+                    "x-box-field-variant": 2
                   },
                   {
                     "nullable": false
@@ -13892,7 +14156,7 @@
                 ]
               },
               "size": {
-                "x-box-field-variant": 1,
+                "x-box-field-variant": 2,
                 "type": "integer",
                 "format": "int64",
                 "description": "The folder size in bytes.\n\nBe careful parsing this integer as its\nvalue can get very large.",
@@ -13908,7 +14172,7 @@
                     "description": "The tree of folders that this folder is contained in,\nstarting at the root."
                   },
                   {
-                    "x-box-field-variant": 1
+                    "x-box-field-variant": 2
                   },
                   {
                     "nullable": false
@@ -13924,7 +14188,7 @@
                     "description": "The user who created this folder"
                   },
                   {
-                    "x-box-field-variant": 1
+                    "x-box-field-variant": 2
                   },
                   {
                     "nullable": false
@@ -13940,7 +14204,7 @@
                     "description": "The user who last modified this folder."
                   },
                   {
-                    "x-box-field-variant": 1
+                    "x-box-field-variant": 2
                   },
                   {
                     "nullable": false
@@ -13948,7 +14212,7 @@
                 ]
               },
               "trashed_at": {
-                "x-box-field-variant": 1,
+                "x-box-field-variant": 2,
                 "type": "string",
                 "format": "date-time",
                 "description": "The time at which this folder was put in the trash.",
@@ -13956,15 +14220,15 @@
                 "nullable": true
               },
               "purged_at": {
-                "x-box-field-variant": 1,
+                "x-box-field-variant": 2,
                 "type": "string",
                 "format": "date-time",
-                "description": "The time at which this folder is expected to be purged\nfrom the trash.\nThe time at which this folder will be permanently deleted.",
+                "description": "The time at which this folder is expected to be purged\nfrom the trash.",
                 "example": "2012-12-12T10:53:43-08:00",
                 "nullable": true
               },
               "content_created_at": {
-                "x-box-field-variant": 1,
+                "x-box-field-variant": 2,
                 "type": "string",
                 "format": "date-time",
                 "nullable": true,
@@ -13972,7 +14236,7 @@
                 "example": "2012-12-12T10:53:43-08:00"
               },
               "content_modified_at": {
-                "x-box-field-variant": 1,
+                "x-box-field-variant": 2,
                 "type": "string",
                 "format": "date-time",
                 "nullable": true,
@@ -13980,7 +14244,7 @@
                 "example": "2012-12-12T10:53:43-08:00"
               },
               "expires_at": {
-                "x-box-field-variant": 1,
+                "x-box-field-variant": 2,
                 "type": "string",
                 "format": "date-time",
                 "nullable": true,
@@ -13996,7 +14260,7 @@
                     "description": "The user who owns this folder."
                   },
                   {
-                    "x-box-field-variant": 1
+                    "x-box-field-variant": 2
                   },
                   {
                     "nullable": false
@@ -14012,13 +14276,13 @@
                     "description": "The shared link for this folder. This will be\n`null` if no shared link has been created for this\nfolder."
                   },
                   {
-                    "x-box-field-variant": 1
+                    "x-box-field-variant": 2
                   }
                 ],
                 "nullable": true
               },
               "folder_upload_email": {
-                "x-box-field-variant": 1,
+                "x-box-field-variant": 2,
                 "type": "object",
                 "nullable": true,
                 "properties": {
@@ -14050,13 +14314,13 @@
                     "description": "The optional folder that this folder is located within.\n\nThis value may be `null` for some folders such as the\nroot folder or the trash folder."
                   },
                   {
-                    "x-box-field-variant": 1
+                    "x-box-field-variant": 2
                   }
                 ],
                 "nullable": true
               },
               "item_status": {
-                "x-box-field-variant": 1,
+                "x-box-field-variant": 2,
                 "type": "string",
                 "description": "Defines if this item has been deleted or not.\n\n* `active` when the item has is not in the trash\n* `trashed` when the item has been moved to the trash but not deleted\n* `deleted` when the item has been permanently deleted.",
                 "enum": [
@@ -14076,13 +14340,13 @@
                     "description": "A page of the items that are in the folder.\n\nThis field can only be requested when querying a folder's\ninformation, not when querying a folder's items."
                   },
                   {
-                    "x-box-field-variant": 1
+                    "x-box-field-variant": 2
                   },
                   {
                     "nullable": false
                   }
                 ],
-                "x-box-field-variant": 1
+                "x-box-field-variant": 2
               }
             }
           }
@@ -14097,40 +14361,57 @@
         "x-box-sanitized": true,
         "allOf": [
           {
-            "$ref": "#/components/schemas/Item"
+            "$ref": "#/components/schemas/Folder--Base"
           },
           {
             "properties": {
-              "type": {
-                "type": "string",
-                "description": "`folder`",
-                "example": "folder",
-                "enum": [
-                  "folder"
-                ],
-                "nullable": false
-              },
               "sequence_id": {
                 "type": "string",
                 "nullable": true,
                 "example": "1",
-                "description": "A unique identifier that can be used in combination\nwith the `/events` endpoint. May be `null` for\nsome folders such as the root folder and trash folder."
-              },
-              "etag": {
-                "type": "string",
-                "nullable": true,
-                "example": "1",
-                "description": "The HTTP etag of this folder. This can be used within some API\nendpoints in the `If-Match` and `If-None-Match` headers to only\nperform changes on the folder if (no) changes have happened."
+                "description": "A unique identifier that can be used in combination\nwith the `/events` endpoint. May be `null` for\nsome folders such as the root folder and trash folder.",
+                "x-box-field-variant": 1
               },
               "name": {
                 "type": "string",
                 "description": "The name of the folder.",
                 "example": "Contracts",
-                "nullable": false
+                "nullable": false,
+                "x-box-field-variant": 1
               }
             }
           }
         ]
+      },
+      "Folder--Base": {
+        "title": "Folder (Base)",
+        "x-box-resource-id": "folder--base",
+        "x-box-sanitized": true,
+        "x-box-reference-hide": true,
+        "description": "The bare basic representation of a folder, the minimal\namount of fields returned when using the `fields` query\nparameter.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "nullable": false,
+            "description": "The unique identifier that represent a folder.\n\nThe ID for any folder can be determined\nby visiting a folder in the web application\nand copying the ID from the URL. For example,\nfor the url `https://*.app.box.com/folders/123`\nthe `folder_id` is `123`.",
+            "example": "12345"
+          },
+          "etag": {
+            "type": "string",
+            "nullable": true,
+            "example": "1",
+            "description": "The HTTP etag of this folder. This can be used within some API\nendpoints in the `If-Match` and `If-None-Match` headers to only\nperform changes on the folder if (no) changes have happened."
+          },
+          "type": {
+            "type": "string",
+            "description": "`folder`",
+            "example": "folder",
+            "enum": [
+              "folder"
+            ],
+            "nullable": false
+          }
+        }
       },
       "FolderUploadEmail": {
         "title": "Folder Upload Email",
@@ -14186,27 +14467,27 @@
           {
             "properties": {
               "provenance": {
-                "x-box-field-variant": 2,
+                "x-box-field-variant": 3,
                 "type": "string",
                 "description": "Keeps track of which external source this group is\ncoming from (e.g. \"Active Directory\", \"Google Groups\",\n\"Facebook Groups\").  Setting this will\nalso prevent Box users from editing the group name\nand its members directly via the Box web application.\nThis is desirable for one-way syncing of groups.",
                 "maxLength": 255,
                 "example": "Active Directory"
               },
               "external_sync_identifier": {
-                "x-box-field-variant": 2,
+                "x-box-field-variant": 3,
                 "type": "string",
                 "description": "An arbitrary identifier that can be used by\nexternal group sync tools to link this Box Group to\nan external group. Example values of this field\ncould be an Active Directory Object ID or a Google\nGroup ID.  We recommend you use of this field in\norder to avoid issues when group names are updated in\neither Box or external systems.",
                 "example": "AD:123456"
               },
               "description": {
-                "x-box-field-variant": 2,
+                "x-box-field-variant": 3,
                 "type": "string",
                 "description": "Human readable description of the group.",
                 "maxLength": 255,
                 "example": "Support Group - as imported from Active Directory"
               },
               "invitability_level": {
-                "x-box-field-variant": 2,
+                "x-box-field-variant": 3,
                 "type": "string",
                 "example": "admins_only",
                 "description": "Specifies who can invite the group to collaborate\non folders (Create Collaboration).\n\nWhen set to `admins_only` the enterprise admin, co-admins,\nand the group's admin can invite the group.\n\nWhen set to `admins_and_members` all the admins listed\nabove and group members can invite the group.\n\nWhen set to `all_managed_users` all managed users in the\nenterprise can invite the group.",
@@ -14217,7 +14498,7 @@
                 ]
               },
               "member_viewability_level": {
-                "x-box-field-variant": 2,
+                "x-box-field-variant": 3,
                 "type": "string",
                 "example": "admins_only",
                 "description": "Specifies who can view the members of the group\n(Get Memberships for Group).\n\n* `admins_only` - the enterprise admin, co-admins, group's\n  group admin\n* `admins_and_members` - all admins and group members\n* `all_managed_users` - all managed users in the\n  enterprise",
@@ -14264,14 +14545,14 @@
           {
             "properties": {
               "created_at": {
-                "x-box-field-variant": 1,
+                "x-box-field-variant": 2,
                 "type": "string",
                 "format": "date-time",
                 "description": "When the group object was created",
                 "example": "2012-12-12T10:53:43-08:00"
               },
               "modified_at": {
-                "x-box-field-variant": 1,
+                "x-box-field-variant": 2,
                 "type": "string",
                 "format": "date-time",
                 "description": "When the group object was last modified",
@@ -14304,12 +14585,14 @@
               "name": {
                 "type": "string",
                 "description": "The name of the group",
-                "example": "Support"
+                "example": "Support",
+                "x-box-field-variant": 1
               },
               "group_type": {
                 "type": "string",
                 "description": "The type of the group.",
                 "example": "managed_group",
+                "x-box-field-variant": 1,
                 "enum": [
                   "managed_group",
                   "all_users_group"
@@ -15650,7 +15933,7 @@
           },
           "url": {
             "type": "string",
-            "example": "http://2.realtime.services.box.net/\\\nsubscribe\\?channel=cc807c9c4869ffb1c81a&stream_type=all",
+            "example": "http://2.realtime.services.box.net/subscribe?channel=cc807c9c4869ffb1c81a&stream_type=all",
             "description": "The URL for the server."
           },
           "ttl": {
@@ -15766,6 +16049,93 @@
             "type": "string",
             "description": "The unique identifier for this object",
             "example": "11446498"
+          }
+        }
+      },
+      "Representation": {
+        "title": "Representation",
+        "x-box-resource-id": "representation",
+        "description": "A file representation",
+        "properties": {
+          "content": {
+            "type": "object",
+            "description": "An object containing the URL that can be used to actually fetch\nthe representation.",
+            "properties": {
+              "url_template": {
+                "type": "string",
+                "example": "https://dl.boxcloud.com/api/2.0/internal_files/123/versions/345/representations/png_paged_2048x2048/content/{+asset_path}?watermark_content=4567",
+                "description": "The download URL that can be used to fetch the representation.\nMake sure to make an authenticated API call to this endpoint.\n\nThis URL is a template and will require the `{+asset_path}` to\nbe replaced by a path. In general, for unpaged representations\nit can be replaced by an empty string.\n\nFor paged representations, replace the `{+asset_path}` with the\npage to request plus the extension for the file, for example\n`1.pdf`.\n\nWhen requesting the download URL the following additional\nquery params can be passed along.\n\n* `set_content_disposition_type` - Sets the `Content-Disposition`\n  header in the API response with the specified disposition type\n  of either `inline` or `attachment`. If not supplied, the\n  `Content-Disposition` header is not included in the response.\n\n* `set_content_disposition_filename` - Allows the application to\n  define the representation's file name used in the\n  `Content-Disposition` header.  If not defined, the filename\n  is derived from the source file name in Box combined with the\n  extension of the representation."
+              }
+            }
+          },
+          "info": {
+            "type": "object",
+            "description": "An object containing the URL that can be used to fetch more info\non this representation.",
+            "properties": {
+              "url": {
+                "type": "string",
+                "example": "https://api.box.com/2.0/internal_files/123/versions/345/representations/png_paged_2048x2048",
+                "description": "The API URL that can be used to get more info on this file\nrepresentation. Make sure to make an authenticated API call\nto this endpoint."
+              }
+            }
+          },
+          "properties": {
+            "type": "object",
+            "description": "An object containing the size and type of this presentation.",
+            "properties": {
+              "dimensions": {
+                "type": "string",
+                "format": "<width>x<height>",
+                "example": "2048x2048",
+                "description": "The width by height size of this representation in pixels."
+              },
+              "paged": {
+                "type": "boolean",
+                "example": true,
+                "description": "Indicates if the representation is build up out of multiple pages"
+              },
+              "thumb": {
+                "type": "boolean",
+                "example": true,
+                "description": "Indicates if the representation can be used as a thumbnail of the\nfile"
+              }
+            }
+          },
+          "representation": {
+            "type": "string",
+            "example": "png",
+            "description": "Indicates the file type of the returned representation."
+          },
+          "status": {
+            "type": "object",
+            "description": "An object containing the status of this representation.",
+            "properties": {
+              "state": {
+                "type": "string",
+                "example": "success",
+                "enum": [
+                  "success",
+                  "viewable",
+                  "pending",
+                  "none"
+                ],
+                "description": "The status of the representation.\n\n* `success` defines the representation as ready to be viewed.\n* `viewable` defines a video to be ready for viewing.\n* `pending` defines the representation as to be generated. Retry\n  this endpoint to re-check the status.\n* `none` defines that the representation will be created when\n  requested. Request the URL defined in the `info` object to trigger\n  this generation."
+              }
+            }
+          }
+        }
+      },
+      "Representations": {
+        "title": "Representations",
+        "x-box-resource-id": "representations",
+        "description": "A list of file representations",
+        "properties": {
+          "entries": {
+            "type": "array",
+            "description": "A list of files",
+            "items": {
+              "$ref": "#/components/schemas/Representation"
+            }
           }
         }
       },
@@ -17125,7 +17495,7 @@
           {
             "properties": {
               "role": {
-                "x-box-field-variant": 2,
+                "x-box-field-variant": 3,
                 "type": "string",
                 "enum": [
                   "admin",
@@ -17136,7 +17506,7 @@
                 "example": "admin"
               },
               "tracking_codes": {
-                "x-box-field-variant": 2,
+                "x-box-field-variant": 3,
                 "type": "array",
                 "description": "An array of key/value pairs set by the user’s admin",
                 "items": {
@@ -17144,31 +17514,31 @@
                 }
               },
               "can_see_managed_users": {
-                "x-box-field-variant": 2,
+                "x-box-field-variant": 3,
                 "type": "boolean",
                 "example": true,
                 "description": "Whether the user can see other enterprise users in her contact list"
               },
               "is_sync_enabled": {
-                "x-box-field-variant": 2,
+                "x-box-field-variant": 3,
                 "type": "boolean",
                 "description": "Whether the user can use Box Sync",
                 "example": true
               },
               "is_external_collab_restricted": {
-                "x-box-field-variant": 2,
+                "x-box-field-variant": 3,
                 "type": "boolean",
                 "example": true,
                 "description": "Whether the user is allowed to collaborate with users outside her\nenterprise"
               },
               "is_exempt_from_device_limits": {
-                "x-box-field-variant": 2,
+                "x-box-field-variant": 3,
                 "type": "boolean",
                 "example": true,
                 "description": "Whether to exempt the user from Enterprise device limits"
               },
               "is_exempt_from_login_verification": {
-                "x-box-field-variant": 2,
+                "x-box-field-variant": 3,
                 "type": "boolean",
                 "example": true,
                 "description": "Whether the user must use two-factor authentication"
@@ -17182,12 +17552,12 @@
                     "description": "Representation of the user’s enterprise"
                   },
                   {
-                    "x-box-field-variant": 2
+                    "x-box-field-variant": 3
                   }
                 ]
               },
               "my_tags": {
-                "x-box-field-variant": 2,
+                "x-box-field-variant": 3,
                 "type": "array",
                 "items": {
                   "type": "string"
@@ -17198,19 +17568,19 @@
                 "description": "Tags for all files and folders owned by the user. Values returned\nwill only contain tags that were set by the requester."
               },
               "hostname": {
-                "x-box-field-variant": 2,
+                "x-box-field-variant": 3,
                 "type": "string",
                 "example": "https://example.app.box.com/",
                 "description": "The root (protocol, subdomain, domain) of any links that need to be\ngenerated for the user"
               },
               "is_platform_access_only": {
-                "x-box-field-variant": 2,
+                "x-box-field-variant": 3,
                 "type": "boolean",
                 "example": true,
                 "description": "Whether the user is an App User"
               },
               "external_app_user_id": {
-                "x-box-field-variant": 2,
+                "x-box-field-variant": 3,
                 "type": "string",
                 "example": "my-app-user",
                 "description": "An external identifier for an app user, which can be used to look up\nthe user."
@@ -17252,53 +17622,53 @@
           {
             "properties": {
               "created_at": {
-                "x-box-field-variant": 1,
+                "x-box-field-variant": 2,
                 "type": "string",
                 "format": "date-time",
                 "description": "When the user object was created",
                 "example": "2012-12-12T10:53:43-08:00"
               },
               "modified_at": {
-                "x-box-field-variant": 1,
+                "x-box-field-variant": 2,
                 "type": "string",
                 "format": "date-time",
                 "description": "When the user object was last modified",
                 "example": "2012-12-12T10:53:43-08:00"
               },
               "language": {
-                "x-box-field-variant": 1,
+                "x-box-field-variant": 2,
                 "type": "string",
                 "format": "ISO639-1-BOX",
                 "description": "The user's preferred language",
                 "example": "en"
               },
               "timezone": {
-                "x-box-field-variant": 1,
+                "x-box-field-variant": 2,
                 "type": "string",
                 "format": "timezone",
                 "description": "The user's timezone",
                 "example": "Africa/Bujumbura"
               },
               "space_amount": {
-                "x-box-field-variant": 1,
+                "x-box-field-variant": 2,
                 "type": "integer",
                 "description": "The user’s total available space amount in bytes",
                 "example": 11345156112
               },
               "space_used": {
-                "x-box-field-variant": 1,
+                "x-box-field-variant": 2,
                 "type": "integer",
                 "description": "The amount of space in use by the user",
                 "example": 1237009912
               },
               "max_upload_size": {
-                "x-box-field-variant": 1,
+                "x-box-field-variant": 2,
                 "type": "integer",
                 "description": "The maximum individual file size in bytes the user can have",
                 "example": 2147483648
               },
               "status": {
-                "x-box-field-variant": 1,
+                "x-box-field-variant": 2,
                 "type": "string",
                 "enum": [
                   "active",
@@ -17310,28 +17680,28 @@
                 "example": "active"
               },
               "job_title": {
-                "x-box-field-variant": 1,
+                "x-box-field-variant": 2,
                 "type": "string",
                 "description": "The user’s job title",
                 "maxLength": 100,
                 "example": "CEO"
               },
               "phone": {
-                "x-box-field-variant": 1,
+                "x-box-field-variant": 2,
                 "type": "string",
                 "description": "The user’s phone number",
                 "maxLength": 100,
                 "example": "6509241374"
               },
               "address": {
-                "x-box-field-variant": 1,
+                "x-box-field-variant": 2,
                 "type": "string",
                 "description": "The user’s address",
                 "maxLength": 255,
                 "example": "900 Jefferson Ave, Redwood City, CA 94063"
               },
               "avatar_url": {
-                "x-box-field-variant": 1,
+                "x-box-field-variant": 2,
                 "type": "string",
                 "description": "URL of the user’s avatar image",
                 "example": "https://www.box.com/api/avatar/large/181216415"
@@ -17365,14 +17735,16 @@
                 "description": "The display name of this user",
                 "example": "Aaron Levie",
                 "maxLength": 50,
-                "nullable": false
+                "nullable": false,
+                "x-box-field-variant": 1
               },
               "login": {
                 "type": "string",
                 "format": "email",
                 "description": "The primary email address of this user",
                 "example": "ceo@example.com",
-                "nullable": false
+                "nullable": false,
+                "x-box-field-variant": 1
               }
             }
           }
@@ -17824,7 +18196,8 @@
               "url": {
                 "type": "string",
                 "example": "https://www.example.com/example/1234",
-                "description": "The URL this web link points to"
+                "description": "The URL this web link points to",
+                "x-box-field-variant": 1
               },
               "type": {
                 "type": "string",
@@ -17837,6 +18210,7 @@
               "sequence_id": {
                 "type": "string",
                 "example": "1",
+                "x-box-field-variant": 1,
                 "description": "A unique ID for use with the /events endpoint"
               },
               "etag": {
@@ -17847,7 +18221,8 @@
               "name": {
                 "type": "string",
                 "description": "The name of the web link",
-                "example": "My Bookmark"
+                "example": "My Bookmark",
+                "x-box-field-variant": 1
               }
             }
           }
