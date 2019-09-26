@@ -9,20 +9,7 @@ let specification = null
 let spellChecker = null
 beforeAll(async () => {
   specification = await loader.loadSpecification()
-
-  // make sure we use en-US spelling
-  process.env.LANG = 'en_US'
   spellChecker = require('./helpers/spellChecker')
-  // make sure to reset the system language
-  process.env.LANG  = systemLang
-})
-
-/**
- * Make sure the system language is reset at the end of 
- * the tests
- */
-afterAll(() => {
-  expect(process.env.LANG).toBe(systemLang)
 })
 
 /**
