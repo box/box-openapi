@@ -1,7 +1,7 @@
 ---
 operationId: get_files_id
 
-summary: Get a file
+summary: Get file information
 
 tags:
   - Files
@@ -15,6 +15,35 @@ description: |-
 parameters:
   - $ref: '../attributes/file_id.yml'
   - $ref: '../attributes/fields.yml'
+  - $ref: '../attributes/if_none_match.yml'
+  - name: "X-Rep-Hints"
+    description: |-
+      A header required to request specific `representations`
+      of a file. Use this in combination with the `fields` query
+      parameter to request a specific file representation.
+
+      The general format for these representations is
+      `X-Rep-Hints: [...]` where `[...]` is one or many
+      hints in the format `[fileType?query]`.
+
+      For example, to request a `png` representation in `32x32`
+      as well as `94x94` pixel dimensions provide the following
+      hints.
+
+      `X-Rep-Hints: [jpg?dimensions=32x32][jpg?dimensions=94x94]`
+
+      Additionally, a `text` representation is available for all
+      document file types in Box using the `[extracted_text]`
+      representation.
+
+      `X-Rep-Hints: [extracted_text]`
+
+    example: "X-Rep-Hints: [pdf]"
+    in: header
+    required: true
+    schema:
+      type: string
+      nullable: true
 
 responses:
   200:
@@ -28,3 +57,48 @@ responses:
       application/json:
         schema:
           $ref: '#/components/schemas/File'
+
+  304:
+    description: |-
+      Returns an empty response when the `If-None-Match` header matches
+      the current `etag` value of the folder. This indicates that the folder
+      has not changed since it was last requested.
+
+  403:
+    description: |-
+      Returned when the access token provided in the `Authorization` header
+      is not recognized or not provided.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
+
+  404:
+    description: |-
+      Returned if the file is not found, or the user does not
+      have access to the file.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
+
+  405:
+    description: |-
+      Returned if the `file_id` is not in a recognized format.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
+
+  415:
+    description: |-
+      Returns an error if an action is performed on a file with an
+      incorrect media type.
+
+      * `unsupported_media_type` when requesting an `expiring_embed_link`
+        for a file that is not supported by Box Embed.
+
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'

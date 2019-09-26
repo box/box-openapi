@@ -3,6 +3,7 @@ title: File (Standard)
 
 x-box-resource-id: file--standard
 x-box-reference-category: null
+x-box-sanitized: true
 
 description: |-
   A standard representation of a file, as returned from any
@@ -14,138 +15,148 @@ allOf:
   - $ref: '#/components/schemas/File--Mini'
   - properties:
       sha1:
-        x-box-field-variant: 1
+        x-box-field-variant: 2
         type: string
         format: digest
+        nullable: false
         example: 85136C79CBF9FE36BB9D05D0639C70C265C18D37
         description: |-
-          The SHA1 hash of the file.
+          The SHA1 hash of the file. This can be used to compare the contents
+          of a file on Box with a local file.
 
       description:
-        x-box-field-variant: 1
+        x-box-field-variant: 2
         type: string
-        description: The description of the file
+        nullable: false
+        description: The optional description of this file
         maxLength: 256
         example: "Contract for Q1 renewal"
 
       size:
-        x-box-field-variant: 1
+        x-box-field-variant: 2
         type: integer
+        nullable: false
         description: |-
           The file size in bytes. Be careful parsing this integer, it can
-          easily go into [exponent notation](http://en.wikipedia.org/wiki/\
-          Double-precision_floating-point_format).
+          easily get very large and cause an integer overflow.
         example: 629644
 
       path_collection:
-        x-box-field-variant: 1
-        type: array
-        description: The path of folders to this file, starting at the root
-        items:
-          $ref: '#/components/schemas/Folder--Mini'
+        allOf:
+          - $ref: '#/components/schemas/PathCollection'
+          - description: |-
+              The tree of folders that this file is contained in,
+              starting at the root.
+          - x-box-field-variant: 2
+          - nullable: false
 
       created_at:
-        x-box-field-variant: 1
+        x-box-field-variant: 2
         type: string
         format: date-time
+        nullable: false
         description: |-
-          When this file was upload to Box’s servers
+          The date and time when the file was created on Box.
         example: "2012-12-12T10:53:43-08:00"
 
       modified_at:
-        x-box-field-variant: 1
+        x-box-field-variant: 2
         type: string
         format: date-time
+        nullable: false
         description: |-
-          When this file was last updated on the Box servers
+          The date and time when the folder was last updated on Box.
         example: "2012-12-12T10:53:43-08:00"
 
       trashed_at:
-        x-box-field-variant: 1
+        x-box-field-variant: 2
         type: string
         format: date-time
         nullable: true
         description: |-
-          When this file was last moved to the trash
+          The time at which this file was put in the trash.
         example: "2012-12-12T10:53:43-08:00"
 
       purged_at:
-        x-box-field-variant: 1
+        x-box-field-variant: 2
         type: string
         format: date-time
         nullable: true
         description: |-
-          When this file will be permanently deleted
+          The time at which this file is expected to be purged
+          from the trash.
         example: "2012-12-12T10:53:43-08:00"
 
       content_created_at:
-        x-box-field-variant: 1
-        type: string
-        format: date-time
-        description: |-
-          When this file was created originally
-        example: "2012-12-12T10:53:43-08:00"
-
-      content_modified_at:
-        x-box-field-variant: 1
-        type: string
-        format: date-time
-        description: |-
-          When this file was last updated
-        example: "2012-12-12T10:53:43-08:00"
-
-      expires_at:
-        x-box-field-variant: 1
+        x-box-field-variant: 2
         type: string
         format: date-time
         nullable: true
         description: |-
-          When the file will automatically be deleted
+          The date and time at which this file was originally
+          created, which might be before it was uploaded to Box.
+        example: "2012-12-12T10:53:43-08:00"
+
+      content_modified_at:
+        x-box-field-variant: 2
+        type: string
+        format: date-time
+        nullable: true
+        description: |-
+          The date and time at which this folder was last updated,
+          which might be before it was uploaded to Box.
         example: "2012-12-12T10:53:43-08:00"
 
       created_by:
         allOf:
           - $ref: '#/components/schemas/User--Mini'
           - description: The user who created this file
-          - x-box-field-variant: 1
+          - x-box-field-variant: 2
 
       modified_by:
         allOf:
           - $ref: '#/components/schemas/User--Mini'
           - description: The user who last modified this file
-          - x-box-field-variant: 1
+          - x-box-field-variant: 2
+          - nullable: false
 
       owned_by:
         allOf:
           - $ref: '#/components/schemas/User--Mini'
           - description: The user who owns this file
-          - x-box-field-variant: 1
+          - x-box-field-variant: 2
+          - nullable: false
 
       shared_link:
         allOf:
           - $ref: '#/components/schemas/SharedLink'
           - description: |-
-              The shared link object for this file. Will be
-              `null` if no shared link has been created.
-          - x-box-field-variant: 1
-        nullable: true
+              The shared link for this file. This will be
+              `null` if no shared link has been created for this
+              file.
+          - x-box-field-variant: 2
+          - nullable: true
 
       parent:
         allOf:
           - $ref: '#/components/schemas/Folder--Mini'
           - description: |-
-              The folder that contains this file.
-          - x-box-field-variant: 1
+              The folder that this file is located within.
+          - x-box-field-variant: 2
+        nullable: true
 
       item_status:
-        x-box-field-variant: 1
+        x-box-field-variant: 2
         type: string
-        example: active
+        description: |-
+          Defines if this item has been deleted or not.
+
+          * `active` when the item has is not in the trash
+          * `trashed` when the item has been moved to the trash but not deleted
+          * `deleted` when the item has been permanently deleted.
         enum:
           - active
           - trashed
           - deleted
-        description: |-
-          Whether this item is deleted or not. Values include `active`,
-          `trashed` if the file has been moved to the trash, and `deleted` if
-          the file has been permanently deleted
+        nullable: false
+        example: "active"
