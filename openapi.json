@@ -162,7 +162,7 @@
     "/oauth2/revoke": {
       "post": {
         "operationId": "post_oauth2_revoke", 
-        "summary": "アクセストークンを無効化", 
+        "summary": "アクセストークンを取り消し", 
         "description": "アクティブなアクセストークンを無効にします。これにより、認証されていたユーザーはログアウトされます。", 
         "tags": [
           "Authorization"
@@ -204,7 +204,7 @@
     "/files/{file_id}": {
       "get": {
         "operationId": "get_files_id", 
-        "summary": "ファイルを取得", 
+        "summary": "ファイル情報の取得", 
         "tags": [
           "Files"
         ], 
@@ -214,7 +214,7 @@
         "parameters": [
           {
             "name": "file_id", 
-            "description": "ファイルのID。", 
+            "description": "ファイルを表す一意の識別子。\n\nファイルIDを確認するには、ウェブアプリケーションでファイルにアクセスして、URLからIDをコピーします。たとえば、URLが`https://*.app.box.com/files/123`の場合、`file_id`は`123`です。", 
             "example": "12345", 
             "in": "path", 
             "required": true, 
@@ -224,7 +224,7 @@
           }, 
           {
             "name": "fields", 
-            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれないという影響があることに注意してください。", 
+            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれず、リクエストしたフィールドのほかには、簡易版レプリゼンテーションのフィールドしか返されないことに注意してください。", 
             "in": "query", 
             "example": "id,type,name", 
             "required": false, 
@@ -235,15 +235,79 @@
                 "type": "string"
               }
             }
+          }, 
+          {
+            "name": "If-None-Match", 
+            "description": "項目が変更されている場合にのみ、その項目を返します。\n\nその項目の最後に認識された`etag`値をこのヘッダーに渡すと、それ以降に項目が変更されていない場合、エンドポイントは`304 Not Modified`を返して失敗します。", 
+            "in": "header", 
+            "required": false, 
+            "example": 1, 
+            "schema": {
+              "type": "string"
+            }
+          }, 
+          {
+            "name": "X-Rep-Hints", 
+            "description": "ファイルの特定の`representations`をリクエストするために必要なヘッダー。特定のファイルレプリゼンテーションをリクエストするには、このヘッダーを`fields`クエリパラメータと組み合わせて使用します。\n\nこれらのレプリゼンテーションの一般的な形式は`X-Rep-Hints: [...]`で、`[...]`の部分では`[fileType?query]`という形式で1つまたは複数のヒントを指定します。\n\nたとえば、ピクセルサイズ`32x32`および`94x94`の`png`レプリゼンテーションをリクエストするには、以下のヒントを指定します。\n\n`X-Rep-Hints: [jpg?dimensions=32x32][jpg?dimensions=94x94]`\n\nまた、`[extracted_text]`レプリゼンテーションを使用すると、Box内のすべてのドキュメントファイルタイプの`text`レプリゼンテーションを使用できます。\n\n`X-Rep-Hints: [extracted_text]`", 
+            "example": "X-Rep-Hints: [pdf]", 
+            "in": "header", 
+            "required": true, 
+            "schema": {
+              "type": "string", 
+              "nullable": true
+            }
           }
         ], 
         "responses": {
           "200": {
-            "description": "ファイルオブジェクトを返します。\n\n[一部のフィールドはデフォルトで返されます](#file)。[fields](#get-files-id--request--fields)パラメータを使用して明示的にリクエストする必要があります。", 
+            "description": "ファイルオブジェクトを返します。\n\n使用可能なすべてのフィールドがデフォルトで返されるとは限りません。特定のフィールドを明示的にリクエストするには、[fields](#param-fields)クエリパラメータを使用します。", 
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/File"
+                }
+              }
+            }
+          }, 
+          "304": {
+            "description": "`If-None-Match`ヘッダーがフォルダの現在の`etag`値と一致する場合は、空の応答を返します。これは、フォルダが前回リクエストされたときから変更されていないことを示します。"
+          }, 
+          "403": {
+            "description": "`Authorization`ヘッダーで指定されているアクセストークンが\n認識されないか、指定されていない場合に返されます。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }, 
+          "404": {
+            "description": "ファイルが見つからない場合、またはユーザーにファイルへのアクセス権限が与えられていない場合に返されます。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }, 
+          "405": {
+            "description": "`file_id`が認識されていない形式で指定されている場合に返されます。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }, 
+          "415": {
+            "description": "誤ったメディアタイプのファイルに対してアクションが実行されると、エラーが返されます。\n\n* Box Embedによってサポートされないファイルの`expiring_embed_link`をリクエストすると、`unsupported_media_type`が返されます。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
                 }
               }
             }
@@ -262,7 +326,7 @@
         "parameters": [
           {
             "name": "file_id", 
-            "description": "ファイルのID。", 
+            "description": "ファイルを表す一意の識別子。\n\nファイルIDを確認するには、ウェブアプリケーションでファイルにアクセスして、URLからIDをコピーします。たとえば、URLが`https://*.app.box.com/files/123`の場合、`file_id`は`123`です。", 
             "example": "12345", 
             "in": "path", 
             "required": true, 
@@ -272,7 +336,7 @@
           }, 
           {
             "name": "fields", 
-            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれないという影響があることに注意してください。", 
+            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれず、リクエストしたフィールドのほかには、簡易版レプリゼンテーションのフィールドしか返されないことに注意してください。", 
             "in": "query", 
             "example": "id,type,name", 
             "required": false, 
@@ -365,7 +429,7 @@
         "parameters": [
           {
             "name": "file_id", 
-            "description": "ファイルのID。", 
+            "description": "ファイルを表す一意の識別子。\n\nファイルIDを確認するには、ウェブアプリケーションでファイルにアクセスして、URLからIDをコピーします。たとえば、URLが`https://*.app.box.com/files/123`の場合、`file_id`は`123`です。", 
             "example": "12345", 
             "in": "path", 
             "required": true, 
@@ -375,7 +439,7 @@
           }, 
           {
             "name": "fields", 
-            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれないという影響があることに注意してください。", 
+            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれず、リクエストしたフィールドのほかには、簡易版レプリゼンテーションのフィールドしか返されないことに注意してください。", 
             "in": "query", 
             "example": "id,type,name", 
             "required": false, 
@@ -389,7 +453,7 @@
           }, 
           {
             "name": "If-Match", 
-            "description": "この項目が最近変更されていないことを確認するには、その項目の現在の`etag`がこのヘッダーに渡された`etag`と一致しているかどうかを確認します。", 
+            "description": "変更を加える前にこの項目が最近変更されていないことを確認します。\n\nその項目の最後に認識された`etag`値をこのヘッダーに渡すと、それ以降に項目が変更されている場合、エンドポイントは`412 Precondition Failed`を返して失敗します。", 
             "in": "header", 
             "required": false, 
             "example": 1, 
@@ -473,11 +537,21 @@
         }, 
         "responses": {
           "200": {
-            "description": "ファイルオブジェクトを返します。\n\n[一部のフィールドはデフォルトで返されます](#file)。[fields](#get-files-id--request--fields)パラメータを使用して明示的にリクエストする必要があります。", 
+            "description": "ファイルオブジェクトを返します。\n\n使用可能なすべてのフィールドがデフォルトで返されるとは限りません。特定のフィールドを明示的にリクエストするには、[fields](#param-fields)クエリパラメータを使用します。", 
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/File"
+                }
+              }
+            }
+          }, 
+          "412": {
+            "description": "`If-Match`ヘッダーがファイルの現在の`etag`値と一致しない場合にエラーを返します。これは、ファイルが前回リクエストされたときから変更されていることを示します。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
                 }
               }
             }
@@ -495,7 +569,7 @@
         "parameters": [
           {
             "name": "file_id", 
-            "description": "ファイルのID。", 
+            "description": "ファイルを表す一意の識別子。\n\nファイルIDを確認するには、ウェブアプリケーションでファイルにアクセスして、URLからIDをコピーします。たとえば、URLが`https://*.app.box.com/files/123`の場合、`file_id`は`123`です。", 
             "example": "12345", 
             "in": "path", 
             "required": true, 
@@ -505,7 +579,7 @@
           }, 
           {
             "name": "If-Match", 
-            "description": "この項目が最近変更されていないことを確認するには、その項目の現在の`etag`がこのヘッダーに渡された`etag`と一致しているかどうかを確認します。", 
+            "description": "変更を加える前にこの項目が最近変更されていないことを確認します。\n\nその項目の最後に認識された`etag`値をこのヘッダーに渡すと、それ以降に項目が変更されている場合、エンドポイントは`412 Precondition Failed`を返して失敗します。", 
             "in": "header", 
             "required": false, 
             "example": 1, 
@@ -519,7 +593,7 @@
             "description": "ファイルが正常に削除された場合は、空の応答を返します。"
           }, 
           "412": {
-            "description": "`If-Match`ヘッダーが送信された後にファイルが変更されていた場合は、\nAPIから`412 Precondition Failed`エラーが返されます。", 
+            "description": "`If-Match`ヘッダーがファイルの現在の`etag`値と一致しない場合にエラーを返します。これは、ファイルが前回リクエストされたときから変更されていることを示します。", 
             "content": {
               "application/json": {
                 "schema": {
@@ -543,7 +617,7 @@
         "parameters": [
           {
             "name": "file_id", 
-            "description": "ファイルのID。", 
+            "description": "ファイルを表す一意の識別子。\n\nファイルIDを確認するには、ウェブアプリケーションでファイルにアクセスして、URLからIDをコピーします。たとえば、URLが`https://*.app.box.com/files/123`の場合、`file_id`は`123`です。", 
             "example": "12345", 
             "in": "path", 
             "required": true, 
@@ -615,7 +689,7 @@
         ], 
         "x-box-reference-category": "uploads", 
         "summary": "ファイルバージョンをアップロード", 
-        "description": "ファイルのコンテンツを更新します。ファイルサイズが50MBを超える場合は、チャンクアップロードAPIを使用することをお勧めします。", 
+        "description": "ファイルのコンテンツを更新します。ファイルサイズが50MBを超える場合は、分割アップロードAPIを使用することをお勧めします。", 
         "servers": [
           {
             "url": "https://upload.box.com/api/2.0", 
@@ -625,7 +699,7 @@
         "parameters": [
           {
             "name": "file_id", 
-            "description": "ファイルのID。", 
+            "description": "ファイルを表す一意の識別子。\n\nファイルIDを確認するには、ウェブアプリケーションでファイルにアクセスして、URLからIDをコピーします。たとえば、URLが`https://*.app.box.com/files/123`の場合、`file_id`は`123`です。", 
             "example": "12345", 
             "in": "path", 
             "required": true, 
@@ -635,7 +709,7 @@
           }, 
           {
             "name": "If-Match", 
-            "description": "この項目が最近変更されていないことを確認するには、その項目の現在の`etag`がこのヘッダーに渡された`etag`と一致しているかどうかを確認します。", 
+            "description": "変更を加える前にこの項目が最近変更されていないことを確認します。\n\nその項目の最後に認識された`etag`値をこのヘッダーに渡すと、それ以降に項目が変更されている場合、エンドポイントは`412 Precondition Failed`を返して失敗します。", 
             "in": "header", 
             "required": false, 
             "example": 1, 
@@ -645,7 +719,7 @@
           }, 
           {
             "name": "fields", 
-            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれないという影響があることに注意してください。", 
+            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれず、リクエストしたフィールドのほかには、簡易版レプリゼンテーションのフィールドしか返されないことに注意してください。", 
             "in": "query", 
             "example": "id,type,name", 
             "required": false, 
@@ -714,6 +788,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Files"
+                }
+              }
+            }
+          }, 
+          "412": {
+            "description": "`If-Match`ヘッダーがファイルの現在の`etag`値と一致しない場合にエラーを返します。これは、ファイルが前回リクエストされたときから変更されていることを示します。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
                 }
               }
             }
@@ -791,7 +875,7 @@
         ], 
         "x-box-reference-category": "uploads", 
         "summary": "ファイルをアップロード", 
-        "description": "小さいファイルをBoxにアップロードします。ファイルサイズが50MBを超える場合は、チャンクアップロードAPIを使用することをお勧めします。", 
+        "description": "小さいファイルをBoxにアップロードします。ファイルサイズが50MBを超える場合は、分割アップロードAPIを使用することをお勧めします。", 
         "servers": [
           {
             "url": "https://upload.box.com/api/2.0", 
@@ -801,7 +885,7 @@
         "parameters": [
           {
             "name": "fields", 
-            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれないという影響があることに注意してください。", 
+            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれず、リクエストしたフィールドのほかには、簡易版レプリゼンテーションのフィールドしか返されないことに注意してください。", 
             "in": "query", 
             "example": "id,type,name", 
             "required": false, 
@@ -996,7 +1080,7 @@
         "parameters": [
           {
             "name": "file_id", 
-            "description": "ファイルのID。", 
+            "description": "ファイルを表す一意の識別子。\n\nファイルIDを確認するには、ウェブアプリケーションでファイルにアクセスして、URLからIDをコピーします。たとえば、URLが`https://*.app.box.com/files/123`の場合、`file_id`は`123`です。", 
             "example": "12345", 
             "in": "path", 
             "required": true, 
@@ -1120,7 +1204,7 @@
           }, 
           {
             "name": "Digest", 
-            "description": "アップロードされたチャンクの[RFC3230][1]メッセージのダイジェスト。\n\nサポートされているのはSHA-1のみです。SHA-1ダイジェストはBase64でエンコードされている必要があります。このヘッダーの形式は、`sha=BASE64_ENCODED_DIGEST`です。\n\n[1]: https://tools.ietf.org/html/rfc3230", 
+            "description": "分割アップロードの[RFC3230][1]メッセージのダイジェスト。\n\nサポートされているのはSHA-1のみです。SHA-1ダイジェストはBase64でエンコードされている必要があります。このヘッダーの形式は、`sha=BASE64_ENCODED_DIGEST`です。\n\n[1]: https://tools.ietf.org/html/rfc3230", 
             "example": "sha=fpRyg5eVQletdZqEKaFlqwBXJzM=", 
             "in": "header", 
             "required": true, 
@@ -1329,7 +1413,7 @@
           }, 
           {
             "name": "If-Match", 
-            "description": "この項目が最近変更されていないことを確認するには、その項目の現在の`etag`がこのヘッダーに渡された`etag`と一致しているかどうかを確認します。", 
+            "description": "変更を加える前にこの項目が最近変更されていないことを確認します。\n\nその項目の最後に認識された`etag`値をこのヘッダーに渡すと、それ以降に項目が変更されている場合、エンドポイントは`412 Precondition Failed`を返して失敗します。", 
             "in": "header", 
             "required": false, 
             "example": 1, 
@@ -1339,7 +1423,7 @@
           }, 
           {
             "name": "If-None-Match", 
-            "description": "項目の`etag`が指定した`etag`と一致しない場合にのみ変更を適用し、コンテンツが変更されている場合にのみ項目を更新します。", 
+            "description": "項目が変更されている場合にのみ、その項目を返します。\n\nその項目の最後に認識された`etag`値をこのヘッダーに渡すと、それ以降に項目が変更されていない場合、エンドポイントは`304 Not Modified`を返して失敗します。", 
             "in": "header", 
             "required": false, 
             "example": 1, 
@@ -1425,7 +1509,7 @@
         "parameters": [
           {
             "name": "file_id", 
-            "description": "ファイルのID。", 
+            "description": "ファイルを表す一意の識別子。\n\nファイルIDを確認するには、ウェブアプリケーションでファイルにアクセスして、URLからIDをコピーします。たとえば、URLが`https://*.app.box.com/files/123`の場合、`file_id`は`123`です。", 
             "example": "12345", 
             "in": "path", 
             "required": true, 
@@ -1435,7 +1519,7 @@
           }, 
           {
             "name": "fields", 
-            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれないという影響があることに注意してください。", 
+            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれず、リクエストしたフィールドのほかには、簡易版レプリゼンテーションのフィールドしか返されないことに注意してください。", 
             "in": "query", 
             "example": "id,type,name", 
             "required": false, 
@@ -1488,7 +1572,7 @@
         }, 
         "responses": {
           "201": {
-            "description": "コピーされたファイルを表す新しいファイルオブジェクトを返します。\n\n[一部のフィールドはデフォルトで返されます](#file)。[fields](#post-files-id-copy--request--fields)パラメータを使用して明示的にリクエストする必要があります。", 
+            "description": "コピーされたファイルを表す新しいファイルオブジェクトを返します。\n\n使用可能なすべてのフィールドがデフォルトで返されるとは限りません。特定のフィールドを明示的にリクエストするには、[fields](#param-fields)クエリパラメータを使用します。", 
             "content": {
               "application/json": {
                 "schema": {
@@ -1514,7 +1598,7 @@
       "get": {
         "operationId": "get_files_id_thumbnail_id", 
         "summary": "ファイルサムネイルを取得", 
-        "description": "ファイルのサムネイル(小さい画像レプリゼンテーション)を取得します。\n\n`.png`形式の場合は、`32x32`、`64x64`、`128x128`、および`256x256`のサイズを返すことができ、`.jpg`形式の場合は、`32x32`、`94x94`、`160x160`、`320x320`の\nサイズを返すことができます。\n\nサムネイルを生成できる画像および動画ファイルの形式については、[found on our community site](https://community.box.com/t5/コンテンツの移動とプレビューのハウツーガイド/Boxでプレビュー出来るファイルタイプ一覧について/ta-p/12310)を参照してください。", 
+        "description": "ファイルのサムネイル(小さい画像レプリゼンテーション)を取得します。\n\n`.png`形式の場合は、`32x32`、`64x64`、`128x128`、および`256x256`のサイズを返すことができ、`.jpg`形式の場合は、`32x32`、`94x94`、`160x160`、`320x320`のサイズを返すことができます。\n\nサムネイルを生成できる画像および動画ファイルの形式については、[found on our community site][1]。\n\n[1]: https://community.box.com/t5/Migrating-and-Previewing-Content/File-Types-and-Fonts-Supported-in-Box-Content-Preview/ta-p/327", 
         "tags": [
           "Files", 
           "Thumbnails"
@@ -1523,7 +1607,7 @@
         "parameters": [
           {
             "name": "file_id", 
-            "description": "ファイルのID。", 
+            "description": "ファイルを表す一意の識別子。\n\nファイルIDを確認するには、ウェブアプリケーションでファイルにアクセスして、URLからIDをコピーします。たとえば、URLが`https://*.app.box.com/files/123`の場合、`file_id`は`123`です。", 
             "example": "12345", 
             "in": "path", 
             "required": true, 
@@ -1552,7 +1636,8 @@
             "example": 32, 
             "schema": {
               "type": "integer", 
-              "format": "int64"
+              "minimum": 32, 
+              "maximum": 320
             }
           }, 
           {
@@ -1562,7 +1647,8 @@
             "example": 32, 
             "schema": {
               "type": "integer", 
-              "format": "int64"
+              "minimum": 32, 
+              "maximum": 320
             }
           }, 
           {
@@ -1570,10 +1656,11 @@
             "description": "サムネイルの高さの最大値", 
             "in": "query", 
             "required": false, 
-            "example": 32, 
+            "example": 320, 
             "schema": {
               "type": "integer", 
-              "format": "int64"
+              "minimum": 32, 
+              "maximum": 320
             }
           }, 
           {
@@ -1581,10 +1668,11 @@
             "description": "サムネイルの幅の最大値", 
             "in": "query", 
             "required": false, 
-            "example": 32, 
+            "example": 320, 
             "schema": {
               "type": "integer", 
-              "format": "int64"
+              "minimum": 32, 
+              "maximum": 320
             }
           }
         ], 
@@ -1609,7 +1697,7 @@
             }
           }, 
           "202": {
-            "description": "サムネイルがまだ生成されていない場合は、プレースホルダグラフィックを指す`Location`ヘッダーが返されます。", 
+            "description": "サムネイルの生成には数秒かかることがあります。そのような場合、APIはこのファイルタイプに対して使用できるプレースホルダグラフィックを示す`Location`ヘッダーを返します。\n\nプレースホルダグラフィックはサムネイルの生成が完了するまでユーザーインターフェイスで使用できます。`Retry-After`ヘッダーは、サムネイルの準備がいつ完了するかを示します。その時点で、このエンドポイントを再試行するとサムネイルを取得できます。", 
             "headers": {
               "Retry-After": {
                 "description": "サムネイルが利用可能になるまでの時間(秒)。\n\nアプリケーションはこの時間が経過するまでサムネイルの取得を再試行しません。", 
@@ -1628,7 +1716,7 @@
             }
           }, 
           "302": {
-            "description": "このファイルタイプのサムネイルをBoxで生成できない場合は、このファイルタイプのプレースホルダグラフィックを指す`Location`ヘッダーが返されます。", 
+            "description": "このファイルタイプのサムネイルをBoxで生成できない場合は、エラーを返します。\n\n代わりに、このファイルタイプのプレースホルダグラフィックを指す`Location`ヘッダーが返されます。", 
             "headers": {
               "Location": {
                 "description": "このファイルタイプに使用できるプレースホルダグラフィックへのポインタ。", 
@@ -1639,8 +1727,28 @@
               }
             }
           }, 
+          "400": {
+            "description": "一部のパラメータが指定されていないか無効な場合はエラーを返します。\n\n* `requested_preview_unavailable` - 無効なサイズがリクエストされました。これは、リクエストされたサイズが、サムネイル形式で使用可能なファイルサイズよりも大きいか小さい場合に、またはサイズの制約どうしが矛盾している場合に発生します。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }, 
+          "403": {
+            "description": "`Authorization`ヘッダーで指定されているアクセストークンが\n認識されないか、指定されていない場合に返されます。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }, 
           "404": {
-            "description": "このファイルのサムネイルをBoxで生成できない場合は、`preview_cannot_be_generated`というコードとともに`404`が返されます。", 
+            "description": "ファイルが見つからない場合、ユーザーがファイルにアクセスできない場合、またはその他の理由でファイルを使用できない場合に返されます。\n\n* `preview_cannot_be_generated` - Boxはこのファイルタイプのサムネイルをサポートしていません", 
             "content": {
               "application/json": {
                 "schema": {
@@ -1665,7 +1773,7 @@
         "parameters": [
           {
             "name": "file_id", 
-            "description": "ファイルのID。", 
+            "description": "ファイルを表す一意の識別子。\n\nファイルIDを確認するには、ウェブアプリケーションでファイルにアクセスして、URLからIDをコピーします。たとえば、URLが`https://*.app.box.com/files/123`の場合、`file_id`は`123`です。", 
             "example": "12345", 
             "in": "path", 
             "required": true, 
@@ -1675,7 +1783,7 @@
           }, 
           {
             "name": "fields", 
-            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれないという影響があることに注意してください。", 
+            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれず、リクエストしたフィールドのほかには、簡易版レプリゼンテーションのフィールドしか返されないことに注意してください。", 
             "in": "query", 
             "example": "id,type,name", 
             "required": false, 
@@ -1740,7 +1848,7 @@
         "parameters": [
           {
             "name": "file_id", 
-            "description": "ファイルのID。", 
+            "description": "ファイルを表す一意の識別子。\n\nファイルIDを確認するには、ウェブアプリケーションでファイルにアクセスして、URLからIDをコピーします。たとえば、URLが`https://*.app.box.com/files/123`の場合、`file_id`は`123`です。", 
             "example": "12345", 
             "in": "path", 
             "required": true, 
@@ -1750,7 +1858,7 @@
           }, 
           {
             "name": "fields", 
-            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれないという影響があることに注意してください。", 
+            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれず、リクエストしたフィールドのほかには、簡易版レプリゼンテーションのフィールドしか返されないことに注意してください。", 
             "in": "query", 
             "example": "id,type,name", 
             "required": false, 
@@ -1815,7 +1923,7 @@
         "parameters": [
           {
             "name": "file_id", 
-            "description": "ファイルのID。", 
+            "description": "ファイルを表す一意の識別子。\n\nファイルIDを確認するには、ウェブアプリケーションでファイルにアクセスして、URLからIDをコピーします。たとえば、URLが`https://*.app.box.com/files/123`の場合、`file_id`は`123`です。", 
             "example": "12345", 
             "in": "path", 
             "required": true, 
@@ -1861,7 +1969,7 @@
         "parameters": [
           {
             "name": "file_id", 
-            "description": "ファイルのID。", 
+            "description": "ファイルを表す一意の識別子。\n\nファイルIDを確認するには、ウェブアプリケーションでファイルにアクセスして、URLからIDをコピーします。たとえば、URLが`https://*.app.box.com/files/123`の場合、`file_id`は`123`です。", 
             "example": "12345", 
             "in": "path", 
             "required": true, 
@@ -1871,7 +1979,7 @@
           }, 
           {
             "name": "fields", 
-            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれないという影響があることに注意してください。", 
+            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれず、リクエストしたフィールドのほかには、簡易版レプリゼンテーションのフィールドしか返されないことに注意してください。", 
             "in": "query", 
             "example": "id,type,name", 
             "required": false, 
@@ -1919,7 +2027,7 @@
         "parameters": [
           {
             "name": "file_id", 
-            "description": "ファイルのID。", 
+            "description": "ファイルを表す一意の識別子。\n\nファイルIDを確認するには、ウェブアプリケーションでファイルにアクセスして、URLからIDをコピーします。たとえば、URLが`https://*.app.box.com/files/123`の場合、`file_id`は`123`です。", 
             "example": "12345", 
             "in": "path", 
             "required": true, 
@@ -1958,7 +2066,7 @@
         "parameters": [
           {
             "name": "file_id", 
-            "description": "ファイルのID。", 
+            "description": "ファイルを表す一意の識別子。\n\nファイルIDを確認するには、ウェブアプリケーションでファイルにアクセスして、URLからIDをコピーします。たとえば、URLが`https://*.app.box.com/files/123`の場合、`file_id`は`123`です。", 
             "example": "12345", 
             "in": "path", 
             "required": true, 
@@ -1968,7 +2076,7 @@
           }, 
           {
             "name": "fields", 
-            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれないという影響があることに注意してください。", 
+            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれず、リクエストしたフィールドのほかには、簡易版レプリゼンテーションのフィールドしか返されないことに注意してください。", 
             "in": "query", 
             "example": "id,type,name", 
             "required": false, 
@@ -2033,7 +2141,7 @@
         "parameters": [
           {
             "name": "file_id", 
-            "description": "ファイルのID。", 
+            "description": "ファイルを表す一意の識別子。\n\nファイルIDを確認するには、ウェブアプリケーションでファイルにアクセスして、URLからIDをコピーします。たとえば、URLが`https://*.app.box.com/files/123`の場合、`file_id`は`123`です。", 
             "example": "12345", 
             "in": "path", 
             "required": true, 
@@ -2043,7 +2151,7 @@
           }, 
           {
             "name": "fields", 
-            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれないという影響があることに注意してください。", 
+            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれず、リクエストしたフィールドのほかには、簡易版レプリゼンテーションのフィールドしか返されないことに注意してください。", 
             "in": "query", 
             "example": "id,type,name", 
             "required": false, 
@@ -2068,7 +2176,7 @@
         ], 
         "responses": {
           "200": {
-            "description": "ファイルオブジェクトを返します。\n\n[一部のフィールドはデフォルトで返されます](#file)。[fields](#get-files-id-versions--request--fields)パラメータを使用して明示的にリクエストする必要があります。", 
+            "description": "ファイルオブジェクトを返します。\n\n使用可能なすべてのフィールドがデフォルトで返されるとは限りません。特定のフィールドを明示的にリクエストするには、[fields](#param-fields)クエリパラメータを使用します。", 
             "content": {
               "application/json": {
                 "schema": {
@@ -2091,7 +2199,7 @@
         "parameters": [
           {
             "name": "file_id", 
-            "description": "ファイルのID。", 
+            "description": "ファイルを表す一意の識別子。\n\nファイルIDを確認するには、ウェブアプリケーションでファイルにアクセスして、URLからIDをコピーします。たとえば、URLが`https://*.app.box.com/files/123`の場合、`file_id`は`123`です。", 
             "example": "12345", 
             "in": "path", 
             "required": true, 
@@ -2111,7 +2219,7 @@
           }, 
           {
             "name": "If-Match", 
-            "description": "この項目が最近変更されていないことを確認するには、その項目の現在の`etag`がこのヘッダーに渡された`etag`と一致しているかどうかを確認します。", 
+            "description": "変更を加える前にこの項目が最近変更されていないことを確認します。\n\nその項目の最後に認識された`etag`値をこのヘッダーに渡すと、それ以降に項目が変更されている場合、エンドポイントは`412 Precondition Failed`を返して失敗します。", 
             "in": "header", 
             "required": false, 
             "example": 1, 
@@ -2140,7 +2248,7 @@
         "parameters": [
           {
             "name": "file_id", 
-            "description": "ファイルのID。", 
+            "description": "ファイルを表す一意の識別子。\n\nファイルIDを確認するには、ウェブアプリケーションでファイルにアクセスして、URLからIDをコピーします。たとえば、URLが`https://*.app.box.com/files/123`の場合、`file_id`は`123`です。", 
             "example": "12345", 
             "in": "path", 
             "required": true, 
@@ -2150,7 +2258,7 @@
           }, 
           {
             "name": "fields", 
-            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれないという影響があることに注意してください。", 
+            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれず、リクエストしたフィールドのほかには、簡易版レプリゼンテーションのフィールドしか返されないことに注意してください。", 
             "in": "query", 
             "example": "id,type,name", 
             "required": false, 
@@ -2213,7 +2321,7 @@
         "parameters": [
           {
             "name": "file_id", 
-            "description": "ファイルのID。", 
+            "description": "ファイルを表す一意の識別子。\n\nファイルIDを確認するには、ウェブアプリケーションでファイルにアクセスして、URLからIDをコピーします。たとえば、URLが`https://*.app.box.com/files/123`の場合、`file_id`は`123`です。", 
             "example": "12345", 
             "in": "path", 
             "required": true, 
@@ -2248,7 +2356,7 @@
         "parameters": [
           {
             "name": "file_id", 
-            "description": "ファイルのID。", 
+            "description": "ファイルを表す一意の識別子。\n\nファイルIDを確認するには、ウェブアプリケーションでファイルにアクセスして、URLからIDをコピーします。たとえば、URLが`https://*.app.box.com/files/123`の場合、`file_id`は`123`です。", 
             "example": "12345", 
             "in": "path", 
             "required": true, 
@@ -2315,7 +2423,7 @@
         "parameters": [
           {
             "name": "file_id", 
-            "description": "ファイルのID。", 
+            "description": "ファイルを表す一意の識別子。\n\nファイルIDを確認するには、ウェブアプリケーションでファイルにアクセスして、URLからIDをコピーします。たとえば、URLが`https://*.app.box.com/files/123`の場合、`file_id`は`123`です。", 
             "example": "12345", 
             "in": "path", 
             "required": true, 
@@ -2398,7 +2506,7 @@
         "parameters": [
           {
             "name": "file_id", 
-            "description": "ファイルのID。", 
+            "description": "ファイルを表す一意の識別子。\n\nファイルIDを確認するには、ウェブアプリケーションでファイルにアクセスして、URLからIDをコピーします。たとえば、URLが`https://*.app.box.com/files/123`の場合、`file_id`は`123`です。", 
             "example": "12345", 
             "in": "path", 
             "required": true, 
@@ -2478,7 +2586,7 @@
         "parameters": [
           {
             "name": "file_id", 
-            "description": "ファイルのID。", 
+            "description": "ファイルを表す一意の識別子。\n\nファイルIDを確認するには、ウェブアプリケーションでファイルにアクセスして、URLからIDをコピーします。たとえば、URLが`https://*.app.box.com/files/123`の場合、`file_id`は`123`です。", 
             "example": "12345", 
             "in": "path", 
             "required": true, 
@@ -2530,7 +2638,7 @@
         "parameters": [
           {
             "name": "file_id", 
-            "description": "ファイルのID。", 
+            "description": "ファイルを表す一意の識別子。\n\nファイルIDを確認するには、ウェブアプリケーションでファイルにアクセスして、URLからIDをコピーします。たとえば、URLが`https://*.app.box.com/files/123`の場合、`file_id`は`123`です。", 
             "example": "12345", 
             "in": "path", 
             "required": true, 
@@ -2573,7 +2681,7 @@
         "parameters": [
           {
             "name": "file_id", 
-            "description": "ファイルのID。", 
+            "description": "ファイルを表す一意の識別子。\n\nファイルIDを確認するには、ウェブアプリケーションでファイルにアクセスして、URLからIDをコピーします。たとえば、URLが`https://*.app.box.com/files/123`の場合、`file_id`は`123`です。", 
             "example": "12345", 
             "in": "path", 
             "required": true, 
@@ -2646,7 +2754,7 @@
         "parameters": [
           {
             "name": "file_id", 
-            "description": "ファイルのID。", 
+            "description": "ファイルを表す一意の識別子。\n\nファイルIDを確認するには、ウェブアプリケーションでファイルにアクセスして、URLからIDをコピーします。たとえば、URLが`https://*.app.box.com/files/123`の場合、`file_id`は`123`です。", 
             "example": "12345", 
             "in": "path", 
             "required": true, 
@@ -2675,7 +2783,7 @@
     "/folders/{folder_id}": {
       "get": {
         "operationId": "get_folders_id", 
-        "summary": "フォルダを取得", 
+        "summary": "フォルダ情報の取得", 
         "tags": [
           "Folders"
         ], 
@@ -2697,7 +2805,7 @@
           }, 
           {
             "name": "fields", 
-            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれないという影響があることに注意してください。", 
+            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれず、リクエストしたフィールドのほかには、簡易版レプリゼンテーションのフィールドしか返されないことに注意してください。", 
             "in": "query", 
             "example": "id,type,name", 
             "required": false, 
@@ -2708,11 +2816,21 @@
                 "type": "string"
               }
             }
+          }, 
+          {
+            "name": "If-None-Match", 
+            "description": "項目が変更されている場合にのみ、その項目を返します。\n\nその項目の最後に認識された`etag`値をこのヘッダーに渡すと、それ以降に項目が変更されていない場合、エンドポイントは`304 Not Modified`を返して失敗します。", 
+            "in": "header", 
+            "required": false, 
+            "example": 1, 
+            "schema": {
+              "type": "string"
+            }
           }
         ], 
         "responses": {
           "200": {
-            "description": "フォルダ内の最初の100エントリを含め、フォルダを返します。\n\nフォルダ内の項目をさらに多く取得するには、\n[Get items in a folder](#get-folders-id-items)エンドポイントを使用してください。\n\n[一部のフィールドはデフォルトで返されます](#folder)。[fields](#get_folders_id-fields)パラメータを使用して明示的にリクエストする必要があります。", 
+            "description": "フォルダ内の最初の100エントリを含め、フォルダを返します。\n\nフォルダ内の項目をさらに多く取得するには、[Get items in a folder](#get-folders-id-items)エンドポイントを使用してください。\n\n使用可能なすべてのフィールドがデフォルトで返されるとは限りません。特定のフィールドを明示的にリクエストするには、[fields](#param-fields)クエリパラメータを使用します。", 
             "content": {
               "application/json": {
                 "schema": {
@@ -2720,6 +2838,9 @@
                 }
               }
             }
+          }, 
+          "304": {
+            "description": "`If-None-Match`ヘッダーがフォルダの現在の`etag`値と一致する場合は、空の応答を返します。これは、フォルダが前回リクエストされたときから変更されていないことを示します。"
           }, 
           "403": {
             "description": "`Authorization`ヘッダーで指定されているアクセストークンが\n認識されないか、指定されていない場合に返されます。", 
@@ -2776,7 +2897,7 @@
           }, 
           {
             "name": "fields", 
-            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれないという影響があることに注意してください。", 
+            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれず、リクエストしたフィールドのほかには、簡易版レプリゼンテーションのフィールドしか返されないことに注意してください。", 
             "in": "query", 
             "example": "id,type,name", 
             "required": false, 
@@ -2881,7 +3002,7 @@
           }, 
           {
             "name": "fields", 
-            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれないという影響があることに注意してください。", 
+            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれず、リクエストしたフィールドのほかには、簡易版レプリゼンテーションのフィールドしか返されないことに注意してください。", 
             "in": "query", 
             "example": "id,type,name", 
             "required": false, 
@@ -2895,7 +3016,7 @@
           }, 
           {
             "name": "If-Match", 
-            "description": "この項目が最近変更されていないことを確認するには、その項目の現在の`etag`がこのヘッダーに渡された`etag`と一致しているかどうかを確認します。", 
+            "description": "変更を加える前にこの項目が最近変更されていないことを確認します。\n\nその項目の最後に認識された`etag`値をこのヘッダーに渡すと、それ以降に項目が変更されている場合、エンドポイントは`412 Precondition Failed`を返して失敗します。", 
             "in": "header", 
             "required": false, 
             "example": 1, 
@@ -3019,7 +3140,7 @@
         }, 
         "responses": {
           "200": {
-            "description": "更新されたフォルダのフォルダオブジェクトを返します\n\n[一部のフィールドはデフォルトで返されます](#folder)。[fields](#put-folders-id--request--fields)パラメータを使用して明示的にリクエストする必要があります。\n\nこの呼び出しは同期的に復帰します。これは、すべての子孫に大量の項目が含まれているフォルダを移動する場合にも当てはまります。つまり、非常に大きいフォルダの場合は、この呼び出しが復帰するまでに数分または数時間かかる場合があります。", 
+            "description": "更新されたフォルダのフォルダオブジェクトを返します\n\n使用可能なすべてのフィールドがデフォルトで返されるとは限りません。特定のフィールドを明示的にリクエストするには、[fields](#param-fields)クエリパラメータを使用します。\n\nこの呼び出しは同期的に復帰します。これは、すべての子孫に大量の項目が含まれているフォルダを移動する場合にも当てはまります。つまり、非常に大きいフォルダの場合は、この呼び出しが復帰するまでに数分または数時間かかる場合があります。", 
             "content": {
               "application/json": {
                 "schema": {
@@ -3068,6 +3189,16 @@
               }
             }
           }, 
+          "412": {
+            "description": "`If-Match`ヘッダーがフォルダの現在の`etag`値と一致しない場合はエラーを返します。これは、フォルダが前回リクエストされたときから変更されていることを示します。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }, 
           "503": {
             "description": "操作の処理時間が60秒を超えるとエラーを返します。\nこの応答が返された後も\n操作は続行されます。", 
             "content": {
@@ -3102,6 +3233,16 @@
             }
           }, 
           {
+            "name": "If-Match", 
+            "description": "変更を加える前にこの項目が最近変更されていないことを確認します。\n\nその項目の最後に認識された`etag`値をこのヘッダーに渡すと、それ以降に項目が変更されている場合、エンドポイントは`412 Precondition Failed`を返して失敗します。", 
+            "in": "header", 
+            "required": false, 
+            "example": 1, 
+            "schema": {
+              "type": "string"
+            }
+          }, 
+          {
             "name": "recursive", 
             "description": "フォルダとその中にあるすべてのコンテンツを再帰的に削除することにより、空でないフォルダを削除します。", 
             "in": "query", 
@@ -3109,16 +3250,6 @@
             "example": true, 
             "schema": {
               "type": "boolean"
-            }
-          }, 
-          {
-            "name": "If-Match", 
-            "description": "この項目が最近変更されていないことを確認するには、その項目の現在の`etag`がこのヘッダーに渡された`etag`と一致しているかどうかを確認します。", 
-            "in": "header", 
-            "required": false, 
-            "example": 1, 
-            "schema": {
-              "type": "string"
             }
           }
         ], 
@@ -3148,6 +3279,16 @@
           }, 
           "409": {
             "description": "* `folder_not_empty`: フォルダが空でない場合に返されます。\n  フォルダとそのコンテンツを再帰的に削除するには、`recursive`クエリパラメータを\n  使用します。\n* `operation_blocked_temporary`: 別の移動、コピー、削除、\n  または復元操作が進行中であるためにフォルダが\n  ロックされている場合に返されます。\n\n  操作は後で再試行することができます。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }, 
+          "412": {
+            "description": "`If-Match`ヘッダーがフォルダの現在の`etag`値と一致しない場合はエラーを返します。これは、フォルダが前回リクエストされたときから変更されていることを示します。", 
             "content": {
               "application/json": {
                 "schema": {
@@ -3195,7 +3336,7 @@
           }, 
           {
             "name": "fields", 
-            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれないという影響があることに注意してください。", 
+            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれず、リクエストしたフィールドのほかには、簡易版レプリゼンテーションのフィールドしか返されないことに注意してください。", 
             "in": "query", 
             "example": "id,type,name", 
             "required": false, 
@@ -3340,7 +3481,7 @@
         "parameters": [
           {
             "name": "fields", 
-            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれないという影響があることに注意してください。", 
+            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれず、リクエストしたフィールドのほかには、簡易版レプリゼンテーションのフィールドしか返されないことに注意してください。", 
             "in": "query", 
             "example": "id,type,name", 
             "required": false, 
@@ -3411,7 +3552,7 @@
         }, 
         "responses": {
           "201": {
-            "description": "フォルダオブジェクトを返します。\n\n[一部のフィールドはデフォルトで返されます](#folder)。[fields](##post_folders-fields)パラメータを使用して明示的にリクエストする必要があります。", 
+            "description": "フォルダオブジェクトを返します。\n\n使用可能なすべてのフィールドがデフォルトで返されるとは限りません。特定のフィールドを明示的にリクエストするには、[fields](#param-fields)クエリパラメータを使用します。", 
             "content": {
               "application/json": {
                 "schema": {
@@ -3487,7 +3628,7 @@
           }, 
           {
             "name": "fields", 
-            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれないという影響があることに注意してください。", 
+            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれず、リクエストしたフィールドのほかには、簡易版レプリゼンテーションのフィールドしか返されないことに注意してください。", 
             "in": "query", 
             "example": "id,type,name", 
             "required": false, 
@@ -3536,7 +3677,7 @@
         }, 
         "responses": {
           "201": {
-            "description": "コピーされたフォルダを表す新しいフォルダオブジェクトを返します。\n\n[一部のフィールドはデフォルトで返されます](#folder)。[fields](#post-folders-id-copy--request--fields)パラメータを使用して明示的にリクエストする必要があります。", 
+            "description": "コピーされたフォルダを表す新しいフォルダオブジェクトを返します。\n\n使用可能なすべてのフィールドがデフォルトで返されるとは限りません。特定のフィールドを明示的にリクエストするには、[fields](#param-fields)クエリパラメータを使用します。", 
             "content": {
               "application/json": {
                 "schema": {
@@ -3544,6 +3685,9 @@
                 }
               }
             }
+          }, 
+          "304": {
+            "description": "`If-None-Match`ヘッダーがフォルダの現在の`etag`値と一致する場合は、空の応答を返します。これは、フォルダが前回リクエストされたときから変更されていないことを示します。"
           }, 
           "400": {
             "description": "一部のパラメータが指定されていないか、無効な場合はエラーを返します。\n\n* `bad_request` - パラメータが指定されていない場合に返されます。\n* `item_name_too_long` - 新しいフォルダ名が長すぎる場合に返されます。", 
@@ -3612,7 +3756,7 @@
           }, 
           {
             "name": "fields", 
-            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれないという影響があることに注意してください。", 
+            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれず、リクエストしたフィールドのほかには、簡易版レプリゼンテーションのフィールドしか返されないことに注意してください。", 
             "in": "query", 
             "example": "id,type,name", 
             "required": false, 
@@ -3688,7 +3832,7 @@
           }, 
           {
             "name": "fields", 
-            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれないという影響があることに注意してください。", 
+            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれず、リクエストしたフィールドのほかには、簡易版レプリゼンテーションのフィールドしか返されないことに注意してください。", 
             "in": "query", 
             "example": "id,type,name", 
             "required": false, 
@@ -4098,7 +4242,7 @@
         "parameters": [
           {
             "name": "fields", 
-            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれないという影響があることに注意してください。", 
+            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれず、リクエストしたフィールドのほかには、簡易版レプリゼンテーションのフィールドしか返されないことに注意してください。", 
             "in": "query", 
             "example": "id,type,name", 
             "required": false, 
@@ -4903,7 +5047,7 @@
           }, 
           {
             "name": "fields", 
-            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれないという影響があることに注意してください。", 
+            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれず、リクエストしたフィールドのほかには、簡易版レプリゼンテーションのフィールドしか返されないことに注意してください。", 
             "in": "query", 
             "example": "id,type,name", 
             "required": false, 
@@ -4950,7 +5094,7 @@
           }, 
           {
             "name": "fields", 
-            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれないという影響があることに注意してください。", 
+            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれず、リクエストしたフィールドのほかには、簡易版レプリゼンテーションのフィールドしか返されないことに注意してください。", 
             "in": "query", 
             "example": "id,type,name", 
             "required": false, 
@@ -5030,7 +5174,7 @@
         "parameters": [
           {
             "name": "fields", 
-            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれないという影響があることに注意してください。", 
+            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれず、リクエストしたフィールドのほかには、簡易版レプリゼンテーションのフィールドしか返されないことに注意してください。", 
             "in": "query", 
             "example": "id,type,name", 
             "required": false, 
@@ -5092,7 +5236,7 @@
         }, 
         "responses": {
           "201": {
-            "description": "新しく作成されたコメントオブジェクトを返します。\n\n[一部のフィールドはデフォルトで返されます](#comment)。[fields](#post_comments--request--fields)パラメータを使用して明示的にリクエストする必要があります。", 
+            "description": "新しく作成されたコメントオブジェクトを返します。\n\n使用可能なすべてのフィールドがデフォルトで返されるとは限りません。特定のフィールドを明示的にリクエストするには、[fields](#param-fields)クエリパラメータを使用します。", 
             "content": {
               "application/json": {
                 "schema": {
@@ -5126,7 +5270,7 @@
           }, 
           {
             "name": "fields", 
-            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれないという影響があることに注意してください。", 
+            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれず、リクエストしたフィールドのほかには、簡易版レプリゼンテーションのフィールドしか返されないことに注意してください。", 
             "in": "query", 
             "example": "id,type,name", 
             "required": false, 
@@ -5173,7 +5317,7 @@
           }, 
           {
             "name": "fields", 
-            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれないという影響があることに注意してください。", 
+            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれず、リクエストしたフィールドのほかには、簡易版レプリゼンテーションのフィールドしか返されないことに注意してください。", 
             "in": "query", 
             "example": "id,type,name", 
             "required": false, 
@@ -5301,7 +5445,7 @@
           }, 
           {
             "name": "fields", 
-            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれないという影響があることに注意してください。", 
+            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれず、リクエストしたフィールドのほかには、簡易版レプリゼンテーションのフィールドしか返されないことに注意してください。", 
             "in": "query", 
             "example": "id,type,name", 
             "required": false, 
@@ -5363,7 +5507,7 @@
         "parameters": [
           {
             "name": "fields", 
-            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれないという影響があることに注意してください。", 
+            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれず、リクエストしたフィールドのほかには、簡易版レプリゼンテーションのフィールドしか返されないことに注意してください。", 
             "in": "query", 
             "example": "id,type,name", 
             "required": false, 
@@ -5645,7 +5789,7 @@
           }, 
           {
             "name": "fields", 
-            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれないという影響があることに注意してください。", 
+            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれず、リクエストしたフィールドのほかには、簡易版レプリゼンテーションのフィールドしか返されないことに注意してください。", 
             "in": "query", 
             "example": "id,type,name", 
             "required": false, 
@@ -5756,6 +5900,15 @@
                     "format": "date-time", 
                     "description": "タスクの期限", 
                     "example": "2012-12-12T10:53:43-08:00"
+                  }, 
+                  "completion_rule": {
+                    "type": "string", 
+                    "description": "完了ルール\"all_assignees\" (デフォルト)を使用して作成されたタスクは、すべての担当者が作業を完了したときにのみ完了済みと見なされます。完了ルール\"any_assignee\"を使用して作成されたタスクは、1人の担当者が作業を完了すると完了済みと見なされます。", 
+                    "example": "all_assignees", 
+                    "enum": [
+                      "all_assignees", 
+                      "any_assignee"
+                    ]
                   }
                 }
               }
@@ -5866,6 +6019,15 @@
                     "format": "date-time", 
                     "description": "タスクの期限", 
                     "example": "2012-12-12T10:53:43-08:00"
+                  }, 
+                  "completion_rule": {
+                    "type": "string", 
+                    "description": "完了ルール\"all_assignees\" (デフォルト)を使用して作成されたタスクは、すべての担当者が作業を完了したときにのみ完了済みと見なされます。完了ルール\"any_assignee\"を使用して作成されたタスクは、1人の担当者が作業を完了すると完了済みと見なされます。", 
+                    "example": "all_assignees", 
+                    "enum": [
+                      "all_assignees", 
+                      "any_assignee"
+                    ]
                   }
                 }
               }
@@ -6214,9 +6376,19 @@
         "description": "共有リンクで表されるファイルまたはフォルダを返します。\n\n共有項目は、共有リンクで表されるファイルまたはフォルダであり、現在の会社内に存在する項目である場合も、別の会社内に存在する項目である場合もあります。\n\nアプリケーションからこのエンドポイントを呼び出すと、共有項目についての情報を取得できます(共有リンクが存在する場合のみ)。", 
         "parameters": [
           {
+            "name": "If-None-Match", 
+            "description": "項目が変更されている場合にのみ、その項目を返します。\n\nその項目の最後に認識された`etag`値をこのヘッダーに渡すと、それ以降に項目が変更されていない場合、エンドポイントは`304 Not Modified`を返して失敗します。", 
+            "in": "header", 
+            "required": false, 
+            "example": 1, 
+            "schema": {
+              "type": "string"
+            }
+          }, 
+          {
             "name": "BoxApi", 
             "description": "共有リンクとその共有リンクの省略可能なパスワードを含むヘッダー。\n\nこのヘッダーの形式は次のようになります。\n\n`shared_link=[link]&shared_link_password=[password]`", 
-            "example": "shared_link=https://cloud.box.com/shared/static/gjasdasjhasd&\\\nshared_link_password=letmein", 
+            "example": "shared_link=https://cloud.box.com/shared/static/gjasdasjhasd&shared_link_password=letmein", 
             "in": "header", 
             "required": true, 
             "schema": {
@@ -6234,6 +6406,9 @@
                 }
               }
             }
+          }, 
+          "304": {
+            "description": "`If-None-Match`ヘッダーがフォルダの現在の`etag`値と一致する場合は、空の応答を返します。これは、フォルダが前回リクエストされたときから変更されていないことを示します。"
           }
         }
       }
@@ -6356,7 +6531,7 @@
           }, 
           {
             "name": "fields", 
-            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれないという影響があることに注意してください。", 
+            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれず、リクエストしたフィールドのほかには、簡易版レプリゼンテーションのフィールドしか返されないことに注意してください。", 
             "in": "query", 
             "example": "id,type,name", 
             "required": false, 
@@ -6555,7 +6730,7 @@
           }, 
           {
             "name": "fields", 
-            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれないという影響があることに注意してください。", 
+            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれず、リクエストしたフィールドのほかには、簡易版レプリゼンテーションのフィールドしか返されないことに注意してください。", 
             "in": "query", 
             "example": "id,type,name", 
             "required": false, 
@@ -6666,7 +6841,7 @@
           }, 
           {
             "name": "fields", 
-            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれないという影響があることに注意してください。", 
+            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれず、リクエストしたフィールドのほかには、簡易版レプリゼンテーションのフィールドしか返されないことに注意してください。", 
             "in": "query", 
             "example": "id,type,name", 
             "required": false, 
@@ -6728,7 +6903,7 @@
         "parameters": [
           {
             "name": "fields", 
-            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれないという影響があることに注意してください。", 
+            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれず、リクエストしたフィールドのほかには、簡易版レプリゼンテーションのフィールドしか返されないことに注意してください。", 
             "in": "query", 
             "example": "id,type,name", 
             "required": false, 
@@ -6886,7 +7061,7 @@
         "parameters": [
           {
             "name": "fields", 
-            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれないという影響があることに注意してください。", 
+            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれず、リクエストしたフィールドのほかには、簡易版レプリゼンテーションのフィールドしか返されないことに注意してください。", 
             "in": "query", 
             "example": "id,type,name", 
             "required": false, 
@@ -6935,7 +7110,7 @@
           }, 
           {
             "name": "fields", 
-            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれないという影響があることに注意してください。", 
+            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれず、リクエストしたフィールドのほかには、簡易版レプリゼンテーションのフィールドしか返されないことに注意してください。", 
             "in": "query", 
             "example": "id,type,name", 
             "required": false, 
@@ -6950,7 +7125,7 @@
         ], 
         "responses": {
           "200": {
-            "description": "1つのユーザーオブジェクトを返します。\n\n[一部のフィールドはデフォルトで返されます](#user)。[fields](#get-users-id--request--fields)パラメータを使用して明示的にリクエストする必要があります。", 
+            "description": "単一のユーザーオブジェクトを返します。\n\n使用可能なすべてのフィールドがデフォルトで返されるとは限りません。特定のフィールドを明示的にリクエストするには、[fields](#param-fields)クエリパラメータを使用します。[fields](#get-users-id--request--fields)パラメータを使用します。", 
             "content": {
               "application/json": {
                 "schema": {
@@ -6982,7 +7157,7 @@
           }, 
           {
             "name": "fields", 
-            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれないという影響があることに注意してください。", 
+            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれず、リクエストしたフィールドのほかには、簡易版レプリゼンテーションのフィールドしか返されないことに注意してください。", 
             "in": "query", 
             "example": "id,type,name", 
             "required": false, 
@@ -7110,6 +7285,18 @@
                     ], 
                     "description": "ユーザーのアカウントのステータス", 
                     "example": "active"
+                  }, 
+                  "notification_email": {
+                    "type": "object", 
+                    "nullable": true, 
+                    "description": "通知メールが送信される代替の通知用メールアドレス。確認されると、通知メールはプライマリメールアドレスではなくこのメールアドレスに送信されます。\n\nこれを`null`に設定すると、通知メールが削除されます。", 
+                    "properties": {
+                      "email": {
+                        "type": "string", 
+                        "example": "notifications@example.com", 
+                        "description": "通知を送付するメールアドレス。"
+                      }
+                    }
                   }
                 }
               }
@@ -7123,6 +7310,26 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          }, 
+          "400": {
+            "description": "パラメータが不足しているか無効の場合にエラーを返します。\n\n* `invalid_parameter`: パラメータの形式が正しくない場合です。例えば、`notification_email`に正しくない形式のメールアドレスが含まれている場合です。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }, 
+          "403": {
+            "description": "ユーザーに変更が許可されていない場合にエラーを返します。\n\n* `access_denied_insufficient_permissions`: ユーザーに適切な権限がない場合です。例えば、企業の設定で通知メールのアップデートが無効化されている場合です。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
                 }
               }
             }
@@ -7244,7 +7451,7 @@
           }, 
           {
             "name": "fields", 
-            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれないという影響があることに注意してください。", 
+            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれず、リクエストしたフィールドのほかには、簡易版レプリゼンテーションのフィールドしか返されないことに注意してください。", 
             "in": "query", 
             "example": "id,type,name", 
             "required": false, 
@@ -7504,7 +7711,7 @@
         "parameters": [
           {
             "name": "fields", 
-            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれないという影響があることに注意してください。", 
+            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれず、リクエストしたフィールドのほかには、簡易版レプリゼンテーションのフィールドしか返されないことに注意してください。", 
             "in": "query", 
             "example": "id,type,name", 
             "required": false, 
@@ -7595,7 +7802,7 @@
           }, 
           {
             "name": "fields", 
-            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれないという影響があることに注意してください。", 
+            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれず、リクエストしたフィールドのほかには、簡易版レプリゼンテーションのフィールドしか返されないことに注意してください。", 
             "in": "query", 
             "example": "id,type,name", 
             "required": false, 
@@ -7634,7 +7841,7 @@
         "parameters": [
           {
             "name": "fields", 
-            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれないという影響があることに注意してください。", 
+            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれず、リクエストしたフィールドのほかには、簡易版レプリゼンテーションのフィールドしか返されないことに注意してください。", 
             "in": "query", 
             "example": "id,type,name", 
             "required": false, 
@@ -7696,7 +7903,7 @@
         "parameters": [
           {
             "name": "fields", 
-            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれないという影響があることに注意してください。", 
+            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれず、リクエストしたフィールドのほかには、簡易版レプリゼンテーションのフィールドしか返されないことに注意してください。", 
             "in": "query", 
             "example": "id,type,name", 
             "required": false, 
@@ -7800,7 +8007,7 @@
           }, 
           {
             "name": "fields", 
-            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれないという影響があることに注意してください。", 
+            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれず、リクエストしたフィールドのほかには、簡易版レプリゼンテーションのフィールドしか返されないことに注意してください。", 
             "in": "query", 
             "example": "id,type,name", 
             "required": false, 
@@ -7847,7 +8054,7 @@
           }, 
           {
             "name": "fields", 
-            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれないという影響があることに注意してください。", 
+            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれず、リクエストしたフィールドのほかには、簡易版レプリゼンテーションのフィールドしか返されないことに注意してください。", 
             "in": "query", 
             "example": "id,type,name", 
             "required": false, 
@@ -8084,7 +8291,7 @@
         "parameters": [
           {
             "name": "fields", 
-            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれないという影響があることに注意してください。", 
+            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれず、リクエストしたフィールドのほかには、簡易版レプリゼンテーションのフィールドしか返されないことに注意してください。", 
             "in": "query", 
             "example": "id,type,name", 
             "required": false, 
@@ -8196,7 +8403,7 @@
           }, 
           {
             "name": "fields", 
-            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれないという影響があることに注意してください。", 
+            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれず、リクエストしたフィールドのほかには、簡易版レプリゼンテーションのフィールドしか返されないことに注意してください。", 
             "in": "query", 
             "example": "id,type,name", 
             "required": false, 
@@ -8243,7 +8450,7 @@
           }, 
           {
             "name": "fields", 
-            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれないという影響があることに注意してください。", 
+            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれず、リクエストしたフィールドのほかには、簡易版レプリゼンテーションのフィールドしか返されないことに注意してください。", 
             "in": "query", 
             "example": "id,type,name", 
             "required": false, 
@@ -9147,7 +9354,7 @@
         "parameters": [
           {
             "name": "fields", 
-            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれないという影響があることに注意してください。", 
+            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれず、リクエストしたフィールドのほかには、簡易版レプリゼンテーションのフィールドしか返されないことに注意してください。", 
             "in": "query", 
             "example": "id,type,name", 
             "required": false, 
@@ -9221,7 +9428,7 @@
           }, 
           {
             "name": "fields", 
-            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれないという影響があることに注意してください。", 
+            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれず、リクエストしたフィールドのほかには、簡易版レプリゼンテーションのフィールドしか返されないことに注意してください。", 
             "in": "query", 
             "example": "id,type,name", 
             "required": false, 
@@ -9285,7 +9492,7 @@
         "parameters": [
           {
             "name": "fields", 
-            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれないという影響があることに注意してください。", 
+            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれず、リクエストしたフィールドのほかには、簡易版レプリゼンテーションのフィールドしか返されないことに注意してください。", 
             "in": "query", 
             "example": "id,type,name", 
             "required": false, 
@@ -9871,7 +10078,7 @@
           }, 
           {
             "name": "fields", 
-            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれないという影響があることに注意してください。", 
+            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれず、リクエストしたフィールドのほかには、簡易版レプリゼンテーションのフィールドしか返されないことに注意してください。", 
             "in": "query", 
             "example": "id,type,name", 
             "required": false, 
@@ -11426,7 +11633,7 @@
         "parameters": [
           {
             "name": "fields", 
-            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれないという影響があることに注意してください。", 
+            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれず、リクエストしたフィールドのほかには、簡易版レプリゼンテーションのフィールドしか返されないことに注意してください。", 
             "in": "query", 
             "example": "id,type,name", 
             "required": false, 
@@ -11842,7 +12049,7 @@
         ]
       }, 
       "AccessToken--Mini": {
-        "title": "アクセストークン(簡易版)", 
+        "title": "Access Token Mini", 
         "x-box-resource-id": "access_token--mini", 
         "description": "アクセストークンの基本情報", 
         "x-box-reference-hide": true, 
@@ -11878,7 +12085,7 @@
         }
       }, 
       "AssignmentCounts": {
-        "title": "割り当て数", 
+        "title": "Assignment Counts", 
         "x-box-resource-id": "assignment_counts", 
         "description": "このリーガルホールド内の項目タイプごとの割り当て数", 
         "properties": {
@@ -12161,7 +12368,7 @@
         ]
       }, 
       "CollaborationWhitelistEntry": {
-        "title": "コラボレーションホワイトリストエントリ", 
+        "title": "Collaboration Whitelist Entry", 
         "x-box-resource-id": "collaboration_whitelist_entry", 
         "x-box-reference-category": "collaboration_whitelist_entries", 
         "description": "コラボレーションホワイトリストエントリでは、会社とのコラボレーションが承認されているドメインが定義されます", 
@@ -12215,7 +12422,7 @@
         ]
       }, 
       "CollaborationWhitelistEntries": {
-        "title": "コラボレーションホワイトリストエントリ", 
+        "title": "Collaboration Whitelist Entries", 
         "x-box-resource-id": "collaboration_whitelist_entries", 
         "x-box-reference-category": "collaboration_whitelist_entries", 
         "description": "コラボレーションホワイトリストエントリのリスト。", 
@@ -12372,7 +12579,7 @@
         ]
       }, 
       "Comment": {
-        "title": "コメント", 
+        "title": "Comment", 
         "x-box-resource-id": "comment", 
         "x-box-has-field-variants": true, 
         "x-box-reference-category": "comments", 
@@ -12388,7 +12595,7 @@
           {
             "properties": {
               "tagged_message": {
-                "x-box-field-variant": 2, 
+                "x-box-field-variant": 3, 
                 "type": "string", 
                 "example": "@[1234567:Aaron Levie] these tigers are cool!", 
                 "description": "@メンションを含むコメントテキストを表す文字列。@メンションの形式は@[id:username]で、`id`はユーザーのBox ID、`username`はユーザーの表示名になります。"
@@ -12398,7 +12605,7 @@
         ]
       }, 
       "Comments": {
-        "title": "コメント", 
+        "title": "Comments", 
         "x-box-resource-id": "comments", 
         "x-box-reference-category": "comments", 
         "description": "コメントのリスト", 
@@ -12431,7 +12638,7 @@
           {
             "properties": {
               "type": {
-                "x-box-field-variant": 1, 
+                "x-box-field-variant": 0, 
                 "type": "string", 
                 "description": "`comment`", 
                 "example": "comment", 
@@ -12440,13 +12647,13 @@
                 ]
               }, 
               "is_reply_comment": {
-                "x-box-field-variant": 1, 
+                "x-box-field-variant": 2, 
                 "type": "boolean", 
                 "description": "このコメントが他のコメントへの返信かどうか", 
                 "example": true
               }, 
               "message": {
-                "x-box-field-variant": 1, 
+                "x-box-field-variant": 2, 
                 "type": "string", 
                 "example": "@Aaron Levie these tigers are cool!", 
                 "description": "ユーザーが入力したコメントのテキスト"
@@ -12460,19 +12667,19 @@
                     "description": "コメントの作成者を表す簡易版のユーザーオブジェクト"
                   }, 
                   {
-                    "x-box-field-variant": 1
+                    "x-box-field-variant": 2
                   }
                 ]
               }, 
               "created_at": {
-                "x-box-field-variant": 1, 
+                "x-box-field-variant": 2, 
                 "type": "string", 
                 "format": "date-time", 
                 "description": "このコメントが作成された日時", 
                 "example": "2012-12-12T10:53:43-08:00"
               }, 
               "modified_at": {
-                "x-box-field-variant": 1, 
+                "x-box-field-variant": 2, 
                 "type": "string", 
                 "format": "date-time", 
                 "description": "このコメントが最後に変更された日時", 
@@ -12487,7 +12694,7 @@
                     "description": "このコメントが追加されたオブジェクト"
                   }, 
                   {
-                    "x-box-field-variant": 1
+                    "x-box-field-variant": 2
                   }
                 ]
               }
@@ -12606,7 +12813,7 @@
         ]
       }, 
       "Enterprise": {
-        "title": "エンタープライズ", 
+        "title": "Enterprise", 
         "x-box-resource-id": "enterprise", 
         "description": "Boxに登録されている会社のレプリゼンテーション", 
         "allOf": [
@@ -12894,10 +13101,34 @@
           }
         }
       }, 
+      "ExpiringEmbedLink": {
+        "title": "有効期限付きの埋め込みリンク", 
+        "x-box-resource-id": "expiring_embed_link", 
+        "description": "有効期限付きのBox Embedリンク。", 
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AccessToken--Mini"
+          }, 
+          {
+            "x-box-reference-hide": false
+          }, 
+          {
+            "properties": {
+              "url": {
+                "type": "string", 
+                "format": "url", 
+                "example": "https://cloud.app.box.com/preview/expiring_embed/...", 
+                "description": "このファイルの実際の有効期限付き埋め込みURL。このオブジェクトで指定されたファイルIDとアクセストークンから作成されます。"
+              }
+            }
+          }
+        ]
+      }, 
       "File": {
         "title": "File", 
         "x-box-resource-id": "file", 
         "x-box-has-field-variants": true, 
+        "x-box-sanitized": true, 
         "description": "任意のファイルAPIエンドポイントからデフォルトで返される可能性がある、ファイルの完全版レプリゼンテーション", 
         "x-box-reference-category": "files", 
         "allOf": [
@@ -12910,13 +13141,13 @@
           {
             "properties": {
               "version_number": {
-                "x-box-field-variant": 2, 
+                "x-box-field-variant": 3, 
                 "type": "string", 
                 "example": "1", 
                 "description": "このファイルのバージョン番号"
               }, 
               "comment_count": {
-                "x-box-field-variant": 2, 
+                "x-box-field-variant": 3, 
                 "type": "integer", 
                 "example": 10, 
                 "description": "このファイルに関するコメントの数"
@@ -12930,7 +13161,7 @@
                     "description": "このファイルに対して現在のユーザーが持っている権限について説明します。"
                   }, 
                   {
-                    "x-box-field-variant": 2
+                    "x-box-field-variant": 3
                   }, 
                   {
                     "nullable": false
@@ -12938,16 +13169,26 @@
                 ]
               }, 
               "tags": {
-                "x-box-field-variant": 2, 
-                "type": "array", 
-                "example": [
-                  "draft", 
-                  "needs_review"
-                ], 
-                "items": {
-                  "type": "string"
-                }, 
-                "description": "このフォルダに適用されているすべてのタグ。"
+                "allOf": [
+                  {
+                    "type": "array", 
+                    "example": [
+                      "approved"
+                    ], 
+                    "items": {
+                      "type": "string"
+                    }, 
+                    "minItems": 1, 
+                    "maxItems": 100, 
+                    "description": "この項目のタグ。これらのタグは\nBoxウェブアプリおよびモバイルアプリで項目の横に表示されます。\n\nタグを追加または削除するには、項目の現在のタグを取得して\n変更してから、このフィールドを更新します。\n\nタグの数は、1項目あたり100個までに制限され、一意のタグは会社あたり10,000個までに\n制限されます。"
+                  }, 
+                  {
+                    "x-box-field-variant": 2
+                  }, 
+                  {
+                    "nullable": false
+                  }
+                ]
               }, 
               "lock": {
                 "allOf": [
@@ -12958,28 +13199,35 @@
                     "description": "このファイルで保持されているロック。ロックが存在しない場合は`null`になるか、過去のタイムスタンプになります。"
                   }, 
                   {
-                    "x-box-field-variant": 2
+                    "x-box-field-variant": 3
                   }
                 ], 
                 "nullable": true
               }, 
               "extension": {
-                "x-box-field-variant": 2, 
+                "x-box-field-variant": 3, 
                 "type": "string", 
-                "example": "png", 
-                "description": "ファイルのサフィックスを示します(サフィックスがある場合)。デフォルトでは、空の文字列に設定されます。通常、サフィックスは、ファイルコンテンツのエンコード(ファイル形式)や利用状況を示します。"
+                "example": "pdf", 
+                "description": "このファイルのファイル拡張子(省略可)を示します。デフォルトでは、空の文字列に設定されます。"
               }, 
               "is_package": {
-                "x-box-field-variant": 2, 
+                "x-box-field-variant": 3, 
                 "type": "boolean", 
                 "example": true, 
-                "description": "ファイルがパッケージであるかどうか。iWorksで使用されるMacパッケージに使用します。"
+                "description": "ファイルがパッケージかどうかを示します。パッケージはMacアプリケーションで一般的に使用され、iWorkファイルを含めることができます。"
               }, 
               "expiring_embed_link": {
-                "x-box-field-variant": 2, 
-                "type": "string", 
-                "example": "https://app.box.com/preview/expiring_embed/gvoct6FE!", 
-                "description": "このフィールドをリクエストすると、iframeに埋め込まれたプレビューセッション用の有効期限付きURLが作成されます。\n\nこのURLは60秒後に有効期限切れとなり、セッションはその60秒後に有効期限切れとなります。"
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/ExpiringEmbedLink"
+                  }, 
+                  {
+                    "x-box-field-variant": 3
+                  }, 
+                  {
+                    "description": "このフィールドをリクエストすると、iframeに埋め込まれたプレビューセッション用の有効期限付きBox Embed URLが作成されます。\n\nこのURLは60秒後に有効期限切れとなり、セッションはその60秒後に有効期限切れとなります。\n\n一部のファイルタイプはこれらの埋め込みURLでサポートされていません。"
+                  }
+                ]
               }, 
               "watermark_info": {
                 "allOf": [
@@ -12987,45 +13235,52 @@
                     "$ref": "#/components/schemas/WatermarkInfo"
                   }, 
                   {
-                    "description": "このファイルの電子すかしに関する情報"
+                    "description": "このフォルダに適用された電子すかしに関する詳細"
                   }, 
                   {
-                    "x-box-field-variant": 2
+                    "x-box-field-variant": 3
                   }
                 ]
               }, 
               "allowed_invitee_roles": {
                 "x-box-field-variant": 2, 
                 "type": "array", 
-                "description": "会社の管理者が許可しているフォルダの[collaboration](#collaboration-object)ロール。", 
-                "items": {
-                  "type": "string"
-                }, 
                 "example": [
                   "open"
                 ], 
+                "nullable": false, 
                 "enum": [
-                  "open", 
-                  "company", 
-                  "collaborators"
-                ]
+                  "editor", 
+                  "viewer", 
+                  "previewer", 
+                  "uploader", 
+                  "previewer uploader", 
+                  "viewer uploader", 
+                  "co-owner"
+                ], 
+                "description": "このファイルを共有するときに招待できるユーザーの役割タイプのリスト。", 
+                "items": {
+                  "type": "string"
+                }
               }, 
               "is_externally_owned": {
                 "x-box-field-variant": 2, 
                 "type": "boolean", 
                 "example": true, 
-                "description": "このファイルが社外のユーザーによって所有されているかどうか。"
+                "nullable": false, 
+                "description": "このフォルダが認証済みの会社以外のユーザーによって\n所有されているかどうかを指定します。"
               }, 
               "has_collaborations": {
                 "x-box-field-variant": 2, 
                 "type": "boolean", 
                 "example": true, 
-                "description": "このファイルにコラボレータが存在するかどうか。"
+                "nullable": false, 
+                "description": "このフォルダに他のコラボレータが存在するかどうかを指定します。"
               }, 
               "metadata": {
-                "x-box-field-variant": 2, 
+                "x-box-field-variant": 3, 
                 "type": "object", 
-                "description": "スコープ内のメタデータオブジェクトのキー/値ペアのリスト。\n\nファイルのメタデータにアクセスするには、最初に\n[Metadata](#metadata)エンドポイントを使用して、会社で使用できるメタデータテンプレートを特定します。\n\n`fields`クエリパラメータを指定して[Retrieve File](#get-file-id)エンドポイントを使用すると、IDを指定してメタデータを取得できます。メタデータテンプレートのIDの形式は、`metadata.<scope>.<templatename>`になります。例: `fields=metadata.global.properties`", 
+                "description": "スコープ内のメタデータオブジェクトのキー/値ペアのリスト。\n\nファイルのメタデータにアクセスするには、最初にMetadataエンドポイントを使用して、会社で使用できるメタデータテンプレートを特定します。\n\nその後、`fields`クエリパラメータを指定して`GET /files/:id`エンドポイントを使用すると、IDを指定してメタデータを取得できます。\n\nメタデータテンプレートのIDの形式は、`metadata.<scope>.<templatename>`になります。例: `metadata.global.properties`。", 
                 "example": {
                   "global": {
                     "marketingCollateral": {
@@ -13063,6 +13318,27 @@
                     "$ref": "#/components/schemas/Metadata"
                   }
                 }
+              }, 
+              "expires_at": {
+                "x-box-field-variant": 3, 
+                "type": "string", 
+                "format": "date-time", 
+                "nullable": true, 
+                "description": "ファイルが自動的に削除される日時", 
+                "example": "2012-12-12T10:53:43-08:00"
+              }, 
+              "representations": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/Representations"
+                  }, 
+                  {
+                    "x-box-field-variant": 3
+                  }, 
+                  {
+                    "description": "アプリケーション内でファイルのプレースホルダを表示するために使用できるレプリゼンテーションのリスト。デフォルトでは、すべてのレプリゼンテーションが返されるため、`X-Rep-Hints`ヘッダーを使用して目的のレプリゼンテーションをさらにカスタマイズすることをお勧めします。"
+                  }
+                ]
               }
             }
           }
@@ -13093,6 +13369,7 @@
         "title": "ファイル(標準版)", 
         "x-box-resource-id": "file--standard", 
         "x-box-reference-category": null, 
+        "x-box-sanitized": true, 
         "description": "任意のファイルAPIエンドポイントからデフォルトで返される、ファイルの標準レプリゼンテーション", 
         "x-box-reference-hide": true, 
         "allOf": [
@@ -13102,83 +13379,90 @@
           {
             "properties": {
               "sha1": {
-                "x-box-field-variant": 1, 
+                "x-box-field-variant": 2, 
                 "type": "string", 
                 "format": "digest", 
+                "nullable": false, 
                 "example": "85136C79CBF9FE36BB9D05D0639C70C265C18D37", 
-                "description": "ファイルのSHA1ハッシュ。"
+                "description": "ファイルのSHA1ハッシュ。Box上のファイルとローカルファイルの内容を比較する目的に使用できます。"
               }, 
               "description": {
-                "x-box-field-variant": 1, 
+                "x-box-field-variant": 2, 
                 "type": "string", 
-                "description": "ファイルの説明", 
+                "nullable": false, 
+                "description": "このファイルの説明(省略可)", 
                 "maxLength": 256, 
                 "example": "Contract for Q1 renewal"
               }, 
               "size": {
-                "x-box-field-variant": 1, 
+                "x-box-field-variant": 2, 
                 "type": "integer", 
-                "description": "ファイルサイズ(バイト単位)。この整数を解析する際には、[exponent notation](http://en.wikipedia.org/wiki/\\\nDouble-precision_floating-point_format)になりやすいため、注意が必要です。", 
+                "nullable": false, 
+                "description": "ファイルサイズ(バイト単位)。この整数を解析する際には、非常に大きな数値となって整数オーバーフローになりやすいため、注意が必要です。", 
                 "example": 629644
               }, 
               "path_collection": {
-                "x-box-field-variant": 1, 
-                "type": "array", 
-                "description": "ルートを起点にした、このファイルまでのフォルダのパス", 
-                "items": {
-                  "$ref": "#/components/schemas/Folder--Mini"
-                }
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/PathCollection"
+                  }, 
+                  {
+                    "description": "ルートフォルダを起点にした、このファイルを含むフォルダツリー。"
+                  }, 
+                  {
+                    "x-box-field-variant": 2
+                  }, 
+                  {
+                    "nullable": false
+                  }
+                ]
               }, 
               "created_at": {
-                "x-box-field-variant": 1, 
+                "x-box-field-variant": 2, 
                 "type": "string", 
                 "format": "date-time", 
-                "description": "Boxのサーバーにこのファイルがアップロードされた日時", 
+                "nullable": false, 
+                "description": "Box上でこのファイルが作成された日時。", 
                 "example": "2012-12-12T10:53:43-08:00"
               }, 
               "modified_at": {
-                "x-box-field-variant": 1, 
+                "x-box-field-variant": 2, 
                 "type": "string", 
                 "format": "date-time", 
-                "description": "Boxサーバー上でこのファイルが最後に更新された日時", 
+                "nullable": false, 
+                "description": "Boxでこのフォルダが最後に更新された日時。", 
                 "example": "2012-12-12T10:53:43-08:00"
               }, 
               "trashed_at": {
-                "x-box-field-variant": 1, 
+                "x-box-field-variant": 2, 
                 "type": "string", 
                 "format": "date-time", 
                 "nullable": true, 
-                "description": "このファイルが最後にごみ箱に移動された日時", 
+                "description": "このファイルがごみ箱に移動された日時。", 
                 "example": "2012-12-12T10:53:43-08:00"
               }, 
               "purged_at": {
-                "x-box-field-variant": 1, 
+                "x-box-field-variant": 2, 
                 "type": "string", 
                 "format": "date-time", 
                 "nullable": true, 
-                "description": "このファイルが完全に削除される日時", 
+                "description": "このファイルがごみ箱から削除される予定日時。", 
                 "example": "2012-12-12T10:53:43-08:00"
               }, 
               "content_created_at": {
-                "x-box-field-variant": 1, 
-                "type": "string", 
-                "format": "date-time", 
-                "description": "このファイルが最初に作成された日時", 
-                "example": "2012-12-12T10:53:43-08:00"
-              }, 
-              "content_modified_at": {
-                "x-box-field-variant": 1, 
-                "type": "string", 
-                "format": "date-time", 
-                "description": "このファイルが最後に更新された日時", 
-                "example": "2012-12-12T10:53:43-08:00"
-              }, 
-              "expires_at": {
-                "x-box-field-variant": 1, 
+                "x-box-field-variant": 2, 
                 "type": "string", 
                 "format": "date-time", 
                 "nullable": true, 
-                "description": "ファイルが自動的に削除される日時", 
+                "description": "このファイルが最初に作成された日時。この日時はファイルがBoxにアップロードされた時点よりも前になる場合があります。", 
+                "example": "2012-12-12T10:53:43-08:00"
+              }, 
+              "content_modified_at": {
+                "x-box-field-variant": 2, 
+                "type": "string", 
+                "format": "date-time", 
+                "nullable": true, 
+                "description": "このフォルダが最後に更新された日時。この日時はフォルダがBoxにアップロードされた時点よりも前になる場合があります。", 
                 "example": "2012-12-12T10:53:43-08:00"
               }, 
               "created_by": {
@@ -13190,7 +13474,7 @@
                     "description": "このファイルを作成したユーザー"
                   }, 
                   {
-                    "x-box-field-variant": 1
+                    "x-box-field-variant": 2
                   }
                 ]
               }, 
@@ -13203,7 +13487,10 @@
                     "description": "このファイルを最後に変更したユーザー"
                   }, 
                   {
-                    "x-box-field-variant": 1
+                    "x-box-field-variant": 2
+                  }, 
+                  {
+                    "nullable": false
                   }
                 ]
               }, 
@@ -13216,7 +13503,10 @@
                     "description": "このファイルを所有するユーザー"
                   }, 
                   {
-                    "x-box-field-variant": 1
+                    "x-box-field-variant": 2
+                  }, 
+                  {
+                    "nullable": false
                   }
                 ]
               }, 
@@ -13226,13 +13516,15 @@
                     "$ref": "#/components/schemas/SharedLink"
                   }, 
                   {
-                    "description": "このファイルの共有リンクオブジェクト。共有リンクがまだ作成されていない場合は、`null`になります。"
+                    "description": "このファイルの共有リンク。このファイルに対してまだ共有リンクが作成されていない場合は、`null`になります。"
                   }, 
                   {
-                    "x-box-field-variant": 1
+                    "x-box-field-variant": 2
+                  }, 
+                  {
+                    "nullable": true
                   }
-                ], 
-                "nullable": true
+                ]
               }, 
               "parent": {
                 "allOf": [
@@ -13240,23 +13532,25 @@
                     "$ref": "#/components/schemas/Folder--Mini"
                   }, 
                   {
-                    "description": "このファイルが格納されているフォルダ。"
+                    "description": "このファイルが配置されているフォルダ。"
                   }, 
                   {
-                    "x-box-field-variant": 1
+                    "x-box-field-variant": 2
                   }
-                ]
+                ], 
+                "nullable": true
               }, 
               "item_status": {
-                "x-box-field-variant": 1, 
+                "x-box-field-variant": 2, 
                 "type": "string", 
-                "example": "active", 
+                "description": "この項目が削除されたかどうかを定義します。\n\n* `active` - 項目がごみ箱に移動されていない場合。\n* `trashed` - 項目がごみ箱に移動されているが、まだ削除されていない場合。\n* `deleted` - 項目がすでに完全に削除されている場合。", 
                 "enum": [
                   "active", 
                   "trashed", 
                   "deleted"
                 ], 
-                "description": "この項目が削除されたかどうか。値には、`active`、`trashed` (ファイルがごみ箱に移動された場合)、`deleted` (ファイルが完全に削除された場合)があります"
+                "nullable": false, 
+                "example": "active"
               }
             }
           }
@@ -13266,40 +13560,70 @@
         "title": "File (Mini)", 
         "x-box-resource-id": "file--mini", 
         "x-box-reference-category": null, 
+        "x-box-sanitized": true, 
         "description": "他のリソースの下にネストされたときに使用される、ファイルの簡易版レプリゼンテーション。", 
         "x-box-reference-hide": true, 
         "allOf": [
           {
-            "$ref": "#/components/schemas/Item"
+            "$ref": "#/components/schemas/File--Base"
           }, 
           {
             "properties": {
-              "type": {
-                "type": "string", 
-                "description": "`file`", 
-                "example": "file", 
-                "enum": [
-                  "file"
-                ]
-              }, 
               "sequence_id": {
-                "type": "string", 
-                "example": "1", 
-                "description": "/eventsエンドポイントで使用する一意のID"
-              }, 
-              "etag": {
-                "type": "string", 
-                "example": "1", 
-                "description": "このファイルオブジェクトのエンティティタグ。`If-Match`ヘッダーで使用します。"
+                "allOf": [
+                  {
+                    "type": "string", 
+                    "example": "3", 
+                    "nullable": false, 
+                    "description": "この項目に適用された最新のユーザーイベントを表す数値の識別子\n\nこれを`GET /events`エンドポイントと組み合わせて使用すると、この識別子が読み取られる前に発生した可能性があるユーザーイベントを除外できます。\n\nたとえば、Box DriveなどのアプリケーションがAPIを介して項目を取得し、その項目の変更に関連するユーザーイベントの発生を監視する場合などがこれに該当します。ユーザーイベントの`sequence_id`が最初に取得されたリソースの`sequence_id`よりも小さいか同じである場合、アプリケーションはそのようなユーザーイベントをすべて無視します。"
+                  }, 
+                  {
+                    "x-box-field-variant": 1
+                  }, 
+                  {
+                    "nullable": false
+                  }
+                ]
               }, 
               "name": {
                 "type": "string", 
+                "x-box-field-variant": 1, 
                 "description": "ファイルの名前", 
-                "example": "Contract.png"
+                "example": "Contract.pdf"
               }
             }
           }
         ]
+      }, 
+      "File--Base": {
+        "title": "ファイル(ベース)", 
+        "x-box-resource-id": "file--base", 
+        "x-box-sanitized": true, 
+        "x-box-reference-hide": true, 
+        "description": "ファイルの最も基本的なレプリゼンテーション。`fields`クエリパラメータを使用すると、最小限の数のフィールドが返されます。", 
+        "properties": {
+          "id": {
+            "type": "string", 
+            "nullable": false, 
+            "description": "ファイルを表す一意の識別子。\n\nファイルIDを確認するには、ウェブアプリケーションでファイルにアクセスして、URLからIDをコピーします。たとえば、URLが`https://*.app.box.com/files/123`の場合、`file_id`は`123`です。", 
+            "example": "12345"
+          }, 
+          "etag": {
+            "type": "string", 
+            "example": "1", 
+            "nullable": true, 
+            "description": "このファイルのHTTP etag。これは変更が発生した場合(またはしなかった場合)にファイルに対して変更を行う目的でのみ、`If-Match`および`If-None-Match`ヘッダー内の一部のAPIエンドポイントで使用できます。"
+          }, 
+          "type": {
+            "type": "string", 
+            "description": "`file`", 
+            "example": "file", 
+            "enum": [
+              "file"
+            ], 
+            "nullable": false
+          }
+        }
       }, 
       "FilePermissions": {
         "title": "ファイルの権限", 
@@ -13352,7 +13676,7 @@
         ]
       }, 
       "FileScope": {
-        "title": "ファイルスコープ", 
+        "title": "File Scope", 
         "x-box-resource-id": "file_scope", 
         "description": "ファイルとそのファイルにアクセスできるスコープの関係", 
         "properties": {
@@ -13475,7 +13799,7 @@
         ]
       }, 
       "FileVersion--Mini": {
-        "title": "ファイルバージョン(簡易版)", 
+        "title": "File Version (Mini)", 
         "x-box-resource-id": "file_version--mini", 
         "description": "他のリソースの下にネストされたときに使用される、ファイルバージョンの簡易版レプリゼンテーション。", 
         "x-box-reference-hide": true, 
@@ -13666,7 +13990,7 @@
         ]
       }, 
       "Folder": {
-        "title": "フォルダ", 
+        "title": "Folder", 
         "x-box-resource-id": "folder", 
         "x-box-has-field-variants": true, 
         "x-box-sanitized": true, 
@@ -13695,12 +14019,12 @@
                     ]
                   }, 
                   {
-                    "x-box-field-variant": 2
+                    "x-box-field-variant": 3
                   }
                 ]
               }, 
               "has_collaborations": {
-                "x-box-field-variant": 2, 
+                "x-box-field-variant": 3, 
                 "type": "boolean", 
                 "example": true, 
                 "nullable": false, 
@@ -13715,7 +14039,7 @@
                     "description": "このフォルダに対して現在のユーザーが持っている権限について説明します。"
                   }, 
                   {
-                    "x-box-field-variant": 2
+                    "x-box-field-variant": 3
                   }, 
                   {
                     "nullable": false
@@ -13737,7 +14061,7 @@
                     "description": "この項目のタグ。これらのタグは\nBoxウェブアプリおよびモバイルアプリで項目の横に表示されます。\n\nタグを追加または削除するには、項目の現在のタグを取得して\n変更してから、このフィールドを更新します。\n\nタグの数は、1項目あたり100個までに制限され、一意のタグは会社あたり10,000個までに\n制限されます。"
                   }, 
                   {
-                    "x-box-field-variant": 2
+                    "x-box-field-variant": 3
                   }, 
                   {
                     "nullable": false
@@ -13752,7 +14076,7 @@
                     "description": "フォルダの所有者ではないユーザーが\nそのフォルダに新しいコラボレータを招待できるかどうかを指定します。"
                   }, 
                   {
-                    "x-box-field-variant": 2
+                    "x-box-field-variant": 3
                   }, 
                   {
                     "nullable": false
@@ -13760,7 +14084,7 @@
                 ]
               }, 
               "is_externally_owned": {
-                "x-box-field-variant": 2, 
+                "x-box-field-variant": 3, 
                 "type": "boolean", 
                 "example": true, 
                 "nullable": false, 
@@ -13774,7 +14098,7 @@
                     "description": "このフォルダへの招待を社内のユーザーのみに限定するかどうかを指定します。既存のコラボレーションには影響しません。"
                   }, 
                   {
-                    "x-box-field-variant": 2
+                    "x-box-field-variant": 3
                   }, 
                   {
                     "nullable": false
@@ -13782,7 +14106,7 @@
                 ]
               }, 
               "allowed_shared_link_access_levels": {
-                "x-box-field-variant": 2, 
+                "x-box-field-variant": 3, 
                 "type": "array", 
                 "example": [
                   "open"
@@ -13799,7 +14123,7 @@
                 "description": "このフォルダで使用できるアクセスレベルのリスト。\n\nルートフォルダなどの一部のフォルダでは共有が許可されていないため、このリストは常に空になります。"
               }, 
               "allowed_invitee_roles": {
-                "x-box-field-variant": 2, 
+                "x-box-field-variant": 3, 
                 "type": "array", 
                 "example": [
                   "open"
@@ -13828,7 +14152,7 @@
                     "description": "このフォルダに適用された電子すかしに関する詳細"
                   }, 
                   {
-                    "x-box-field-variant": 2
+                    "x-box-field-variant": 3
                   }, 
                   {
                     "nullable": false
@@ -13836,7 +14160,7 @@
                 ]
               }, 
               "can_non_owners_view_collaborators": {
-                "x-box-field-variant": 2, 
+                "x-box-field-variant": 3, 
                 "type": "boolean", 
                 "example": true, 
                 "description": "このフォルダの所有者ではないコラボレータが\nこのフォルダの他のコラボレータを表示できないように制限するかどうかを\n指定します。\n\nこの制限を有効にした場合は、所有者ではないユーザーが\n新しいコラボレータを招待することも\n制限されます。"
@@ -13859,7 +14183,7 @@
           {
             "properties": {
               "created_at": {
-                "x-box-field-variant": 1, 
+                "x-box-field-variant": 2, 
                 "type": "string", 
                 "format": "date-time", 
                 "nullable": true, 
@@ -13867,7 +14191,7 @@
                 "example": "2012-12-12T10:53:43-08:00"
               }, 
               "modified_at": {
-                "x-box-field-variant": 1, 
+                "x-box-field-variant": 2, 
                 "type": "string", 
                 "format": "date-time", 
                 "description": "このフォルダが最後に更新された日時。ルートフォルダやごみ箱フォルダなど、\n一部のフォルダの場合、この値は\n`null`になる場合があります。", 
@@ -13884,7 +14208,7 @@
                     "nullable": false
                   }, 
                   {
-                    "x-box-field-variant": 1
+                    "x-box-field-variant": 2
                   }, 
                   {
                     "nullable": false
@@ -13892,7 +14216,7 @@
                 ]
               }, 
               "size": {
-                "x-box-field-variant": 1, 
+                "x-box-field-variant": 2, 
                 "type": "integer", 
                 "format": "int64", 
                 "description": "フォルダサイズ(バイト単位)。\n\nこの整数を解析する際には、値が非常に大きくなる\nことがあるため注意が必要です。", 
@@ -13908,7 +14232,7 @@
                     "description": "ルートフォルダを起点にした、このフォルダを含むフォルダツリー。"
                   }, 
                   {
-                    "x-box-field-variant": 1
+                    "x-box-field-variant": 2
                   }, 
                   {
                     "nullable": false
@@ -13924,7 +14248,7 @@
                     "description": "このフォルダを作成したユーザー"
                   }, 
                   {
-                    "x-box-field-variant": 1
+                    "x-box-field-variant": 2
                   }, 
                   {
                     "nullable": false
@@ -13940,7 +14264,7 @@
                     "description": "このフォルダを最後に変更したユーザー。"
                   }, 
                   {
-                    "x-box-field-variant": 1
+                    "x-box-field-variant": 2
                   }, 
                   {
                     "nullable": false
@@ -13948,7 +14272,7 @@
                 ]
               }, 
               "trashed_at": {
-                "x-box-field-variant": 1, 
+                "x-box-field-variant": 2, 
                 "type": "string", 
                 "format": "date-time", 
                 "description": "このフォルダがごみ箱に移動された日時。", 
@@ -13956,15 +14280,15 @@
                 "nullable": true
               }, 
               "purged_at": {
-                "x-box-field-variant": 1, 
+                "x-box-field-variant": 2, 
                 "type": "string", 
                 "format": "date-time", 
-                "description": "このフォルダがごみ箱から削除される日時。このフォルダが完全に削除される日時。", 
+                "description": "このフォルダがごみ箱から削除される予定日時。", 
                 "example": "2012-12-12T10:53:43-08:00", 
                 "nullable": true
               }, 
               "content_created_at": {
-                "x-box-field-variant": 1, 
+                "x-box-field-variant": 2, 
                 "type": "string", 
                 "format": "date-time", 
                 "nullable": true, 
@@ -13972,7 +14296,7 @@
                 "example": "2012-12-12T10:53:43-08:00"
               }, 
               "content_modified_at": {
-                "x-box-field-variant": 1, 
+                "x-box-field-variant": 2, 
                 "type": "string", 
                 "format": "date-time", 
                 "nullable": true, 
@@ -13980,7 +14304,7 @@
                 "example": "2012-12-12T10:53:43-08:00"
               }, 
               "expires_at": {
-                "x-box-field-variant": 1, 
+                "x-box-field-variant": 2, 
                 "type": "string", 
                 "format": "date-time", 
                 "nullable": true, 
@@ -13996,7 +14320,7 @@
                     "description": "このフォルダを所有するユーザー。"
                   }, 
                   {
-                    "x-box-field-variant": 1
+                    "x-box-field-variant": 2
                   }, 
                   {
                     "nullable": false
@@ -14012,13 +14336,13 @@
                     "description": "このフォルダの共有リンク。このフォルダに対して\nまだ共有リンクが作成されていない場合は、\n`null`になります。"
                   }, 
                   {
-                    "x-box-field-variant": 1
+                    "x-box-field-variant": 2
                   }
                 ], 
                 "nullable": true
               }, 
               "folder_upload_email": {
-                "x-box-field-variant": 1, 
+                "x-box-field-variant": 2, 
                 "type": "object", 
                 "nullable": true, 
                 "properties": {
@@ -14050,13 +14374,13 @@
                     "description": "このフォルダが配置されているフォルダ(省略可)\n\nルートフォルダやごみ箱フォルダなど、一部のフォルダの場合、\nこの値は`null`になることがあります。"
                   }, 
                   {
-                    "x-box-field-variant": 1
+                    "x-box-field-variant": 2
                   }
                 ], 
                 "nullable": true
               }, 
               "item_status": {
-                "x-box-field-variant": 1, 
+                "x-box-field-variant": 2, 
                 "type": "string", 
                 "description": "この項目が削除されたかどうかを定義します。\n\n* `active` - 項目がごみ箱に移動されていない場合。\n* `trashed` - 項目がごみ箱に移動されているが、まだ削除されていない場合。\n* `deleted` - 項目がすでに完全に削除されている場合。", 
                 "enum": [
@@ -14076,13 +14400,13 @@
                     "description": "フォルダ内の項目のページ。\n\nこのフィールドをリクエストできるのは、フォルダの情報をクエリで照会するときのみで、\nフォルダの項目をクエリで照会するときにはリクエストできません。"
                   }, 
                   {
-                    "x-box-field-variant": 1
+                    "x-box-field-variant": 2
                   }, 
                   {
                     "nullable": false
                   }
                 ], 
-                "x-box-field-variant": 1
+                "x-box-field-variant": 2
               }
             }
           }
@@ -14097,40 +14421,66 @@
         "x-box-sanitized": true, 
         "allOf": [
           {
-            "$ref": "#/components/schemas/Item"
+            "$ref": "#/components/schemas/Folder--Base"
           }, 
           {
             "properties": {
-              "type": {
-                "type": "string", 
-                "description": "`folder`", 
-                "example": "folder", 
-                "enum": [
-                  "folder"
-                ], 
-                "nullable": false
-              }, 
               "sequence_id": {
-                "type": "string", 
-                "nullable": true, 
-                "example": "1", 
-                "description": "`/events`エンドポイントと組み合わせて使用できる\n一意の識別子。ルートフォルダやごみ箱フォルダなど、一部のフォルダの場合は`null`になることがあります。"
-              }, 
-              "etag": {
-                "type": "string", 
-                "nullable": true, 
-                "example": "1", 
-                "description": "このフォルダのHTTP etag。これは変更が発生した場合(またはしなかった場合)に\nフォルダに対して変更を行う目的でのみ、\n`If-Match`および`If-None-Match`ヘッダー内の一部のAPIエンドポイントで使用できます。"
+                "allOf": [
+                  {
+                    "type": "string", 
+                    "example": "3", 
+                    "nullable": false, 
+                    "description": "この項目に適用された最新のユーザーイベントを表す数値の識別子\n\nこれを`GET /events`エンドポイントと組み合わせて使用すると、この識別子が読み取られる前に発生した可能性があるユーザーイベントを除外できます。\n\nたとえば、Box DriveなどのアプリケーションがAPIを介して項目を取得し、その項目の変更に関連するユーザーイベントの発生を監視する場合などがこれに該当します。ユーザーイベントの`sequence_id`が最初に取得されたリソースの`sequence_id`よりも小さいか同じである場合、アプリケーションはそのようなユーザーイベントをすべて無視します。"
+                  }, 
+                  {
+                    "x-box-field-variant": 1
+                  }, 
+                  {
+                    "nullable": false
+                  }
+                ]
               }, 
               "name": {
                 "type": "string", 
                 "description": "フォルダの名前。", 
                 "example": "Contracts", 
-                "nullable": false
+                "nullable": false, 
+                "x-box-field-variant": 1
               }
             }
           }
         ]
+      }, 
+      "Folder--Base": {
+        "title": "フォルダ(ベース)", 
+        "x-box-resource-id": "folder--base", 
+        "x-box-sanitized": true, 
+        "x-box-reference-hide": true, 
+        "description": "フォルダの最も基本的なレプリゼンテーション。`fields`クエリパラメータを使用すると、最小限の数のフィールドが返されます。", 
+        "properties": {
+          "id": {
+            "type": "string", 
+            "nullable": false, 
+            "description": "フォルダを表す一意の識別子。\n\nフォルダIDを確認するには、ウェブアプリケーションでフォルダにアクセスして、URLからIDをコピーします。たとえば、URLが`https://*.app.box.com/folders/123`の場合、`folder_id`は`123`です。", 
+            "example": "12345"
+          }, 
+          "etag": {
+            "type": "string", 
+            "nullable": true, 
+            "example": "1", 
+            "description": "このフォルダのHTTP etag。これは変更が発生した場合(またはしなかった場合)に\nフォルダに対して変更を行う目的でのみ、\n`If-Match`および`If-None-Match`ヘッダー内の一部のAPIエンドポイントで使用できます。"
+          }, 
+          "type": {
+            "type": "string", 
+            "description": "`folder`", 
+            "example": "folder", 
+            "enum": [
+              "folder"
+            ], 
+            "nullable": false
+          }
+        }
       }, 
       "FolderUploadEmail": {
         "title": "フォルダアップロードメール", 
@@ -14151,7 +14501,7 @@
         }
       }, 
       "FolderPermissions": {
-        "title": "フォルダ権限", 
+        "title": "Folder Permissions", 
         "x-box-resource-id": "folder-permissions", 
         "description": "フォルダに対して認証済みユーザーが持っている権限。", 
         "allOf": [
@@ -14186,27 +14536,27 @@
           {
             "properties": {
               "provenance": {
-                "x-box-field-variant": 2, 
+                "x-box-field-variant": 3, 
                 "type": "string", 
                 "description": "このグループの元になっている外部ソース(`\"Active \nDirectory\"、\"Google Groups\"、\"Facebook Groups\"など)を追跡します。また、これを設定すると、Box管理者がBoxウェブアプリケーションからグループ名やメンバーを直接編集できなくなります。\n\nこれはグループを一方向に同期する場合に適しています。", 
                 "maxLength": 255, 
                 "example": "Active Directory"
               }, 
               "external_sync_identifier": {
-                "x-box-field-variant": 2, 
+                "x-box-field-variant": 3, 
                 "type": "string", 
                 "description": "このBoxグループを外部グループにリンクするために外部のグループ同期ツールで使用できる任意の識別子。このフィールドの値には、Active DirectoryオブジェクトIDやGoogleグループIDなどを使用できます。Boxまたは外部システム内でグループ名が更新されたときの問題を回避するために、このフィールドを使用することをお勧めします。", 
                 "example": "AD:123456"
               }, 
               "description": {
-                "x-box-field-variant": 2, 
+                "x-box-field-variant": 3, 
                 "type": "string", 
                 "description": "グループについての人間が判読できる説明。", 
                 "maxLength": 255, 
                 "example": "Support Group - as imported from Active Directory"
               }, 
               "invitability_level": {
-                "x-box-field-variant": 2, 
+                "x-box-field-variant": 3, 
                 "type": "string", 
                 "example": "admins_only", 
                 "description": "フォルダでのコラボレーションにグループを招待できるユーザーを指定します(コラボレーションの作成)。\n\n`admins_only`に設定すると、会社の管理者、共同管理者、およびグループ管理者がグループを招待できるようになります。\n\n`admins_and_members`に設定すると、上記すべての管理者に加えて、グループのメンバーもグループを招待できるようになります。\n\n`all_managed_users`に設定すると、社内のすべての管理対象ユーザーがグループを招待できるようになります。", 
@@ -14217,7 +14567,7 @@
                 ]
               }, 
               "member_viewability_level": {
-                "x-box-field-variant": 2, 
+                "x-box-field-variant": 3, 
                 "type": "string", 
                 "example": "admins_only", 
                 "description": "グループのメンバーを表示できるユーザーを指定します(グループのメンバーを取得)。\n\n* `admins_only` - 会社の管理者、共同管理者、グループのグループ管理者\n* `admins_and_members` - すべての管理者とグループメンバー\n* `all_managed_users` - 会社内のすべての管理対象ユーザー", 
@@ -14232,7 +14582,7 @@
         ]
       }, 
       "Groups": {
-        "title": "グループ", 
+        "title": "Groups", 
         "x-box-resource-id": "groups", 
         "x-box-reference-category": "groups", 
         "description": "グループのリスト。", 
@@ -14264,14 +14614,14 @@
           {
             "properties": {
               "created_at": {
-                "x-box-field-variant": 1, 
+                "x-box-field-variant": 2, 
                 "type": "string", 
                 "format": "date-time", 
                 "description": "グループオブジェクトが作成された日時", 
                 "example": "2012-12-12T10:53:43-08:00"
               }, 
               "modified_at": {
-                "x-box-field-variant": 1, 
+                "x-box-field-variant": 2, 
                 "type": "string", 
                 "format": "date-time", 
                 "description": "グループオブジェクトが最後に変更された日時", 
@@ -14282,7 +14632,7 @@
         ]
       }, 
       "Group--Mini": {
-        "title": "グループ(簡易版)", 
+        "title": "Group (Mini)", 
         "x-box-resource-id": "group--mini", 
         "type": "object", 
         "description": "グループのIDや名前を含む、グループの簡易版レプリゼンテーション。", 
@@ -14304,12 +14654,14 @@
               "name": {
                 "type": "string", 
                 "description": "グループの名前", 
-                "example": "Support"
+                "example": "Support", 
+                "x-box-field-variant": 1
               }, 
               "group_type": {
                 "type": "string", 
                 "description": "グループのタイプ。", 
                 "example": "managed_group", 
+                "x-box-field-variant": 1, 
                 "enum": [
                   "managed_group", 
                   "all_users_group"
@@ -14405,7 +14757,7 @@
         ]
       }, 
       "Invite": {
-        "title": "招待", 
+        "title": "Invite", 
         "x-box-resource-id": "invite", 
         "x-box-reference-category": "invites", 
         "description": "会社へのユーザーの招待。", 
@@ -14470,9 +14822,20 @@
                 "example": "file"
               }, 
               "sequence_id": {
-                "type": "string", 
-                "example": "1", 
-                "description": "`/events`エンドポイントで使用する一意のID。ルートやごみ箱など、一部の項目では`null`になることがあります。"
+                "allOf": [
+                  {
+                    "type": "string", 
+                    "example": "3", 
+                    "nullable": false, 
+                    "description": "この項目に適用された最新のユーザーイベントを表す数値の識別子\n\nこれを`GET /events`エンドポイントと組み合わせて使用すると、この識別子が読み取られる前に発生した可能性があるユーザーイベントを除外できます。\n\nたとえば、Box DriveなどのアプリケーションがAPIを介して項目を取得し、その項目の変更に関連するユーザーイベントの発生を監視する場合などがこれに該当します。ユーザーイベントの`sequence_id`が最初に取得されたリソースの`sequence_id`よりも小さいか同じである場合、アプリケーションはそのようなユーザーイベントをすべて無視します。"
+                  }, 
+                  {
+                    "x-box-field-variant": 1
+                  }, 
+                  {
+                    "nullable": false
+                  }
+                ]
               }, 
               "etag": {
                 "type": "string", 
@@ -14639,7 +15002,7 @@
         ]
       }, 
       "LegalHoldPolicy--Mini": {
-        "title": "リーガルホールドポリシー(簡易版)", 
+        "title": "Legal Hold Policy (Mini)", 
         "x-box-resource-id": "legal_hold_policy--mini", 
         "description": "簡易版のリーガルホールドポリシー", 
         "x-box-reference-hide": true, 
@@ -14850,7 +15213,7 @@
         }
       }, 
       "Metadata": {
-        "title": "メタデータ", 
+        "title": "Metadata", 
         "x-box-resource-id": "metadata", 
         "description": "メタデータテンプレートで指定され、ファイルまたはフォルダに適用されるメタデータ。", 
         "x-box-reference-category": "file_metadata", 
@@ -14900,7 +15263,7 @@
         }
       }, 
       "Metadatas": {
-        "title": "メタデータ", 
+        "title": "Metadatas", 
         "x-box-resource-id": "metadatas", 
         "x-box-reference-category": "file_metadata", 
         "description": "メタデータのリスト", 
@@ -15404,7 +15767,7 @@
         }
       }, 
       "MetadataCardEntry": {
-        "title": "メタデータカードエントリ", 
+        "title": "Metadata Card Entry", 
         "x-box-resource-id": "metadata_cards_entry", 
         "x-box-reference-category": "skills", 
         "description": "メタデータカードの`entries`属性のエントリ", 
@@ -15429,7 +15792,7 @@
         }
       }, 
       "NotifiedUser": {
-        "title": "通知の対象となるユーザー", 
+        "title": "Notified User", 
         "x-box-resource-id": "notified_user", 
         "description": "イベントが通知されるユーザー。", 
         "type": "object", 
@@ -15556,7 +15919,7 @@
         }
       }, 
       "PathCollection": {
-        "title": "パスのコレクション", 
+        "title": "Path Collection", 
         "x-box-resource-id": "path_collection", 
         "x-box-sanitized": true, 
         "description": "項目の親フォルダのリスト。", 
@@ -15650,7 +16013,7 @@
           }, 
           "url": {
             "type": "string", 
-            "example": "http://2.realtime.services.box.net/\\\nsubscribe\\?channel=cc807c9c4869ffb1c81a&stream_type=all", 
+            "example": "http://2.realtime.services.box.net/subscribe?channel=cc807c9c4869ffb1c81a&stream_type=all", 
             "description": "サーバーのURL。"
           }, 
           "ttl": {
@@ -15691,7 +16054,7 @@
         }
       }, 
       "RecentItem": {
-        "title": "最近の項目", 
+        "title": "Recent Item", 
         "x-box-resource-id": "recent_item", 
         "description": "ユーザーが最近アクセスした項目。", 
         "x-box-reference-category": "recent_items", 
@@ -15737,7 +16100,7 @@
         }
       }, 
       "RecentItems": {
-        "title": "最近使用した項目", 
+        "title": "Recent Items", 
         "x-box-resource-id": "recent_items", 
         "description": "最近使用した項目のリスト。", 
         "allOf": [
@@ -15757,7 +16120,7 @@
         ]
       }, 
       "Reference": {
-        "title": "リファレンス", 
+        "title": "Reference", 
         "x-box-resource-id": "reference", 
         "x-box-sanitized": true, 
         "description": "オブジェクトの最も基本的な参照", 
@@ -15766,6 +16129,93 @@
             "type": "string", 
             "description": "このオブジェクトの一意の識別子", 
             "example": "11446498"
+          }
+        }
+      }, 
+      "Representation": {
+        "title": "レプリゼンテーション", 
+        "x-box-resource-id": "representation", 
+        "description": "ファイルレプリゼンテーション", 
+        "properties": {
+          "content": {
+            "type": "object", 
+            "description": "このレプリゼンテーションを実際に取得するために使用できるURLを含むオブジェクト。", 
+            "properties": {
+              "url_template": {
+                "type": "string", 
+                "example": "https://dl.boxcloud.com/api/2.0/internal_files/123/versions/345/representations/png_paged_2048x2048/content/{+asset_path}?watermark_content=4567", 
+                "description": "レプリゼンテーションを取得するために使用できるダウンロードURL。\nこのエンドポイントに対しては必ず認証済みAPI呼び出しを行ってください。\n\nこのURLはテンプレートであるため、`{+asset_path}`を実際のパスに置き換える必要があります。通常、ページ付けが行われていないレプリゼンテーションの場合は、空の文字列に置き換えることができます。\n\nページ付けが行われているレプリゼンテーションの場合は、`1.pdf`など、リクエストするページにファイル拡張子を付けた文字列で`{+asset_path}`を置き換えます。\n\nダウンロードURLをリクエストする際には、以下の追加クエリパラメータを渡すことができます。\n\n* `set_content_disposition_type` - 配置タイプとして`inline`または`attachment`のいずれかを指定してAPI応答の`Content-Disposition`ヘッダーを設定します。このパラメータを指定しない場合、応答に`Content-Disposition`ヘッダーは含まれません。\n\n* `set_content_disposition_filename` - `Content-Disposition`ヘッダーで使用するレプリゼンテーションのファイル名をアプリケーションで定義できます。定義しない場合は、Boxのソースファイル名から派生したファイル名とレプリゼンテーション拡張子の組み合わせがファイル名になります。"
+              }
+            }
+          }, 
+          "info": {
+            "type": "object", 
+            "description": "このレプリゼンテーションの詳細を取得するために使用できるURLを含むオブジェクト。", 
+            "properties": {
+              "url": {
+                "type": "string", 
+                "example": "https://api.box.com/2.0/internal_files/123/versions/345/representations/png_paged_2048x2048", 
+                "description": "このファイルレプリゼンテーションの詳細を取得するために使用できるAPI URL。このエンドポイントに対しては必ず認証済みAPI呼び出しを行ってください。"
+              }
+            }
+          }, 
+          "properties": {
+            "type": "object", 
+            "description": "このプレゼンテーションのサイズとタイプを含むオブジェクト。", 
+            "properties": {
+              "dimensions": {
+                "type": "string", 
+                "format": "<width>x<height>", 
+                "example": "2048x2048", 
+                "description": "このレプリゼンテーションの幅と高さ。"
+              }, 
+              "paged": {
+                "type": "boolean", 
+                "example": true, 
+                "description": "レプリゼンテーションが複数のページで構成されているかどうかを示します"
+              }, 
+              "thumb": {
+                "type": "boolean", 
+                "example": true, 
+                "description": "そのレプリゼンテーションをファイルのサムネイルとして使用できるかどうかを示します"
+              }
+            }
+          }, 
+          "representation": {
+            "type": "string", 
+            "example": "png", 
+            "description": "返されたレプリゼンテーションのファイルタイプを示します。"
+          }, 
+          "status": {
+            "type": "object", 
+            "description": "このレプリゼンテーションのステータスを含むオブジェクト。", 
+            "properties": {
+              "state": {
+                "type": "string", 
+                "example": "success", 
+                "enum": [
+                  "success", 
+                  "viewable", 
+                  "pending", 
+                  "none"
+                ], 
+                "description": "レプリゼンテーションのステータス。\n\n* `success`はそのレプリゼンテーションが表示可能な状態であることを示します。\n* `viewable`は視聴可能な動画であることを示します。\n* `pending`はそのレプリゼンテーションがこれから生成されることを示します。ステータスを再確認するにはこのエンドポイントを再試行します。\n* `none`はリクエストされたときにレプリゼンテーションが再作成されることを示します。この生成をトリガーするには、`info`オブジェクトで定義されたURLをリクエストします。"
+              }
+            }
+          }
+        }
+      }, 
+      "Representations": {
+        "title": "レプリゼンテーション", 
+        "x-box-resource-id": "representations", 
+        "description": "ファイルレプリゼンテーションのリスト", 
+        "properties": {
+          "entries": {
+            "type": "array", 
+            "description": "ファイルのリスト", 
+            "items": {
+              "$ref": "#/components/schemas/Representation"
+            }
           }
         }
       }, 
@@ -15971,10 +16421,10 @@
         ]
       }, 
       "SessionEndpoints": {
-        "title": "セッションエンドポイント", 
+        "title": "Session Endpoints", 
         "x-box-resource-id": "session_endpoints", 
         "x-box-reference-category": "chunked_uploads", 
-        "description": "チャンク化されたアップロードセッションに使用されるエンドポイントのリスト。", 
+        "description": "分割アップロードセッションに使用されるエンドポイントのリスト。", 
         "properties": {
           "upload_part": {
             "type": "string", 
@@ -16009,7 +16459,7 @@
         }
       }, 
       "SharedLink": {
-        "title": "共有リンク", 
+        "title": "Shared Link", 
         "x-box-resource-id": "shared_link", 
         "x-box-sanitized": true, 
         "description": "共有リンクを作成すると、Box上のファイルやフォルダに対する読み取り専用アクセスを直接実行できます。\n\nアクセスレベルがopenに設定されている共有リンクの場合は、URLを知っているすべてのユーザーが項目にアクセスでき、アクセスレベルがcompanyまたはcollaboratorsに設定されている共有リンクの場合は、適切に認証されたBoxユーザーのみが項目にアクセスできます。", 
@@ -16359,7 +16809,7 @@
         ]
       }, 
       "StoragePolicy--Mini": {
-        "title": "ストレージポリシー(簡易版)", 
+        "title": "Storage Policy (Mini)", 
         "x-box-resource-id": "storage_policy--mini", 
         "description": "ストレージポリシーオブジェクトの簡易版の説明", 
         "x-box-reference-hide": true, 
@@ -16508,6 +16958,15 @@
                 "format": "date-time", 
                 "description": "タスクオブジェクトが作成された日時", 
                 "example": "2012-12-12T10:53:43-08:00"
+              }, 
+              "completion_rule": {
+                "type": "string", 
+                "description": "完了ルール\"all_assignees\" (デフォルト)を使用して作成されたタスクは、すべての担当者が作業を完了したときにのみ完了済みと見なされます。完了ルール\"any_assignee\"を使用して作成されたタスクは、1人の担当者が作業を完了すると完了済みと見なされます。", 
+                "example": "all_assignees", 
+                "enum": [
+                  "all_assignees", 
+                  "any_assignee"
+                ]
               }
             }
           }
@@ -16946,7 +17405,7 @@
         }
       }, 
       "TrackingCode": {
-        "title": "追跡コード", 
+        "title": "Tracking Code", 
         "x-box-resource-id": "tracking_code", 
         "description": "ユーザーのカスタム追跡コード。", 
         "properties": {
@@ -17110,7 +17569,7 @@
         }
       }, 
       "User": {
-        "title": "ユーザー", 
+        "title": "User", 
         "x-box-resource-id": "user", 
         "x-box-has-field-variants": true, 
         "description": "任意のユーザーAPIエンドポイントから返される可能性がある、ユーザーの完全版レプリゼンテーション。", 
@@ -17125,7 +17584,7 @@
           {
             "properties": {
               "role": {
-                "x-box-field-variant": 2, 
+                "x-box-field-variant": 3, 
                 "type": "string", 
                 "enum": [
                   "admin", 
@@ -17136,7 +17595,7 @@
                 "example": "admin"
               }, 
               "tracking_codes": {
-                "x-box-field-variant": 2, 
+                "x-box-field-variant": 3, 
                 "type": "array", 
                 "description": "そのユーザーの管理者が設定したキーと値のペアの配列", 
                 "items": {
@@ -17144,31 +17603,31 @@
                 }
               }, 
               "can_see_managed_users": {
-                "x-box-field-variant": 2, 
+                "x-box-field-variant": 3, 
                 "type": "boolean", 
                 "example": true, 
                 "description": "ユーザーが自身の連絡先リストで会社の他のユーザーを参照できるかどうか"
               }, 
               "is_sync_enabled": {
-                "x-box-field-variant": 2, 
+                "x-box-field-variant": 3, 
                 "type": "boolean", 
                 "description": "ユーザーがBox Syncを使用できるかどうか", 
                 "example": true
               }, 
               "is_external_collab_restricted": {
-                "x-box-field-variant": 2, 
+                "x-box-field-variant": 3, 
                 "type": "boolean", 
                 "example": true, 
                 "description": "ユーザーが社外のユーザーとのコラボレーションを許可されているかどうか"
               }, 
               "is_exempt_from_device_limits": {
-                "x-box-field-variant": 2, 
+                "x-box-field-variant": 3, 
                 "type": "boolean", 
                 "example": true, 
                 "description": "会社のデバイス制限からユーザーを除外するかどうか"
               }, 
               "is_exempt_from_login_verification": {
-                "x-box-field-variant": 2, 
+                "x-box-field-variant": 3, 
                 "type": "boolean", 
                 "example": true, 
                 "description": "ユーザーが2要素認証を使用する必要があるかどうか"
@@ -17182,12 +17641,12 @@
                     "description": "ユーザーの会社のレプリゼンテーション"
                   }, 
                   {
-                    "x-box-field-variant": 2
+                    "x-box-field-variant": 3
                   }
                 ]
               }, 
               "my_tags": {
-                "x-box-field-variant": 2, 
+                "x-box-field-variant": 3, 
                 "type": "array", 
                 "items": {
                   "type": "string"
@@ -17198,29 +17657,47 @@
                 "description": "ユーザーが所有するすべてのファイルとフォルダのタグ。返される値にはリクエスト元によって設定されたタグのみが含まれます。"
               }, 
               "hostname": {
-                "x-box-field-variant": 2, 
+                "x-box-field-variant": 3, 
                 "type": "string", 
                 "example": "https://example.app.box.com/", 
                 "description": "ユーザーに対して生成する必要があるリンクのルート(プロトコル、サブドメイン、ドメイン)"
               }, 
               "is_platform_access_only": {
-                "x-box-field-variant": 2, 
+                "x-box-field-variant": 3, 
                 "type": "boolean", 
                 "example": true, 
                 "description": "ユーザーがApp Userであるかどうか"
               }, 
               "external_app_user_id": {
-                "x-box-field-variant": 2, 
+                "x-box-field-variant": 3, 
                 "type": "string", 
                 "example": "my-app-user", 
                 "description": "ユーザーの検索に使用できる、アプリユーザーの\n外部識別子。"
+              }, 
+              "notification_email": {
+                "x-box-field-variant": 2, 
+                "type": "object", 
+                "description": "通知メールが送信される代替の通知用メールアドレス。確認されると、通知メールはプライマリメールアドレスではなくこのメールアドレスに送信されます。", 
+                "nullable": true, 
+                "properties": {
+                  "email": {
+                    "type": "string", 
+                    "example": "notifications@example.com", 
+                    "description": "通知を送付するメールアドレス。"
+                  }, 
+                  "is_confirmed": {
+                    "type": "boolean", 
+                    "example": true, 
+                    "description": "このメールアドレスが確認されたかどうかを指定します。"
+                  }
+                }
               }
             }
           }
         ]
       }, 
       "Users": {
-        "title": "ユーザー", 
+        "title": "Users", 
         "x-box-resource-id": "users", 
         "x-box-reference-category": "users", 
         "description": "ユーザーのリスト。", 
@@ -17252,53 +17729,53 @@
           {
             "properties": {
               "created_at": {
-                "x-box-field-variant": 1, 
+                "x-box-field-variant": 2, 
                 "type": "string", 
                 "format": "date-time", 
                 "description": "ユーザーオブジェクトが作成された日時", 
                 "example": "2012-12-12T10:53:43-08:00"
               }, 
               "modified_at": {
-                "x-box-field-variant": 1, 
+                "x-box-field-variant": 2, 
                 "type": "string", 
                 "format": "date-time", 
                 "description": "ユーザーオブジェクトが最後に変更された日時", 
                 "example": "2012-12-12T10:53:43-08:00"
               }, 
               "language": {
-                "x-box-field-variant": 1, 
+                "x-box-field-variant": 2, 
                 "type": "string", 
                 "format": "ISO639-1-BOX", 
                 "description": "ユーザーの使用言語", 
                 "example": "en"
               }, 
               "timezone": {
-                "x-box-field-variant": 1, 
+                "x-box-field-variant": 2, 
                 "type": "string", 
                 "format": "timezone", 
                 "description": "ユーザーのタイムゾーン", 
                 "example": "Africa/Bujumbura"
               }, 
               "space_amount": {
-                "x-box-field-variant": 1, 
+                "x-box-field-variant": 2, 
                 "type": "integer", 
                 "description": "ユーザーが利用可能な容量の合計(バイト数)", 
                 "example": 11345156112
               }, 
               "space_used": {
-                "x-box-field-variant": 1, 
+                "x-box-field-variant": 2, 
                 "type": "integer", 
                 "description": "ユーザーが現在使用している容量", 
                 "example": 1237009912
               }, 
               "max_upload_size": {
-                "x-box-field-variant": 1, 
+                "x-box-field-variant": 2, 
                 "type": "integer", 
                 "description": "ユーザーが所有できる個々のファイルの最大サイズ(バイト単位)", 
                 "example": 2147483648
               }, 
               "status": {
-                "x-box-field-variant": 1, 
+                "x-box-field-variant": 2, 
                 "type": "string", 
                 "enum": [
                   "active", 
@@ -17310,28 +17787,28 @@
                 "example": "active"
               }, 
               "job_title": {
-                "x-box-field-variant": 1, 
+                "x-box-field-variant": 2, 
                 "type": "string", 
                 "description": "ユーザーの役職", 
                 "maxLength": 100, 
                 "example": "CEO"
               }, 
               "phone": {
-                "x-box-field-variant": 1, 
+                "x-box-field-variant": 2, 
                 "type": "string", 
                 "description": "ユーザーの電話番号", 
                 "maxLength": 100, 
                 "example": "6509241374"
               }, 
               "address": {
-                "x-box-field-variant": 1, 
+                "x-box-field-variant": 2, 
                 "type": "string", 
                 "description": "ユーザーの住所", 
                 "maxLength": 255, 
                 "example": "900 Jefferson Ave, Redwood City, CA 94063"
               }, 
               "avatar_url": {
-                "x-box-field-variant": 1, 
+                "x-box-field-variant": 2, 
                 "type": "string", 
                 "description": "ユーザーのアバター画像のURL", 
                 "example": "https://www.box.com/api/avatar/large/181216415"
@@ -17341,7 +17818,7 @@
         ]
       }, 
       "User--Mini": {
-        "title": "ユーザー(簡易版)", 
+        "title": "User (Mini)", 
         "x-box-resource-id": "user--mini", 
         "description": "他のリソース内にネストされたときに使用される、ユーザーの簡易版レプリゼンテーション。", 
         "x-box-reference-hide": true, 
@@ -17365,21 +17842,23 @@
                 "description": "このユーザーの表示名", 
                 "example": "Aaron Levie", 
                 "maxLength": 50, 
-                "nullable": false
+                "nullable": false, 
+                "x-box-field-variant": 1
               }, 
               "login": {
                 "type": "string", 
                 "format": "email", 
                 "description": "このユーザーのプライマリメールアドレス", 
                 "example": "ceo@example.com", 
-                "nullable": false
+                "nullable": false, 
+                "x-box-field-variant": 1
               }
             }
           }
         ]
       }, 
       "Watermark": {
-        "title": "電子すかし", 
+        "title": "Watermark", 
         "x-box-resource-id": "watermark", 
         "x-box-reference-category": "file_watermarks", 
         "description": "電子すかしとは、埋め込みファイルのプレビューに適用される半透明のオーバーレイです。電子すかしには、ビューアーのメールアドレスまたはユーザーIDと、ファイルのコンテンツのアクセス日時が表示されます", 
@@ -17404,7 +17883,7 @@
         }
       }, 
       "WatermarkInfo": {
-        "title": "電子すかし情報", 
+        "title": "Watermark Info", 
         "x-box-resource-id": "watermark_info", 
         "description": "この項目に適用された電子すかしに関する詳細", 
         "properties": {
@@ -17669,7 +18148,7 @@
         ]
       }, 
       "WebLink": {
-        "title": "ウェブリンク", 
+        "title": "Web Link", 
         "x-box-resource-id": "web_link", 
         "description": "ウェブリンクとは、URLを指すオブジェクトです。これらのオブジェクトはBoxウェブアプリケーション内ではブックマークとも呼ばれます。\n\nウェブリンクオブジェクトはファイルオブジェクトと同様に扱われ、通常のファイルに適用されるアクションの大部分もサポートしています。", 
         "x-box-reference-category": "web_links", 
@@ -17811,7 +18290,7 @@
         ]
       }, 
       "WebLink--Mini": {
-        "title": "ウェブリンク(簡易版)", 
+        "title": "Web Link (Mini)", 
         "x-box-resource-id": "web_link--mini", 
         "description": "ウェブリンクとは、URLを指すオブジェクトです。これらのオブジェクトはBoxウェブアプリケーション内ではブックマークとも呼ばれます。\n\nウェブリンクオブジェクトはファイルオブジェクトと同様に扱われ、通常のファイルに適用されるアクションの大部分もサポートしています。", 
         "x-box-reference-category": "web_links", 
@@ -17824,7 +18303,8 @@
               "url": {
                 "type": "string", 
                 "example": "https://www.example.com/example/1234", 
-                "description": "このウェブリンクが指すURL"
+                "description": "このウェブリンクが指すURL", 
+                "x-box-field-variant": 1
               }, 
               "type": {
                 "type": "string", 
@@ -17835,9 +18315,20 @@
                 ]
               }, 
               "sequence_id": {
-                "type": "string", 
-                "example": "1", 
-                "description": "/eventsエンドポイントで使用する一意のID"
+                "allOf": [
+                  {
+                    "type": "string", 
+                    "example": "3", 
+                    "nullable": false, 
+                    "description": "この項目に適用された最新のユーザーイベントを表す数値の識別子\n\nこれを`GET /events`エンドポイントと組み合わせて使用すると、この識別子が読み取られる前に発生した可能性があるユーザーイベントを除外できます。\n\nたとえば、Box DriveなどのアプリケーションがAPIを介して項目を取得し、その項目の変更に関連するユーザーイベントの発生を監視する場合などがこれに該当します。ユーザーイベントの`sequence_id`が最初に取得されたリソースの`sequence_id`よりも小さいか同じである場合、アプリケーションはそのようなユーザーイベントをすべて無視します。"
+                  }, 
+                  {
+                    "x-box-field-variant": 1
+                  }, 
+                  {
+                    "nullable": false
+                  }
+                ]
               }, 
               "etag": {
                 "type": "string", 
@@ -17847,7 +18338,8 @@
               "name": {
                 "type": "string", 
                 "description": "ウェブリンクの名前", 
-                "example": "My Bookmark"
+                "example": "My Bookmark", 
+                "x-box-field-variant": 1
               }
             }
           }
@@ -17878,7 +18370,7 @@
       "x-box-reference-category": "trash"
     }, 
     {
-      "name": "メタデータ", 
+      "name": "Metadata", 
       "x-box-reference-category": "metadata"
     }, 
     {
@@ -17911,7 +18403,7 @@
       "x-box-reference-parent-category": "basics"
     }, 
     {
-      "name": "フォルダ", 
+      "name": "Folders", 
       "x-box-reference-category": "folders", 
       "x-box-reference-parent-category": "basics", 
       "x-box-reference-description": "フォルダは、ファイル、ウェブリンク、他のフォルダの集合を表します。フォルダは、Box Platformを使用する上で基本となる構成要素の1つです。\n\nフォルダには、それ自体に関するメタデータ(フォルダの所有者、作成日時、最終更新日時など)も含まれます。"
@@ -17932,7 +18424,7 @@
       "x-box-reference-parent-category": "downloads_and_uploads"
     }, 
     {
-      "name": "チャンクアップロード", 
+      "name": "分割アップロード", 
       "x-box-reference-category": "chunked_uploads", 
       "x-box-reference-parent-category": "downloads_and_uploads"
     }, 
@@ -17942,7 +18434,7 @@
       "x-box-reference-parent-category": "advanced_files_and_folders"
     }, 
     {
-      "name": "共有リンク", 
+      "name": "Shared Links", 
       "x-box-reference-category": "shared_links", 
       "x-box-reference-parent-category": "advanced_files_and_folders"
     }, 
@@ -17952,7 +18444,7 @@
       "x-box-reference-parent-category": "advanced_files_and_folders"
     }, 
     {
-      "name": "コメント", 
+      "name": "Comments", 
       "x-box-reference-category": "comments", 
       "x-box-reference-parent-category": "advanced_files_and_folders"
     }, 
@@ -18022,7 +18514,7 @@
       "x-box-reference-parent-category": "automation_and_events"
     }, 
     {
-      "name": "最近使用した項目", 
+      "name": "Recent Items", 
       "x-box-reference-category": "recent_items", 
       "x-box-reference-parent-category": "automation_and_events"
     }, 
@@ -18067,12 +18559,12 @@
       "x-box-reference-parent-category": "collaborations"
     }, 
     {
-      "name": "ユーザー", 
+      "name": "Users", 
       "x-box-reference-category": "users", 
       "x-box-reference-parent-category": "users_and_groups"
     }, 
     {
-      "name": "グループ", 
+      "name": "Groups", 
       "x-box-reference-category": "groups", 
       "x-box-reference-parent-category": "users_and_groups"
     }, 
