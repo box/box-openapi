@@ -145,6 +145,22 @@ requestBody:
             description: The user's account status
             example: active
 
+          notification_email:
+            type: object
+            nullable: true
+            description: |-
+              An alternate notification email address to which email
+              notifications are sent. When it's confirmed, this will be
+              the email address to which notifications are sent instead of
+              to the primary email address.
+
+              Set this value to `null` to remove the notification email.
+            properties:
+              email:
+                type: string
+                example: notifications@example.com
+                description: The email address to send the notifications to.
+
 responses:
   200:
     description: |-
@@ -153,3 +169,28 @@ responses:
       application/json:
         schema:
           $ref: '#/components/schemas/User'
+
+  400:
+    description: |-
+      Returns an error if some of the parameters are missing or
+      invalid.
+
+      * `invalid_parameter` when a parameter is formatted incorrectly,
+        for example when the `notification_email` has an incorrectly formatted
+        email address.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
+
+  403:
+    description: |-
+      Returns an error if the user is not allowed to make the changes.
+
+      * `access_denied_insufficient_permissions` when the user does not have
+        the right permissions, for example when updating the notification email
+        is disabled in the enterprise.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
