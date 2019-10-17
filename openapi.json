@@ -2205,7 +2205,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/File"
+                  "$ref": "#/components/schemas/FileVersion"
                 }
               }
             }
@@ -13078,27 +13078,74 @@
           },
           "source": {
             "type": "object",
-            "allOf": [
+            "nullable": true,
+            "oneOf": [
               {
-                "oneOf": [
-                  {
-                    "$ref": "#/components/schemas/File--Standard"
-                  },
-                  {
-                    "$ref": "#/components/schemas/Folder--Standard"
-                  },
-                  {
-                    "$ref": "#/components/schemas/Comment"
-                  }
-                ]
+                "$ref": "#/components/schemas/User--Mini"
+              },
+              {
+                "$ref": "#/components/schemas/EventSource"
               }
             ],
-            "description": "The object that triggered this event"
+            "description": "The item that triggered this event"
           },
           "additional_details": {
             "type": "object",
             "example": "",
             "description": "This object provides additional information about the event if available.\n\nThis can include how a user performed an event as well as additional\ninformation to correlate an event to external Keysafe logs. Not all events\nhave an additional_details object.  This object is only available in the\nEnterprise Events."
+          }
+        }
+      },
+      "EventSource": {
+        "title": "Event Source",
+        "x-box-resource-id": "event_source",
+        "description": "The source file or folder that triggered an event in\nthe event stream.",
+        "properties": {
+          "item_type": {
+            "type": "string",
+            "nullable": false,
+            "enum": [
+              "file",
+              "folder"
+            ],
+            "description": "The type of the item that the event\nrepresents. Can be `file` or `folder`.\n",
+            "example": "file"
+          },
+          "item_id": {
+            "type": "string",
+            "nullable": false,
+            "description": "The unique identifier that represents the\nitem.\n",
+            "example": "560284318361"
+          },
+          "item_name": {
+            "type": "string",
+            "nullable": false,
+            "description": "The name of the item.\n",
+            "example": "report.pdf"
+          },
+          "parent": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Folder--Mini"
+              },
+              {
+                "description": "The optional folder that this folder is located within.\n\nThis value may be `null` for some folders such as the\nroot folder or the trash folder."
+              }
+            ],
+            "nullable": true
+          },
+          "owned_by": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/User--Mini"
+              },
+              {
+                "description": "The user who owns this item."
+              },
+              {
+                "nullable": false
+              }
+            ]
           }
         }
       },
@@ -17534,6 +17581,7 @@
       "UploadPart--Mini": {
         "title": "Upload Part (Mini)",
         "x-box-resource-id": "upload_part--mini",
+        "x-box-reference-hide": true,
         "description": "The basic representation of an upload\nsession chunk.",
         "properties": {
           "part_id": {
@@ -18374,8 +18422,8 @@
       "WebLink--Mini": {
         "title": "Web Link (Mini)",
         "x-box-resource-id": "web_link--mini",
+        "x-box-reference-hide": true,
         "description": "Web links are objects that point to URLs. These objects\nare also known as bookmarks within the Box web application.\n\nWeb link objects are treated similarly to file objects,\nthey will also support most actions that apply to regular files.",
-        "x-box-reference-category": "web_links",
         "allOf": [
           {
             "$ref": "#/components/schemas/Item"
