@@ -1506,6 +1506,7 @@
         ],
         "x-box-reference-category": "files",
         "x-box-enable-explorer": true,
+        "x-box-sanitized": true,
         "parameters": [
           {
             "name": "file_id",
@@ -1539,16 +1540,17 @@
                 "required": [
                   "parent"
                 ],
+                "nullable": false,
                 "properties": {
                   "name": {
                     "type": "string",
-                    "description": "An optional different name for the new file.\n\nNames can only contain basic, printable\nASCII characters, without any slashes or\ntrailing spaces.\n\nBoth `.` and `..` are protected names.",
+                    "description": "An optional new name for the copied file.\n\nThere are some restrictions to the file name. Names containing\nnon-printable ASCII characters, forward and backward slashes\n(`/`, `\\`), and protected names like `.` and `..` are\nautomatically sanitized by removing the non-allowed\ncharacters.",
                     "example": "FileCopy.txt",
                     "maxLength": 255
                   },
                   "version": {
                     "type": "string",
-                    "description": "An optional ID of the specific file version you want to copy",
+                    "description": "An optional ID of the specific file version to copy.",
                     "example": "0"
                   },
                   "parent": {
@@ -1581,8 +1583,31 @@
               }
             }
           },
+          "304": {
+            "description": "Returns an empty response when the `If-None-Match` header matches\nthe current `etag` value of the file. This indicates that the file\nhas not changed since it was last requested."
+          },
+          "400": {
+            "description": "Returns an error if some of the parameters are missing or\ninvalid.\n\n* `bad_request` when a parameter is missing.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Returns an error if either the source file or the destination\nfolder could not be found, or the authenticated user does not\nhave access to either.\n\n* `not_found` when the authenticated user does not have access\n  to the source file or the destination folder",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
           "409": {
-            "description": "* `operation_blocked_temporary`: Returned if either of the destination\n  or source folders is locked due to another move, copy, delete or\n  restore operation in process.\n\n  The operation can be retried at a later point.",
+            "description": "* `operation_blocked_temporary`: Returned if either of the destination\n  or source folders is locked due to another move, copy, delete or\n  restore operation in process.\n\n  The operation can be retried at a later point.\n\n* `item_name_in_use` when a folder with the same name already\n  exists.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2981,7 +3006,7 @@
       "put": {
         "operationId": "put_folders_id",
         "summary": "Update a folder",
-        "description": "Updates a folder. This can be also be used to move the folder,\ncreate shared links, update collaborations, and more.\n\n# Folder locking\n\nWhen moving a folder, part of the file tree will be locked, mainly\nthe source folder and all of its descendants, as well as the destination\nfolder.\n\nFor the duration of the move, no other move, copy, delete, or restore\noperation can performed on any of the locked folders.\n\n# Timeout\n\nTimeout for this operation is 60 seconds. The operation will complete\nafter a `HTTP 503` has been returned.",
+        "description": "Updates a folder. This can be also be used to move the folder,\ncreate shared links, update collaborations, and more.",
         "tags": [
           "Folders"
         ],
@@ -3214,7 +3239,7 @@
       "delete": {
         "operationId": "delete_folders_id",
         "summary": "Delete a folder",
-        "description": "Deletes a folder, either permanently or by moving it to\nthe trash.\n\n# Recursive deletion\n\nThis API returns an error if the folder is not empty. You\ncan use the `recursive` query parameter to force this\noperation to recursively delete the folder and all of its\ncontents.\n\n# Folder locking\n\nThe enterprise settings determine whether the folder will\nbe permanently deleted from Box or moved to the trash.\n\nDuring this operation, part of the file tree will be locked, mainly\nthe source folder and all of its descendants.\n\nFor the duration of the operation, no other move, copy, delete, or restore\noperation can performed on any of the locked folders.\n\n# Timeout\n\nTimeout for this operation is 60 seconds. The operation will include\nafter a `HTTP 503` has been returned.",
+        "description": "Deletes a folder, either permanently or by moving it to\nthe trash.",
         "tags": [
           "Folders"
         ],
@@ -3610,7 +3635,7 @@
         "summary": "Copy a folder",
         "x-box-enable-explorer": true,
         "x-box-reference-category": "folders",
-        "description": "Creates a copy of a folder within a destination folder.\n\nThe original folder will not be changed.\n\n# Asynchronous copying\n\nIf the folder being copied contains up to 500 items the copy will\nhappen synchronously with the API call. The call will not return until\nthe copy operation has completed.\n\nIf the folder contains more than 500 items the copy operation will be\nexecuted asynchronously and the API call will return directly yet before\nthe copy operation has completed. We currently have no API to check when\na copy operation has finished.\n\n# Folder locking\n\nDuring this operation, part of the file tree will be locked, mainly\nthe source folder and all of its descendants, as well as the destination\nfolder.\n\nFor the duration of the operation, no other move, copy, delete, or restore\noperation can performed on any of the locked folders. Most importantly, this\nmeans that the same folder can not be copied to two different parts of the\nfolder tree at the same time.\n\n# Metadata\n\nIf the destination folder has a metadata cascade policy attached to any of the\nparent folders a metadata cascade operation will be kicked off asynchronously.\n\nWe currently have no API to check when this operation has finished.",
+        "description": "Creates a copy of a folder within a destination folder.\n\nThe original folder will not be changed.",
         "tags": [
           "Folders"
         ],
@@ -3648,6 +3673,7 @@
                 "required": [
                   "parent"
                 ],
+                "nullable": false,
                 "properties": {
                   "name": {
                     "type": "string",
@@ -6437,14 +6463,18 @@
                     "description": "The URL that this web link links to. Must start with\n`\"http://\"` or `\"https://\"`."
                   },
                   "parent": {
-                    "allOf": [
-                      {
-                        "$ref": "#/components/schemas/Parent"
-                      },
-                      {
-                        "description": "The parent folder to put the web link in"
+                    "type": "object",
+                    "description": "The parent folder to create the web link within.",
+                    "required": [
+                      "id"
+                    ],
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "description": "The ID of parent folder",
+                        "example": "0"
                       }
-                    ]
+                    }
                   },
                   "name": {
                     "type": "string",
@@ -13176,8 +13206,8 @@
         "x-box-resource-id": "file",
         "x-box-has-field-variants": true,
         "x-box-sanitized": true,
-        "description": "A full representation of a file, as can be returned from any\nfile API endpoints by default",
         "x-box-reference-category": "files",
+        "description": "A full representation of a file, as can be returned from any\nfile API endpoints by default",
         "allOf": [
           {
             "$ref": "#/components/schemas/File--Standard"
@@ -13762,8 +13792,9 @@
       "FileVersion": {
         "title": "File Version",
         "x-box-resource-id": "file_version",
+        "x-box-has-field-variants": true,
         "x-box-reference-category": "file_versions",
-        "description": "A full representation of a file version",
+        "description": "A standard representation of a file version",
         "allOf": [
           {
             "$ref": "#/components/schemas/FileVersion--Mini"
@@ -13776,25 +13807,29 @@
               "name": {
                 "type": "string",
                 "description": "The name of the file version",
-                "example": "tigers.jpeg"
+                "example": "tigers.jpeg",
+                "x-box-field-variant": 2
               },
               "size": {
                 "type": "integer",
                 "format": "int64",
                 "description": "Size of the file version in bytes",
-                "example": 629644
+                "example": 629644,
+                "x-box-field-variant": 2
               },
               "created_at": {
                 "type": "string",
                 "format": "date-time",
                 "description": "When the file version object was created",
-                "example": "2012-12-12T10:53:43-08:00"
+                "example": "2012-12-12T10:53:43-08:00",
+                "x-box-field-variant": 2
               },
               "modified_at": {
                 "type": "string",
                 "format": "date-time",
                 "description": "When the file version object was last updated",
-                "example": "2012-12-12T10:53:43-08:00"
+                "example": "2012-12-12T10:53:43-08:00",
+                "x-box-field-variant": 2
               },
               "modified_by": {
                 "allOf": [
@@ -13803,6 +13838,9 @@
                   },
                   {
                     "description": "The user who last updated the file version"
+                  },
+                  {
+                    "x-box-field-variant": 2
                   }
                 ]
               },
@@ -13811,18 +13849,66 @@
                 "description": "When the file version object was trashed.",
                 "format": "date-time",
                 "nullable": true,
-                "example": "2012-12-12T10:53:43-08:00"
+                "example": "2012-12-12T10:53:43-08:00",
+                "x-box-field-variant": 2
               },
               "purged_at": {
                 "type": "string",
                 "description": "When the file version object will be permanently deleted.",
                 "format": "date-time",
                 "nullable": true,
-                "example": "2012-12-12T10:53:43-08:00"
+                "example": "2012-12-12T10:53:43-08:00",
+                "x-box-field-variant": 2
               }
             }
           }
         ]
+      },
+      "FileVersion--Mini": {
+        "title": "File Version (Mini)",
+        "x-box-resource-id": "file_version--mini",
+        "x-box-has-field-variants": true,
+        "x-box-reference-hide": true,
+        "description": "A mini representation of a file version, used when\nnested within another resource.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/FileVersion--Base"
+          },
+          {
+            "properties": {
+              "sha1": {
+                "type": "string",
+                "description": "The SHA1 hash of this version of the file.",
+                "example": "134b65991ed521fcfe4724b7d814ab8ded5185dc",
+                "x-box-field-variant": 1
+              }
+            }
+          }
+        ]
+      },
+      "FileVersion--Base": {
+        "title": "File Version (Base)",
+        "x-box-resource-id": "file_version--base",
+        "x-box-has-field-variants": true,
+        "x-box-reference-hide": true,
+        "description": "The bare basic representation of a file version, the minimal\namount of fields returned when using the `fields` query\nparameter.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "nullable": false,
+            "description": "The unique identifier that represent a file version.",
+            "example": "12345"
+          },
+          "type": {
+            "type": "string",
+            "description": "`file_version`",
+            "example": "file_version",
+            "enum": [
+              "file_version"
+            ],
+            "nullable": false
+          }
+        }
       },
       "FileVersions": {
         "title": "File Versions",
@@ -13840,34 +13926,6 @@
                 "items": {
                   "$ref": "#/components/schemas/FileVersion"
                 }
-              }
-            }
-          }
-        ]
-      },
-      "FileVersion--Mini": {
-        "title": "File Version (Mini)",
-        "x-box-resource-id": "file_version--mini",
-        "description": "A mini representation of a file version, used when\nnested under another resource.",
-        "x-box-reference-hide": true,
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/Reference"
-          },
-          {
-            "properties": {
-              "type": {
-                "type": "string",
-                "description": "`file_version`",
-                "example": "file_version",
-                "enum": [
-                  "file_version"
-                ]
-              },
-              "sha1": {
-                "type": "string",
-                "description": "The SHA1 hash of this file.",
-                "example": "134b65991ed521fcfe4724b7d814ab8ded5185dc"
               }
             }
           }
@@ -14855,7 +14913,6 @@
       "Item": {
         "title": "Item",
         "x-box-resource-id": "item_reference",
-        "x-box-reference-category": "shared_links",
         "description": "A generic mini representation of a file, folder, user or enterprise",
         "allOf": [
           {
@@ -16266,79 +16323,6 @@
           }
         }
       },
-      "RetentionPolicy": {
-        "title": "Retention Policy",
-        "x-box-resource-id": "retention_policy",
-        "x-box-reference-category": "retention_policies",
-        "description": "A retention policy blocks permanent deletion of content\nfor a specified amount of time. Admins can create retention\npolicies and then later assign them to specific folders\nor their entire enterprise.  To use this feature, you must\nhave the manage retention policies scope enabled\nfor your API key via your application management console.",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/RetentionPolicy--Mini"
-          },
-          {
-            "x-box-reference-hide": false
-          },
-          {
-            "properties": {
-              "policy_type": {
-                "type": "string",
-                "example": "finite",
-                "description": "The type of the retention policy. A retention\npolicy type can either be `finite`, where a\nspecific amount of time to retain the content is known\nupfront, or `indefinite`, where the amount of time\nto retain the content is still unknown.",
-                "enum": [
-                  "finite",
-                  "indefinite"
-                ]
-              },
-              "retention_length": {
-                "type": "string",
-                "format": "int32",
-                "example": "0",
-                "description": "The length of the retention policy. This length\nspecifies the duration in days that the retention\npolicy will be active for after being assigned to\ncontent.  If the policy has A `policy_type` of\n`indefinite`, the `retention_length` will also be\n`indefinite`."
-              },
-              "disposition_action": {
-                "type": "string",
-                "example": "permanently_delete",
-                "description": "The disposition action of the retention policy.\nThis action can be `permanently_delete`, which\nwill cause the content retained by the policy\nto be permanently deleted, or `remove_retention`,\nwhich will lift the retention policy from the content,\nallowing it to be deleted by users,\nonce the retention policy time period has passed.",
-                "enum": [
-                  "permanently_delete",
-                  "remove_retention"
-                ]
-              },
-              "status": {
-                "type": "string",
-                "example": "active",
-                "description": "The status of the retention policy. The status of\na policy will be `active`, unless explicitly retired by an\nadministrator, in which case the status will be `retired`.\nOnce a policy has been retired, it cannot become\nactive again.",
-                "enum": [
-                  "active",
-                  "retired"
-                ]
-              },
-              "created_by": {
-                "allOf": [
-                  {
-                    "$ref": "#/components/schemas/User--Mini"
-                  },
-                  {
-                    "description": "A mini user object representing the user that\ncreated the retention policy"
-                  }
-                ]
-              },
-              "created_at": {
-                "type": "string",
-                "format": "date-time",
-                "description": "When the retention policy object was created",
-                "example": "2012-12-12T10:53:43-08:00"
-              },
-              "modified_at": {
-                "type": "string",
-                "format": "date-time",
-                "description": "When the retention policy object was last modified",
-                "example": "2012-12-12T10:53:43-08:00"
-              }
-            }
-          }
-        ]
-      },
       "RetentionPolicies": {
         "title": "Retention Policies",
         "x-box-resource-id": "retention_policies",
@@ -16359,33 +16343,134 @@
           }
         }
       },
-      "RetentionPolicy--Mini": {
-        "title": "Retention Policy (Mini)",
-        "x-box-resource-id": "retention_policy--mini",
-        "description": "Mini representation of the retention policy",
+      "RetentionPolicy": {
+        "title": "Retention Policy",
+        "x-box-resource-id": "retention_policy",
+        "x-box-reference-category": "retention_policies",
+        "x-box-has-field-variants": true,
         "x-box-reference-hide": true,
+        "description": "A retention policy blocks permanent deletion of content\nfor a specified amount of time. Admins can create retention\npolicies and then later assign them to specific folders\nor their entire enterprise.  To use this feature, you must\nhave the manage retention policies scope enabled\nfor your API key via your application management console.",
         "allOf": [
           {
-            "$ref": "#/components/schemas/Reference"
+            "$ref": "#/components/schemas/RetentionPolicy--Mini"
+          },
+          {
+            "x-box-reference-hide": false
           },
           {
             "properties": {
-              "type": {
+              "policy_type": {
                 "type": "string",
-                "description": "`retention_policy`",
-                "example": "retention_policy",
+                "example": "finite",
+                "x-box-field-variant": 2,
+                "description": "The type of the retention policy. A retention\npolicy type can either be `finite`, where a\nspecific amount of time to retain the content is known\nupfront, or `indefinite`, where the amount of time\nto retain the content is still unknown.",
                 "enum": [
-                  "retention_policy"
+                  "finite",
+                  "indefinite"
                 ]
               },
-              "policy_name": {
+              "status": {
                 "type": "string",
-                "description": "The name given to the retention policy",
-                "example": "Some Policy Name"
+                "example": "active",
+                "x-box-field-variant": 2,
+                "description": "The status of the retention policy. The status of\na policy will be `active`, unless explicitly retired by an\nadministrator, in which case the status will be `retired`.\nOnce a policy has been retired, it cannot become\nactive again.",
+                "enum": [
+                  "active",
+                  "retired"
+                ]
+              },
+              "created_by": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/User--Mini"
+                  },
+                  {
+                    "description": "A mini user object representing the user that\ncreated the retention policy"
+                  }
+                ]
+              },
+              "created_at": {
+                "type": "string",
+                "format": "date-time",
+                "x-box-field-variant": 2,
+                "description": "When the retention policy object was created",
+                "example": "2012-12-12T10:53:43-08:00"
+              },
+              "modified_at": {
+                "type": "string",
+                "format": "date-time",
+                "x-box-field-variant": 2,
+                "description": "When the retention policy object was last modified",
+                "example": "2012-12-12T10:53:43-08:00"
               }
             }
           }
         ]
+      },
+      "RetentionPolicy--Mini": {
+        "title": "Retention Policy (Mini)",
+        "x-box-resource-id": "retention_policy--mini",
+        "x-box-reference-category": null,
+        "x-box-has-field-variants": true,
+        "x-box-reference-hide": true,
+        "description": "A mini representation of a retention policy, used when\nnested within another resource.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/RetentionPolicy--Base"
+          },
+          {
+            "properties": {
+              "policy_name": {
+                "type": "string",
+                "description": "The name given to the retention policy",
+                "example": "Some Policy Name",
+                "x-box-field-variant": 1
+              },
+              "retention_length": {
+                "type": "string",
+                "format": "int32",
+                "example": "0",
+                "description": "The length of the retention policy. This length\nspecifies the duration in days that the retention\npolicy will be active for after being assigned to\ncontent.  If the policy has A `policy_type` of\n`indefinite`, the `retention_length` will also be\n`indefinite`.",
+                "x-box-field-variant": 1
+              },
+              "disposition_action": {
+                "type": "string",
+                "example": "permanently_delete",
+                "description": "The disposition action of the retention policy.\nThis action can be `permanently_delete`, which\nwill cause the content retained by the policy\nto be permanently deleted, or `remove_retention`,\nwhich will lift the retention policy from the content,\nallowing it to be deleted by users,\nonce the retention policy time period has passed.",
+                "enum": [
+                  "permanently_delete",
+                  "remove_retention"
+                ],
+                "x-box-field-variant": 1
+              }
+            }
+          }
+        ]
+      },
+      "RetentionPolicy--Base": {
+        "title": "Retention Policy (Base)",
+        "x-box-resource-id": "retention_policy--base",
+        "x-box-reference-category": null,
+        "x-box-has-field-variants": true,
+        "x-box-reference-hide": true,
+        "description": "The bare basic representation of a file version, the minimal\namount of fields returned when using the `fields` query\nparameter.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "nullable": false,
+            "description": "The unique identifier that represent a file version.",
+            "example": "12345"
+          },
+          "type": {
+            "type": "string",
+            "description": "`file_version`",
+            "example": "file_version",
+            "enum": [
+              "file_version"
+            ],
+            "nullable": false
+          }
+        }
       },
       "RetentionPolicyAssignment": {
         "title": "Retention Policy Assignment",
@@ -18198,9 +18283,9 @@
       "WebLink": {
         "title": "Web Link",
         "x-box-resource-id": "web_link",
-        "description": "Web links are objects that point to URLs. These objects\nare also known as bookmarks within the Box web application.\n\nWeb link objects are treated similarly to file objects,\nthey will also support most actions that apply to regular files.",
         "x-box-reference-category": "web_links",
         "x-box-has-field-variants": true,
+        "description": "Web links are objects that point to URLs. These objects\nare also known as bookmarks within the Box web application.\n\nWeb link objects are treated similarly to file objects,\nthey will also support most actions that apply to regular files.",
         "allOf": [
           {
             "$ref": "#/components/schemas/WebLink--Mini"
@@ -18341,6 +18426,7 @@
         "title": "Web Link (Mini)",
         "x-box-resource-id": "web_link--mini",
         "x-box-reference-hide": true,
+        "x-box-reference-category": null,
         "description": "Web links are objects that point to URLs. These objects\nare also known as bookmarks within the Box web application.\n\nWeb link objects are treated similarly to file objects,\nthey will also support most actions that apply to regular files.",
         "allOf": [
           {
