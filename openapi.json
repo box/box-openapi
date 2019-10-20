@@ -1049,6 +1049,16 @@
               }
             }
           },
+          "400": {
+            "description": "Returns an error if some of the parameters are missing or\ninvalid.\n\n* `missing_destination`: No `folder_id` was provided\n* `invalid_folder_id`: `folder_id` is invalid\n* `invalid_file_name`: `file_name` is invalid\n* `missing_file_size`: `file_size` was not provided\n* `invalid_file_size`: `file_size` was not a valid number\n* `file_size_too_small`: `file_size` is below minimum file size for\n  uploads via this API\n* `missing_file_name`: `file_name` was not provided",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
           "409": {
             "description": "Returns an error if the file already exists,\nor the account has run out of disk space.",
             "content": {
@@ -16561,32 +16571,32 @@
           "upload_part": {
             "type": "string",
             "description": "The URL to upload parts to",
-            "example": "https://upload.box.com/api/2.0/files/upload_sessions/D5E3F7A"
+            "example": "https://upload.box.com/api/2.0/files/upload_sessions/F971964745A5CD0C001BBE4E58196BFD"
           },
           "commit": {
             "type": "string",
             "description": "The URL used to commit the file",
-            "example": "https://upload.box.com/api/2.0/files/upload_sessions/D5E3F7A/commit"
+            "example": "https://upload.box.com/api/2.0/files/upload_sessions/F971964745A5CD0C001BBE4E58196BFD/commit"
           },
           "abort": {
             "type": "string",
             "description": "The URL for used to abort the session.",
-            "example": "https://upload.box.com/api/2.0/files/upload_sessions/D5E3F7A"
+            "example": "https://upload.box.com/api/2.0/files/upload_sessions/F971964745A5CD0C001BBE4E58196BFD"
           },
           "list_parts": {
             "type": "string",
             "description": "The URL users to list all parts.",
-            "example": "https://upload.box.com/api/2.0/files/upload_sessions/D5E3F7A/parts"
+            "example": "https://upload.box.com/api/2.0/files/upload_sessions/F971964745A5CD0C001BBE4E58196BFD/parts"
           },
           "status": {
             "type": "string",
             "description": "The URL used to get the status of the upload.",
-            "example": "https://upload.box.com/api/2.0/files/upload_sessions/D5E3F7A"
+            "example": "https://upload.box.com/api/2.0/files/upload_sessions/F971964745A5CD0C001BBE4E58196BFD"
           },
           "log_event": {
             "type": "string",
             "description": "The URL used to get the upload log from.",
-            "example": "https://upload.box.com/api/2.0/files/upload_sessions/D5E3F7A/log"
+            "example": "https://upload.box.com/api/2.0/files/upload_sessions/F971964745A5CD0C001BBE4E58196BFD/log"
           }
         }
       },
@@ -17632,57 +17642,55 @@
         "x-box-resource-id": "upload_session",
         "description": "An upload session for chunk uploading a file.",
         "x-box-reference-category": "chunked_uploads",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/Reference"
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The unique identifier for this session",
+            "example": "F971964745A5CD0C001BBE4E58196BFD"
           },
-          {
-            "properties": {
-              "type": {
-                "type": "string",
-                "description": "`upload_session`",
-                "example": "upload_session",
-                "enum": [
-                  "upload_session"
-                ]
+          "type": {
+            "type": "string",
+            "description": "`upload_session`",
+            "example": "upload_session",
+            "enum": [
+              "upload_session"
+            ]
+          },
+          "session_expires_at": {
+            "description": "The date and time when this session expires.",
+            "type": "string",
+            "format": "date-time",
+            "example": "2012-12-12T10:53:43-08:00"
+          },
+          "part_size": {
+            "type": "integer",
+            "format": "int64",
+            "example": 1024,
+            "description": "The  size in bytes that must be used for all parts of of the\nupload.\n\nOnly the last part is allowed to be of a smaller size."
+          },
+          "total_parts": {
+            "type": "integer",
+            "format": "int32",
+            "example": 1000,
+            "description": "The total number of parts expected in this upload session,\nas determined by the file size and part size."
+          },
+          "num_parts_processed": {
+            "type": "integer",
+            "format": "int32",
+            "example": 455,
+            "description": "The number of parts that have been uploaded and processed\nby the server. This starts at `0`.\n\nWhen committing a file files, inspecting this property can\nprovide insight if all parts have been uploaded correctly."
+          },
+          "session_endpoints": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SessionEndpoints"
               },
-              "session_expires_at": {
-                "description": "The date and time when this session expires.",
-                "type": "string",
-                "format": "date-time",
-                "example": "2012-12-12T10:53:43-08:00"
-              },
-              "part_size": {
-                "type": "integer",
-                "format": "int64",
-                "example": 1024,
-                "description": "The  size in bytes that must be used for all parts of of the\nupload.\n\nOnly the last part is allowed to be of a smaller size."
-              },
-              "total_parts": {
-                "type": "integer",
-                "format": "int32",
-                "example": 1000,
-                "description": "The total number of parts expected in this upload session,\nas determined by the file size and part size."
-              },
-              "num_parts_processed": {
-                "type": "integer",
-                "format": "int32",
-                "example": 455,
-                "description": "The number of parts that have been uploaded and processed\nby the server. This starts at `0`.\n\nWhen committing a file files, inspecting this property can\nprovide insight if all parts have been uploaded correctly."
-              },
-              "session_endpoints": {
-                "allOf": [
-                  {
-                    "$ref": "#/components/schemas/SessionEndpoints"
-                  },
-                  {
-                    "description": "A list of endpoints for this session."
-                  }
-                ]
+              {
+                "description": "A list of endpoints for this session."
               }
-            }
+            ]
           }
-        ]
+        }
       },
       "UploadUrl": {
         "title": "Upload Url",
