@@ -3696,6 +3696,30 @@
             }
           },
           {
+            "name": "sort",
+            "description": "Defines the order in which results are returned. Defaults to `relevance`.\n\n* `relevance` (default) returns the results sorted by relevance to the\nquery search term.\n* `modified_at`  returns the results ordered in descending order by date\nat which the item was last modified.",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "default": "relevance",
+            "enum": [
+              "modified_at",
+              "relevance"
+            ]
+          },
+          {
+            "name": "direction",
+            "description": "Defines the direction in which search results are ordered. Default value\nis `DESC`.\n\nWhen results are sorted by `relevance` the ordering is forced to `DESC`,\nignoring the value of this parameter.",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "default": "DESC",
+            "enum": [
+              "DESC",
+              "ASC"
+            ]
+          },
+          {
             "name": "fields",
             "description": "A comma-separated list of attributes to include in the\nresponse. This can be used to request fields that are\nnot normally returned in a standard response.\n\nBe aware that specifying this parameter will have the\neffect that none of the standard fields are returned in\nthe response unless explicitly specified, instead only\nfields for the mini representation are returned, additional\nto the fields requested.",
             "in": "query",
@@ -8597,7 +8621,7 @@
                 },
                 {},
                 {
-                  "description": "Requesting this field creates an expiring Box Embed URL for an\nembedded preview session in an iframe.\n\nThis URL will expire after 60 seconds and the session will\nexpire after 60 minutes.\n\nNot all file types are supported for these embed URLs."
+                  "description": "Requesting this field creates an expiring Box Embed URL for an\nembedded preview session in an iframe.\n\nThis URL will expire after 60 seconds and the session will\nexpire after 60 minutes.\n\nNot all file types are supported for these embed URLs. Box Embed\nis not optimized for mobile browsers and should not be used in web\nexperiences designed for mobile devices. Many UI elements, like\nthe **download** and **print** options might not show in mobile\nbrowsers."
                 }
               ]
             },
@@ -8973,6 +8997,33 @@
               "type": "string",
               "description": "When the file version object was trashed.",
               "format": "date-time"
+            },
+            "trashed_by": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/User--Mini"
+                },
+                {
+                  "description": "The user who trashed the file version"
+                },
+                {}
+              ]
+            },
+            "restored_at": {
+              "type": "string",
+              "description": "When the file version was restored from the trash.",
+              "format": "date-time"
+            },
+            "restored_by": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/User--Mini"
+                },
+                {
+                  "description": "The user who restored the file version from the trash."
+                },
+                {}
+              ]
             },
             "purged_at": {
               "type": "string",
@@ -12176,7 +12227,8 @@
             "string",
             "enum",
             "float",
-            "date"
+            "date",
+            "multiSelect"
           ]
         },
         "key": {

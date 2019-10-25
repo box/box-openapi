@@ -142,6 +142,12 @@
               "$ref": "#/definitions/UploadSession"
             }
           },
+          "400": {
+            "description": "Returns an error if some of the parameters are missing or\ninvalid.\n\n* `missing_destination`: No `folder_id` was provided\n* `invalid_folder_id`: `folder_id` is invalid\n* `invalid_file_name`: `file_name` is invalid\n* `missing_file_size`: `file_size` was not provided\n* `invalid_file_size`: `file_size` was not a valid number\n* `file_size_too_small`: `file_size` is below minimum file size for\n  uploads via this API\n* `missing_file_name`: `file_name` was not provided",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
           "409": {
             "description": "Returns an error if the file already exists,\nor the account has run out of disk space.",
             "schema": {
@@ -568,52 +574,49 @@
     "UploadSession": {
       "title": "Upload Session",
       "description": "An upload session for chunk uploading a file.",
-      "allOf": [
-        {
-          "$ref": "#/definitions/Reference"
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The unique identifier for this session"
         },
-        {
-          "properties": {
-            "type": {
-              "type": "string",
-              "description": "`upload_session`",
-              "enum": [
-                "upload_session"
-              ]
+        "type": {
+          "type": "string",
+          "description": "`upload_session`",
+          "enum": [
+            "upload_session"
+          ]
+        },
+        "session_expires_at": {
+          "description": "The date and time when this session expires.",
+          "type": "string",
+          "format": "date-time"
+        },
+        "part_size": {
+          "type": "integer",
+          "format": "int64",
+          "description": "The  size in bytes that must be used for all parts of of the\nupload.\n\nOnly the last part is allowed to be of a smaller size."
+        },
+        "total_parts": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The total number of parts expected in this upload session,\nas determined by the file size and part size."
+        },
+        "num_parts_processed": {
+          "type": "integer",
+          "format": "int32",
+          "description": "The number of parts that have been uploaded and processed\nby the server. This starts at `0`.\n\nWhen committing a file files, inspecting this property can\nprovide insight if all parts have been uploaded correctly."
+        },
+        "session_endpoints": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/SessionEndpoints"
             },
-            "session_expires_at": {
-              "description": "The date and time when this session expires.",
-              "type": "string",
-              "format": "date-time"
-            },
-            "part_size": {
-              "type": "integer",
-              "format": "int64",
-              "description": "The  size in bytes that must be used for all parts of of the\nupload.\n\nOnly the last part is allowed to be of a smaller size."
-            },
-            "total_parts": {
-              "type": "integer",
-              "format": "int32",
-              "description": "The total number of parts expected in this upload session,\nas determined by the file size and part size."
-            },
-            "num_parts_processed": {
-              "type": "integer",
-              "format": "int32",
-              "description": "The number of parts that have been uploaded and processed\nby the server. This starts at `0`.\n\nWhen committing a file files, inspecting this property can\nprovide insight if all parts have been uploaded correctly."
-            },
-            "session_endpoints": {
-              "allOf": [
-                {
-                  "$ref": "#/definitions/SessionEndpoints"
-                },
-                {
-                  "description": "A list of endpoints for this session."
-                }
-              ]
+            {
+              "description": "A list of endpoints for this session."
             }
-          }
+          ]
         }
-      ]
+      }
     },
     "UploadPart": {
       "title": "Upload Part",
@@ -742,7 +745,7 @@
                 },
                 {},
                 {
-                  "description": "Requesting this field creates an expiring Box Embed URL for an\nembedded preview session in an iframe.\n\nThis URL will expire after 60 seconds and the session will\nexpire after 60 minutes.\n\nNot all file types are supported for these embed URLs."
+                  "description": "Requesting this field creates an expiring Box Embed URL for an\nembedded preview session in an iframe.\n\nThis URL will expire after 60 seconds and the session will\nexpire after 60 minutes.\n\nNot all file types are supported for these embed URLs. Box Embed\nis not optimized for mobile browsers and should not be used in web\nexperiences designed for mobile devices. Many UI elements, like\nthe **download** and **print** options might not show in mobile\nbrowsers."
                 }
               ]
             },
@@ -815,16 +818,6 @@
           }
         }
       ]
-    },
-    "Reference": {
-      "title": "Reference",
-      "description": "The bare basic reference for an object",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "The unique identifier for this object"
-        }
-      }
     },
     "SessionEndpoints": {
       "title": "Session Endpoints",
@@ -1409,6 +1402,16 @@
         "can_share": {
           "type": "boolean",
           "description": "Specifies if the user can invite new collaborators to this item"
+        }
+      }
+    },
+    "Reference": {
+      "title": "Reference",
+      "description": "The bare basic reference for an object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The unique identifier for this object"
         }
       }
     },
