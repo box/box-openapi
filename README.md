@@ -24,7 +24,7 @@ As this project is a work in progress no rights can be derived from
 this specification and it may change without warning.
 
 Currently the only recognized downstream dependency of this specification is 
-the new Box developer documentation available on [Box.dev](https://box.dev).
+the new Box developer documentation available on [developer.box.com](https://developer.box.com).
 
 # Swagger 2.0
 
