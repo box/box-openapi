@@ -4574,7 +4574,7 @@
             "application/json": {
               "schema": {
                 "title": "Metadata Template Patch",
-                "description": "A patch specification for the changes to make to the metadata template.\nThe changes are represented as a JSON array of operation objects.",
+                "description": "A list of changes to make to the metadata template.\n\nThe changes are represented as a JSON array of operation objects.",
                 "type": "array",
                 "items": {
                   "$ref": "#/components/schemas/MetadataTemplatePatchItem"
@@ -4710,7 +4710,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Returns the metadata template matching the `scope`\nand `template` name.",
+            "description": "Returns the metadata template that matches the ID.",
             "content": {
               "application/json": {
                 "schema": {
@@ -4777,7 +4777,7 @@
         "tags": [
           "Metadata Templates"
         ],
-        "description": "Creates a new metadata template that can be applied to files and folders.",
+        "description": "Creates a new metadata template that can be applied to\nfiles and folders.",
         "x-box-reference-category": "metadata_templates",
         "requestBody": {
           "content": {
@@ -15682,6 +15682,7 @@
       "MetadataTemplate--Writable": {
         "title": "Metadata Template (Writable)",
         "x-box-resource-id": "metadata_template--writable",
+        "x-box-reference-hide": true,
         "description": "The writable parts of a metadata template that can be\napplied to files and folders",
         "properties": {
           "scope": {
@@ -15786,33 +15787,46 @@
         "title": "Metadata Template Patch Item",
         "x-box-resource-id": "metadata-template-patch-item",
         "type": "object",
-        "description": "A patch operation for the\nchanges to make to the metadata template.\n\nThe possible operations are as follows.\n\n* `addEnumOption` Adds an enum option at the\n  end of the enum option list for the specified `fieldKey`.\n\n  Example `{\"op\":\"addEnumOption\",\"fieldKey\":\"category\",\n  \"data\":{\"key\":\"New Option\"}}`\n\n* `addField` Adds a field at the end of the field list\n  for the template.\n\n  Example `{\"op\":\"addField\",\"data\":{\"displayName\":\"Category\",\n  \"key\":\"category\",\"hidden\":false,\"type\":\"string\"}}`.\n\n* `editTemplate` Allows for editing the base properties\n  of a template, mainly the `displayName` and `hidden`\n  properties.\n\n  Example `{\"op\":\"editTemplate\",\"data\":{\"displayName\":\"Client\"}}`.\n\n* `reorderEnumOptions` Reorders the enum option list to\n  match the requested enum option list.\n\n  Example `{\"op\":\"reorderEnumOptions\",\"fieldKey\":\"category\",\n  \"enumOptionKeys\":[\"option2\",\"option1\",\"option3\"]}`\n\n* `reorderFields`  Reorders the field list to match the requested\n  field list\n\n  Example `{\"op\":\"reorderFields\",\"fieldKeys\":[\"field2\",\"field1\",\"field3\"]}`\n\nThe following changes can affect existing instances of this template.\n\n* `editField` Edits any number of the base properties of a field, mainly\n  the `displayName`, `hidden`, `description`, and `key` properties.\n\n  If the key is changed, existing values of the specified field are\n  migrated to the new key. Search indexes are updated, which can take\n  time depending on how many files are affected by the change.\n\n  Example `{\"op\":\"editField\",\"fieldKey\":\"category\",\n  \"data\":{\"displayName\":\"Customer Group\"}}`\n\n* `editEnumOption` Edits one of the options of an enum field.\n\n  Example `{\"op\":\"editEnumOption\",\"fieldKey\":\"years\",\"enumOptionKey\":\"2011\",\n  \"data\":{\"key\":\"2020\"}}`\n\n* `removeEnumOption` Removes the specified enum option from the\n  specified enum field.\n\n  Example `{\"op\":\"removeEnumOption\",\"fieldKey\":\"years\",\n  \"enumOptionKey\":\"2011\"}`\n\n* `removeField` Removes the specified field from the template.\n\n  Example `{\"op\":\"removeField\",\"fieldKey\":\"brand\"}`",
+        "description": "A patch operation for the\nchanges to make to the metadata template.",
+        "required": [
+          "op"
+        ],
         "properties": {
           "op": {
             "type": "string",
             "example": "addEnumOption",
             "enum": [
-              "addEnumOption",
-              "addField",
               "editTemplate",
-              "reorderEnumOptions",
+              "addField",
               "reorderFields",
+              "addEnumOption",
+              "reorderEnumOptions",
+              "reorderMultiSelectOptions",
+              "addMultiSelectOption",
               "editField",
+              "removeField",
               "editEnumOption",
               "removeEnumOption",
-              "removeField"
+              "editMultiSelectOption",
+              "removeMultiSelectOption"
             ],
-            "description": "The operation type to perform on the template."
+            "description": "The type of change to perform on the template. Some\nof these are hazardous as they will change existing templates."
           },
           "data": {
-            "description": "The data for the operation. Can vary depending on the operation.",
+            "description": "The data for the operation. This will vary depending on the operation\nbeing performed.",
             "example": {
               "displayName": "New name"
             },
             "additionalProperties": {
               "type": "string",
+              "description": "The value of a custom data entry.",
               "example": "New name"
             }
+          },
+          "fieldKey": {
+            "type": "string",
+            "example": "category",
+            "description": "For operations that affect a single field this defines the key of the\nfield that is affected."
           },
           "fieldKeys": {
             "type": "array",
@@ -15823,10 +15837,32 @@
               "category",
               "name"
             ],
-            "description": "For operations that affect multiple fields, the keys of the\nfields to be affected."
+            "description": "For operations that affect multiple fields this defines the keys of the\nfields that are affected."
+          },
+          "enumOptionKey": {
+            "description": "For operations that affect a single enum option this defines\nthe key of the option that is affected.",
+            "type": "string",
+            "example": "option1"
           },
           "enumOptionKeys": {
-            "description": "For operations that affect multiple enum options,\nthe keys of the enum options to be affected.",
+            "description": "For operations that affect multiple enum options this defines\nthe keys of the options that are affected.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "option1",
+              "option2",
+              "option3"
+            ]
+          },
+          "multiSelectOptionKey": {
+            "description": "For operations that affect a single multi select option this defines\nthe key of the option that is affected.",
+            "type": "string",
+            "example": "option1"
+          },
+          "multiSelectOptionKeys": {
+            "description": "For operations that affect multiple multi select options this defines\nthe keys of the options that are affected.",
             "type": "array",
             "items": {
               "type": "string"
