@@ -249,7 +249,7 @@
           {
             "name": "X-Rep-Hints",
             "description": "A header required to request specific `representations`\nof a file. Use this in combination with the `fields` query\nparameter to request a specific file representation.\n\nThe general format for these representations is\n`X-Rep-Hints: [...]` where `[...]` is one or many\nhints in the format `[fileType?query]`.\n\nFor example, to request a `png` representation in `32x32`\nas well as `94x94` pixel dimensions provide the following\nhints.\n\n`X-Rep-Hints: [jpg?dimensions=32x32][jpg?dimensions=94x94]`\n\nAdditionally, a `text` representation is available for all\ndocument file types in Box using the `[extracted_text]`\nrepresentation.\n\n`X-Rep-Hints: [extracted_text]`",
-            "example": "X-Rep-Hints: [pdf]",
+            "example": "[pdf]",
             "in": "header",
             "required": true,
             "schema": {
@@ -322,7 +322,7 @@
           "Files"
         ],
         "x-box-reference-category": "trashed_files",
-        "description": "Restores an file that has been moved to the trash.",
+        "description": "Restores a file that has been moved to the trash.\n\nAn optional new parent ID can be provided to restore the file to in case the\noriginal folder has been deleted.",
         "parameters": [
           {
             "name": "file_id",
@@ -365,7 +365,7 @@
                         "$ref": "#/components/schemas/Parent"
                       },
                       {
-                        "description": "The optional parent folder that the item will\nbe restored to.\n\nUse this if the original parent folder no longer\nexists, or the user no longer has access to the\noriginal parent folder."
+                        "description": "Specifies an optional ID of a folder to restore the file to\nwhen the original folder no longer exists.\n\nPlease be aware that this ID will only be used if the original\nfolder no longer exists. Use this ID to provide a fallback\nlocation to restore the file to if the original location\nhas been deleted."
                       }
                     ]
                   }
@@ -2917,7 +2917,7 @@
           "Folders"
         ],
         "x-box-reference-category": "trashed_folders",
-        "description": "Restores a folder that has been moved to the trash.\n\n# Folder locking\n\nDuring this operation, part of the file tree will be locked, mainly\nthe source folder and all of its descendants, as well as the destination\nfolder.\n\nFor the duration of the operation, no other move, copy, delete, or restore\noperation can performed on any of the locked folders.",
+        "description": "Restores a folder that has been moved to the trash.\n\nAn optional new parent ID can be provided to restore the folder to in case the\noriginal folder has been deleted.\n\n# Folder locking\n\nDuring this operation, part of the file tree will be locked, mainly\nthe source folder and all of its descendants, as well as the destination\nfolder.\n\nFor the duration of the operation, no other move, copy, delete, or restore\noperation can performed on any of the locked folders.",
         "parameters": [
           {
             "name": "folder_id",
@@ -2961,7 +2961,7 @@
                         "$ref": "#/components/schemas/Parent"
                       },
                       {
-                        "description": "The optional parent folder that the folder will\nbe restored to.\n\nUse this if the original parent folder no longer\nexists, or the user no longer has access to the\noriginal parent folder."
+                        "description": "Specifies an optional ID of a folder to restore the folder\nto when the original folder no longer exists.\n\nPlease be aware that this ID will only be used if the original\nfolder no longer exists. Use this ID to provide a fallback\nlocation to restore the folder to if the original location\nhas been deleted."
                       }
                     ]
                   }
@@ -4574,7 +4574,7 @@
             "application/json": {
               "schema": {
                 "title": "Metadata Template Patch",
-                "description": "A patch specification for the changes to make to the metadata template.\nThe changes are represented as a JSON array of operation objects.",
+                "description": "A list of changes to make to the metadata template.\n\nThe changes are represented as a JSON array of operation objects.",
                 "type": "array",
                 "items": {
                   "$ref": "#/components/schemas/MetadataTemplatePatchItem"
@@ -4710,7 +4710,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Returns the metadata template matching the `scope`\nand `template` name.",
+            "description": "Returns the metadata template that matches the ID.",
             "content": {
               "application/json": {
                 "schema": {
@@ -4777,7 +4777,7 @@
         "tags": [
           "Metadata Templates"
         ],
-        "description": "Creates a new metadata template that can be applied to files and folders.",
+        "description": "Creates a new metadata template that can be applied to\nfiles and folders.",
         "x-box-reference-category": "metadata_templates",
         "requestBody": {
           "content": {
@@ -6587,7 +6587,7 @@
           "Web Links"
         ],
         "x-box-reference-category": "trashed_web_links",
-        "description": "Restores an web link that has been moved to the trash.",
+        "description": "Restores a web link that has been moved to the trash.\n\nAn optional new parent ID can be provided to restore the  web link to in case\nthe original folder has been deleted.",
         "parameters": [
           {
             "name": "web_link_id",
@@ -6630,7 +6630,7 @@
                         "$ref": "#/components/schemas/Parent"
                       },
                       {
-                        "description": "The optional parent folder that the web link will\nbe restored to.\n\nUse this if the original parent folder no longer\nexists, or the user no longer has access to the\noriginal parent folder."
+                        "description": "Specifies an optional ID of a folder to restore the web link\nto when the original folder no longer exists.\n\nPlease be aware that this ID will only be used if the original\nfolder no longer exists. Use this ID to provide a fallback\nlocation to restore the web link to if the original location\nhas been deleted."
                       }
                     ]
                   }
@@ -7099,6 +7099,11 @@
                     ],
                     "description": "The user's account status",
                     "example": "active"
+                  },
+                  "external_app_user_id": {
+                    "type": "string",
+                    "example": "my-user-1234",
+                    "description": "An external identifier for an app user, which can be used to look\nup the user. This can be used to tie user IDs from external\nidentity providers to Box users."
                   }
                 }
               }
@@ -7355,6 +7360,11 @@
                     ],
                     "description": "The user's account status",
                     "example": "active"
+                  },
+                  "space_amount": {
+                    "type": "integer",
+                    "description": "The user’s total available space in bytes. Set this to `-1` to\nindicate unlimited storage.",
+                    "example": 11345156112
                   },
                   "notification_email": {
                     "type": "object",
@@ -9421,7 +9431,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Returns a list of event objects.\n\nEvents objects are returned in pages, with each page (chunk)\nincluding a list of event objects. The response also includes a\n`chunk_size` parameter indicating how many\nchunks are left, as well as the next `stream_position` that can be\nqueried.",
+            "description": "Returns a list of event objects.\n\nEvents objects are returned in pages, with each page (chunk)\nincluding a list of event objects. The response includes a\n`chunk_size` parameter indicating how many events were returned in this\nchunk, as well as the next `stream_position` that can be\nqueried.",
             "content": {
               "application/json": {
                 "schema": {
@@ -12462,7 +12472,7 @@
         "title": "Collaboration Whitelist Entry",
         "x-box-resource-id": "collaboration_whitelist_entry",
         "x-box-reference-category": "collaboration_whitelist_entries",
-        "description": "A Collaboration Whitelist entry describes an\napproved domains that can collaborate with your enterprise",
+        "description": "A Collaboration Whitelist entry describes an\napproved domain that can collaborate with your enterprise",
         "allOf": [
           {
             "$ref": "#/components/schemas/Reference"
@@ -13222,13 +13232,13 @@
         "description": "A list of event objects",
         "properties": {
           "chunk_size": {
-            "description": "The number of pages of events remaining.",
+            "description": "The number of events returned in this response.",
             "example": 2,
             "type": "integer",
             "format": "int64"
           },
           "next_stream_position": {
-            "description": "The stream position of the start of the next page\nof events.",
+            "description": "The stream position of the start of the next page (chunk)\nof events.",
             "example": "1152922976252290886",
             "type": "string"
           },
@@ -15672,6 +15682,7 @@
       "MetadataTemplate--Writable": {
         "title": "Metadata Template (Writable)",
         "x-box-resource-id": "metadata_template--writable",
+        "x-box-reference-hide": true,
         "description": "The writable parts of a metadata template that can be\napplied to files and folders",
         "properties": {
           "scope": {
@@ -15704,6 +15715,12 @@
             "items": {
               "$ref": "#/components/schemas/MetadataTemplateField"
             }
+          },
+          "copyInstanceOnItemCopy": {
+            "type": "boolean",
+            "description": "Whether or not to copy the metadata for a file or folder when an it is\ncopied.",
+            "default": false,
+            "example": true
           }
         }
       },
@@ -15776,33 +15793,46 @@
         "title": "Metadata Template Patch Item",
         "x-box-resource-id": "metadata-template-patch-item",
         "type": "object",
-        "description": "A patch operation for the\nchanges to make to the metadata template.\n\nThe possible operations are as follows.\n\n* `addEnumOption` Adds an enum option at the\n  end of the enum option list for the specified `fieldKey`.\n\n  Example `{\"op\":\"addEnumOption\",\"fieldKey\":\"category\",\n  \"data\":{\"key\":\"New Option\"}}`\n\n* `addField` Adds a field at the end of the field list\n  for the template.\n\n  Example `{\"op\":\"addField\",\"data\":{\"displayName\":\"Category\",\n  \"key\":\"category\",\"hidden\":false,\"type\":\"string\"}}`.\n\n* `editTemplate` Allows for editing the base properties\n  of a template, mainly the `displayName` and `hidden`\n  properties.\n\n  Example `{\"op\":\"editTemplate\",\"data\":{\"displayName\":\"Client\"}}`.\n\n* `reorderEnumOptions` Reorders the enum option list to\n  match the requested enum option list.\n\n  Example `{\"op\":\"reorderEnumOptions\",\"fieldKey\":\"category\",\n  \"enumOptionKeys\":[\"option2\",\"option1\",\"option3\"]}`\n\n* `reorderFields`  Reorders the field list to match the requested\n  field list\n\n  Example `{\"op\":\"reorderFields\",\"fieldKeys\":[\"field2\",\"field1\",\"field3\"]}`\n\nThe following changes can affect existing instances of this template.\n\n* `editField` Edits any number of the base properties of a field, mainly\n  the `displayName`, `hidden`, `description`, and `key` properties.\n\n  If the key is changed, existing values of the specified field are\n  migrated to the new key. Search indexes are updated, which can take\n  time depending on how many files are affected by the change.\n\n  Example `{\"op\":\"editField\",\"fieldKey\":\"category\",\n  \"data\":{\"displayName\":\"Customer Group\"}}`\n\n* `editEnumOption` Edits one of the options of an enum field.\n\n  Example `{\"op\":\"editEnumOption\",\"fieldKey\":\"years\",\"enumOptionKey\":\"2011\",\n  \"data\":{\"key\":\"2020\"}}`\n\n* `removeEnumOption` Removes the specified enum option from the\n  specified enum field.\n\n  Example `{\"op\":\"removeEnumOption\",\"fieldKey\":\"years\",\n  \"enumOptionKey\":\"2011\"}`\n\n* `removeField` Removes the specified field from the template.\n\n  Example `{\"op\":\"removeField\",\"fieldKey\":\"brand\"}`",
+        "description": "A patch operation for the\nchanges to make to the metadata template.",
+        "required": [
+          "op"
+        ],
         "properties": {
           "op": {
             "type": "string",
             "example": "addEnumOption",
             "enum": [
-              "addEnumOption",
-              "addField",
               "editTemplate",
-              "reorderEnumOptions",
+              "addField",
               "reorderFields",
+              "addEnumOption",
+              "reorderEnumOptions",
+              "reorderMultiSelectOptions",
+              "addMultiSelectOption",
               "editField",
+              "removeField",
               "editEnumOption",
               "removeEnumOption",
-              "removeField"
+              "editMultiSelectOption",
+              "removeMultiSelectOption"
             ],
-            "description": "The operation type to perform on the template."
+            "description": "The type of change to perform on the template. Some\nof these are hazardous as they will change existing templates."
           },
           "data": {
-            "description": "The data for the operation. Can vary depending on the operation.",
+            "description": "The data for the operation. This will vary depending on the operation\nbeing performed.",
             "example": {
               "displayName": "New name"
             },
             "additionalProperties": {
               "type": "string",
+              "description": "The value of a custom data entry.",
               "example": "New name"
             }
+          },
+          "fieldKey": {
+            "type": "string",
+            "example": "category",
+            "description": "For operations that affect a single field this defines the key of the\nfield that is affected."
           },
           "fieldKeys": {
             "type": "array",
@@ -15813,10 +15843,32 @@
               "category",
               "name"
             ],
-            "description": "For operations that affect multiple fields, the keys of the\nfields to be affected."
+            "description": "For operations that affect multiple fields this defines the keys of the\nfields that are affected."
+          },
+          "enumOptionKey": {
+            "description": "For operations that affect a single enum option this defines\nthe key of the option that is affected.",
+            "type": "string",
+            "example": "option1"
           },
           "enumOptionKeys": {
-            "description": "For operations that affect multiple enum options,\nthe keys of the enum options to be affected.",
+            "description": "For operations that affect multiple enum options this defines\nthe keys of the options that are affected.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "option1",
+              "option2",
+              "option3"
+            ]
+          },
+          "multiSelectOptionKey": {
+            "description": "For operations that affect a single multi select option this defines\nthe key of the option that is affected.",
+            "type": "string",
+            "example": "option1"
+          },
+          "multiSelectOptionKeys": {
+            "description": "For operations that affect multiple multi select options this defines\nthe keys of the options that are affected.",
             "type": "array",
             "items": {
               "type": "string"
@@ -16241,7 +16293,7 @@
         "x-box-reference-category": "events",
         "properties": {
           "chunk_size": {
-            "description": "The number of pages of servers remaining.",
+            "description": "The number of items in this response.",
             "example": 1,
             "type": "integer",
             "format": "int64"
@@ -17900,8 +17952,8 @@
               "external_app_user_id": {
                 "x-box-field-variant": 3,
                 "type": "string",
-                "example": "my-app-user",
-                "description": "An external identifier for an app user, which can be used to look up\nthe user."
+                "example": "my-user-1234",
+                "description": "An external identifier for an app user, which can be used to look up\nthe user. This can be used to tie user IDs from external identity\nproviders to Box users."
               },
               "notification_email": {
                 "x-box-field-variant": 2,
