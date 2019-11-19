@@ -78,7 +78,7 @@
           "304": {
             "description": "Returns an empty response when the `If-None-Match` header matches\nthe current `etag` value of the folder. This indicates that the folder\nhas not changed since it was last requested."
           },
-          "403": {
+          "401": {
             "description": "Returned when the access token provided in the `Authorization` header\nis not recognized or not provided.",
             "schema": {
               "$ref": "#/definitions/ClientError"
@@ -142,7 +142,14 @@
                 "parent": {
                   "allOf": [
                     {
-                      "$ref": "#/definitions/Parent"
+                      "type": "object",
+                      "description": "The parent for this item",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "description": "The ID of parent item"
+                        }
+                      }
                     },
                     {
                       "description": "Specifies an optional ID of a folder to restore the file to\nwhen the original folder no longer exists.\n\nPlease be aware that this ID will only be used if the original\nfolder no longer exists. Use this ID to provide a fallback\nlocation to restore the file to if the original location\nhas been deleted."
@@ -219,52 +226,109 @@
               "properties": {
                 "name": {
                   "type": "string",
-                  "description": "The new name for the file"
+                  "description": "An optional different name for the file. This can be used to\nrename the file."
                 },
                 "description": {
                   "type": "string",
-                  "description": "The description for a file",
+                  "description": "The description for a file. This can be seen in the details panel of the Box\nweb app.",
                   "maxLength": 256
                 },
                 "parent": {
                   "allOf": [
                     {
-                      "$ref": "#/definitions/Parent"
+                      "type": "object",
+                      "description": "The parent for this item",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "description": "The ID of parent item"
+                        }
+                      }
                     },
                     {
-                      "description": "The parent folder for this file. Use this to move the file\nor to restore it out of the trash."
+                      "description": "An optional new parent folder for the file. This can be used\nto move the file to a new folder."
                     }
                   ]
                 },
                 "shared_link": {
                   "allOf": [
                     {
-                      "$ref": "#/definitions/SharedLink--Writable"
+                      "description": "Defines a shared link for an item. Set this to `null` to remove\nthe shared link.",
+                      "type": "object",
+                      "properties": {
+                        "access": {
+                          "type": "string",
+                          "description": "The level of access for the shared link. This can be\nrestricted to anyone with the link (`open`), only people\nwithin the company (`company`) and only those who\nhave been invited to the folder (`collaborators`).\n\nThis field defaults to the `default` access level,\nwhich is the access level as specified by the\nenterprise admin.\n\nThe `company` access level is only available to paid\naccounts.",
+                          "enum": [
+                            "default",
+                            "open",
+                            "company",
+                            "collaborators"
+                          ]
+                        },
+                        "password": {
+                          "type": "string",
+                          "description": "The password required to access the shared link. Set the\npassword to `null` to remove it.\n\nA password can only be set when `access` is set to `open`."
+                        },
+                        "unshared_at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "description": "The timestamp at which this shared link will\nbe disabled. This field can only be set by\nusers with paid accounts."
+                        },
+                        "permissions": {
+                          "type": "object",
+                          "properties": {
+                            "can_download": {
+                              "type": "boolean",
+                              "description": "If the shared link allows for downloading of files.\nThis can only be set when `access` is set to\n`open` or `company`."
+                            }
+                          }
+                        }
+                      }
                     },
                     {
-                      "description": "Enables the creation of a shared link for this file"
+                      "description": "Defines a shared link for a file. Set this to `null` to remove\nthe shared link."
                     }
                   ]
                 },
                 "lock": {
-                  "allOf": [
-                    {
-                      "$ref": "#/definitions/Lock--Writable"
+                  "type": "object",
+                  "description": "Defines a lock on an item. This prevents the item from being\nmoved, renamed, or otherwise changed by anyone other than the user\nwho created the lock.\n\nSet this to `null` to remove the lock.",
+                  "required": [
+                    "type"
+                  ],
+                  "properties": {
+                    "access": {
+                      "type": "string",
+                      "description": "The type of this object.",
+                      "enum": [
+                        "lock"
+                      ]
                     },
-                    {
-                      "description": "Creates a lock on a file. Set to `null` to unlock a file"
+                    "expires_at": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "Defines the time at which the lock expires."
+                    },
+                    "is_download_prevented": {
+                      "type": "boolean",
+                      "description": "Defines if the file can be downloaded while it is locked."
                     }
-                  ]
+                  }
                 },
                 "permissions": {
-                  "allOf": [
-                    {
-                      "$ref": "#/definitions/Permissions--Writable"
-                    },
-                    {
-                      "description": "Describes if a file can be downloaded and by who."
+                  "description": "Defines who can download a file.",
+                  "type": "object",
+                  "properties": {
+                    "can_download": {
+                      "description": "Defines who is allowed to download this file. The possible\nvalues are either `open` for everyone or `company` for just\nthe other members of the user's enterprise.",
+                      "type": "string",
+                      "enum": [
+                        "open",
+                        "company"
+                      ]
                     }
-                  ]
+                  }
                 },
                 "tags": {
                   "type": "array",
@@ -284,6 +348,24 @@
             "description": "Returns a file object.\n\nNot all available fields are returned by default. Use the\n[fields](#param-fields) query parameter to explicitly request\nany specific fields.",
             "schema": {
               "$ref": "#/definitions/File"
+            }
+          },
+          "401": {
+            "description": "Returned when the access token provided in the `Authorization` header\nis not recognized or not provided.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "404": {
+            "description": "Returned if the file is not found, or the user does not\nhave access to the file.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "405": {
+            "description": "Returned if the `file_id` is not in a recognized format.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
             }
           },
           "412": {
@@ -320,6 +402,24 @@
         "responses": {
           "204": {
             "description": "Returns an empty response when the file has been successfully\ndeleted."
+          },
+          "401": {
+            "description": "Returned when the access token provided in the `Authorization` header\nis not recognized or not provided.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "404": {
+            "description": "Returned if the file is not found or has already been deleted, or the user\ndoes not have access to the file.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "405": {
+            "description": "Returned if the `file_id` is not in a recognized format.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
           },
           "412": {
             "description": "Returns an error when the `If-Match` header does not match\nthe current `etag` value of the file. This indicates that the file\nhas changed since it was last requested.",
@@ -431,7 +531,14 @@
                 "parent": {
                   "allOf": [
                     {
-                      "$ref": "#/definitions/Parent"
+                      "type": "object",
+                      "description": "The parent for this item",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "description": "The ID of parent item"
+                        }
+                      }
                     },
                     {
                       "description": "The parent folder to upload the file to"
@@ -1527,7 +1634,14 @@
                 "parent": {
                   "allOf": [
                     {
-                      "$ref": "#/definitions/Parent"
+                      "type": "object",
+                      "description": "The parent for this item",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "description": "The ID of parent item"
+                        }
+                      }
                     },
                     {
                       "description": "Specifies an optional ID of a folder to restore the folder\nto when the original folder no longer exists.\n\nPlease be aware that this ID will only be used if the original\nfolder no longer exists. Use this ID to provide a fallback\nlocation to restore the folder to if the original location\nhas been deleted."
@@ -1637,7 +1751,38 @@
                 "shared_link": {
                   "allOf": [
                     {
-                      "$ref": "#/definitions/SharedLink--Writable"
+                      "description": "Defines a shared link for an item. Set this to `null` to remove\nthe shared link.",
+                      "type": "object",
+                      "properties": {
+                        "access": {
+                          "type": "string",
+                          "description": "The level of access for the shared link. This can be\nrestricted to anyone with the link (`open`), only people\nwithin the company (`company`) and only those who\nhave been invited to the folder (`collaborators`).\n\nThis field defaults to the `default` access level,\nwhich is the access level as specified by the\nenterprise admin.\n\nThe `company` access level is only available to paid\naccounts.",
+                          "enum": [
+                            "default",
+                            "open",
+                            "company",
+                            "collaborators"
+                          ]
+                        },
+                        "password": {
+                          "type": "string",
+                          "description": "The password required to access the shared link. Set the\npassword to `null` to remove it.\n\nA password can only be set when `access` is set to `open`."
+                        },
+                        "unshared_at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "description": "The timestamp at which this shared link will\nbe disabled. This field can only be set by\nusers with paid accounts."
+                        },
+                        "permissions": {
+                          "type": "object",
+                          "properties": {
+                            "can_download": {
+                              "type": "boolean",
+                              "description": "If the shared link allows for downloading of files.\nThis can only be set when `access` is set to\n`open` or `company`."
+                            }
+                          }
+                        }
+                      }
                     },
                     {
                       "description": "Enables the creation of a shared link for a folder."
@@ -1681,7 +1826,7 @@
                   "type": "array",
                   "description": "An array of collections to make this folder\na member of. Currently\nwe only support the `favorites` collection.\n\nTo get the ID for a collection, use the\n[List all collections][1] endpoint.\n\nPassing an empty array `[]` or `null` will remove\nthe folder from all collections.\n\n[1]: ../advanced-files-and-folders/#get-collections",
                   "items": {
-                    "$ref": "#/definitions/Parent"
+                    "$ref": "#/definitions/Reference"
                   }
                 },
                 "can_non_owners_invite_collaborators": {
@@ -2882,7 +3027,42 @@
             "name": "body",
             "in": "body",
             "schema": {
-              "$ref": "#/definitions/MetadataTemplate--Writable"
+              "type": "description",
+              "description": "The writable parts of a metadata template that can be\napplied to files and folders",
+              "properties": {
+                "scope": {
+                  "type": "string",
+                  "description": "The scope of the object. `global` and `enterprise_*` scopes are supported.\n\nThe `global` scope contains the template with a key of `properties`,\nwhile the enterprise scope pertains to custom templates created within\nthe enterprise.\n\n The ID of the enterprise will be appended to the enterprise scope."
+                },
+                "templateKey": {
+                  "type": "string",
+                  "description": "A unique identifier for the template. The identifier must be unique across\nthe scope of the enterprise to which the metadata template is being\napplied.",
+                  "maxLength": 64,
+                  "pattern": "^[a-zA-Z_][-a-zA-Z0-9_]*$"
+                },
+                "displayName": {
+                  "type": "string",
+                  "description": "The display name of the template",
+                  "maxLength": 4096
+                },
+                "hidden": {
+                  "type": "boolean",
+                  "description": "Whether this template is hidden in the UI",
+                  "default": false
+                },
+                "fields": {
+                  "type": "array",
+                  "description": "The ordered set of key:value pairs for the template.",
+                  "items": {
+                    "$ref": "#/definitions/MetadataTemplateField"
+                  }
+                },
+                "copyInstanceOnItemCopy": {
+                  "type": "boolean",
+                  "description": "Whether or not to copy the metadata for a file or folder when an it is\ncopied.",
+                  "default": false
+                }
+              }
             }
           }
         ]
@@ -4314,7 +4494,14 @@
                 "parent": {
                   "allOf": [
                     {
-                      "$ref": "#/definitions/Parent"
+                      "type": "object",
+                      "description": "The parent for this item",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "description": "The ID of parent item"
+                        }
+                      }
                     },
                     {
                       "description": "Specifies an optional ID of a folder to restore the web link\nto when the original folder no longer exists.\n\nPlease be aware that this ID will only be used if the original\nfolder no longer exists. Use this ID to provide a fallback\nlocation to restore the web link to if the original location\nhas been deleted."
@@ -4379,7 +4566,14 @@
                 "parent": {
                   "allOf": [
                     {
-                      "$ref": "#/definitions/Parent"
+                      "type": "object",
+                      "description": "The parent for this item",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "description": "The ID of parent item"
+                        }
+                      }
                     },
                     {
                       "description": "The new parent folder to put the web link in.\nUse this to move the web link to a different folder."
@@ -8570,7 +8764,68 @@
             "permissions": {
               "allOf": [
                 {
-                  "$ref": "#/definitions/FilePermissions"
+                  "type": "object",
+                  "description": "The permissions that the authenticated user has for a file.",
+                  "allOf": [
+                    {
+                      "type": "object",
+                      "description": "The permissions that the authenticated user has for an item.",
+                      "properties": {
+                        "can_delete": {
+                          "type": "boolean",
+                          "description": "Specifies if the user can delete this item"
+                        },
+                        "can_download": {
+                          "type": "boolean",
+                          "description": "Specifies if the user can download this item"
+                        },
+                        "can_invite_collaborator": {
+                          "type": "boolean",
+                          "description": "Specifies if the user can invite collaborators to the item"
+                        },
+                        "can_rename": {
+                          "type": "boolean",
+                          "description": "Specifies if the user can rename this item"
+                        },
+                        "can_set_share_access": {
+                          "type": "boolean",
+                          "description": "Specifies if the user can manage shared links for\nthis item"
+                        },
+                        "can_share": {
+                          "type": "boolean",
+                          "description": "Specifies if the user can invite new collaborators to this item"
+                        }
+                      }
+                    },
+                    {
+                      "properties": {
+                        "can_annotate": {
+                          "type": "boolean",
+                          "description": "Specifies if the user can place annotations on this file."
+                        },
+                        "can_comment": {
+                          "type": "boolean",
+                          "description": "Specifies if the user can place comments on this file."
+                        },
+                        "can_preview": {
+                          "type": "boolean",
+                          "description": "Specifies if the user can preview this file."
+                        },
+                        "can_upload": {
+                          "type": "boolean",
+                          "description": "Specifies if the user can upload a new version of this file."
+                        },
+                        "can_view_annotations_all": {
+                          "type": "boolean",
+                          "description": "Specifies if the user view all annotations placed on this file"
+                        },
+                        "can_view_annotations_self": {
+                          "type": "boolean",
+                          "description": "Specifies if the user view annotations placed by themselves\non this file"
+                        }
+                      }
+                    }
+                  ]
                 },
                 {
                   "description": "Describes the permissions that the current user has\nfor this file."
@@ -8627,7 +8882,14 @@
             "watermark_info": {
               "allOf": [
                 {
-                  "$ref": "#/definitions/WatermarkInfo"
+                  "type": "object",
+                  "description": "Details about the watermark applied to this item",
+                  "properties": {
+                    "is_watermarked": {
+                      "type": "boolean",
+                      "description": "Specifies if this item has a watermark applied."
+                    }
+                  }
                 },
                 {
                   "description": "Details about the watermark applied to this folder"
@@ -8745,89 +9007,6 @@
         }
       }
     },
-    "Parent": {
-      "title": "Parent",
-      "description": "The parent for this item",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "The ID of parent item"
-        }
-      }
-    },
-    "SharedLink--Writable": {
-      "title": "Shared Link (Writable)",
-      "type": "object",
-      "description": "The writable attributes for a Shared Link.",
-      "properties": {
-        "access": {
-          "type": "string",
-          "description": "The level of access for the shared link. This can be\nrestricted to anyone with the link (`open`), only people\nwithin the company (`company`) and only those who\nhave been invited to the folder (`collaborators`).\n\nThis field defaults to the `default` access level,\nwhich is the access level as specified by the\nenterprise admin.\n\nThe `company` access level is only available to paid\naccounts.",
-          "enum": [
-            "default",
-            "open",
-            "company",
-            "collaborators"
-          ]
-        },
-        "password": {
-          "type": "string",
-          "description": "The password required to access the shared link. Set the\npassword to `null` to remove it.\n\nA password can only be set when `access` is set to `open`."
-        },
-        "unshared_at": {
-          "type": "string",
-          "format": "date-time",
-          "description": "The timestamp at which this shared link will\nbe disabled. This field can only be set by\nusers with paid accounts."
-        },
-        "permissions": {
-          "type": "object",
-          "properties": {
-            "can_download": {
-              "type": "boolean",
-              "description": "If the shared link allows for downloading of files.\nThis can only be set when `access` is set to\n`open` or `company`."
-            }
-          }
-        }
-      }
-    },
-    "Lock--Writable": {
-      "title": "Lock Writable",
-      "type": "object",
-      "description": "Defines a lock on an item",
-      "properties": {
-        "access": {
-          "type": "string",
-          "description": "The type of this item, should be `lock`.",
-          "enum": [
-            "lock"
-          ]
-        },
-        "expires_at": {
-          "type": "string",
-          "format": "date-time",
-          "description": "The time at which the lock expires"
-        },
-        "is_download_prevented": {
-          "type": "boolean",
-          "description": "Whether the file can be downloaded while locked"
-        }
-      }
-    },
-    "Permissions--Writable": {
-      "title": "Permissions (Writable)",
-      "description": "An object defining if a file can be downloaded.",
-      "type": "object",
-      "properties": {
-        "can_download": {
-          "description": "Describes who is allowed to download this file",
-          "type": "string",
-          "enum": [
-            "open",
-            "company"
-          ]
-        }
-      }
-    },
     "UploadUrl": {
       "title": "Upload Url",
       "description": "The details for the upload session for the file.",
@@ -8883,7 +9062,32 @@
       "description": "A list of collaborations",
       "allOf": [
         {
-          "$ref": "#/definitions/Pagination"
+          "type": "object",
+          "description": "The part of an API response that describes pagination",
+          "properties": {
+            "total_count": {
+              "description": "One greater than the offset of the last entry in the entire collection.\nThe total number of entries in the collection may be less than\n`total_count`.",
+              "type": "integer",
+              "format": "int64"
+            },
+            "limit": {
+              "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
+              "type": "integer",
+              "format": "int64"
+            },
+            "offset": {
+              "description": "The 0-based offset of the first entry in this set. This will be the same\nas the `offset` query parameter.",
+              "type": "integer",
+              "format": "int64"
+            },
+            "order": {
+              "description": "The order by which items are returned",
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/PaginationOrder"
+              }
+            }
+          }
         },
         {
           "properties": {
@@ -8902,7 +9106,32 @@
       "description": "A list of comments",
       "allOf": [
         {
-          "$ref": "#/definitions/Pagination"
+          "type": "object",
+          "description": "The part of an API response that describes pagination",
+          "properties": {
+            "total_count": {
+              "description": "One greater than the offset of the last entry in the entire collection.\nThe total number of entries in the collection may be less than\n`total_count`.",
+              "type": "integer",
+              "format": "int64"
+            },
+            "limit": {
+              "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
+              "type": "integer",
+              "format": "int64"
+            },
+            "offset": {
+              "description": "The 0-based offset of the first entry in this set. This will be the same\nas the `offset` query parameter.",
+              "type": "integer",
+              "format": "int64"
+            },
+            "order": {
+              "description": "The order by which items are returned",
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/PaginationOrder"
+              }
+            }
+          }
         },
         {
           "properties": {
@@ -8938,7 +9167,32 @@
       "description": "A list of file versions",
       "allOf": [
         {
-          "$ref": "#/definitions/Pagination"
+          "type": "object",
+          "description": "The part of an API response that describes pagination",
+          "properties": {
+            "total_count": {
+              "description": "One greater than the offset of the last entry in the entire collection.\nThe total number of entries in the collection may be less than\n`total_count`.",
+              "type": "integer",
+              "format": "int64"
+            },
+            "limit": {
+              "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
+              "type": "integer",
+              "format": "int64"
+            },
+            "offset": {
+              "description": "The 0-based offset of the first entry in this set. This will be the same\nas the `offset` query parameter.",
+              "type": "integer",
+              "format": "int64"
+            },
+            "order": {
+              "description": "The order by which items are returned",
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/PaginationOrder"
+              }
+            }
+          }
         },
         {
           "properties": {
@@ -9168,7 +9422,48 @@
             "permissions": {
               "allOf": [
                 {
-                  "$ref": "#/definitions/FolderPermissions"
+                  "type": "object",
+                  "description": "The permissions that the authenticated user has for a folder.",
+                  "allOf": [
+                    {
+                      "type": "object",
+                      "description": "The permissions that the authenticated user has for an item.",
+                      "properties": {
+                        "can_delete": {
+                          "type": "boolean",
+                          "description": "Specifies if the user can delete this item"
+                        },
+                        "can_download": {
+                          "type": "boolean",
+                          "description": "Specifies if the user can download this item"
+                        },
+                        "can_invite_collaborator": {
+                          "type": "boolean",
+                          "description": "Specifies if the user can invite collaborators to the item"
+                        },
+                        "can_rename": {
+                          "type": "boolean",
+                          "description": "Specifies if the user can rename this item"
+                        },
+                        "can_set_share_access": {
+                          "type": "boolean",
+                          "description": "Specifies if the user can manage shared links for\nthis item"
+                        },
+                        "can_share": {
+                          "type": "boolean",
+                          "description": "Specifies if the user can invite new collaborators to this item"
+                        }
+                      }
+                    },
+                    {
+                      "properties": {
+                        "can_upload": {
+                          "type": "boolean",
+                          "description": "Specifies if the user can upload into this folder."
+                        }
+                      }
+                    }
+                  ]
                 },
                 {
                   "description": "Describes the permissions that the current user has\nfor this folder"
@@ -9247,7 +9542,14 @@
             "watermark_info": {
               "allOf": [
                 {
-                  "$ref": "#/definitions/WatermarkInfo"
+                  "type": "object",
+                  "description": "Details about the watermark applied to this item",
+                  "properties": {
+                    "is_watermarked": {
+                      "type": "boolean",
+                      "description": "Specifies if this item has a watermark applied."
+                    }
+                  }
                 },
                 {
                   "description": "Details about the watermark applied to this folder"
@@ -9290,12 +9592,47 @@
         }
       }
     },
+    "Reference": {
+      "title": "Reference",
+      "description": "The bare basic reference for an object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The unique identifier for this object"
+        }
+      }
+    },
     "Items": {
       "title": "Items",
       "description": "A list of files, folders, and web links in\ntheir mini representation.",
       "allOf": [
         {
-          "$ref": "#/definitions/Pagination"
+          "type": "object",
+          "description": "The part of an API response that describes pagination",
+          "properties": {
+            "total_count": {
+              "description": "One greater than the offset of the last entry in the entire collection.\nThe total number of entries in the collection may be less than\n`total_count`.",
+              "type": "integer",
+              "format": "int64"
+            },
+            "limit": {
+              "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
+              "type": "integer",
+              "format": "int64"
+            },
+            "offset": {
+              "description": "The 0-based offset of the first entry in this set. This will be the same\nas the `offset` query parameter.",
+              "type": "integer",
+              "format": "int64"
+            },
+            "order": {
+              "description": "The order by which items are returned",
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/PaginationOrder"
+              }
+            }
+          }
         },
         {
           "properties": {
@@ -9315,7 +9652,42 @@
       "description": "A template for metadata that can be applied to files and folders",
       "allOf": [
         {
-          "$ref": "#/definitions/MetadataTemplate--Writable"
+          "type": "description",
+          "description": "The writable parts of a metadata template that can be\napplied to files and folders",
+          "properties": {
+            "scope": {
+              "type": "string",
+              "description": "The scope of the object. `global` and `enterprise_*` scopes are supported.\n\nThe `global` scope contains the template with a key of `properties`,\nwhile the enterprise scope pertains to custom templates created within\nthe enterprise.\n\n The ID of the enterprise will be appended to the enterprise scope."
+            },
+            "templateKey": {
+              "type": "string",
+              "description": "A unique identifier for the template. The identifier must be unique across\nthe scope of the enterprise to which the metadata template is being\napplied.",
+              "maxLength": 64,
+              "pattern": "^[a-zA-Z_][-a-zA-Z0-9_]*$"
+            },
+            "displayName": {
+              "type": "string",
+              "description": "The display name of the template",
+              "maxLength": 4096
+            },
+            "hidden": {
+              "type": "boolean",
+              "description": "Whether this template is hidden in the UI",
+              "default": false
+            },
+            "fields": {
+              "type": "array",
+              "description": "The ordered set of key:value pairs for the template.",
+              "items": {
+                "$ref": "#/definitions/MetadataTemplateField"
+              }
+            },
+            "copyInstanceOnItemCopy": {
+              "type": "boolean",
+              "description": "Whether or not to copy the metadata for a file or folder when an it is\ncopied.",
+              "default": false
+            }
+          }
         },
         {
           "properties": {
@@ -9401,7 +9773,25 @@
       "description": "A list of metadata templates",
       "allOf": [
         {
-          "$ref": "#/definitions/MarkerPagination"
+          "type": "object",
+          "description": "The part of an API response that describes marker\nbased pagination",
+          "properties": {
+            "limit": {
+              "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
+              "type": "integer",
+              "format": "int64"
+            },
+            "next_marker": {
+              "description": "The marker for the start of the next page of results.",
+              "type": "integer",
+              "format": "int64"
+            },
+            "prev_marker": {
+              "description": "The marker for the start of the previous page of results.",
+              "type": "integer",
+              "format": "int64"
+            }
+          }
         },
         {
           "properties": {
@@ -9415,41 +9805,45 @@
         }
       ]
     },
-    "MetadataTemplate--Writable": {
-      "title": "Metadata Template (Writable)",
-      "description": "The writable parts of a metadata template that can be\napplied to files and folders",
+    "MetadataTemplateField": {
+      "title": "Metadata Template Field",
+      "description": "An ordered set of key-value pairs that are part of a\nmetadata template",
       "properties": {
-        "scope": {
+        "type": {
           "type": "string",
-          "description": "The scope of the object. `global` and `enterprise_*` scopes are supported.\n\nThe `global` scope contains the template with a key of `properties`,\nwhile the enterprise scope pertains to custom templates created within\nthe enterprise.\n\n The ID of the enterprise will be appended to the enterprise scope."
+          "description": "The data type of the field's value",
+          "enum": [
+            "string",
+            "enum",
+            "float",
+            "date",
+            "multiSelect"
+          ]
         },
-        "templateKey": {
+        "key": {
           "type": "string",
-          "description": "A unique identifier for the template. The identifier must be unique across\nthe scope of the enterprise to which the metadata template is being\napplied.",
-          "maxLength": 64,
-          "pattern": "^[a-zA-Z_][-a-zA-Z0-9_]*$"
+          "description": "A unique identifier for the field. The identifier must\nbe unique within the template to which it belongs.",
+          "maxLength": 256
         },
         "displayName": {
           "type": "string",
-          "description": "The display name of the template",
+          "description": "The display name of the field.",
+          "maxLength": 4096
+        },
+        "description": {
+          "type": "string",
+          "description": "A description of the field.",
           "maxLength": 4096
         },
         "hidden": {
           "type": "boolean",
-          "description": "Whether this template is hidden in the UI",
-          "default": false
+          "description": "Whether this template is hidden in the UI"
         },
-        "fields": {
+        "options": {
           "type": "array",
-          "description": "The ordered set of key:value pairs for the template.",
           "items": {
-            "$ref": "#/definitions/MetadataTemplateField"
+            "$ref": "#/definitions/MetadataTemplateFieldOption"
           }
-        },
-        "copyInstanceOnItemCopy": {
-          "type": "boolean",
-          "description": "Whether or not to copy the metadata for a file or folder when an it is\ncopied.",
-          "default": false
         }
       }
     },
@@ -9458,7 +9852,25 @@
       "description": "A list of metadata cascade policies.",
       "allOf": [
         {
-          "$ref": "#/definitions/MarkerPagination"
+          "type": "object",
+          "description": "The part of an API response that describes marker\nbased pagination",
+          "properties": {
+            "limit": {
+              "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
+              "type": "integer",
+              "format": "int64"
+            },
+            "next_marker": {
+              "description": "The marker for the start of the next page of results.",
+              "type": "integer",
+              "format": "int64"
+            },
+            "prev_marker": {
+              "description": "The marker for the start of the previous page of results.",
+              "type": "integer",
+              "format": "int64"
+            }
+          }
         },
         {
           "properties": {
@@ -9779,7 +10191,32 @@
       "description": "A list of task assignments",
       "allOf": [
         {
-          "$ref": "#/definitions/Pagination"
+          "type": "object",
+          "description": "The part of an API response that describes pagination",
+          "properties": {
+            "total_count": {
+              "description": "One greater than the offset of the last entry in the entire collection.\nThe total number of entries in the collection may be less than\n`total_count`.",
+              "type": "integer",
+              "format": "int64"
+            },
+            "limit": {
+              "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
+              "type": "integer",
+              "format": "int64"
+            },
+            "offset": {
+              "description": "The 0-based offset of the first entry in this set. This will be the same\nas the `offset` query parameter.",
+              "type": "integer",
+              "format": "int64"
+            },
+            "order": {
+              "description": "The order by which items are returned",
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/PaginationOrder"
+              }
+            }
+          }
         },
         {
           "properties": {
@@ -10022,7 +10459,32 @@
       "description": "A list of users.",
       "allOf": [
         {
-          "$ref": "#/definitions/Pagination"
+          "type": "object",
+          "description": "The part of an API response that describes pagination",
+          "properties": {
+            "total_count": {
+              "description": "One greater than the offset of the last entry in the entire collection.\nThe total number of entries in the collection may be less than\n`total_count`.",
+              "type": "integer",
+              "format": "int64"
+            },
+            "limit": {
+              "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
+              "type": "integer",
+              "format": "int64"
+            },
+            "offset": {
+              "description": "The 0-based offset of the first entry in this set. This will be the same\nas the `offset` query parameter.",
+              "type": "integer",
+              "format": "int64"
+            },
+            "order": {
+              "description": "The order by which items are returned",
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/PaginationOrder"
+              }
+            }
+          }
         },
         {
           "properties": {
@@ -10181,7 +10643,32 @@
       "description": "A list of group memberships.",
       "allOf": [
         {
-          "$ref": "#/definitions/Pagination"
+          "type": "object",
+          "description": "The part of an API response that describes pagination",
+          "properties": {
+            "total_count": {
+              "description": "One greater than the offset of the last entry in the entire collection.\nThe total number of entries in the collection may be less than\n`total_count`.",
+              "type": "integer",
+              "format": "int64"
+            },
+            "limit": {
+              "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
+              "type": "integer",
+              "format": "int64"
+            },
+            "offset": {
+              "description": "The 0-based offset of the first entry in this set. This will be the same\nas the `offset` query parameter.",
+              "type": "integer",
+              "format": "int64"
+            },
+            "order": {
+              "description": "The order by which items are returned",
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/PaginationOrder"
+              }
+            }
+          }
         },
         {
           "properties": {
@@ -10243,7 +10730,32 @@
       "description": "A list of groups.",
       "allOf": [
         {
-          "$ref": "#/definitions/Pagination"
+          "type": "object",
+          "description": "The part of an API response that describes pagination",
+          "properties": {
+            "total_count": {
+              "description": "One greater than the offset of the last entry in the entire collection.\nThe total number of entries in the collection may be less than\n`total_count`.",
+              "type": "integer",
+              "format": "int64"
+            },
+            "limit": {
+              "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
+              "type": "integer",
+              "format": "int64"
+            },
+            "offset": {
+              "description": "The 0-based offset of the first entry in this set. This will be the same\nas the `offset` query parameter.",
+              "type": "integer",
+              "format": "int64"
+            },
+            "order": {
+              "description": "The order by which items are returned",
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/PaginationOrder"
+              }
+            }
+          }
         },
         {
           "properties": {
@@ -10366,7 +10878,25 @@
       "description": "A list of webhooks.",
       "allOf": [
         {
-          "$ref": "#/definitions/MarkerPagination"
+          "type": "object",
+          "description": "The part of an API response that describes marker\nbased pagination",
+          "properties": {
+            "limit": {
+              "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
+              "type": "integer",
+              "format": "int64"
+            },
+            "next_marker": {
+              "description": "The marker for the start of the next page of results.",
+              "type": "integer",
+              "format": "int64"
+            },
+            "prev_marker": {
+              "description": "The marker for the start of the previous page of results.",
+              "type": "integer",
+              "format": "int64"
+            }
+          }
         },
         {
           "properties": {
@@ -10651,7 +11181,32 @@
       "description": "A list of collections",
       "allOf": [
         {
-          "$ref": "#/definitions/Pagination"
+          "type": "object",
+          "description": "The part of an API response that describes pagination",
+          "properties": {
+            "total_count": {
+              "description": "One greater than the offset of the last entry in the entire collection.\nThe total number of entries in the collection may be less than\n`total_count`.",
+              "type": "integer",
+              "format": "int64"
+            },
+            "limit": {
+              "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
+              "type": "integer",
+              "format": "int64"
+            },
+            "offset": {
+              "description": "The 0-based offset of the first entry in this set. This will be the same\nas the `offset` query parameter.",
+              "type": "integer",
+              "format": "int64"
+            },
+            "order": {
+              "description": "The order by which items are returned",
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/PaginationOrder"
+              }
+            }
+          }
         },
         {
           "properties": {
@@ -10670,7 +11225,25 @@
       "description": "A list of recent items.",
       "allOf": [
         {
-          "$ref": "#/definitions/MarkerPagination"
+          "type": "object",
+          "description": "The part of an API response that describes marker\nbased pagination",
+          "properties": {
+            "limit": {
+              "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
+              "type": "integer",
+              "format": "int64"
+            },
+            "next_marker": {
+              "description": "The marker for the start of the next page of results.",
+              "type": "integer",
+              "format": "int64"
+            },
+            "prev_marker": {
+              "description": "The marker for the start of the previous page of results.",
+              "type": "integer",
+              "format": "int64"
+            }
+          }
         },
         {
           "properties": {
@@ -10782,7 +11355,25 @@
       "description": "A list of retention policy assignments",
       "allOf": [
         {
-          "$ref": "#/definitions/MarkerPagination"
+          "type": "object",
+          "description": "The part of an API response that describes marker\nbased pagination",
+          "properties": {
+            "limit": {
+              "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
+              "type": "integer",
+              "format": "int64"
+            },
+            "next_marker": {
+              "description": "The marker for the start of the next page of results.",
+              "type": "integer",
+              "format": "int64"
+            },
+            "prev_marker": {
+              "description": "The marker for the start of the previous page of results.",
+              "type": "integer",
+              "format": "int64"
+            }
+          }
         },
         {
           "properties": {
@@ -10856,7 +11447,25 @@
       "description": "A list of legal hold policies.",
       "allOf": [
         {
-          "$ref": "#/definitions/MarkerPagination"
+          "type": "object",
+          "description": "The part of an API response that describes marker\nbased pagination",
+          "properties": {
+            "limit": {
+              "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
+              "type": "integer",
+              "format": "int64"
+            },
+            "next_marker": {
+              "description": "The marker for the start of the next page of results.",
+              "type": "integer",
+              "format": "int64"
+            },
+            "prev_marker": {
+              "description": "The marker for the start of the previous page of results.",
+              "type": "integer",
+              "format": "int64"
+            }
+          }
         },
         {
           "properties": {
@@ -10901,14 +11510,30 @@
               "description": "* 'active' - the policy is not in a transition state\n* 'applying' - that the policy is in the process of\n  being applied\n* 'releasing' - that the process is in the process\n  of being released\n* 'released' - the policy is no longer active"
             },
             "assignment_counts": {
-              "allOf": [
-                {
-                  "$ref": "#/definitions/AssignmentCounts"
+              "type": "object",
+              "description": "Counts of assignments within this a legal hold policy by item type",
+              "properties": {
+                "user": {
+                  "type": "integer",
+                  "format": "int64",
+                  "description": "The number of users this policy is applied to"
                 },
-                {
-                  "description": "Counts of assignments within this policy by apply-to type"
+                "folder": {
+                  "type": "integer",
+                  "format": "int64",
+                  "description": "The number of folders this policy is applied to"
+                },
+                "file": {
+                  "type": "integer",
+                  "format": "int64",
+                  "description": "The number of files this policy is applied to"
+                },
+                "file_version": {
+                  "type": "integer",
+                  "format": "int64",
+                  "description": "The number of file versions this policy is applied to"
                 }
-              ]
+              }
             },
             "created_by": {
               "allOf": [
@@ -10959,7 +11584,25 @@
       "description": "A list of legal hold policies assignments.",
       "allOf": [
         {
-          "$ref": "#/definitions/MarkerPagination"
+          "type": "object",
+          "description": "The part of an API response that describes marker\nbased pagination",
+          "properties": {
+            "limit": {
+              "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
+              "type": "integer",
+              "format": "int64"
+            },
+            "next_marker": {
+              "description": "The marker for the start of the next page of results.",
+              "type": "integer",
+              "format": "int64"
+            },
+            "prev_marker": {
+              "description": "The marker for the start of the previous page of results.",
+              "type": "integer",
+              "format": "int64"
+            }
+          }
         },
         {
           "properties": {
@@ -11098,7 +11741,25 @@
       "description": "A list of file version retentions.",
       "allOf": [
         {
-          "$ref": "#/definitions/MarkerPagination"
+          "type": "object",
+          "description": "The part of an API response that describes marker\nbased pagination",
+          "properties": {
+            "limit": {
+              "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
+              "type": "integer",
+              "format": "int64"
+            },
+            "next_marker": {
+              "description": "The marker for the start of the next page of results.",
+              "type": "integer",
+              "format": "int64"
+            },
+            "prev_marker": {
+              "description": "The marker for the start of the previous page of results.",
+              "type": "integer",
+              "format": "int64"
+            }
+          }
         },
         {
           "properties": {
@@ -11169,7 +11830,25 @@
       "description": "A list of file version legal holds.",
       "allOf": [
         {
-          "$ref": "#/definitions/MarkerPagination"
+          "type": "object",
+          "description": "The part of an API response that describes marker\nbased pagination",
+          "properties": {
+            "limit": {
+              "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
+              "type": "integer",
+              "format": "int64"
+            },
+            "next_marker": {
+              "description": "The marker for the start of the next page of results.",
+              "type": "integer",
+              "format": "int64"
+            },
+            "prev_marker": {
+              "description": "The marker for the start of the previous page of results.",
+              "type": "integer",
+              "format": "int64"
+            }
+          }
         },
         {
           "properties": {
@@ -11232,7 +11911,25 @@
       "description": "A list of device pins",
       "allOf": [
         {
-          "$ref": "#/definitions/MarkerPagination"
+          "type": "object",
+          "description": "The part of an API response that describes marker\nbased pagination",
+          "properties": {
+            "limit": {
+              "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
+              "type": "integer",
+              "format": "int64"
+            },
+            "next_marker": {
+              "description": "The marker for the start of the next page of results.",
+              "type": "integer",
+              "format": "int64"
+            },
+            "prev_marker": {
+              "description": "The marker for the start of the previous page of results.",
+              "type": "integer",
+              "format": "int64"
+            }
+          }
         },
         {
           "properties": {
@@ -11393,7 +12090,25 @@
       "description": "A list of collaboration whitelist entries.",
       "allOf": [
         {
-          "$ref": "#/definitions/MarkerPagination"
+          "type": "object",
+          "description": "The part of an API response that describes marker\nbased pagination",
+          "properties": {
+            "limit": {
+              "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
+              "type": "integer",
+              "format": "int64"
+            },
+            "next_marker": {
+              "description": "The marker for the start of the next page of results.",
+              "type": "integer",
+              "format": "int64"
+            },
+            "prev_marker": {
+              "description": "The marker for the start of the previous page of results.",
+              "type": "integer",
+              "format": "int64"
+            }
+          }
         },
         {
           "properties": {
@@ -11460,7 +12175,25 @@
       "description": "A list of collaboration whitelist exemptions.",
       "allOf": [
         {
-          "$ref": "#/definitions/MarkerPagination"
+          "type": "object",
+          "description": "The part of an API response that describes marker\nbased pagination",
+          "properties": {
+            "limit": {
+              "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
+              "type": "integer",
+              "format": "int64"
+            },
+            "next_marker": {
+              "description": "The marker for the start of the next page of results.",
+              "type": "integer",
+              "format": "int64"
+            },
+            "prev_marker": {
+              "description": "The marker for the start of the previous page of results.",
+              "type": "integer",
+              "format": "int64"
+            }
+          }
         },
         {
           "properties": {
@@ -11529,7 +12262,25 @@
       "description": "A list of storage policies.",
       "allOf": [
         {
-          "$ref": "#/definitions/MarkerPagination"
+          "type": "object",
+          "description": "The part of an API response that describes marker\nbased pagination",
+          "properties": {
+            "limit": {
+              "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
+              "type": "integer",
+              "format": "int64"
+            },
+            "next_marker": {
+              "description": "The marker for the start of the next page of results.",
+              "type": "integer",
+              "format": "int64"
+            },
+            "prev_marker": {
+              "description": "The marker for the start of the previous page of results.",
+              "type": "integer",
+              "format": "int64"
+            }
+          }
         },
         {
           "properties": {
@@ -11566,7 +12317,25 @@
       "description": "A list of storage policy assignments.",
       "allOf": [
         {
-          "$ref": "#/definitions/MarkerPagination"
+          "type": "object",
+          "description": "The part of an API response that describes marker\nbased pagination",
+          "properties": {
+            "limit": {
+              "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
+              "type": "integer",
+              "format": "int64"
+            },
+            "next_marker": {
+              "description": "The marker for the start of the next page of results.",
+              "type": "integer",
+              "format": "int64"
+            },
+            "prev_marker": {
+              "description": "The marker for the start of the previous page of results.",
+              "type": "integer",
+              "format": "int64"
+            }
+          }
         },
         {
           "properties": {
@@ -11742,46 +12511,9 @@
         }
       ]
     },
-    "FilePermissions": {
-      "title": "File Permissions",
-      "description": "The permissions that the authenticated user has for a file.",
-      "allOf": [
-        {
-          "$ref": "#/definitions/Permissions"
-        },
-        {
-          "properties": {
-            "can_annotate": {
-              "type": "boolean",
-              "description": "Specifies if the user can place annotations on this file."
-            },
-            "can_comment": {
-              "type": "boolean",
-              "description": "Specifies if the user can place comments on this file."
-            },
-            "can_preview": {
-              "type": "boolean",
-              "description": "Specifies if the user can preview this file."
-            },
-            "can_upload": {
-              "type": "boolean",
-              "description": "Specifies if the user can upload a new version of this file."
-            },
-            "can_view_annotations_all": {
-              "type": "boolean",
-              "description": "Specifies if the user view all annotations placed on this file"
-            },
-            "can_view_annotations_self": {
-              "type": "boolean",
-              "description": "Specifies if the user view annotations placed by themselves\non this file"
-            }
-          }
-        }
-      ]
-    },
     "Lock": {
       "title": "Lock",
-      "description": "The lock held on a file.",
+      "description": "The lock held on a file. A lock prevents a file from being moved,\nrenamed, or otherwise changed by anyone else than the user who created the\nlock.",
       "allOf": [
         {
           "$ref": "#/definitions/Reference"
@@ -11801,23 +12533,23 @@
                   "$ref": "#/definitions/User--Mini"
                 },
                 {
-                  "description": "The use who created the lock"
+                  "description": "The user who created the lock."
                 }
               ]
             },
             "created_at": {
               "type": "string",
               "format": "date-time",
-              "description": "The time this lock was created at"
+              "description": "The time this lock was created at."
             },
             "expired_at": {
               "type": "string",
               "format": "date-time",
-              "description": "The time this lock is to expire at, which might be in the past"
+              "description": "The time this lock is to expire at, which might be in the past."
             },
             "is_download_prevented": {
               "type": "boolean",
-              "description": "Whether or not the file can be downloaded while locked"
+              "description": "Whether or not the file can be downloaded while locked."
             }
           }
         }
@@ -11828,7 +12560,34 @@
       "description": "An expiring Box Embed Link.",
       "allOf": [
         {
-          "$ref": "#/definitions/AccessToken--Mini"
+          "type": "object",
+          "description": "The basics of an access token",
+          "properties": {
+            "access_token": {
+              "type": "string",
+              "format": "token",
+              "description": "The requested access token."
+            },
+            "expires_in": {
+              "type": "integer",
+              "format": "int64",
+              "description": "The time in seconds in seconds by which this token will expire."
+            },
+            "token_type": {
+              "type": "string",
+              "enum": [
+                "bearer"
+              ],
+              "description": "The type of access token returned."
+            },
+            "restricted_to": {
+              "type": "array",
+              "description": "The permissions that this access token permits,\nproviding a list of resources (files, folders, etc)\nand the scopes permitted for each of those resources.",
+              "items": {
+                "$ref": "#/definitions/FileScope"
+              }
+            }
+          }
         },
         {},
         {
@@ -11841,16 +12600,6 @@
           }
         }
       ]
-    },
-    "WatermarkInfo": {
-      "title": "Watermark Info",
-      "description": "Details about the watermark applied to this item",
-      "properties": {
-        "is_watermarked": {
-          "type": "boolean",
-          "description": "Specifies if this item has a watermark applied."
-        }
-      }
     },
     "Representations": {
       "title": "Representations",
@@ -11909,31 +12658,21 @@
         }
       ]
     },
-    "Pagination": {
-      "title": "Pagination",
-      "description": "The part of an API response that describes pagination",
+    "PaginationOrder": {
+      "title": "Pagination Order",
+      "description": "The order in which a pagination is ordered",
       "properties": {
-        "total_count": {
-          "description": "One greater than the offset of the last entry in the entire collection.\nThe total number of entries in the collection may be less than\n`total_count`.",
-          "type": "integer",
-          "format": "int64"
+        "by": {
+          "description": "The field to order by",
+          "type": "string"
         },
-        "limit": {
-          "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
-          "type": "integer",
-          "format": "int64"
-        },
-        "offset": {
-          "description": "The 0-based offset of the first entry in this set. This will be the same\nas the `offset` query parameter.",
-          "type": "integer",
-          "format": "int64"
-        },
-        "order": {
-          "description": "The order by which items are returned",
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/PaginationOrder"
-          }
+        "direction": {
+          "type": "string",
+          "description": "The direction to order by, either ascending or descending",
+          "enum": [
+            "ASC",
+            "DESC"
+          ]
         }
       }
     },
@@ -12140,23 +12879,6 @@
         }
       ]
     },
-    "FolderPermissions": {
-      "title": "Folder Permissions",
-      "description": "The permissions that the authenticated user has for a folder.",
-      "allOf": [
-        {
-          "$ref": "#/definitions/Permissions"
-        },
-        {
-          "properties": {
-            "can_upload": {
-              "type": "boolean",
-              "description": "Specifies if the user can upload into this folder."
-            }
-          }
-        }
-      ]
-    },
     "Folder--Mini": {
       "title": "Folder (Mini)",
       "description": "A mini representation of a file version, used when\nnested under another resource.",
@@ -12226,66 +12948,17 @@
         }
       ]
     },
-    "MarkerPagination": {
-      "title": "Marker Pagination",
-      "description": "The part of an API response that describes marker\nbased pagination",
+    "MetadataTemplateFieldOption": {
+      "title": "Metadata Template Field Option",
+      "description": "For type `enum` and `multiSelect`, one of the potential values\nthat can be selected.",
       "properties": {
-        "limit": {
-          "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
-          "type": "integer",
-          "format": "int64"
-        },
-        "next_marker": {
-          "description": "The marker for the start of the next page of results.",
-          "type": "integer",
-          "format": "int64"
-        },
-        "prev_marker": {
-          "description": "The marker for the start of the previous page of results.",
-          "type": "integer",
-          "format": "int64"
-        }
-      }
-    },
-    "MetadataTemplateField": {
-      "title": "Metadata Template Field",
-      "description": "An ordered set of key-value pairs that are part of a\nmetadata template",
-      "properties": {
-        "type": {
+        "id": {
           "type": "string",
-          "description": "The data type of the field's value",
-          "enum": [
-            "string",
-            "enum",
-            "float",
-            "date",
-            "multiSelect"
-          ]
+          "description": "The ID of the option"
         },
         "key": {
-          "type": "string",
-          "description": "A unique identifier for the field. The identifier must\nbe unique within the template to which it belongs.",
-          "maxLength": 256
-        },
-        "displayName": {
-          "type": "string",
-          "description": "The display name of the field.",
-          "maxLength": 4096
-        },
-        "description": {
-          "type": "string",
-          "description": "A description of the field.",
-          "maxLength": 4096
-        },
-        "hidden": {
-          "type": "boolean",
-          "description": "Whether this template is hidden in the UI"
-        },
-        "options": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/MetadataTemplateFieldOption"
-          }
+          "description": "The text value of the option",
+          "type": "string"
         }
       }
     },
@@ -12349,16 +13022,6 @@
           }
         }
       ]
-    },
-    "Reference": {
-      "title": "Reference",
-      "description": "The bare basic reference for an object",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "The unique identifier for this object"
-        }
-      }
     },
     "TermsOfService--Mini": {
       "title": "Terms Of Service (Mini)",
@@ -12966,32 +13629,6 @@
         }
       ]
     },
-    "AssignmentCounts": {
-      "title": "Assignment Counts",
-      "description": "Counts of assignments within this a legal hold policy by item type",
-      "properties": {
-        "user": {
-          "type": "integer",
-          "format": "int64",
-          "description": "The number of users this policy is applied to"
-        },
-        "folder": {
-          "type": "integer",
-          "format": "int64",
-          "description": "The number of folders this policy is applied to"
-        },
-        "file": {
-          "type": "integer",
-          "format": "int64",
-          "description": "The number of files this policy is applied to"
-        },
-        "file_version": {
-          "type": "integer",
-          "format": "int64",
-          "description": "The number of file versions this policy is applied to"
-        }
-      }
-    },
     "StoragePolicy--Mini": {
       "title": "Storage Policy (Mini)",
       "description": "A mini description of a Storage Policy object",
@@ -13030,64 +13667,38 @@
         }
       }
     },
-    "Permissions": {
-      "title": "Permissions",
-      "description": "The permissions that the authenticated user has for an item.",
+    "FileScope": {
+      "title": "File Scope",
+      "description": "A relation between a file and the scopes for which the file can be accessed",
       "properties": {
-        "can_delete": {
-          "type": "boolean",
-          "description": "Specifies if the user can delete this item"
-        },
-        "can_download": {
-          "type": "boolean",
-          "description": "Specifies if the user can download this item"
-        },
-        "can_invite_collaborator": {
-          "type": "boolean",
-          "description": "Specifies if the user can invite collaborators to the item"
-        },
-        "can_rename": {
-          "type": "boolean",
-          "description": "Specifies if the user can rename this item"
-        },
-        "can_set_share_access": {
-          "type": "boolean",
-          "description": "Specifies if the user can manage shared links for\nthis item"
-        },
-        "can_share": {
-          "type": "boolean",
-          "description": "Specifies if the user can invite new collaborators to this item"
-        }
-      }
-    },
-    "AccessToken--Mini": {
-      "title": "Access Token Mini",
-      "description": "The basics of an access token",
-      "type": "object",
-      "properties": {
-        "access_token": {
+        "scope": {
           "type": "string",
-          "format": "token",
-          "description": "The requested access token."
-        },
-        "expires_in": {
-          "type": "integer",
-          "format": "int64",
-          "description": "The time in seconds in seconds by which this token will expire."
-        },
-        "token_type": {
-          "type": "string",
+          "description": "The file scopes for the file access",
           "enum": [
-            "bearer"
-          ],
-          "description": "The type of access token returned."
+            "annotation_edit",
+            "annotation_view_all",
+            "annotation_view_self",
+            "base_explorer",
+            "base_picker",
+            "base_preview",
+            "base_upload",
+            "item_delete",
+            "item_download",
+            "item_preview",
+            "item_rename",
+            "item_share",
+            null
+          ]
         },
-        "restricted_to": {
-          "type": "array",
-          "description": "The permissions that this access token permits,\nproviding a list of resources (files, folders, etc)\nand the scopes permitted for each of those resources.",
-          "items": {
-            "$ref": "#/definitions/FileScope"
-          }
+        "object": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/File--Mini"
+            },
+            {
+              "description": "The file for which the file can be accessed"
+            }
+          ]
         }
       }
     },
@@ -13194,24 +13805,6 @@
         }
       }
     },
-    "PaginationOrder": {
-      "title": "Pagination Order",
-      "description": "The order in which a pagination is ordered",
-      "properties": {
-        "by": {
-          "description": "The field to order by",
-          "type": "string"
-        },
-        "direction": {
-          "type": "string",
-          "description": "The direction to order by, either ascending or descending",
-          "enum": [
-            "ASC",
-            "DESC"
-          ]
-        }
-      }
-    },
     "Folder--Base": {
       "title": "Folder (Base)",
       "description": "The bare basic representation of a folder, the minimal\namount of fields returned when using the `fields` query\nparameter.",
@@ -13230,20 +13823,6 @@
           "enum": [
             "folder"
           ]
-        }
-      }
-    },
-    "MetadataTemplateFieldOption": {
-      "title": "Metadata Template Field Option",
-      "description": "For type `enum` and `multiSelect`, one of the potential values\nthat can be selected.",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "The ID of the option"
-        },
-        "key": {
-          "description": "The text value of the option",
-          "type": "string"
         }
       }
     },
@@ -13303,41 +13882,6 @@
           "description": "`file_version`",
           "enum": [
             "file_version"
-          ]
-        }
-      }
-    },
-    "FileScope": {
-      "title": "File Scope",
-      "description": "A relation between a file and the scopes for which the file can be accessed",
-      "properties": {
-        "scope": {
-          "type": "string",
-          "description": "The file scopes for the file access",
-          "enum": [
-            "annotation_edit",
-            "annotation_view_all",
-            "annotation_view_self",
-            "base_explorer",
-            "base_picker",
-            "base_preview",
-            "base_upload",
-            "item_delete",
-            "item_download",
-            "item_preview",
-            "item_rename",
-            "item_share",
-            null
-          ]
-        },
-        "object": {
-          "allOf": [
-            {
-              "$ref": "#/definitions/File--Mini"
-            },
-            {
-              "description": "The file for which the file can be accessed"
-            }
           ]
         }
       }

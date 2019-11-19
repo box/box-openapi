@@ -34,7 +34,7 @@
           "File Uploads"
         ],
         "summary": "Upload a file version",
-        "description": "Update a file's content. For file sizes over 50MB we recommend\nusing the Chunk Upload APIs.\n\n## Request body order\n\nThe `attributes` part of the body must come **before** the\n`file` part. Requests that do not follow this format when\nuploading the file will receive a HTTP `400` error with a\n`metadata_after_file_contents` error code.",
+        "description": "Update a file's content. For file sizes over 50MB we recommend\nusing the Chunk Upload APIs.\n\n# Request body order\n\nThe `attributes` part of the body must come **before** the\n`file` part. Requests that do not follow this format when\nuploading the file will receive a HTTP `400` error with a\n`metadata_after_file_contents` error code.",
         "parameters": [
           {
             "name": "file_id",
@@ -91,7 +91,7 @@
           "File Uploads"
         ],
         "summary": "Upload a file",
-        "description": "Uploads a small file to Box. For file sizes over 50MB we recommend\nusing the Chunk Upload APIs.\n\n## Request body order\n\nThe `attributes` part of the body must come **before** the\n`file` part. Requests that do not follow this format when\nuploading the file will receive a HTTP `400` error with a\n`metadata_after_file_contents` error code.",
+        "description": "Uploads a small file to Box. For file sizes over 50MB we recommend\nusing the Chunk Upload APIs.\n\n# Request body order\n\nThe `attributes` part of the body must come **before** the\n`file` part. Requests that do not follow this format when\nuploading the file will receive a HTTP `400` error with a\n`metadata_after_file_contents` error code.",
         "parameters": [
           {
             "name": "fields",
@@ -640,7 +640,32 @@
       "description": "A list of uploaded chunks for an upload\nsession.",
       "allOf": [
         {
-          "$ref": "#/definitions/Pagination"
+          "type": "object",
+          "description": "The part of an API response that describes pagination",
+          "properties": {
+            "total_count": {
+              "description": "One greater than the offset of the last entry in the entire collection.\nThe total number of entries in the collection may be less than\n`total_count`.",
+              "type": "integer",
+              "format": "int64"
+            },
+            "limit": {
+              "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
+              "type": "integer",
+              "format": "int64"
+            },
+            "offset": {
+              "description": "The 0-based offset of the first entry in this set. This will be the same\nas the `offset` query parameter.",
+              "type": "integer",
+              "format": "int64"
+            },
+            "order": {
+              "description": "The order by which items are returned",
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/PaginationOrder"
+              }
+            }
+          }
         },
         {
           "properties": {
@@ -695,7 +720,68 @@
             "permissions": {
               "allOf": [
                 {
-                  "$ref": "#/definitions/FilePermissions"
+                  "type": "object",
+                  "description": "The permissions that the authenticated user has for a file.",
+                  "allOf": [
+                    {
+                      "type": "object",
+                      "description": "The permissions that the authenticated user has for an item.",
+                      "properties": {
+                        "can_delete": {
+                          "type": "boolean",
+                          "description": "Specifies if the user can delete this item"
+                        },
+                        "can_download": {
+                          "type": "boolean",
+                          "description": "Specifies if the user can download this item"
+                        },
+                        "can_invite_collaborator": {
+                          "type": "boolean",
+                          "description": "Specifies if the user can invite collaborators to the item"
+                        },
+                        "can_rename": {
+                          "type": "boolean",
+                          "description": "Specifies if the user can rename this item"
+                        },
+                        "can_set_share_access": {
+                          "type": "boolean",
+                          "description": "Specifies if the user can manage shared links for\nthis item"
+                        },
+                        "can_share": {
+                          "type": "boolean",
+                          "description": "Specifies if the user can invite new collaborators to this item"
+                        }
+                      }
+                    },
+                    {
+                      "properties": {
+                        "can_annotate": {
+                          "type": "boolean",
+                          "description": "Specifies if the user can place annotations on this file."
+                        },
+                        "can_comment": {
+                          "type": "boolean",
+                          "description": "Specifies if the user can place comments on this file."
+                        },
+                        "can_preview": {
+                          "type": "boolean",
+                          "description": "Specifies if the user can preview this file."
+                        },
+                        "can_upload": {
+                          "type": "boolean",
+                          "description": "Specifies if the user can upload a new version of this file."
+                        },
+                        "can_view_annotations_all": {
+                          "type": "boolean",
+                          "description": "Specifies if the user view all annotations placed on this file"
+                        },
+                        "can_view_annotations_self": {
+                          "type": "boolean",
+                          "description": "Specifies if the user view annotations placed by themselves\non this file"
+                        }
+                      }
+                    }
+                  ]
                 },
                 {
                   "description": "Describes the permissions that the current user has\nfor this file."
@@ -752,7 +838,14 @@
             "watermark_info": {
               "allOf": [
                 {
-                  "$ref": "#/definitions/WatermarkInfo"
+                  "type": "object",
+                  "description": "Details about the watermark applied to this item",
+                  "properties": {
+                    "is_watermarked": {
+                      "type": "boolean",
+                      "description": "Specifies if this item has a watermark applied."
+                    }
+                  }
                 },
                 {
                   "description": "Details about the watermark applied to this folder"
@@ -849,31 +942,21 @@
         }
       }
     },
-    "Pagination": {
-      "title": "Pagination",
-      "description": "The part of an API response that describes pagination",
+    "PaginationOrder": {
+      "title": "Pagination Order",
+      "description": "The order in which a pagination is ordered",
       "properties": {
-        "total_count": {
-          "description": "One greater than the offset of the last entry in the entire collection.\nThe total number of entries in the collection may be less than\n`total_count`.",
-          "type": "integer",
-          "format": "int64"
+        "by": {
+          "description": "The field to order by",
+          "type": "string"
         },
-        "limit": {
-          "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
-          "type": "integer",
-          "format": "int64"
-        },
-        "offset": {
-          "description": "The 0-based offset of the first entry in this set. This will be the same\nas the `offset` query parameter.",
-          "type": "integer",
-          "format": "int64"
-        },
-        "order": {
-          "description": "The order by which items are returned",
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/PaginationOrder"
-          }
+        "direction": {
+          "type": "string",
+          "description": "The direction to order by, either ascending or descending",
+          "enum": [
+            "ASC",
+            "DESC"
+          ]
         }
       }
     },
@@ -1013,46 +1096,9 @@
         }
       ]
     },
-    "FilePermissions": {
-      "title": "File Permissions",
-      "description": "The permissions that the authenticated user has for a file.",
-      "allOf": [
-        {
-          "$ref": "#/definitions/Permissions"
-        },
-        {
-          "properties": {
-            "can_annotate": {
-              "type": "boolean",
-              "description": "Specifies if the user can place annotations on this file."
-            },
-            "can_comment": {
-              "type": "boolean",
-              "description": "Specifies if the user can place comments on this file."
-            },
-            "can_preview": {
-              "type": "boolean",
-              "description": "Specifies if the user can preview this file."
-            },
-            "can_upload": {
-              "type": "boolean",
-              "description": "Specifies if the user can upload a new version of this file."
-            },
-            "can_view_annotations_all": {
-              "type": "boolean",
-              "description": "Specifies if the user view all annotations placed on this file"
-            },
-            "can_view_annotations_self": {
-              "type": "boolean",
-              "description": "Specifies if the user view annotations placed by themselves\non this file"
-            }
-          }
-        }
-      ]
-    },
     "Lock": {
       "title": "Lock",
-      "description": "The lock held on a file.",
+      "description": "The lock held on a file. A lock prevents a file from being moved,\nrenamed, or otherwise changed by anyone else than the user who created the\nlock.",
       "allOf": [
         {
           "$ref": "#/definitions/Reference"
@@ -1072,23 +1118,23 @@
                   "$ref": "#/definitions/User--Mini"
                 },
                 {
-                  "description": "The use who created the lock"
+                  "description": "The user who created the lock."
                 }
               ]
             },
             "created_at": {
               "type": "string",
               "format": "date-time",
-              "description": "The time this lock was created at"
+              "description": "The time this lock was created at."
             },
             "expired_at": {
               "type": "string",
               "format": "date-time",
-              "description": "The time this lock is to expire at, which might be in the past"
+              "description": "The time this lock is to expire at, which might be in the past."
             },
             "is_download_prevented": {
               "type": "boolean",
-              "description": "Whether or not the file can be downloaded while locked"
+              "description": "Whether or not the file can be downloaded while locked."
             }
           }
         }
@@ -1099,7 +1145,34 @@
       "description": "An expiring Box Embed Link.",
       "allOf": [
         {
-          "$ref": "#/definitions/AccessToken--Mini"
+          "type": "object",
+          "description": "The basics of an access token",
+          "properties": {
+            "access_token": {
+              "type": "string",
+              "format": "token",
+              "description": "The requested access token."
+            },
+            "expires_in": {
+              "type": "integer",
+              "format": "int64",
+              "description": "The time in seconds in seconds by which this token will expire."
+            },
+            "token_type": {
+              "type": "string",
+              "enum": [
+                "bearer"
+              ],
+              "description": "The type of access token returned."
+            },
+            "restricted_to": {
+              "type": "array",
+              "description": "The permissions that this access token permits,\nproviding a list of resources (files, folders, etc)\nand the scopes permitted for each of those resources.",
+              "items": {
+                "$ref": "#/definitions/FileScope"
+              }
+            }
+          }
         },
         {},
         {
@@ -1112,16 +1185,6 @@
           }
         }
       ]
-    },
-    "WatermarkInfo": {
-      "title": "Watermark Info",
-      "description": "Details about the watermark applied to this item",
-      "properties": {
-        "is_watermarked": {
-          "type": "boolean",
-          "description": "Specifies if this item has a watermark applied."
-        }
-      }
     },
     "Metadata": {
       "title": "Metadata",
@@ -1173,24 +1236,6 @@
           "items": {
             "$ref": "#/definitions/Representation"
           }
-        }
-      }
-    },
-    "PaginationOrder": {
-      "title": "Pagination Order",
-      "description": "The order in which a pagination is ordered",
-      "properties": {
-        "by": {
-          "description": "The field to order by",
-          "type": "string"
-        },
-        "direction": {
-          "type": "string",
-          "description": "The direction to order by, either ascending or descending",
-          "enum": [
-            "ASC",
-            "DESC"
-          ]
         }
       }
     },
@@ -1375,36 +1420,6 @@
         }
       ]
     },
-    "Permissions": {
-      "title": "Permissions",
-      "description": "The permissions that the authenticated user has for an item.",
-      "properties": {
-        "can_delete": {
-          "type": "boolean",
-          "description": "Specifies if the user can delete this item"
-        },
-        "can_download": {
-          "type": "boolean",
-          "description": "Specifies if the user can download this item"
-        },
-        "can_invite_collaborator": {
-          "type": "boolean",
-          "description": "Specifies if the user can invite collaborators to the item"
-        },
-        "can_rename": {
-          "type": "boolean",
-          "description": "Specifies if the user can rename this item"
-        },
-        "can_set_share_access": {
-          "type": "boolean",
-          "description": "Specifies if the user can manage shared links for\nthis item"
-        },
-        "can_share": {
-          "type": "boolean",
-          "description": "Specifies if the user can invite new collaborators to this item"
-        }
-      }
-    },
     "Reference": {
       "title": "Reference",
       "description": "The bare basic reference for an object",
@@ -1415,34 +1430,38 @@
         }
       }
     },
-    "AccessToken--Mini": {
-      "title": "Access Token Mini",
-      "description": "The basics of an access token",
-      "type": "object",
+    "FileScope": {
+      "title": "File Scope",
+      "description": "A relation between a file and the scopes for which the file can be accessed",
       "properties": {
-        "access_token": {
+        "scope": {
           "type": "string",
-          "format": "token",
-          "description": "The requested access token."
-        },
-        "expires_in": {
-          "type": "integer",
-          "format": "int64",
-          "description": "The time in seconds in seconds by which this token will expire."
-        },
-        "token_type": {
-          "type": "string",
+          "description": "The file scopes for the file access",
           "enum": [
-            "bearer"
-          ],
-          "description": "The type of access token returned."
+            "annotation_edit",
+            "annotation_view_all",
+            "annotation_view_self",
+            "base_explorer",
+            "base_picker",
+            "base_preview",
+            "base_upload",
+            "item_delete",
+            "item_download",
+            "item_preview",
+            "item_rename",
+            "item_share",
+            null
+          ]
         },
-        "restricted_to": {
-          "type": "array",
-          "description": "The permissions that this access token permits,\nproviding a list of resources (files, folders, etc)\nand the scopes permitted for each of those resources.",
-          "items": {
-            "$ref": "#/definitions/FileScope"
-          }
+        "object": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/File--Mini"
+            },
+            {
+              "description": "The file for which the file can be accessed"
+            }
+          ]
         }
       }
     },
@@ -1549,41 +1568,6 @@
           "description": "`folder`",
           "enum": [
             "folder"
-          ]
-        }
-      }
-    },
-    "FileScope": {
-      "title": "File Scope",
-      "description": "A relation between a file and the scopes for which the file can be accessed",
-      "properties": {
-        "scope": {
-          "type": "string",
-          "description": "The file scopes for the file access",
-          "enum": [
-            "annotation_edit",
-            "annotation_view_all",
-            "annotation_view_self",
-            "base_explorer",
-            "base_picker",
-            "base_preview",
-            "base_upload",
-            "item_delete",
-            "item_download",
-            "item_preview",
-            "item_rename",
-            "item_share",
-            null
-          ]
-        },
-        "object": {
-          "allOf": [
-            {
-              "$ref": "#/definitions/File--Mini"
-            },
-            {
-              "description": "The file for which the file can be accessed"
-            }
           ]
         }
       }
