@@ -8,6 +8,7 @@ tags:
 
 x-box-reference-category: files
 x-box-enable-explorer: true
+x-box-sanitized: true
 
 description: |-
   Updates a file. This can be used to rename or move a file,
@@ -26,7 +27,8 @@ requestBody:
           name:
             type: string
             description: |-
-              The new name for the file
+              An optional different name for the file. This can be used to
+              rename the file.
             example: NewFile.txt
 
           description:
@@ -34,28 +36,65 @@ requestBody:
 
           parent:
             allOf:
-              - $ref: "#/components/schemas/Parent"
+              - $ref: "../attributes/parent.yml"
               - description: |-
-                  The parent folder for this file. Use this to move the file
-                  or to restore it out of the trash.
+                  An optional new parent folder for the file. This can be used
+                  to move the file to a new folder.
 
           shared_link:
             allOf:
-              - $ref: "#/components/schemas/SharedLink--Writable"
+              - $ref: "../attributes/shared_link.yml"
               - description: |-
-                  Enables the creation of a shared link for this file
+                  Defines a shared link for a file. Set this to `null` to remove
+                  the shared link.
 
           lock:
-            allOf:
-              - $ref: "#/components/schemas/Lock--Writable"
-              - description: |-
-                  Creates a lock on a file. Set to `null` to unlock a file
+            type: object
+            description: |-
+              Defines a lock on an item. This prevents the item from being
+              moved, renamed, or otherwise changed by anyone other than the user
+              who created the lock.
+
+              Set this to `null` to remove the lock.
+            required:
+              - type
+            properties:
+              access:
+                type: string
+                description: |-
+                  The type of this object.
+                enum:
+                  - lock
+                example: "lock"
+
+              expires_at:
+                type: string
+                format: date-time
+                example: "2012-12-12T10:53:43-08:00"
+                description: |-
+                  Defines the time at which the lock expires.
+
+              is_download_prevented:
+                type: boolean
+                example: true
+                description: |-
+                  Defines if the file can be downloaded while it is locked.
 
           permissions:
-            allOf:
-              - $ref: "#/components/schemas/Permissions--Writable"
-              - description: |-
-                  Describes if a file can be downloaded and by who.
+            description: |-
+              Defines who can download a file.
+            type: object
+            properties:
+              can_download:
+                description: |-
+                  Defines who is allowed to download this file. The possible
+                  values are either `open` for everyone or `company` for just
+                  the other members of the user's enterprise.
+                type: string
+                example: open
+                enum:
+                  - open
+                  - company
 
           tags:
             $ref: "../attributes/tags.yml"
@@ -72,6 +111,32 @@ responses:
       application/json:
         schema:
           $ref: '#/components/schemas/File'
+
+  401:
+    description: |-
+      Returned when the access token provided in the `Authorization` header
+      is not recognized or not provided.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
+
+  404:
+    description: |-
+      Returned if the file is not found, or the user does not
+      have access to the file.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
+
+  405:
+    description: |-
+      Returned if the `file_id` is not in a recognized format.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
 
   412:
     description: |-
