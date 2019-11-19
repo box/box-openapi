@@ -12,6 +12,13 @@ description: |-
   Uploads a small file to Box. For file sizes over 50MB we recommend
   using the Chunk Upload APIs.
 
+  ## Request body order
+
+  The `attributes` part of the body must come **before** the
+  `file` part. Requests that do not follow this format when
+  uploading the file will receive a HTTP `400` error with a
+  `metadata_after_file_contents` error code.
+
 servers:
   - url: https://upload.box.com/api/2.0
     description: |-
@@ -88,7 +95,17 @@ requestBody:
           file:
             type: string
             format: binary
-            description: The content of the file to upload to Box.
+            description: |-
+              The content of the file to upload to Box.
+
+              <Message warning>
+
+                The `attributes` part of the body must come **before** the
+                `file` part. Requests that do not follow this format when
+                uploading the file will receive a HTTP `400` error with a
+                `metadata_after_file_contents` error code.
+
+              </Message>
 
 responses:
   201:
