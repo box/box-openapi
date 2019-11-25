@@ -483,7 +483,7 @@
                   },
                   "description": {
                     "type": "string",
-                    "description": "The description for a file. This can be seen in the details panel of the Box\nweb app.",
+                    "description": "The description for a file. This can be seen in the right-hand sidebar panel\nwhen viewing a file in the Box web app. Additionally, this index is used in\nthe search index of the file, allowing users to find the file by the content\nin the description.",
                     "maxLength": 256,
                     "example": "The latest reports. Automatically updated"
                   },
@@ -583,7 +583,7 @@
                     "type": "object",
                     "properties": {
                       "can_download": {
-                        "description": "Defines who is allowed to download this file. The possible\nvalues are either `open` for everyone or `company` for just\nthe other members of the user's enterprise.",
+                        "description": "Defines who is allowed to download this file. The possible\nvalues are either `open` for everyone or `company` for just\nthe other members of the user's enterprise.\n\nThis setting overrides the download permissions that are\nnormally part of the `role` of a collaboration. When set to\n`company`, this essentially removes the download option for\nexternal users with `viewer` or `editor` a roles.",
                         "type": "string",
                         "example": "open",
                         "enum": [
@@ -623,6 +623,16 @@
           },
           "401": {
             "description": "Returned when the access token provided in the `Authorization` header\nis not recognized or not provided.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Returned if the user does not have all the permissions to complete the\nupdate.\n\n* `access_denied_insufficient_permissions` when the authenticated user\ndoes not have access the destination folder to move the file to.",
             "content": {
               "application/json": {
                 "schema": {
