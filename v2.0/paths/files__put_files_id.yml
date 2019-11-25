@@ -90,6 +90,11 @@ requestBody:
                   Defines who is allowed to download this file. The possible
                   values are either `open` for everyone or `company` for just
                   the other members of the user's enterprise.
+
+                  This setting overrides the download permissions that are
+                  normally part of the `role` of a collaboration. When set to
+                  `company`, this essentially removes the download option for
+                  external users with `viewer` or `editor` a roles.
                 type: string
                 example: open
                 enum:
@@ -116,6 +121,18 @@ responses:
     description: |-
       Returned when the access token provided in the `Authorization` header
       is not recognized or not provided.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
+
+  403:
+    description: |-
+      Returned if the user does not have all the permissions to complete the
+      update.
+
+      * `access_denied_insufficient_permissions` when the authenticated user
+      does not have access the destination folder to move the file to.
     content:
       application/json:
         schema:
