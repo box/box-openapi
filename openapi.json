@@ -26,7 +26,7 @@
       "get": {
         "operationId": "get_authorize", 
         "summary": "ユーザーを承認", 
-        "description": "ユーザーを[Box](https://box.com)ウェブサイトにリダイレクトして認証し、ユーザーに代わって操作を実行する権限をリクエストします。\n\nこれは、OAuth 2.0を使用してユーザーを認証する際の最初の手順です。Box APIをユーザーに代わって使用することについて、ユーザーに承認してもらうよう依頼するには、この形式を使用してユーザーを所定のURLにリダイレクトする必要があります。", 
+        "description": "ユーザーを[Box](https://box.com)ウェブサイトにリダイレクトして承認し、ユーザーに代わって操作を実行する権限をリクエストします。\n\nこれは、OAuth 2.0を使用してユーザーを承認する際の最初の手順です。Box APIをユーザーに代わって使用することについて、ユーザーに承認してもらうよう依頼するには、この形式を使用してユーザーを所定のURLにリダイレクトする必要があります。", 
         "tags": [
           "Authorization"
         ], 
@@ -114,7 +114,7 @@
       "post": {
         "operationId": "post_oauth2_token", 
         "summary": "アクセストークンをリクエスト", 
-        "description": "クライアント側で取得したOAuth2認証コードまたはサーバー側のJWTアサーションを使用してアクセストークンをリクエストします。\n\nアクセストークンとは、リクエストが認証済みセッションに属していることをBoxで検証するための文字列です。通常の手順では、最初にユーザーが[authorize](#get-authorize)エンドポイントに対して認証をリクエストした後で、Boxが認証コードを送信します。\n\nユーザーはこのエンドポイントに認証コードを送信してアクセストークンと交換します。返されたアクセストークンは、Box API呼び出しを行うときに使用できます。", 
+        "description": "クライアント側で取得したOAuth2承認コードまたはサーバー側のJWTアサーションを使用してアクセストークンをリクエストします。\n\nアクセストークンとは、リクエストが承認済みセッションに属していることをBoxで検証するための文字列です。通常の手順では、最初にユーザーが[authorize](#get-authorize)エンドポイントから認証をリクエストした後で、Boxが承認コードを送信します。\n\nユーザーはこのエンドポイントに承認コードを送信してアクセストークンと交換します。返されたアクセストークンは、Box API呼び出しを行うときに使用できます。", 
         "tags": [
           "Authorization"
         ], 
@@ -137,7 +137,7 @@
         }, 
         "responses": {
           "200": {
-            "description": "`Authorization: Bearer <Token>`のように認証ヘッダー内でトークンを渡すことによって認証済みのAPI呼び出しを行うために使用できる新しいアクセストークンを返します。", 
+            "description": "`Authorization: Bearer <Token>`のように承認ヘッダー内でトークンを渡すことによって認証済みのAPI呼び出しを行うために使用できる新しいアクセストークンを返します。", 
             "content": {
               "application/json": {
                 "schema": {
@@ -249,7 +249,7 @@
           {
             "name": "X-Rep-Hints", 
             "description": "ファイルの特定の`representations`をリクエストするために必要なヘッダー。特定のファイルレプリゼンテーションをリクエストするには、このヘッダーを`fields`クエリパラメータと組み合わせて使用します。\n\nこれらのレプリゼンテーションの一般的な形式は`X-Rep-Hints: [...]`で、`[...]`の部分では`[fileType?query]`という形式で1つまたは複数のヒントを指定します。\n\nたとえば、ピクセルサイズ`32x32`および`94x94`の`png`レプリゼンテーションをリクエストするには、以下のヒントを指定します。\n\n`X-Rep-Hints: [jpg?dimensions=32x32][jpg?dimensions=94x94]`\n\nまた、`[extracted_text]`レプリゼンテーションを使用すると、Box内のすべてのドキュメントファイルタイプの`text`レプリゼンテーションを使用できます。\n\n`X-Rep-Hints: [extracted_text]`", 
-            "example": "X-Rep-Hints: [pdf]", 
+            "example": "[pdf]", 
             "in": "header", 
             "required": true, 
             "schema": {
@@ -272,8 +272,8 @@
           "304": {
             "description": "`If-None-Match`ヘッダーがフォルダの現在の`etag`値と一致する場合は、空の応答を返します。これは、フォルダが前回リクエストされたときから変更されていないことを示します。"
           }, 
-          "403": {
-            "description": "`Authorization`ヘッダーで指定されているアクセストークンが\n認識されないか、指定されていない場合に返されます。", 
+          "401": {
+            "description": "`Authorization`ヘッダーで指定されているアクセストークンが認識されないか、指定されていない場合に返されます。", 
             "content": {
               "application/json": {
                 "schema": {
@@ -322,7 +322,7 @@
           "Files"
         ], 
         "x-box-reference-category": "trashed_files", 
-        "description": "ごみ箱に移動されたファイルを復元します。", 
+        "description": "Restores a file that has been moved to the trash.\n\nAn optional new parent ID can be provided to restore the file to in case the\noriginal folder has been deleted.", 
         "parameters": [
           {
             "name": "file_id", 
@@ -362,10 +362,18 @@
                   "parent": {
                     "allOf": [
                       {
-                        "$ref": "#/components/schemas/Parent"
+                        "type": "object", 
+                        "description": "この項目の親", 
+                        "properties": {
+                          "id": {
+                            "type": "string", 
+                            "description": "親項目のID", 
+                            "example": "123"
+                          }
+                        }
                       }, 
                       {
-                        "description": "項目の復元先となる親フォルダ(省略可)。\n\n元の親フォルダがすでに存在しない場合や、ユーザーが元の親フォルダに対するアクセス権限をすでに失っている場合に使用します。"
+                        "description": "Specifies an optional ID of a folder to restore the file to\nwhen the original folder no longer exists.\n\nPlease be aware that this ID will only be used if the original\nfolder no longer exists. Use this ID to provide a fallback\nlocation to restore the file to if the original location\nhas been deleted."
                       }
                     ]
                   }
@@ -425,6 +433,7 @@
         ], 
         "x-box-reference-category": "files", 
         "x-box-enable-explorer": true, 
+        "x-box-sanitized": true, 
         "description": "ファイルを更新します。ファイルの名前変更や移動、共有リンクの作成、ファイルのロックといった目的に使用できます。", 
         "parameters": [
           {
@@ -469,54 +478,120 @@
                 "properties": {
                   "name": {
                     "type": "string", 
-                    "description": "ファイルの新しい名前", 
+                    "description": "An optional different name for the file. This can be used to\nrename the file.", 
                     "example": "NewFile.txt"
                   }, 
                   "description": {
                     "type": "string", 
-                    "description": "ファイルの説明", 
+                    "description": "The description for a file. This can be seen in the details panel of the Box\nweb app.", 
                     "maxLength": 256, 
-                    "example": "Amazing Photo"
+                    "example": "The latest reports. Automatically updated"
                   }, 
                   "parent": {
                     "allOf": [
                       {
-                        "$ref": "#/components/schemas/Parent"
+                        "type": "object", 
+                        "description": "この項目の親", 
+                        "properties": {
+                          "id": {
+                            "type": "string", 
+                            "description": "親項目のID", 
+                            "example": "123"
+                          }
+                        }
                       }, 
                       {
-                        "description": "このファイルの親フォルダ。ファイルを移動したり、ごみ箱からファイルを復元したりするには、これを使用します。"
+                        "description": "An optional new parent folder for the file. This can be used\nto move the file to a new folder."
                       }
                     ]
                   }, 
                   "shared_link": {
                     "allOf": [
                       {
-                        "$ref": "#/components/schemas/SharedLink--Writable"
+                        "description": "Defines a shared link for an item. Set this to `null` to remove\nthe shared link.", 
+                        "type": "object", 
+                        "properties": {
+                          "access": {
+                            "type": "string", 
+                            "description": "共有リンクのアクセスレベル。これは、リンクを知っているすべてのユーザー(`open`)、会社内のユーザーのみ(`company`)、フォルダに招待されたユーザーのみ(`collaborators`)のいずれかに制限できます。\n\nこのフィールドは、デフォルトで、会社の管理者が指定したアクセスレベルである、`default`アクセスレベルに設定されます。\n\n`company`アクセスレベルは、有料アカウントのみで\n使用できます。", 
+                            "enum": [
+                              "default", 
+                              "open", 
+                              "company", 
+                              "collaborators"
+                            ], 
+                            "example": "open"
+                          }, 
+                          "password": {
+                            "type": "string", 
+                            "description": "共有リンクへのアクセスに必要なパスワード。\nパスワードを`null`に設定するとパスワードが削除されます。\n\nパスワードは`access`が`open`に設定されている場合にのみ設定できます。", 
+                            "example": "do-not-use-this-password"
+                          }, 
+                          "unshared_at": {
+                            "type": "string", 
+                            "format": "date-time", 
+                            "example": "2012-12-12T10:53:43-08:00", 
+                            "description": "この共有リンクが無効になる日時のタイムスタンプ。\nこのフィールドを設定できるのは、有料アカウントを持つユーザーのみです。"
+                          }, 
+                          "permissions": {
+                            "type": "object", 
+                            "properties": {
+                              "can_download": {
+                                "type": "boolean", 
+                                "example": true, 
+                                "description": "共有リンクからのファイルのダウンロードが許可されているかどうか。`access`が、`open`または`company`に設定されている場合にのみ設定できます。"
+                              }
+                            }
+                          }
+                        }
                       }, 
                       {
-                        "description": "このファイルの共有リンクの作成を可能にします"
+                        "description": "Defines a shared link for a file. Set this to `null` to remove\nthe shared link."
                       }
                     ]
                   }, 
                   "lock": {
-                    "allOf": [
-                      {
-                        "$ref": "#/components/schemas/Lock--Writable"
+                    "type": "object", 
+                    "description": "Defines a lock on an item. This prevents the item from being\nmoved, renamed, or otherwise changed by anyone other than the user\nwho created the lock.\n\nSet this to `null` to remove the lock.", 
+                    "required": [
+                      "type"
+                    ], 
+                    "properties": {
+                      "access": {
+                        "type": "string", 
+                        "description": "The type of this object.", 
+                        "enum": [
+                          "lock"
+                        ], 
+                        "example": "lock"
                       }, 
-                      {
-                        "description": "ファイルのロックを作成します。`null`に設定すると、ファイルのロックが解除されます"
+                      "expires_at": {
+                        "type": "string", 
+                        "format": "date-time", 
+                        "example": "2012-12-12T10:53:43-08:00", 
+                        "description": "Defines the time at which the lock expires."
+                      }, 
+                      "is_download_prevented": {
+                        "type": "boolean", 
+                        "example": true, 
+                        "description": "Defines if the file can be downloaded while it is locked."
                       }
-                    ]
+                    }
                   }, 
                   "permissions": {
-                    "allOf": [
-                      {
-                        "$ref": "#/components/schemas/Permissions--Writable"
-                      }, 
-                      {
-                        "description": "ファイルのダウンロードの可否と、ダウンロードできるユーザーを示します。"
+                    "description": "Defines who can download a file.", 
+                    "type": "object", 
+                    "properties": {
+                      "can_download": {
+                        "description": "Defines who is allowed to download this file. The possible\nvalues are either `open` for everyone or `company` for just\nthe other members of the user's enterprise.", 
+                        "type": "string", 
+                        "example": "open", 
+                        "enum": [
+                          "open", 
+                          "company"
+                        ]
                       }
-                    ]
+                    }
                   }, 
                   "tags": {
                     "type": "array", 
@@ -546,6 +621,36 @@
               }
             }
           }, 
+          "401": {
+            "description": "`Authorization`ヘッダーで指定されているアクセストークンが認識されないか、指定されていない場合に返されます。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }, 
+          "404": {
+            "description": "ファイルが見つからない場合、またはユーザーにファイルへのアクセス権限が与えられていない場合に返されます。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }, 
+          "405": {
+            "description": "`file_id`が認識されていない形式で指定されている場合に返されます。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }, 
           "412": {
             "description": "`If-Match`ヘッダーがファイルの現在の`etag`値と一致しない場合にエラーを返します。これは、ファイルが前回リクエストされたときから変更されていることを示します。", 
             "content": {
@@ -565,6 +670,7 @@
           "Files"
         ], 
         "x-box-reference-category": "files", 
+        "x-box-sanitized": true, 
         "description": "ファイルを削除します(完全に削除するか、ごみ箱に移動します)。\n\n項目がBoxから完全に削除されるか、ごみ箱に移動されるかは、会社の設定により決定されます。", 
         "parameters": [
           {
@@ -591,6 +697,36 @@
         "responses": {
           "204": {
             "description": "ファイルが正常に削除された場合は、空の応答を返します。"
+          }, 
+          "401": {
+            "description": "`Authorization`ヘッダーで指定されているアクセストークンが認識されないか、指定されていない場合に返されます。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }, 
+          "404": {
+            "description": "Returned if the file is not found or has already been deleted, or the user\ndoes not have access to the file.", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }, 
+          "405": {
+            "description": "`file_id`が認識されていない形式で指定されている場合に返されます。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
           }, 
           "412": {
             "description": "`If-Match`ヘッダーがファイルの現在の`etag`値と一致しない場合にエラーを返します。これは、ファイルが前回リクエストされたときから変更されていることを示します。", 
@@ -689,7 +825,7 @@
         ], 
         "x-box-reference-category": "uploads", 
         "summary": "ファイルバージョンをアップロード", 
-        "description": "ファイルのコンテンツを更新します。ファイルサイズが50MBを超える場合は、分割アップロードAPIを使用することをお勧めします。", 
+        "description": "Update a file's content. For file sizes over 50MB we recommend\nusing the Chunk Upload APIs.\n\n# Request body order\n\nThe `attributes` part of the body must come **before** the\n`file` part. Requests that do not follow this format when\nuploading the file will receive a HTTP `400` error with a\n`metadata_after_file_contents` error code.", 
         "servers": [
           {
             "url": "https://upload.box.com/api/2.0", 
@@ -752,7 +888,7 @@
                 ], 
                 "properties": {
                   "attributes": {
-                    "description": "このリクエストのJSON属性。", 
+                    "description": "The additional attributes of the file being uploaded. Mainly the\nname and the parent folder. These attributes are part of the multi\npart request body and are in JSON format.\n\n<Message warning>\n\n  The `attributes` part of the body must come **before** the\n  `file` part. Requests that do not follow this format when\n  uploading the file will receive a HTTP `400` error with a\n  `metadata_after_file_contents` error code.\n\n</Message>", 
                     "type": "object", 
                     "required": [
                       "name"
@@ -774,7 +910,7 @@
                   "file": {
                     "type": "string", 
                     "format": "binary", 
-                    "description": "Boxにアップロードするファイルのコンテンツ。"
+                    "description": "The content of the file to upload to Box.\n\n<Message warning>\n\n  The `attributes` part of the body must come **before** the\n  `file` part. Requests that do not follow this format when\n  uploading the file will receive a HTTP `400` error with a\n  `metadata_after_file_contents` error code.\n\n</Message>"
                   }
                 }
               }
@@ -833,7 +969,15 @@
                   "parent": {
                     "allOf": [
                       {
-                        "$ref": "#/components/schemas/Parent"
+                        "type": "object", 
+                        "description": "この項目の親", 
+                        "properties": {
+                          "id": {
+                            "type": "string", 
+                            "description": "親項目のID", 
+                            "example": "123"
+                          }
+                        }
                       }, 
                       {
                         "description": "ファイルのアップロード先の親フォルダ"
@@ -875,7 +1019,7 @@
         ], 
         "x-box-reference-category": "uploads", 
         "summary": "ファイルをアップロード", 
-        "description": "小さいファイルをBoxにアップロードします。ファイルサイズが50MBを超える場合は、分割アップロードAPIを使用することをお勧めします。", 
+        "description": "Uploads a small file to Box. For file sizes over 50MB we recommend\nusing the Chunk Upload APIs.\n\n# Request body order\n\nThe `attributes` part of the body must come **before** the\n`file` part. Requests that do not follow this format when\nuploading the file will receive a HTTP `400` error with a\n`metadata_after_file_contents` error code.", 
         "servers": [
           {
             "url": "https://upload.box.com/api/2.0", 
@@ -918,7 +1062,7 @@
                 ], 
                 "properties": {
                   "attributes": {
-                    "description": "このリクエストのJSON属性。", 
+                    "description": "The additional attributes of the file being uploaded. Mainly the\nname and the parent folder. These attributes are part of the multi\npart request body and are in JSON format.\n\n<Message warning>\n\n  The `attributes` part of the body must come **before** the\n  `file` part. Requests that do not follow this format when\n  uploading the file will receive a HTTP `400` error with a\n  `metadata_after_file_contents` error code.\n\n</Message>", 
                     "type": "object", 
                     "required": [
                       "name", 
@@ -961,7 +1105,7 @@
                   "file": {
                     "type": "string", 
                     "format": "binary", 
-                    "description": "Boxにアップロードするファイルのコンテンツ。"
+                    "description": "The content of the file to upload to Box.\n\n<Message warning>\n\n  The `attributes` part of the body must come **before** the\n  `file` part. Requests that do not follow this format when\n  uploading the file will receive a HTTP `400` error with a\n  `metadata_after_file_contents` error code.\n\n</Message>"
                   }
                 }
               }
@@ -1045,6 +1189,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/UploadSession"
+                }
+              }
+            }
+          }, 
+          "400": {
+            "description": "一部のパラメータが指定されていないか、無効な場合はエラーを返します。\n\n* `missing_destination`: `folder_id`が指定されていません\n* `invalid_folder_id`: `folder_id`が無効です\n* `invalid_file_name`: `file_name`が無効です\n* `missing_file_size`: `file_size`が指定されていません\n* `invalid_file_size`: `file_size`が有効な数値ではありません\n* `file_size_too_small`: `file_size`が、このAPIを介したアップロードの最小ファイルサイズを下回っています\n* `missing_file_name`: `file_name`が指定されていません", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
                 }
               }
             }
@@ -1215,7 +1369,7 @@
           {
             "name": "Content-Range", 
             "description": "チャンクのバイト範囲。\n\nこのセッションですでにアップロードされた部分の\n範囲と重複してはなりません。", 
-            "example": "8388608-16777215/445856194", 
+            "example": "bytes 8388608-16777215/445856194", 
             "in": "header", 
             "required": true, 
             "schema": {
@@ -1506,6 +1660,7 @@
         ], 
         "x-box-reference-category": "files", 
         "x-box-enable-explorer": true, 
+        "x-box-sanitized": true, 
         "parameters": [
           {
             "name": "file_id", 
@@ -1539,10 +1694,11 @@
                 "required": [
                   "parent"
                 ], 
+                "nullable": false, 
                 "properties": {
                   "name": {
                     "type": "string", 
-                    "description": "新しいファイルの別の名前(省略可)。\n\n名前に含めることができるのは、基本的な印刷可能ASCII文字のみです。スラッシュと末尾のスペースは使用できません。\n\n`.`および`..`はいずれも予約済みの名前です。", 
+                    "description": "コピーされたファイルの新しい名前(省略可)。\n\nファイル名にはいくつかの制約があります。印刷不可能なASCII文字、スラッシュ、およびバックスラッシュ(`/`、`\\`)を含む名前のほか、`.`や`..`のような予約済みの名前は、許可されていない文字を削除することで自動的にサニタイズされます。", 
                     "example": "FileCopy.txt", 
                     "maxLength": 255
                   }, 
@@ -1581,8 +1737,31 @@
               }
             }
           }, 
+          "304": {
+            "description": "`If-None-Match`ヘッダーがファイルの現在の`etag`値と一致する場合は、空の応答を返します。これは、ファイルが前回リクエストされたときから変更されていないことを示します。"
+          }, 
+          "400": {
+            "description": "一部のパラメータが指定されていないか、無効な場合はエラーを返します。\n\n* `bad_request` - パラメータが指定されていない場合に返されます。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }, 
+          "404": {
+            "description": "ソースファイルまたは宛先フォルダのどちらも見つからないか、認証済みユーザーがどちらにもアクセスできない場合はエラーを返します。\n\n* `not_found` - 認証済みユーザーがソースファイルまたは宛先フォルダにアクセスできない場合に返されます", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }, 
           "409": {
-            "description": "* `operation_blocked_temporary`: 別の移動、コピー、削除、\n  または復元操作が進行中であるために宛先フォルダまたは元のフォルダが\n  ロックされている場合に返されます。\n\n  操作は後で再試行することができます。", 
+            "description": "* `operation_blocked_temporary`: 別の移動、コピー、削除、または復元操作が進行中であるために宛先フォルダまたは元のフォルダがロックされている場合に返されます。\n\n  操作は後で再試行することができます。\n\n* `item_name_in_use`: 同じ名前のフォルダがすでに存在する場合に返されます。", 
             "content": {
               "application/json": {
                 "schema": {
@@ -1598,7 +1777,7 @@
       "get": {
         "operationId": "get_files_id_thumbnail_id", 
         "summary": "ファイルサムネイルを取得", 
-        "description": "ファイルのサムネイル(小さい画像レプリゼンテーション)を取得します。\n\n`.png`形式の場合は、`32x32`、`64x64`、`128x128`、および`256x256`のサイズを返すことができ、`.jpg`形式の場合は、`32x32`、`94x94`、`160x160`、`320x320`のサイズを返すことができます。\n\nサムネイルを生成できる画像および動画ファイルの形式については、[found on our community site][1]。\n\n[1]: https://community.box.com/t5/Migrating-and-Previewing-Content/File-Types-and-Fonts-Supported-in-Box-Content-Preview/ta-p/327", 
+        "description": "ファイルのサムネイル(小さい画像レプリゼンテーション)を取得します。\n\n`.png`形式の場合は、`32x32`、`64x64`、`128x128`、および`256x256`のサイズを返すことができ、`.jpg`形式の場合は、`32x32`、`94x94`、`160x160`、`320x320`のサイズを返すことができます。\n\nサムネイルを生成できる画像および動画ファイルの形式については、[found on our community site][1]。\n\n[1]: https://community.box.com/t5/コンテンツの移動とプレビューのハウツーガイド/Box-Content-Previewでサポートされるファイル/ta-p/12310", 
         "tags": [
           "Files", 
           "Thumbnails"
@@ -1738,7 +1917,7 @@
             }
           }, 
           "403": {
-            "description": "`Authorization`ヘッダーで指定されているアクセストークンが\n認識されないか、指定されていない場合に返されます。", 
+            "description": "`Authorization`ヘッダーで指定されているアクセストークンが認識されないか、指定されていない場合に返されます。", 
             "content": {
               "application/json": {
                 "schema": {
@@ -1809,15 +1988,13 @@
             }
           }, 
           {
-            "name": "offset", 
-            "description": "応答が開始される項目のオフセット。", 
+            "name": "marker", 
+            "description": "応答を開始される位置のマーカー。", 
             "in": "query", 
             "required": false, 
-            "example": 1000, 
+            "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii", 
             "schema": {
-              "type": "integer", 
-              "format": "int64", 
-              "default": 0
+              "type": "string"
             }
           }
         ], 
@@ -2843,7 +3020,7 @@
             "description": "`If-None-Match`ヘッダーがフォルダの現在の`etag`値と一致する場合は、空の応答を返します。これは、フォルダが前回リクエストされたときから変更されていないことを示します。"
           }, 
           "403": {
-            "description": "`Authorization`ヘッダーで指定されているアクセストークンが\n認識されないか、指定されていない場合に返されます。", 
+            "description": "`Authorization`ヘッダーで指定されているアクセストークンが認識されないか、指定されていない場合に返されます。", 
             "content": {
               "application/json": {
                 "schema": {
@@ -2882,7 +3059,7 @@
           "Folders"
         ], 
         "x-box-reference-category": "trashed_folders", 
-        "description": "ごみ箱に移動されたフォルダを復元します。\n\n# フォルダのロック\n\nこの操作の進行中は、ファイルツリーの一部がロックされます。\nロックされるのは主に元のフォルダとその子孫フォルダ、\nおよび宛先フォルダです。\n\n操作の進行中は、ロックされたどのフォルダに対しても、\nその他の移動、コピー、削除または復元操作を実行できません。", 
+        "description": "Restores a folder that has been moved to the trash.\n\nAn optional new parent ID can be provided to restore the folder to in case the\noriginal folder has been deleted.\n\n# Folder locking\n\nDuring this operation, part of the file tree will be locked, mainly\nthe source folder and all of its descendants, as well as the destination\nfolder.\n\nFor the duration of the operation, no other move, copy, delete, or restore\noperation can performed on any of the locked folders.", 
         "parameters": [
           {
             "name": "folder_id", 
@@ -2923,10 +3100,18 @@
                   "parent": {
                     "allOf": [
                       {
-                        "$ref": "#/components/schemas/Parent"
+                        "type": "object", 
+                        "description": "この項目の親", 
+                        "properties": {
+                          "id": {
+                            "type": "string", 
+                            "description": "親項目のID", 
+                            "example": "123"
+                          }
+                        }
                       }, 
                       {
-                        "description": "フォルダの復元先となる親フォルダ(省略可)。\n\n元の親フォルダがすでに存在しない場合や、ユーザーが元の親フォルダに対するアクセス権限をすでに失っている場合に使用します。"
+                        "description": "Specifies an optional ID of a folder to restore the folder\nto when the original folder no longer exists.\n\nPlease be aware that this ID will only be used if the original\nfolder no longer exists. Use this ID to provide a fallback\nlocation to restore the folder to if the original location\nhas been deleted."
                       }
                     ]
                   }
@@ -2981,7 +3166,7 @@
       "put": {
         "operationId": "put_folders_id", 
         "summary": "フォルダを更新", 
-        "description": "フォルダを更新します。フォルダの移動、共有リンクの作成、コラボレーションの更新といった目的にも使用できます。\n\n# フォルダのロック\n\nフォルダの移動中は、ファイルツリーの一部がロックされます。ロックされるのは主に送り元フォルダとその子孫フォルダ、および送り先フォルダです。\n\n移動操作の間は、ロックされたどのフォルダに対しても、その他の移動、コピー、削除または復元操作を実行できません。\n\n# タイムアウト\n\nこの操作のタイムアウトは60秒です。操作は、`HTTP 503`が返されると完了します。", 
+        "description": "フォルダを更新します。フォルダの移動、共有リンクの作成、コラボレーションの更新といった目的にも使用できます。", 
         "tags": [
           "Folders"
         ], 
@@ -3072,7 +3257,42 @@
                   "shared_link": {
                     "allOf": [
                       {
-                        "$ref": "#/components/schemas/SharedLink--Writable"
+                        "description": "Defines a shared link for an item. Set this to `null` to remove\nthe shared link.", 
+                        "type": "object", 
+                        "properties": {
+                          "access": {
+                            "type": "string", 
+                            "description": "共有リンクのアクセスレベル。これは、リンクを知っているすべてのユーザー(`open`)、会社内のユーザーのみ(`company`)、フォルダに招待されたユーザーのみ(`collaborators`)のいずれかに制限できます。\n\nこのフィールドは、デフォルトで、会社の管理者が指定したアクセスレベルである、`default`アクセスレベルに設定されます。\n\n`company`アクセスレベルは、有料アカウントのみで\n使用できます。", 
+                            "enum": [
+                              "default", 
+                              "open", 
+                              "company", 
+                              "collaborators"
+                            ], 
+                            "example": "open"
+                          }, 
+                          "password": {
+                            "type": "string", 
+                            "description": "共有リンクへのアクセスに必要なパスワード。\nパスワードを`null`に設定するとパスワードが削除されます。\n\nパスワードは`access`が`open`に設定されている場合にのみ設定できます。", 
+                            "example": "do-not-use-this-password"
+                          }, 
+                          "unshared_at": {
+                            "type": "string", 
+                            "format": "date-time", 
+                            "example": "2012-12-12T10:53:43-08:00", 
+                            "description": "この共有リンクが無効になる日時のタイムスタンプ。\nこのフィールドを設定できるのは、有料アカウントを持つユーザーのみです。"
+                          }, 
+                          "permissions": {
+                            "type": "object", 
+                            "properties": {
+                              "can_download": {
+                                "type": "boolean", 
+                                "example": true, 
+                                "description": "共有リンクからのファイルのダウンロードが許可されているかどうか。`access`が、`open`または`company`に設定されている場合にのみ設定できます。"
+                              }
+                            }
+                          }
+                        }
                       }, 
                       {
                         "description": "フォルダの共有リンクの作成を有効にします。"
@@ -3120,7 +3340,7 @@
                     "type": "array", 
                     "description": "このフォルダをメンバーとして追加するコレクションの配列。現時点では、`favorites`コレクションのみがサポートされています。\n\nコレクションのIDを取得するには、[すべてのコレクションのリストを取得][1]エンドポイントを使用します。\n\n空の配列`[]`または`null`を渡すと、すべてのコレクションからこのフォルダが削除されます。\n\n[1]: ../advanced-files-and-folders/#get-collections", 
                     "items": {
-                      "$ref": "#/components/schemas/Parent"
+                      "$ref": "#/components/schemas/Reference"
                     }
                   }, 
                   "can_non_owners_invite_collaborators": {
@@ -3214,7 +3434,7 @@
       "delete": {
         "operationId": "delete_folders_id", 
         "summary": "フォルダを削除", 
-        "description": "フォルダを完全に削除するか、ごみ箱に移動します。\n\n# 再帰的な削除\n\nフォルダが空でない場合、このAPIはエラーを返します。\n`recursive`クエリパラメータを使用すると、この操作でフォルダとそのコンテンツを再帰的に削除できます。\n\n# フォルダのロック\n\nフォルダがBoxから完全に削除されるか、ごみ箱に移動されるかは、会社の設定に応じて決定されます。\n\nこの操作の進行中は、ファイルツリーの一部がロックされます。ロックされるのは主に元のフォルダとその子孫フォルダです。\n\n操作の進行中は、ロックされたどのフォルダに対しても、その他の移動、コピー、削除または復元操作を実行できません。\n\n# タイムアウト\n\nこの操作のタイムアウトは60秒です。操作の時間には、`HTTP 503`が返されてからの時間も含まれます。", 
+        "description": "フォルダを完全に削除するか、ごみ箱に移動して削除します。", 
         "tags": [
           "Folders"
         ], 
@@ -3371,16 +3591,6 @@
             }
           }, 
           {
-            "name": "marker", 
-            "description": "応答が開始される位置のマーカー。\n\nこれを使用するには、`usemarker`をtrueに設定する必要があります。", 
-            "in": "query", 
-            "required": false, 
-            "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii", 
-            "schema": {
-              "type": "string"
-            }
-          }, 
-          {
             "name": "limit", 
             "description": "返す項目の1ページあたりの最大数。", 
             "in": "query", 
@@ -3391,6 +3601,16 @@
               "format": "int64", 
               "default": 100, 
               "maximum": 1000
+            }
+          }, 
+          {
+            "name": "marker", 
+            "description": "Paginate using marker-based pagination. Defines the position marker at\nwhich to begin the response.\n\nThis requires `usemarker` to be set to `true`.", 
+            "in": "query", 
+            "required": false, 
+            "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii", 
+            "schema": {
+              "type": "string"
             }
           }, 
           {
@@ -3436,7 +3656,7 @@
             }
           }, 
           "403": {
-            "description": "`Authorization`ヘッダーで指定されているアクセストークンが\n認識されないか、指定されていない場合に返されます。", 
+            "description": "`Authorization`ヘッダーで指定されているアクセストークンが認識されないか、指定されていない場合に返されます。", 
             "content": {
               "application/json": {
                 "schema": {
@@ -3610,7 +3830,7 @@
         "summary": "フォルダをコピー", 
         "x-box-enable-explorer": true, 
         "x-box-reference-category": "folders", 
-        "description": "宛先フォルダ内にフォルダのコピーを作成します。\n\n元のフォルダは変更されません。\n\n# 非同期コピー\n\nコピーされるフォルダに含まれる項目が500個以下の場合は、API呼び出しと同時にコピーが実行されます。呼び出しは\nコピー操作が完了するまで復帰しません。\n\nこのフォルダに500個を超える項目が含まれる場合は、\n非同期的にコピー操作が実行され、API呼び出しはコピー\n操作が完了していなくても直ちに復帰します。現時点では、コピー操作がいつ終了したのかを\n確認するAPIはありません。\n\n# フォルダのロック\n\nこの操作の進行中は、ファイルツリーの一部がロックされます。\nロックされるのは主に元のフォルダとその子孫フォルダ、および宛先フォルダです。\n\n操作の進行中は、ロックされたどのフォルダに対しても、\nその他の移動、コピー、削除または復元操作を実行できません。\n最も重要な点は、同じフォルダを同時にフォルダツリーの2つの異なる部分に\nコピーできないことです。\n\n# メタデータ\n\n宛先フォルダのいずれかの親フォルダにメタデータカスケードポリシーが適用されている場合は、\nメタデータカスケード操作が非同期的に開始されます。\n\n現時点では、この操作がいつ終了したのかを確認するAPIはありません。", 
+        "description": "フォルダのコピーを宛先フォルダ内に作成します。\n\n元のフォルダは変更されません。", 
         "tags": [
           "Folders"
         ], 
@@ -3648,6 +3868,7 @@
                 "required": [
                   "parent"
                 ], 
+                "nullable": false, 
                 "properties": {
                   "name": {
                     "type": "string", 
@@ -3766,31 +3987,6 @@
               "items": {
                 "type": "string"
               }
-            }
-          }, 
-          {
-            "name": "limit", 
-            "description": "返す項目の1ページあたりの最大数。", 
-            "in": "query", 
-            "required": false, 
-            "example": 1000, 
-            "schema": {
-              "type": "integer", 
-              "format": "int64", 
-              "default": 100, 
-              "maximum": 1000
-            }
-          }, 
-          {
-            "name": "offset", 
-            "description": "応答が開始される項目のオフセット。", 
-            "in": "query", 
-            "required": false, 
-            "example": 1000, 
-            "schema": {
-              "type": "integer", 
-              "format": "int64", 
-              "default": 0
             }
           }
         ], 
@@ -4538,7 +4734,7 @@
             "application/json": {
               "schema": {
                 "title": "メタデータテンプレートのパッチ", 
-                "description": "メタデータテンプレートに変更を加えるためのパッチの指定。変更は操作オブジェクトのJSON配列として表されます。", 
+                "description": "メタデータテンプレートに加える変更のリスト。\n\n変更は操作オブジェクトのJSON配列として表されます。", 
                 "type": "array", 
                 "items": {
                   "$ref": "#/components/schemas/MetadataTemplatePatchItem"
@@ -4674,7 +4870,7 @@
         ], 
         "responses": {
           "200": {
-            "description": "`scope`および`template`の名前と一致するメタデータテンプレートを返します。", 
+            "description": "IDと一致するメタデータテンプレートを返します。", 
             "content": {
               "application/json": {
                 "schema": {
@@ -4698,7 +4894,7 @@
         "parameters": [
           {
             "name": "marker", 
-            "description": "応答が開始される位置のマーカー。\n\nこれを使用するには、`usemarker`をtrueに設定する必要があります。", 
+            "description": "応答を開始される位置のマーカー。", 
             "in": "query", 
             "required": false, 
             "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii", 
@@ -4747,7 +4943,47 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/MetadataTemplate--Writable"
+                "type": "description", 
+                "description": "ファイルとフォルダに適用できるメタデータテンプレートの書き込み可能部分", 
+                "properties": {
+                  "scope": {
+                    "type": "string", 
+                    "description": "オブジェクトのスコープ。`global`および`enterprise_*`スコープがサポートされています。\n\n`global`スコープには`properties`のキーを持つテンプレートが含まれ、enterpriseスコープは会社内で作成されたカスタムテンプレートに関係します。\n\nenterpriseスコープの末尾には、会社のIDが追加されます。", 
+                    "example": "enterprise_123456"
+                  }, 
+                  "templateKey": {
+                    "type": "string", 
+                    "example": "productInfo", 
+                    "description": "テンプレートの一意の識別子。この識別子は、メタデータテンプレートが適用されている会社のスコープ全体にわたって一意である必要があります。", 
+                    "maxLength": 64, 
+                    "pattern": "^[a-zA-Z_][-a-zA-Z0-9_]*$"
+                  }, 
+                  "displayName": {
+                    "type": "string", 
+                    "description": "テンプレートの表示名", 
+                    "maxLength": 4096, 
+                    "example": "Product Info"
+                  }, 
+                  "hidden": {
+                    "type": "boolean", 
+                    "example": true, 
+                    "description": "このテンプレートをUI上で非表示にするかどうか", 
+                    "default": false
+                  }, 
+                  "fields": {
+                    "type": "array", 
+                    "description": "テンプレートのキー/値ペアの順序付けされたセット。", 
+                    "items": {
+                      "$ref": "#/components/schemas/MetadataTemplateField"
+                    }
+                  }, 
+                  "copyInstanceOnItemCopy": {
+                    "type": "boolean", 
+                    "description": "ファイルまたはフォルダのコピー時にそのメタデータをコピーするかどうか。", 
+                    "default": false, 
+                    "example": true
+                  }
+                }
               }
             }
           }
@@ -4817,7 +5053,7 @@
           }, 
           {
             "name": "marker", 
-            "description": "応答が開始される位置のマーカー。\n\nこれを使用するには、`usemarker`をtrueに設定する必要があります。", 
+            "description": "応答を開始される位置のマーカー。", 
             "in": "query", 
             "required": false, 
             "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii", 
@@ -5788,6 +6024,36 @@
             }
           }, 
           {
+            "name": "sort", 
+            "description": "結果が返される順序を定義します。デフォルトでは、`relevance`になっています。\n\n* `relevance` (デフォルト)を指定すると、クエリの検索語との関連性を基準として並べ替えられた結果が返されます。\n* `modified_at`を指定すると、項目が最後に変更された日付の降順で並べ替えられた結果が返されます。", 
+            "in": "query", 
+            "required": false, 
+            "schema": {
+              "type": "string", 
+              "default": "relevance", 
+              "enum": [
+                "modified_at", 
+                "relevance"
+              ]
+            }, 
+            "example": "modified_at"
+          }, 
+          {
+            "name": "direction", 
+            "description": "検索結果の並べ替えの方向を定義します。デフォルト値は`DESC`です。\n\n結果が`relevance`を基準にして並べ替えられると、順序は`DESC`なり、このパラメータの値は無視されます。", 
+            "in": "query", 
+            "required": false, 
+            "schema": {
+              "type": "string", 
+              "default": "DESC", 
+              "enum": [
+                "DESC", 
+                "ASC"
+              ]
+            }, 
+            "example": "ASC"
+          }, 
+          {
             "name": "fields", 
             "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれず、リクエストしたフィールドのほかには、簡易版レプリゼンテーションのフィールドしか返されないことに注意してください。", 
             "in": "query", 
@@ -6437,14 +6703,18 @@
                     "description": "このウェブリンクのリンク先となるURL。`\"http://\"`または`\"https://\"`で始まっている必要があります。"
                   }, 
                   "parent": {
-                    "allOf": [
-                      {
-                        "$ref": "#/components/schemas/Parent"
-                      }, 
-                      {
-                        "description": "ウェブリンクが配置される親フォルダ"
+                    "type": "object", 
+                    "description": "ウェブリンクの作成先となる親フォルダ。", 
+                    "required": [
+                      "id"
+                    ], 
+                    "properties": {
+                      "id": {
+                        "type": "string", 
+                        "description": "親フォルダのID", 
+                        "example": "0"
                       }
-                    ]
+                    }
                   }, 
                   "name": {
                     "type": "string", 
@@ -6517,7 +6787,7 @@
           "Web Links"
         ], 
         "x-box-reference-category": "trashed_web_links", 
-        "description": "ごみ箱に移動されたウェブリンクを復元します。", 
+        "description": "Restores a web link that has been moved to the trash.\n\nAn optional new parent ID can be provided to restore the  web link to in case\nthe original folder has been deleted.", 
         "parameters": [
           {
             "name": "web_link_id", 
@@ -6557,10 +6827,18 @@
                   "parent": {
                     "allOf": [
                       {
-                        "$ref": "#/components/schemas/Parent"
+                        "type": "object", 
+                        "description": "この項目の親", 
+                        "properties": {
+                          "id": {
+                            "type": "string", 
+                            "description": "親項目のID", 
+                            "example": "123"
+                          }
+                        }
                       }, 
                       {
-                        "description": "ウェブリンクの復元先となる親フォルダ(省略可)。\n\n元の親フォルダがすでに存在しない場合や、ユーザーが元の親フォルダに対するアクセス権限をすでに失っている場合に使用します。"
+                        "description": "Specifies an optional ID of a folder to restore the web link\nto when the original folder no longer exists.\n\nPlease be aware that this ID will only be used if the original\nfolder no longer exists. Use this ID to provide a fallback\nlocation to restore the web link to if the original location\nhas been deleted."
                       }
                     ]
                   }
@@ -6645,7 +6923,15 @@
                   "parent": {
                     "allOf": [
                       {
-                        "$ref": "#/components/schemas/Parent"
+                        "type": "object", 
+                        "description": "この項目の親", 
+                        "properties": {
+                          "id": {
+                            "type": "string", 
+                            "description": "親項目のID", 
+                            "example": "123"
+                          }
+                        }
                       }, 
                       {
                         "description": "ウェブリンクが配置される新しい親フォルダ。これを利用してウェブリンクを別のフォルダに移動します。"
@@ -6985,7 +7271,7 @@
                   }, 
                   "tracking_codes": {
                     "type": "array", 
-                    "description": "そのユーザーの管理者が設定したキーと値のペアの配列", 
+                    "description": "追跡コードを使用すると、管理者は管理コンソールからレポートを生成し、特定のグループのユーザーに属性を割り当てることができます。この設定を使用するには、会社に対して有効にしておく必要があります。", 
                     "example": [
                       "code1: 12345"
                     ], 
@@ -7029,6 +7315,11 @@
                     ], 
                     "description": "ユーザーのアカウントのステータス", 
                     "example": "active"
+                  }, 
+                  "external_app_user_id": {
+                    "type": "string", 
+                    "example": "my-user-1234", 
+                    "description": "ユーザーの検索に使用できる、アプリユーザーの外部識別子。これを使用して、外部IDプロバイダーのユーザーIDをBoxユーザーに結び付けることが使用できます。"
                   }
                 }
               }
@@ -7057,7 +7348,7 @@
         "tags": [
           "Users"
         ], 
-        "description": "現在認証されているユーザーに関する情報を取得します。\n\nクライアント側でアプリケーションが認証される3者間OAuth2の場合、これはアプリケーションを認証したユーザーになります。\n\nサーバー側でアプリケーションが認証されるJWTの場合、これはデフォルトでアプリケーションに属するサービスアカウントになります。\n\nこのAPI呼び出しに使用するユーザーを変更するには、`As-User`ヘッダーを使用します。", 
+        "description": "現在承認されているユーザーに関する情報を取得します。\n\nクライアント側でアプリケーションが認証される3者間OAuth2の場合、これはアプリケーションを承認したユーザーになります。\n\nサーバー側でアプリケーションが認証されるJWTの場合、これはデフォルトでアプリケーションに属するサービスアカウントになります。\n\nこのAPI呼び出しに使用するユーザーを変更するには、`As-User`ヘッダーを使用します。", 
         "parameters": [
           {
             "name": "fields", 
@@ -7236,7 +7527,7 @@
                   }, 
                   "tracking_codes": {
                     "type": "array", 
-                    "description": "そのユーザーの管理者が設定したキーと値のペアの配列", 
+                    "description": "追跡コードを使用すると、管理者は管理コンソールからレポートを生成し、特定のグループのユーザーに属性を割り当てることができます。この設定を使用するには、会社に対して有効にしておく必要があります。", 
                     "example": [
                       "code1: 12345"
                     ], 
@@ -7285,6 +7576,11 @@
                     ], 
                     "description": "ユーザーのアカウントのステータス", 
                     "example": "active"
+                  }, 
+                  "space_amount": {
+                    "type": "integer", 
+                    "description": "ユーザーが利用可能な容量の合計(バイト数)。これを`-1`に設定すると\nストレージ容量が無制限になります。", 
+                    "example": 11345156112
                   }, 
                   "notification_email": {
                     "type": "object", 
@@ -7927,7 +8223,7 @@
                   "name": {
                     "type": "string", 
                     "example": "Customer Support", 
-                    "description": "作成する新しいグループの名前"
+                    "description": "作成する新しいグループの名前。この名前は、会社内で一意である必要があります。"
                   }, 
                   "provenance": {
                     "type": "string", 
@@ -7978,6 +8274,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Group"
+                }
+              }
+            }
+          }, 
+          "409": {
+            "description": "競合が原因でグループを作成できないことを示すエラーを返します。\n\n* `invalid_parameter`: グループ名が会社内で一意でない場合によく返されます。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
                 }
               }
             }
@@ -8075,7 +8381,7 @@
                   "name": {
                     "type": "string", 
                     "example": "Customer Support", 
-                    "description": "作成する新しいグループの名前"
+                    "description": "作成する新しいグループの名前。会社内で一意である必要があります。"
                   }, 
                   "provenance": {
                     "type": "string", 
@@ -8126,6 +8432,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Group"
+                }
+              }
+            }
+          }, 
+          "409": {
+            "description": "競合が原因でグループを作成できないことを示すエラーを返します。\n\n* `invalid_parameter`: グループ名が会社内で一意でない場合によく返されます。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
                 }
               }
             }
@@ -8546,7 +8862,7 @@
         "parameters": [
           {
             "name": "marker", 
-            "description": "応答が開始される位置のマーカー。\n\nこれを使用するには、`usemarker`をtrueに設定する必要があります。", 
+            "description": "応答を開始される位置のマーカー。", 
             "in": "query", 
             "required": false, 
             "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii", 
@@ -9284,6 +9600,7 @@
                   "RETENTION_POLICY_ASSIGNMENT_ADD", 
                   "SHARE", 
                   "SHARE_EXPIRATION", 
+                  "SHIELD_ALERT", 
                   "STORAGE_EXPIRATION", 
                   "TAG_ITEM_CREATE", 
                   "TASK_ASSIGNMENT_CREATE", 
@@ -9330,7 +9647,7 @@
         ], 
         "responses": {
           "200": {
-            "description": "イベントオブジェクトのリストを返します。\n\nイベントオブジェクトは複数のページで返され、各ページ(チャンク)にイベントオブジェクトのリストが含まれます。応答には残りのチャンク数を示す`chunk_size`パラメータに加え、クエリできる次の`stream_position`が含まれます。", 
+            "description": "イベントオブジェクトのリストを返します。\n\nイベントオブジェクトは複数のページで返され、各ページ(チャンク)にイベントオブジェクトのリストが含まれます。応答には、このチャンクで返されたイベント数を示す`chunk_size`パラメータに加え、クエリできる次の`stream_position`が含まれます。", 
             "content": {
               "application/json": {
                 "schema": {
@@ -9519,7 +9836,7 @@
           }, 
           {
             "name": "marker", 
-            "description": "応答が開始される位置のマーカー。\n\nこれを使用するには、`usemarker`をtrueに設定する必要があります。", 
+            "description": "応答を開始される位置のマーカー。", 
             "in": "query", 
             "required": false, 
             "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii", 
@@ -9878,7 +10195,7 @@
           }, 
           {
             "name": "marker", 
-            "description": "応答が開始される位置のマーカー。\n\nこれを使用するには、`usemarker`をtrueに設定する必要があります。", 
+            "description": "応答を開始される位置のマーカー。", 
             "in": "query", 
             "required": false, 
             "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii", 
@@ -10092,7 +10409,7 @@
           }, 
           {
             "name": "marker", 
-            "description": "応答が開始される位置のマーカー。\n\nこれを使用するには、`usemarker`をtrueに設定する必要があります。", 
+            "description": "応答を開始される位置のマーカー。", 
             "in": "query", 
             "required": false, 
             "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii", 
@@ -10391,7 +10708,7 @@
           }, 
           {
             "name": "marker", 
-            "description": "応答が開始される位置のマーカー。\n\nこれを使用するには、`usemarker`をtrueに設定する必要があります。", 
+            "description": "応答を開始される位置のマーカー。", 
             "in": "query", 
             "required": false, 
             "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii", 
@@ -10678,7 +10995,7 @@
           }, 
           {
             "name": "marker", 
-            "description": "応答が開始される位置のマーカー。\n\nこれを使用するには、`usemarker`をtrueに設定する必要があります。", 
+            "description": "応答を開始される位置のマーカー。", 
             "in": "query", 
             "required": false, 
             "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii", 
@@ -10758,7 +11075,7 @@
           }, 
           {
             "name": "marker", 
-            "description": "応答が開始される位置のマーカー。\n\nこれを使用するには、`usemarker`をtrueに設定する必要があります。", 
+            "description": "応答を開始される位置のマーカー。", 
             "in": "query", 
             "required": false, 
             "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii", 
@@ -10877,7 +11194,7 @@
           }, 
           {
             "name": "marker", 
-            "description": "応答が開始される位置のマーカー。\n\nこれを使用するには、`usemarker`をtrueに設定する必要があります。", 
+            "description": "応答を開始される位置のマーカー。", 
             "in": "query", 
             "required": false, 
             "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii", 
@@ -11317,7 +11634,7 @@
         "parameters": [
           {
             "name": "marker", 
-            "description": "応答が開始される位置のマーカー。\n\nこれを使用するには、`usemarker`をtrueに設定する必要があります。", 
+            "description": "応答を開始される位置のマーカー。", 
             "in": "query", 
             "required": false, 
             "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii", 
@@ -11476,7 +11793,7 @@
         "parameters": [
           {
             "name": "marker", 
-            "description": "応答が開始される位置のマーカー。\n\nこれを使用するには、`usemarker`をtrueに設定する必要があります。", 
+            "description": "応答を開始される位置のマーカー。", 
             "in": "query", 
             "required": false, 
             "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii", 
@@ -11647,7 +11964,7 @@
           }, 
           {
             "name": "marker", 
-            "description": "応答が開始される位置のマーカー。\n\nこれを使用するには、`usemarker`をtrueに設定する必要があります。", 
+            "description": "応答を開始される位置のマーカー。", 
             "in": "query", 
             "required": false, 
             "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii", 
@@ -11730,7 +12047,7 @@
         "parameters": [
           {
             "name": "marker", 
-            "description": "応答が開始される位置のマーカー。\n\nこれを使用するには、`usemarker`をtrueに設定する必要があります。", 
+            "description": "応答を開始される位置のマーカー。", 
             "in": "query", 
             "required": false, 
             "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii", 
@@ -12022,7 +12339,37 @@
         "type": "object", 
         "allOf": [
           {
-            "$ref": "#/components/schemas/AccessToken--Mini"
+            "type": "object", 
+            "description": "アクセストークンの基本情報", 
+            "properties": {
+              "access_token": {
+                "type": "string", 
+                "format": "token", 
+                "example": "c3FIOG9vSGV4VHo4QzAyg5T1JvNnJoZ3ExaVNyQWw6WjRsanRKZG5lQk9qUE1BVQ", 
+                "description": "リクエストされたアクセストークン。"
+              }, 
+              "expires_in": {
+                "type": "integer", 
+                "format": "int64", 
+                "example": 3600, 
+                "description": "このトークンが期限切れになるまでの秒数。"
+              }, 
+              "token_type": {
+                "type": "string", 
+                "enum": [
+                  "bearer"
+                ], 
+                "example": "bearer", 
+                "description": "返されるアクセストークンのタイプ。"
+              }, 
+              "restricted_to": {
+                "type": "array", 
+                "description": "このアクセストークンで許可される権限を返します。これにより、リソース(ファイルやフォルダなど)のリストと、各リソースで許可されるスコープが提供されます。", 
+                "items": {
+                  "$ref": "#/components/schemas/FileScope"
+                }
+              }
+            }
           }, 
           {
             "x-box-reference-hide": false
@@ -12047,73 +12394,6 @@
             }
           }
         ]
-      }, 
-      "AccessToken--Mini": {
-        "title": "Access Token Mini", 
-        "x-box-resource-id": "access_token--mini", 
-        "description": "アクセストークンの基本情報", 
-        "x-box-reference-hide": true, 
-        "type": "object", 
-        "properties": {
-          "access_token": {
-            "type": "string", 
-            "format": "token", 
-            "example": "c3FIOG9vSGV4VHo4QzAyg5T1JvNnJoZ3ExaVNyQWw6WjRsanRKZG5lQk9qUE1BVQ", 
-            "description": "リクエストされたアクセストークン。"
-          }, 
-          "expires_in": {
-            "type": "integer", 
-            "format": "int64", 
-            "example": 3600, 
-            "description": "このトークンが期限切れになるまでの秒数。"
-          }, 
-          "token_type": {
-            "type": "string", 
-            "enum": [
-              "bearer"
-            ], 
-            "example": "bearer", 
-            "description": "返されるアクセストークンのタイプ。"
-          }, 
-          "restricted_to": {
-            "type": "array", 
-            "description": "このアクセストークンで許可される権限を返します。これにより、リソース(ファイルやフォルダなど)のリストと、各リソースで許可されるスコープが提供されます。", 
-            "items": {
-              "$ref": "#/components/schemas/FileScope"
-            }
-          }
-        }
-      }, 
-      "AssignmentCounts": {
-        "title": "Assignment Counts", 
-        "x-box-resource-id": "assignment_counts", 
-        "description": "このリーガルホールド内の項目タイプごとの割り当て数", 
-        "properties": {
-          "user": {
-            "type": "integer", 
-            "format": "int64", 
-            "description": "このポリシーが割り当てられているユーザーの数", 
-            "example": 1
-          }, 
-          "folder": {
-            "type": "integer", 
-            "format": "int64", 
-            "description": "このポリシーを適用するフォルダの数", 
-            "example": 2
-          }, 
-          "file": {
-            "type": "integer", 
-            "format": "int64", 
-            "description": "このポリシーが適用されるファイルの数", 
-            "example": 3
-          }, 
-          "file_version": {
-            "type": "integer", 
-            "format": "int64", 
-            "description": "このポリシーが適用されるファイルバージョンの数", 
-            "example": 4
-          }
-        }
       }, 
       "ClientError": {
         "title": "Client Error", 
@@ -12330,13 +12610,13 @@
                       "enterprise_has_two_factor_auth_enabled": {
                         "type": "boolean", 
                         "example": true, 
-                        "description": "このコンテンツを所有する会社が、このコンテンツでのコラボレーションを行うために\n2要素認証を有効にする必要が\nあるかどうか。"
+                        "description": "このコンテンツを所有する会社が、このコンテンツでのコラボレーションを行うために2要素認証を有効にする必要があるかどうか。"
                       }, 
                       "user_has_two_factor_authentication_enabled": {
                         "type": "boolean", 
                         "nullable": true, 
                         "example": true, 
-                        "description": "ユーザーが2要素認証を有効にしているかどうか。\n2要素認証が必要ない場合、このフィールドは`null`です。"
+                        "description": "ユーザーが2要素認証を有効にしているかどうか。2要素認証が必要ない場合、このフィールドは`null`です。"
                       }
                     }
                   }
@@ -12353,7 +12633,35 @@
         "description": "コラボレーションのリスト", 
         "allOf": [
           {
-            "$ref": "#/components/schemas/Pagination"
+            "type": "object", 
+            "description": "ページ割りについて説明しているAPI応答の部分", 
+            "properties": {
+              "total_count": {
+                "description": "コレクション全体の最後のエントリのオフセットに1を加算をした値。\nコレクション内のエントリの合計数は、`total_count`よりも少ない場合があります。", 
+                "example": 5000, 
+                "type": "integer", 
+                "format": "int64"
+              }, 
+              "limit": {
+                "description": "これらのエントリで使用された制限値。許容される最大値を超えていない限り、クエリパラメータの`limit`と等しくなります。最大値はAPIによって異なります。", 
+                "example": 1000, 
+                "type": "integer", 
+                "format": "int64"
+              }, 
+              "offset": {
+                "description": "このセットに含まれる最初のエントリのゼロから始まるオフセット。これは、`offset`クエリパラメータと同じになります。", 
+                "example": 2000, 
+                "type": "integer", 
+                "format": "int64"
+              }, 
+              "order": {
+                "description": "項目が返される順序", 
+                "type": "array", 
+                "items": {
+                  "$ref": "#/components/schemas/PaginationOrder"
+                }
+              }
+            }
           }, 
           {
             "properties": {
@@ -12428,7 +12736,28 @@
         "description": "コラボレーションホワイトリストエントリのリスト。", 
         "allOf": [
           {
-            "$ref": "#/components/schemas/MarkerPagination"
+            "type": "object", 
+            "description": "マーカーベースのページ割りについて説明しているAPI応答の部分", 
+            "properties": {
+              "limit": {
+                "description": "これらのエントリで使用された制限値。許容される最大値を超えていない限り、クエリパラメータの`limit`と等しくなります。最大値はAPIによって異なります。", 
+                "example": 1000, 
+                "type": "integer", 
+                "format": "int64"
+              }, 
+              "next_marker": {
+                "description": "次の検索結果ページの開始場所のマーカー。", 
+                "example": 3000, 
+                "type": "integer", 
+                "format": "int64"
+              }, 
+              "prev_marker": {
+                "description": "前の検索結果ページの開始場所のマーカー。", 
+                "example": 1000, 
+                "type": "integer", 
+                "format": "int64"
+              }
+            }
           }, 
           {
             "properties": {
@@ -12504,7 +12833,28 @@
         "description": "コラボレーションホワイトリスト例外のリスト。", 
         "allOf": [
           {
-            "$ref": "#/components/schemas/MarkerPagination"
+            "type": "object", 
+            "description": "マーカーベースのページ割りについて説明しているAPI応答の部分", 
+            "properties": {
+              "limit": {
+                "description": "これらのエントリで使用された制限値。許容される最大値を超えていない限り、クエリパラメータの`limit`と等しくなります。最大値はAPIによって異なります。", 
+                "example": 1000, 
+                "type": "integer", 
+                "format": "int64"
+              }, 
+              "next_marker": {
+                "description": "次の検索結果ページの開始場所のマーカー。", 
+                "example": 3000, 
+                "type": "integer", 
+                "format": "int64"
+              }, 
+              "prev_marker": {
+                "description": "前の検索結果ページの開始場所のマーカー。", 
+                "example": 1000, 
+                "type": "integer", 
+                "format": "int64"
+              }
+            }
           }, 
           {
             "properties": {
@@ -12564,7 +12914,35 @@
         "description": "コレクションのリスト", 
         "allOf": [
           {
-            "$ref": "#/components/schemas/Pagination"
+            "type": "object", 
+            "description": "ページ割りについて説明しているAPI応答の部分", 
+            "properties": {
+              "total_count": {
+                "description": "コレクション全体の最後のエントリのオフセットに1を加算をした値。\nコレクション内のエントリの合計数は、`total_count`よりも少ない場合があります。", 
+                "example": 5000, 
+                "type": "integer", 
+                "format": "int64"
+              }, 
+              "limit": {
+                "description": "これらのエントリで使用された制限値。許容される最大値を超えていない限り、クエリパラメータの`limit`と等しくなります。最大値はAPIによって異なります。", 
+                "example": 1000, 
+                "type": "integer", 
+                "format": "int64"
+              }, 
+              "offset": {
+                "description": "このセットに含まれる最初のエントリのゼロから始まるオフセット。これは、`offset`クエリパラメータと同じになります。", 
+                "example": 2000, 
+                "type": "integer", 
+                "format": "int64"
+              }, 
+              "order": {
+                "description": "項目が返される順序", 
+                "type": "array", 
+                "items": {
+                  "$ref": "#/components/schemas/PaginationOrder"
+                }
+              }
+            }
           }, 
           {
             "properties": {
@@ -12611,7 +12989,35 @@
         "description": "コメントのリスト", 
         "allOf": [
           {
-            "$ref": "#/components/schemas/Pagination"
+            "type": "object", 
+            "description": "ページ割りについて説明しているAPI応答の部分", 
+            "properties": {
+              "total_count": {
+                "description": "コレクション全体の最後のエントリのオフセットに1を加算をした値。\nコレクション内のエントリの合計数は、`total_count`よりも少ない場合があります。", 
+                "example": 5000, 
+                "type": "integer", 
+                "format": "int64"
+              }, 
+              "limit": {
+                "description": "これらのエントリで使用された制限値。許容される最大値を超えていない限り、クエリパラメータの`limit`と等しくなります。最大値はAPIによって異なります。", 
+                "example": 1000, 
+                "type": "integer", 
+                "format": "int64"
+              }, 
+              "offset": {
+                "description": "このセットに含まれる最初のエントリのゼロから始まるオフセット。これは、`offset`クエリパラメータと同じになります。", 
+                "example": 2000, 
+                "type": "integer", 
+                "format": "int64"
+              }, 
+              "order": {
+                "description": "項目が返される順序", 
+                "type": "array", 
+                "items": {
+                  "$ref": "#/components/schemas/PaginationOrder"
+                }
+              }
+            }
           }, 
           {
             "properties": {
@@ -12798,7 +13204,28 @@
         "description": "デバイスピンのリスト", 
         "allOf": [
           {
-            "$ref": "#/components/schemas/MarkerPagination"
+            "type": "object", 
+            "description": "マーカーベースのページ割りについて説明しているAPI応答の部分", 
+            "properties": {
+              "limit": {
+                "description": "これらのエントリで使用された制限値。許容される最大値を超えていない限り、クエリパラメータの`limit`と等しくなります。最大値はAPIによって異なります。", 
+                "example": 1000, 
+                "type": "integer", 
+                "format": "int64"
+              }, 
+              "next_marker": {
+                "description": "次の検索結果ページの開始場所のマーカー。", 
+                "example": 3000, 
+                "type": "integer", 
+                "format": "int64"
+              }, 
+              "prev_marker": {
+                "description": "前の検索結果ページの開始場所のマーカー。", 
+                "example": 1000, 
+                "type": "integer", 
+                "format": "int64"
+              }
+            }
           }, 
           {
             "properties": {
@@ -13020,6 +13447,7 @@
                   "RETENTION_POLICY_ASSIGNMENT_ADD", 
                   "SHARE", 
                   "SHARE_EXPIRATION", 
+                  "SHIELD_ALERT", 
                   "STORAGE_EXPIRATION", 
                   "TAG_ITEM_CREATE", 
                   "TASK_ASSIGNMENT_CREATE", 
@@ -13130,13 +13558,13 @@
         "description": "イベントオブジェクトのリスト", 
         "properties": {
           "chunk_size": {
-            "description": "残りのイベントのページ数。", 
+            "description": "この応答で返されるイベントの数。", 
             "example": 2, 
             "type": "integer", 
             "format": "int64"
           }, 
           "next_stream_position": {
-            "description": "次のイベントページのストリーム開始位置。", 
+            "description": "次のイベントページ(チャンク)のストリーム開始位置。", 
             "example": "1152922976252290886", 
             "type": "string"
           }, 
@@ -13154,7 +13582,37 @@
         "description": "有効期限付きのBox Embedリンク。", 
         "allOf": [
           {
-            "$ref": "#/components/schemas/AccessToken--Mini"
+            "type": "object", 
+            "description": "アクセストークンの基本情報", 
+            "properties": {
+              "access_token": {
+                "type": "string", 
+                "format": "token", 
+                "example": "c3FIOG9vSGV4VHo4QzAyg5T1JvNnJoZ3ExaVNyQWw6WjRsanRKZG5lQk9qUE1BVQ", 
+                "description": "リクエストされたアクセストークン。"
+              }, 
+              "expires_in": {
+                "type": "integer", 
+                "format": "int64", 
+                "example": 3600, 
+                "description": "このトークンが期限切れになるまでの秒数。"
+              }, 
+              "token_type": {
+                "type": "string", 
+                "enum": [
+                  "bearer"
+                ], 
+                "example": "bearer", 
+                "description": "返されるアクセストークンのタイプ。"
+              }, 
+              "restricted_to": {
+                "type": "array", 
+                "description": "このアクセストークンで許可される権限を返します。これにより、リソース(ファイルやフォルダなど)のリストと、各リソースで許可されるスコープが提供されます。", 
+                "items": {
+                  "$ref": "#/components/schemas/FileScope"
+                }
+              }
+            }
           }, 
           {
             "x-box-reference-hide": false
@@ -13176,8 +13634,8 @@
         "x-box-resource-id": "file", 
         "x-box-has-field-variants": true, 
         "x-box-sanitized": true, 
-        "description": "任意のファイルAPIエンドポイントからデフォルトで返される可能性がある、ファイルの完全版レプリゼンテーション", 
         "x-box-reference-category": "files", 
+        "description": "任意のファイルAPIエンドポイントからデフォルトで返される可能性がある、ファイルの完全版レプリゼンテーション", 
         "allOf": [
           {
             "$ref": "#/components/schemas/File--Standard"
@@ -13202,7 +13660,92 @@
               "permissions": {
                 "allOf": [
                   {
-                    "$ref": "#/components/schemas/FilePermissions"
+                    "type": "object", 
+                    "description": "このファイルに対して認証済みユーザーが持っている権限。", 
+                    "allOf": [
+                      {
+                        "type": "object", 
+                        "description": "この項目に対して認証済みユーザーが持っている権限。", 
+                        "properties": {
+                          "can_delete": {
+                            "type": "boolean", 
+                            "description": "ユーザーがこの項目を削除できるかどうかを指定します", 
+                            "example": true, 
+                            "nullable": false
+                          }, 
+                          "can_download": {
+                            "type": "boolean", 
+                            "description": "ユーザーがこの項目をダウンロードできるかどうかを指定します", 
+                            "example": true, 
+                            "nullable": false
+                          }, 
+                          "can_invite_collaborator": {
+                            "type": "boolean", 
+                            "description": "ユーザーがこの項目にコラボレータを招待できるかどうかを指定します", 
+                            "example": true, 
+                            "nullable": false
+                          }, 
+                          "can_rename": {
+                            "type": "boolean", 
+                            "description": "ユーザーがこの項目の名前を変更できるかどうかを指定します", 
+                            "example": true, 
+                            "nullable": false
+                          }, 
+                          "can_set_share_access": {
+                            "type": "boolean", 
+                            "description": "ユーザーがこの項目の共有リンクを管理できるかどうかを\n指定します", 
+                            "example": true, 
+                            "nullable": false
+                          }, 
+                          "can_share": {
+                            "type": "boolean", 
+                            "description": "ユーザーがこの項目に新しいコラボレータを招待できるかどうかを指定します", 
+                            "example": true, 
+                            "nullable": false
+                          }
+                        }
+                      }, 
+                      {
+                        "properties": {
+                          "can_annotate": {
+                            "type": "boolean", 
+                            "description": "ユーザーがこのファイルに注釈を付けられるかどうかを指定します。", 
+                            "example": true, 
+                            "nullable": false
+                          }, 
+                          "can_comment": {
+                            "type": "boolean", 
+                            "description": "ユーザーがこのファイルにコメントを追加できるかどうかを指定します。", 
+                            "example": true, 
+                            "nullable": false
+                          }, 
+                          "can_preview": {
+                            "type": "boolean", 
+                            "description": "ユーザーがこのファイルをプレビューできるかどうかを指定します。", 
+                            "example": true, 
+                            "nullable": false
+                          }, 
+                          "can_upload": {
+                            "type": "boolean", 
+                            "description": "ユーザーがこのファイルの新しいバージョンをアップロードできるかどうかを指定します。", 
+                            "example": true, 
+                            "nullable": false
+                          }, 
+                          "can_view_annotations_all": {
+                            "type": "boolean", 
+                            "description": "ユーザーに対してこのファイルに付けられたすべての注釈を表示するかどうかを指定します", 
+                            "example": true, 
+                            "nullable": false
+                          }, 
+                          "can_view_annotations_self": {
+                            "type": "boolean", 
+                            "description": "ユーザーに対して自分が付けた注釈を表示するかどうかを\n指定します", 
+                            "example": true, 
+                            "nullable": false
+                          }
+                        }
+                      }
+                    ]
                   }, 
                   {
                     "description": "このファイルに対して現在のユーザーが持っている権限について説明します。"
@@ -13272,14 +13815,23 @@
                     "x-box-field-variant": 3
                   }, 
                   {
-                    "description": "このフィールドをリクエストすると、iframeに埋め込まれたプレビューセッション用の有効期限付きBox Embed URLが作成されます。\n\nこのURLは60秒後に有効期限切れとなり、セッションはその60秒後に有効期限切れとなります。\n\n一部のファイルタイプはこれらの埋め込みURLでサポートされていません。"
+                    "description": "このフィールドをリクエストすると、iframeに埋め込まれたプレビューセッション用の有効期限付きBox Embed URLが作成されます。\n\nこのURLは60秒後に有効期限切れとなり、セッションはその60分後に有効期限切れとなります。\n\n一部のファイルタイプは、これらの埋め込みURLでサポートされていません。Box Embedはモバイルブラウザ向けに最適化されていないため、モバイルデバイス用に設計されたウェブエクスペリエンスでは使用しないでください。多くのUI Element (**ダウンロード**オプションや**印刷**オプションなど)はモバイルブラウザに表示されない可能性があります。"
                   }
                 ]
               }, 
               "watermark_info": {
                 "allOf": [
                   {
-                    "$ref": "#/components/schemas/WatermarkInfo"
+                    "type": "object", 
+                    "description": "この項目に適用された電子すかしに関する詳細", 
+                    "properties": {
+                      "is_watermarked": {
+                        "type": "boolean", 
+                        "description": "この項目に電子すかしが適用されているかどうかを指定します。", 
+                        "example": true, 
+                        "nullable": false
+                      }
+                    }
                   }, 
                   {
                     "description": "このフォルダに適用された電子すかしに関する詳細"
@@ -13672,56 +14224,6 @@
           }
         }
       }, 
-      "FilePermissions": {
-        "title": "File Permissions", 
-        "x-box-resource-id": "file-permissions", 
-        "description": "このファイルに対して認証済みユーザーが持っている権限。", 
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/Permissions"
-          }, 
-          {
-            "properties": {
-              "can_annotate": {
-                "type": "boolean", 
-                "description": "ユーザーがこのファイルに注釈を付けられるかどうかを指定します。", 
-                "example": true, 
-                "nullable": false
-              }, 
-              "can_comment": {
-                "type": "boolean", 
-                "description": "ユーザーがこのファイルにコメントを追加できるかどうかを指定します。", 
-                "example": true, 
-                "nullable": false
-              }, 
-              "can_preview": {
-                "type": "boolean", 
-                "description": "ユーザーがこのファイルをプレビューできるかどうかを指定します。", 
-                "example": true, 
-                "nullable": false
-              }, 
-              "can_upload": {
-                "type": "boolean", 
-                "description": "ユーザーがこのファイルの新しいバージョンをアップロードできるかどうかを指定します。", 
-                "example": true, 
-                "nullable": false
-              }, 
-              "can_view_annotations_all": {
-                "type": "boolean", 
-                "description": "ユーザーに対してこのファイルに付けられたすべての注釈を表示するかどうかを指定します", 
-                "example": true, 
-                "nullable": false
-              }, 
-              "can_view_annotations_self": {
-                "type": "boolean", 
-                "description": "ユーザーに対して自分が付けた注釈を表示するかどうかを\n指定します", 
-                "example": true, 
-                "nullable": false
-              }
-            }
-          }
-        ]
-      }, 
       "FileScope": {
         "title": "File Scope", 
         "x-box-resource-id": "file_scope", 
@@ -13762,8 +14264,9 @@
       "FileVersion": {
         "title": "File Version", 
         "x-box-resource-id": "file_version", 
+        "x-box-has-field-variants": true, 
         "x-box-reference-category": "file_versions", 
-        "description": "ファイルバージョンの完全版レプリゼンテーション", 
+        "description": "ファイルバージョンの標準レプリゼンテーション", 
         "allOf": [
           {
             "$ref": "#/components/schemas/FileVersion--Mini"
@@ -13776,25 +14279,29 @@
               "name": {
                 "type": "string", 
                 "description": "ファイルバージョンの名前", 
-                "example": "tigers.jpeg"
+                "example": "tigers.jpeg", 
+                "x-box-field-variant": 2
               }, 
               "size": {
                 "type": "integer", 
                 "format": "int64", 
                 "description": "ファイルバージョンのサイズ(バイト単位)", 
-                "example": 629644
+                "example": 629644, 
+                "x-box-field-variant": 2
               }, 
               "created_at": {
                 "type": "string", 
                 "format": "date-time", 
                 "description": "ファイルバージョンオブジェクトが作成された日時", 
-                "example": "2012-12-12T10:53:43-08:00"
+                "example": "2012-12-12T10:53:43-08:00", 
+                "x-box-field-variant": 2
               }, 
               "modified_at": {
                 "type": "string", 
                 "format": "date-time", 
                 "description": "ファイルバージョンオブジェクトが最後に更新された日時", 
-                "example": "2012-12-12T10:53:43-08:00"
+                "example": "2012-12-12T10:53:43-08:00", 
+                "x-box-field-variant": 2
               }, 
               "modified_by": {
                 "allOf": [
@@ -13803,6 +14310,9 @@
                   }, 
                   {
                     "description": "ファイルバージョンを最後に更新したユーザー"
+                  }, 
+                  {
+                    "x-box-field-variant": 2
                   }
                 ]
               }, 
@@ -13811,18 +14321,100 @@
                 "description": "ファイルバージョンオブジェクトがごみ箱に移動された日時。", 
                 "format": "date-time", 
                 "nullable": true, 
-                "example": "2012-12-12T10:53:43-08:00"
+                "example": "2012-12-12T10:53:43-08:00", 
+                "x-box-field-variant": 2
+              }, 
+              "trashed_by": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/User--Mini"
+                  }, 
+                  {
+                    "description": "ファイルバージョンをごみ箱に移動したユーザー"
+                  }, 
+                  {
+                    "x-box-field-variant": 2
+                  }
+                ]
+              }, 
+              "restored_at": {
+                "type": "string", 
+                "description": "ファイルバージョンがごみ箱から復元された日時。", 
+                "format": "date-time", 
+                "nullable": true, 
+                "example": "2012-12-12T10:53:43-08:00", 
+                "x-box-field-variant": 2
+              }, 
+              "restored_by": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/User--Mini"
+                  }, 
+                  {
+                    "description": "ごみ箱からファイルバージョンを復元したユーザー。"
+                  }, 
+                  {
+                    "x-box-field-variant": 2
+                  }
+                ]
               }, 
               "purged_at": {
                 "type": "string", 
                 "description": "ファイルバージョンオブジェクトが完全に削除される日時。", 
                 "format": "date-time", 
                 "nullable": true, 
-                "example": "2012-12-12T10:53:43-08:00"
+                "example": "2012-12-12T10:53:43-08:00", 
+                "x-box-field-variant": 2
               }
             }
           }
         ]
+      }, 
+      "FileVersion--Mini": {
+        "title": "File Version (Mini)", 
+        "x-box-resource-id": "file_version--mini", 
+        "x-box-has-field-variants": true, 
+        "x-box-reference-hide": true, 
+        "description": "他のリソース内にネストされたときに使用される、ファイルバージョンの簡易版レプリゼンテーション。", 
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/FileVersion--Base"
+          }, 
+          {
+            "properties": {
+              "sha1": {
+                "type": "string", 
+                "description": "ファイルの現在のバージョンのSHA1ハッシュ。", 
+                "example": "134b65991ed521fcfe4724b7d814ab8ded5185dc", 
+                "x-box-field-variant": 1
+              }
+            }
+          }
+        ]
+      }, 
+      "FileVersion--Base": {
+        "title": "ファイルバージョン(ベース)", 
+        "x-box-resource-id": "file_version--base", 
+        "x-box-has-field-variants": true, 
+        "x-box-reference-hide": true, 
+        "description": "ファイルバージョンの最も基本的なレプリゼンテーション。`fields`クエリパラメータを使用すると、最小限の数のフィールドが返されます。", 
+        "properties": {
+          "id": {
+            "type": "string", 
+            "nullable": false, 
+            "description": "ファイルバージョンを表す一意の識別子。", 
+            "example": "12345"
+          }, 
+          "type": {
+            "type": "string", 
+            "description": "`file_version`", 
+            "example": "file_version", 
+            "enum": [
+              "file_version"
+            ], 
+            "nullable": false
+          }
+        }
       }, 
       "FileVersions": {
         "title": "File Versions", 
@@ -13831,7 +14423,35 @@
         "description": "ファイルバージョンのリスト", 
         "allOf": [
           {
-            "$ref": "#/components/schemas/Pagination"
+            "type": "object", 
+            "description": "ページ割りについて説明しているAPI応答の部分", 
+            "properties": {
+              "total_count": {
+                "description": "コレクション全体の最後のエントリのオフセットに1を加算をした値。\nコレクション内のエントリの合計数は、`total_count`よりも少ない場合があります。", 
+                "example": 5000, 
+                "type": "integer", 
+                "format": "int64"
+              }, 
+              "limit": {
+                "description": "これらのエントリで使用された制限値。許容される最大値を超えていない限り、クエリパラメータの`limit`と等しくなります。最大値はAPIによって異なります。", 
+                "example": 1000, 
+                "type": "integer", 
+                "format": "int64"
+              }, 
+              "offset": {
+                "description": "このセットに含まれる最初のエントリのゼロから始まるオフセット。これは、`offset`クエリパラメータと同じになります。", 
+                "example": 2000, 
+                "type": "integer", 
+                "format": "int64"
+              }, 
+              "order": {
+                "description": "項目が返される順序", 
+                "type": "array", 
+                "items": {
+                  "$ref": "#/components/schemas/PaginationOrder"
+                }
+              }
+            }
           }, 
           {
             "properties": {
@@ -13845,36 +14465,8 @@
           }
         ]
       }, 
-      "FileVersion--Mini": {
-        "title": "File Version (Mini)", 
-        "x-box-resource-id": "file_version--mini", 
-        "description": "他のリソースの下にネストされたときに使用される、ファイルバージョンの簡易版レプリゼンテーション。", 
-        "x-box-reference-hide": true, 
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/Reference"
-          }, 
-          {
-            "properties": {
-              "type": {
-                "type": "string", 
-                "description": "`file_version`", 
-                "example": "file_version", 
-                "enum": [
-                  "file_version"
-                ]
-              }, 
-              "sha1": {
-                "type": "string", 
-                "description": "このファイルのSHA1ハッシュ。", 
-                "example": "134b65991ed521fcfe4724b7d814ab8ded5185dc"
-              }
-            }
-          }
-        ]
-      }, 
       "FileVersionLegalHold": {
-        "title": "Legal Hold", 
+        "title": "ファイルバージョンのリーガルホールド", 
         "x-box-resource-id": "file_version_legal_hold", 
         "x-box-reference-category": "file_version_legal_holds", 
         "description": "File-Version-Legal-Holdは、ファイルバージョンのすべてのリテンションを表すエンティティです。", 
@@ -13930,13 +14522,34 @@
         ]
       }, 
       "FileVersionLegalHolds": {
-        "title": "Legal Holds", 
+        "title": "ファイルバージョンのリーガルホールド", 
         "x-box-resource-id": "file_version_legal_holds", 
         "x-box-reference-category": "file_version_legal_holds", 
         "description": "ファイルバージョンのリーガルホールドのリスト。", 
         "allOf": [
           {
-            "$ref": "#/components/schemas/MarkerPagination"
+            "type": "object", 
+            "description": "マーカーベースのページ割りについて説明しているAPI応答の部分", 
+            "properties": {
+              "limit": {
+                "description": "これらのエントリで使用された制限値。許容される最大値を超えていない限り、クエリパラメータの`limit`と等しくなります。最大値はAPIによって異なります。", 
+                "example": 1000, 
+                "type": "integer", 
+                "format": "int64"
+              }, 
+              "next_marker": {
+                "description": "次の検索結果ページの開始場所のマーカー。", 
+                "example": 3000, 
+                "type": "integer", 
+                "format": "int64"
+              }, 
+              "prev_marker": {
+                "description": "前の検索結果ページの開始場所のマーカー。", 
+                "example": 1000, 
+                "type": "integer", 
+                "format": "int64"
+              }
+            }
           }, 
           {
             "properties": {
@@ -13951,7 +14564,7 @@
         ]
       }, 
       "FileVersionRetention": {
-        "title": "Retention", 
+        "title": "ファイルバージョンリテンション", 
         "x-box-resource-id": "file_version_retention", 
         "x-box-reference-category": "file_version_retentions", 
         "description": "リテンションポリシーは、指定した期間にわたってコンテンツが完全に消去されるのを防止します。管理者はポリシーを特定のフォルダや会社全体に適用できます。ファイルバージョンリテンションとは、保持されているファイルバージョンのレコードです。この機能を使用するには、アプリケーション管理コンソールから、APIキーに対してリテンションポリシーを管理スコープを有効にする必要があります。リテンションポリシーについて詳しくは、Boxのヘルプドキュメントをご覧ください", 
@@ -14016,13 +14629,34 @@
         ]
       }, 
       "FileVersionRetentions": {
-        "title": "Retentions", 
+        "title": "ファイルバージョンリテンション", 
         "x-box-resource-id": "file_version_retentions", 
         "x-box-reference-category": "file_version_retentions", 
         "description": "ファイルバージョンリテンションのリスト。", 
         "allOf": [
           {
-            "$ref": "#/components/schemas/MarkerPagination"
+            "type": "object", 
+            "description": "マーカーベースのページ割りについて説明しているAPI応答の部分", 
+            "properties": {
+              "limit": {
+                "description": "これらのエントリで使用された制限値。許容される最大値を超えていない限り、クエリパラメータの`limit`と等しくなります。最大値はAPIによって異なります。", 
+                "example": 1000, 
+                "type": "integer", 
+                "format": "int64"
+              }, 
+              "next_marker": {
+                "description": "次の検索結果ページの開始場所のマーカー。", 
+                "example": 3000, 
+                "type": "integer", 
+                "format": "int64"
+              }, 
+              "prev_marker": {
+                "description": "前の検索結果ページの開始場所のマーカー。", 
+                "example": 1000, 
+                "type": "integer", 
+                "format": "int64"
+              }
+            }
           }, 
           {
             "properties": {
@@ -14080,7 +14714,62 @@
               "permissions": {
                 "allOf": [
                   {
-                    "$ref": "#/components/schemas/FolderPermissions"
+                    "type": "object", 
+                    "description": "フォルダに対して認証済みユーザーが持っている権限。", 
+                    "allOf": [
+                      {
+                        "type": "object", 
+                        "description": "この項目に対して認証済みユーザーが持っている権限。", 
+                        "properties": {
+                          "can_delete": {
+                            "type": "boolean", 
+                            "description": "ユーザーがこの項目を削除できるかどうかを指定します", 
+                            "example": true, 
+                            "nullable": false
+                          }, 
+                          "can_download": {
+                            "type": "boolean", 
+                            "description": "ユーザーがこの項目をダウンロードできるかどうかを指定します", 
+                            "example": true, 
+                            "nullable": false
+                          }, 
+                          "can_invite_collaborator": {
+                            "type": "boolean", 
+                            "description": "ユーザーがこの項目にコラボレータを招待できるかどうかを指定します", 
+                            "example": true, 
+                            "nullable": false
+                          }, 
+                          "can_rename": {
+                            "type": "boolean", 
+                            "description": "ユーザーがこの項目の名前を変更できるかどうかを指定します", 
+                            "example": true, 
+                            "nullable": false
+                          }, 
+                          "can_set_share_access": {
+                            "type": "boolean", 
+                            "description": "ユーザーがこの項目の共有リンクを管理できるかどうかを\n指定します", 
+                            "example": true, 
+                            "nullable": false
+                          }, 
+                          "can_share": {
+                            "type": "boolean", 
+                            "description": "ユーザーがこの項目に新しいコラボレータを招待できるかどうかを指定します", 
+                            "example": true, 
+                            "nullable": false
+                          }
+                        }
+                      }, 
+                      {
+                        "properties": {
+                          "can_upload": {
+                            "type": "boolean", 
+                            "description": "ユーザーがこのフォルダにアップロードできるかどうかを指定します。", 
+                            "example": true, 
+                            "nullable": false
+                          }
+                        }
+                      }
+                    ]
                   }, 
                   {
                     "description": "このフォルダに対して現在のユーザーが持っている権限について説明します。"
@@ -14193,7 +14882,16 @@
               "watermark_info": {
                 "allOf": [
                   {
-                    "$ref": "#/components/schemas/WatermarkInfo"
+                    "type": "object", 
+                    "description": "この項目に適用された電子すかしに関する詳細", 
+                    "properties": {
+                      "is_watermarked": {
+                        "type": "boolean", 
+                        "description": "この項目に電子すかしが適用されているかどうかを指定します。", 
+                        "example": true, 
+                        "nullable": false
+                      }
+                    }
                   }, 
                   {
                     "description": "このフォルダに適用された電子すかしに関する詳細"
@@ -14547,26 +15245,6 @@
           }
         }
       }, 
-      "FolderPermissions": {
-        "title": "Folder Permissions", 
-        "x-box-resource-id": "folder-permissions", 
-        "description": "フォルダに対して認証済みユーザーが持っている権限。", 
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/Permissions"
-          }, 
-          {
-            "properties": {
-              "can_upload": {
-                "type": "boolean", 
-                "description": "ユーザーがこのフォルダにアップロードできるかどうかを指定します。", 
-                "example": true, 
-                "nullable": false
-              }
-            }
-          }
-        ]
-      }, 
       "Group": {
         "title": "Group", 
         "x-box-resource-id": "group", 
@@ -14635,7 +15313,35 @@
         "description": "グループのリスト。", 
         "allOf": [
           {
-            "$ref": "#/components/schemas/Pagination"
+            "type": "object", 
+            "description": "ページ割りについて説明しているAPI応答の部分", 
+            "properties": {
+              "total_count": {
+                "description": "コレクション全体の最後のエントリのオフセットに1を加算をした値。\nコレクション内のエントリの合計数は、`total_count`よりも少ない場合があります。", 
+                "example": 5000, 
+                "type": "integer", 
+                "format": "int64"
+              }, 
+              "limit": {
+                "description": "これらのエントリで使用された制限値。許容される最大値を超えていない限り、クエリパラメータの`limit`と等しくなります。最大値はAPIによって異なります。", 
+                "example": 1000, 
+                "type": "integer", 
+                "format": "int64"
+              }, 
+              "offset": {
+                "description": "このセットに含まれる最初のエントリのゼロから始まるオフセット。これは、`offset`クエリパラメータと同じになります。", 
+                "example": 2000, 
+                "type": "integer", 
+                "format": "int64"
+              }, 
+              "order": {
+                "description": "項目が返される順序", 
+                "type": "array", 
+                "items": {
+                  "$ref": "#/components/schemas/PaginationOrder"
+                }
+              }
+            }
           }, 
           {
             "properties": {
@@ -14789,7 +15495,35 @@
         "description": "グループメンバーシップのリスト。", 
         "allOf": [
           {
-            "$ref": "#/components/schemas/Pagination"
+            "type": "object", 
+            "description": "ページ割りについて説明しているAPI応答の部分", 
+            "properties": {
+              "total_count": {
+                "description": "コレクション全体の最後のエントリのオフセットに1を加算をした値。\nコレクション内のエントリの合計数は、`total_count`よりも少ない場合があります。", 
+                "example": 5000, 
+                "type": "integer", 
+                "format": "int64"
+              }, 
+              "limit": {
+                "description": "これらのエントリで使用された制限値。許容される最大値を超えていない限り、クエリパラメータの`limit`と等しくなります。最大値はAPIによって異なります。", 
+                "example": 1000, 
+                "type": "integer", 
+                "format": "int64"
+              }, 
+              "offset": {
+                "description": "このセットに含まれる最初のエントリのゼロから始まるオフセット。これは、`offset`クエリパラメータと同じになります。", 
+                "example": 2000, 
+                "type": "integer", 
+                "format": "int64"
+              }, 
+              "order": {
+                "description": "項目が返される順序", 
+                "type": "array", 
+                "items": {
+                  "$ref": "#/components/schemas/PaginationOrder"
+                }
+              }
+            }
           }, 
           {
             "properties": {
@@ -14855,7 +15589,6 @@
       "Item": {
         "title": "Item", 
         "x-box-resource-id": "item_reference", 
-        "x-box-reference-category": "shared_links", 
         "description": "ファイル、フォルダ、ユーザー、会社の一般的な簡易版レプリゼンテーション", 
         "allOf": [
           {
@@ -14905,7 +15638,35 @@
         "description": "簡易版レプリゼンテーション内のファイル、フォルダ、およびウェブリンクのリスト。", 
         "allOf": [
           {
-            "$ref": "#/components/schemas/Pagination"
+            "type": "object", 
+            "description": "ページ割りについて説明しているAPI応答の部分", 
+            "properties": {
+              "total_count": {
+                "description": "コレクション全体の最後のエントリのオフセットに1を加算をした値。\nコレクション内のエントリの合計数は、`total_count`よりも少ない場合があります。", 
+                "example": 5000, 
+                "type": "integer", 
+                "format": "int64"
+              }, 
+              "limit": {
+                "description": "これらのエントリで使用された制限値。許容される最大値を超えていない限り、クエリパラメータの`limit`と等しくなります。最大値はAPIによって異なります。", 
+                "example": 1000, 
+                "type": "integer", 
+                "format": "int64"
+              }, 
+              "offset": {
+                "description": "このセットに含まれる最初のエントリのゼロから始まるオフセット。これは、`offset`クエリパラメータと同じになります。", 
+                "example": 2000, 
+                "type": "integer", 
+                "format": "int64"
+              }, 
+              "order": {
+                "description": "項目が返される順序", 
+                "type": "array", 
+                "items": {
+                  "$ref": "#/components/schemas/PaginationOrder"
+                }
+              }
+            }
           }, 
           {
             "properties": {
@@ -14968,14 +15729,34 @@
                 "description": "* 'active' - ポリシーは遷移中の状態ではありません\n* 'applying' - ポリシーの適用処理を行っています\n* 'releasing' - 解除処理を行っています\n* 'released' - ポリシーはアクティブでなくなりました"
               }, 
               "assignment_counts": {
-                "allOf": [
-                  {
-                    "$ref": "#/components/schemas/AssignmentCounts"
+                "type": "object", 
+                "description": "このリーガルホールド内の項目タイプごとの割り当て数", 
+                "properties": {
+                  "user": {
+                    "type": "integer", 
+                    "format": "int64", 
+                    "description": "このポリシーが割り当てられているユーザーの数", 
+                    "example": 1
                   }, 
-                  {
-                    "description": "適用対象のタイプごとに分けられた、このポリシー内の割り当ての数"
+                  "folder": {
+                    "type": "integer", 
+                    "format": "int64", 
+                    "description": "このポリシーを適用するフォルダの数", 
+                    "example": 2
+                  }, 
+                  "file": {
+                    "type": "integer", 
+                    "format": "int64", 
+                    "description": "このポリシーが適用されるファイルの数", 
+                    "example": 3
+                  }, 
+                  "file_version": {
+                    "type": "integer", 
+                    "format": "int64", 
+                    "description": "このポリシーが適用されるファイルバージョンの数", 
+                    "example": 4
                   }
-                ]
+                }
               }, 
               "created_by": {
                 "allOf": [
@@ -15034,7 +15815,28 @@
         "description": "リーガルホールドポリシーのリスト。", 
         "allOf": [
           {
-            "$ref": "#/components/schemas/MarkerPagination"
+            "type": "object", 
+            "description": "マーカーベースのページ割りについて説明しているAPI応答の部分", 
+            "properties": {
+              "limit": {
+                "description": "これらのエントリで使用された制限値。許容される最大値を超えていない限り、クエリパラメータの`limit`と等しくなります。最大値はAPIによって異なります。", 
+                "example": 1000, 
+                "type": "integer", 
+                "format": "int64"
+              }, 
+              "next_marker": {
+                "description": "次の検索結果ページの開始場所のマーカー。", 
+                "example": 3000, 
+                "type": "integer", 
+                "format": "int64"
+              }, 
+              "prev_marker": {
+                "description": "前の検索結果ページの開始場所のマーカー。", 
+                "example": 1000, 
+                "type": "integer", 
+                "format": "int64"
+              }
+            }
           }, 
           {
             "properties": {
@@ -15143,7 +15945,28 @@
         "description": "リーガルホールドポリシー割り当てのリスト。", 
         "allOf": [
           {
-            "$ref": "#/components/schemas/MarkerPagination"
+            "type": "object", 
+            "description": "マーカーベースのページ割りについて説明しているAPI応答の部分", 
+            "properties": {
+              "limit": {
+                "description": "これらのエントリで使用された制限値。許容される最大値を超えていない限り、クエリパラメータの`limit`と等しくなります。最大値はAPIによって異なります。", 
+                "example": 1000, 
+                "type": "integer", 
+                "format": "int64"
+              }, 
+              "next_marker": {
+                "description": "次の検索結果ページの開始場所のマーカー。", 
+                "example": 3000, 
+                "type": "integer", 
+                "format": "int64"
+              }, 
+              "prev_marker": {
+                "description": "前の検索結果ページの開始場所のマーカー。", 
+                "example": 1000, 
+                "type": "integer", 
+                "format": "int64"
+              }
+            }
           }, 
           {
             "properties": {
@@ -15160,7 +15983,7 @@
       "Lock": {
         "title": "Lock", 
         "x-box-resource-id": "lock", 
-        "description": "ファイルで保持されているロック。", 
+        "description": "The lock held on a file. A lock prevents a file from being moved,\nrenamed, or otherwise changed by anyone else than the user who created the\nlock.", 
         "allOf": [
           {
             "$ref": "#/components/schemas/Reference"
@@ -15181,7 +16004,7 @@
                     "$ref": "#/components/schemas/User--Mini"
                   }, 
                   {
-                    "description": "ロックを作成したユーザー"
+                    "description": "The user who created the lock."
                   }
                 ]
               }, 
@@ -15189,75 +16012,22 @@
                 "type": "string", 
                 "format": "date-time", 
                 "example": "2012-12-12T10:53:43-08:00", 
-                "description": "このロックが作成された日時"
+                "description": "The time this lock was created at."
               }, 
               "expired_at": {
                 "type": "string", 
                 "format": "date-time", 
                 "example": "2012-12-12T10:53:43-08:00", 
-                "description": "このロックが期限切れになる日時。過去の日時になる場合もあります"
+                "description": "The time this lock is to expire at, which might be in the past."
               }, 
               "is_download_prevented": {
                 "type": "boolean", 
                 "example": true, 
-                "description": "ロック中でもファイルのダウンロードを許可するかどうか"
+                "description": "Whether or not the file can be downloaded while locked."
               }
             }
           }
         ]
-      }, 
-      "Lock--Writable": {
-        "title": "Lock Writable", 
-        "x-box-resource-id": "lock--writable", 
-        "type": "object", 
-        "description": "項目のロックを定義します", 
-        "x-box-reference-hide": true, 
-        "properties": {
-          "access": {
-            "type": "string", 
-            "description": "この項目のタイプは、`lock`でなければなりません。", 
-            "enum": [
-              "lock"
-            ], 
-            "example": "lock"
-          }, 
-          "expires_at": {
-            "type": "string", 
-            "format": "date-time", 
-            "example": "2012-12-12T10:53:43-08:00", 
-            "description": "ロックが期限切れになる日時"
-          }, 
-          "is_download_prevented": {
-            "type": "boolean", 
-            "example": true, 
-            "description": "ロック中でもファイルのダウンロードを許可するかどうか"
-          }
-        }
-      }, 
-      "MarkerPagination": {
-        "title": "マーカーによるページ割り", 
-        "x-box-resource-id": "marker_pagination", 
-        "description": "マーカーベースのページ割りについて説明しているAPI応答の部分", 
-        "properties": {
-          "limit": {
-            "description": "これらのエントリで使用された制限値。許容される最大値を超えていない限り、クエリパラメータの`limit`と等しくなります。最大値はAPIによって異なります。", 
-            "example": 1000, 
-            "type": "integer", 
-            "format": "int64"
-          }, 
-          "next_marker": {
-            "description": "次の検索結果ページの開始場所のマーカー。", 
-            "example": 3000, 
-            "type": "integer", 
-            "format": "int64"
-          }, 
-          "prev_marker": {
-            "description": "前の検索結果ページの開始場所のマーカー。", 
-            "example": 1000, 
-            "type": "integer", 
-            "format": "int64"
-          }
-        }
       }, 
       "Metadata": {
         "title": "Metadata", 
@@ -15427,7 +16197,28 @@
         "description": "メタデータカスケードポリシーのリスト。", 
         "allOf": [
           {
-            "$ref": "#/components/schemas/MarkerPagination"
+            "type": "object", 
+            "description": "マーカーベースのページ割りについて説明しているAPI応答の部分", 
+            "properties": {
+              "limit": {
+                "description": "これらのエントリで使用された制限値。許容される最大値を超えていない限り、クエリパラメータの`limit`と等しくなります。最大値はAPIによって異なります。", 
+                "example": 1000, 
+                "type": "integer", 
+                "format": "int64"
+              }, 
+              "next_marker": {
+                "description": "次の検索結果ページの開始場所のマーカー。", 
+                "example": 3000, 
+                "type": "integer", 
+                "format": "int64"
+              }, 
+              "prev_marker": {
+                "description": "前の検索結果ページの開始場所のマーカー。", 
+                "example": 1000, 
+                "type": "integer", 
+                "format": "int64"
+              }
+            }
           }, 
           {
             "properties": {
@@ -15482,7 +16273,47 @@
         "description": "ファイルやフォルダに適用可能なメタデータのテンプレート", 
         "allOf": [
           {
-            "$ref": "#/components/schemas/MetadataTemplate--Writable"
+            "type": "description", 
+            "description": "ファイルとフォルダに適用できるメタデータテンプレートの書き込み可能部分", 
+            "properties": {
+              "scope": {
+                "type": "string", 
+                "description": "オブジェクトのスコープ。`global`および`enterprise_*`スコープがサポートされています。\n\n`global`スコープには`properties`のキーを持つテンプレートが含まれ、enterpriseスコープは会社内で作成されたカスタムテンプレートに関係します。\n\nenterpriseスコープの末尾には、会社のIDが追加されます。", 
+                "example": "enterprise_123456"
+              }, 
+              "templateKey": {
+                "type": "string", 
+                "example": "productInfo", 
+                "description": "テンプレートの一意の識別子。この識別子は、メタデータテンプレートが適用されている会社のスコープ全体にわたって一意である必要があります。", 
+                "maxLength": 64, 
+                "pattern": "^[a-zA-Z_][-a-zA-Z0-9_]*$"
+              }, 
+              "displayName": {
+                "type": "string", 
+                "description": "テンプレートの表示名", 
+                "maxLength": 4096, 
+                "example": "Product Info"
+              }, 
+              "hidden": {
+                "type": "boolean", 
+                "example": true, 
+                "description": "このテンプレートをUI上で非表示にするかどうか", 
+                "default": false
+              }, 
+              "fields": {
+                "type": "array", 
+                "description": "テンプレートのキー/値ペアの順序付けされたセット。", 
+                "items": {
+                  "$ref": "#/components/schemas/MetadataTemplateField"
+                }
+              }, 
+              "copyInstanceOnItemCopy": {
+                "type": "boolean", 
+                "description": "ファイルまたはフォルダのコピー時にそのメタデータをコピーするかどうか。", 
+                "default": false, 
+                "example": true
+              }
+            }
           }, 
           {
             "properties": {
@@ -15502,7 +16333,28 @@
         "description": "メタデータテンプレートのリスト", 
         "allOf": [
           {
-            "$ref": "#/components/schemas/MarkerPagination"
+            "type": "object", 
+            "description": "マーカーベースのページ割りについて説明しているAPI応答の部分", 
+            "properties": {
+              "limit": {
+                "description": "これらのエントリで使用された制限値。許容される最大値を超えていない限り、クエリパラメータの`limit`と等しくなります。最大値はAPIによって異なります。", 
+                "example": 1000, 
+                "type": "integer", 
+                "format": "int64"
+              }, 
+              "next_marker": {
+                "description": "次の検索結果ページの開始場所のマーカー。", 
+                "example": 3000, 
+                "type": "integer", 
+                "format": "int64"
+              }, 
+              "prev_marker": {
+                "description": "前の検索結果ページの開始場所のマーカー。", 
+                "example": 1000, 
+                "type": "integer", 
+                "format": "int64"
+              }
+            }
           }, 
           {
             "properties": {
@@ -15515,44 +16367,6 @@
             }
           }
         ]
-      }, 
-      "MetadataTemplate--Writable": {
-        "title": "Metadata Template (Writable)", 
-        "x-box-resource-id": "metadata_template--writable", 
-        "description": "ファイルとフォルダに適用できるメタデータテンプレートの書き込み可能部分", 
-        "properties": {
-          "scope": {
-            "type": "string", 
-            "description": "オブジェクトのスコープ。`global`および`enterprise_*`スコープがサポートされています。\n\n`global`スコープには`properties`のキーを持つテンプレートが含まれ、enterpriseスコープは会社内で作成されたカスタムテンプレートに関係します。\n\nenterpriseスコープの末尾には、会社のIDが追加されます。", 
-            "example": "enterprise_123456"
-          }, 
-          "templateKey": {
-            "type": "string", 
-            "example": "productInfo", 
-            "description": "テンプレートの一意の識別子。この識別子は、メタデータテンプレートが適用されている会社のスコープ全体にわたって一意である必要があります。", 
-            "maxLength": 64, 
-            "pattern": "^[a-zA-Z_][-a-zA-Z0-9_]*$"
-          }, 
-          "displayName": {
-            "type": "string", 
-            "description": "テンプレートの表示名", 
-            "maxLength": 4096, 
-            "example": "Product Info"
-          }, 
-          "hidden": {
-            "type": "boolean", 
-            "example": true, 
-            "description": "このテンプレートをUI上で非表示にするかどうか", 
-            "default": false
-          }, 
-          "fields": {
-            "type": "array", 
-            "description": "テンプレートのキー/値ペアの順序付けされたセット。", 
-            "items": {
-              "$ref": "#/components/schemas/MetadataTemplateField"
-            }
-          }
-        }
       }, 
       "MetadataTemplateField": {
         "title": "Metadata Template Field", 
@@ -15567,7 +16381,8 @@
               "string", 
               "enum", 
               "float", 
-              "date"
+              "date", 
+              "multiSelect"
             ]
           }, 
           "key": {
@@ -15622,33 +16437,46 @@
         "title": "メタデータテンプレートのパッチ項目", 
         "x-box-resource-id": "metadata-template-patch-item", 
         "type": "object", 
-        "description": "メタデータテンプレートに変更を加えるためのパッチ操作。\n\n実行可能な操作は以下のとおりです。\n\n* `addEnumOption`: 指定した`fieldKey`の列挙型オプションリストの末尾に列挙型オプションを追加します。\n\n  例: `{\"op\":\"addEnumOption\",\"fieldKey\":\"category\",\"data\":{\"key\":\"New Option\"}}`\n\n* `addField`: テンプレートのフィールドリストの末尾にフィールドを追加します。\n\n  例: `{\"op\":\"addField\",\"data\":{\"displayName\":\"Category\",\"key\":\"category\",\"hidden\":false,\"type\":\"string\"}}`\n\n* `editTemplate`: 主に`displayName`プロパティや`hidden`プロパティなど、テンプレートの基本プロパティの編集を許可します。\n\n  例: `{\"op\":\"editTemplate\",\"data\":{\"displayName\":\"Client\"}}`\n\n* `reorderEnumOptions`: リクエストされた列挙型オプションリストと一致するように列挙型オプションリストを並べ替えます。\n\n  例: `{\"op\":\"reorderEnumOptions\",\"fieldKey\":\"category\",\"enumOptionKeys\":[\"option2\",\"option1\",\"option3\"]}`\n\n* `reorderFields`: リクエストされたフィールドリストと一致するようにフィールドリストを並べ替えます。\n\n  例: `{\"op\":\"reorderFields\",\"fieldKeys\":[\"field2\",\"field1\",\"field3\"]}`\n\n以下の変更を行うと、このテンプレートの既存のインスタンスに影響する可能性があります。\n\n* `editField`: 主に`displayName`、`hidden`、`description`、`key`といったプロパティなど、フィールドのさまざまな基本プロパティを編集します。\n\n  キーが変更された場合、指定したフィールドの既存の値は新しいキーに移行されます。検索インデックスは更新されます。更新にかかる時間は、変更の対象となるファイルの数によって異なります。\n\n  例:  `{\"op\":\"editField\",\"fieldKey\":\"category\",\"data\":{\"displayName\":\"Customer Group\"}}`\n\n* `editEnumOption`: 列挙型フィールドのオプションの1つを編集します。\n\n  例:  `{\"op\":\"editEnumOption\",\"fieldKey\":\"years\",\"enumOptionKey\":\"2011\",\"data\":{\"key\":\"2020\"}}`\n\n* `removeEnumOption`: 指定した列挙型オプションを指定した列挙型フィールドから削除します。\n\n  例: `{\"op\":\"removeEnumOption\",\"fieldKey\":\"years\",\"enumOptionKey\":\"2011\"}`\n\n* `removeField` 指定したフィールドをテンプレートから削除します。\n\n  例: `{\"op\":\"removeField\",\"fieldKey\":\"brand\"}`", 
+        "description": "メタデータテンプレートに変更を加えるためのパッチ操作。", 
+        "required": [
+          "op"
+        ], 
         "properties": {
           "op": {
             "type": "string", 
             "example": "addEnumOption", 
             "enum": [
-              "addEnumOption", 
-              "addField", 
               "editTemplate", 
-              "reorderEnumOptions", 
+              "addField", 
               "reorderFields", 
+              "addEnumOption", 
+              "reorderEnumOptions", 
+              "reorderMultiSelectOptions", 
+              "addMultiSelectOption", 
               "editField", 
+              "removeField", 
               "editEnumOption", 
               "removeEnumOption", 
-              "removeField"
+              "editMultiSelectOption", 
+              "removeMultiSelectOption"
             ], 
-            "description": "テンプレートに対して実行する操作のタイプ。"
+            "description": "テンプレートに対して実行する変更のタイプ。その中には、既存のテンプレートを変更する際に危険を伴うものもあります。"
           }, 
           "data": {
-            "description": "操作するデータ。操作によって異なります。", 
+            "description": "操作するデータ。これは、実行される操作によって異なります。", 
             "example": {
               "displayName": "New name"
             }, 
             "additionalProperties": {
               "type": "string", 
+              "description": "カスタムデータエントリの値。", 
               "example": "New name"
             }
+          }, 
+          "fieldKey": {
+            "type": "string", 
+            "example": "category", 
+            "description": "1つのフィールドに影響する操作の場合は、影響を受けるフィールドのキーを定義します。"
           }, 
           "fieldKeys": {
             "type": "array", 
@@ -15659,10 +16487,32 @@
               "category", 
               "name"
             ], 
-            "description": "複数のフィールドに影響する操作の場合は、影響を受けるフィールドのキー。"
+            "description": "複数のフィールドに影響する操作の場合は、影響を受けるフィールドのキーを定義します。"
+          }, 
+          "enumOptionKey": {
+            "description": "1つの列挙型オプションに影響する操作の場合は、影響を受けるオプションのキーを定義します。", 
+            "type": "string", 
+            "example": "option1"
           }, 
           "enumOptionKeys": {
-            "description": "複数の列挙型オプションに影響する操作の場合は、影響を受ける列挙型オプションのキー。", 
+            "description": "複数の列挙型オプションに影響する操作の場合は、影響を受けるオプションのキーを定義します。", 
+            "type": "array", 
+            "items": {
+              "type": "string"
+            }, 
+            "example": [
+              "option1", 
+              "option2", 
+              "option3"
+            ]
+          }, 
+          "multiSelectOptionKey": {
+            "description": "1つの複数選択オプションに影響する操作の場合は、影響を受けるオプションのキーを定義します。", 
+            "type": "string", 
+            "example": "option1"
+          }, 
+          "multiSelectOptionKeys": {
+            "description": "複数の複数選択オプションに影響する操作の場合は、影響を受けるオプションのキーを定義します。", 
             "type": "array", 
             "items": {
               "type": "string"
@@ -15900,38 +16750,6 @@
           }
         }
       }, 
-      "Pagination": {
-        "title": "ページネーション", 
-        "x-box-resource-id": "pagination", 
-        "description": "ページ割りについて説明しているAPI応答の部分", 
-        "properties": {
-          "total_count": {
-            "description": "コレクション全体の最後のエントリのオフセットに1を加算をした値。\nコレクション内のエントリの合計数は、`total_count`よりも少ない場合があります。", 
-            "example": 5000, 
-            "type": "integer", 
-            "format": "int64"
-          }, 
-          "limit": {
-            "description": "これらのエントリで使用された制限値。許容される最大値を超えていない限り、クエリパラメータの`limit`と等しくなります。最大値はAPIによって異なります。", 
-            "example": 1000, 
-            "type": "integer", 
-            "format": "int64"
-          }, 
-          "offset": {
-            "description": "このセットに含まれる最初のエントリのゼロから始まるオフセット。これは、`offset`クエリパラメータと同じになります。", 
-            "example": 2000, 
-            "type": "integer", 
-            "format": "int64"
-          }, 
-          "order": {
-            "description": "項目が返される順序", 
-            "type": "array", 
-            "items": {
-              "$ref": "#/components/schemas/PaginationOrder"
-            }
-          }
-        }
-      }, 
       "PaginationOrder": {
         "title": "Pagination Order", 
         "x-box-resource-id": "pagination_order", 
@@ -15950,18 +16768,6 @@
               "ASC", 
               "DESC"
             ]
-          }
-        }
-      }, 
-      "Parent": {
-        "title": "Parent", 
-        "x-box-resource-id": "parent", 
-        "description": "この項目の親", 
-        "properties": {
-          "id": {
-            "type": "string", 
-            "description": "親項目のID", 
-            "example": "123"
           }
         }
       }, 
@@ -15985,66 +16791,6 @@
             "items": {
               "$ref": "#/components/schemas/Folder--Mini"
             }
-          }
-        }
-      }, 
-      "Permissions": {
-        "title": "権限", 
-        "x-box-resource-id": "permissions", 
-        "description": "この項目に対して認証済みユーザーが持っている権限。", 
-        "properties": {
-          "can_delete": {
-            "type": "boolean", 
-            "description": "ユーザーがこの項目を削除できるかどうかを指定します", 
-            "example": true, 
-            "nullable": false
-          }, 
-          "can_download": {
-            "type": "boolean", 
-            "description": "ユーザーがこの項目をダウンロードできるかどうかを指定します", 
-            "example": true, 
-            "nullable": false
-          }, 
-          "can_invite_collaborator": {
-            "type": "boolean", 
-            "description": "ユーザーがこの項目にコラボレータを招待できるかどうかを指定します", 
-            "example": true, 
-            "nullable": false
-          }, 
-          "can_rename": {
-            "type": "boolean", 
-            "description": "ユーザーがこの項目の名前を変更できるかどうかを指定します", 
-            "example": true, 
-            "nullable": false
-          }, 
-          "can_set_share_access": {
-            "type": "boolean", 
-            "description": "ユーザーがこの項目の共有リンクを管理できるかどうかを\n指定します", 
-            "example": true, 
-            "nullable": false
-          }, 
-          "can_share": {
-            "type": "boolean", 
-            "description": "ユーザーがこの項目に新しいコラボレータを招待できるかどうかを指定します", 
-            "example": true, 
-            "nullable": false
-          }
-        }
-      }, 
-      "Permissions--Writable": {
-        "title": "Permissions (Writable)", 
-        "x-box-resource-id": "permissions--writable", 
-        "description": "ファイルをダウンロードできるかどうかを定義するオブジェクト。", 
-        "type": "object", 
-        "properties": {
-          "can_download": {
-            "description": "このファイルのダウンロードが許可されているユーザーを示します", 
-            "type": "string", 
-            "example": "open", 
-            "enum": [
-              "open", 
-              "company"
-            ]
           }
         }
       }, 
@@ -16087,7 +16833,7 @@
         "x-box-reference-category": "events", 
         "properties": {
           "chunk_size": {
-            "description": "残りのサーバーのページ数。", 
+            "description": "この応答内の項目の数。", 
             "example": 1, 
             "type": "integer", 
             "format": "int64"
@@ -16152,7 +16898,28 @@
         "description": "最近使用した項目のリスト。", 
         "allOf": [
           {
-            "$ref": "#/components/schemas/MarkerPagination"
+            "type": "object", 
+            "description": "マーカーベースのページ割りについて説明しているAPI応答の部分", 
+            "properties": {
+              "limit": {
+                "description": "これらのエントリで使用された制限値。許容される最大値を超えていない限り、クエリパラメータの`limit`と等しくなります。最大値はAPIによって異なります。", 
+                "example": 1000, 
+                "type": "integer", 
+                "format": "int64"
+              }, 
+              "next_marker": {
+                "description": "次の検索結果ページの開始場所のマーカー。", 
+                "example": 3000, 
+                "type": "integer", 
+                "format": "int64"
+              }, 
+              "prev_marker": {
+                "description": "前の検索結果ページの開始場所のマーカー。", 
+                "example": 1000, 
+                "type": "integer", 
+                "format": "int64"
+              }
+            }
           }, 
           {
             "properties": {
@@ -16266,10 +17033,32 @@
           }
         }
       }, 
+      "RetentionPolicies": {
+        "title": "Retention Policies", 
+        "x-box-resource-id": "retention_policies", 
+        "x-box-reference-category": "retention_policies", 
+        "description": "リテンションポリシーのリスト", 
+        "properties": {
+          "total_count": {
+            "description": "リテンションポリシーの数。", 
+            "example": 156, 
+            "type": "integer", 
+            "format": "int64"
+          }, 
+          "entries": {
+            "type": "array", 
+            "items": {
+              "$ref": "#/components/schemas/RetentionPolicy--Mini"
+            }
+          }
+        }
+      }, 
       "RetentionPolicy": {
         "title": "Retention Policy", 
         "x-box-resource-id": "retention_policy", 
         "x-box-reference-category": "retention_policies", 
+        "x-box-has-field-variants": true, 
+        "x-box-reference-hide": true, 
         "description": "リテンションポリシーは、指定した期間にわたってコンテンツが完全に削除されるのを防止します。管理者はリテンションポリシーを作成して特定のフォルダや会社全体に割り当てることができます。この機能を使用するには、アプリケーション管理コンソールから、APIキーに対してリテンションポリシーを管理スコープを有効にする必要があります。", 
         "allOf": [
           {
@@ -16283,30 +17072,17 @@
               "policy_type": {
                 "type": "string", 
                 "example": "finite", 
+                "x-box-field-variant": 2, 
                 "description": "リテンションポリシーのタイプ。リテンションポリシーのタイプは、`finite` (コンテンツを保持する期間が事前にわかっている場合)、または`indefinite` (コンテンツを保持する期間が不明な場合)のいずれかになります。", 
                 "enum": [
                   "finite", 
                   "indefinite"
                 ]
               }, 
-              "retention_length": {
-                "type": "string", 
-                "format": "int32", 
-                "example": "0", 
-                "description": "リテンションポリシーの期間。これはリテンションポリシーがコンテンツに割り当てられた後、有効である日数を示します。ポリシーの`policy_type`が`indefinite`である場合は、`retention_length`も`indefinite`になります。"
-              }, 
-              "disposition_action": {
-                "type": "string", 
-                "example": "permanently_delete", 
-                "description": "リテンションポリシーの廃棄アクション。\nこのアクションを`permanently_delete`に設定すると、ポリシーによって保持されているコンテンツが完全に削除されます。`remove_retention`に設定すると、コンテンツへのリテンションポリシーの適用が解除され、リテンションポリシーの有効期限が過ぎた後は、ユーザーがコンテンツを削除できるようになります。", 
-                "enum": [
-                  "permanently_delete", 
-                  "remove_retention"
-                ]
-              }, 
               "status": {
                 "type": "string", 
                 "example": "active", 
+                "x-box-field-variant": 2, 
                 "description": "リテンションポリシーのステータス。ポリシーのステータスは、管理者が明示的に廃止しない限り、`active`になります(廃止されたポリシーのステータスは`retired`になります)。いったん廃止したポリシーを再度アクティブにすることはできません。", 
                 "enum": [
                   "active", 
@@ -16326,12 +17102,14 @@
               "created_at": {
                 "type": "string", 
                 "format": "date-time", 
+                "x-box-field-variant": 2, 
                 "description": "リテンションポリシーオブジェクトが作成された日時", 
                 "example": "2012-12-12T10:53:43-08:00"
               }, 
               "modified_at": {
                 "type": "string", 
                 "format": "date-time", 
+                "x-box-field-variant": 2, 
                 "description": "リテンションポリシーオブジェクトが最後に変更された日時", 
                 "example": "2012-12-12T10:53:43-08:00"
               }
@@ -16339,53 +17117,70 @@
           }
         ]
       }, 
-      "RetentionPolicies": {
-        "title": "Retention Policies", 
-        "x-box-resource-id": "retention_policies", 
-        "x-box-reference-category": "retention_policies", 
-        "description": "リテンションポリシーのリスト", 
-        "properties": {
-          "total_count": {
-            "description": "リテンションポリシーの数。", 
-            "example": 156, 
-            "type": "integer", 
-            "format": "int64"
-          }, 
-          "entries": {
-            "type": "array", 
-            "items": {
-              "$ref": "#/components/schemas/RetentionPolicy"
-            }
-          }
-        }
-      }, 
       "RetentionPolicy--Mini": {
         "title": "Retention Policy (Mini)", 
         "x-box-resource-id": "retention_policy--mini", 
-        "description": "リテンションポリシーの簡易版表記", 
+        "x-box-reference-category": null, 
+        "x-box-has-field-variants": true, 
         "x-box-reference-hide": true, 
+        "description": "他のリソース内にネストされたときに使用される、リテンションポリシーの簡易版レプリゼンテーション。", 
         "allOf": [
           {
-            "$ref": "#/components/schemas/Reference"
+            "$ref": "#/components/schemas/RetentionPolicy--Base"
           }, 
           {
             "properties": {
-              "type": {
-                "type": "string", 
-                "description": "`retention_policy`", 
-                "example": "retention_policy", 
-                "enum": [
-                  "retention_policy"
-                ]
-              }, 
               "policy_name": {
                 "type": "string", 
                 "description": "リテンションポリシーの名前", 
-                "example": "Some Policy Name"
+                "example": "Some Policy Name", 
+                "x-box-field-variant": 1
+              }, 
+              "retention_length": {
+                "type": "string", 
+                "format": "int32", 
+                "example": "0", 
+                "description": "リテンションポリシーの期間。これはリテンションポリシーがコンテンツに割り当てられた後、有効である日数を示します。ポリシーの`policy_type`が`indefinite`である場合は、`retention_length`も`indefinite`になります。", 
+                "x-box-field-variant": 1
+              }, 
+              "disposition_action": {
+                "type": "string", 
+                "example": "permanently_delete", 
+                "description": "リテンションポリシーの廃棄アクション。\nこのアクションを`permanently_delete`に設定すると、ポリシーによって保持されているコンテンツが完全に削除されます。`remove_retention`に設定すると、コンテンツへのリテンションポリシーの適用が解除され、リテンションポリシーの有効期限が過ぎた後は、ユーザーがコンテンツを削除できるようになります。", 
+                "enum": [
+                  "permanently_delete", 
+                  "remove_retention"
+                ], 
+                "x-box-field-variant": 1
               }
             }
           }
         ]
+      }, 
+      "RetentionPolicy--Base": {
+        "title": "リテンションポリシー(ベース)", 
+        "x-box-resource-id": "retention_policy--base", 
+        "x-box-reference-category": null, 
+        "x-box-has-field-variants": true, 
+        "x-box-reference-hide": true, 
+        "description": "ファイルバージョンの最も基本的なレプリゼンテーション。`fields`クエリパラメータを使用すると、最小限の数のフィールドが返されます。", 
+        "properties": {
+          "id": {
+            "type": "string", 
+            "nullable": false, 
+            "description": "ファイルバージョンを表す一意の識別子。", 
+            "example": "12345"
+          }, 
+          "type": {
+            "type": "string", 
+            "description": "`file_version`", 
+            "example": "file_version", 
+            "enum": [
+              "file_version"
+            ], 
+            "nullable": false
+          }
+        }
       }, 
       "RetentionPolicyAssignment": {
         "title": "Retention Policy Assignment", 
@@ -16453,7 +17248,28 @@
         "description": "リテンションポリシー割り当てのリスト", 
         "allOf": [
           {
-            "$ref": "#/components/schemas/MarkerPagination"
+            "type": "object", 
+            "description": "マーカーベースのページ割りについて説明しているAPI応答の部分", 
+            "properties": {
+              "limit": {
+                "description": "これらのエントリで使用された制限値。許容される最大値を超えていない限り、クエリパラメータの`limit`と等しくなります。最大値はAPIによって異なります。", 
+                "example": 1000, 
+                "type": "integer", 
+                "format": "int64"
+              }, 
+              "next_marker": {
+                "description": "次の検索結果ページの開始場所のマーカー。", 
+                "example": 3000, 
+                "type": "integer", 
+                "format": "int64"
+              }, 
+              "prev_marker": {
+                "description": "前の検索結果ページの開始場所のマーカー。", 
+                "example": 1000, 
+                "type": "integer", 
+                "format": "int64"
+              }
+            }
           }, 
           {
             "properties": {
@@ -16476,32 +17292,32 @@
           "upload_part": {
             "type": "string", 
             "description": "パーツのアップロード先のURL", 
-            "example": "https://upload.box.com/api/2.0/files/upload_sessions/D5E3F7A"
+            "example": "https://upload.box.com/api/2.0/files/upload_sessions/F971964745A5CD0C001BBE4E58196BFD"
           }, 
           "commit": {
             "type": "string", 
             "description": "ファイルのコミットに使用されるURL", 
-            "example": "https://upload.box.com/api/2.0/files/upload_sessions/D5E3F7A/commit"
+            "example": "https://upload.box.com/api/2.0/files/upload_sessions/F971964745A5CD0C001BBE4E58196BFD/commit"
           }, 
           "abort": {
             "type": "string", 
             "description": "セッションの中止に使用されるURL。", 
-            "example": "https://upload.box.com/api/2.0/files/upload_sessions/D5E3F7A"
+            "example": "https://upload.box.com/api/2.0/files/upload_sessions/F971964745A5CD0C001BBE4E58196BFD"
           }, 
           "list_parts": {
             "type": "string", 
             "description": "すべてのパーツのリストを取得するためのURL。", 
-            "example": "https://upload.box.com/api/2.0/files/upload_sessions/D5E3F7A/parts"
+            "example": "https://upload.box.com/api/2.0/files/upload_sessions/F971964745A5CD0C001BBE4E58196BFD/parts"
           }, 
           "status": {
             "type": "string", 
             "description": "アップロードステータスの取得に使用されるURL。", 
-            "example": "https://upload.box.com/api/2.0/files/upload_sessions/D5E3F7A"
+            "example": "https://upload.box.com/api/2.0/files/upload_sessions/F971964745A5CD0C001BBE4E58196BFD"
           }, 
           "log_event": {
             "type": "string", 
             "description": "アップロードログの取得に使用されるURL。", 
-            "example": "https://upload.box.com/api/2.0/files/upload_sessions/D5E3F7A/log"
+            "example": "https://upload.box.com/api/2.0/files/upload_sessions/F971964745A5CD0C001BBE4E58196BFD/log"
           }
         }
       }, 
@@ -16521,6 +17337,7 @@
           "download_url": {
             "type": "string", 
             "format": "url", 
+            "x-box-premium-feature": true, 
             "description": "ファイルをダウンロードするために使用できるURL。\nこのURLをブラウザで使用すると、ファイルをダウンロードできます。このURLには、ファイルを正しいファイルタイプで保存できるように、ファイル拡張子が含まれます。\n\nフォルダの場合、このプロパティは`null`になります。", 
             "example": "https://www.box.com/shared/static/rh935iit6ewrmw0unyul.jpeg", 
             "nullable": true
@@ -16609,47 +17426,6 @@
           }
         }
       }, 
-      "SharedLink--Writable": {
-        "title": "Shared Link (Writable)", 
-        "x-box-resource-id": "shared_link--writable", 
-        "type": "object", 
-        "description": "共有リンクの書き込み可能な属性。", 
-        "x-box-reference-hide": true, 
-        "properties": {
-          "access": {
-            "type": "string", 
-            "description": "共有リンクのアクセスレベル。これは、リンクを知っているすべてのユーザー(`open`)、会社内のユーザーのみ(`company`)、フォルダに招待されたユーザーのみ(`collaborators`)のいずれかに制限できます。\n\nこのフィールドは、デフォルトで、会社の管理者が指定したアクセスレベルである、`default`アクセスレベルに設定されます。\n\n`company`アクセスレベルは、有料アカウントのみで\n使用できます。", 
-            "enum": [
-              "default", 
-              "open", 
-              "company", 
-              "collaborators"
-            ], 
-            "example": "open"
-          }, 
-          "password": {
-            "type": "string", 
-            "description": "共有リンクへのアクセスに必要なパスワード。\nパスワードを`null`に設定するとパスワードが削除されます。\n\nパスワードは`access`が`open`に設定されている場合にのみ設定できます。", 
-            "example": "do-not-use-this-password"
-          }, 
-          "unshared_at": {
-            "type": "string", 
-            "format": "date-time", 
-            "example": "2012-12-12T10:53:43-08:00", 
-            "description": "この共有リンクが無効になる日時のタイムスタンプ。\nこのフィールドを設定できるのは、有料アカウントを持つユーザーのみです。"
-          }, 
-          "permissions": {
-            "type": "object", 
-            "properties": {
-              "can_download": {
-                "type": "boolean", 
-                "example": true, 
-                "description": "共有リンクからのファイルのダウンロードが許可されているかどうか。`access`が、`open`または`company`に設定されている場合にのみ設定できます。"
-              }
-            }
-          }
-        }
-      }, 
       "Skill": {
         "title": "スキル", 
         "x-box-resource-id": "skill", 
@@ -16720,10 +17496,70 @@
                 "description": "この項目の読み取り専用および読み取り/書き込みアクセス権限トークン", 
                 "properties": {
                   "read": {
-                    "$ref": "#/components/schemas/AccessToken--Mini"
+                    "type": "object", 
+                    "description": "アクセストークンの基本情報", 
+                    "properties": {
+                      "access_token": {
+                        "type": "string", 
+                        "format": "token", 
+                        "example": "c3FIOG9vSGV4VHo4QzAyg5T1JvNnJoZ3ExaVNyQWw6WjRsanRKZG5lQk9qUE1BVQ", 
+                        "description": "リクエストされたアクセストークン。"
+                      }, 
+                      "expires_in": {
+                        "type": "integer", 
+                        "format": "int64", 
+                        "example": 3600, 
+                        "description": "このトークンが期限切れになるまでの秒数。"
+                      }, 
+                      "token_type": {
+                        "type": "string", 
+                        "enum": [
+                          "bearer"
+                        ], 
+                        "example": "bearer", 
+                        "description": "返されるアクセストークンのタイプ。"
+                      }, 
+                      "restricted_to": {
+                        "type": "array", 
+                        "description": "このアクセストークンで許可される権限を返します。これにより、リソース(ファイルやフォルダなど)のリストと、各リソースで許可されるスコープが提供されます。", 
+                        "items": {
+                          "$ref": "#/components/schemas/FileScope"
+                        }
+                      }
+                    }
                   }, 
                   "write": {
-                    "$ref": "#/components/schemas/AccessToken--Mini"
+                    "type": "object", 
+                    "description": "アクセストークンの基本情報", 
+                    "properties": {
+                      "access_token": {
+                        "type": "string", 
+                        "format": "token", 
+                        "example": "c3FIOG9vSGV4VHo4QzAyg5T1JvNnJoZ3ExaVNyQWw6WjRsanRKZG5lQk9qUE1BVQ", 
+                        "description": "リクエストされたアクセストークン。"
+                      }, 
+                      "expires_in": {
+                        "type": "integer", 
+                        "format": "int64", 
+                        "example": 3600, 
+                        "description": "このトークンが期限切れになるまでの秒数。"
+                      }, 
+                      "token_type": {
+                        "type": "string", 
+                        "enum": [
+                          "bearer"
+                        ], 
+                        "example": "bearer", 
+                        "description": "返されるアクセストークンのタイプ。"
+                      }, 
+                      "restricted_to": {
+                        "type": "array", 
+                        "description": "このアクセストークンで許可される権限を返します。これにより、リソース(ファイルやフォルダなど)のリストと、各リソースで許可されるスコープが提供されます。", 
+                        "items": {
+                          "$ref": "#/components/schemas/FileScope"
+                        }
+                      }
+                    }
                   }
                 }
               }, 
@@ -16841,7 +17677,28 @@
         "description": "ストレージポリシーのリスト。", 
         "allOf": [
           {
-            "$ref": "#/components/schemas/MarkerPagination"
+            "type": "object", 
+            "description": "マーカーベースのページ割りについて説明しているAPI応答の部分", 
+            "properties": {
+              "limit": {
+                "description": "これらのエントリで使用された制限値。許容される最大値を超えていない限り、クエリパラメータの`limit`と等しくなります。最大値はAPIによって異なります。", 
+                "example": 1000, 
+                "type": "integer", 
+                "format": "int64"
+              }, 
+              "next_marker": {
+                "description": "次の検索結果ページの開始場所のマーカー。", 
+                "example": 3000, 
+                "type": "integer", 
+                "format": "int64"
+              }, 
+              "prev_marker": {
+                "description": "前の検索結果ページの開始場所のマーカー。", 
+                "example": 1000, 
+                "type": "integer", 
+                "format": "int64"
+              }
+            }
           }, 
           {
             "properties": {
@@ -16913,7 +17770,28 @@
         "description": "ストレージポリシー割り当てのリスト。", 
         "allOf": [
           {
-            "$ref": "#/components/schemas/MarkerPagination"
+            "type": "object", 
+            "description": "マーカーベースのページ割りについて説明しているAPI応答の部分", 
+            "properties": {
+              "limit": {
+                "description": "これらのエントリで使用された制限値。許容される最大値を超えていない限り、クエリパラメータの`limit`と等しくなります。最大値はAPIによって異なります。", 
+                "example": 1000, 
+                "type": "integer", 
+                "format": "int64"
+              }, 
+              "next_marker": {
+                "description": "次の検索結果ページの開始場所のマーカー。", 
+                "example": 3000, 
+                "type": "integer", 
+                "format": "int64"
+              }, 
+              "prev_marker": {
+                "description": "前の検索結果ページの開始場所のマーカー。", 
+                "example": 1000, 
+                "type": "integer", 
+                "format": "int64"
+              }
+            }
           }, 
           {
             "properties": {
@@ -17134,7 +18012,35 @@
         "description": "タスク割り当てのリスト", 
         "allOf": [
           {
-            "$ref": "#/components/schemas/Pagination"
+            "type": "object", 
+            "description": "ページ割りについて説明しているAPI応答の部分", 
+            "properties": {
+              "total_count": {
+                "description": "コレクション全体の最後のエントリのオフセットに1を加算をした値。\nコレクション内のエントリの合計数は、`total_count`よりも少ない場合があります。", 
+                "example": 5000, 
+                "type": "integer", 
+                "format": "int64"
+              }, 
+              "limit": {
+                "description": "これらのエントリで使用された制限値。許容される最大値を超えていない限り、クエリパラメータの`limit`と等しくなります。最大値はAPIによって異なります。", 
+                "example": 1000, 
+                "type": "integer", 
+                "format": "int64"
+              }, 
+              "offset": {
+                "description": "このセットに含まれる最初のエントリのゼロから始まるオフセット。これは、`offset`クエリパラメータと同じになります。", 
+                "example": 2000, 
+                "type": "integer", 
+                "format": "int64"
+              }, 
+              "order": {
+                "description": "項目が返される順序", 
+                "type": "array", 
+                "items": {
+                  "$ref": "#/components/schemas/PaginationOrder"
+                }
+              }
+            }
           }, 
           {
             "properties": {
@@ -17346,7 +18252,7 @@
             "type": "string", 
             "format": "urn", 
             "example": "authorization_code", 
-            "description": "クライアント側で取得される認証コード、更新トークン、JWTアサーション、またはトークンのダウンスコープを目的とするその他のアクセストークンを使用して行われているリクエストのタイプ。", 
+            "description": "クライアント側で取得される承認コード、更新トークン、JWTアサーション、またはトークンのダウンスコープを目的とするその他のアクセストークンを使用して行われているリクエストのタイプ。", 
             "enum": [
               "authorization_code", 
               "refresh_token", 
@@ -17367,7 +18273,7 @@
           "code": {
             "type": "string", 
             "format": "token", 
-            "description": "ユーザーが自身の代わりにAPI呼び出しを行う権限をアプリケーションに付与した後、ブラウザリダイレクト時にBoxからアプリケーションに渡されるクライアント側認証コード。\n\n`authorization_code`との組み合わせで`grant_type`として使用されます。", 
+            "description": "ユーザーが自身の代わりにAPI呼び出しを行う権限をアプリケーションに付与した後、ブラウザリダイレクト時にBoxからアプリケーションに渡されるクライアント側承認コード。\n\n`authorization_code`との組み合わせで`grant_type`として使用されます。", 
             "example": "n22JPxrh18m4Y0wIZPIqYZK7VRrsMTWW"
           }, 
           "refresh_token": {
@@ -17527,7 +18433,35 @@
         "description": "アップロードセッションのアップロード済みチャンクのリスト。", 
         "allOf": [
           {
-            "$ref": "#/components/schemas/Pagination"
+            "type": "object", 
+            "description": "ページ割りについて説明しているAPI応答の部分", 
+            "properties": {
+              "total_count": {
+                "description": "コレクション全体の最後のエントリのオフセットに1を加算をした値。\nコレクション内のエントリの合計数は、`total_count`よりも少ない場合があります。", 
+                "example": 5000, 
+                "type": "integer", 
+                "format": "int64"
+              }, 
+              "limit": {
+                "description": "これらのエントリで使用された制限値。許容される最大値を超えていない限り、クエリパラメータの`limit`と等しくなります。最大値はAPIによって異なります。", 
+                "example": 1000, 
+                "type": "integer", 
+                "format": "int64"
+              }, 
+              "offset": {
+                "description": "このセットに含まれる最初のエントリのゼロから始まるオフセット。これは、`offset`クエリパラメータと同じになります。", 
+                "example": 2000, 
+                "type": "integer", 
+                "format": "int64"
+              }, 
+              "order": {
+                "description": "項目が返される順序", 
+                "type": "array", 
+                "items": {
+                  "$ref": "#/components/schemas/PaginationOrder"
+                }
+              }
+            }
           }, 
           {
             "properties": {
@@ -17546,57 +18480,55 @@
         "x-box-resource-id": "upload_session", 
         "description": "ファイルをアップロードするチャンクのアップロードセッション。", 
         "x-box-reference-category": "chunked_uploads", 
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/Reference"
+        "properties": {
+          "id": {
+            "type": "string", 
+            "description": "このセッションの一意の識別子", 
+            "example": "F971964745A5CD0C001BBE4E58196BFD"
           }, 
-          {
-            "properties": {
-              "type": {
-                "type": "string", 
-                "description": "`upload_session`", 
-                "example": "upload_session", 
-                "enum": [
-                  "upload_session"
-                ]
+          "type": {
+            "type": "string", 
+            "description": "`upload_session`", 
+            "example": "upload_session", 
+            "enum": [
+              "upload_session"
+            ]
+          }, 
+          "session_expires_at": {
+            "description": "このセッションが期限切れになる日時。", 
+            "type": "string", 
+            "format": "date-time", 
+            "example": "2012-12-12T10:53:43-08:00"
+          }, 
+          "part_size": {
+            "type": "integer", 
+            "format": "int64", 
+            "example": 1024, 
+            "description": "アップロードのすべての部分で使用する必要があるサイズ(バイト単位)。\n\n最後の部分のみ、これより小さいサイズを使用できます。"
+          }, 
+          "total_parts": {
+            "type": "integer", 
+            "format": "int32", 
+            "example": 1000, 
+            "description": "ファイルのサイズとパーツのサイズで決定される、このアップロードセッションで予想されるパーツの総数。"
+          }, 
+          "num_parts_processed": {
+            "type": "integer", 
+            "format": "int32", 
+            "example": 455, 
+            "description": "アップロードが完了し、サーバーで処理されたパーツの数。値は`0`から始まります。\n\nファイルをコミットするときにこのプロパティを調べることで、すべてのパーツが正しくアップロードされているかどうかを確認できます。"
+          }, 
+          "session_endpoints": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SessionEndpoints"
               }, 
-              "session_expires_at": {
-                "description": "このセッションが期限切れになる日時。", 
-                "type": "string", 
-                "format": "date-time", 
-                "example": "2012-12-12T10:53:43-08:00"
-              }, 
-              "part_size": {
-                "type": "integer", 
-                "format": "int64", 
-                "example": 1024, 
-                "description": "アップロードのすべての部分で使用する必要があるサイズ(バイト単位)。\n\n最後の部分のみ、これより小さいサイズを使用できます。"
-              }, 
-              "total_parts": {
-                "type": "integer", 
-                "format": "int32", 
-                "example": 1000, 
-                "description": "ファイルのサイズとパーツのサイズで決定される、このアップロードセッションで予想されるパーツの総数。"
-              }, 
-              "num_parts_processed": {
-                "type": "integer", 
-                "format": "int32", 
-                "example": 455, 
-                "description": "アップロードが完了し、サーバーで処理されたパーツの数。値は`0`から始まります。\n\nファイルをコミットするときにこのプロパティを調べることで、すべてのパーツが正しくアップロードされているかどうかを確認できます。"
-              }, 
-              "session_endpoints": {
-                "allOf": [
-                  {
-                    "$ref": "#/components/schemas/SessionEndpoints"
-                  }, 
-                  {
-                    "description": "このセッションに使用されるエンドポイントのリスト。"
-                  }
-                ]
+              {
+                "description": "このセッションに使用されるエンドポイントのリスト。"
               }
-            }
+            ]
           }
-        ]
+        }
       }, 
       "UploadUrl": {
         "title": "Upload Url", 
@@ -17645,7 +18577,7 @@
               "tracking_codes": {
                 "x-box-field-variant": 3, 
                 "type": "array", 
-                "description": "そのユーザーの管理者が設定したキーと値のペアの配列", 
+                "description": "追跡コードを使用すると、管理者は管理コンソールからレポートを生成し、特定のグループのユーザーに属性を割り当てることができます。この設定を使用するには、会社に対して有効にしておく必要があります。", 
                 "items": {
                   "$ref": "#/components/schemas/TrackingCode"
                 }
@@ -17719,8 +18651,8 @@
               "external_app_user_id": {
                 "x-box-field-variant": 3, 
                 "type": "string", 
-                "example": "my-app-user", 
-                "description": "ユーザーの検索に使用できる、アプリユーザーの\n外部識別子。"
+                "example": "my-user-1234", 
+                "description": "ユーザーの検索に使用できる、アプリユーザーの外部識別子。これを使用して、外部IDプロバイダーのユーザーIDをBoxユーザーに結び付けることが使用できます。"
               }, 
               "notification_email": {
                 "x-box-field-variant": 2, 
@@ -17751,7 +18683,35 @@
         "description": "ユーザーのリスト。", 
         "allOf": [
           {
-            "$ref": "#/components/schemas/Pagination"
+            "type": "object", 
+            "description": "ページ割りについて説明しているAPI応答の部分", 
+            "properties": {
+              "total_count": {
+                "description": "コレクション全体の最後のエントリのオフセットに1を加算をした値。\nコレクション内のエントリの合計数は、`total_count`よりも少ない場合があります。", 
+                "example": 5000, 
+                "type": "integer", 
+                "format": "int64"
+              }, 
+              "limit": {
+                "description": "これらのエントリで使用された制限値。許容される最大値を超えていない限り、クエリパラメータの`limit`と等しくなります。最大値はAPIによって異なります。", 
+                "example": 1000, 
+                "type": "integer", 
+                "format": "int64"
+              }, 
+              "offset": {
+                "description": "このセットに含まれる最初のエントリのゼロから始まるオフセット。これは、`offset`クエリパラメータと同じになります。", 
+                "example": 2000, 
+                "type": "integer", 
+                "format": "int64"
+              }, 
+              "order": {
+                "description": "項目が返される順序", 
+                "type": "array", 
+                "items": {
+                  "$ref": "#/components/schemas/PaginationOrder"
+                }
+              }
+            }
           }, 
           {
             "properties": {
@@ -17930,19 +18890,6 @@
           }
         }
       }, 
-      "WatermarkInfo": {
-        "title": "Watermark Info", 
-        "x-box-resource-id": "watermark_info", 
-        "description": "この項目に適用された電子すかしに関する詳細", 
-        "properties": {
-          "is_watermarked": {
-            "type": "boolean", 
-            "description": "この項目に電子すかしが適用されているかどうかを指定します。", 
-            "example": true, 
-            "nullable": false
-          }
-        }
-      }, 
       "Webhook": {
         "title": "Webhook", 
         "x-box-resource-id": "webhook", 
@@ -18065,7 +19012,28 @@
         "description": "Webhookのリスト。", 
         "allOf": [
           {
-            "$ref": "#/components/schemas/MarkerPagination"
+            "type": "object", 
+            "description": "マーカーベースのページ割りについて説明しているAPI応答の部分", 
+            "properties": {
+              "limit": {
+                "description": "これらのエントリで使用された制限値。許容される最大値を超えていない限り、クエリパラメータの`limit`と等しくなります。最大値はAPIによって異なります。", 
+                "example": 1000, 
+                "type": "integer", 
+                "format": "int64"
+              }, 
+              "next_marker": {
+                "description": "次の検索結果ページの開始場所のマーカー。", 
+                "example": 3000, 
+                "type": "integer", 
+                "format": "int64"
+              }, 
+              "prev_marker": {
+                "description": "前の検索結果ページの開始場所のマーカー。", 
+                "example": 1000, 
+                "type": "integer", 
+                "format": "int64"
+              }
+            }
           }, 
           {
             "properties": {
@@ -18198,9 +19166,9 @@
       "WebLink": {
         "title": "Web Link", 
         "x-box-resource-id": "web_link", 
-        "description": "ウェブリンクとは、URLを指すオブジェクトです。これらのオブジェクトはBoxウェブアプリケーション内ではブックマークとも呼ばれます。\n\nウェブリンクオブジェクトはファイルオブジェクトと同様に扱われ、通常のファイルに適用されるアクションの大部分もサポートしています。", 
         "x-box-reference-category": "web_links", 
         "x-box-has-field-variants": true, 
+        "description": "ウェブリンクとは、URLを指すオブジェクトです。これらのオブジェクトはBoxウェブアプリケーション内ではブックマークとも呼ばれます。\n\nウェブリンクオブジェクトはファイルオブジェクトと同様に扱われ、通常のファイルに適用されるアクションの大部分もサポートしています。", 
         "allOf": [
           {
             "$ref": "#/components/schemas/WebLink--Mini"
@@ -18341,6 +19309,7 @@
         "title": "Web Link (Mini)", 
         "x-box-resource-id": "web_link--mini", 
         "x-box-reference-hide": true, 
+        "x-box-reference-category": null, 
         "description": "ウェブリンクとは、URLを指すオブジェクトです。これらのオブジェクトはBoxウェブアプリケーション内ではブックマークとも呼ばれます。\n\nウェブリンクオブジェクトはファイルオブジェクトと同様に扱われ、通常のファイルに適用されるアクションの大部分もサポートしています。", 
         "allOf": [
           {
@@ -18446,7 +19415,7 @@
       "x-box-reference-category": "multizones"
     }, 
     {
-      "name": "認証", 
+      "name": "承認", 
       "x-box-reference-category": "authorization", 
       "x-box-reference-parent-category": "basics"
     }, 
