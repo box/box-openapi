@@ -4892,15 +4892,63 @@
         }
       }
     },
-    "/metadata_templates/enterprise": {
+    "/metadata_templates/global": {
       "get": {
-        "operationId": "get_metadata_templates_enterprise",
-        "summary": "List enterprise templates",
+        "operationId": "get_metadata_templates_global",
+        "summary": "List all global templates",
         "tags": [
           "Metadata Templates"
         ],
         "x-box-reference-category": "metadata_templates",
-        "description": "Used to retrieve all metadata templates within a user's enterprise",
+        "description": "Used to retrieve all generic, global metadata templates available to all\nenterprises using Box.",
+        "parameters": [
+          {
+            "name": "marker",
+            "description": "The position marker at which to begin the response.",
+            "in": "query",
+            "required": false,
+            "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "description": "The maximum number of items to return per page.",
+            "in": "query",
+            "required": false,
+            "example": 1000,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "default": 100,
+              "maximum": 1000
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns all of the metadata templates within an enterprise\nand their corresponding schema.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MetadataTemplates"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/metadata_templates/enterprise": {
+      "get": {
+        "operationId": "get_metadata_templates_enterprise",
+        "summary": "List all enterprise templates",
+        "tags": [
+          "Metadata Templates"
+        ],
+        "x-box-reference-category": "metadata_templates",
+        "description": "Used to retrieve all metadata templates created to be used specifically within\nthe user's enterprise",
         "parameters": [
           {
             "name": "marker",
@@ -4958,13 +5006,13 @@
                 "properties": {
                   "scope": {
                     "type": "string",
-                    "description": "The scope of the object. `global` and `enterprise_*` scopes are supported.\n\nThe `global` scope contains the template with a key of `properties`,\nwhile the enterprise scope pertains to custom templates created within\nthe enterprise.\n\n The ID of the enterprise will be appended to the enterprise scope.",
+                    "description": "The scope of the metadata template, which can be either `global` for\ntemplates that are available to any Box enterprise, or `enterprise_*` for\ntemplates that have been created within the enterprise in question.\n\n The ID of the enterprise will be appended to the enterprise scope.",
                     "example": "enterprise_123456"
                   },
                   "templateKey": {
                     "type": "string",
                     "example": "productInfo",
-                    "description": "A unique identifier for the template. The identifier must be unique across\nthe scope of the enterprise to which the metadata template is being\napplied.",
+                    "description": "A unique identifier for the template. This identifier is unique across\nthe scope of the enterprise to which the metadata template is being\napplied.",
                     "maxLength": 64,
                     "pattern": "^[a-zA-Z_][-a-zA-Z0-9_]*$"
                   },
@@ -4977,12 +5025,12 @@
                   "hidden": {
                     "type": "boolean",
                     "example": true,
-                    "description": "Whether this template is hidden in the UI",
+                    "description": "Defines if this field is visible in the Box web app UI.",
                     "default": false
                   },
                   "fields": {
                     "type": "array",
-                    "description": "The ordered set of key:value pairs for the template.",
+                    "description": "An ordered list of template fields which are part of the template. Each\nfield can be a regular text field, date field, number field, as well as a\nsingle or multi-select list.",
                     "items": {
                       "$ref": "#/components/schemas/MetadataTemplateField"
                     }
@@ -16288,13 +16336,13 @@
             "properties": {
               "scope": {
                 "type": "string",
-                "description": "The scope of the object. `global` and `enterprise_*` scopes are supported.\n\nThe `global` scope contains the template with a key of `properties`,\nwhile the enterprise scope pertains to custom templates created within\nthe enterprise.\n\n The ID of the enterprise will be appended to the enterprise scope.",
+                "description": "The scope of the metadata template, which can be either `global` for\ntemplates that are available to any Box enterprise, or `enterprise_*` for\ntemplates that have been created within the enterprise in question.\n\n The ID of the enterprise will be appended to the enterprise scope.",
                 "example": "enterprise_123456"
               },
               "templateKey": {
                 "type": "string",
                 "example": "productInfo",
-                "description": "A unique identifier for the template. The identifier must be unique across\nthe scope of the enterprise to which the metadata template is being\napplied.",
+                "description": "A unique identifier for the template. This identifier is unique across\nthe scope of the enterprise to which the metadata template is being\napplied.",
                 "maxLength": 64,
                 "pattern": "^[a-zA-Z_][-a-zA-Z0-9_]*$"
               },
@@ -16307,12 +16355,12 @@
               "hidden": {
                 "type": "boolean",
                 "example": true,
-                "description": "Whether this template is hidden in the UI",
+                "description": "Defines if this field is visible in the Box web app UI.",
                 "default": false
               },
               "fields": {
                 "type": "array",
-                "description": "The ordered set of key:value pairs for the template.",
+                "description": "An ordered list of template fields which are part of the template. Each\nfield can be a regular text field, date field, number field, as well as a\nsingle or multi-select list.",
                 "items": {
                   "$ref": "#/components/schemas/MetadataTemplateField"
                 }
@@ -16329,8 +16377,17 @@
             "properties": {
               "id": {
                 "type": "string",
-                "example": "f7a9891f",
-                "description": "The ID of the template"
+                "example": "58063d82-4128-7b43-bba9-92f706befcdf",
+                "description": "The ID of the metadata template."
+              },
+              "type": {
+                "type": "string",
+                "description": "`metadata_template`",
+                "example": "metadata_template",
+                "enum": [
+                  "metadata_template"
+                ],
+                "nullable": false
               }
             }
           }
@@ -16423,6 +16480,11 @@
             "items": {
               "$ref": "#/components/schemas/MetadataTemplateFieldOption"
             }
+          },
+          "id": {
+            "type": "string",
+            "example": "822227e0-47a5-921b-88a8-494760b2e6d2",
+            "description": "The ID of the metadata template field."
           }
         }
       },
@@ -16433,7 +16495,7 @@
         "properties": {
           "id": {
             "type": "string",
-            "example": "f7a9895f",
+            "example": "45dc2849-a4a7-40a9-a751-4a699a589190",
             "description": "The ID of the option"
           },
           "key": {
