@@ -1999,7 +1999,7 @@
           },
           {
             "name": "marker",
-            "description": "The position marker at which to begin the response.",
+            "description": "Defines the position marker at which to begin returning results. This is\nused when paginating using marker-based pagination.\n\nThis requires `usemarker` to be set to `true`.",
             "in": "query",
             "required": false,
             "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
@@ -3589,6 +3589,16 @@
             }
           },
           {
+            "name": "marker",
+            "description": "Defines the position marker at which to begin returning results. This is\nused when paginating using marker-based pagination.\n\nThis requires `usemarker` to be set to `true`.",
+            "in": "query",
+            "required": false,
+            "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "offset",
             "description": "The offset of the item at which to begin the response.",
             "in": "query",
@@ -3614,16 +3624,6 @@
             }
           },
           {
-            "name": "marker",
-            "description": "Paginate using marker-based pagination. Defines the position marker at\nwhich to begin the response.\n\nThis requires `usemarker` to be set to `true`.",
-            "in": "query",
-            "required": false,
-            "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
             "name": "sort",
             "description": "Defines the **second** attribute by which items\nare sorted.\n\nItems are always sorted by their `type` first, with\nfolders listed before files, and files listed\nbefore web links.\n\nThis parameter is not supported for marker-based pagination\non the root folder (the folder with an ID of `0`).",
             "in": "query",
@@ -3641,7 +3641,7 @@
           },
           {
             "name": "direction",
-            "description": "The direction to sort items in.",
+            "description": "The direction to sort results in. This can be either in alphabetical ascending\n(`ASC`) or descending (`DESC`) order.",
             "in": "query",
             "required": false,
             "example": "ASC",
@@ -4444,7 +4444,7 @@
           "Trash"
         ],
         "x-box-reference-category": "trashed_items",
-        "description": "Retrieves the files and folders that have been moved\nto the trash.\n\nAny attribute in the full files or folders objects can be passed\nin with the `fields` parameter to retrieve those specific\nattributes that are not returned by default.",
+        "description": "Retrieves the files and folders that have been moved\nto the trash.\n\nAny attribute in the full files or folders objects can be passed\nin with the `fields` parameter to retrieve those specific\nattributes that are not returned by default.\n\nThis endpoint defaults to use offset-based pagination, yet also supports\nmarker-based pagination using the `marker` parameter.",
         "parameters": [
           {
             "name": "fields",
@@ -4484,6 +4484,56 @@
               "format": "int64",
               "default": 0
             }
+          },
+          {
+            "name": "usemarker",
+            "description": "Specifies whether to use marker-based pagination instead of\noffset-based pagination. Only one pagination method can\nbe used at a time.\n\nBy setting this value to true, the API will return a `marker` field\nthat can be passed as a parameter to this endpoint to get the next\npage of the response.",
+            "in": "query",
+            "required": false,
+            "example": true,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "marker",
+            "description": "Defines the position marker at which to begin returning results. This is\nused when paginating using marker-based pagination.\n\nThis requires `usemarker` to be set to `true`.",
+            "in": "query",
+            "required": false,
+            "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "direction",
+            "description": "The direction to sort results in. This can be either in alphabetical ascending\n(`ASC`) or descending (`DESC`) order.",
+            "in": "query",
+            "required": false,
+            "example": "ASC",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ASC",
+                "DESC"
+              ]
+            }
+          },
+          {
+            "name": "sort",
+            "description": "Defines the **second** attribute by which items\nare sorted.\n\nItems are always sorted by their `type` first, with\nfolders listed before files, and files listed\nbefore web links.\n\nThis parameter is not supported when using marker-based pagination.",
+            "in": "query",
+            "required": false,
+            "example": 1000,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "id",
+                "name",
+                "date",
+                "size"
+              ]
+            }
           }
         ],
         "responses": {
@@ -4493,6 +4543,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Items"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Returns an error if some of the parameters are missing or\ninvalid.\n\n* `invalid_parameter` can appear when the `sort`, `direction` or `offset`\nparameter is provided when using marker based pagination, or when the\n`marker` parameter is provided but `usemarker` is set to `false` or\n`null`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
                 }
               }
             }
@@ -4904,7 +4964,7 @@
         "parameters": [
           {
             "name": "marker",
-            "description": "The position marker at which to begin the response.",
+            "description": "Defines the position marker at which to begin returning results. This is\nused when paginating using marker-based pagination.\n\nThis requires `usemarker` to be set to `true`.",
             "in": "query",
             "required": false,
             "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
@@ -4952,7 +5012,7 @@
         "parameters": [
           {
             "name": "marker",
-            "description": "The position marker at which to begin the response.",
+            "description": "Defines the position marker at which to begin returning results. This is\nused when paginating using marker-based pagination.\n\nThis requires `usemarker` to be set to `true`.",
             "in": "query",
             "required": false,
             "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
@@ -5178,7 +5238,7 @@
           },
           {
             "name": "marker",
-            "description": "The position marker at which to begin the response.",
+            "description": "Defines the position marker at which to begin returning results. This is\nused when paginating using marker-based pagination.\n\nThis requires `usemarker` to be set to `true`.",
             "in": "query",
             "required": false,
             "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
@@ -8987,7 +9047,7 @@
         "parameters": [
           {
             "name": "marker",
-            "description": "The position marker at which to begin the response.",
+            "description": "Defines the position marker at which to begin returning results. This is\nused when paginating using marker-based pagination.\n\nThis requires `usemarker` to be set to `true`.",
             "in": "query",
             "required": false,
             "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
@@ -9961,7 +10021,7 @@
           },
           {
             "name": "marker",
-            "description": "The position marker at which to begin the response.",
+            "description": "Defines the position marker at which to begin returning results. This is\nused when paginating using marker-based pagination.\n\nThis requires `usemarker` to be set to `true`.",
             "in": "query",
             "required": false,
             "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
@@ -10320,7 +10380,7 @@
           },
           {
             "name": "marker",
-            "description": "The position marker at which to begin the response.",
+            "description": "Defines the position marker at which to begin returning results. This is\nused when paginating using marker-based pagination.\n\nThis requires `usemarker` to be set to `true`.",
             "in": "query",
             "required": false,
             "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
@@ -10534,7 +10594,7 @@
           },
           {
             "name": "marker",
-            "description": "The position marker at which to begin the response.",
+            "description": "Defines the position marker at which to begin returning results. This is\nused when paginating using marker-based pagination.\n\nThis requires `usemarker` to be set to `true`.",
             "in": "query",
             "required": false,
             "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
@@ -10833,7 +10893,7 @@
           },
           {
             "name": "marker",
-            "description": "The position marker at which to begin the response.",
+            "description": "Defines the position marker at which to begin returning results. This is\nused when paginating using marker-based pagination.\n\nThis requires `usemarker` to be set to `true`.",
             "in": "query",
             "required": false,
             "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
@@ -11120,7 +11180,7 @@
           },
           {
             "name": "marker",
-            "description": "The position marker at which to begin the response.",
+            "description": "Defines the position marker at which to begin returning results. This is\nused when paginating using marker-based pagination.\n\nThis requires `usemarker` to be set to `true`.",
             "in": "query",
             "required": false,
             "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
@@ -11200,7 +11260,7 @@
           },
           {
             "name": "marker",
-            "description": "The position marker at which to begin the response.",
+            "description": "Defines the position marker at which to begin returning results. This is\nused when paginating using marker-based pagination.\n\nThis requires `usemarker` to be set to `true`.",
             "in": "query",
             "required": false,
             "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
@@ -11319,7 +11379,7 @@
           },
           {
             "name": "marker",
-            "description": "The position marker at which to begin the response.",
+            "description": "Defines the position marker at which to begin returning results. This is\nused when paginating using marker-based pagination.\n\nThis requires `usemarker` to be set to `true`.",
             "in": "query",
             "required": false,
             "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
@@ -11342,7 +11402,7 @@
           },
           {
             "name": "direction",
-            "description": "The direction to sort items in.",
+            "description": "The direction to sort results in. This can be either in alphabetical ascending\n(`ASC`) or descending (`DESC`) order.",
             "in": "query",
             "required": false,
             "example": "ASC",
@@ -11759,7 +11819,7 @@
         "parameters": [
           {
             "name": "marker",
-            "description": "The position marker at which to begin the response.",
+            "description": "Defines the position marker at which to begin returning results. This is\nused when paginating using marker-based pagination.\n\nThis requires `usemarker` to be set to `true`.",
             "in": "query",
             "required": false,
             "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
@@ -11918,7 +11978,7 @@
         "parameters": [
           {
             "name": "marker",
-            "description": "The position marker at which to begin the response.",
+            "description": "Defines the position marker at which to begin returning results. This is\nused when paginating using marker-based pagination.\n\nThis requires `usemarker` to be set to `true`.",
             "in": "query",
             "required": false,
             "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
@@ -12089,7 +12149,7 @@
           },
           {
             "name": "marker",
-            "description": "The position marker at which to begin the response.",
+            "description": "Defines the position marker at which to begin returning results. This is\nused when paginating using marker-based pagination.\n\nThis requires `usemarker` to be set to `true`.",
             "in": "query",
             "required": false,
             "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
@@ -12172,7 +12232,7 @@
         "parameters": [
           {
             "name": "marker",
-            "description": "The position marker at which to begin the response.",
+            "description": "Defines the position marker at which to begin returning results. This is\nused when paginating using marker-based pagination.\n\nThis requires `usemarker` to be set to `true`.",
             "in": "query",
             "required": false,
             "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
