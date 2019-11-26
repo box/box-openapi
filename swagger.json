@@ -3099,7 +3099,7 @@
                   "type": "array",
                   "description": "An ordered list of template fields which are part of the template.\nEach field can be a regular text field, date field, number field,\nas well as a single or multi-select list.",
                   "items": {
-                    "$ref": "#/definitions/MetadataTemplateField"
+                    "$ref": "#/definitions/MetadataTemplateField--Request"
                   }
                 },
                 "copyInstanceOnItemCopy": {
@@ -9845,18 +9845,23 @@
         }
       ]
     },
-    "MetadataTemplateField": {
-      "title": "Metadata Template Field",
-      "description": "An ordered set of key-value pairs that are part of a\nmetadata template",
+    "MetadataTemplateField--Request": {
+      "title": "Metadata Template Field (Request)",
+      "description": "A field within a metadata template. Fields can be a simple text, date, or\nnumber field, or a list of options.",
+      "required": [
+        "type",
+        "key",
+        "displayName"
+      ],
       "properties": {
         "type": {
           "type": "string",
-          "description": "The data type of the field's value",
+          "description": "The type of field. The basic fields are a `string` field for text, a\n`float` field for numbers, and a `date` fields to present the user with a\ndate-time picker.\n\nAdditionally, metadata templates support an `enum` field for a basic list\nof items, and ` multiSelect` field for a similar list of items where the\nuser can select more than one value.",
           "enum": [
             "string",
-            "enum",
             "float",
             "date",
+            "enum",
             "multiSelect"
           ]
         },
@@ -9867,27 +9872,24 @@
         },
         "displayName": {
           "type": "string",
-          "description": "The display name of the field.",
+          "description": "The display name of the field as it is shown to the user in the web and\nmobile apps.",
           "maxLength": 4096
         },
         "description": {
           "type": "string",
-          "description": "A description of the field.",
+          "description": "A description of the field. This is not shown to the user.",
           "maxLength": 4096
         },
         "hidden": {
           "type": "boolean",
-          "description": "Whether this template is hidden in the UI"
+          "description": "Whether this field is hidden in the UI for the user and can only be set\nthrough the API instead."
         },
         "options": {
+          "description": "A list of options for this field. This is used in combination with the\n`enum` and `multiSelect` field types.",
           "type": "array",
           "items": {
             "$ref": "#/definitions/MetadataTemplateFieldOption"
           }
-        },
-        "id": {
-          "type": "string",
-          "description": "The ID of the metadata template field."
         }
       }
     },
@@ -12992,19 +12994,45 @@
         }
       ]
     },
-    "MetadataTemplateFieldOption": {
-      "title": "Metadata Template Field Option",
-      "description": "For type `enum` and `multiSelect`, one of the potential values\nthat can be selected.",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "The ID of the option"
+    "MetadataTemplateField": {
+      "title": "Metadata Template Field (Response)",
+      "description": "A field within a metadata template. Fields can be a simple text, date, or\nnumber field, or a list of options.",
+      "allOf": [
+        {
+          "$ref": "#/definitions/MetadataTemplateField--Request"
         },
-        "key": {
-          "description": "The text value of the option",
-          "type": "string"
+        {
+          "required": []
+        },
+        {
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "The unique ID of the metadata template field."
+            }
+          }
         }
-      }
+      ]
+    },
+    "MetadataTemplateFieldOption": {
+      "title": "Metadata Template Field Option (Response)",
+      "description": "An option for a Metadata Template Field.\n\nOptions are only present for fields of type `enum` and `multiSelect`.\nOptions represent the value(s) a user can select for the field either\nthrough the UI or through the API.",
+      "allOf": [
+        {
+          "$ref": "#/definitions/MetadataTemplateFieldOption--Request"
+        },
+        {
+          "required": []
+        },
+        {
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "The internal unique identifier of the the option."
+            }
+          }
+        }
+      ]
     },
     "Comment--Standard": {
       "title": "Comment (Standard)",
@@ -13867,6 +13895,19 @@
           "enum": [
             "folder"
           ]
+        }
+      }
+    },
+    "MetadataTemplateFieldOption--Request": {
+      "title": "Metadata Template Field Option (Request)",
+      "description": "An option for a Metadata Template Field.\n\nOptions only need to be provided for fields of type `enum` and `multiSelect`.\nOptions represent the value(s) a user can select for the field either through\nthe UI or through the API.",
+      "required": [
+        "key"
+      ],
+      "properties": {
+        "key": {
+          "description": "The text value of the option. This represents both the display name of the\noption and the internal key used when updating templates.",
+          "type": "string"
         }
       }
     },
