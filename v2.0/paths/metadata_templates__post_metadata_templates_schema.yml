@@ -11,12 +11,74 @@ description: |-
   files and folders.
 
 x-box-reference-category: metadata_templates
+x-box-requires-admin: true
+x-box-sanitized: true
 
 requestBody:
   content:
     application/json:
       schema:
-        $ref: '../attributes/metadata_template--writable.yml'
+        required:
+          - scope
+          - displayName
+        properties:
+          scope:
+            type: string
+            description: |-
+              The scope of the metadata template to create. Applications can
+              only create templates for use within the authenticated user's
+              enterprise.
+
+              This value needs to be set to `enterprise`, or alternatively to
+              `enterprise_*` where `*` is the ID of the enterprise.
+            example: enterprise
+
+          templateKey:
+            type: string
+            example: productInfo
+            description: |-
+              A unique identifier for the template. This identifier needs to be
+              unique across the enterprise for which the metadata template is
+              being created.
+
+              When not provided, the API will create a unique `templateKey`
+              based on the value of the `displayName`.
+            maxLength: 64
+            pattern: '^[a-zA-Z_][-a-zA-Z0-9_]*$'
+
+          displayName:
+            type: string
+            description: |-
+              The display name of the template.
+            maxLength: 4096
+            example: Product Info
+
+          hidden:
+            type: boolean
+            example: true
+            description: |-
+              Defines if this template is visible in the Box web app UI, or if
+              it is purely intended for usage through the API.
+            default: false
+
+          fields:
+            type: array
+            description: |-
+              An ordered list of template fields which are part of the template.
+              Each field can be a regular text field, date field, number field,
+              as well as a single or multi-select list.
+            items:
+              $ref: '../attributes/metadata_fields--writable.yml'
+
+          copyInstanceOnItemCopy:
+            type: boolean
+            description: |-
+              Whether or not to copy any metadata attached to a file or folder
+              when it is copied. By default, metadata is not copied along with a
+              file or folder when it is copied.
+            default: false
+            example: true
+
 
 responses:
   201:
@@ -28,7 +90,10 @@ responses:
 
   400:
     description: |-
-      Request body contains an invalid metadata schema.
+      Returned if the request parameters or body is not valid.
+
+      * `bad_request` when the body does not contain a valid request. In many
+      cases this response will include extra details on what fields are missing.
     content:
       application/json:
         schema:
@@ -36,8 +101,10 @@ responses:
 
   403:
     description: |-
-      Request body contains a scope that the user is not allowed to
-      create a template for.
+      Returned when the user does not have the permission to create the metadata
+      template. This can happen for a few reasons, most commonly when the user
+      does not have (co-)admin permissions, or the application tries to create a
+      template with the `global` scope.
     content:
       application/json:
         schema:
