@@ -1,0 +1,87 @@
+---
+operationId: get_folders_id_items
+
+summary: Get items in folder
+
+tags:
+  - Folders
+  - Files
+
+x-box-reference-category: folders
+x-box-sanitized: true
+x-box-enable-explorer: true
+
+description: |-
+  Retrieves a page of items in a folder. These items can be files,
+  folders, and web links.
+
+  To request more information about the folder itself, like its size,
+  please use the [Get a folder](#get-folders-id) endpoint instead.
+
+parameters:
+  - $ref: '../attributes/folder_id.yml'
+  - $ref: '../attributes/fields.yml'
+  - $ref: '../attributes/usemarker.yml'
+  - $ref: '../attributes/marker.yml'
+  - $ref: '../attributes/offset.yml'
+  - $ref: '../attributes/limit.yml'
+
+  - name: sort
+    description: |-
+      Defines the **second** attribute by which items
+      are sorted.
+
+      Items are always sorted by their `type` first, with
+      folders listed before files, and files listed
+      before web links.
+
+      This parameter is not supported for marker-based pagination
+      on the root folder (the folder with an ID of `0`).
+    in: query
+    required: false
+    example: id
+    schema:
+      type: string
+      enum:
+        - id
+        - name
+        - date
+        - size
+
+  - $ref: '../attributes/direction.yml'
+
+responses:
+  200:
+    description:
+      Returns a collection of files, folders, and web links
+      contained in a folder.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/Items'
+
+  403:
+    description: |-
+      Returned when the access token provided in the `Authorization` header
+      is not recognized or not provided.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
+
+  404:
+    description: |-
+      Returned if the folder is not found, or the user does not
+      have access to the folder.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
+
+  405:
+    description: |-
+      Returned if the `folder_id` is not in a recognized format.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'

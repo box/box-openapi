@@ -2,26 +2,26 @@
   "name": "box-openapi",
   "version": "3.0.2",
   "description": "The Open API specification for the Box Platform API.",
-  "main": "v2.0/openapi.json",
   "scripts": {
     "pretest": "concurrently 'yarn lint:yaml' 'yarn build:dev'",
-    "test": "concurrently 'yarn:test:spelling'",
-    "test:spelling": "json-schema-spell-checker -a -n -d v2.0/dictionaries/en_US -f 'description,title' ./dev/openapi.json",
-    "lint:yaml": "yamllint v2.0/",
+    "test": "concurrently 'yarn:test:spectral' 'yarn:test:spelling'",
+    "test:spectral": "spectral lint ./src/dev/openapi.json",
+    "test:spelling": "json-schema-spell-checker -a -n -d content/dictionaries/en_US -f 'description,title' ./src/dev/openapi.json",
+    "lint:yaml": "yamllint content/",
     "watch": "concurrently 'npm:watch:*'",
-    "watch:tests": "watch 'npm test' v2.0 tests",
-    "watch:build": "watch 'npm run build:dev' v2.0",
+    "watch:tests": "watch 'npm test' content tests",
+    "watch:build": "watch 'npm run build:dev' content",
     "clean": "rm -rf build",
     "prebuild": "npm run clean & npm run build:index",
-    "build": "node -e 'require(\"./tests/helpers/specLoader\").writeSpecification(\"./build/openapi\")'",
-    "build:dev": "node -e 'require(\"./tests/helpers/specLoader\").writeSpecification(\"dev\")'",
+    "build": "node -e 'require(\"./src/specLoader\").writeSpecification(\"./build/openapi\")'",
+    "build:dev": "node -e 'require(\"./src/specLoader\").writeSpecification(\"src/dev\")'",
     "build:index": "webpack --config webpack.dev.js",
-    "build:copy": "cp dev/index.build.js dev/index.html dev/auth.html build/openapi",
-    "build:swagger": "node -e 'require(\"./tests/helpers/swaggerConverter\").writeSpecification(\"./build/swagger\")'",
+    "build:copy": "cp src/dev/index.build.js src/dev/index.html src/dev/auth.html build/openapi",
+    "build:swagger": "node -e 'require(\"./src/swaggerConverter\").writeSpecification(\"./build/swagger\")'",
     "postbuild": "npm run build:copy",
     "dev-server": "webpack-dev-server --config webpack.dev.js",
     "start": "concurrently 'npm:dev-server' 'npm:watch'",
-    "notify:downstream": "node -e 'require(\"./tests/scripts/downstreamNotifier\").notify()'"
+    "notify:downstream": "node -e 'require(\"./src/downstreamNotifier\").notify()'"
   },
   "repository": {
     "type": "git",
@@ -68,7 +68,7 @@
   },
   "jest": {
     "setupFilesAfterEnv": [
-      "./tests/helpers/matchers.js"
+      "./src/helpers/matchers.js"
     ]
   },
   "private": true

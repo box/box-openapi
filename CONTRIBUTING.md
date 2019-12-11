@@ -51,7 +51,7 @@ watch for changes, and automatically run the linter, spell checker, and all othe
 ### How To: Add a resource
 
 Request and response resources are located in the
-`/v2.0/resources/` folder. They are written in [YAML](https://en.wikipedia.org/wiki/YAML).
+`/content/resources/` folder. They are written in [YAML](https://en.wikipedia.org/wiki/YAML).
 
 Before editing any fules, run `yarn start` to start the dev server, Swagger UI
 and tests watcher. Alternatively, just run `npm run watch` to run automatically
@@ -59,7 +59,7 @@ watch and run the linter and tests.
 
 Resources are automatically linted by `yamllinter`, ensuring that they are valid
 YAML. Resources are not automatically included into the spec, as
-you will need to explicitly add them to the `v2.0/resources/_index.json` file.
+you will need to explicitly add them to the `content/resources/_index.json` file.
 
 Once resources have been added to this file, they are automatically tested
 to ensure they are valid OpenAPI Specification 3.0, as well spell checking, and
@@ -82,7 +82,7 @@ Some useful resources:
 ### How To: Add an endpoint
 
 Endpoints are located in the
-`/v2.0/paths/` folder. They are written in [YAML](https://en.wikipedia.org/wiki/YAML).
+`/content/paths/` folder. They are written in [YAML](https://en.wikipedia.org/wiki/YAML).
 
 Before editing any fules, run `npm start` to start the dev server, Swagger UI
 and tests watcher. Alternatively, just run `npm run watch` to run automatically
@@ -90,7 +90,7 @@ watch and run the linter and tests.
 
 Endpoints are automatically linted by `yamllinter`, ensuring that they are valid
 YAML. Resources are not automatically included into the spec, as
-you will need to explicitly add them to the `v2.0/paths/_index.json` file.
+you will need to explicitly add them to the `content/paths/_index.json` file.
 
 Once paths have been added to this file, they are automatically tested
 to ensure they are valid OpenAPI Specification 3.0, as well spell checking, and

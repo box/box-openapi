@@ -1,0 +1,73 @@
+---
+operationId: get_folders_trash_items
+
+summary: List trashed items
+
+tags:
+  - Folders
+  - Trash
+
+x-box-reference-category: trashed_items
+
+description: |-
+  Retrieves the files and folders that have been moved
+  to the trash.
+
+  Any attribute in the full files or folders objects can be passed
+  in with the `fields` parameter to retrieve those specific
+  attributes that are not returned by default.
+
+  This endpoint defaults to use offset-based pagination, yet also supports
+  marker-based pagination using the `marker` parameter.
+
+parameters:
+  - $ref: '../attributes/fields.yml'
+  - $ref: '../attributes/limit.yml'
+  - $ref: '../attributes/offset.yml'
+  - $ref: '../attributes/usemarker.yml'
+  - $ref: '../attributes/marker.yml'
+  - $ref: '../attributes/direction.yml'
+
+  - name: sort
+    description: |-
+      Defines the **second** attribute by which items
+      are sorted.
+
+      Items are always sorted by their `type` first, with
+      folders listed before files, and files listed
+      before web links.
+
+      This parameter is not supported when using marker-based pagination.
+    in: query
+    required: false
+    example: id
+    schema:
+      type: string
+      enum:
+        - id
+        - name
+        - date
+        - size
+
+responses:
+  200:
+    description: |-
+      Returns a list of items that have been deleted
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/Items'
+
+  400:
+    description: |-
+      Returns an error if some of the parameters are missing or
+      invalid.
+
+      * `invalid_parameter` can appear when the `sort`, `direction` or `offset`
+      parameter is provided when using marker based pagination, or when the
+      `marker` parameter is provided but `usemarker` is set to `false` or
+      `null`.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
