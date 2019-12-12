@@ -1,27 +1,27 @@
 {
   "name": "box-openapi",
   "version": "3.0.2",
-  "description": "The Open API specification for the Box Platform API.",
+  "description": "Box Platform OpenAPI Specification",
   "scripts": {
     "pretest": "concurrently 'yarn lint:yaml' 'yarn build:dev'",
     "test": "concurrently 'yarn:test:spectral' 'yarn:test:spelling'",
-    "test:spectral": "spectral lint ./src/dev/openapi.json",
+    "test:spectral": "spectral lint ./src/dev/openapi.json -v",
     "test:spelling": "json-schema-spell-checker -a -n -d content/dictionaries/en_US -f 'description,title' ./src/dev/openapi.json",
     "lint:yaml": "yamllint content/",
     "watch": "concurrently 'npm:watch:*'",
-    "watch:tests": "watch 'npm test' content tests",
+    "watch:tests": "watch 'npm test' content src/scripts src/spectral",
     "watch:build": "watch 'npm run build:dev' content",
     "clean": "rm -rf build",
     "prebuild": "npm run clean & npm run build:index",
-    "build": "node -e 'require(\"./src/specLoader\").writeSpecification(\"./build/openapi\")'",
-    "build:dev": "node -e 'require(\"./src/specLoader\").writeSpecification(\"src/dev\")'",
+    "build": "node -e 'require(\"./src/scripts/specLoader\").writeSpecification(\"./build/openapi\")'",
+    "build:dev": "node -e 'require(\"./src/scripts/specLoader\").writeSpecification(\"src/dev\")'",
     "build:index": "webpack --config webpack.dev.js",
     "build:copy": "cp src/dev/index.build.js src/dev/index.html src/dev/auth.html build/openapi",
-    "build:swagger": "node -e 'require(\"./src/swaggerConverter\").writeSpecification(\"./build/swagger\")'",
+    "build:swagger": "node -e 'require(\"./src/scripts/swaggerConverter\").writeSpecification(\"./build/swagger\")'",
     "postbuild": "npm run build:copy",
     "dev-server": "webpack-dev-server --config webpack.dev.js",
     "start": "concurrently 'npm:dev-server' 'npm:watch'",
-    "notify:downstream": "node -e 'require(\"./src/downstreamNotifier\").notify()'"
+    "notify:downstream": "node -e 'require(\"./src/scripts/downstreamNotifier\").notify()'"
   },
   "repository": {
     "type": "git",
@@ -34,42 +34,29 @@
     "api",
     "box"
   ],
-  "author": "Box Developer Relations <devrel@box.com>",
+  "author": "Box, Inc <developer@box.com>",
   "license": "Apache-2.0",
   "bugs": {
     "url": "https://github.com/box/box-openapi/issues"
   },
-  "homepage": "https://developer.box.com/reference",
+  "homepage": "https://developer.box.com/",
   "dependencies": {
     "@stoplight/json-ref-resolver": "^3.0.1",
     "@stoplight/spectral": "^4.2.0",
     "axios": "^0.19.0",
-    "change-case": "^4.1.0",
-    "colors": "^1.4.0",
     "concurrently": "^5.0.0",
     "css-loader": "^3.0.0",
+    "eslint-plugin-json": "^2.0.1",
     "fs-extra": "^8.1.0",
-    "glob": "^7.1.6",
-    "jest": "^24.7.1",
     "js-yaml": "^3.13.1",
     "json-schema-spell-checker": "^1.0.1",
     "jsonpath": "^1.0.2",
-    "remark": "^11.0.1",
-    "remark-plain-text": "^0.2.0",
-    "spellchecker": "^3.5.2",
-    "strip-markdown": "^3.0.3",
     "style-loader": "^1.0.0",
     "swagger-ui": "^3.24.2",
-    "swagger2openapi": "^5.2.5",
     "tslib": "^1.9.3",
     "webpack": "^4.41.2",
     "webpack-cli": "^3.3.10",
     "webpack-dev-server": "^3.9.0"
-  },
-  "jest": {
-    "setupFilesAfterEnv": [
-      "./src/helpers/matchers.js"
-    ]
   },
   "private": true
 }
