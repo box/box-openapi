@@ -48,10 +48,10 @@ yarn start
 This will open a Swagger UI preview on [localhost:8080/](http://localhost:8080/),
 watch for changes, and automatically run the linter, spell checker, and all other tests.
 
-### How To: Add a resource
+### How To: Add a response resource
 
-Request and response resources are located in the
-`/content/resources/` folder. They are written in [YAML](https://en.wikipedia.org/wiki/YAML).
+Response resources are located in the
+`/content/responses/` folder. They are written in [YAML](https://en.wikipedia.org/wiki/YAML).
 
 Before editing any fules, run `yarn start` to start the dev server, Swagger UI
 and tests watcher. Alternatively, just run `npm run watch` to run automatically
@@ -59,7 +59,7 @@ watch and run the linter and tests.
 
 Resources are automatically linted by `yamllinter`, ensuring that they are valid
 YAML. Resources are not automatically included into the spec, as
-you will need to explicitly add them to the `content/resources/_index.json` file.
+you will need to explicitly add them to the `content/responses/_index.json` file.
 
 Once resources have been added to this file, they are automatically tested
 to ensure they are valid OpenAPI Specification 3.0, as well spell checking, and
