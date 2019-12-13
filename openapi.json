@@ -65,7 +65,7 @@
           },
           {
             "name": "redirect_uri",
-            "description": "The URL to which Box redirects the browser after the user has granted\nor rejected the application permission. This URL must match the\nredirect URL in the configuration of your application. It must be a\nvalid HTTPS URL and it needs to be able to handle the redirection to\ncomplete the next step in the OAuth 2.0 flow.",
+            "description": "The URL to which Box redirects the browser after the user has granted\nor denied the application permission. This URL must match the\nredirect URL in the configuration of your application. It must be a\nvalid HTTPS URL and it needs to be able to handle the redirection to\ncomplete the next step in the OAuth 2.0 flow.",
             "in": "query",
             "example": "http://example.com/auth/callback",
             "required": true,
@@ -76,7 +76,7 @@
           },
           {
             "name": "state",
-            "description": "A custom string of your choice. Box will pass the same string to\nthe redirect URL when authentication is complete. This parameter\ncan be used to identify a user on redirect, as well as protect\nagainst hijacked sessions and other attacks.",
+            "description": "A custom string of your choice. Box will pass the same string to\nthe redirect URL when authentication is complete. This parameter\ncan be used to identify a user on redirect, as well as protect\nagainst hijacked sessions and other exploits.",
             "in": "query",
             "example": "my_state",
             "required": false,
@@ -593,7 +593,7 @@
                             "type": "string",
                             "format": "date-time",
                             "example": "2012-12-12T10:53:43-08:00",
-                            "description": "The timestamp at which this shared link will\nbe disabled. This field can only be set by\nusers with paid accounts."
+                            "description": "The timestamp at which this shared link will\nexpire. This field can only be set by\nusers with paid accounts."
                           },
                           "permissions": {
                             "type": "object",
@@ -645,7 +645,7 @@
                     "type": "object",
                     "properties": {
                       "can_download": {
-                        "description": "Defines who is allowed to download this file. The possible\nvalues are either `open` for everyone or `company` for just\nthe other members of the user's enterprise.\n\nThis setting overrides the download permissions that are\nnormally part of the `role` of a collaboration. When set to\n`company`, this essentially removes the download option for\nexternal users with `viewer` or `editor` a roles.",
+                        "description": "Defines who is allowed to download this file. The possible\nvalues are either `open` for everyone or `company` for\nthe other members of the user's enterprise.\n\nThis setting overrides the download permissions that are\nnormally part of the `role` of a collaboration. When set to\n`company`, this essentially removes the download option for\nexternal users with `viewer` or `editor` a roles.",
                         "type": "string",
                         "example": "open",
                         "enum": [
@@ -1334,7 +1334,7 @@
             }
           },
           "400": {
-            "description": "Returns an error if some of the parameters are missing or\ninvalid.\n\n* `missing_destination`: No `folder_id` was provided\n* `invalid_folder_id`: `folder_id` is invalid\n* `invalid_file_name`: `file_name` is invalid\n* `missing_file_size`: `file_size` was not provided\n* `invalid_file_size`: `file_size` was not a valid number\n* `file_size_too_small`: `file_size` is below minimum file size for\n  uploads via this API\n* `missing_file_name`: `file_name` was not provided",
+            "description": "Returns an error if some of the parameters are missing or\nnot valid.\n\n* `missing_destination`: No `folder_id` was provided\n* `invalid_folder_id`: `folder_id` is not valid\n* `invalid_file_name`: `file_name` is not valid\n* `missing_file_size`: `file_size` was not provided\n* `invalid_file_size`: `file_size` was not a valid number\n* `file_size_too_small`: `file_size` is below minimum file size for\n  uploads via this API\n* `missing_file_name`: `file_name` was not provided",
             "content": {
               "application/json": {
                 "schema": {
@@ -1579,7 +1579,7 @@
             }
           },
           "412": {
-            "description": "Returns an error if a precondition failed.",
+            "description": "Returns an error if a precondition was not met.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1955,7 +1955,7 @@
             "description": "Returns an empty response when the `If-None-Match` header matches\nthe current `etag` value of the file. This indicates that the file\nhas not changed since it was last requested."
           },
           "400": {
-            "description": "Returns an error if some of the parameters are missing or\ninvalid.\n\n* `bad_request` when a parameter is missing.",
+            "description": "Returns an error if some of the parameters are missing or\nnot valid.\n\n* `bad_request` when a parameter is missing.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2130,7 +2130,7 @@
             }
           },
           "400": {
-            "description": "Returns an error if some of the parameters are missing or\ninvalid.\n\n* `requested_preview_unavailable` - an invalid dimension was\n  requested. This will happen if the dimension requested is\n  larger or smaller than the available file sizes for the thumbnail\n  format, or when when any of the size constraints contradict\n  each other.",
+            "description": "Returns an error if some of the parameters are missing or\nnot valid.\n\n* `requested_preview_unavailable` - an incorrect dimension was\n  requested. This will happen if the dimension requested is\n  larger or smaller than the available file sizes for the thumbnail\n  format, or when when any of the size constraints contradict\n  each other.",
             "content": {
               "application/json": {
                 "schema": {
@@ -3047,7 +3047,7 @@
           "File & Folder Metadata"
         ],
         "x-box-reference-category": "file_metadata",
-        "description": "Updates a piece of metadata on a file.\n\nThe metadata instance can only be updated if the instance\nalready exists. When editing metadata, only values that adhere to the\nmetadata template schema will be accepted.\n\nThe update is applied atomically. If any errors occur during the\napplication of the operations, the metadata instance remains unchanged.",
+        "description": "Updates a piece of metadata on a file.\n\nThe metadata instance can only be updated if the instance\nalready exists. When editing metadata, only values that adhere to the\nmetadata template schema will be accepted.\n\nThe update is applied atomically. If any errors occur during the\napplication of the operations, the metadata instance will not be changed.",
         "parameters": [
           {
             "name": "file_id",
@@ -3729,7 +3729,7 @@
                             "type": "string",
                             "format": "date-time",
                             "example": "2012-12-12T10:53:43-08:00",
-                            "description": "The timestamp at which this shared link will\nbe disabled. This field can only be set by\nusers with paid accounts."
+                            "description": "The timestamp at which this shared link will\nexpire. This field can only be set by\nusers with paid accounts."
                           },
                           "permissions": {
                             "type": "object",
@@ -3819,7 +3819,7 @@
             }
           },
           "400": {
-            "description": "Returns an error if some of the parameters are missing or\ninvalid.\n\n* `bad_request` when a parameter is missing or incorrect. This error also\n  happens when a password is set for a shared link with an access type\n  of `open`.\n* `item_name_too_long` when the folder name is too long.\n* `item_name_invalid` when the folder name contains\n  invalid characters.",
+            "description": "Returns an error if some of the parameters are missing or\nnot valid.\n\n* `bad_request` when a parameter is missing or incorrect. This error also\n  happens when a password is set for a shared link with an access type\n  of `open`.\n* `item_name_too_long` when the folder name is too long.\n* `item_name_invalid` when the folder name contains\n  non-valid characters.",
             "content": {
               "application/json": {
                 "schema": {
@@ -4211,7 +4211,7 @@
                 "properties": {
                   "name": {
                     "type": "string",
-                    "description": "The name for the new folder.\n\nThere are some restrictions to the file name. Names containing\nnon-printable ASCII characters, forward and backward slashes\n(`/`, `\\`), as well as names with trailing spaces are\nprohibited.\n\nAdditionally, the special names `.` and `..` are\nnot allowed either.",
+                    "description": "The name for the new folder.\n\nThere are some restrictions to the file name. Names containing\nnon-printable ASCII characters, forward and backward slashes\n(`/`, `\\`), as well as names with trailing spaces are\nprohibited.\n\nAdditionally, the names `.` and `..` are\nnot allowed either.",
                     "example": "New Folder",
                     "maxLength": 255,
                     "minLength": 1
@@ -4268,7 +4268,7 @@
             }
           },
           "400": {
-            "description": "Returns an error if some of the parameters are missing or\ninvalid.\n\n* `bad_request` when a parameter is missing or incorrect.\n* `item_name_too_long` when the folder name is too long.\n* `item_name_invalid` when the folder name contains\n  invalid characters.",
+            "description": "Returns an error if some of the parameters are missing or\nnot valid.\n\n* `bad_request` when a parameter is missing or incorrect.\n* `item_name_too_long` when the folder name is too long.\n* `item_name_invalid` when the folder name contains\n  non-valid characters.",
             "content": {
               "application/json": {
                 "schema": {
@@ -4372,7 +4372,7 @@
                 "properties": {
                   "name": {
                     "type": "string",
-                    "description": "An optional new name for the copied folder.\n\nThere are some restrictions to the file name. Names containing\nnon-printable ASCII characters, forward and backward slashes\n(`/`, `\\`), as well as names with trailing spaces are\nprohibited.\n\nAdditionally, the special names `.` and `..` are\nnot allowed either.",
+                    "description": "An optional new name for the copied folder.\n\nThere are some restrictions to the file name. Names containing\nnon-printable ASCII characters, forward and backward slashes\n(`/`, `\\`), as well as names with trailing spaces are\nprohibited.\n\nAdditionally, the names `.` and `..` are\nnot allowed either.",
                     "example": "New Folder",
                     "maxLength": 255,
                     "minLength": 1
@@ -4411,7 +4411,7 @@
             "description": "Returns an empty response when the `If-None-Match` header matches\nthe current `etag` value of the folder. This indicates that the folder\nhas not changed since it was last requested."
           },
           "400": {
-            "description": "Returns an error if some of the parameters are missing or\ninvalid.\n\n* `bad_request` when a parameter is missing.\n* `item_name_too_long` when the new folder name is too long.",
+            "description": "Returns an error if some of the parameters are missing or\nnot valid.\n\n* `bad_request` when a parameter is missing.\n* `item_name_too_long` when the new folder name is too long.",
             "content": {
               "application/json": {
                 "schema": {
@@ -4874,7 +4874,7 @@
           "File & Folder Metadata"
         ],
         "x-box-reference-category": "folder_metadata",
-        "description": "Updates a piece of metadata on a folder based.\n\nThe metadata instance can only be updated if the instance\nalready exists. When editing metadata, only values that adhere to the\nmetadata template schema will be accepted.\n\nThe update is applied atomically. If any errors occur during the\napplication of the operations, the metadata instance remains unchanged.",
+        "description": "Updates a piece of metadata on a folder based.\n\nThe metadata instance can only be updated if the instance\nalready exists. When editing metadata, only values that adhere to the\nmetadata template schema will be accepted.\n\nThe update is applied atomically. If any errors occur during the\napplication of the operations, the metadata instance will not be changed.",
         "parameters": [
           {
             "name": "folder_id",
@@ -5136,7 +5136,7 @@
             }
           },
           "400": {
-            "description": "Returns an error if some of the parameters are missing or\ninvalid.\n\n* `invalid_parameter` can appear when the `sort`, `direction` or `offset`\nparameter is provided when using marker based pagination, or when the\n`marker` parameter is provided but `usemarker` is set to `false` or\n`null`.",
+            "description": "Returns an error if some of the parameters are missing or\nnot valid.\n\n* `invalid_parameter` can appear when the `sort`, `direction` or `offset`\nparameter is provided when using marker based pagination, or when the\n`marker` parameter is provided but `usemarker` is set to `false` or\n`null`.",
             "content": {
               "application/json": {
                 "schema": {
@@ -5410,7 +5410,7 @@
         ],
         "x-box-reference-category": "metadata_templates",
         "summary": "Update metadata template",
-        "description": "Updates a metadata template.\n\nThe metadata template can only be updated if the template\nalready exists.\n\nThe update is applied atomically. If any errors occur during the\napplication of the operations, the metadata template remains unchanged.",
+        "description": "Updates a metadata template.\n\nThe metadata template can only be updated if the template\nalready exists.\n\nThe update is applied atomically. If any errors occur during the\napplication of the operations, the metadata template will not be changed.",
         "parameters": [
           {
             "name": "scope",
@@ -5463,7 +5463,7 @@
             }
           },
           "400": {
-            "description": "The request body contains an invalid metadata schema.",
+            "description": "The request body does not contain a valid metadata schema.",
             "content": {
               "application/json": {
                 "schema": {
@@ -5543,7 +5543,7 @@
             "description": "Returns an empty response when the metadata\ntemplate is successfully deleted."
           },
           "400": {
-            "description": "Request body contains an invalid metadata schema.",
+            "description": "Request body does not contain a valid metadata schema.",
             "content": {
               "application/json": {
                 "schema": {
@@ -5785,7 +5785,7 @@
                     "description": "An ordered list of template fields which are part of the template.\nEach field can be a regular text field, date field, number field,\nas well as a single or multi-select list.",
                     "items": {
                       "title": "Metadata Field (Write)",
-                      "description": "A field within a metadata template. Fields can be a simple text, date, or\nnumber field, or a list of options.",
+                      "description": "A field within a metadata template. Fields can be a basic text, date, or\nnumber field, or a list of options.",
                       "required": [
                         "type",
                         "key",
@@ -6590,7 +6590,7 @@
                   },
                   "status": {
                     "type": "string",
-                    "description": "Set the status of a `pending` collaboration invitation,\neffectively accepting, or rejecting the invite.",
+                    "description": "<!-- alex disable reject -->\n\nSet the status of a `pending` collaboration invitation,\neffectively accepting, or rejecting the invite.",
                     "example": "accepted",
                     "enum": [
                       "pending",
@@ -7220,7 +7220,7 @@
                   },
                   "action": {
                     "type": "string",
-                    "description": "The action the task assignee will be prompted to complete.\n\nCurrently only `review` is supported. This will provide the\nassigned user the ability to approve or reject the\nassociated request.",
+                    "description": "The action the task assignee will be prompted to complete.\n\nCurrently only `review` is supported. This will provide the\nassigned user the ability to approve or dismiss the\nassociated request.",
                     "example": "review",
                     "enum": [
                       "review"
@@ -7359,7 +7359,7 @@
                 "properties": {
                   "action": {
                     "type": "string",
-                    "description": "The action the task assignee will be prompted to complete.\n\nCurrently only `review` is supported. This will provide the\nassigned user the ability to approve or reject the\nassociated request.",
+                    "description": "The action the task assignee will be prompted to complete.\n\nCurrently only `review` is supported. This will provide the\nassigned user the ability to approve or dismiss the\nassociated request.",
                     "example": "review",
                     "enum": [
                       "review"
@@ -8556,7 +8556,7 @@
                   "is_external_collab_restricted": {
                     "type": "boolean",
                     "example": true,
-                    "description": "Whether the user is allowed to collaborate with users outside her\nenterprise"
+                    "description": "Whether the user is allowed to collaborate with users outside\ntheir enterprise"
                   },
                   "is_exempt_from_device_limits": {
                     "type": "boolean",
@@ -8854,7 +8854,7 @@
                   "is_external_collab_restricted": {
                     "type": "boolean",
                     "example": true,
-                    "description": "Whether the user is allowed to collaborate with users outside her\nenterprise"
+                    "description": "Whether the user is allowed to collaborate with users outside\ntheir enterprise"
                   },
                   "is_exempt_from_device_limits": {
                     "type": "boolean",
@@ -8916,7 +8916,7 @@
             }
           },
           "400": {
-            "description": "Returns an error if some of the parameters are missing or\ninvalid.\n\n* `invalid_parameter` when a parameter is formatted incorrectly,\n  for example when the `notification_email` has an incorrectly formatted\n  email address.",
+            "description": "Returns an error if some of the parameters are missing or\nnot valid.\n\n* `invalid_parameter` when a parameter is formatted incorrectly,\n  for example when the `notification_email` has an incorrectly formatted\n  email address.",
             "content": {
               "application/json": {
                 "schema": {
@@ -8926,7 +8926,7 @@
             }
           },
           "403": {
-            "description": "Returns an error if the user is not allowed to make the changes.\n\n* `access_denied_insufficient_permissions` when the user does not have\n  the right permissions, for example when updating the notification email\n  is disabled in the enterprise.",
+            "description": "Returns an error if the user is not allowed to make the changes.\n\n* `access_denied_insufficient_permissions` when the user does not have\n  the right permissions, for example when updating the notification email\n  is turned off for the enterprise.",
             "content": {
               "application/json": {
                 "schema": {
@@ -11049,7 +11049,7 @@
           "Events"
         ],
         "x-box-reference-category": "events",
-        "description": "Returns a list of real-time servers that can be used for long-polling updates\nto the [event stream](#get-events).\n\nLong polling is the concept where a HTTP request is kept open until the\nserver sends a response, then repeating the process over and over to receive\nupdated responses.\n\nLong polling the event stream can only be used for user events, not for\nenterprise events.\n\nTo use long polling, first use this endpoint to retrieve a list of long poll\nURLs. Next, make a long poll request to any of the provided URLs.\n\nWhen an event occurs in monitored account a response with the value\n`new_change` will be sent. The response contains no other details as\nit simply serves as a prompt to take further action such as sending a\nrequest to the [events endpoint](#get-events) with the last known\n`stream_position`.\n\nAfter the server sends this response it closes the connection. You must now\nrepeat the long poll process to begin listening for events again.\n\nIf no events occur for a while and the connection times out you will\nreceive a response with the value `reconnect`. When you receive this response\nyou’ll make another call to this endpoint to restart the process.\n\nIf you receive no events in `retry_timeout` seconds then you will need to\nmake another request to the real-time server (one of the URLs in the response\nfor this endpoint). This might be necessary due to network errors.\n\nFinally, if you receive a `max_retries` error when making a request to the\nreal-time server, you should start over by making a call to this endpoint\nfirst.",
+        "description": "Returns a list of real-time servers that can be used for long-polling updates\nto the [event stream](#get-events).\n\nLong polling is the concept where a HTTP request is kept open until the\nserver sends a response, then repeating the process over and over to receive\nupdated responses.\n\nLong polling the event stream can only be used for user events, not for\nenterprise events.\n\nTo use long polling, first use this endpoint to retrieve a list of long poll\nURLs. Next, make a long poll request to any of the provided URLs.\n\nWhen an event occurs in monitored account a response with the value\n`new_change` will be sent. The response contains no other details as\nit only serves as a prompt to take further action such as sending a\nrequest to the [events endpoint](#get-events) with the last known\n`stream_position`.\n\nAfter the server sends this response it closes the connection. You must now\nrepeat the long poll process to begin listening for events again.\n\nIf no events occur for a while and the connection times out you will\nreceive a response with the value `reconnect`. When you receive this response\nyou’ll make another call to this endpoint to restart the process.\n\nIf you receive no events in `retry_timeout` seconds then you will need to\nmake another request to the real-time server (one of the URLs in the response\nfor this endpoint). This might be necessary due to network errors.\n\nFinally, if you receive a `max_retries` error when making a request to the\nreal-time server, you should start over by making a call to this endpoint\nfirst.",
         "responses": {
           "200": {
             "description": "Returns a paginated array of servers that can be used\ninstead of the regular endpoints for long-polling events.",
@@ -11662,7 +11662,7 @@
                   "disposition_action": {
                     "type": "string",
                     "example": "permanently_delete",
-                    "description": "The disposition action of the retention policy.\nThis action can be `permanently_delete`, which\nwill cause the content retained by the policy\nto be permanently deleted, or `remove_retention`,\nwhich will lift the retention policy from the content,\nallowing it to be deleted by users,\nonce the retention policy time period has passed.",
+                    "description": "The disposition action of the retention policy.\nThis action can be `permanently_delete`, which\nwill cause the content retained by the policy\nto be permanently deleted, or `remove_retention`,\nwhich will lift the retention policy from the content,\nallowing it to be deleted by users,\nonce the retention policy has expired.",
                     "enum": [
                       "permanently_delete",
                       "remove_retention"
@@ -11816,7 +11816,7 @@
                   "disposition_action": {
                     "type": "string",
                     "example": "permanently_delete",
-                    "description": "The disposition action of the retention policy.\nThis action can be `permanently_delete`, which\nwill cause the content retained by the policy\nto be permanently deleted, or `remove_retention`,\nwhich will lift the retention policy from the content,\nallowing it to be deleted by users,\nonce the retention policy time period has passed.",
+                    "description": "The disposition action of the retention policy.\nThis action can be `permanently_delete`, which\nwill cause the content retained by the policy\nto be permanently deleted, or `remove_retention`,\nwhich will lift the retention policy from the content,\nallowing it to be deleted by users,\nonce the retention policy has expired.",
                     "enum": [
                       "permanently_delete",
                       "remove_retention"
@@ -13933,7 +13933,7 @@
         "parameters": [
           {
             "name": "collaboration_whitelist_exempt_target_id",
-            "description": "The ID of the collaboration whitelist exemption",
+            "description": "<!-- alex disable whitelist -->\n\nThe ID of the collaboration whitelist exemption",
             "in": "path",
             "required": true,
             "example": "984923",
@@ -13976,7 +13976,7 @@
         "parameters": [
           {
             "name": "collaboration_whitelist_exempt_target_id",
-            "description": "The ID of the collaboration whitelist exemption",
+            "description": "<!-- alex disable whitelist -->\n\nThe ID of the collaboration whitelist exemption",
             "in": "path",
             "required": true,
             "example": "984923",
@@ -14414,7 +14414,7 @@
           "Multi Zones"
         ],
         "x-box-reference-category": "storage_policy_assignments",
-        "description": "Delete a storage policy assignment.\n\nDeleting a storage policy assignment on a user\nwill have the user inherit the enterprise's default\nstorage policy.\n\nThere is a rate limit for calling this endpoint of only\ntwice per user in a 24 hour period.",
+        "description": "Delete a storage policy assignment.\n\nDeleting a storage policy assignment on a user\nwill have the user inherit the enterprise's default\nstorage policy.\n\nThere is a rate limit for calling this endpoint of only\ntwice per user in a 24 hour time frame.",
         "parameters": [
           {
             "name": "storage_policy_assignment_id",
@@ -16132,7 +16132,7 @@
                 "x-box-field-variant": 2,
                 "type": "integer",
                 "nullable": false,
-                "description": "The file size in bytes. Be careful parsing this integer, it can\neasily get very large and cause an integer overflow.",
+                "description": "The file size in bytes. Be careful parsing this integer as it can\nget very large and cause an integer overflow.",
                 "example": 629644
               },
               "path_collection": {
@@ -16309,7 +16309,7 @@
                     "type": "string",
                     "example": "3",
                     "nullable": false,
-                    "description": "A numeric identifier that represents the most recent user event\nthat has been applied to this item.\n\nThis can be used in combination with the `GET /events`-endpoint\nto filter out user events that would have occurred before this\nidentifier was read.\n\nA simple example would be where a Box Drive-like application\nwould fetch an item via the API, and then listen to incoming\nuser events for changes to the item. The application would\nignore any user events where the `sequence_id` in the event\nis smaller than or equal to the `sequence_id` in the originally\nfetched resource."
+                    "description": "A numeric identifier that represents the most recent user event\nthat has been applied to this item.\n\nThis can be used in combination with the `GET /events`-endpoint\nto filter out user events that would have occurred before this\nidentifier was read.\n\nAn example would be where a Box Drive-like application\nwould fetch an item via the API, and then listen to incoming\nuser events for changes to the item. The application would\nignore any user events where the `sequence_id` in the event\nis smaller than or equal to the `sequence_id` in the originally\nfetched resource."
                   },
                   {
                     "x-box-field-variant": 1
@@ -16746,7 +16746,7 @@
               "disposition_at": {
                 "type": "string",
                 "format": "date-time",
-                "description": "When the retention period expires on this file\nversion retention",
+                "description": "When the retention expires on this file\nversion retention",
                 "example": "2012-12-12T10:53:43-08:00"
               },
               "winning_retention_policy": {
@@ -17311,7 +17311,7 @@
                     "type": "string",
                     "example": "3",
                     "nullable": false,
-                    "description": "A numeric identifier that represents the most recent user event\nthat has been applied to this item.\n\nThis can be used in combination with the `GET /events`-endpoint\nto filter out user events that would have occurred before this\nidentifier was read.\n\nA simple example would be where a Box Drive-like application\nwould fetch an item via the API, and then listen to incoming\nuser events for changes to the item. The application would\nignore any user events where the `sequence_id` in the event\nis smaller than or equal to the `sequence_id` in the originally\nfetched resource."
+                    "description": "A numeric identifier that represents the most recent user event\nthat has been applied to this item.\n\nThis can be used in combination with the `GET /events`-endpoint\nto filter out user events that would have occurred before this\nidentifier was read.\n\nAn example would be where a Box Drive-like application\nwould fetch an item via the API, and then listen to incoming\nuser events for changes to the item. The application would\nignore any user events where the `sequence_id` in the event\nis smaller than or equal to the `sequence_id` in the originally\nfetched resource."
                   },
                   {
                     "x-box-field-variant": 1
@@ -17742,7 +17742,7 @@
                     "type": "string",
                     "example": "3",
                     "nullable": false,
-                    "description": "A numeric identifier that represents the most recent user event\nthat has been applied to this item.\n\nThis can be used in combination with the `GET /events`-endpoint\nto filter out user events that would have occurred before this\nidentifier was read.\n\nA simple example would be where a Box Drive-like application\nwould fetch an item via the API, and then listen to incoming\nuser events for changes to the item. The application would\nignore any user events where the `sequence_id` in the event\nis smaller than or equal to the `sequence_id` in the originally\nfetched resource."
+                    "description": "A numeric identifier that represents the most recent user event\nthat has been applied to this item.\n\nThis can be used in combination with the `GET /events`-endpoint\nto filter out user events that would have occurred before this\nidentifier was read.\n\nAn example would be where a Box Drive-like application\nwould fetch an item via the API, and then listen to incoming\nuser events for changes to the item. The application would\nignore any user events where the `sequence_id` in the event\nis smaller than or equal to the `sequence_id` in the originally\nfetched resource."
                   },
                   {
                     "x-box-field-variant": 1
@@ -18251,7 +18251,7 @@
           "path": {
             "type": "string",
             "example": "/currentState",
-            "description": "The location in the metadata JSON object\nto apply the changes to, in the format of a\n[JSON-Pointer](https://tools.ietf.org/html/rfc6901).\n\nThe path must always be prefixed with a `/`.\n\nSpecial characters `~` and `/` in the key must be escaped\nto ensure the operation can be executed as intended."
+            "description": "The location in the metadata JSON object\nto apply the changes to, in the format of a\n[JSON-Pointer](https://tools.ietf.org/html/rfc6901).\n\nThe path must always be prefixed with a `/`.\n\nThe characters `~` and `/` in the key must be escaped\nto ensure the operation can be performed as intended."
           },
           "value": {
             "type": "string",
@@ -18505,12 +18505,12 @@
       "MetadataField": {
         "title": "Metadata Field",
         "x-box-resource-id": "metadata_field",
-        "description": "A field within a metadata template. Fields can be a simple text, date, or\nnumber field, or a list of options.",
+        "description": "A field within a metadata template. Fields can be a basic text, date, or\nnumber field, or a list of options.",
         "type": "object",
         "allOf": [
           {
             "title": "Metadata Field (Write)",
-            "description": "A field within a metadata template. Fields can be a simple text, date, or\nnumber field, or a list of options.",
+            "description": "A field within a metadata template. Fields can be a basic text, date, or\nnumber field, or a list of options.",
             "required": [
               "type",
               "key",
@@ -18923,7 +18923,7 @@
           },
           "error_description": {
             "type": "string",
-            "example": "The client credentials are invalid",
+            "example": "The client credentials are not valid",
             "description": "The type of the error returned."
           }
         }
@@ -19001,7 +19001,7 @@
             "description": "The URL for the server."
           },
           "ttl": {
-            "description": "he time in minutes for which this server is available",
+            "description": "The time in minutes for which this server is available",
             "type": "integer",
             "example": 10
           },
@@ -19337,7 +19337,7 @@
               "disposition_action": {
                 "type": "string",
                 "example": "permanently_delete",
-                "description": "The disposition action of the retention policy.\nThis action can be `permanently_delete`, which\nwill cause the content retained by the policy\nto be permanently deleted, or `remove_retention`,\nwhich will lift the retention policy from the content,\nallowing it to be deleted by users,\nonce the retention policy time period has passed.",
+                "description": "The disposition action of the retention policy.\nThis action can be `permanently_delete`, which\nwill cause the content retained by the policy\nto be permanently deleted, or `remove_retention`,\nwhich will lift the retention policy from the content,\nallowing it to be deleted by users,\nonce the retention policy has expired.",
                 "enum": [
                   "permanently_delete",
                   "remove_retention"
@@ -19575,7 +19575,7 @@
           "unshared_at": {
             "type": "string",
             "format": "date-time",
-            "description": "The date and time when this link will be disabled. This field can only be\nset by users with paid accounts.",
+            "description": "The date and time when this link will be unshared. This field can only be\nset by users with paid accounts.",
             "example": "2018-04-13T13:53:23-07:00",
             "nullable": true
           },
@@ -19760,7 +19760,7 @@
                   "state": {
                     "type": "string",
                     "example": "invoked",
-                    "description": "The state of this event.\n\n* `invoked` - Triggered the skill with event details to start\n  applying skill on the file.\n* `processing` - Currently processing.\n* `success` - Completed processing with a success.\n* `transient_failure` - Encountered a failure which can be\n  retried.\n* `permanent_failure` -  Encountered a permanent failure and\n  retry would not help.",
+                    "description": "The state of this event.\n\n* `invoked` - Triggered the skill with event details to start\n  applying skill on the file.\n* `processing` - Currently processing.\n* `success` - Completed processing with a success.\n* `transient_failure` - Encountered an issue which can be\n  retried.\n* `permanent_failure` -  Encountered a permanent issue and\n  retry would not help.",
                     "enum": [
                       "invoked",
                       "processing",
@@ -20288,7 +20288,7 @@
                 ]
               },
               "text": {
-                "description": "The text for your terms and conditions. This text could be\nempty if the status is disabled",
+                "description": "The text for your terms and conditions. This text could be\nempty if the `status` is set to `disabled`.",
                 "type": "string",
                 "example": "By using this service, you agree to ..."
               },
@@ -20496,7 +20496,7 @@
           "actor_token": {
             "type": "string",
             "format": "token",
-            "description": "The actor token used to create an annotator token.\nThis is a JWT assertion.\n\nUsed in combination with `urn:ietf:params:oauth:grant-type:token-exchange`\nas the `grant_type`.",
+            "description": "The token used to create an annotator token.\nThis is a JWT assertion.\n\nUsed in combination with `urn:ietf:params:oauth:grant-type:token-exchange`\nas the `grant_type`.",
             "example": "c3FIOG9vSGV4VHo4QzAyg5T1JvNnJoZ3ExaVNyQWw6WjRsanRKZG5lQk9qUE1BVQ"
           },
           "actor_token_type": {
@@ -20777,7 +20777,7 @@
                 "x-box-field-variant": 3,
                 "type": "boolean",
                 "example": true,
-                "description": "Whether the user can see other enterprise users in her contact list"
+                "description": "Whether the user can see other enterprise users in their contact list"
               },
               "is_sync_enabled": {
                 "x-box-field-variant": 3,
@@ -20789,7 +20789,7 @@
                 "x-box-field-variant": 3,
                 "type": "boolean",
                 "example": true,
-                "description": "Whether the user is allowed to collaborate with users outside her\nenterprise"
+                "description": "Whether the user is allowed to collaborate with users outside their\nenterprise"
               },
               "is_exempt_from_device_limits": {
                 "x-box-field-variant": 3,
@@ -21528,7 +21528,7 @@
                     "type": "string",
                     "example": "3",
                     "nullable": false,
-                    "description": "A numeric identifier that represents the most recent user event\nthat has been applied to this item.\n\nThis can be used in combination with the `GET /events`-endpoint\nto filter out user events that would have occurred before this\nidentifier was read.\n\nA simple example would be where a Box Drive-like application\nwould fetch an item via the API, and then listen to incoming\nuser events for changes to the item. The application would\nignore any user events where the `sequence_id` in the event\nis smaller than or equal to the `sequence_id` in the originally\nfetched resource."
+                    "description": "A numeric identifier that represents the most recent user event\nthat has been applied to this item.\n\nThis can be used in combination with the `GET /events`-endpoint\nto filter out user events that would have occurred before this\nidentifier was read.\n\nAn example would be where a Box Drive-like application\nwould fetch an item via the API, and then listen to incoming\nuser events for changes to the item. The application would\nignore any user events where the `sequence_id` in the event\nis smaller than or equal to the `sequence_id` in the originally\nfetched resource."
                   },
                   {
                     "x-box-field-variant": 1
@@ -21627,7 +21627,7 @@
       "x-box-reference-parent-category": "downloads_and_uploads"
     },
     {
-      "name": "Simple Uploads",
+      "name": "Regular Uploads",
       "x-box-reference-category": "uploads",
       "x-box-reference-parent-category": "downloads_and_uploads"
     },
