@@ -25,7 +25,7 @@
     "/authorize": {
       "get": {
         "operationId": "get_authorize",
-        "summary": "Authorize a user",
+        "summary": "Authorize user",
         "description": "Authorize a user by sending them through the [Box](https://box.com)\nwebsite and request their permission to act on their behalf.\n\nThis is the first step when authenticating a user using\nOAuth 2.0. To request a user's authorization to use the Box APIs\non their behalf you will need to send a user to the URL with this\nformat.",
         "tags": [
           "Authorization"
@@ -124,7 +124,7 @@
     "/oauth2/token": {
       "post": {
         "operationId": "post_oauth2_token",
-        "summary": "Request an access token",
+        "summary": "Request access token",
         "description": "Request an Access Token using either a client-side obtained OAuth 2.0\nauthorization code or a server-side JWT assertion.\n\nAn Access Token is a string that enables Box to verify that a\nrequest belongs to an authorized session. In the normal order of\noperations you will begin by requesting authentication from the\n[authorize](#get-authorize) endpoint and Box will send you an\nauthorization code.\n\nYou will then send this code to this endpoint to exchange it for\nan Access Token. The returned Access Token can then be used to to make\nBox API calls.",
         "tags": [
           "Authorization"
@@ -141,7 +141,14 @@
           "content": {
             "application/x-www-form-urlencoded": {
               "schema": {
-                "$ref": "#/components/schemas/TokenRequest"
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/TokenRequest"
+                  },
+                  {
+                    "$ref": "#/components/schemas/RefreshRequest"
+                  }
+                ]
               }
             }
           }
@@ -183,7 +190,7 @@
     "/oauth2/revoke": {
       "post": {
         "operationId": "post_oauth2_revoke",
-        "summary": "Revoke an access token",
+        "summary": "Revoke access token",
         "description": "Revoke an active Access Token, effectively logging a user out\nthat has been previously authenticated.",
         "tags": [
           "Authorization"
@@ -485,7 +492,7 @@
       },
       "put": {
         "operationId": "put_files_id",
-        "summary": "Update a file",
+        "summary": "Update file",
         "tags": [
           "Files"
         ],
@@ -747,7 +754,7 @@
       },
       "delete": {
         "operationId": "delete_files_id",
-        "summary": "Delete a file",
+        "summary": "Delete file",
         "tags": [
           "Files"
         ],
@@ -836,7 +843,7 @@
     "/files/{file_id}/content": {
       "get": {
         "operationId": "get_files_id_content",
-        "summary": "Download a file",
+        "summary": "Download file",
         "tags": [
           "Files"
         ],
@@ -923,10 +930,10 @@
       "post": {
         "operationId": "post_files_id_content",
         "tags": [
-          "Regular Uploads"
+          "Uploads"
         ],
         "x-box-reference-category": "uploads",
-        "summary": "Upload a file version",
+        "summary": "Upload file version",
         "description": "Update a file's content. For file sizes over 50MB we recommend\nusing the Chunk Upload APIs.\n\n# Request body order\n\nThe `attributes` part of the body must come **before** the\n`file` part. Requests that do not follow this format when\nuploading the file will receive a HTTP `400` error with a\n`metadata_after_file_contents` error code.",
         "servers": [
           {
@@ -1060,7 +1067,7 @@
     "/files/content": {
       "options": {
         "operationId": "options_files_content",
-        "summary": "Preflight check",
+        "summary": "Preflight check before upload",
         "tags": [
           "Files"
         ],
@@ -1141,10 +1148,10 @@
       "post": {
         "operationId": "post_files_content",
         "tags": [
-          "Regular Uploads"
+          "Uploads"
         ],
         "x-box-reference-category": "uploads",
-        "summary": "Upload a file",
+        "summary": "Upload file",
         "description": "Uploads a small file to Box. For file sizes over 50MB we recommend\nusing the Chunk Upload APIs.\n\n# Request body order\n\nThe `attributes` part of the body must come **before** the\n`file` part. Requests that do not follow this format when\nuploading the file will receive a HTTP `400` error with a\n`metadata_after_file_contents` error code.",
         "servers": [
           {
@@ -1281,7 +1288,7 @@
         "operationId": "post_files_upload_sessions",
         "summary": "Create upload session",
         "tags": [
-          "Chunked Uploads"
+          "Uploads (Chunked)"
         ],
         "x-box-reference-category": "chunked_uploads",
         "description": "Creates an upload session for a new file.",
@@ -1371,7 +1378,7 @@
         "operationId": "post_files_id_upload_sessions",
         "summary": "Create upload session for existing file",
         "tags": [
-          "Chunked Uploads"
+          "Uploads (Chunked)"
         ],
         "x-box-reference-category": "chunked_uploads",
         "description": "Creates an upload session for an existing file.",
@@ -1456,7 +1463,7 @@
         "operationId": "get_files_upload_sessions_id",
         "summary": "Get upload session",
         "tags": [
-          "Chunked Uploads"
+          "Uploads (Chunked)"
         ],
         "description": "Return information about an upload session.",
         "x-box-reference-category": "chunked_uploads",
@@ -1503,9 +1510,9 @@
       },
       "put": {
         "operationId": "put_files_upload_sessions_id",
-        "summary": "Upload a part",
+        "summary": "Upload part of file",
         "tags": [
-          "Chunked Uploads"
+          "Uploads (Chunked)"
         ],
         "x-box-reference-category": "chunked_uploads",
         "description": "Updates a chunk of an upload session for a file.",
@@ -1612,9 +1619,9 @@
       },
       "delete": {
         "operationId": "delete_files_upload_sessions_id",
-        "summary": "Abort upload session",
+        "summary": "Remove upload session",
         "tags": [
-          "Chunked Uploads"
+          "Uploads (Chunked)"
         ],
         "description": "Abort an upload session and discard all data uploaded.\n\nThis cannot be reversed.",
         "servers": [
@@ -1658,7 +1665,7 @@
         "operationId": "get_files_upload_sessions_id_parts",
         "summary": "List parts",
         "tags": [
-          "Chunked Uploads"
+          "Uploads (Chunked)"
         ],
         "x-box-reference-category": "chunked_uploads",
         "servers": [
@@ -1734,7 +1741,7 @@
         "operationId": "post_files_upload_sessions_id_commit",
         "summary": "Commit upload session",
         "tags": [
-          "Chunked Uploads"
+          "Uploads (Chunked)"
         ],
         "x-box-reference-category": "chunked_uploads",
         "servers": [
@@ -1863,7 +1870,7 @@
     "/files/{file_id}/copy": {
       "post": {
         "operationId": "post_files_id_copy",
-        "summary": "Copy a file",
+        "summary": "Copy file",
         "description": "Creates a copy of a file.",
         "tags": [
           "Files"
@@ -2000,7 +2007,7 @@
     "/files/{file_id}/thumbnail.{extension}": {
       "get": {
         "operationId": "get_files_id_thumbnail_id",
-        "summary": "Get a file thumbnail",
+        "summary": "Get file thumbnail",
         "description": "Retrieves a thumbnail, or smaller image representation, of a file.\n\nSizes of `32x32`,`64x64`, `128x128`, and `256x256` can be returned in\nthe `.png` format and sizes of `32x32`, `94x94`, `160x160`, and `320x320`\ncan be returned in the `.jpg` format.\n\nThumbnails can be generated for the image and video file formats listed\n[found on our community site][1].\n\n[1]: https://community.box.com/t5/Migrating-and-Previewing-Content/File-Types-and-Fonts-Supported-in-Box-Content-Preview/ta-p/327",
         "tags": [
           "Files"
@@ -2175,7 +2182,7 @@
     "/files/{file_id}/collaborations": {
       "get": {
         "operationId": "get_files_id_collaborations",
-        "summary": "Get file collaborations",
+        "summary": "List file collaborations",
         "description": "Retrieves a list of collaborations for a file. This\nreturns all the users that have access to the file.",
         "tags": [
           "Collaborations"
@@ -2261,7 +2268,7 @@
     "/files/{file_id}/comments": {
       "get": {
         "operationId": "get_files_id_comments",
-        "summary": "List a file's comments",
+        "summary": "List file comments",
         "description": "Retrieves a list of comments for a file.",
         "tags": [
           "Comments"
@@ -2349,7 +2356,7 @@
     "/files/{file_id}/tasks": {
       "get": {
         "operationId": "get_files_id_tasks",
-        "summary": "Get file tasks",
+        "summary": "List tasks on file",
         "description": "Retrieves a list of all the tasks for a file. This\nendpoint does not support paging.",
         "tags": [
           "Tasks"
@@ -2475,7 +2482,7 @@
       },
       "delete": {
         "operationId": "delete_files_id_trash",
-        "summary": "Permanently delete file",
+        "summary": "Permanently remove file",
         "tags": [
           "Trash"
         ],
@@ -2611,7 +2618,7 @@
     "/files/{file_id}/versions/{file_version_id}": {
       "get": {
         "operationId": "get_files_id_versions_id",
-        "summary": "Get a file version",
+        "summary": "Get file version",
         "tags": [
           "File Versions"
         ],
@@ -2682,7 +2689,7 @@
       },
       "delete": {
         "operationId": "delete_files_id_versions_id",
-        "summary": "Delete file version",
+        "summary": "Remove file version",
         "tags": [
           "File Versions"
         ],
@@ -2827,9 +2834,9 @@
     "/files/{file_id}/metadata": {
       "get": {
         "operationId": "get_files_id_metadata",
-        "summary": "List file's metadata",
+        "summary": "List file's metadata instances",
         "tags": [
-          "File Metadata"
+          "Metadata (Files)"
         ],
         "x-box-reference-category": "file_metadata",
         "description": "Retrieves all metadata for a given file.",
@@ -2872,9 +2879,9 @@
     "/files/{file_id}/metadata/{scope}/{template_key}": {
       "get": {
         "operationId": "get_files_id_metadata_id_id",
-        "summary": "Get specific file metadata",
+        "summary": "Get metadata instance on file",
         "tags": [
-          "File Metadata"
+          "Metadata (Files)"
         ],
         "x-box-reference-category": "file_metadata",
         "description": "Retrieve a specific metadata template instance for a file",
@@ -2949,9 +2956,9 @@
       },
       "post": {
         "operationId": "post_files_id_metadata_id_id",
-        "summary": "Create metadata on file",
+        "summary": "Create metadata instance on file",
         "tags": [
-          "File Metadata"
+          "Metadata (Files)"
         ],
         "x-box-reference-category": "file_metadata",
         "description": "Creates a piece of metadata on a file based on the specified template.\n\nOnly values that are present in the metadata template\nwill be accepted.",
@@ -3042,9 +3049,9 @@
       },
       "put": {
         "operationId": "put_files_id_metadata_id_id",
-        "summary": "Update file metadata",
+        "summary": "Update metadata instance on file",
         "tags": [
-          "File Metadata"
+          "Metadata (Files)"
         ],
         "x-box-reference-category": "file_metadata",
         "description": "Updates a piece of metadata on a file.\n\nThe metadata instance can only be updated if the instance\nalready exists. When editing metadata, only values that adhere to the\nmetadata template schema will be accepted.\n\nThe update is applied atomically. If any errors occur during the\napplication of the operations, the metadata instance will not be changed.",
@@ -3132,9 +3139,9 @@
       },
       "delete": {
         "operationId": "delete_files_id_metadata_id_id",
-        "summary": "Delete file metadata",
+        "summary": "Remove metadata instance from file",
         "tags": [
-          "File Metadata"
+          "Metadata (Files)"
         ],
         "x-box-reference-category": "file_metadata",
         "description": "Deletes a piece of file metadata.",
@@ -3194,9 +3201,9 @@
     "/files/{file_id}/watermark": {
       "get": {
         "operationId": "get_files_id_watermark",
-        "summary": "Get file watermark",
+        "summary": "Get watermark on file",
         "tags": [
-          "File Watermarks"
+          "Watermarks (Files)"
         ],
         "x-box-reference-category": "file_watermarks",
         "description": "Retrieve the watermark for a file.",
@@ -3249,7 +3256,7 @@
         "operationId": "put_files_id_watermark",
         "summary": "Apply watermark to file",
         "tags": [
-          "File Watermarks"
+          "Watermarks (Files)"
         ],
         "x-box-reference-category": "file_watermarks",
         "description": "Applies or update a watermark on a file.",
@@ -3330,9 +3337,9 @@
       },
       "delete": {
         "operationId": "delete_files_id_watermark",
-        "summary": "Remove file watermark",
+        "summary": "Remove watermark from file",
         "tags": [
-          "File Watermarks"
+          "Watermarks (Files)"
         ],
         "x-box-reference-category": "file_watermarks",
         "description": "Removes the watermark from a file.",
@@ -3610,7 +3617,7 @@
       },
       "put": {
         "operationId": "put_folders_id",
-        "summary": "Update a folder",
+        "summary": "Update folder",
         "description": "Updates a folder. This can be also be used to move the folder,\ncreate shared links, update collaborations, and more.",
         "tags": [
           "Folders"
@@ -3892,7 +3899,7 @@
       },
       "delete": {
         "operationId": "delete_folders_id",
-        "summary": "Delete a folder",
+        "summary": "Delete folder",
         "description": "Deletes a folder, either permanently or by moving it to\nthe trash.",
         "tags": [
           "Folders"
@@ -4002,7 +4009,7 @@
     "/folders/{folder_id}/items": {
       "get": {
         "operationId": "get_folders_id_items",
-        "summary": "Get items in folder",
+        "summary": "List items in folder",
         "tags": [
           "Folders"
         ],
@@ -4173,7 +4180,7 @@
     "/folders": {
       "post": {
         "operationId": "post_folders",
-        "summary": "Create a folder",
+        "summary": "Create folder",
         "tags": [
           "Folders"
         ],
@@ -4323,7 +4330,7 @@
     "/folders/{folder_id}/copy": {
       "post": {
         "operationId": "post_folders_id_copy",
-        "summary": "Copy a folder",
+        "summary": "Copy folder",
         "x-box-enable-explorer": true,
         "x-box-reference-category": "folders",
         "description": "Creates a copy of a folder within a destination folder.\n\nThe original folder will not be changed.",
@@ -4466,7 +4473,7 @@
     "/folders/{folder_id}/collaborations": {
       "get": {
         "operationId": "get_folders_id_collaborations",
-        "summary": "Get folder collaborations",
+        "summary": "List folder collaborations",
         "description": "Retrieves a list of collaborations for a folder. This\nreturns all the users that have access to the folder.",
         "tags": [
           "Folders"
@@ -4602,7 +4609,7 @@
       },
       "delete": {
         "operationId": "delete_folders_id_trash",
-        "summary": "Permanently delete folder",
+        "summary": "Permanently remove folder",
         "tags": [
           "Trash"
         ],
@@ -4651,9 +4658,9 @@
     "/folders/{folder_id}/metadata": {
       "get": {
         "operationId": "get_folders_id_metadata",
-        "summary": "List folder's metadata",
+        "summary": "List metadata instances on folder",
         "tags": [
-          "Folder Metadata"
+          "Metadata (Folders)"
         ],
         "x-box-reference-category": "folder_metadata",
         "description": "Retrieves all metadata for a given folder.",
@@ -4697,9 +4704,9 @@
     "/folders/{folder_id}/metadata/{scope}/{template_key}": {
       "get": {
         "operationId": "get_folders_id_metadata_id_id",
-        "summary": "Get specific folder metadata",
+        "summary": "Get metadata instance on folder",
         "tags": [
-          "Folder Metadata"
+          "Metadata (Folders)"
         ],
         "x-box-reference-category": "folder_metadata",
         "description": "Retrieve a specific metadata template instance for a folder",
@@ -4775,9 +4782,9 @@
       },
       "post": {
         "operationId": "post_folders_id_metadata_id_id",
-        "summary": "Create metadata on folder",
+        "summary": "Create metadata instance on folder",
         "tags": [
-          "Folder Metadata"
+          "Metadata (Folders)"
         ],
         "x-box-reference-category": "folder_metadata",
         "description": "Creates a piece of metadata on a folder based on the specified template.\n\nOnly values that are present in the metadata template\nwill be accepted.",
@@ -4869,9 +4876,9 @@
       },
       "put": {
         "operationId": "put_folders_id_metadata_id_id",
-        "summary": "Update folder metadata",
+        "summary": "Update metadata instance on folder",
         "tags": [
-          "Folder Metadata"
+          "Metadata (Folders)"
         ],
         "x-box-reference-category": "folder_metadata",
         "description": "Updates a piece of metadata on a folder based.\n\nThe metadata instance can only be updated if the instance\nalready exists. When editing metadata, only values that adhere to the\nmetadata template schema will be accepted.\n\nThe update is applied atomically. If any errors occur during the\napplication of the operations, the metadata instance will not be changed.",
@@ -4960,9 +4967,9 @@
       },
       "delete": {
         "operationId": "delete_folders_id_metadata_id_id",
-        "summary": "Delete folder metadata",
+        "summary": "Remove metadata instance from folder",
         "tags": [
-          "Folder Metadata"
+          "Metadata (Folders)"
         ],
         "x-box-reference-category": "folder_metadata",
         "description": "Deletes a piece of folder metadata.",
@@ -5161,9 +5168,9 @@
     "/folders/{folder_id}/watermark": {
       "get": {
         "operationId": "get_folders_id_watermark",
-        "summary": "Get folder watermark",
+        "summary": "Get watermark for folder",
         "tags": [
-          "Folder Watermarks"
+          "Watermarks (Folders)"
         ],
         "x-box-reference-category": "folder_watermarks",
         "description": "Retrieve the watermark for a folder.",
@@ -5217,7 +5224,7 @@
         "operationId": "put_folders_id_watermark",
         "summary": "Apply watermark to folder",
         "tags": [
-          "Folder Watermarks"
+          "Watermarks (Folders)"
         ],
         "x-box-reference-category": "folder_watermarks",
         "description": "Applies or update a watermark on a folder.",
@@ -5299,9 +5306,9 @@
       },
       "delete": {
         "operationId": "delete_folders_id_watermark",
-        "summary": "Remove folder watermark",
+        "summary": "Remove watermark from folder",
         "tags": [
-          "Folder Watermarks"
+          "Watermarks (Folders)"
         ],
         "x-box-reference-category": "folder_watermarks",
         "description": "Removes the watermark from a folder.",
@@ -5348,7 +5355,7 @@
     "/metadata_templates/{scope}/{template_key}/schema": {
       "get": {
         "operationId": "get_metadata_templates_id_id_schema",
-        "summary": "Get template by name",
+        "summary": "Get metadata template by name",
         "tags": [
           "Metadata Templates"
         ],
@@ -5506,7 +5513,7 @@
       },
       "delete": {
         "operationId": "delete_metadata_templates_id_id_schema",
-        "summary": "Delete metadata template",
+        "summary": "Remove metadata template",
         "tags": [
           "Metadata Templates"
         ],
@@ -5578,7 +5585,7 @@
     "/metadata_templates/{template_id}": {
       "get": {
         "operationId": "get_metadata_templates_id",
-        "summary": "Get a template by ID",
+        "summary": "Get metadata template by ID",
         "tags": [
           "Metadata Templates"
         ],
@@ -5623,7 +5630,7 @@
     "/metadata_templates/global": {
       "get": {
         "operationId": "get_metadata_templates_global",
-        "summary": "List all global templates",
+        "summary": "List all global metadata templates",
         "tags": [
           "Metadata Templates"
         ],
@@ -5681,7 +5688,7 @@
     "/metadata_templates/enterprise": {
       "get": {
         "operationId": "get_metadata_templates_enterprise",
-        "summary": "List all enterprise templates",
+        "summary": "List all metadata templates for enterprise",
         "tags": [
           "Metadata Templates"
         ],
@@ -5908,9 +5915,9 @@
     "/metadata_cascade_policies": {
       "get": {
         "operationId": "get_metadata_cascade_policies",
-        "summary": "List cascade policies",
+        "summary": "List metadata cascade policies",
         "tags": [
-          "Cascade Policies (Beta)"
+          "Metadata Cascade Policies (Beta)"
         ],
         "x-box-reference-category": "metadata_cascade_policies",
         "description": "Retrieve a collection of metadata cascade policies\nwithin a given folder for the current enterprise.",
@@ -5982,9 +5989,9 @@
       },
       "post": {
         "operationId": "post_metadata_cascade_policies",
-        "summary": "Create cascade policy",
+        "summary": "Create metadata cascade policy",
         "tags": [
-          "Cascade Policies (Beta)"
+          "Metadata Cascade Policies (Beta)"
         ],
         "x-box-reference-category": "metadata_cascade_policies",
         "description": "Creates a new metadata cascade policy that applies a given\nmetadata template to a given folder and automatically\ncascades it down to its children.\n\nIn order for the policy to work, a metadata instance must first\nbe applied to the folder.",
@@ -6049,9 +6056,9 @@
     "/metadata_cascade_policies/{metadata_cascade_policy_id}": {
       "get": {
         "operationId": "get_metadata_cascade_policies_id",
-        "summary": "Get cascade policy",
+        "summary": "Get metadata cascade policy",
         "tags": [
-          "Cascade Policies (Beta)"
+          "Metadata Cascade Policies (Beta)"
         ],
         "x-box-reference-category": "metadata_cascade_policies",
         "description": "Retrieve a metadata cascade policy.",
@@ -6092,9 +6099,9 @@
       },
       "delete": {
         "operationId": "delete_metadata_cascade_policies_id",
-        "summary": "Delete cascade policy",
+        "summary": "Remove metadata cascade policy",
         "tags": [
-          "Cascade Policies (Beta)"
+          "Metadata Cascade Policies (Beta)"
         ],
         "x-box-reference-category": "metadata_cascade_policies",
         "description": "Deletes a metadata cascade policy.",
@@ -6130,9 +6137,9 @@
     "/metadata_cascade_policies/{metadata_cascade_policy_id}/apply": {
       "post": {
         "operationId": "post_metadata_cascade_policies_id_apply",
-        "summary": "Force apply cascade policy",
+        "summary": "Force-apply metadata cascade policy to folder",
         "tags": [
-          "Cascade Policies (Beta)"
+          "Metadata Cascade Policies (Beta)"
         ],
         "x-box-reference-category": "metadata_cascade_policies",
         "description": "If a policy already exists on a folder, this will apply that policy\nto all existing files and sub-folders within the target folder.",
@@ -6334,7 +6341,7 @@
       },
       "delete": {
         "operationId": "delete_comments_id",
-        "summary": "Delete comment",
+        "summary": "Remove comment",
         "tags": [
           "Comments"
         ],
@@ -6631,7 +6638,7 @@
       },
       "delete": {
         "operationId": "delete_collaborations_id",
-        "summary": "Delete collaboration",
+        "summary": "Remove collaboration",
         "tags": [
           "Collaborations"
         ],
@@ -7420,7 +7427,7 @@
         "tags": [
           "Tasks"
         ],
-        "summary": "Delete task",
+        "summary": "Remove task",
         "x-box-reference-category": "tasks",
         "description": "Deletes a specific task.",
         "parameters": [
@@ -7465,7 +7472,7 @@
     "/tasks/{task_id}/assignments": {
       "get": {
         "operationId": "get_tasks_id_assignments",
-        "summary": "List task's assignments",
+        "summary": "List task assignments",
         "tags": [
           "Tasks"
         ],
@@ -8191,7 +8198,7 @@
       },
       "delete": {
         "operationId": "delete_web_links_id",
-        "summary": "Delete web link",
+        "summary": "Remove web link",
         "tags": [
           "Web Links"
         ],
@@ -8300,7 +8307,7 @@
       },
       "delete": {
         "operationId": "delete_web_links_id_trash",
-        "summary": "Permanently delete web link",
+        "summary": "Permanently remove web link",
         "tags": [
           "Trash"
         ],
@@ -8647,7 +8654,7 @@
       "get": {
         "operationId": "get_users_me",
         "x-box-reference-category": "users",
-        "summary": "Get authenticated user",
+        "summary": "Get current user",
         "tags": [
           "Users"
         ],
@@ -9418,7 +9425,7 @@
     "/invites": {
       "post": {
         "operationId": "post_invites",
-        "summary": "Invite user",
+        "summary": "Create user invite",
         "tags": [
           "Users"
         ],
@@ -9576,7 +9583,7 @@
     "/groups": {
       "get": {
         "operationId": "get_groups",
-        "summary": "List enterprise groups",
+        "summary": "List groups for enterprise",
         "x-box-reference-category": "groups",
         "tags": [
           "Groups"
@@ -9954,7 +9961,7 @@
       },
       "delete": {
         "operationId": "delete_groups_id",
-        "summary": "Delete group",
+        "summary": "Remove group",
         "tags": [
           "Groups"
         ],
@@ -9992,7 +9999,7 @@
     "/groups/{group_id}/memberships": {
       "get": {
         "operationId": "get_groups_id_memberships",
-        "summary": "List group's members",
+        "summary": "List members of group",
         "x-box-reference-category": "memberships",
         "tags": [
           "Groups"
@@ -10062,7 +10069,7 @@
     "/groups/{group_id}/collaborations": {
       "get": {
         "operationId": "get_groups_id_collaborations",
-        "summary": "List group's collaborations",
+        "summary": "List collaborations for group",
         "x-box-reference-category": "group_collaborations",
         "tags": [
           "Groups"
@@ -10309,7 +10316,7 @@
       },
       "put": {
         "operationId": "put_group_memberships_id",
-        "summary": "Update user's membership",
+        "summary": "Update group membership",
         "tags": [
           "Groups"
         ],
@@ -10901,7 +10908,7 @@
       },
       "delete": {
         "operationId": "delete_webhooks_id",
-        "summary": "Delete webhook",
+        "summary": "Remove webhook",
         "tags": [
           "Webhooks"
         ],
@@ -11075,7 +11082,7 @@
     "/events": {
       "options": {
         "operationId": "options_events",
-        "summary": "Get a long poll endpoint",
+        "summary": "Get events long poll endpoint",
         "tags": [
           "Events"
         ],
@@ -11106,7 +11113,7 @@
       },
       "get": {
         "operationId": "get_events",
-        "summary": "Get user and enterprise events",
+        "summary": "List user and enterprise events",
         "tags": [
           "Events"
         ],
@@ -11497,7 +11504,7 @@
     "/recent_items": {
       "get": {
         "operationId": "get_recent_items",
-        "summary": "List recent items",
+        "summary": "List recently accessed items",
         "tags": [
           "Recent Items"
         ],
@@ -11913,7 +11920,7 @@
     "/retention_policies/{retention_policy_id}/assignments": {
       "get": {
         "operationId": "get_retention_policies_id_assignments",
-        "summary": "List policy's assignments",
+        "summary": "List retention policy assignments",
         "tags": [
           "Retention Policies"
         ],
@@ -12112,7 +12119,7 @@
     "/retention_policy_assignments/{retention_policy_assignment_id}": {
       "get": {
         "operationId": "get_retention_policy_assignments_id",
-        "summary": "Get policy assignment",
+        "summary": "Get retention policy assignment",
         "tags": [
           "Retention Policies"
         ],
@@ -12466,7 +12473,7 @@
         "tags": [
           "Legal Hold Policies"
         ],
-        "summary": "Delete legal hold policy",
+        "summary": "Remove legal hold policy",
         "description": "Delete an existing legal hold policy.\n\nThis is an asynchronous process. The policy will not be\nfully deleted yet when the response returns.",
         "parameters": [
           {
@@ -12500,7 +12507,7 @@
     "/legal_hold_policy_assignments": {
       "get": {
         "operationId": "get_legal_hold_policy_assignments",
-        "summary": "List policy's assignments",
+        "summary": "List legal hold policy assignments",
         "tags": [
           "Legal Hold Policies"
         ],
@@ -12668,7 +12675,7 @@
     "/legal_hold_policy_assignments/{legal_hold_policy_assignment_id}": {
       "get": {
         "operationId": "get_legal_hold_policy_assignments_id",
-        "summary": "Get policy assignment",
+        "summary": "Get legal hold policy assignment",
         "tags": [
           "Legal Hold Policies"
         ],
@@ -12753,7 +12760,7 @@
           "Retention Policies"
         ],
         "x-box-reference-category": "file_version_retentions",
-        "summary": "Get retention for file",
+        "summary": "Get retention on file",
         "description": "Returns information about a file version retention.",
         "parameters": [
           {
@@ -12798,7 +12805,7 @@
           "Retention Policies"
         ],
         "x-box-reference-category": "file_version_retentions",
-        "summary": "List retentions on files",
+        "summary": "List file version retentions",
         "description": "Retrieves all file version retentions for the given enterprise.",
         "parameters": [
           {
@@ -12916,7 +12923,7 @@
     "/file_version_legal_holds/{file_version_legal_hold_id}": {
       "get": {
         "operationId": "get_file_version_legal_holds_id",
-        "summary": "Inspect legal hold on file",
+        "summary": "Get file version legal hold",
         "tags": [
           "Legal Hold Policies"
         ],
@@ -12961,7 +12968,7 @@
     "/file_version_legal_holds": {
       "get": {
         "operationId": "get_file_version_legal_holds",
-        "summary": "List legal holds for policy",
+        "summary": "List file version legal holds",
         "tags": [
           "Legal Hold Policies"
         ],
@@ -13072,7 +13079,7 @@
       },
       "delete": {
         "operationId": "delete_device_pinners_id",
-        "summary": "Delete device pin",
+        "summary": "Remove device pin",
         "tags": [
           "Device Pins"
         ],
@@ -13425,7 +13432,7 @@
     "/terms_of_service_user_statuses": {
       "get": {
         "operationId": "get_terms_of_service_user_statuses",
-        "summary": "List Terms of Service user statuses",
+        "summary": "List terms of service user statuses",
         "tags": [
           "Terms of Service"
         ],
@@ -13478,7 +13485,7 @@
       },
       "post": {
         "operationId": "post_terms_of_service_user_statuses",
-        "summary": "Set status for new user",
+        "summary": "Create terms of service status for new user",
         "tags": [
           "Terms of Service"
         ],
@@ -13577,7 +13584,7 @@
     "/terms_of_service_user_statuses/{terms_of_service_user_status_id}": {
       "put": {
         "operationId": "put_terms_of_service_user_statuses_id",
-        "summary": "Set status for existing user",
+        "summary": "Update terms of service status for existing user",
         "tags": [
           "Terms of Service"
         ],
@@ -13640,7 +13647,7 @@
     "/collaboration_whitelist_entries": {
       "get": {
         "operationId": "get_collaboration_whitelist_entries",
-        "summary": "List whitelist entries",
+        "summary": "List collaboration whitelist entries",
         "tags": [
           "Whitelist"
         ],
@@ -13696,7 +13703,7 @@
       },
       "post": {
         "operationId": "post_collaboration_whitelist_entries",
-        "summary": "Create whitelist entry",
+        "summary": "Create collaboration whitelist entry",
         "tags": [
           "Whitelist"
         ],
@@ -13758,7 +13765,7 @@
     "/collaboration_whitelist_entries/{collaboration_whitelist_entry_id}": {
       "get": {
         "operationId": "get_collaboration_whitelist_entries_id",
-        "summary": "Get whitelist entry",
+        "summary": "Get collaboration whitelist entry",
         "tags": [
           "Whitelist"
         ],
@@ -13801,7 +13808,7 @@
       },
       "delete": {
         "operationId": "delete_collaboration_whitelist_entries_id",
-        "summary": "Delete whitelist entry",
+        "summary": "Remove collaboration whitelist entry",
         "tags": [
           "Whitelist"
         ],
@@ -13839,7 +13846,7 @@
     "/collaboration_whitelist_exempt_targets": {
       "get": {
         "operationId": "get_collaboration_whitelist_exempt_targets",
-        "summary": "List whitelist exemptions",
+        "summary": "List collaboration whitelist exempt target",
         "tags": [
           "Whitelist"
         ],
@@ -13895,7 +13902,7 @@
       },
       "post": {
         "operationId": "post_collaboration_whitelist_exempt_targets",
-        "summary": "Create whitelist exemption",
+        "summary": "Create whitelist exempt target",
         "tags": [
           "Whitelist"
         ],
@@ -13955,7 +13962,7 @@
     "/collaboration_whitelist_exempt_targets/{collaboration_whitelist_exempt_target_id}": {
       "get": {
         "operationId": "get_collaboration_whitelist_exempt_targets_id",
-        "summary": "Get whitelist exemption",
+        "summary": "Get collaboration whitelist exempt target",
         "tags": [
           "Whitelist"
         ],
@@ -13998,7 +14005,7 @@
       },
       "delete": {
         "operationId": "delete_collaboration_whitelist_exempt_targets_id",
-        "summary": "Remove whitelist exemption",
+        "summary": "Remove collaboration whitelist exempt target",
         "tags": [
           "Whitelist"
         ],
@@ -14157,7 +14164,7 @@
     "/storage_policy_assignments": {
       "get": {
         "operationId": "get_storage_policy_assignments",
-        "summary": "List policy assignments",
+        "summary": "List storage policy assignments",
         "tags": [
           "Multi Zones"
         ],
@@ -14318,7 +14325,7 @@
     "/storage_policy_assignments/{storage_policy_assignment_id}": {
       "get": {
         "operationId": "get_storage_policy_assignments_id",
-        "summary": "Get policy assignment",
+        "summary": "Get storage policy assignment",
         "tags": [
           "Multi Zones"
         ],
@@ -14361,7 +14368,7 @@
       },
       "put": {
         "operationId": "put_storage_policy_assignments_id",
-        "summary": "Update policy assignment",
+        "summary": "Update storage policy assignment",
         "tags": [
           "Multi Zones"
         ],
@@ -19155,6 +19162,45 @@
           }
         ]
       },
+      "RefreshRequest": {
+        "title": "Refresh access token",
+        "x-box-resource-id": "refresh_request",
+        "x-box-reference-hide": true,
+        "description": "A request to refresh an Access Token. Use this API to refresh an expired\nAccess Token using a valid Refresh Token.",
+        "required": [
+          "grant_type",
+          "client_id",
+          "client_secret",
+          "refresh_token"
+        ],
+        "properties": {
+          "grant_type": {
+            "type": "string",
+            "format": "urn",
+            "example": "refresh_token",
+            "description": "The type of request being made, in this case a refresh request.",
+            "enum": [
+              "refresh_token"
+            ]
+          },
+          "client_id": {
+            "type": "string",
+            "description": "The client ID of the application requesting to refresh the token.",
+            "example": "ly1nj6n11vionaie65emwzk575hnnmrk"
+          },
+          "client_secret": {
+            "type": "string",
+            "description": "The client secret of the application requesting to refresh the token.",
+            "example": "hOzsTeFlT6ko0dme22uGbQal04SBPYc1"
+          },
+          "refresh_token": {
+            "type": "string",
+            "format": "token",
+            "description": "The refresh token to refresh.",
+            "example": "c3FIOG9vSGV4VHo4QzAyg5T1JvNnJoZ3ExaVNyQWw6WjRsanRKZG5lQk9qUE1BVQ"
+          }
+        }
+      },
       "Reference": {
         "title": "Reference",
         "x-box-resource-id": "reference",
@@ -21639,7 +21685,8 @@
     {
       "name": "Authorization",
       "x-box-reference-category": "authorization",
-      "x-box-reference-parent-category": "basics"
+      "x-box-reference-parent-category": "basics",
+      "x-box-prioritize": true
     },
     {
       "name": "Folders",
@@ -21658,12 +21705,12 @@
       "x-box-reference-parent-category": "downloads_and_uploads"
     },
     {
-      "name": "Regular Uploads",
+      "name": "Uploads",
       "x-box-reference-category": "uploads",
       "x-box-reference-parent-category": "downloads_and_uploads"
     },
     {
-      "name": "Chunked Uploads",
+      "name": "Uploads (Chunked)",
       "x-box-reference-category": "chunked_uploads",
       "x-box-reference-parent-category": "downloads_and_uploads"
     },
@@ -21718,12 +21765,12 @@
       "x-box-reference-parent-category": "trash"
     },
     {
-      "name": "File Metadata",
+      "name": "Metadata (Files)",
       "x-box-reference-category": "file_metadata",
       "x-box-reference-parent-category": "metadata"
     },
     {
-      "name": "Folder Metadata",
+      "name": "Metadata (Folders)",
       "x-box-reference-category": "folder_metadata",
       "x-box-reference-parent-category": "metadata"
     },
@@ -21733,7 +21780,7 @@
       "x-box-reference-parent-category": "metadata"
     },
     {
-      "name": "Cascade Policies (Beta)",
+      "name": "Metadata Cascade Policies (Beta)",
       "x-box-reference-category": "metadata_cascade_policies",
       "x-box-reference-parent-category": "metadata"
     },
@@ -21768,22 +21815,22 @@
       "x-box-reference-parent-category": "automation_and_events"
     },
     {
-      "name": "User Collaboration",
+      "name": "Collaborations (Users)",
       "x-box-reference-category": "user_collaborations",
       "x-box-reference-parent-category": "collaborations"
     },
     {
-      "name": "File Collaborations",
+      "name": "Collaborations (Files)",
       "x-box-reference-category": "file_collaborations",
       "x-box-reference-parent-category": "collaborations"
     },
     {
-      "name": "Folder Collaborations",
+      "name": "Collaborations (Folders)",
       "x-box-reference-category": "folder_collaborations",
       "x-box-reference-parent-category": "collaborations"
     },
     {
-      "name": "Group Collaborations",
+      "name": "Collaborations (Group)",
       "x-box-reference-category": "group_collaborations",
       "x-box-reference-parent-category": "collaborations"
     },
@@ -21808,12 +21855,12 @@
       "x-box-reference-parent-category": "users_and_groups"
     },
     {
-      "name": "Memberships",
+      "name": "Group Memberships",
       "x-box-reference-category": "memberships",
       "x-box-reference-parent-category": "users_and_groups"
     },
     {
-      "name": "Avatars",
+      "name": "User Avatars",
       "x-box-reference-category": "avatars",
       "x-box-reference-parent-category": "users_and_groups"
     },
@@ -21838,12 +21885,12 @@
       "x-box-reference-parent-category": "governance"
     },
     {
-      "name": "Legal Hold Assignments",
+      "name": "Legal Hold Policy Assignments",
       "x-box-reference-category": "legal_hold_policy_assignments",
       "x-box-reference-parent-category": "governance"
     },
     {
-      "name": "File Version Holds",
+      "name": "File Version Legal Holds",
       "x-box-reference-category": "file_version_legal_holds",
       "x-box-reference-parent-category": "governance"
     },
@@ -21853,7 +21900,7 @@
       "x-box-reference-parent-category": "governance"
     },
     {
-      "name": "Retention Assignments",
+      "name": "Retention Policy Assignments",
       "x-box-reference-category": "retention_policy_assignments",
       "x-box-reference-parent-category": "governance"
     },
@@ -21873,17 +21920,17 @@
       "x-box-reference-parent-category": "security_and_compliance"
     },
     {
-      "name": "Terms Users Statuses",
+      "name": "Terms of Service Users Statuses",
       "x-box-reference-category": "terms_of_service_user_statuses",
       "x-box-reference-parent-category": "security_and_compliance"
     },
     {
-      "name": "File Watermarks",
+      "name": "Watermarks (Files)",
       "x-box-reference-category": "file_watermarks",
       "x-box-reference-parent-category": "security_and_compliance"
     },
     {
-      "name": "Folder Watermarks",
+      "name": "Watermarks (Folders)",
       "x-box-reference-category": "folder_watermarks",
       "x-box-reference-parent-category": "security_and_compliance"
     },
