@@ -141,7 +141,14 @@
           "content": {
             "application/x-www-form-urlencoded": {
               "schema": {
-                "$ref": "#/components/schemas/TokenRequest"
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/TokenRequest"
+                  },
+                  {
+                    "$ref": "#/components/schemas/RefreshRequest"
+                  }
+                ]
               }
             }
           }
@@ -6549,24 +6556,6 @@
             "schema": {
               "type": "string"
             }
-          },
-          {
-            "name": "fields",
-            "description": "A comma-separated list of attributes to include in the\nresponse. This can be used to request fields that are\nnot normally returned in a standard response.\n\nBe aware that specifying this parameter will have the\neffect that none of the standard fields are returned in\nthe response unless explicitly specified, instead only\nfields for the mini representation are returned, additional\nto the fields requested.",
-            "in": "query",
-            "example": [
-              "id",
-              "type",
-              "name"
-            ],
-            "required": false,
-            "explode": false,
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            }
           }
         ],
         "requestBody": {
@@ -6603,6 +6592,11 @@
                     "format": "date-time",
                     "description": "Set the expiration date for the collaboration. At this date, the\ncollaboration will be automatically removed from the item.",
                     "example": "2019-08-29T23:59:00-07:00"
+                  },
+                  "can_view_path": {
+                    "type": "boolean",
+                    "description": "Determines if the invited users can see the entire parent path to\nthe associated folder. The user will not gain privileges in any\nparent folder and therefore can not see content the user is not\ncollaborated on.\n\nBe aware that this meaningfully increases the time required to load the\ninvitee's **All Files** page. We recommend you limit the number of\ncollaborations with `can_view_path` enabled to 1,000 per user.",
+                    "example": true
                   }
                 }
               }
@@ -6882,6 +6876,11 @@
                       "viewer uploader",
                       "co-owner"
                     ]
+                  },
+                  "can_view_path": {
+                    "type": "boolean",
+                    "description": "Determines if the invited users can see the entire parent path to\nthe associated folder. The user will not gain privileges in any\nparent folder and therefore can not see content the user is not\ncollaborated on.\n\nBe aware that this meaningfully increases the time required to load the\ninvitee's **All Files** page. We recommend you limit the number of\ncollaborations with `can_view_path` enabled to 1,000 per user.",
+                    "example": true
                   }
                 }
               }
@@ -19162,6 +19161,45 @@
             }
           }
         ]
+      },
+      "RefreshRequest": {
+        "title": "Refresh access token",
+        "x-box-resource-id": "refresh_request",
+        "x-box-reference-hide": true,
+        "description": "A request to refresh an Access Token. Use this API to refresh an expired\nAccess Token using a valid Refresh Token.",
+        "required": [
+          "grant_type",
+          "client_id",
+          "client_secret",
+          "refresh_token"
+        ],
+        "properties": {
+          "grant_type": {
+            "type": "string",
+            "format": "urn",
+            "example": "refresh_token",
+            "description": "The type of request being made, in this case a refresh request.",
+            "enum": [
+              "refresh_token"
+            ]
+          },
+          "client_id": {
+            "type": "string",
+            "description": "The client ID of the application requesting to refresh the token.",
+            "example": "ly1nj6n11vionaie65emwzk575hnnmrk"
+          },
+          "client_secret": {
+            "type": "string",
+            "description": "The client secret of the application requesting to refresh the token.",
+            "example": "hOzsTeFlT6ko0dme22uGbQal04SBPYc1"
+          },
+          "refresh_token": {
+            "type": "string",
+            "format": "token",
+            "description": "The refresh token to refresh.",
+            "example": "c3FIOG9vSGV4VHo4QzAyg5T1JvNnJoZ3ExaVNyQWw6WjRsanRKZG5lQk9qUE1BVQ"
+          }
+        }
       },
       "Reference": {
         "title": "Reference",
