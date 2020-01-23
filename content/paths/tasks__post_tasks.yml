@@ -43,14 +43,15 @@ requestBody:
           action:
             type: string
             description: |-
-              The action the task assignee will be prompted to complete.
-
-              Currently only `review` is supported. This will provide the
-              assigned user the ability to approve or dismiss the
-              associated request.
+              The action the task assignee will be prompted to do. Must be
+              `review` for an approval task, or `complete` for a general
+              task. This will provide the assignee the ability to `approve` or
+              `reject` the associated file or request for approval tasks, and
+              the ability to `complete` general tasks.
             example: review
             enum:
               - review
+              - complete
 
           message:
             type: string
@@ -87,7 +88,13 @@ responses:
       application/json:
         schema:
           $ref: '#/components/schemas/Task'
-
+  400:
+    description: |-
+      Returns an error if the date used for `due_at` is in the past
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
   default:
     description: |-
       An unexpected client error.
