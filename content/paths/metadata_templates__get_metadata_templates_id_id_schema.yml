@@ -4,12 +4,15 @@ operationId: get_metadata_templates_id_id_schema
 summary: Get metadata template by name
 
 tags:
-  - Metadata Templates
+  - Metadata templates
 
 x-box-reference-category: metadata_templates
 
 description: |-
-  Retrieves a metadata template by its scope and template name.
+  Retrieves a metadata template by its `scope` and `templateKey` values.
+
+  To find the `scope` and `templateKey` for a template, list all templates for
+  an enterprise or globally, or list all templates applied to a file or folder.
 
 parameters:
   - $ref: '../attributes/metadata_scope.yml'
@@ -24,6 +27,28 @@ responses:
       application/json:
         schema:
           $ref: '#/components/schemas/MetadataTemplate'
+
+  400:
+    description: |-
+      Returned if any of the request parameters are not valid.
+
+      * `bad_request`: Often returned when the scope of the template is not
+        recognised. Please make sure to use either `enterprise` or `global` as
+        the `scope` value.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
+
+  404:
+    description: |-
+      Returned when a template with the given `scope` and `template_key` can not
+      be found.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
+
 
   default:
     description: |-
