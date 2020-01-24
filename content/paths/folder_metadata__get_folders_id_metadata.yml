@@ -7,9 +7,11 @@ tags:
   - Metadata instances (Folders)
 
 x-box-reference-category: folder_metadata
+x-box-sanitized: true
 
 description: |-
-  Retrieves all metadata for a given folder.
+  Retrieves all metadata for a given folder. This can not be used on the root
+  folder with ID `0`.
 
 parameters:
   - $ref: '../attributes/folder_id.yml'
@@ -26,6 +28,24 @@ responses:
       application/json:
         schema:
           $ref: '#/components/schemas/Metadatas'
+
+  403:
+    description: |-
+      Returned when the request parameters are not valid.
+
+      * `forbidden` - this operation is not allowed on the Root folder.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
+
+  404:
+    description: |-
+      Returned when the user does not have access to the folder.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
 
   default:
     description: |-
