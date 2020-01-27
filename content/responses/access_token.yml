@@ -1,6 +1,8 @@
 ---
 title: Access token
 
+type: object
+
 x-box-resource-id: access_token
 
 description: |-
@@ -8,27 +10,54 @@ description: |-
 
 x-box-reference-category: authorization
 
-type: object
+properties:
+  access_token:
+    type: string
+    format: token
+    example: c3FIOG9vSGV4VHo4QzAyg5T1JvNnJoZ3ExaVNyQWw6WjRsanRKZG5lQk9qUE1BVQ
+    description: |-
+      The requested access token.
 
-allOf:
-  - $ref: "../attributes/access_token--embedded.yml"
-  - x-box-reference-hide: false
-  - properties:
-      refresh_token:
-        type: string
-        format: token
-        example: |-
-          c3FIOG9vSGV4VHo4QzAyg5T1JvNnJoZ3ExaVNyQWw6WjRsanRKZG5lQk9qUE1BVQ
-        description: |-
-          The refresh token for this access token, which can be used
-          to request a new access token when the current one expires.
+  expires_in:
+    type: integer
+    format: int64
+    example: 3600
+    description: |-
+      The time in seconds in seconds by which this token will expire.
 
-      issued_token_type:
-        type: string
-        format: urn
-        example: urn:ietf:params:oauth:token-type:access_token
-        enum:
-          - urn:ietf:params:oauth:token-type:access_token
-        description: |-
-          The type of downscoped access token returned. This is only
-          returned if an access token has been downscoped.
+  token_type:
+    type: string
+    enum:
+      - bearer
+    example: bearer
+    description: |-
+      The type of access token returned.
+
+  restricted_to:
+    type: array
+    description: |-
+      The permissions that this access token permits,
+      providing a list of resources (files, folders, etc)
+      and the scopes permitted for each of those resources.
+    items:
+      $ref: "#/components/schemas/FileScope"
+
+
+  refresh_token:
+    type: string
+    format: token
+    example: |-
+      c3FIOG9vSGV4VHo4QzAyg5T1JvNnJoZ3ExaVNyQWw6WjRsanRKZG5lQk9qUE1BVQ
+    description: |-
+      The refresh token for this access token, which can be used
+      to request a new access token when the current one expires.
+
+  issued_token_type:
+    type: string
+    format: urn
+    example: urn:ietf:params:oauth:token-type:access_token
+    enum:
+      - urn:ietf:params:oauth:token-type:access_token
+    description: |-
+      The type of downscoped access token returned. This is only
+      returned if an access token has been downscoped.
