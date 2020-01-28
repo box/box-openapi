@@ -575,7 +575,7 @@
       }
     },
     "ClientError": {
-      "title": "Client Error",
+      "title": "Client error",
       "description": "A generic error",
       "properties": {
         "type": {
@@ -627,7 +627,7 @@
       }
     },
     "UploadSession": {
-      "title": "Upload Session",
+      "title": "Upload session",
       "description": "An upload session for chunk uploading a file.",
       "properties": {
         "id": {
@@ -664,7 +664,35 @@
         "session_endpoints": {
           "allOf": [
             {
-              "$ref": "#/definitions/SessionEndpoints"
+              "title": "Session endpoints",
+              "description": "A list of endpoints for a chunked upload session.",
+              "type": "object",
+              "properties": {
+                "upload_part": {
+                  "type": "string",
+                  "description": "The URL to upload parts to"
+                },
+                "commit": {
+                  "type": "string",
+                  "description": "The URL used to commit the file"
+                },
+                "abort": {
+                  "type": "string",
+                  "description": "The URL for used to abort the session."
+                },
+                "list_parts": {
+                  "type": "string",
+                  "description": "The URL users to list all parts."
+                },
+                "status": {
+                  "type": "string",
+                  "description": "The URL used to get the status of the upload."
+                },
+                "log_event": {
+                  "type": "string",
+                  "description": "The URL used to get the upload log from."
+                }
+              }
             },
             {
               "description": "A list of endpoints for this session."
@@ -674,7 +702,7 @@
       }
     },
     "UploadPart": {
-      "title": "Upload Part",
+      "title": "Upload part",
       "description": "A chunk of a file uploaded as part of\nan upload session.",
       "allOf": [
         {
@@ -691,7 +719,7 @@
       ]
     },
     "UploadParts": {
-      "title": "Upload Parts",
+      "title": "Upload parts",
       "description": "A list of uploaded chunks for an upload\nsession.",
       "allOf": [
         {
@@ -717,7 +745,22 @@
               "description": "The order by which items are returned.\n\nThis field is only returned for calls that use offset-based pagination.\nFor marker-based paginated APIs, this field will be omitted.",
               "type": "array",
               "items": {
-                "$ref": "#/definitions/PaginationOrder"
+                "type": "object",
+                "description": "The order in which a pagination is ordered",
+                "properties": {
+                  "by": {
+                    "description": "The field to order by",
+                    "type": "string"
+                  },
+                  "direction": {
+                    "type": "string",
+                    "description": "The direction to order by, either ascending or descending",
+                    "enum": [
+                      "ASC",
+                      "DESC"
+                    ]
+                  }
+                }
               }
             }
           }
@@ -735,7 +778,7 @@
       ]
     },
     "UploadPart--Mini": {
-      "title": "Upload Part (Mini)",
+      "title": "Upload part (Mini)",
       "description": "The basic representation of an upload\nsession chunk.",
       "properties": {
         "part_id": {
@@ -863,7 +906,57 @@
             "lock": {
               "allOf": [
                 {
-                  "$ref": "#/definitions/Lock"
+                  "title": "Lock",
+                  "type": "object",
+                  "description": "The lock held on a file. A lock prevents a file from being moved,\nrenamed, or otherwise changed by anyone else than the user who created the\nlock.",
+                  "allOf": [
+                    {
+                      "title": "Reference",
+                      "description": "The bare basic reference for an object",
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "description": "The unique identifier for this object"
+                        }
+                      }
+                    },
+                    {
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "description": "`lock`",
+                          "enum": [
+                            "lock"
+                          ]
+                        },
+                        "created_by": {
+                          "allOf": [
+                            {
+                              "$ref": "#/definitions/User--Mini"
+                            },
+                            {
+                              "description": "The user who created the lock."
+                            }
+                          ]
+                        },
+                        "created_at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "description": "The time this lock was created at."
+                        },
+                        "expired_at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "description": "The time this lock is to expire at, which might be in the past."
+                        },
+                        "is_download_prevented": {
+                          "type": "boolean",
+                          "description": "Whether or not the file can be downloaded while locked."
+                        }
+                      }
+                    }
+                  ]
                 },
                 {
                   "description": "The lock held on this file. If there is no lock, this can either\nbe `null` or have a timestamp in the past."
@@ -882,7 +975,50 @@
             "expiring_embed_link": {
               "allOf": [
                 {
-                  "$ref": "#/definitions/ExpiringEmbedLink"
+                  "title": "Expiring embed link",
+                  "type": "object",
+                  "description": "An expiring Box Embed Link.",
+                  "allOf": [
+                    {
+                      "type": "object",
+                      "description": "The basics of an access token",
+                      "properties": {
+                        "access_token": {
+                          "type": "string",
+                          "format": "token",
+                          "description": "The requested access token."
+                        },
+                        "expires_in": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "The time in seconds in seconds by which this token will expire."
+                        },
+                        "token_type": {
+                          "type": "string",
+                          "enum": [
+                            "bearer"
+                          ],
+                          "description": "The type of access token returned."
+                        },
+                        "restricted_to": {
+                          "type": "array",
+                          "description": "The permissions that this access token permits,\nproviding a list of resources (files, folders, etc)\nand the scopes permitted for each of those resources.",
+                          "items": {
+                            "$ref": "#/definitions/FileScope"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "properties": {
+                        "url": {
+                          "type": "string",
+                          "format": "url",
+                          "description": "The actual expiring embed URL for this file, constructed\nfrom the file ID and access tokens specified in this object."
+                        }
+                      }
+                    }
+                  ]
                 },
                 {
                   "description": "Requesting this field creates an expiring Box Embed URL for an\nembedded preview session in an `iframe`.\n\nThis URL will expire after 60 seconds and the session will\nexpire after 60 minutes.\n\nNot all file types are supported for these embed URLs. Box Embed\nis not optimized for mobile browsers and should not be used in web\nexperiences designed for mobile devices. Many UI elements, like\nthe **download** and **print** options might not show in mobile\nbrowsers."
@@ -951,7 +1087,80 @@
             "representations": {
               "allOf": [
                 {
-                  "$ref": "#/definitions/Representations"
+                  "title": "Representations",
+                  "description": "A list of file representations",
+                  "type": "object",
+                  "properties": {
+                    "entries": {
+                      "type": "array",
+                      "description": "A list of files",
+                      "items": {
+                        "type": "object",
+                        "description": "A file representation",
+                        "properties": {
+                          "content": {
+                            "type": "object",
+                            "description": "An object containing the URL that can be used to actually fetch\nthe representation.",
+                            "properties": {
+                              "url_template": {
+                                "type": "string",
+                                "description": "The download URL that can be used to fetch the representation.\nMake sure to make an authenticated API call to this endpoint.\n\nThis URL is a template and will require the `{+asset_path}` to\nbe replaced by a path. In general, for unpaged representations\nit can be replaced by an empty string.\n\nFor paged representations, replace the `{+asset_path}` with the\npage to request plus the extension for the file, for example\n`1.pdf`.\n\nWhen requesting the download URL the following additional\nquery params can be passed along.\n\n* `set_content_disposition_type` - Sets the\n`Content-Disposition` header in the API response with the\nspecified disposition type of either `inline` or `attachment`.\nIf not supplied, the `Content-Disposition` header is not\nincluded in the response.\n\n* `set_content_disposition_filename` - Allows the application to\n  define the representation's file name used in the\n  `Content-Disposition` header.  If not defined, the filename\n  is derived from the source file name in Box combined with the\n  extension of the representation."
+                              }
+                            }
+                          },
+                          "info": {
+                            "type": "object",
+                            "description": "An object containing the URL that can be used to fetch more info\non this representation.",
+                            "properties": {
+                              "url": {
+                                "type": "string",
+                                "description": "The API URL that can be used to get more info on this file\nrepresentation. Make sure to make an authenticated API call\nto this endpoint."
+                              }
+                            }
+                          },
+                          "properties": {
+                            "type": "object",
+                            "description": "An object containing the size and type of this presentation.",
+                            "properties": {
+                              "dimensions": {
+                                "type": "string",
+                                "format": "<width>x<height>",
+                                "description": "The width by height size of this representation in pixels."
+                              },
+                              "paged": {
+                                "type": "boolean",
+                                "description": "Indicates if the representation is build up out of multiple\npages."
+                              },
+                              "thumb": {
+                                "type": "boolean",
+                                "description": "Indicates if the representation can be used as a thumbnail of\nthe file."
+                              }
+                            }
+                          },
+                          "representation": {
+                            "type": "string",
+                            "description": "Indicates the file type of the returned representation."
+                          },
+                          "status": {
+                            "type": "object",
+                            "description": "An object containing the status of this representation.",
+                            "properties": {
+                              "state": {
+                                "type": "string",
+                                "enum": [
+                                  "success",
+                                  "viewable",
+                                  "pending",
+                                  "none"
+                                ],
+                                "description": "The status of the representation.\n\n* `success` defines the representation as ready to be viewed.\n* `viewable` defines a video to be ready for viewing.\n* `pending` defines the representation as to be generated. Retry\n  this endpoint to re-check the status.\n* `none` defines that the representation will be created when\n  requested. Request the URL defined in the `info` object to\n  trigger this generation."
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
                 },
                 {
                   "description": "A list of representations for a file that can be used to\ndisplay a placeholder of the file in your application. By default\nthis returns all representations and we recommend using the\n`X-Rep-Hints` header to further customize the desired\nrepresentations."
@@ -962,54 +1171,6 @@
           }
         }
       ]
-    },
-    "SessionEndpoints": {
-      "title": "Session Endpoints",
-      "description": "A list of endpoints for a chunked upload session.",
-      "properties": {
-        "upload_part": {
-          "type": "string",
-          "description": "The URL to upload parts to"
-        },
-        "commit": {
-          "type": "string",
-          "description": "The URL used to commit the file"
-        },
-        "abort": {
-          "type": "string",
-          "description": "The URL for used to abort the session."
-        },
-        "list_parts": {
-          "type": "string",
-          "description": "The URL users to list all parts."
-        },
-        "status": {
-          "type": "string",
-          "description": "The URL used to get the status of the upload."
-        },
-        "log_event": {
-          "type": "string",
-          "description": "The URL used to get the upload log from."
-        }
-      }
-    },
-    "PaginationOrder": {
-      "title": "Pagination Order",
-      "description": "The order in which a pagination is ordered",
-      "properties": {
-        "by": {
-          "description": "The field to order by",
-          "type": "string"
-        },
-        "direction": {
-          "type": "string",
-          "description": "The direction to order by, either ascending or descending",
-          "enum": [
-            "ASC",
-            "DESC"
-          ]
-        }
-      }
     },
     "File--Standard": {
       "title": "File (Standard)",
@@ -1037,7 +1198,23 @@
             "path_collection": {
               "allOf": [
                 {
-                  "$ref": "#/definitions/PathCollection"
+                  "title": "Path collection",
+                  "description": "A list of parent folders for an item.",
+                  "type": "object",
+                  "properties": {
+                    "total_count": {
+                      "description": "The number of folders in this list.",
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "entries": {
+                      "type": "array",
+                      "description": "The parent folders for this item",
+                      "items": {
+                        "$ref": "#/definitions/Folder--Mini"
+                      }
+                    }
+                  }
                 },
                 {
                   "description": "The tree of folders that this file is contained in,\nstarting at the root."
@@ -1114,7 +1291,84 @@
             "shared_link": {
               "allOf": [
                 {
-                  "$ref": "#/definitions/SharedLink"
+                  "title": "Shared link",
+                  "description": "Shared links provide direct, read-only access to files or folder on Box.\n\nShared links with open access level allow anyone with the URL\nto access the item, while shared links with company or collaborators access\nlevels can only be accessed by appropriately authenticated Box users.",
+                  "type": "object",
+                  "properties": {
+                    "url": {
+                      "type": "string",
+                      "format": "url",
+                      "description": "The URL that can be used to access the item on Box.\n\nThis URL will display the item in Box's preview UI where the file\ncan be downloaded if allowed.\n\nThis URL will continue to work even when a custom `vanity_url`\nhas been set for this shared link."
+                    },
+                    "download_url": {
+                      "type": "string",
+                      "format": "url",
+                      "x-box-premium-feature": true,
+                      "description": "A URL that can be used to download the file. This URL can be used in\na browser to download the file. This URL includes the file\nextension so that the file will be saved with the right file type.\n\nThis property will be `null` for folders."
+                    },
+                    "vanity_url": {
+                      "type": "string",
+                      "format": "url",
+                      "description": "The \"Custom URL\" that can also be used to preview the item on Box.  Custom\nURLs can only be created or modified in the Box Web application."
+                    },
+                    "access": {
+                      "type": "string",
+                      "description": "The access level for this shared link.\n\n* `open` - provides access to this item to anyone with this link\n* `company` - only provides access to this item to people the same company\n* `collaborators` - only provides access to this item to people who are\n   collaborators on this item\n\nIf this field is omitted when creating the shared link, the access level\nwill be set to the default access level specified by the enterprise admin.",
+                      "enum": [
+                        "open",
+                        "company",
+                        "collaborators"
+                      ]
+                    },
+                    "effective_access": {
+                      "type": "string",
+                      "description": "The effective access level for the shared link. This can be a more\nrestrictive access level than the value in the `access` field when the\nenterprise settings restrict the allowed access levels.",
+                      "enum": [
+                        "open",
+                        "company",
+                        "collaborators"
+                      ]
+                    },
+                    "effective_permission": {
+                      "type": "string",
+                      "description": "The effective permissions for this shared link.",
+                      "enum": [
+                        "can_download",
+                        "can_preview"
+                      ]
+                    },
+                    "unshared_at": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "The date and time when this link will be unshared. This field can only be\nset by users with paid accounts."
+                    },
+                    "is_password_enabled": {
+                      "type": "boolean",
+                      "description": "Defines if the shared link requires a password to access the item."
+                    },
+                    "permissions": {
+                      "type": "object",
+                      "description": "Defines if this link allows a user to preview and download an item.",
+                      "properties": {
+                        "can_download": {
+                          "type": "boolean",
+                          "description": "Defines if the shared link allows for the item to be downloaded. For\nshared links on folders, this also applies to any items in the folder.\n\nThis value can be set to `true` when the effective access level is\nset to `open` or `company`, not `collaborators`."
+                        },
+                        "can_preview": {
+                          "type": "boolean",
+                          "description": "Defines if the shared link allows for the item to be previewed.\n\nThis value is always `true`. For shared links on folders this also\napplies to any items in the folder."
+                        }
+                      }
+                    },
+                    "download_count": {
+                      "type": "integer",
+                      "description": "The number of times this item has been downloaded."
+                    },
+                    "preview_count": {
+                      "type": "integer",
+                      "description": "The number of times this item has been previewed."
+                    }
+                  }
                 },
                 {
                   "description": "The shared link for this file. This will be\n`null` if no shared link has been created for this\nfile."
@@ -1147,98 +1401,81 @@
         }
       ]
     },
-    "Lock": {
-      "title": "Lock",
-      "description": "The lock held on a file. A lock prevents a file from being moved,\nrenamed, or otherwise changed by anyone else than the user who created the\nlock.",
+    "User--Mini": {
+      "title": "User (Mini)",
+      "description": "A mini representation of a user, used when\nnested within another resource.",
       "allOf": [
         {
-          "$ref": "#/definitions/Reference"
+          "title": "Reference",
+          "description": "The bare basic reference for an object",
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "The unique identifier for this object"
+            }
+          }
         },
         {
           "properties": {
             "type": {
               "type": "string",
-              "description": "`lock`",
+              "description": "`user`",
               "enum": [
-                "lock"
+                "user"
               ]
             },
-            "created_by": {
-              "allOf": [
-                {
-                  "$ref": "#/definitions/User--Mini"
-                },
-                {
-                  "description": "The user who created the lock."
-                }
-              ]
-            },
-            "created_at": {
+            "name": {
               "type": "string",
-              "format": "date-time",
-              "description": "The time this lock was created at."
+              "description": "The display name of this user",
+              "maxLength": 50
             },
-            "expired_at": {
+            "login": {
               "type": "string",
-              "format": "date-time",
-              "description": "The time this lock is to expire at, which might be in the past."
-            },
-            "is_download_prevented": {
-              "type": "boolean",
-              "description": "Whether or not the file can be downloaded while locked."
+              "format": "email",
+              "description": "The primary email address of this user"
             }
           }
         }
       ]
     },
-    "ExpiringEmbedLink": {
-      "title": "Expiring Embed Link",
-      "description": "An expiring Box Embed Link.",
-      "allOf": [
-        {
-          "type": "object",
-          "description": "The basics of an access token",
-          "properties": {
-            "access_token": {
-              "type": "string",
-              "format": "token",
-              "description": "The requested access token."
-            },
-            "expires_in": {
-              "type": "integer",
-              "format": "int64",
-              "description": "The time in seconds in seconds by which this token will expire."
-            },
-            "token_type": {
-              "type": "string",
-              "enum": [
-                "bearer"
-              ],
-              "description": "The type of access token returned."
-            },
-            "restricted_to": {
-              "type": "array",
-              "description": "The permissions that this access token permits,\nproviding a list of resources (files, folders, etc)\nand the scopes permitted for each of those resources.",
-              "items": {
-                "$ref": "#/definitions/FileScope"
-              }
-            }
-          }
+    "FileScope": {
+      "title": "File scope",
+      "type": "object",
+      "description": "A relation between a file and the scopes for which the file can be accessed",
+      "properties": {
+        "scope": {
+          "type": "string",
+          "description": "The file scopes for the file access",
+          "enum": [
+            "annotation_edit",
+            "annotation_view_all",
+            "annotation_view_self",
+            "base_explorer",
+            "base_picker",
+            "base_preview",
+            "base_upload",
+            "item_delete",
+            "item_download",
+            "item_preview",
+            "item_rename",
+            "item_share"
+          ]
         },
-        {},
-        {
-          "properties": {
-            "url": {
-              "type": "string",
-              "format": "url",
-              "description": "The actual expiring embed URL for this file, constructed\nfrom the file ID and access tokens specified in this object."
+        "object": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/File--Mini"
+            },
+            {
+              "description": "The file for which the file can be accessed"
             }
-          }
+          ]
         }
-      ]
+      }
     },
     "Metadata": {
-      "title": "Metadata",
+      "title": "Metadata instance",
       "description": "A piece of metadata as specified by a metadata template and\napplied to a file or folder.",
       "type": "object",
       "properties": {
@@ -1276,19 +1513,10 @@
           "type": "integer",
           "description": "The version of the metadata object. Starts at 0 and increases every time\na user-defined property is modified."
         }
-      }
-    },
-    "Representations": {
-      "title": "Representations",
-      "description": "A list of file representations",
-      "properties": {
-        "entries": {
-          "type": "array",
-          "description": "A list of files",
-          "items": {
-            "$ref": "#/definitions/Representation"
-          }
-        }
+      },
+      "additionalProperties": {
+        "type": "string",
+        "x-box-example-key": "name"
       }
     },
     "File--Mini": {
@@ -1318,133 +1546,6 @@
         }
       ]
     },
-    "PathCollection": {
-      "title": "Path Collection",
-      "description": "A list of parent folders for an item.",
-      "properties": {
-        "total_count": {
-          "description": "The number of folders in this list.",
-          "type": "integer",
-          "format": "int64"
-        },
-        "entries": {
-          "type": "array",
-          "description": "The parent folders for this item",
-          "items": {
-            "$ref": "#/definitions/Folder--Mini"
-          }
-        }
-      }
-    },
-    "User--Mini": {
-      "title": "User (Mini)",
-      "description": "A mini representation of a user, used when\nnested within another resource.",
-      "allOf": [
-        {
-          "$ref": "#/definitions/Reference"
-        },
-        {
-          "properties": {
-            "type": {
-              "type": "string",
-              "description": "`user`",
-              "enum": [
-                "user"
-              ]
-            },
-            "name": {
-              "type": "string",
-              "description": "The display name of this user",
-              "maxLength": 50
-            },
-            "login": {
-              "type": "string",
-              "format": "email",
-              "description": "The primary email address of this user"
-            }
-          }
-        }
-      ]
-    },
-    "SharedLink": {
-      "title": "Shared Link",
-      "description": "Shared links provide direct, read-only access to files or folder on Box.\n\nShared links with open access level allow anyone with the URL\nto access the item, while shared links with company or collaborators access\nlevels can only be accessed by appropriately authenticated Box users.",
-      "properties": {
-        "url": {
-          "type": "string",
-          "format": "url",
-          "description": "The URL that can be used to access the item on Box.\n\nThis URL will display the item in Box's preview UI where the file\ncan be downloaded if allowed.\n\nThis URL will continue to work even when a custom `vanity_url`\nhas been set for this shared link."
-        },
-        "download_url": {
-          "type": "string",
-          "format": "url",
-          "x-box-premium-feature": true,
-          "description": "A URL that can be used to download the file. This URL can be used in\na browser to download the file. This URL includes the file\nextension so that the file will be saved with the right file type.\n\nThis property will be `null` for folders."
-        },
-        "vanity_url": {
-          "type": "string",
-          "format": "url",
-          "description": "The \"Custom URL\" that can also be used to preview the item on Box.  Custom\nURLs can only be created or modified in the Box Web application."
-        },
-        "access": {
-          "type": "string",
-          "description": "The access level for this shared link.\n\n* `open` - provides access to this item to anyone with this link\n* `company` - only provides access to this item to people the same company\n* `collaborators` - only provides access to this item to people who are\n   collaborators on this item\n\nIf this field is omitted when creating the shared link, the access level\nwill be set to the default access level specified by the enterprise admin.",
-          "enum": [
-            "open",
-            "company",
-            "collaborators"
-          ]
-        },
-        "effective_access": {
-          "type": "string",
-          "description": "The effective access level for the shared link. This can be a more\nrestrictive access level than the value in the `access` field when the\nenterprise settings restrict the allowed access levels.",
-          "enum": [
-            "open",
-            "company",
-            "collaborators"
-          ]
-        },
-        "effective_permission": {
-          "type": "string",
-          "description": "The effective permissions for this shared link.",
-          "enum": [
-            "can_download",
-            "can_preview"
-          ]
-        },
-        "unshared_at": {
-          "type": "string",
-          "format": "date-time",
-          "description": "The date and time when this link will be unshared. This field can only be\nset by users with paid accounts."
-        },
-        "is_password_enabled": {
-          "type": "boolean",
-          "description": "Defines if the shared link requires a password to access the item."
-        },
-        "permissions": {
-          "type": "object",
-          "description": "Defines if this link allows a user to preview and download an item.",
-          "properties": {
-            "can_download": {
-              "type": "boolean",
-              "description": "Defines if the shared link allows for the item to be downloaded. For\nshared links on folders, this also applies to any items in the folder.\n\nThis value can be set to `true` when the effective access level is\nset to `open` or `company`, not `collaborators`."
-            },
-            "can_preview": {
-              "type": "boolean",
-              "description": "Defines if the shared link allows for the item to be previewed.\n\nThis value is always `true`. For shared links on folders this also\napplies to any items in the folder."
-            }
-          }
-        },
-        "download_count": {
-          "type": "integer",
-          "description": "The number of times this item has been downloaded."
-        },
-        "preview_count": {
-          "type": "integer",
-          "description": "The number of times this item has been previewed."
-        }
-      }
-    },
     "Folder--Mini": {
       "title": "Folder (Mini)",
       "description": "A mini representation of a file version, used when\nnested under another resource.",
@@ -1471,115 +1572,6 @@
           }
         }
       ]
-    },
-    "Reference": {
-      "title": "Reference",
-      "description": "The bare basic reference for an object",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "The unique identifier for this object"
-        }
-      }
-    },
-    "FileScope": {
-      "title": "File Scope",
-      "description": "A relation between a file and the scopes for which the file can be accessed",
-      "properties": {
-        "scope": {
-          "type": "string",
-          "description": "The file scopes for the file access",
-          "enum": [
-            "annotation_edit",
-            "annotation_view_all",
-            "annotation_view_self",
-            "base_explorer",
-            "base_picker",
-            "base_preview",
-            "base_upload",
-            "item_delete",
-            "item_download",
-            "item_preview",
-            "item_rename",
-            "item_share"
-          ]
-        },
-        "object": {
-          "allOf": [
-            {
-              "$ref": "#/definitions/File--Mini"
-            },
-            {
-              "description": "The file for which the file can be accessed"
-            }
-          ]
-        }
-      }
-    },
-    "Representation": {
-      "title": "Representation",
-      "description": "A file representation",
-      "properties": {
-        "content": {
-          "type": "object",
-          "description": "An object containing the URL that can be used to actually fetch\nthe representation.",
-          "properties": {
-            "url_template": {
-              "type": "string",
-              "description": "The download URL that can be used to fetch the representation.\nMake sure to make an authenticated API call to this endpoint.\n\nThis URL is a template and will require the `{+asset_path}` to\nbe replaced by a path. In general, for unpaged representations\nit can be replaced by an empty string.\n\nFor paged representations, replace the `{+asset_path}` with the\npage to request plus the extension for the file, for example\n`1.pdf`.\n\nWhen requesting the download URL the following additional\nquery params can be passed along.\n\n* `set_content_disposition_type` - Sets the `Content-Disposition`\n  header in the API response with the specified disposition type\n  of either `inline` or `attachment`. If not supplied, the\n  `Content-Disposition` header is not included in the response.\n\n* `set_content_disposition_filename` - Allows the application to\n  define the representation's file name used in the\n  `Content-Disposition` header.  If not defined, the filename\n  is derived from the source file name in Box combined with the\n  extension of the representation."
-            }
-          }
-        },
-        "info": {
-          "type": "object",
-          "description": "An object containing the URL that can be used to fetch more info\non this representation.",
-          "properties": {
-            "url": {
-              "type": "string",
-              "description": "The API URL that can be used to get more info on this file\nrepresentation. Make sure to make an authenticated API call\nto this endpoint."
-            }
-          }
-        },
-        "properties": {
-          "type": "object",
-          "description": "An object containing the size and type of this presentation.",
-          "properties": {
-            "dimensions": {
-              "type": "string",
-              "format": "<width>x<height>",
-              "description": "The width by height size of this representation in pixels."
-            },
-            "paged": {
-              "type": "boolean",
-              "description": "Indicates if the representation is build up out of multiple pages"
-            },
-            "thumb": {
-              "type": "boolean",
-              "description": "Indicates if the representation can be used as a thumbnail of the\nfile"
-            }
-          }
-        },
-        "representation": {
-          "type": "string",
-          "description": "Indicates the file type of the returned representation."
-        },
-        "status": {
-          "type": "object",
-          "description": "An object containing the status of this representation.",
-          "properties": {
-            "state": {
-              "type": "string",
-              "enum": [
-                "success",
-                "viewable",
-                "pending",
-                "none"
-              ],
-              "description": "The status of the representation.\n\n* `success` defines the representation as ready to be viewed.\n* `viewable` defines a video to be ready for viewing.\n* `pending` defines the representation as to be generated. Retry\n  this endpoint to re-check the status.\n* `none` defines that the representation will be created when\n  requested. Request the URL defined in the `info` object to trigger\n  this generation."
-            }
-          }
-        }
-      }
     },
     "File--Base": {
       "title": "File (Base)",

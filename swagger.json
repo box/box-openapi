@@ -1061,7 +1061,7 @@
         "operationId": "get_files_id_versions",
         "summary": "List all file versions",
         "tags": [
-          "File Versions"
+          "File versions"
         ],
         "description": "Retrieve information on all version of a file. This endpoint can be used to\nretrieve information about older versions of a file.\n\nVersions are only tracked for Box users with premium accounts.",
         "parameters": [
@@ -1123,7 +1123,7 @@
         "operationId": "get_files_id_versions_id",
         "summary": "Get file version",
         "tags": [
-          "File Versions"
+          "File versions"
         ],
         "description": "Retrieve a specific older version of a file.\n\nVersions are only tracked for Box users with premium accounts.",
         "parameters": [
@@ -1171,7 +1171,7 @@
         "operationId": "delete_files_id_versions_id",
         "summary": "Remove file version",
         "tags": [
-          "File Versions"
+          "File versions"
         ],
         "description": "Move a file version to the trash.\n\nVersions are only tracked for Box users with premium accounts.",
         "parameters": [
@@ -1215,7 +1215,7 @@
         "operationId": "post_files_id_versions_current",
         "summary": "Revert file version",
         "tags": [
-          "File Versions"
+          "File versions"
         ],
         "description": "Revert to a previous version of a file.\n\n\nIf previous versions exist, this method can be used to\npromote one of the older versions to the top of the version history.\n\nThis actually creates a new copy of the old version and puts it at the\ntop of the versions history. The file will have the exact same contents\nas the older version, with the the same hash digest, `etag`, and\nname as the original.\n\nOther properties such as comments do not get updated to their\nformer values.",
         "parameters": [
@@ -1276,11 +1276,11 @@
     "/files/{file_id}/metadata": {
       "get": {
         "operationId": "get_files_id_metadata",
-        "summary": "List file's metadata instances",
+        "summary": "List metadata instances on file",
         "tags": [
-          "Metadata (Files)"
+          "Metadata instances (Files)"
         ],
-        "description": "Retrieves all metadata for a given file.",
+        "description": "Retrieves all metadata for a given file. This can not be used on the root\nfile with ID `0`.",
         "parameters": [
           {
             "name": "file_id",
@@ -1297,6 +1297,18 @@
               "$ref": "#/definitions/Metadatas"
             }
           },
+          "403": {
+            "description": "Returned when the request parameters are not valid.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "404": {
+            "description": "Returned when the user does not have access to the file.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
           "default": {
             "description": "An unexpected client error.",
             "schema": {
@@ -1311,9 +1323,9 @@
         "operationId": "get_files_id_metadata_id_id",
         "summary": "Get metadata instance on file",
         "tags": [
-          "Metadata (Files)"
+          "Metadata instances (Files)"
         ],
-        "description": "Retrieve a specific metadata template instance for a file",
+        "description": "Retrieves the instance of a metadata template that has been applied to a\nfile.",
         "parameters": [
           {
             "name": "file_id",
@@ -1330,7 +1342,7 @@
             "type": "string",
             "enum": [
               "global",
-              "enterprise_*"
+              "enterprise"
             ]
           },
           {
@@ -1348,8 +1360,20 @@
               "$ref": "#/definitions/Metadata"
             }
           },
+          "403": {
+            "description": "Returned when the request parameters are not valid.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
           "404": {
-            "description": "Returned if the metadata template specified\nwas not applied to this file.",
+            "description": "Returned if the metadata template specified\nwas not applied to this file or the user does not have access to the\nfile.\n\n* `instance_not_found` - The metadata template was not applied to the\nfile.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "405": {
+            "description": "Returned when the method was not allowed.",
             "schema": {
               "$ref": "#/definitions/ClientError"
             }
@@ -1366,9 +1390,9 @@
         "operationId": "post_files_id_metadata_id_id",
         "summary": "Create metadata instance on file",
         "tags": [
-          "Metadata (Files)"
+          "Metadata instances (Files)"
         ],
-        "description": "Creates a piece of metadata on a file based on the specified template.\n\nOnly values that are present in the metadata template\nwill be accepted.",
+        "description": "Applies an instance of a metadata template to a file.\n\nIn most cases only values that are present in the metadata template\nwill be accepted, except for the `global.properties` template which accepts\nany key-value pair.",
         "parameters": [
           {
             "name": "file_id",
@@ -1385,7 +1409,7 @@
             "type": "string",
             "enum": [
               "global",
-              "enterprise_*"
+              "enterprise"
             ]
           },
           {
@@ -1401,20 +1425,34 @@
             "schema": {
               "type": "object",
               "additionalProperties": {
-                "type": "string"
+                "type": "string",
+                "description": "A value for each of the fields that are present on the metadata\ntemplate.\n\nFor the `global.properties` template this can be an a list of zero\nor more fields, as this template allows for any generic key-value\npairs to be stored on the template.",
+                "x-box-example-key": "name"
               }
             }
           }
         ],
         "responses": {
-          "200": {
-            "description": "Returns an instance of the template that was specified, with the\ncustom template data included.",
+          "201": {
+            "description": "Returns the instance of the template that was applied to the file,\nincluding the data that was applied to the template.",
             "schema": {
               "$ref": "#/definitions/Metadata"
             }
           },
+          "400": {
+            "description": "Returns an error when the request body is not valid.\n\n* `schema_validation_failed` - The request body contains a value for a for\na field that either does not exist, or for which the value or type does\nnot match the expected field type. An example might be an unknown option\nfor an `enum` or `multiSelect` field.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "404": {
+            "description": "Returns an error when the file or metadata template could not be found.\n\n* `not_found` - The file could not be found, or the user does not have\naccess to the file.\n* `instance_tuple_not_found` - The metadata template could not be found.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
           "409": {
-            "description": "If the piece of metadata already exists, a conflict error\nwill be returned. The metadata can then instead be updated with the\n`PUT` method.",
+            "description": "Returns an error when an instance of this metadata template is already\npresent on the file.\n\n* `tuple_already_exists` - An instance of them metadata template already\nexists on the file.",
             "schema": {
               "$ref": "#/definitions/ClientError"
             }
@@ -1431,9 +1469,9 @@
         "operationId": "put_files_id_metadata_id_id",
         "summary": "Update metadata instance on file",
         "tags": [
-          "Metadata (Files)"
+          "Metadata instances (Files)"
         ],
-        "description": "Updates a piece of metadata on a file.\n\nThe metadata instance can only be updated if the instance\nalready exists. When editing metadata, only values that adhere to the\nmetadata template schema will be accepted.\n\nThe update is applied atomically. If any errors occur during the\napplication of the operations, the metadata instance will not be changed.",
+        "description": "Updates a piece of metadata on a file.\n\nThe metadata instance can only be updated if the template has already been\napplied to the file before. When editing metadata, only values that match\nthe metadata template schema will be accepted.\n\nThe update is applied atomically. If any errors occur during the\napplication of the operations, the metadata instance will not be changed.",
         "parameters": [
           {
             "name": "file_id",
@@ -1450,7 +1488,7 @@
             "type": "string",
             "enum": [
               "global",
-              "enterprise_*"
+              "enterprise"
             ]
           },
           {
@@ -1459,17 +1497,6 @@
             "in": "path",
             "required": true,
             "type": "string"
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "schema": {
-              "description": "A [JSON-Patch](https://tools.ietf.org/html/rfc6902)\nspecification for the changes to make to the metadata.\nThe changes are represented as a JSON array of\noperation objects.",
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/MetadataPatchItem"
-              }
-            }
           }
         ],
         "responses": {
@@ -1479,8 +1506,14 @@
               "$ref": "#/definitions/Metadata"
             }
           },
-          "409": {
-            "description": "If the piece of metadata already exists, a conflict error\nwill be returned. The metadata can then instead be updated with the\n`PUT` method.",
+          "400": {
+            "description": "Returns an error when the request body is not valid.\n\n* `bad_request` - The request body format is not an array of valid JSON\nPatch objects.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "500": {
+            "description": "Returns an error in some edge cases when the request body is not a valid\narray of JSON Patch items.",
             "schema": {
               "$ref": "#/definitions/ClientError"
             }
@@ -1497,7 +1530,7 @@
         "operationId": "delete_files_id_metadata_id_id",
         "summary": "Remove metadata instance from file",
         "tags": [
-          "Metadata (Files)"
+          "Metadata instances (Files)"
         ],
         "description": "Deletes a piece of file metadata.",
         "parameters": [
@@ -1516,7 +1549,7 @@
             "type": "string",
             "enum": [
               "global",
-              "enterprise_*"
+              "enterprise"
             ]
           },
           {
@@ -1530,6 +1563,24 @@
         "responses": {
           "204": {
             "description": "Returns an empty response when the metadata is\nsuccessfully deleted."
+          },
+          "400": {
+            "description": "Returned when the request parameters are not valid. This may happen of the\n`scope` is not valid.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "404": {
+            "description": "Returns an error when the file does not have an instance of the metadata\ntemplate applied to it, or when the user does not have access to the\nfile.\n\n* `instance_not_found` - An instance of the metadata template with the\ngiven `scope` and `templateKey` was not found on this file.\n* `not_found` - The file was not found, or the user does not have access\nto the file.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "405": {
+            "description": "Returned when the method was not allowed.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
           },
           "default": {
             "description": "An unexpected client error.",
@@ -1948,7 +1999,19 @@
                 "folder_upload_email": {
                   "allOf": [
                     {
-                      "$ref": "#/definitions/FolderUploadEmail"
+                      "title": "Folder upload email",
+                      "type": "object",
+                      "description": "The Write Folder Upload Email object",
+                      "properties": {
+                        "access": {
+                          "type": "string",
+                          "enum": [
+                            "open",
+                            "collaborators"
+                          ],
+                          "description": "When this parameter has been set, users can email files\nto the email address that has been automatically\ncreated for this folder.\n\nTo create an email address, set this property either when\ncreating or updating the folder.\n\nWhen set to `collaborators`, only emails from registered email\naddresses for collaborators will be accepted. This includes\nany email aliases a user might have registered.\n\nWhen set to `open` it will accept emails from any email\naddress."
+                        }
+                      }
                     },
                     {
                       "description": "Setting this object enables the upload email address.\n\nThis email address can be used by users to directly\nupload files directly to the folder via email.\n\nSetting the value to `null` will disable the email address."
@@ -1972,7 +2035,15 @@
                   "type": "array",
                   "description": "An array of collections to make this folder\na member of. Currently\nwe only support the `favorites` collection.\n\nTo get the ID for a collection, use the\n[List all collections][1] endpoint.\n\nPassing an empty array `[]` or `null` will remove\nthe folder from all collections.\n\n[1]: ../advanced-files-and-folders/#get-collections",
                   "items": {
-                    "$ref": "#/definitions/Reference"
+                    "title": "Reference",
+                    "description": "The bare basic reference for an object",
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "description": "The unique identifier for this object"
+                      }
+                    }
                   }
                 },
                 "can_non_owners_view_collaborators": {
@@ -2275,7 +2346,19 @@
                 "folder_upload_email": {
                   "allOf": [
                     {
-                      "$ref": "#/definitions/FolderUploadEmail"
+                      "title": "Folder upload email",
+                      "type": "object",
+                      "description": "The Write Folder Upload Email object",
+                      "properties": {
+                        "access": {
+                          "type": "string",
+                          "enum": [
+                            "open",
+                            "collaborators"
+                          ],
+                          "description": "When this parameter has been set, users can email files\nto the email address that has been automatically\ncreated for this folder.\n\nTo create an email address, set this property either when\ncreating or updating the folder.\n\nWhen set to `collaborators`, only emails from registered email\naddresses for collaborators will be accepted. This includes\nany email aliases a user might have registered.\n\nWhen set to `open` it will accept emails from any email\naddress."
+                        }
+                      }
                     },
                     {
                       "description": "Setting this object enables the upload email address.\n\nThis email address can be used by users to directly\nupload files directly to the folder via email."
@@ -2566,9 +2649,9 @@
         "operationId": "get_folders_id_metadata",
         "summary": "List metadata instances on folder",
         "tags": [
-          "Metadata (Folders)"
+          "Metadata instances (Folders)"
         ],
-        "description": "Retrieves all metadata for a given folder.",
+        "description": "Retrieves all metadata for a given folder. This can not be used on the root\nfolder with ID `0`.",
         "parameters": [
           {
             "name": "folder_id",
@@ -2585,6 +2668,18 @@
               "$ref": "#/definitions/Metadatas"
             }
           },
+          "403": {
+            "description": "Returned when the request parameters are not valid.\n\n* `forbidden` - this operation is not allowed on the Root folder.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "404": {
+            "description": "Returned when the user does not have access to the folder.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
           "default": {
             "description": "An unexpected client error.",
             "schema": {
@@ -2599,9 +2694,9 @@
         "operationId": "get_folders_id_metadata_id_id",
         "summary": "Get metadata instance on folder",
         "tags": [
-          "Metadata (Folders)"
+          "Metadata instances (Folders)"
         ],
-        "description": "Retrieve a specific metadata template instance for a folder",
+        "description": "Retrieves the instance of a metadata template that has been applied to a\nfolder. This can not be used on the root folder with ID `0`.",
         "parameters": [
           {
             "name": "folder_id",
@@ -2618,7 +2713,7 @@
             "type": "string",
             "enum": [
               "global",
-              "enterprise_*"
+              "enterprise"
             ]
           },
           {
@@ -2636,8 +2731,20 @@
               "$ref": "#/definitions/Metadata"
             }
           },
+          "403": {
+            "description": "Returned when the request parameters are not valid.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
           "404": {
-            "description": "Returned if the metadata template specified\nwas not applied to this folder.",
+            "description": "Returned if the metadata template specified\nwas not applied to this folder or the user does not have access to the\nfolder.\n\n* `instance_not_found` - The metadata template was not applied to the\nfolder.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "405": {
+            "description": "Returned when the method was not allowed. This often happens when the\nfolder ID is not valid or the root folder with ID `0`.",
             "schema": {
               "$ref": "#/definitions/ClientError"
             }
@@ -2654,9 +2761,9 @@
         "operationId": "post_folders_id_metadata_id_id",
         "summary": "Create metadata instance on folder",
         "tags": [
-          "Metadata (Folders)"
+          "Metadata instances (Folders)"
         ],
-        "description": "Creates a piece of metadata on a folder based on the specified template.\n\nOnly values that are present in the metadata template\nwill be accepted.",
+        "description": "Applies an instance of a metadata template to a folder.\n\nIn most cases only values that are present in the metadata template\nwill be accepted, except for the `global.properties` template which accepts\nany key-value pair.\n\nTo display the metadata template in the Box web app the enterprise needs to be\nconfigured to enable **Cascading Folder Level Metadata** for the user in the\nadmin console.",
         "parameters": [
           {
             "name": "folder_id",
@@ -2673,7 +2780,7 @@
             "type": "string",
             "enum": [
               "global",
-              "enterprise_*"
+              "enterprise"
             ]
           },
           {
@@ -2689,20 +2796,34 @@
             "schema": {
               "type": "object",
               "additionalProperties": {
-                "type": "string"
+                "type": "string",
+                "description": "A value for each of the fields that are present on the metadata\ntemplate.\n\nFor the `global.properties` template this can be an a list of zero\nor more fields, as this template allows for any generic key-value\npairs to be stored on the template.",
+                "x-box-example-key": "name"
               }
             }
           }
         ],
         "responses": {
-          "200": {
-            "description": "Returns an instance of the template that was specified, with the\ncustom template data included.",
+          "201": {
+            "description": "Returns the instance of the template that was applied to the folder,\nincluding the data that was applied to the template.",
             "schema": {
               "$ref": "#/definitions/Metadata"
             }
           },
+          "400": {
+            "description": "Returns an error when the request body is not valid.\n\n* `schema_validation_failed` - The request body contains a value for a for\na field that either does not exist, or for which the value or type does\nnot match the expected field type. An example might be an unknown option\nfor an `enum` or `multiSelect` field.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "404": {
+            "description": "Returns an error when the folder or metadata template could not be found.\n\n* `not_found` - The folder could not be found, or the user does not have\naccess to the folder.\n* `instance_tuple_not_found` - The metadata template could not be found.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
           "409": {
-            "description": "If the piece of metadata already exists, a conflict error\nwill be returned. The metadata can then instead be updated with the\n`PUT` method.",
+            "description": "Returns an error when an instance of this metadata template is already\npresent on the folder.\n\n* `tuple_already_exists` - An instance of them metadata template already\nexists on the file.",
             "schema": {
               "$ref": "#/definitions/ClientError"
             }
@@ -2719,9 +2840,9 @@
         "operationId": "put_folders_id_metadata_id_id",
         "summary": "Update metadata instance on folder",
         "tags": [
-          "Metadata (Folders)"
+          "Metadata instances (Folders)"
         ],
-        "description": "Updates a piece of metadata on a folder based.\n\nThe metadata instance can only be updated if the instance\nalready exists. When editing metadata, only values that adhere to the\nmetadata template schema will be accepted.\n\nThe update is applied atomically. If any errors occur during the\napplication of the operations, the metadata instance will not be changed.",
+        "description": "Updates a piece of metadata on a folder.\n\nThe metadata instance can only be updated if the template has already been\napplied to the folder before. When editing metadata, only values that match\nthe metadata template schema will be accepted.\n\nThe update is applied atomically. If any errors occur during the\napplication of the operations, the metadata instance will not be changed.",
         "parameters": [
           {
             "name": "folder_id",
@@ -2738,7 +2859,7 @@
             "type": "string",
             "enum": [
               "global",
-              "enterprise_*"
+              "enterprise"
             ]
           },
           {
@@ -2747,17 +2868,6 @@
             "in": "path",
             "required": true,
             "type": "string"
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "schema": {
-              "description": "A [JSON-Patch](https://tools.ietf.org/html/rfc6902)\nspecification for the changes to make to the metadata.\nThe changes are represented as a JSON array of\noperation objects.",
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/MetadataPatchItem"
-              }
-            }
           }
         ],
         "responses": {
@@ -2767,8 +2877,14 @@
               "$ref": "#/definitions/Metadata"
             }
           },
-          "409": {
-            "description": "If the piece of metadata already exists, a conflict error\nwill be returned. The metadata can then instead be updated with the\n`PUT` method.",
+          "400": {
+            "description": "Returns an error when the request body is not valid.\n\n* `bad_request` - The request body format is not an array of valid JSON\nPatch objects.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "500": {
+            "description": "Returns an error in some edge cases when the request body is not a valid\narray of JSON Patch items.",
             "schema": {
               "$ref": "#/definitions/ClientError"
             }
@@ -2785,7 +2901,7 @@
         "operationId": "delete_folders_id_metadata_id_id",
         "summary": "Remove metadata instance from folder",
         "tags": [
-          "Metadata (Folders)"
+          "Metadata instances (Folders)"
         ],
         "description": "Deletes a piece of folder metadata.",
         "parameters": [
@@ -2804,7 +2920,7 @@
             "type": "string",
             "enum": [
               "global",
-              "enterprise_*"
+              "enterprise"
             ]
           },
           {
@@ -2818,6 +2934,24 @@
         "responses": {
           "204": {
             "description": "Returns an empty response when the metadata is\nsuccessfully deleted."
+          },
+          "400": {
+            "description": "Returned when the request parameters are not valid. This may happen of the\n`scope` is not valid.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "404": {
+            "description": "Returns an error when the folder does not have an instance of the metadata\ntemplate applied to it, or when the user does not have access to the\nfolder.\n\n* `instance_not_found` - An instance of the metadata template with the\ngiven `scope` and `templateKey` was not found on this folder.\n* `not_found` - The folder was not found, or the user does not have access\nto the folder.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "405": {
+            "description": "Returned when the method was not allowed. This often happens when the\nfolder ID is not valid or the root folder with ID `0`.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
           },
           "default": {
             "description": "An unexpected client error.",
@@ -3069,9 +3203,9 @@
         "operationId": "get_metadata_templates_id_id_schema",
         "summary": "Get metadata template by name",
         "tags": [
-          "Metadata Templates"
+          "Metadata templates"
         ],
-        "description": "Retrieves a metadata template by its scope and template name.",
+        "description": "Retrieves a metadata template by its `scope` and `templateKey` values.\n\nTo find the `scope` and `templateKey` for a template, list all templates for\nan enterprise or globally, or list all templates applied to a file or folder.",
         "parameters": [
           {
             "name": "scope",
@@ -3081,7 +3215,7 @@
             "type": "string",
             "enum": [
               "global",
-              "enterprise_*"
+              "enterprise"
             ]
           },
           {
@@ -3099,6 +3233,18 @@
               "$ref": "#/definitions/MetadataTemplate"
             }
           },
+          "400": {
+            "description": "Returned if any of the request parameters are not valid.\n\n* `bad_request`: Often returned when the scope of the template is not\n  recognised. Please make sure to use either `enterprise` or `global` as\n  the `scope` value.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "404": {
+            "description": "Returned when a template with the given `scope` and `template_key` can not\nbe found.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
           "default": {
             "description": "An unexpected client error.",
             "schema": {
@@ -3110,7 +3256,7 @@
       "put": {
         "operationId": "put_metadata_templates_id_id_schema",
         "tags": [
-          "Metadata Templates"
+          "Metadata templates"
         ],
         "summary": "Update metadata template",
         "description": "Updates a metadata template.\n\nThe metadata template can only be updated if the template\nalready exists.\n\nThe update is applied atomically. If any errors occur during the\napplication of the operations, the metadata template will not be changed.",
@@ -3123,7 +3269,7 @@
             "type": "string",
             "enum": [
               "global",
-              "enterprise_*"
+              "enterprise"
             ]
           },
           {
@@ -3132,18 +3278,6 @@
             "in": "path",
             "required": true,
             "type": "string"
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "schema": {
-              "title": "Metadata Template Patch",
-              "description": "A list of changes to make to the metadata template.\n\nThe changes are represented as a JSON array of operation objects.",
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/MetadataTemplatePatchItem"
-              }
-            }
           }
         ],
         "responses": {
@@ -3183,7 +3317,7 @@
         "operationId": "delete_metadata_templates_id_id_schema",
         "summary": "Remove metadata template",
         "tags": [
-          "Metadata Templates"
+          "Metadata templates"
         ],
         "description": "Delete a metadata template and its instances.\nThis deletion is permanent and can not be reversed.",
         "parameters": [
@@ -3195,7 +3329,7 @@
             "type": "string",
             "enum": [
               "global",
-              "enterprise_*"
+              "enterprise"
             ]
           },
           {
@@ -3236,7 +3370,7 @@
         "operationId": "get_metadata_templates_id",
         "summary": "Get metadata template by ID",
         "tags": [
-          "Metadata Templates"
+          "Metadata templates"
         ],
         "description": "Retrieves a metadata template by its ID.",
         "parameters": [
@@ -3255,6 +3389,12 @@
               "$ref": "#/definitions/MetadataTemplate"
             }
           },
+          "400": {
+            "description": "Returned if any of the request parameters are not valid.\n\n* `bad_request`: Often returned with a message when the ID of the template\n  is not recognised.",
+            "schema": {
+              "$ref": "#/definitions/MetadataTemplate"
+            }
+          },
           "default": {
             "description": "An unexpected client error.",
             "schema": {
@@ -3269,7 +3409,7 @@
         "operationId": "get_metadata_templates_global",
         "summary": "List all global metadata templates",
         "tags": [
-          "Metadata Templates"
+          "Metadata templates"
         ],
         "description": "Used to retrieve all generic, global metadata templates available to all\nenterprises using Box.",
         "parameters": [
@@ -3293,9 +3433,15 @@
         ],
         "responses": {
           "200": {
-            "description": "Returns all of the metadata templates within an enterprise\nand their corresponding schema.",
+            "description": "Returns all of the metadata templates available to all enterprises\nand their corresponding schema.",
             "schema": {
               "$ref": "#/definitions/MetadataTemplates"
+            }
+          },
+          "400": {
+            "description": "Returned when the request parameters are not valid.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
             }
           },
           "default": {
@@ -3312,7 +3458,7 @@
         "operationId": "get_metadata_templates_enterprise",
         "summary": "List all metadata templates for enterprise",
         "tags": [
-          "Metadata Templates"
+          "Metadata templates"
         ],
         "description": "Used to retrieve all metadata templates created to be used specifically within\nthe user's enterprise",
         "parameters": [
@@ -3341,6 +3487,12 @@
               "$ref": "#/definitions/MetadataTemplates"
             }
           },
+          "400": {
+            "description": "Returned when the request parameters are not valid.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
           "default": {
             "description": "An unexpected client error.",
             "schema": {
@@ -3355,7 +3507,7 @@
         "operationId": "post_metadata_templates_schema",
         "summary": "Create metadata template",
         "tags": [
-          "Metadata Templates"
+          "Metadata templates"
         ],
         "description": "Creates a new metadata template that can be applied to\nfiles and folders.",
         "responses": {
@@ -3396,7 +3548,7 @@
               "properties": {
                 "scope": {
                   "type": "string",
-                  "description": "The scope of the metadata template to create. Applications can\nonly create templates for use within the authenticated user's\nenterprise.\n\nThis value needs to be set to `enterprise`, or alternatively to\n`enterprise_*` where `*` is the ID of the enterprise."
+                  "description": "The scope of the metadata template to create. Applications can\nonly create templates for use within the authenticated user's\nenterprise.\n\nThis value needs to be set to `enterprise`, as `global` scopes can\nnot be created by applications."
                 },
                 "templateKey": {
                   "type": "string",
@@ -3494,7 +3646,7 @@
         "operationId": "get_metadata_cascade_policies",
         "summary": "List metadata cascade policies",
         "tags": [
-          "Metadata Cascade Policies (Beta)"
+          "Metadata cascade policies (Beta)"
         ],
         "description": "Retrieve a collection of metadata cascade policies\nwithin a given folder for the current enterprise.",
         "parameters": [
@@ -3547,7 +3699,7 @@
         "operationId": "post_metadata_cascade_policies",
         "summary": "Create metadata cascade policy",
         "tags": [
-          "Metadata Cascade Policies (Beta)"
+          "Metadata cascade policies (Beta)"
         ],
         "description": "Creates a new metadata cascade policy that applies a given\nmetadata template to a given folder and automatically\ncascades it down to its children.\n\nIn order for the policy to work, a metadata instance must first\nbe applied to the folder.",
         "responses": {
@@ -3584,7 +3736,7 @@
                   "type": "string",
                   "enum": [
                     "global",
-                    "enterprise_*"
+                    "enterprise"
                   ]
                 },
                 "templateKey": {
@@ -3602,7 +3754,7 @@
         "operationId": "get_metadata_cascade_policies_id",
         "summary": "Get metadata cascade policy",
         "tags": [
-          "Metadata Cascade Policies (Beta)"
+          "Metadata cascade policies (Beta)"
         ],
         "description": "Retrieve a metadata cascade policy.",
         "parameters": [
@@ -3633,7 +3785,7 @@
         "operationId": "delete_metadata_cascade_policies_id",
         "summary": "Remove metadata cascade policy",
         "tags": [
-          "Metadata Cascade Policies (Beta)"
+          "Metadata cascade policies (Beta)"
         ],
         "description": "Deletes a metadata cascade policy.",
         "parameters": [
@@ -3663,7 +3815,7 @@
         "operationId": "post_metadata_cascade_policies_id_apply",
         "summary": "Force-apply metadata cascade policy to folder",
         "tags": [
-          "Metadata Cascade Policies (Beta)"
+          "Metadata cascade policies (Beta)"
         ],
         "description": "If a policy already exists on a folder, this will apply that policy\nto all existing files and sub-folders within the target folder.",
         "parameters": [
@@ -3983,7 +4135,8 @@
                     "uploader",
                     "previewer uploader",
                     "viewer uploader",
-                    "co-owner"
+                    "co-owner",
+                    "owner"
                   ]
                 },
                 "status": {
@@ -4900,7 +5053,7 @@
         "operationId": "get_shared_items",
         "summary": "Find item for shared link",
         "tags": [
-          "Shared Links"
+          "Shared links"
         ],
         "description": "Return the file or folder represented by a shared link.\n\nShared items are any files or folders that are represented by a shared link,\nwhich can originate within the current enterprise or within another one.\n\nThis endpoint allows an application to retrieve information about a\nshared item when only given a shared link.",
         "parameters": [
@@ -4953,7 +5106,7 @@
         "operationId": "post_web_links",
         "summary": "Create web link",
         "tags": [
-          "Web Links"
+          "Web links"
         ],
         "description": "Creates a web link object within a folder.",
         "responses": {
@@ -5016,7 +5169,7 @@
         "operationId": "get_web_links_id",
         "summary": "Get web link",
         "tags": [
-          "Web Links"
+          "Web links"
         ],
         "description": "Retrieve information about a web link.",
         "parameters": [
@@ -5135,7 +5288,7 @@
         "operationId": "put_web_links_id",
         "summary": "Update web link",
         "tags": [
-          "Web Links"
+          "Web links"
         ],
         "description": "Updates a web link object.",
         "parameters": [
@@ -5203,7 +5356,7 @@
         "operationId": "delete_web_links_id",
         "summary": "Remove web link",
         "tags": [
-          "Web Links"
+          "Web links"
         ],
         "description": "Deletes a web link.",
         "parameters": [
@@ -5825,7 +5978,7 @@
         "operationId": "get_users_id_avatar",
         "summary": "Get user avatar",
         "tags": [
-          "Users"
+          "User avatars"
         ],
         "description": "Retrieves an image of a the user's avatar.",
         "parameters": [
@@ -6696,7 +6849,8 @@
                   "description": "Custom configuration for the permissions an admin\nif a group will receive. This option has no effect\non members with a role of `member`.\n\nSetting these permissions overwrites the default\naccess levels of an admin.\n\nSpecifying a value of \"null\" for this object will disable\nall configurable permissions. Specifying permissions will set\nthem accordingly, omitted permissions will be enabled by default.",
                   "additionalProperties": {
                     "type": "boolean",
-                    "description": "A key value pair of custom permissions."
+                    "description": "A key value pair of custom permissions.",
+                    "x-box-example-key": "can_run_reports"
                   }
                 }
               }
@@ -6804,7 +6958,8 @@
                   "description": "Custom configuration for the permissions an admin\nif a group will receive. This option has no effect\non members with a role of `member`.\n\nSetting these permissions overwrites the default\naccess levels of an admin.\n\nSpecifying a value of \"null\" for this object will disable\nall configurable permissions. Specifying permissions will set\nthem accordingly, omitted permissions will be enabled by default.",
                   "additionalProperties": {
                     "type": "boolean",
-                    "description": "A key value pair of custom permissions."
+                    "description": "A key value pair of custom permissions.",
+                    "x-box-example-key": "can_run_reports"
                   }
                 }
               }
@@ -7296,7 +7451,146 @@
                       "description": "The metadata cards to set on the file.",
                       "type": "array",
                       "items": {
-                        "$ref": "#/definitions/MetadataCard"
+                        "type": "object",
+                        "description": "A Box Skills card that is applied to the metadata\nof a file.",
+                        "required": [
+                          "type",
+                          "created_at",
+                          "skill",
+                          "skill_card_title"
+                        ],
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "description": "`skill_card`",
+                            "enum": [
+                              "skill_card"
+                            ]
+                          },
+                          "created_at": {
+                            "type": "string",
+                            "format": "date-time",
+                            "description": "The time the card was created at"
+                          },
+                          "skill_card_type": {
+                            "type": "string",
+                            "description": "The type of card to create",
+                            "enum": [
+                              "transcript",
+                              "keyword",
+                              "timeline",
+                              "status",
+                              "error"
+                            ]
+                          },
+                          "skill": {
+                            "type": "object",
+                            "description": "The skill that is updating the cards",
+                            "required": [
+                              "type",
+                              "id"
+                            ],
+                            "properties": {
+                              "type": {
+                                "type": "string",
+                                "description": "`service`",
+                                "enum": [
+                                  "service"
+                                ]
+                              },
+                              "id": {
+                                "type": "string",
+                                "description": "The ID of the skill."
+                              }
+                            }
+                          },
+                          "skill_card_title": {
+                            "type": "object",
+                            "description": "The title of the card",
+                            "required": [
+                              "code",
+                              "message"
+                            ],
+                            "properties": {
+                              "code": {
+                                "type": "string",
+                                "description": "An identifier for your title"
+                              },
+                              "message": {
+                                "type": "string",
+                                "description": "The actual title to show in the UI"
+                              }
+                            }
+                          },
+                          "invocation": {
+                            "type": "object",
+                            "description": "The current invocation of the skill",
+                            "required": [
+                              "type",
+                              "id"
+                            ],
+                            "properties": {
+                              "type": {
+                                "type": "string",
+                                "description": "`skill_invocation`",
+                                "enum": [
+                                  "skill_invocation"
+                                ]
+                              },
+                              "id": {
+                                "type": "string",
+                                "description": "The ID of the skill invocation."
+                              }
+                            }
+                          },
+                          "status": {
+                            "type": "object",
+                            "description": "Optional status. Used with a `card_type` of `status`.",
+                            "properties": {
+                              "code": {
+                                "type": "string",
+                                "description": "The type of status being set",
+                                "enum": [
+                                  "skills_pending_status",
+                                  "custom_error"
+                                ]
+                              },
+                              "message": {
+                                "type": "string",
+                                "description": "The message for the status to show in the UI."
+                              }
+                            }
+                          },
+                          "entries": {
+                            "description": "An optional list of entries.\n\nUsed with a `card_type` of`transcript`, `keyword` or\n`timeline`.",
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "description": "An entry in the `entries` attribute of a metadata card",
+                              "required": [
+                                "type",
+                                "text"
+                              ],
+                              "properties": {
+                                "type": {
+                                  "type": "string",
+                                  "description": "`text`",
+                                  "enum": [
+                                    "text"
+                                  ]
+                                },
+                                "text": {
+                                  "type": "string",
+                                  "description": "The text of the entry"
+                                }
+                              }
+                            }
+                          },
+                          "duration": {
+                            "type": "integer",
+                            "description": "An optional duration.\n\nUsed with a `card_type` of`transcript`, or\n`timeline`."
+                          }
+                        }
                       }
                     }
                   }
@@ -7575,7 +7869,7 @@
         "operationId": "get_recent_items",
         "summary": "List recently accessed items",
         "tags": [
-          "Recent Items"
+          "Recent items"
         ],
         "description": "Returns information about the recent items accessed\nby a user, either in the last 90 days or up to the last\n1000 items accessed.",
         "parameters": [
@@ -7628,7 +7922,7 @@
         "operationId": "get_retention_policies",
         "summary": "List retention policies",
         "tags": [
-          "Retention Policies"
+          "Retention policies"
         ],
         "description": "Retrieves all of the retention policies for an enterprise.",
         "parameters": [
@@ -7689,7 +7983,7 @@
         "operationId": "post_retention_policies",
         "summary": "Create retention policy",
         "tags": [
-          "Retention Policies"
+          "Retention policies"
         ],
         "description": "Creates a retention policy.",
         "responses": {
@@ -7765,7 +8059,29 @@
                 "custom_notification_recipients": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/definitions/NotifiedUser"
+                    "type": "object",
+                    "description": "A user that is notified of an event.",
+                    "properties": {
+                      "type": {
+                        "description": "The type of item to notify",
+                        "type": "string",
+                        "enum": [
+                          "user"
+                        ]
+                      },
+                      "id": {
+                        "description": "The id of the user to notify",
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string",
+                        "description": "The name of the user to notify"
+                      },
+                      "login": {
+                        "type": "string",
+                        "description": "The email address the user uses to notify"
+                      }
+                    }
                   }
                 }
               }
@@ -7779,7 +8095,7 @@
         "operationId": "get_retention_policies_id",
         "summary": "Get retention policy",
         "tags": [
-          "Retention Policies"
+          "Retention policies"
         ],
         "description": "Retrieves a retention policy.",
         "parameters": [
@@ -7810,7 +8126,7 @@
         "operationId": "put_retention_policies_id",
         "summary": "Update retention policy",
         "tags": [
-          "Retention Policies"
+          "Retention policies"
         ],
         "description": "Updates a retention policy.",
         "parameters": [
@@ -7882,7 +8198,7 @@
         "operationId": "get_retention_policies_id_assignments",
         "summary": "List retention policy assignments",
         "tags": [
-          "Retention Policies"
+          "Retention policies"
         ],
         "description": "Returns a list of all retention policy assignments associated with a specified\nretention policy.",
         "parameters": [
@@ -7949,7 +8265,7 @@
         "operationId": "post_retention_policy_assignments",
         "summary": "Assign retention policy",
         "tags": [
-          "Retention Policies"
+          "Retention policies"
         ],
         "description": "Assigns a retention policy to an item.",
         "responses": {
@@ -8032,7 +8348,7 @@
         "operationId": "get_retention_policy_assignments_id",
         "summary": "Get retention policy assignment",
         "tags": [
-          "Retention Policies"
+          "Retention policies"
         ],
         "description": "Retrieves a retention policy assignment",
         "parameters": [
@@ -8065,7 +8381,7 @@
         "operationId": "get_legal_hold_policies",
         "summary": "List all legal hold policies",
         "tags": [
-          "Legal Hold Policies"
+          "Legal hold policies"
         ],
         "description": "Retrieves a list of legal hold policies that belong to\nan enterprise.",
         "parameters": [
@@ -8123,7 +8439,7 @@
         "operationId": "post_legal_hold_policies",
         "summary": "Create legal hold policy",
         "tags": [
-          "Legal Hold Policies"
+          "Legal hold policies"
         ],
         "description": "Create a new legal hold policy.",
         "responses": {
@@ -8198,7 +8514,7 @@
         "operationId": "get_legal_hold_policies_id",
         "summary": "Get legal hold policy",
         "tags": [
-          "Legal Hold Policies"
+          "Legal hold policies"
         ],
         "description": "Retrieve a legal hold policy.",
         "parameters": [
@@ -8229,7 +8545,7 @@
         "operationId": "put_legal_hold_policies_id",
         "summary": "Update legal hold policy",
         "tags": [
-          "Legal Hold Policies"
+          "Legal hold policies"
         ],
         "description": "Update legal hold policy.",
         "parameters": [
@@ -8288,7 +8604,7 @@
       "delete": {
         "operationId": "delete_legal_hold_policies_id",
         "tags": [
-          "Legal Hold Policies"
+          "Legal hold policies"
         ],
         "summary": "Remove legal hold policy",
         "description": "Delete an existing legal hold policy.\n\nThis is an asynchronous process. The policy will not be\nfully deleted yet when the response returns.",
@@ -8319,7 +8635,7 @@
         "operationId": "get_legal_hold_policy_assignments",
         "summary": "List legal hold policy assignments",
         "tags": [
-          "Legal Hold Policies"
+          "Legal hold policies"
         ],
         "description": "Retrieves a list of items a legal hold policy has been assigned to.",
         "parameters": [
@@ -8385,7 +8701,7 @@
         "operationId": "post_legal_hold_policy_assignments",
         "summary": "Assign legal hold policy",
         "tags": [
-          "Legal Hold Policies"
+          "Legal hold policies"
         ],
         "description": "Assign a legal hold to a file, file version, folder, or user.",
         "responses": {
@@ -8451,7 +8767,7 @@
         "operationId": "get_legal_hold_policy_assignments_id",
         "summary": "Get legal hold policy assignment",
         "tags": [
-          "Legal Hold Policies"
+          "Legal hold policies"
         ],
         "description": "Retrieve a legal hold policy assignment.",
         "parameters": [
@@ -8481,7 +8797,7 @@
       "delete": {
         "operationId": "delete_legal_hold_policy_assignments_id",
         "tags": [
-          "Legal Hold Policies"
+          "Legal hold policies"
         ],
         "summary": "Unassign legal hold policy",
         "description": "Remove a legal hold from an item.\n\nThis is an asynchronous process. The policy will not be\nfully removed yet when the response returns.",
@@ -8511,7 +8827,7 @@
       "get": {
         "operationId": "get_file_version_retentions_id",
         "tags": [
-          "Retention Policies"
+          "Retention policies"
         ],
         "summary": "Get retention on file",
         "description": "Returns information about a file version retention.",
@@ -8544,7 +8860,7 @@
       "get": {
         "operationId": "get_file_version_retentions",
         "tags": [
-          "Retention Policies"
+          "Retention policies"
         ],
         "summary": "List file version retentions",
         "description": "Retrieves all file version retentions for the given enterprise.",
@@ -8634,7 +8950,7 @@
         "operationId": "get_file_version_legal_holds_id",
         "summary": "Get file version legal hold",
         "tags": [
-          "Legal Hold Policies"
+          "Legal hold policies"
         ],
         "description": "Retrieves information about the legal hold policies\nassigned to a file version.",
         "parameters": [
@@ -8667,7 +8983,7 @@
         "operationId": "get_file_version_legal_holds",
         "summary": "List file version legal holds",
         "tags": [
-          "Legal Hold Policies"
+          "Legal hold policies"
         ],
         "description": "Get list of non-deleted legal holds for a single legal\nhold policy.",
         "parameters": [
@@ -8717,7 +9033,7 @@
         "operationId": "get_device_pinners_id",
         "summary": "Get device pin",
         "tags": [
-          "Device Pins"
+          "Device pinners"
         ],
         "description": "Retrieves information about an individual device pin.",
         "parameters": [
@@ -8748,7 +9064,7 @@
         "operationId": "delete_device_pinners_id",
         "summary": "Remove device pin",
         "tags": [
-          "Device Pins"
+          "Device pinners"
         ],
         "description": "Deletes an individual device pin.",
         "parameters": [
@@ -8778,7 +9094,7 @@
         "operationId": "get_enterprises_id_device_pinners",
         "summary": "List enterprise device pins",
         "tags": [
-          "Device Pins"
+          "Device pinners"
         ],
         "description": "Retrieves all the device pins within an enterprise.\n\nThe user must have admin privileges, and the application\nneeds the \"manage enterprise\" scope to make this call.",
         "parameters": [
@@ -8839,7 +9155,7 @@
         "operationId": "get_terms_of_services",
         "summary": "List terms of services",
         "tags": [
-          "Terms of Service"
+          "Terms of service"
         ],
         "description": "Returns the current terms of service text and settings\nfor the enterprise.",
         "parameters": [
@@ -8873,7 +9189,7 @@
       "post": {
         "operationId": "post_terms_of_services",
         "tags": [
-          "Terms of Service"
+          "Terms of service"
         ],
         "summary": "Create terms of service",
         "description": "Creates a terms of service for a given enterprise\nand type of user.",
@@ -8932,7 +9248,7 @@
         "operationId": "get_terms_of_services_id",
         "summary": "Get terms of service",
         "tags": [
-          "Terms of Service"
+          "Terms of service"
         ],
         "description": "Fetches a specific terms of service.",
         "parameters": [
@@ -8963,7 +9279,7 @@
         "operationId": "put_terms_of_services_id",
         "summary": "Update terms of service",
         "tags": [
-          "Terms of Service"
+          "Terms of service"
         ],
         "description": "Updates a specific terms of service.",
         "parameters": [
@@ -9020,7 +9336,7 @@
         "operationId": "get_terms_of_service_user_statuses",
         "summary": "List terms of service user statuses",
         "tags": [
-          "Terms of Service"
+          "Terms of service"
         ],
         "description": "Retrieves an overview of users and their status for a\nterms of service, including Whether they have accepted\nthe terms and when.",
         "parameters": [
@@ -9058,7 +9374,7 @@
         "operationId": "post_terms_of_service_user_statuses",
         "summary": "Create terms of service status for new user",
         "tags": [
-          "Terms of Service"
+          "Terms of service"
         ],
         "description": "Sets the status for a terms of service for a user.",
         "responses": {
@@ -9143,7 +9459,7 @@
         "operationId": "put_terms_of_service_user_statuses_id",
         "summary": "Update terms of service status for existing user",
         "tags": [
-          "Terms of Service"
+          "Terms of service"
         ],
         "description": "Updates the status for a terms of service for a user.",
         "parameters": [
@@ -9191,7 +9507,7 @@
         "operationId": "get_collaboration_whitelist_entries",
         "summary": "List collaboration whitelist entries",
         "tags": [
-          "Whitelist"
+          "Collaboration whitelist entries"
         ],
         "description": "Returns the list of whitelist entries which specify what domains can\ncollaborate with the current enterprise.",
         "parameters": [
@@ -9232,7 +9548,7 @@
         "operationId": "post_collaboration_whitelist_entries",
         "summary": "Create collaboration whitelist entry",
         "tags": [
-          "Whitelist"
+          "Collaboration whitelist entries"
         ],
         "description": "Creates a collaboration whitelist entry, specifying a domain\nand direction to allow collaboration for.",
         "responses": {
@@ -9283,7 +9599,7 @@
         "operationId": "get_collaboration_whitelist_entries_id",
         "summary": "Get collaboration whitelist entry",
         "tags": [
-          "Whitelist"
+          "Collaboration whitelist entries"
         ],
         "description": "Returns a specific collaboration whitelist entry.",
         "parameters": [
@@ -9314,7 +9630,7 @@
         "operationId": "delete_collaboration_whitelist_entries_id",
         "summary": "Remove collaboration whitelist entry",
         "tags": [
-          "Whitelist"
+          "Collaboration whitelist entries"
         ],
         "description": "Deletes a specific collaboration whitelist entry.",
         "parameters": [
@@ -9344,7 +9660,7 @@
         "operationId": "get_collaboration_whitelist_exempt_targets",
         "summary": "List collaboration whitelist exempt target",
         "tags": [
-          "Whitelist"
+          "Collaboration whitelist entries"
         ],
         "description": "Returns a list of users who have been exempt from the collaboration\nwhitelist.",
         "parameters": [
@@ -9385,7 +9701,7 @@
         "operationId": "post_collaboration_whitelist_exempt_targets",
         "summary": "Create whitelist exempt target",
         "tags": [
-          "Whitelist"
+          "Collaboration whitelist entries"
         ],
         "description": "Creates a collaboration whitelist entry exemption, specifying a user\nthat is exempted from the whitelist.",
         "responses": {
@@ -9435,7 +9751,7 @@
         "operationId": "get_collaboration_whitelist_exempt_targets_id",
         "summary": "Get collaboration whitelist exempt target",
         "tags": [
-          "Whitelist"
+          "Collaboration whitelist entries"
         ],
         "description": "Returns a users who has been exempt from the collaboration\nwhitelist.",
         "parameters": [
@@ -9466,7 +9782,7 @@
         "operationId": "delete_collaboration_whitelist_exempt_targets_id",
         "summary": "Remove collaboration whitelist exempt target",
         "tags": [
-          "Whitelist"
+          "Collaboration whitelist entries"
         ],
         "description": "Deletes a specific collaboration whitelist exemption.",
         "parameters": [
@@ -9966,7 +10282,57 @@
             "lock": {
               "allOf": [
                 {
-                  "$ref": "#/definitions/Lock"
+                  "title": "Lock",
+                  "type": "object",
+                  "description": "The lock held on a file. A lock prevents a file from being moved,\nrenamed, or otherwise changed by anyone else than the user who created the\nlock.",
+                  "allOf": [
+                    {
+                      "title": "Reference",
+                      "description": "The bare basic reference for an object",
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "description": "The unique identifier for this object"
+                        }
+                      }
+                    },
+                    {
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "description": "`lock`",
+                          "enum": [
+                            "lock"
+                          ]
+                        },
+                        "created_by": {
+                          "allOf": [
+                            {
+                              "$ref": "#/definitions/User--Mini"
+                            },
+                            {
+                              "description": "The user who created the lock."
+                            }
+                          ]
+                        },
+                        "created_at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "description": "The time this lock was created at."
+                        },
+                        "expired_at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "description": "The time this lock is to expire at, which might be in the past."
+                        },
+                        "is_download_prevented": {
+                          "type": "boolean",
+                          "description": "Whether or not the file can be downloaded while locked."
+                        }
+                      }
+                    }
+                  ]
                 },
                 {
                   "description": "The lock held on this file. If there is no lock, this can either\nbe `null` or have a timestamp in the past."
@@ -9985,7 +10351,50 @@
             "expiring_embed_link": {
               "allOf": [
                 {
-                  "$ref": "#/definitions/ExpiringEmbedLink"
+                  "title": "Expiring embed link",
+                  "type": "object",
+                  "description": "An expiring Box Embed Link.",
+                  "allOf": [
+                    {
+                      "type": "object",
+                      "description": "The basics of an access token",
+                      "properties": {
+                        "access_token": {
+                          "type": "string",
+                          "format": "token",
+                          "description": "The requested access token."
+                        },
+                        "expires_in": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "The time in seconds in seconds by which this token will expire."
+                        },
+                        "token_type": {
+                          "type": "string",
+                          "enum": [
+                            "bearer"
+                          ],
+                          "description": "The type of access token returned."
+                        },
+                        "restricted_to": {
+                          "type": "array",
+                          "description": "The permissions that this access token permits,\nproviding a list of resources (files, folders, etc)\nand the scopes permitted for each of those resources.",
+                          "items": {
+                            "$ref": "#/definitions/FileScope"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "properties": {
+                        "url": {
+                          "type": "string",
+                          "format": "url",
+                          "description": "The actual expiring embed URL for this file, constructed\nfrom the file ID and access tokens specified in this object."
+                        }
+                      }
+                    }
+                  ]
                 },
                 {
                   "description": "Requesting this field creates an expiring Box Embed URL for an\nembedded preview session in an `iframe`.\n\nThis URL will expire after 60 seconds and the session will\nexpire after 60 minutes.\n\nNot all file types are supported for these embed URLs. Box Embed\nis not optimized for mobile browsers and should not be used in web\nexperiences designed for mobile devices. Many UI elements, like\nthe **download** and **print** options might not show in mobile\nbrowsers."
@@ -10054,7 +10463,80 @@
             "representations": {
               "allOf": [
                 {
-                  "$ref": "#/definitions/Representations"
+                  "title": "Representations",
+                  "description": "A list of file representations",
+                  "type": "object",
+                  "properties": {
+                    "entries": {
+                      "type": "array",
+                      "description": "A list of files",
+                      "items": {
+                        "type": "object",
+                        "description": "A file representation",
+                        "properties": {
+                          "content": {
+                            "type": "object",
+                            "description": "An object containing the URL that can be used to actually fetch\nthe representation.",
+                            "properties": {
+                              "url_template": {
+                                "type": "string",
+                                "description": "The download URL that can be used to fetch the representation.\nMake sure to make an authenticated API call to this endpoint.\n\nThis URL is a template and will require the `{+asset_path}` to\nbe replaced by a path. In general, for unpaged representations\nit can be replaced by an empty string.\n\nFor paged representations, replace the `{+asset_path}` with the\npage to request plus the extension for the file, for example\n`1.pdf`.\n\nWhen requesting the download URL the following additional\nquery params can be passed along.\n\n* `set_content_disposition_type` - Sets the\n`Content-Disposition` header in the API response with the\nspecified disposition type of either `inline` or `attachment`.\nIf not supplied, the `Content-Disposition` header is not\nincluded in the response.\n\n* `set_content_disposition_filename` - Allows the application to\n  define the representation's file name used in the\n  `Content-Disposition` header.  If not defined, the filename\n  is derived from the source file name in Box combined with the\n  extension of the representation."
+                              }
+                            }
+                          },
+                          "info": {
+                            "type": "object",
+                            "description": "An object containing the URL that can be used to fetch more info\non this representation.",
+                            "properties": {
+                              "url": {
+                                "type": "string",
+                                "description": "The API URL that can be used to get more info on this file\nrepresentation. Make sure to make an authenticated API call\nto this endpoint."
+                              }
+                            }
+                          },
+                          "properties": {
+                            "type": "object",
+                            "description": "An object containing the size and type of this presentation.",
+                            "properties": {
+                              "dimensions": {
+                                "type": "string",
+                                "format": "<width>x<height>",
+                                "description": "The width by height size of this representation in pixels."
+                              },
+                              "paged": {
+                                "type": "boolean",
+                                "description": "Indicates if the representation is build up out of multiple\npages."
+                              },
+                              "thumb": {
+                                "type": "boolean",
+                                "description": "Indicates if the representation can be used as a thumbnail of\nthe file."
+                              }
+                            }
+                          },
+                          "representation": {
+                            "type": "string",
+                            "description": "Indicates the file type of the returned representation."
+                          },
+                          "status": {
+                            "type": "object",
+                            "description": "An object containing the status of this representation.",
+                            "properties": {
+                              "state": {
+                                "type": "string",
+                                "enum": [
+                                  "success",
+                                  "viewable",
+                                  "pending",
+                                  "none"
+                                ],
+                                "description": "The status of the representation.\n\n* `success` defines the representation as ready to be viewed.\n* `viewable` defines a video to be ready for viewing.\n* `pending` defines the representation as to be generated. Retry\n  this endpoint to re-check the status.\n* `none` defines that the representation will be created when\n  requested. Request the URL defined in the `info` object to\n  trigger this generation."
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
                 },
                 {
                   "description": "A list of representations for a file that can be used to\ndisplay a placeholder of the file in your application. By default\nthis returns all representations and we recommend using the\n`X-Rep-Hints` header to further customize the desired\nrepresentations."
@@ -10067,7 +10549,7 @@
       ]
     },
     "ClientError": {
-      "title": "Client Error",
+      "title": "Client error",
       "description": "A generic error",
       "properties": {
         "type": {
@@ -10133,7 +10615,7 @@
       }
     },
     "ConflictError": {
-      "title": "Conflict Error",
+      "title": "Conflict error",
       "description": "The error that occurs when a file can not be created due\nto a conflict.",
       "allOf": [
         {
@@ -10195,7 +10677,22 @@
               "description": "The order by which items are returned.\n\nThis field is only returned for calls that use offset-based pagination.\nFor marker-based paginated APIs, this field will be omitted.",
               "type": "array",
               "items": {
-                "$ref": "#/definitions/PaginationOrder"
+                "type": "object",
+                "description": "The order in which a pagination is ordered",
+                "properties": {
+                  "by": {
+                    "description": "The field to order by",
+                    "type": "string"
+                  },
+                  "direction": {
+                    "type": "string",
+                    "description": "The direction to order by, either ascending or descending",
+                    "enum": [
+                      "ASC",
+                      "DESC"
+                    ]
+                  }
+                }
               }
             }
           }
@@ -10239,7 +10736,22 @@
               "description": "The order by which items are returned.\n\nThis field is only returned for calls that use offset-based pagination.\nFor marker-based paginated APIs, this field will be omitted.",
               "type": "array",
               "items": {
-                "$ref": "#/definitions/PaginationOrder"
+                "type": "object",
+                "description": "The order in which a pagination is ordered",
+                "properties": {
+                  "by": {
+                    "description": "The field to order by",
+                    "type": "string"
+                  },
+                  "direction": {
+                    "type": "string",
+                    "description": "The direction to order by, either ascending or descending",
+                    "enum": [
+                      "ASC",
+                      "DESC"
+                    ]
+                  }
+                }
               }
             }
           }
@@ -10274,7 +10786,7 @@
       }
     },
     "FileVersions": {
-      "title": "File Versions",
+      "title": "File versions",
       "description": "A list of file versions",
       "allOf": [
         {
@@ -10300,7 +10812,22 @@
               "description": "The order by which items are returned.\n\nThis field is only returned for calls that use offset-based pagination.\nFor marker-based paginated APIs, this field will be omitted.",
               "type": "array",
               "items": {
-                "$ref": "#/definitions/PaginationOrder"
+                "type": "object",
+                "description": "The order in which a pagination is ordered",
+                "properties": {
+                  "by": {
+                    "description": "The field to order by",
+                    "type": "string"
+                  },
+                  "direction": {
+                    "type": "string",
+                    "description": "The direction to order by, either ascending or descending",
+                    "enum": [
+                      "ASC",
+                      "DESC"
+                    ]
+                  }
+                }
               }
             }
           }
@@ -10318,7 +10845,7 @@
       ]
     },
     "FileVersion": {
-      "title": "File Version",
+      "title": "File version",
       "description": "A standard representation of a file version",
       "allOf": [
         {
@@ -10399,19 +10926,24 @@
       ]
     },
     "Metadatas": {
-      "title": "List of Metadata instances",
-      "description": "A list of metadata",
+      "title": "Metadata instances",
+      "description": "A list of metadata instances that have been applied to a file or folder.",
       "properties": {
         "entries": {
           "type": "array",
+          "description": "A list of metadata instances, as applied to this file or folder.",
           "items": {
             "$ref": "#/definitions/Metadata"
           }
+        },
+        "limit": {
+          "description": "The limit that was used for this page of results.",
+          "type": "integer"
         }
       }
     },
     "Metadata": {
-      "title": "Metadata",
+      "title": "Metadata instance",
       "description": "A piece of metadata as specified by a metadata template and\napplied to a file or folder.",
       "type": "object",
       "properties": {
@@ -10449,37 +10981,10 @@
           "type": "integer",
           "description": "The version of the metadata object. Starts at 0 and increases every time\na user-defined property is modified."
         }
-      }
-    },
-    "MetadataPatchItem": {
-      "title": "Metadata Patch Item",
-      "type": "object",
-      "description": "A [JSON-Patch](https://tools.ietf.org/html/rfc6902) operation for a\nchange to make to the metadata.",
-      "properties": {
-        "op": {
-          "type": "string",
-          "enum": [
-            "add",
-            "replace",
-            "remove",
-            "test",
-            "move",
-            "copy"
-          ],
-          "description": "The operation type"
-        },
-        "path": {
-          "type": "string",
-          "description": "The location in the metadata JSON object\nto apply the changes to, in the format of a\n[JSON-Pointer](https://tools.ietf.org/html/rfc6901).\n\nThe path must always be prefixed with a `/`.\n\nThe characters `~` and `/` in the key must be escaped\nto ensure the operation can be performed as intended."
-        },
-        "value": {
-          "type": "string",
-          "description": "The value to be set or tested.\n\nRequired for `add`, `replace`, and `test` operations.\n\nFor `add`, if the value exists already the previous value will be\noverwritten by the new value.\n\nFor `replace`, the value must exist before replacing.\n\nFor `test`, the existing value at the `path` location must match\nthe specified value."
-        },
-        "from": {
-          "type": "string",
-          "description": "Required for `move` or `copy`.\n\nThe location in the metadata JSON object to move or copy from,\nin the format of a\n[JSON-Pointer](https://tools.ietf.org/html/rfc6901)."
-        }
+      },
+      "additionalProperties": {
+        "type": "string",
+        "x-box-example-key": "name"
       }
     },
     "Watermark": {
@@ -10678,31 +11183,6 @@
         }
       ]
     },
-    "FolderUploadEmail": {
-      "title": "Folder Upload Email",
-      "type": "object",
-      "description": "The Write Folder Upload Email object",
-      "properties": {
-        "access": {
-          "type": "string",
-          "enum": [
-            "open",
-            "collaborators"
-          ],
-          "description": "When this parameter has been set, users can email files\nto the email address that has been automatically\ncreated for this folder.\n\nTo create an email address, set this property either when\ncreating or updating the folder.\n\nWhen set to `collaborators`, only emails from registered email\naddresses for collaborators will be accepted. This includes\nany email aliases a user might have registered.\n\nWhen set to `open` it will accept emails from any email\naddress."
-        }
-      }
-    },
-    "Reference": {
-      "title": "Reference",
-      "description": "The bare basic reference for an object",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "The unique identifier for this object"
-        }
-      }
-    },
     "Items": {
       "title": "Items",
       "description": "A list of files, folders, and web links in\ntheir mini representation.",
@@ -10730,7 +11210,22 @@
               "description": "The order by which items are returned.\n\nThis field is only returned for calls that use offset-based pagination.\nFor marker-based paginated APIs, this field will be omitted.",
               "type": "array",
               "items": {
-                "$ref": "#/definitions/PaginationOrder"
+                "type": "object",
+                "description": "The order in which a pagination is ordered",
+                "properties": {
+                  "by": {
+                    "description": "The field to order by",
+                    "type": "string"
+                  },
+                  "direction": {
+                    "type": "string",
+                    "description": "The direction to order by, either ascending or descending",
+                    "enum": [
+                      "ASC",
+                      "DESC"
+                    ]
+                  }
+                }
               }
             }
           }
@@ -10749,7 +11244,7 @@
       ]
     },
     "MetadataTemplate": {
-      "title": "Metadata Template",
+      "title": "Metadata template",
       "description": "A template for metadata that can be applied to files and folders",
       "type": "object",
       "properties": {
@@ -10766,7 +11261,7 @@
         },
         "scope": {
           "type": "string",
-          "description": "The scope of the metadata template, which can be either `global` for\ntemplates that are available to any Box enterprise, or `enterprise_*`\nfor\ntemplates that have been created within the enterprise in question.\n\nThe ID of the enterprise will be appended to an enterprise scope."
+          "description": "The scope of the metadata template can either be `global` or\n`enterprise_*`. The `global` scope is used for templates that are\navailable to any Box enterprise. The `enterprise_*` scope represents\ntemplates that have been created within a specific enterprise, where `*`\nwill be the ID of that enterprise."
         },
         "templateKey": {
           "type": "string",
@@ -10787,7 +11282,110 @@
           "type": "array",
           "description": "An ordered list of template fields which are part of the template. Each\nfield can be a regular text field, date field, number field, as well as a\nsingle or multi-select list.",
           "items": {
-            "$ref": "#/definitions/MetadataField"
+            "type": "object",
+            "description": "A field within a metadata template. Fields can be a basic text, date, or\nnumber field, or a list of options.",
+            "allOf": [
+              {
+                "title": "Metadata Field (Write)",
+                "description": "A field within a metadata template. Fields can be a basic text, date, or\nnumber field, or a list of options.",
+                "required": [
+                  "type",
+                  "key",
+                  "displayName"
+                ],
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "description": "The type of field. The basic fields are a `string` field for text, a\n`float` field for numbers, and a `date` fields to present the user with a\ndate-time picker.\n\nAdditionally, metadata templates support an `enum` field for a basic list\nof items, and ` multiSelect` field for a similar list of items where the\nuser can select more than one value.",
+                    "enum": [
+                      "string",
+                      "float",
+                      "date",
+                      "enum",
+                      "multiSelect"
+                    ]
+                  },
+                  "key": {
+                    "type": "string",
+                    "description": "A unique identifier for the field. The identifier must\nbe unique within the template to which it belongs.",
+                    "maxLength": 256
+                  },
+                  "displayName": {
+                    "type": "string",
+                    "description": "The display name of the field as it is shown to the user in the web and\nmobile apps.",
+                    "maxLength": 4096
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "A description of the field. This is not shown to the user.",
+                    "maxLength": 4096
+                  },
+                  "hidden": {
+                    "type": "boolean",
+                    "description": "Whether this field is hidden in the UI for the user and can only be set\nthrough the API instead."
+                  },
+                  "options": {
+                    "description": "A list of options for this field. This is used in combination with the\n`enum` and `multiSelect` field types.",
+                    "type": "array",
+                    "items": {
+                      "title": "Metadata Option (Write)",
+                      "type": "object",
+                      "description": "An option for a Metadata Template Field.\n\nOptions only need to be provided for fields of type `enum` and `multiSelect`.\nOptions represent the value(s) a user can select for the field either through\nthe UI or through the API.",
+                      "required": [
+                        "key"
+                      ],
+                      "properties": {
+                        "key": {
+                          "description": "The text value of the option. This represents both the display name of the\noption and the internal key used when updating templates.",
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "The unique ID of the metadata template field."
+                  },
+                  "options": {
+                    "description": "A list of options for this field. This is used in combination\nwith the `enum` and `multiSelect` field types.",
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "description": "An option for a Metadata Template Field.\n\nOptions are only present for fields of type `enum` and\n`multiSelect`. Options represent the value(s) a user can\nselect for the field either through the UI or through the API.",
+                      "allOf": [
+                        {
+                          "title": "Metadata Option (Write)",
+                          "type": "object",
+                          "description": "An option for a Metadata Template Field.\n\nOptions only need to be provided for fields of type `enum` and `multiSelect`.\nOptions represent the value(s) a user can select for the field either through\nthe UI or through the API.",
+                          "required": [
+                            "key"
+                          ],
+                          "properties": {
+                            "key": {
+                              "description": "The text value of the option. This represents both the display name of the\noption and the internal key used when updating templates.",
+                              "type": "string"
+                            }
+                          }
+                        },
+                        {
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "description": "The internal unique identifier of the the option."
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            ]
           }
         },
         "copyInstanceOnItemCopy": {
@@ -10796,77 +11394,8 @@
         }
       }
     },
-    "MetadataTemplatePatchItem": {
-      "title": "Metadata Template Patch Item",
-      "type": "object",
-      "description": "A patch operation for the\nchanges to make to the metadata template.",
-      "required": [
-        "op"
-      ],
-      "properties": {
-        "op": {
-          "type": "string",
-          "enum": [
-            "editTemplate",
-            "addField",
-            "reorderFields",
-            "addEnumOption",
-            "reorderEnumOptions",
-            "reorderMultiSelectOptions",
-            "addMultiSelectOption",
-            "editField",
-            "removeField",
-            "editEnumOption",
-            "removeEnumOption",
-            "editMultiSelectOption",
-            "removeMultiSelectOption"
-          ],
-          "description": "The type of change to perform on the template. Some\nof these are hazardous as they will change existing templates."
-        },
-        "data": {
-          "description": "The data for the operation. This will vary depending on the operation\nbeing performed.",
-          "additionalProperties": {
-            "type": "string",
-            "description": "The value of a custom data entry."
-          }
-        },
-        "fieldKey": {
-          "type": "string",
-          "description": "For operations that affect a single field this defines the key of the\nfield that is affected."
-        },
-        "fieldKeys": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "description": "For operations that affect multiple fields this defines the keys of the\nfields that are affected."
-        },
-        "enumOptionKey": {
-          "description": "For operations that affect a single `enum` option this defines\nthe key of the option that is affected.",
-          "type": "string"
-        },
-        "enumOptionKeys": {
-          "description": "For operations that affect multiple `enum` options this defines\nthe keys of the options that are affected.",
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "multiSelectOptionKey": {
-          "description": "For operations that affect a single multi select option this defines\nthe key of the option that is affected.",
-          "type": "string"
-        },
-        "multiSelectOptionKeys": {
-          "description": "For operations that affect multiple multi select options this defines\nthe keys of the options that are affected.",
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        }
-      }
-    },
     "MetadataTemplates": {
-      "title": "Metadata Templates",
+      "title": "Metadata templates",
       "description": "A list of metadata templates",
       "allOf": [
         {
@@ -10903,7 +11432,7 @@
       ]
     },
     "MetadataCascadePolicies": {
-      "title": "Metadata Cascade Policies",
+      "title": "Metadata cascade policies",
       "description": "A list of metadata cascade policies.",
       "allOf": [
         {
@@ -10940,7 +11469,7 @@
       ]
     },
     "MetadataCascadePolicy": {
-      "title": "Metadata Cascade Policy",
+      "title": "Metadata cascade policy",
       "description": "A cascade policy that applies to metadata policy template\nto a folder",
       "properties": {
         "id": {
@@ -10983,7 +11512,7 @@
         },
         "scope": {
           "type": "string",
-          "description": "The scope of the target instance that will be cascaded down. The `scope`\nand `templateKey` together identify the metadata on the folder that is\nto be cascaded down. Today, only `global` and `enterprise_*` scopes are\nsupported."
+          "description": "The scope of the target instance that will be cascaded down. The `scope`\nand `templateKey` together identify the metadata on the folder that is\nto be cascaded down. Only `global` and `enterprise` scopes are\nsupported."
         },
         "templateKey": {
           "type": "string",
@@ -11015,7 +11544,15 @@
       "description": "Collaborations define access permissions for users and groups to files and\nfolders, similar to access control lists. A collaboration object grants a\nuser or group access to a file or folder with permissions defined by a\nspecific role.",
       "allOf": [
         {
-          "$ref": "#/definitions/Reference"
+          "title": "Reference",
+          "description": "The bare basic reference for an object",
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "The unique identifier for this object"
+            }
+          }
         },
         {
           "properties": {
@@ -11162,7 +11699,15 @@
       "description": "Tasks allow for file-centric workflows in Box. Users can\ncreate tasks on files and assign them to collaborators on\nBox.",
       "allOf": [
         {
-          "$ref": "#/definitions/Reference"
+          "title": "Reference",
+          "description": "The bare basic reference for an object",
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "The unique identifier for this object"
+            }
+          }
         },
         {
           "properties": {
@@ -11241,7 +11786,7 @@
       ]
     },
     "TaskAssignments": {
-      "title": "Task Assignments",
+      "title": "Task assignments",
       "type": "object",
       "description": "A list of task assignments",
       "allOf": [
@@ -11268,7 +11813,22 @@
               "description": "The order by which items are returned.\n\nThis field is only returned for calls that use offset-based pagination.\nFor marker-based paginated APIs, this field will be omitted.",
               "type": "array",
               "items": {
-                "$ref": "#/definitions/PaginationOrder"
+                "type": "object",
+                "description": "The order in which a pagination is ordered",
+                "properties": {
+                  "by": {
+                    "description": "The field to order by",
+                    "type": "string"
+                  },
+                  "direction": {
+                    "type": "string",
+                    "description": "The direction to order by, either ascending or descending",
+                    "enum": [
+                      "ASC",
+                      "DESC"
+                    ]
+                  }
+                }
               }
             }
           }
@@ -11286,11 +11846,19 @@
       ]
     },
     "TaskAssignment": {
-      "title": "Task Assignment",
+      "title": "Task assignment",
       "description": "An assignment of a task to a file and user",
       "allOf": [
         {
-          "$ref": "#/definitions/Reference"
+          "title": "Reference",
+          "description": "The bare basic reference for an object",
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "The unique identifier for this object"
+            }
+          }
         },
         {
           "properties": {
@@ -11369,7 +11937,15 @@
       "description": "A generic mini representation of a file, folder, user or enterprise",
       "allOf": [
         {
-          "$ref": "#/definitions/Reference"
+          "title": "Reference",
+          "description": "The bare basic reference for an object",
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "The unique identifier for this object"
+            }
+          }
         },
         {
           "properties": {
@@ -11400,7 +11976,7 @@
       ]
     },
     "WebLink": {
-      "title": "Web Link",
+      "title": "Web link",
       "description": "Web links are objects that point to URLs. These objects\nare also known as bookmarks within the Box web application.\n\nWeb link objects are treated similarly to file objects,\nthey will also support most actions that apply to regular files.",
       "allOf": [
         {
@@ -11487,7 +12063,84 @@
             "shared_link": {
               "allOf": [
                 {
-                  "$ref": "#/definitions/SharedLink"
+                  "title": "Shared link",
+                  "description": "Shared links provide direct, read-only access to files or folder on Box.\n\nShared links with open access level allow anyone with the URL\nto access the item, while shared links with company or collaborators access\nlevels can only be accessed by appropriately authenticated Box users.",
+                  "type": "object",
+                  "properties": {
+                    "url": {
+                      "type": "string",
+                      "format": "url",
+                      "description": "The URL that can be used to access the item on Box.\n\nThis URL will display the item in Box's preview UI where the file\ncan be downloaded if allowed.\n\nThis URL will continue to work even when a custom `vanity_url`\nhas been set for this shared link."
+                    },
+                    "download_url": {
+                      "type": "string",
+                      "format": "url",
+                      "x-box-premium-feature": true,
+                      "description": "A URL that can be used to download the file. This URL can be used in\na browser to download the file. This URL includes the file\nextension so that the file will be saved with the right file type.\n\nThis property will be `null` for folders."
+                    },
+                    "vanity_url": {
+                      "type": "string",
+                      "format": "url",
+                      "description": "The \"Custom URL\" that can also be used to preview the item on Box.  Custom\nURLs can only be created or modified in the Box Web application."
+                    },
+                    "access": {
+                      "type": "string",
+                      "description": "The access level for this shared link.\n\n* `open` - provides access to this item to anyone with this link\n* `company` - only provides access to this item to people the same company\n* `collaborators` - only provides access to this item to people who are\n   collaborators on this item\n\nIf this field is omitted when creating the shared link, the access level\nwill be set to the default access level specified by the enterprise admin.",
+                      "enum": [
+                        "open",
+                        "company",
+                        "collaborators"
+                      ]
+                    },
+                    "effective_access": {
+                      "type": "string",
+                      "description": "The effective access level for the shared link. This can be a more\nrestrictive access level than the value in the `access` field when the\nenterprise settings restrict the allowed access levels.",
+                      "enum": [
+                        "open",
+                        "company",
+                        "collaborators"
+                      ]
+                    },
+                    "effective_permission": {
+                      "type": "string",
+                      "description": "The effective permissions for this shared link.",
+                      "enum": [
+                        "can_download",
+                        "can_preview"
+                      ]
+                    },
+                    "unshared_at": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "The date and time when this link will be unshared. This field can only be\nset by users with paid accounts."
+                    },
+                    "is_password_enabled": {
+                      "type": "boolean",
+                      "description": "Defines if the shared link requires a password to access the item."
+                    },
+                    "permissions": {
+                      "type": "object",
+                      "description": "Defines if this link allows a user to preview and download an item.",
+                      "properties": {
+                        "can_download": {
+                          "type": "boolean",
+                          "description": "Defines if the shared link allows for the item to be downloaded. For\nshared links on folders, this also applies to any items in the folder.\n\nThis value can be set to `true` when the effective access level is\nset to `open` or `company`, not `collaborators`."
+                        },
+                        "can_preview": {
+                          "type": "boolean",
+                          "description": "Defines if the shared link allows for the item to be previewed.\n\nThis value is always `true`. For shared links on folders this also\napplies to any items in the folder."
+                        }
+                      }
+                    },
+                    "download_count": {
+                      "type": "integer",
+                      "description": "The number of times this item has been downloaded."
+                    },
+                    "preview_count": {
+                      "type": "integer",
+                      "description": "The number of times this item has been previewed."
+                    }
+                  }
                 },
                 {
                   "description": "The shared link object for this item. Will be\n`null` if no shared link has been created."
@@ -11536,7 +12189,22 @@
               "description": "The order by which items are returned.\n\nThis field is only returned for calls that use offset-based pagination.\nFor marker-based paginated APIs, this field will be omitted.",
               "type": "array",
               "items": {
-                "$ref": "#/definitions/PaginationOrder"
+                "type": "object",
+                "description": "The order in which a pagination is ordered",
+                "properties": {
+                  "by": {
+                    "description": "The field to order by",
+                    "type": "string"
+                  },
+                  "direction": {
+                    "type": "string",
+                    "description": "The direction to order by, either ascending or descending",
+                    "enum": [
+                      "ASC",
+                      "DESC"
+                    ]
+                  }
+                }
               }
             }
           }
@@ -11576,7 +12244,25 @@
               "type": "array",
               "description": "Tracking codes allow an admin to generate reports from the\nadmin console and assign an attribute to a specific group\nof users. This setting must be enabled for an enterprise\nbefore it can be used.",
               "items": {
-                "$ref": "#/definitions/TrackingCode"
+                "type": "object",
+                "description": "Custom tracking code for a user.",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "description": "`tracking_code`",
+                    "enum": [
+                      "tracking_code"
+                    ]
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "The name of the tracking code, which must be preconfigured in\nthe Admin Console"
+                  },
+                  "value": {
+                    "type": "string",
+                    "description": "The value of the tracking code"
+                  }
+                }
               }
             },
             "can_see_managed_users": {
@@ -11602,7 +12288,37 @@
             "enterprise": {
               "allOf": [
                 {
-                  "$ref": "#/definitions/Enterprise"
+                  "title": "Enterprise",
+                  "type": "object",
+                  "description": "A representation of a Box enterprise",
+                  "allOf": [
+                    {
+                      "title": "Reference",
+                      "description": "The bare basic reference for an object",
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "description": "The unique identifier for this object"
+                        }
+                      }
+                    },
+                    {
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "description": "`enterprise`",
+                          "enum": [
+                            "enterprise"
+                          ]
+                        },
+                        "name": {
+                          "description": "The name of the enterprise",
+                          "type": "string"
+                        }
+                      }
+                    }
+                  ]
                 },
                 {
                   "description": "Representation of the user’s enterprise"
@@ -11648,7 +12364,7 @@
       ]
     },
     "EmailAliases": {
-      "title": "Email Aliases",
+      "title": "Email aliases",
       "description": "A list of email aliases",
       "properties": {
         "total_count": {
@@ -11665,12 +12381,20 @@
       }
     },
     "EmailAlias": {
-      "title": "Email Alias",
+      "title": "Email alias",
       "description": "An email alias for a user.",
       "type": "object",
       "allOf": [
         {
-          "$ref": "#/definitions/Reference"
+          "title": "Reference",
+          "description": "The bare basic reference for an object",
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "The unique identifier for this object"
+            }
+          }
         },
         {
           "properties": {
@@ -11694,7 +12418,7 @@
       ]
     },
     "GroupMemberships": {
-      "title": "Memberships",
+      "title": "Group memberships",
       "description": "A list of group memberships.",
       "allOf": [
         {
@@ -11720,7 +12444,22 @@
               "description": "The order by which items are returned.\n\nThis field is only returned for calls that use offset-based pagination.\nFor marker-based paginated APIs, this field will be omitted.",
               "type": "array",
               "items": {
-                "$ref": "#/definitions/PaginationOrder"
+                "type": "object",
+                "description": "The order in which a pagination is ordered",
+                "properties": {
+                  "by": {
+                    "description": "The field to order by",
+                    "type": "string"
+                  },
+                  "direction": {
+                    "type": "string",
+                    "description": "The direction to order by, either ascending or descending",
+                    "enum": [
+                      "ASC",
+                      "DESC"
+                    ]
+                  }
+                }
               }
             }
           }
@@ -11742,7 +12481,15 @@
       "description": "An invite for a user to an enterprise.",
       "allOf": [
         {
-          "$ref": "#/definitions/Reference"
+          "title": "Reference",
+          "description": "The bare basic reference for an object",
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "The unique identifier for this object"
+            }
+          }
         },
         {
           "properties": {
@@ -11754,7 +12501,37 @@
               ]
             },
             "invited_to": {
-              "$ref": "#/definitions/Enterprise"
+              "title": "Enterprise",
+              "type": "object",
+              "description": "A representation of a Box enterprise",
+              "allOf": [
+                {
+                  "title": "Reference",
+                  "description": "The bare basic reference for an object",
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "The unique identifier for this object"
+                    }
+                  }
+                },
+                {
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "description": "`enterprise`",
+                      "enum": [
+                        "enterprise"
+                      ]
+                    },
+                    "name": {
+                      "description": "The name of the enterprise",
+                      "type": "string"
+                    }
+                  }
+                }
+              ]
             },
             "actionable_by": {
               "$ref": "#/definitions/User--Mini"
@@ -11807,7 +12584,22 @@
               "description": "The order by which items are returned.\n\nThis field is only returned for calls that use offset-based pagination.\nFor marker-based paginated APIs, this field will be omitted.",
               "type": "array",
               "items": {
-                "$ref": "#/definitions/PaginationOrder"
+                "type": "object",
+                "description": "The order in which a pagination is ordered",
+                "properties": {
+                  "by": {
+                    "description": "The field to order by",
+                    "type": "string"
+                  },
+                  "direction": {
+                    "type": "string",
+                    "description": "The direction to order by, either ascending or descending",
+                    "enum": [
+                      "ASC",
+                      "DESC"
+                    ]
+                  }
+                }
               }
             }
           }
@@ -11871,11 +12663,19 @@
       ]
     },
     "GroupMembership": {
-      "title": "Membership",
+      "title": "Group membership",
       "description": "Membership is used to signify that a user is part of a\ngroup.",
       "allOf": [
         {
-          "$ref": "#/definitions/Reference"
+          "title": "Reference",
+          "description": "The bare basic reference for an object",
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "The unique identifier for this object"
+            }
+          }
         },
         {
           "properties": {
@@ -11970,7 +12770,15 @@
       "description": "Represents a configured webhook.",
       "allOf": [
         {
-          "$ref": "#/definitions/Reference"
+          "title": "Reference",
+          "description": "The bare basic reference for an object",
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "The unique identifier for this object"
+            }
+          }
         },
         {
           "properties": {
@@ -12069,132 +12877,8 @@
         }
       ]
     },
-    "MetadataCard": {
-      "title": "Metadata Card",
-      "description": "A Box Skills card that is applied to the metadata\nof a file.",
-      "required": [
-        "type",
-        "created_at",
-        "skill",
-        "skill_card_title"
-      ],
-      "properties": {
-        "type": {
-          "type": "string",
-          "description": "`skill_card`",
-          "enum": [
-            "skill_card"
-          ]
-        },
-        "created_at": {
-          "type": "string",
-          "format": "date-time",
-          "description": "The time the card was created at"
-        },
-        "skill_card_type": {
-          "type": "string",
-          "description": "The type of card to create",
-          "enum": [
-            "transcript",
-            "keyword",
-            "timeline",
-            "status",
-            "error"
-          ]
-        },
-        "skill": {
-          "type": "object",
-          "description": "The skill that is updating the cards",
-          "required": [
-            "type",
-            "id"
-          ],
-          "properties": {
-            "type": {
-              "type": "string",
-              "description": "`service`",
-              "enum": [
-                "service"
-              ]
-            },
-            "id": {
-              "type": "string",
-              "description": "The ID of the skill."
-            }
-          }
-        },
-        "skill_card_title": {
-          "type": "object",
-          "description": "The title of the card",
-          "required": [
-            "code",
-            "message"
-          ],
-          "properties": {
-            "code": {
-              "type": "string",
-              "description": "An identifier for your title"
-            },
-            "message": {
-              "type": "string",
-              "description": "The actual title to show in the UI"
-            }
-          }
-        },
-        "invocation": {
-          "type": "object",
-          "description": "The current invocation of the skill",
-          "required": [
-            "type",
-            "id"
-          ],
-          "properties": {
-            "type": {
-              "type": "string",
-              "description": "`skill_invocation`",
-              "enum": [
-                "skill_invocation"
-              ]
-            },
-            "id": {
-              "type": "string",
-              "description": "The ID of the skill invocation."
-            }
-          }
-        },
-        "status": {
-          "type": "object",
-          "description": "Optional status. Used with a `card_type` of `status`.",
-          "properties": {
-            "code": {
-              "type": "string",
-              "description": "The type of status being set",
-              "enum": [
-                "skills_pending_status",
-                "custom_error"
-              ]
-            },
-            "message": {
-              "type": "string",
-              "description": "The message for the status to show in the UI"
-            }
-          }
-        },
-        "entries": {
-          "description": "An optional list of entries.\n\nUsed with a `card_type` of`transcript`, `keyword` or\n`timeline`.",
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/MetadataCardEntry"
-          }
-        },
-        "duration": {
-          "type": "integer",
-          "description": "An optional duration.\n\nUsed with a `card_type` of`transcript`, or\n`timeline`."
-        }
-      }
-    },
     "RealtimeServers": {
-      "title": "Real-time Servers",
+      "title": "Real-time servers",
       "description": "A list of real-time servers that can\nbe used for long-polling.",
       "properties": {
         "chunk_size": {
@@ -12258,7 +12942,22 @@
               "description": "The order by which items are returned.\n\nThis field is only returned for calls that use offset-based pagination.\nFor marker-based paginated APIs, this field will be omitted.",
               "type": "array",
               "items": {
-                "$ref": "#/definitions/PaginationOrder"
+                "type": "object",
+                "description": "The order in which a pagination is ordered",
+                "properties": {
+                  "by": {
+                    "description": "The field to order by",
+                    "type": "string"
+                  },
+                  "direction": {
+                    "type": "string",
+                    "description": "The direction to order by, either ascending or descending",
+                    "enum": [
+                      "ASC",
+                      "DESC"
+                    ]
+                  }
+                }
               }
             }
           }
@@ -12276,7 +12975,7 @@
       ]
     },
     "RecentItems": {
-      "title": "Recent Items",
+      "title": "Recent items",
       "description": "A list of recent items.",
       "allOf": [
         {
@@ -12313,7 +13012,7 @@
       ]
     },
     "RetentionPolicies": {
-      "title": "Retention Policies",
+      "title": "Retention policies",
       "description": "A list of retention policies",
       "properties": {
         "total_count": {
@@ -12330,7 +13029,7 @@
       }
     },
     "RetentionPolicy": {
-      "title": "Retention Policy",
+      "title": "Retention policy",
       "description": "A retention policy blocks permanent deletion of content\nfor a specified amount of time. Admins can create retention\npolicies and then later assign them to specific folders\nor their entire enterprise.  To use this feature, you must\nhave the manage retention policies scope enabled\nfor your API key via your application management console.",
       "allOf": [
         {
@@ -12379,34 +13078,8 @@
         }
       ]
     },
-    "NotifiedUser": {
-      "title": "Notified User",
-      "description": "A user that is notified of an event.",
-      "type": "object",
-      "properties": {
-        "type": {
-          "description": "The type of item to notify",
-          "type": "string",
-          "enum": [
-            "user"
-          ]
-        },
-        "id": {
-          "description": "The id of the user to notify",
-          "type": "string"
-        },
-        "name": {
-          "type": "string",
-          "description": "The name of the user to notify"
-        },
-        "login": {
-          "type": "string",
-          "description": "The email address the user uses to notify"
-        }
-      }
-    },
     "RetentionPolicyAssignments": {
-      "title": "Retention Policy Assignments",
+      "title": "Retention policy assignments",
       "description": "A list of retention policy assignments",
       "allOf": [
         {
@@ -12443,11 +13116,19 @@
       ]
     },
     "RetentionPolicyAssignment": {
-      "title": "Retention Policy Assignment",
+      "title": "Retention policy assignment",
       "description": "The retention policy assignment endpoint provides a way\nfor admins to apply a retention policy on a per-folder\nbasis, or place a blanket policy over the entire\nenterprise.",
       "allOf": [
         {
-          "$ref": "#/definitions/Reference"
+          "title": "Reference",
+          "description": "The bare basic reference for an object",
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "The unique identifier for this object"
+            }
+          }
         },
         {
           "properties": {
@@ -12471,7 +13152,15 @@
             "assigned_to": {
               "allOf": [
                 {
-                  "$ref": "#/definitions/Reference"
+                  "title": "Reference",
+                  "description": "The bare basic reference for an object",
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "The unique identifier for this object"
+                    }
+                  }
                 },
                 {
                   "description": "The `type` and `id` of the content that is under\nretention. The `type` can either be `folder` or `\nenterprise`."
@@ -12498,7 +13187,7 @@
       ]
     },
     "LegalHoldPolicies": {
-      "title": "Legal Hold Policies",
+      "title": "Legal hold policies",
       "description": "A list of legal hold policies.",
       "allOf": [
         {
@@ -12535,7 +13224,7 @@
       ]
     },
     "LegalHoldPolicy": {
-      "title": "Legal Hold Policy",
+      "title": "Legal hold policy",
       "description": "Legal Hold Policy information describes the basic\ncharacteristics of the Policy, such as name, description,\nand filter dates.",
       "allOf": [
         {
@@ -12635,7 +13324,7 @@
       ]
     },
     "LegalHoldPolicyAssignments": {
-      "title": "Legal Hold Policy Assignments",
+      "title": "Legal hold policy assignments",
       "description": "A list of legal hold policies assignments.",
       "allOf": [
         {
@@ -12672,11 +13361,19 @@
       ]
     },
     "LegalHoldPolicyAssignment": {
-      "title": "Legal Hold Policy Assignment",
+      "title": "Legal hold policy assignment",
       "description": "Legal Hold Assignments are used to assign Legal Hold\nPolicies to Users, Folders, Files, or File Versions.\n\nCreating a Legal Hold Assignment puts a hold\non the File-Versions that belong to the Assignment's\n'apply-to' entity.",
       "allOf": [
         {
-          "$ref": "#/definitions/Reference"
+          "title": "Reference",
+          "description": "The bare basic reference for an object",
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "The unique identifier for this object"
+            }
+          }
         },
         {
           "properties": {
@@ -12732,11 +13429,19 @@
       ]
     },
     "FileVersionRetention": {
-      "title": "File Version Retention",
+      "title": "File version retention",
       "description": "A retention policy blocks permanent deletion of content\nfor a specified amount of time. Admins can apply policies to\nspecified folders, or an entire enterprise. A file version retention\nis a  record for a retained file version. To use this feature,\nyou must  have the manage retention policies scope enabled for your\nAPI key via  your application management console. For more information\nabout retention policies, please visit our help documentation",
       "allOf": [
         {
-          "$ref": "#/definitions/Reference"
+          "title": "Reference",
+          "description": "The bare basic reference for an object",
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "The unique identifier for this object"
+            }
+          }
         },
         {
           "properties": {
@@ -12792,7 +13497,7 @@
       ]
     },
     "FileVersionRetentions": {
-      "title": "File Version Retentions",
+      "title": "File version retentions",
       "description": "A list of file version retentions.",
       "allOf": [
         {
@@ -12829,11 +13534,19 @@
       ]
     },
     "FileVersionLegalHold": {
-      "title": "File Version Legal Hold",
+      "title": "File version legal hold",
       "description": "File-Version-Legal-Hold is an entity representing all\nholds on a File Version.",
       "allOf": [
         {
-          "$ref": "#/definitions/Reference"
+          "title": "Reference",
+          "description": "The bare basic reference for an object",
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "The unique identifier for this object"
+            }
+          }
         },
         {
           "properties": {
@@ -12881,7 +13594,7 @@
       ]
     },
     "FileVersionLegalHolds": {
-      "title": "File Version Legal Holds",
+      "title": "File version legal holds",
       "description": "A list of file version legal holds.",
       "allOf": [
         {
@@ -12918,11 +13631,19 @@
       ]
     },
     "DevicePinner": {
-      "title": "Device Pinner",
+      "title": "Device pinner",
       "description": "Device pins allow enterprises to control what devices can\nuse native Box applications.",
       "allOf": [
         {
-          "$ref": "#/definitions/Reference"
+          "title": "Reference",
+          "description": "The bare basic reference for an object",
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "The unique identifier for this object"
+            }
+          }
         },
         {
           "properties": {
@@ -12962,7 +13683,7 @@
       ]
     },
     "DevicePinners": {
-      "title": "Device Pinners",
+      "title": "Device pinners",
       "description": "A list of device pins",
       "allOf": [
         {
@@ -12999,7 +13720,7 @@
       ]
     },
     "TermsOfServices": {
-      "title": "Terms Of Services",
+      "title": "Terms of services",
       "description": "A list of terms of services",
       "properties": {
         "total_count": {
@@ -13016,7 +13737,7 @@
       }
     },
     "TermsOfService": {
-      "title": "Terms Of Service",
+      "title": "Terms of service",
       "description": "The root-level record that is supposed to represent a\nsingle Terms of Service.",
       "allOf": [
         {
@@ -13036,7 +13757,37 @@
             "enterprise": {
               "allOf": [
                 {
-                  "$ref": "#/definitions/Enterprise"
+                  "title": "Enterprise",
+                  "type": "object",
+                  "description": "A representation of a Box enterprise",
+                  "allOf": [
+                    {
+                      "title": "Reference",
+                      "description": "The bare basic reference for an object",
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "description": "The unique identifier for this object"
+                        }
+                      }
+                    },
+                    {
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "description": "`enterprise`",
+                          "enum": [
+                            "enterprise"
+                          ]
+                        },
+                        "name": {
+                          "description": "The name of the enterprise",
+                          "type": "string"
+                        }
+                      }
+                    }
+                  ]
                 },
                 {
                   "description": "The enterprise these terms apply to"
@@ -13070,7 +13821,7 @@
       ]
     },
     "TermsOfServiceUserStatuses": {
-      "title": "Terms of Service User Statuses",
+      "title": "Terms of service user statuses",
       "description": "A list of terms of service user statuses",
       "properties": {
         "total_count": {
@@ -13087,11 +13838,19 @@
       }
     },
     "TermsOfServiceUserStatus": {
-      "title": "Terms of Service User Status",
+      "title": "Terms of service user status",
       "description": "The association between a Terms of Service and a user",
       "allOf": [
         {
-          "$ref": "#/definitions/Reference"
+          "title": "Reference",
+          "description": "The bare basic reference for an object",
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "The unique identifier for this object"
+            }
+          }
         },
         {
           "properties": {
@@ -13141,7 +13900,7 @@
       ]
     },
     "CollaborationWhitelistEntries": {
-      "title": "Collaboration Whitelist Entries",
+      "title": "Collaboration whitelist entries",
       "description": "A list of collaboration whitelist entries.",
       "allOf": [
         {
@@ -13178,11 +13937,19 @@
       ]
     },
     "CollaborationWhitelistEntry": {
-      "title": "Collaboration Whitelist Entry",
+      "title": "Collaboration whitelist entry",
       "description": "A Collaboration Whitelist entry describes an\napproved domain that can collaborate with your enterprise",
       "allOf": [
         {
-          "$ref": "#/definitions/Reference"
+          "title": "Reference",
+          "description": "The bare basic reference for an object",
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "The unique identifier for this object"
+            }
+          }
         },
         {
           "properties": {
@@ -13209,7 +13976,37 @@
             "enterprise": {
               "allOf": [
                 {
-                  "$ref": "#/definitions/Enterprise"
+                  "title": "Enterprise",
+                  "type": "object",
+                  "description": "A representation of a Box enterprise",
+                  "allOf": [
+                    {
+                      "title": "Reference",
+                      "description": "The bare basic reference for an object",
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "description": "The unique identifier for this object"
+                        }
+                      }
+                    },
+                    {
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "description": "`enterprise`",
+                          "enum": [
+                            "enterprise"
+                          ]
+                        },
+                        "name": {
+                          "description": "The name of the enterprise",
+                          "type": "string"
+                        }
+                      }
+                    }
+                  ]
                 },
                 {
                   "description": "The enterprise this whitelist is applied to"
@@ -13226,7 +14023,7 @@
       ]
     },
     "CollaborationWhitelistExemptTargets": {
-      "title": "Whitelist Exempt Targets",
+      "title": "Collaboration whitelist exempt targets",
       "description": "A list of collaboration whitelist exemptions.",
       "allOf": [
         {
@@ -13263,11 +14060,19 @@
       ]
     },
     "CollaborationWhitelistExemptTarget": {
-      "title": "Whitelist Exempt Target",
+      "title": "Collaboration whitelist exempt target",
       "description": "The record that represents a target user that is exempt from the\ncollaboration whitelist.",
       "allOf": [
         {
-          "$ref": "#/definitions/Reference"
+          "title": "Reference",
+          "description": "The bare basic reference for an object",
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "The unique identifier for this object"
+            }
+          }
         },
         {
           "properties": {
@@ -13281,7 +14086,37 @@
             "enterprise": {
               "allOf": [
                 {
-                  "$ref": "#/definitions/Enterprise"
+                  "title": "Enterprise",
+                  "type": "object",
+                  "description": "A representation of a Box enterprise",
+                  "allOf": [
+                    {
+                      "title": "Reference",
+                      "description": "The bare basic reference for an object",
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "description": "The unique identifier for this object"
+                        }
+                      }
+                    },
+                    {
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "description": "`enterprise`",
+                          "enum": [
+                            "enterprise"
+                          ]
+                        },
+                        "name": {
+                          "description": "The name of the enterprise",
+                          "type": "string"
+                        }
+                      }
+                    }
+                  ]
                 },
                 {
                   "description": "The enterprise this entry belongs to"
@@ -13291,7 +14126,37 @@
             "user": {
               "allOf": [
                 {
-                  "$ref": "#/definitions/Enterprise"
+                  "title": "Enterprise",
+                  "type": "object",
+                  "description": "A representation of a Box enterprise",
+                  "allOf": [
+                    {
+                      "title": "Reference",
+                      "description": "The bare basic reference for an object",
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "description": "The unique identifier for this object"
+                        }
+                      }
+                    },
+                    {
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "description": "`enterprise`",
+                          "enum": [
+                            "enterprise"
+                          ]
+                        },
+                        "name": {
+                          "description": "The name of the enterprise",
+                          "type": "string"
+                        }
+                      }
+                    }
+                  ]
                 },
                 {
                   "description": "The user that has been exempt"
@@ -13313,7 +14178,7 @@
       ]
     },
     "StoragePolicies": {
-      "title": "Storage Policies",
+      "title": "Storage policies",
       "description": "A list of storage policies.",
       "allOf": [
         {
@@ -13350,7 +14215,7 @@
       ]
     },
     "StoragePolicy": {
-      "title": "Storage Policy",
+      "title": "Storage policy",
       "description": "The Storage Policy object describes the storage zone.",
       "allOf": [
         {
@@ -13368,7 +14233,7 @@
       ]
     },
     "StoragePolicyAssignments": {
-      "title": "Storage Policy Assignments",
+      "title": "Storage policy assignments",
       "description": "A list of storage policy assignments.",
       "allOf": [
         {
@@ -13405,7 +14270,7 @@
       ]
     },
     "StoragePolicyAssignment": {
-      "title": "Storage Policy Assignment",
+      "title": "Storage policy assignment",
       "description": "The assignment of a storage policy to a user or enterprise",
       "properties": {
         "storage_policy": {
@@ -13421,7 +14286,15 @@
         "assigned_to": {
           "allOf": [
             {
-              "$ref": "#/definitions/Reference"
+              "title": "Reference",
+              "description": "The bare basic reference for an object",
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "The unique identifier for this object"
+                }
+              }
             },
             {
               "description": "The enterprise or use the policy is assigned to"
@@ -13456,7 +14329,23 @@
             "path_collection": {
               "allOf": [
                 {
-                  "$ref": "#/definitions/PathCollection"
+                  "title": "Path collection",
+                  "description": "A list of parent folders for an item.",
+                  "type": "object",
+                  "properties": {
+                    "total_count": {
+                      "description": "The number of folders in this list.",
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "entries": {
+                      "type": "array",
+                      "description": "The parent folders for this item",
+                      "items": {
+                        "$ref": "#/definitions/Folder--Mini"
+                      }
+                    }
+                  }
                 },
                 {
                   "description": "The tree of folders that this file is contained in,\nstarting at the root."
@@ -13533,7 +14422,84 @@
             "shared_link": {
               "allOf": [
                 {
-                  "$ref": "#/definitions/SharedLink"
+                  "title": "Shared link",
+                  "description": "Shared links provide direct, read-only access to files or folder on Box.\n\nShared links with open access level allow anyone with the URL\nto access the item, while shared links with company or collaborators access\nlevels can only be accessed by appropriately authenticated Box users.",
+                  "type": "object",
+                  "properties": {
+                    "url": {
+                      "type": "string",
+                      "format": "url",
+                      "description": "The URL that can be used to access the item on Box.\n\nThis URL will display the item in Box's preview UI where the file\ncan be downloaded if allowed.\n\nThis URL will continue to work even when a custom `vanity_url`\nhas been set for this shared link."
+                    },
+                    "download_url": {
+                      "type": "string",
+                      "format": "url",
+                      "x-box-premium-feature": true,
+                      "description": "A URL that can be used to download the file. This URL can be used in\na browser to download the file. This URL includes the file\nextension so that the file will be saved with the right file type.\n\nThis property will be `null` for folders."
+                    },
+                    "vanity_url": {
+                      "type": "string",
+                      "format": "url",
+                      "description": "The \"Custom URL\" that can also be used to preview the item on Box.  Custom\nURLs can only be created or modified in the Box Web application."
+                    },
+                    "access": {
+                      "type": "string",
+                      "description": "The access level for this shared link.\n\n* `open` - provides access to this item to anyone with this link\n* `company` - only provides access to this item to people the same company\n* `collaborators` - only provides access to this item to people who are\n   collaborators on this item\n\nIf this field is omitted when creating the shared link, the access level\nwill be set to the default access level specified by the enterprise admin.",
+                      "enum": [
+                        "open",
+                        "company",
+                        "collaborators"
+                      ]
+                    },
+                    "effective_access": {
+                      "type": "string",
+                      "description": "The effective access level for the shared link. This can be a more\nrestrictive access level than the value in the `access` field when the\nenterprise settings restrict the allowed access levels.",
+                      "enum": [
+                        "open",
+                        "company",
+                        "collaborators"
+                      ]
+                    },
+                    "effective_permission": {
+                      "type": "string",
+                      "description": "The effective permissions for this shared link.",
+                      "enum": [
+                        "can_download",
+                        "can_preview"
+                      ]
+                    },
+                    "unshared_at": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "The date and time when this link will be unshared. This field can only be\nset by users with paid accounts."
+                    },
+                    "is_password_enabled": {
+                      "type": "boolean",
+                      "description": "Defines if the shared link requires a password to access the item."
+                    },
+                    "permissions": {
+                      "type": "object",
+                      "description": "Defines if this link allows a user to preview and download an item.",
+                      "properties": {
+                        "can_download": {
+                          "type": "boolean",
+                          "description": "Defines if the shared link allows for the item to be downloaded. For\nshared links on folders, this also applies to any items in the folder.\n\nThis value can be set to `true` when the effective access level is\nset to `open` or `company`, not `collaborators`."
+                        },
+                        "can_preview": {
+                          "type": "boolean",
+                          "description": "Defines if the shared link allows for the item to be previewed.\n\nThis value is always `true`. For shared links on folders this also\napplies to any items in the folder."
+                        }
+                      }
+                    },
+                    "download_count": {
+                      "type": "integer",
+                      "description": "The number of times this item has been downloaded."
+                    },
+                    "preview_count": {
+                      "type": "integer",
+                      "description": "The number of times this item has been previewed."
+                    }
+                  }
                 },
                 {
                   "description": "The shared link for this file. This will be\n`null` if no shared link has been created for this\nfile."
@@ -13566,106 +14532,76 @@
         }
       ]
     },
-    "Lock": {
-      "title": "Lock",
-      "description": "The lock held on a file. A lock prevents a file from being moved,\nrenamed, or otherwise changed by anyone else than the user who created the\nlock.",
+    "User--Mini": {
+      "title": "User (Mini)",
+      "description": "A mini representation of a user, used when\nnested within another resource.",
       "allOf": [
         {
-          "$ref": "#/definitions/Reference"
+          "title": "Reference",
+          "description": "The bare basic reference for an object",
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "The unique identifier for this object"
+            }
+          }
         },
         {
           "properties": {
             "type": {
               "type": "string",
-              "description": "`lock`",
+              "description": "`user`",
               "enum": [
-                "lock"
+                "user"
               ]
             },
-            "created_by": {
-              "allOf": [
-                {
-                  "$ref": "#/definitions/User--Mini"
-                },
-                {
-                  "description": "The user who created the lock."
-                }
-              ]
-            },
-            "created_at": {
+            "name": {
               "type": "string",
-              "format": "date-time",
-              "description": "The time this lock was created at."
+              "description": "The display name of this user",
+              "maxLength": 50
             },
-            "expired_at": {
+            "login": {
               "type": "string",
-              "format": "date-time",
-              "description": "The time this lock is to expire at, which might be in the past."
-            },
-            "is_download_prevented": {
-              "type": "boolean",
-              "description": "Whether or not the file can be downloaded while locked."
+              "format": "email",
+              "description": "The primary email address of this user"
             }
           }
         }
       ]
     },
-    "ExpiringEmbedLink": {
-      "title": "Expiring Embed Link",
-      "description": "An expiring Box Embed Link.",
-      "allOf": [
-        {
-          "type": "object",
-          "description": "The basics of an access token",
-          "properties": {
-            "access_token": {
-              "type": "string",
-              "format": "token",
-              "description": "The requested access token."
-            },
-            "expires_in": {
-              "type": "integer",
-              "format": "int64",
-              "description": "The time in seconds in seconds by which this token will expire."
-            },
-            "token_type": {
-              "type": "string",
-              "enum": [
-                "bearer"
-              ],
-              "description": "The type of access token returned."
-            },
-            "restricted_to": {
-              "type": "array",
-              "description": "The permissions that this access token permits,\nproviding a list of resources (files, folders, etc)\nand the scopes permitted for each of those resources.",
-              "items": {
-                "$ref": "#/definitions/FileScope"
-              }
-            }
-          }
-        },
-        {},
-        {
-          "properties": {
-            "url": {
-              "type": "string",
-              "format": "url",
-              "description": "The actual expiring embed URL for this file, constructed\nfrom the file ID and access tokens specified in this object."
-            }
-          }
-        }
-      ]
-    },
-    "Representations": {
-      "title": "Representations",
-      "description": "A list of file representations",
+    "FileScope": {
+      "title": "File scope",
+      "type": "object",
+      "description": "A relation between a file and the scopes for which the file can be accessed",
       "properties": {
-        "entries": {
-          "type": "array",
-          "description": "A list of files",
-          "items": {
-            "$ref": "#/definitions/Representation"
-          }
+        "scope": {
+          "type": "string",
+          "description": "The file scopes for the file access",
+          "enum": [
+            "annotation_edit",
+            "annotation_view_all",
+            "annotation_view_self",
+            "base_explorer",
+            "base_picker",
+            "base_preview",
+            "base_upload",
+            "item_delete",
+            "item_download",
+            "item_preview",
+            "item_rename",
+            "item_share"
+          ]
+        },
+        "object": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/File--Mini"
+            },
+            {
+              "description": "The file for which the file can be accessed"
+            }
+          ]
         }
       }
     },
@@ -13697,7 +14633,7 @@
       ]
     },
     "FileVersion--Mini": {
-      "title": "File Version (Mini)",
+      "title": "File version (Mini)",
       "description": "A mini representation of a file version, used when\nnested within another resource.",
       "allOf": [
         {
@@ -13708,54 +14644,6 @@
             "sha1": {
               "type": "string",
               "description": "The SHA1 hash of this version of the file."
-            }
-          }
-        }
-      ]
-    },
-    "PaginationOrder": {
-      "title": "Pagination Order",
-      "description": "The order in which a pagination is ordered",
-      "properties": {
-        "by": {
-          "description": "The field to order by",
-          "type": "string"
-        },
-        "direction": {
-          "type": "string",
-          "description": "The direction to order by, either ascending or descending",
-          "enum": [
-            "ASC",
-            "DESC"
-          ]
-        }
-      }
-    },
-    "User--Mini": {
-      "title": "User (Mini)",
-      "description": "A mini representation of a user, used when\nnested within another resource.",
-      "allOf": [
-        {
-          "$ref": "#/definitions/Reference"
-        },
-        {
-          "properties": {
-            "type": {
-              "type": "string",
-              "description": "`user`",
-              "enum": [
-                "user"
-              ]
-            },
-            "name": {
-              "type": "string",
-              "description": "The display name of this user",
-              "maxLength": 50
-            },
-            "login": {
-              "type": "string",
-              "format": "email",
-              "description": "The primary email address of this user"
             }
           }
         }
@@ -13799,7 +14687,23 @@
             "path_collection": {
               "allOf": [
                 {
-                  "$ref": "#/definitions/PathCollection"
+                  "title": "Path collection",
+                  "description": "A list of parent folders for an item.",
+                  "type": "object",
+                  "properties": {
+                    "total_count": {
+                      "description": "The number of folders in this list.",
+                      "type": "integer",
+                      "format": "int64"
+                    },
+                    "entries": {
+                      "type": "array",
+                      "description": "The parent folders for this item",
+                      "items": {
+                        "$ref": "#/definitions/Folder--Mini"
+                      }
+                    }
+                  }
                 },
                 {
                   "description": "The tree of folders that this folder is contained in,\nstarting at the root."
@@ -13872,7 +14776,84 @@
             "shared_link": {
               "allOf": [
                 {
-                  "$ref": "#/definitions/SharedLink"
+                  "title": "Shared link",
+                  "description": "Shared links provide direct, read-only access to files or folder on Box.\n\nShared links with open access level allow anyone with the URL\nto access the item, while shared links with company or collaborators access\nlevels can only be accessed by appropriately authenticated Box users.",
+                  "type": "object",
+                  "properties": {
+                    "url": {
+                      "type": "string",
+                      "format": "url",
+                      "description": "The URL that can be used to access the item on Box.\n\nThis URL will display the item in Box's preview UI where the file\ncan be downloaded if allowed.\n\nThis URL will continue to work even when a custom `vanity_url`\nhas been set for this shared link."
+                    },
+                    "download_url": {
+                      "type": "string",
+                      "format": "url",
+                      "x-box-premium-feature": true,
+                      "description": "A URL that can be used to download the file. This URL can be used in\na browser to download the file. This URL includes the file\nextension so that the file will be saved with the right file type.\n\nThis property will be `null` for folders."
+                    },
+                    "vanity_url": {
+                      "type": "string",
+                      "format": "url",
+                      "description": "The \"Custom URL\" that can also be used to preview the item on Box.  Custom\nURLs can only be created or modified in the Box Web application."
+                    },
+                    "access": {
+                      "type": "string",
+                      "description": "The access level for this shared link.\n\n* `open` - provides access to this item to anyone with this link\n* `company` - only provides access to this item to people the same company\n* `collaborators` - only provides access to this item to people who are\n   collaborators on this item\n\nIf this field is omitted when creating the shared link, the access level\nwill be set to the default access level specified by the enterprise admin.",
+                      "enum": [
+                        "open",
+                        "company",
+                        "collaborators"
+                      ]
+                    },
+                    "effective_access": {
+                      "type": "string",
+                      "description": "The effective access level for the shared link. This can be a more\nrestrictive access level than the value in the `access` field when the\nenterprise settings restrict the allowed access levels.",
+                      "enum": [
+                        "open",
+                        "company",
+                        "collaborators"
+                      ]
+                    },
+                    "effective_permission": {
+                      "type": "string",
+                      "description": "The effective permissions for this shared link.",
+                      "enum": [
+                        "can_download",
+                        "can_preview"
+                      ]
+                    },
+                    "unshared_at": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "The date and time when this link will be unshared. This field can only be\nset by users with paid accounts."
+                    },
+                    "is_password_enabled": {
+                      "type": "boolean",
+                      "description": "Defines if the shared link requires a password to access the item."
+                    },
+                    "permissions": {
+                      "type": "object",
+                      "description": "Defines if this link allows a user to preview and download an item.",
+                      "properties": {
+                        "can_download": {
+                          "type": "boolean",
+                          "description": "Defines if the shared link allows for the item to be downloaded. For\nshared links on folders, this also applies to any items in the folder.\n\nThis value can be set to `true` when the effective access level is\nset to `open` or `company`, not `collaborators`."
+                        },
+                        "can_preview": {
+                          "type": "boolean",
+                          "description": "Defines if the shared link allows for the item to be previewed.\n\nThis value is always `true`. For shared links on folders this also\napplies to any items in the folder."
+                        }
+                      }
+                    },
+                    "download_count": {
+                      "type": "integer",
+                      "description": "The number of times this item has been downloaded."
+                    },
+                    "preview_count": {
+                      "type": "integer",
+                      "description": "The number of times this item has been previewed."
+                    }
+                  }
                 },
                 {
                   "description": "The shared link for this folder. This will be\n`null` if no shared link has been created for this\nfolder."
@@ -13962,7 +14943,7 @@
       ]
     },
     "WebLink--Mini": {
-      "title": "Web Link (Mini)",
+      "title": "Web link (Mini)",
       "description": "Web links are objects that point to URLs. These objects\nare also known as bookmarks within the Box web application.\n\nWeb link objects are treated similarly to file objects,\nthey will also support most actions that apply to regular files.",
       "allOf": [
         {
@@ -14003,95 +14984,21 @@
         }
       ]
     },
-    "MetadataField": {
-      "title": "Metadata Field",
-      "description": "A field within a metadata template. Fields can be a basic text, date, or\nnumber field, or a list of options.",
-      "type": "object",
-      "allOf": [
-        {
-          "title": "Metadata Field (Write)",
-          "description": "A field within a metadata template. Fields can be a basic text, date, or\nnumber field, or a list of options.",
-          "required": [
-            "type",
-            "key",
-            "displayName"
-          ],
-          "type": "object",
-          "properties": {
-            "type": {
-              "type": "string",
-              "description": "The type of field. The basic fields are a `string` field for text, a\n`float` field for numbers, and a `date` fields to present the user with a\ndate-time picker.\n\nAdditionally, metadata templates support an `enum` field for a basic list\nof items, and ` multiSelect` field for a similar list of items where the\nuser can select more than one value.",
-              "enum": [
-                "string",
-                "float",
-                "date",
-                "enum",
-                "multiSelect"
-              ]
-            },
-            "key": {
-              "type": "string",
-              "description": "A unique identifier for the field. The identifier must\nbe unique within the template to which it belongs.",
-              "maxLength": 256
-            },
-            "displayName": {
-              "type": "string",
-              "description": "The display name of the field as it is shown to the user in the web and\nmobile apps.",
-              "maxLength": 4096
-            },
-            "description": {
-              "type": "string",
-              "description": "A description of the field. This is not shown to the user.",
-              "maxLength": 4096
-            },
-            "hidden": {
-              "type": "boolean",
-              "description": "Whether this field is hidden in the UI for the user and can only be set\nthrough the API instead."
-            },
-            "options": {
-              "description": "A list of options for this field. This is used in combination with the\n`enum` and `multiSelect` field types.",
-              "type": "array",
-              "items": {
-                "title": "Metadata Option (Write)",
-                "type": "object",
-                "description": "An option for a Metadata Template Field.\n\nOptions only need to be provided for fields of type `enum` and `multiSelect`.\nOptions represent the value(s) a user can select for the field either through\nthe UI or through the API.",
-                "required": [
-                  "key"
-                ],
-                "properties": {
-                  "key": {
-                    "description": "The text value of the option. This represents both the display name of the\noption and the internal key used when updating templates.",
-                    "type": "string"
-                  }
-                }
-              }
-            }
-          }
-        },
-        {
-          "properties": {
-            "id": {
-              "type": "string",
-              "description": "The unique ID of the metadata template field."
-            },
-            "options": {
-              "description": "A list of options for this field. This is used in combination with\nthe `enum` and `multiSelect` field types.",
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/MetadataOption"
-              }
-            }
-          }
-        }
-      ]
-    },
     "Comment--Standard": {
       "title": "Comment (Standard)",
       "description": "Standard representation of a comment, as returned by the\ncomment API endpoints and when nested within other resources.",
       "type": "object",
       "allOf": [
         {
-          "$ref": "#/definitions/Reference"
+          "title": "Reference",
+          "description": "The bare basic reference for an object",
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "The unique identifier for this object"
+            }
+          }
         },
         {
           "properties": {
@@ -14134,7 +15041,15 @@
             "item": {
               "allOf": [
                 {
-                  "$ref": "#/definitions/Reference"
+                  "title": "Reference",
+                  "description": "The bare basic reference for an object",
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "The unique identifier for this object"
+                    }
+                  }
                 },
                 {
                   "description": "The object this comment was placed on"
@@ -14147,11 +15062,19 @@
       ]
     },
     "TermsOfService--Mini": {
-      "title": "Terms Of Service (Mini)",
+      "title": "Terms of service (Mini)",
       "description": "The root-level record that is supposed to represent a\nsingle Terms of Service.",
       "allOf": [
         {
-          "$ref": "#/definitions/Reference"
+          "title": "Reference",
+          "description": "The bare basic reference for an object",
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "The unique identifier for this object"
+            }
+          }
         },
         {
           "properties": {
@@ -14165,85 +15088,6 @@
           }
         }
       ]
-    },
-    "SharedLink": {
-      "title": "Shared Link",
-      "description": "Shared links provide direct, read-only access to files or folder on Box.\n\nShared links with open access level allow anyone with the URL\nto access the item, while shared links with company or collaborators access\nlevels can only be accessed by appropriately authenticated Box users.",
-      "properties": {
-        "url": {
-          "type": "string",
-          "format": "url",
-          "description": "The URL that can be used to access the item on Box.\n\nThis URL will display the item in Box's preview UI where the file\ncan be downloaded if allowed.\n\nThis URL will continue to work even when a custom `vanity_url`\nhas been set for this shared link."
-        },
-        "download_url": {
-          "type": "string",
-          "format": "url",
-          "x-box-premium-feature": true,
-          "description": "A URL that can be used to download the file. This URL can be used in\na browser to download the file. This URL includes the file\nextension so that the file will be saved with the right file type.\n\nThis property will be `null` for folders."
-        },
-        "vanity_url": {
-          "type": "string",
-          "format": "url",
-          "description": "The \"Custom URL\" that can also be used to preview the item on Box.  Custom\nURLs can only be created or modified in the Box Web application."
-        },
-        "access": {
-          "type": "string",
-          "description": "The access level for this shared link.\n\n* `open` - provides access to this item to anyone with this link\n* `company` - only provides access to this item to people the same company\n* `collaborators` - only provides access to this item to people who are\n   collaborators on this item\n\nIf this field is omitted when creating the shared link, the access level\nwill be set to the default access level specified by the enterprise admin.",
-          "enum": [
-            "open",
-            "company",
-            "collaborators"
-          ]
-        },
-        "effective_access": {
-          "type": "string",
-          "description": "The effective access level for the shared link. This can be a more\nrestrictive access level than the value in the `access` field when the\nenterprise settings restrict the allowed access levels.",
-          "enum": [
-            "open",
-            "company",
-            "collaborators"
-          ]
-        },
-        "effective_permission": {
-          "type": "string",
-          "description": "The effective permissions for this shared link.",
-          "enum": [
-            "can_download",
-            "can_preview"
-          ]
-        },
-        "unshared_at": {
-          "type": "string",
-          "format": "date-time",
-          "description": "The date and time when this link will be unshared. This field can only be\nset by users with paid accounts."
-        },
-        "is_password_enabled": {
-          "type": "boolean",
-          "description": "Defines if the shared link requires a password to access the item."
-        },
-        "permissions": {
-          "type": "object",
-          "description": "Defines if this link allows a user to preview and download an item.",
-          "properties": {
-            "can_download": {
-              "type": "boolean",
-              "description": "Defines if the shared link allows for the item to be downloaded. For\nshared links on folders, this also applies to any items in the folder.\n\nThis value can be set to `true` when the effective access level is\nset to `open` or `company`, not `collaborators`."
-            },
-            "can_preview": {
-              "type": "boolean",
-              "description": "Defines if the shared link allows for the item to be previewed.\n\nThis value is always `true`. For shared links on folders this also\napplies to any items in the folder."
-            }
-          }
-        },
-        "download_count": {
-          "type": "integer",
-          "description": "The number of times this item has been downloaded."
-        },
-        "preview_count": {
-          "type": "integer",
-          "description": "The number of times this item has been previewed."
-        }
-      }
     },
     "User--Standard": {
       "title": "User (Standard)",
@@ -14319,51 +15163,6 @@
         }
       ]
     },
-    "TrackingCode": {
-      "title": "Tracking Code",
-      "description": "Custom tracking code for a user.",
-      "properties": {
-        "type": {
-          "type": "string",
-          "description": "`tracking_code`",
-          "enum": [
-            "tracking_code"
-          ]
-        },
-        "name": {
-          "type": "string",
-          "description": "The name of the tracking code, which must be preconfigured in\nthe Admin Console"
-        },
-        "value": {
-          "type": "string",
-          "description": "The value of the tracking code"
-        }
-      }
-    },
-    "Enterprise": {
-      "title": "Enterprise",
-      "description": "A representation of a Box enterprise",
-      "allOf": [
-        {
-          "$ref": "#/definitions/Reference"
-        },
-        {
-          "properties": {
-            "type": {
-              "type": "string",
-              "description": "`enterprise`",
-              "enum": [
-                "enterprise"
-              ]
-            },
-            "name": {
-              "description": "The name of the enterprise",
-              "type": "string"
-            }
-          }
-        }
-      ]
-    },
     "Group--Standard": {
       "title": "Group (Standard)",
       "description": "A standard representation of a group, as returned from any\ngroup API endpoints by default",
@@ -14393,7 +15192,15 @@
       "description": "Mini representation of a group, including id and name of\ngroup.",
       "allOf": [
         {
-          "$ref": "#/definitions/Reference"
+          "title": "Reference",
+          "description": "The bare basic reference for an object",
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "The unique identifier for this object"
+            }
+          }
         },
         {
           "properties": {
@@ -14420,29 +15227,8 @@
         }
       ]
     },
-    "MetadataCardEntry": {
-      "title": "Metadata Card Entry",
-      "description": "An entry in the `entries` attribute of a metadata card",
-      "required": [
-        "type",
-        "text"
-      ],
-      "properties": {
-        "type": {
-          "type": "string",
-          "description": "`text`",
-          "enum": [
-            "text"
-          ]
-        },
-        "text": {
-          "type": "string",
-          "description": "The text of the entry"
-        }
-      }
-    },
     "RealtimeServer": {
-      "title": "Real-time Server",
+      "title": "Real-time server",
       "description": "A real-time server that can be used for\nlong polling user events",
       "properties": {
         "type": {
@@ -14633,7 +15419,15 @@
       "description": "A collection of items, including files and folders.\n\nCurrently, the only collection available\nis the `favorites` collection.\n\nThe contents of a collection can be explored in a\nsimilar way to which the contents of a folder is\nexplored.",
       "allOf": [
         {
-          "$ref": "#/definitions/Reference"
+          "title": "Reference",
+          "description": "The bare basic reference for an object",
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "The unique identifier for this object"
+            }
+          }
         },
         {
           "properties": {
@@ -14663,7 +15457,7 @@
       ]
     },
     "RecentItem": {
-      "title": "Recent Item",
+      "title": "Recent item",
       "description": "A recent item accessed by a user.",
       "properties": {
         "type": {
@@ -14703,7 +15497,7 @@
       }
     },
     "RetentionPolicy--Mini": {
-      "title": "Retention Policy (Mini)",
+      "title": "Retention policy (Mini)",
       "description": "A mini representation of a retention policy, used when\nnested within another resource.",
       "allOf": [
         {
@@ -14733,11 +15527,19 @@
       ]
     },
     "LegalHoldPolicy--Mini": {
-      "title": "Legal Hold Policy (Mini)",
+      "title": "Legal hold policy (Mini)",
       "description": "A mini legal hold policy",
       "allOf": [
         {
-          "$ref": "#/definitions/Reference"
+          "title": "Reference",
+          "description": "The bare basic reference for an object",
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "The unique identifier for this object"
+            }
+          }
         },
         {
           "properties": {
@@ -14753,11 +15555,19 @@
       ]
     },
     "StoragePolicy--Mini": {
-      "title": "Storage Policy (Mini)",
+      "title": "Storage policy (Mini)",
       "description": "A mini description of a Storage Policy object",
       "allOf": [
         {
-          "$ref": "#/definitions/Reference"
+          "title": "Reference",
+          "description": "The bare basic reference for an object",
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "The unique identifier for this object"
+            }
+          }
         },
         {
           "properties": {
@@ -14771,123 +15581,6 @@
           }
         }
       ]
-    },
-    "PathCollection": {
-      "title": "Path Collection",
-      "description": "A list of parent folders for an item.",
-      "properties": {
-        "total_count": {
-          "description": "The number of folders in this list.",
-          "type": "integer",
-          "format": "int64"
-        },
-        "entries": {
-          "type": "array",
-          "description": "The parent folders for this item",
-          "items": {
-            "$ref": "#/definitions/Folder--Mini"
-          }
-        }
-      }
-    },
-    "FileScope": {
-      "title": "File Scope",
-      "description": "A relation between a file and the scopes for which the file can be accessed",
-      "properties": {
-        "scope": {
-          "type": "string",
-          "description": "The file scopes for the file access",
-          "enum": [
-            "annotation_edit",
-            "annotation_view_all",
-            "annotation_view_self",
-            "base_explorer",
-            "base_picker",
-            "base_preview",
-            "base_upload",
-            "item_delete",
-            "item_download",
-            "item_preview",
-            "item_rename",
-            "item_share"
-          ]
-        },
-        "object": {
-          "allOf": [
-            {
-              "$ref": "#/definitions/File--Mini"
-            },
-            {
-              "description": "The file for which the file can be accessed"
-            }
-          ]
-        }
-      }
-    },
-    "Representation": {
-      "title": "Representation",
-      "description": "A file representation",
-      "properties": {
-        "content": {
-          "type": "object",
-          "description": "An object containing the URL that can be used to actually fetch\nthe representation.",
-          "properties": {
-            "url_template": {
-              "type": "string",
-              "description": "The download URL that can be used to fetch the representation.\nMake sure to make an authenticated API call to this endpoint.\n\nThis URL is a template and will require the `{+asset_path}` to\nbe replaced by a path. In general, for unpaged representations\nit can be replaced by an empty string.\n\nFor paged representations, replace the `{+asset_path}` with the\npage to request plus the extension for the file, for example\n`1.pdf`.\n\nWhen requesting the download URL the following additional\nquery params can be passed along.\n\n* `set_content_disposition_type` - Sets the `Content-Disposition`\n  header in the API response with the specified disposition type\n  of either `inline` or `attachment`. If not supplied, the\n  `Content-Disposition` header is not included in the response.\n\n* `set_content_disposition_filename` - Allows the application to\n  define the representation's file name used in the\n  `Content-Disposition` header.  If not defined, the filename\n  is derived from the source file name in Box combined with the\n  extension of the representation."
-            }
-          }
-        },
-        "info": {
-          "type": "object",
-          "description": "An object containing the URL that can be used to fetch more info\non this representation.",
-          "properties": {
-            "url": {
-              "type": "string",
-              "description": "The API URL that can be used to get more info on this file\nrepresentation. Make sure to make an authenticated API call\nto this endpoint."
-            }
-          }
-        },
-        "properties": {
-          "type": "object",
-          "description": "An object containing the size and type of this presentation.",
-          "properties": {
-            "dimensions": {
-              "type": "string",
-              "format": "<width>x<height>",
-              "description": "The width by height size of this representation in pixels."
-            },
-            "paged": {
-              "type": "boolean",
-              "description": "Indicates if the representation is build up out of multiple pages"
-            },
-            "thumb": {
-              "type": "boolean",
-              "description": "Indicates if the representation can be used as a thumbnail of the\nfile"
-            }
-          }
-        },
-        "representation": {
-          "type": "string",
-          "description": "Indicates the file type of the returned representation."
-        },
-        "status": {
-          "type": "object",
-          "description": "An object containing the status of this representation.",
-          "properties": {
-            "state": {
-              "type": "string",
-              "enum": [
-                "success",
-                "viewable",
-                "pending",
-                "none"
-              ],
-              "description": "The status of the representation.\n\n* `success` defines the representation as ready to be viewed.\n* `viewable` defines a video to be ready for viewing.\n* `pending` defines the representation as to be generated. Retry\n  this endpoint to re-check the status.\n* `none` defines that the representation will be created when\n  requested. Request the URL defined in the `info` object to trigger\n  this generation."
-            }
-          }
-        }
-      }
     },
     "File--Base": {
       "title": "File (Base)",
@@ -14911,7 +15604,7 @@
       }
     },
     "FileVersion--Base": {
-      "title": "File Version (Base)",
+      "title": "File version (Base)",
       "description": "The bare basic representation of a file version, the minimal\namount of fields returned when using the `fields` query\nparameter.",
       "properties": {
         "id": {
@@ -14948,80 +15641,8 @@
         }
       }
     },
-    "MetadataOption": {
-      "title": "Metadata Option",
-      "description": "An option for a Metadata Template Field.\n\nOptions are only present for fields of type `enum` and `multiSelect`.\nOptions represent the value(s) a user can select for the field either\nthrough the UI or through the API.",
-      "type": "object",
-      "allOf": [
-        {
-          "title": "Metadata Option (Write)",
-          "type": "object",
-          "description": "An option for a Metadata Template Field.\n\nOptions only need to be provided for fields of type `enum` and `multiSelect`.\nOptions represent the value(s) a user can select for the field either through\nthe UI or through the API.",
-          "required": [
-            "key"
-          ],
-          "properties": {
-            "key": {
-              "description": "The text value of the option. This represents both the display name of the\noption and the internal key used when updating templates.",
-              "type": "string"
-            }
-          }
-        },
-        {
-          "properties": {
-            "id": {
-              "type": "string",
-              "description": "The internal unique identifier of the the option."
-            }
-          }
-        }
-      ]
-    },
-    "EventSource": {
-      "title": "Event Source",
-      "description": "The source file or folder that triggered an event in\nthe event stream.",
-      "properties": {
-        "item_type": {
-          "type": "string",
-          "enum": [
-            "file",
-            "folder"
-          ],
-          "description": "The type of the item that the event\nrepresents. Can be `file` or `folder`.\n"
-        },
-        "item_id": {
-          "type": "string",
-          "description": "The unique identifier that represents the\nitem.\n"
-        },
-        "item_name": {
-          "type": "string",
-          "description": "The name of the item.\n"
-        },
-        "parent": {
-          "allOf": [
-            {
-              "$ref": "#/definitions/Folder--Mini"
-            },
-            {
-              "description": "The optional folder that this folder is located within.\n\nThis value may be `null` for some folders such as the\nroot folder or the trash folder."
-            }
-          ]
-        },
-        "owned_by": {
-          "allOf": [
-            {
-              "$ref": "#/definitions/User--Mini"
-            },
-            {
-              "description": "The user who owns this item."
-            },
-            {}
-          ]
-        }
-      }
-    },
     "RetentionPolicy--Base": {
-      "title": "Retention Policy (Base)",
+      "title": "Retention policy (Base)",
       "description": "The bare basic representation of a file version, the minimal\namount of fields returned when using the `fields` query\nparameter.",
       "properties": {
         "id": {
