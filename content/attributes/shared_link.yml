@@ -1,57 +1,146 @@
 ---
+title: Shared link
+
 description: |-
-  Defines a shared link for an item. Set this to `null` to remove
-  the shared link.
+  Shared links provide direct, read-only access to files or folder on Box.
+
+  Shared links with open access level allow anyone with the URL
+  to access the item, while shared links with company or collaborators access
+  levels can only be accessed by appropriately authenticated Box users.
 
 type: object
 
 properties:
+  url:
+    type: string
+    format: url
+    description: |-
+      The URL that can be used to access the item on Box.
+
+      This URL will display the item in Box's preview UI where the file
+      can be downloaded if allowed.
+
+      This URL will continue to work even when a custom `vanity_url`
+      has been set for this shared link.
+    example: https://www.box.com/s/vspke7y05sb214wjokpk
+    nullable: false
+
+  download_url:
+    type: string
+    format: url
+    x-box-premium-feature: true
+    description: |-
+      A URL that can be used to download the file. This URL can be used in
+      a browser to download the file. This URL includes the file
+      extension so that the file will be saved with the right file type.
+
+      This property will be `null` for folders.
+    example: https://www.box.com/shared/static/rh935iit6ewrmw0unyul.jpeg
+    nullable: true
+
+  vanity_url:
+    type: string
+    format: url
+    description: |-
+      The "Custom URL" that can also be used to preview the item on Box.  Custom
+      URLs can only be created or modified in the Box Web application.
+    example: https://acme.app.box.com/v/my_url/
+    nullable: true
+
   access:
     type: string
     description: |-
-      The level of access for the shared link. This can be
-      restricted to anyone with the link (`open`), only people
-      within the company (`company`) and only those who
-      have been invited to the folder (`collaborators`).
+      The access level for this shared link.
 
-      This field defaults to the `default` access level,
-      which is the access level as specified by the
-      enterprise admin.
+      * `open` - provides access to this item to anyone with this link
+      * `company` - only provides access to this item to people the same company
+      * `collaborators` - only provides access to this item to people who are
+         collaborators on this item
 
-      The `company` access level is only available to paid
-      accounts.
+      If this field is omitted when creating the shared link, the access level
+      will be set to the default access level specified by the enterprise admin.
     enum:
-      - default
       - open
       - company
       - collaborators
-    example: "open"
+    example: open
+    nullable: false
 
-  password:
+  effective_access:
     type: string
     description: |-
-      The password required to access the shared link. Set the
-      password to `null` to remove it.
+      The effective access level for the shared link. This can be a more
+      restrictive access level than the value in the `access` field when the
+      enterprise settings restrict the allowed access levels.
+    enum:
+      - open
+      - company
+      - collaborators
+    example: company
+    nullable: false
 
-      A password can only be set when `access` is set to `open`.
-    example: "do-not-use-this-password"
+  effective_permission:
+    type: string
+    description: |-
+      The effective permissions for this shared link.
+    enum:
+      - can_download
+      - can_preview
+    example: can_download
+    nullable: false
 
   unshared_at:
     type: string
     format: date-time
-    example: "2012-12-12T10:53:43-08:00"
     description: |-
-      The timestamp at which this shared link will
-      expire. This field can only be set by
-      users with paid accounts.
+      The date and time when this link will be unshared. This field can only be
+      set by users with paid accounts.
+    example: "2018-04-13T13:53:23-07:00"
+    nullable: true
+
+  is_password_enabled:
+    type: boolean
+    description: |-
+      Defines if the shared link requires a password to access the item.
+    example: true
+    nullable: false
 
   permissions:
     type: object
+    description: |-
+      Defines if this link allows a user to preview and download an item.
     properties:
       can_download:
         type: boolean
         example: true
+        nullable: false
         description: |-
-          If the shared link allows for downloading of files.
-          This can only be set when `access` is set to
-          `open` or `company`.
+          Defines if the shared link allows for the item to be downloaded. For
+          shared links on folders, this also applies to any items in the folder.
+
+          This value can be set to `true` when the effective access level is
+          set to `open` or `company`, not `collaborators`.
+
+      can_preview:
+        type: boolean
+        example: true
+        nullable: false
+        description: |-
+          Defines if the shared link allows for the item to be previewed.
+
+          This value is always `true`. For shared links on folders this also
+          applies to any items in the folder.
+
+  download_count:
+    type: integer
+    example: 3
+    description: |-
+      The number of times this item has been downloaded.
+    nullable: false
+
+  preview_count:
+    type: integer
+    example: 3
+    description: |-
+      The number of times this item has been previewed.
+    nullable: false

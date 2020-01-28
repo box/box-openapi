@@ -1,5 +1,5 @@
 ---
-title: Metadata Template
+title: Metadata template
 
 x-box-resource-id: metadata_template
 
@@ -27,12 +27,11 @@ properties:
   scope:
     type: string
     description: |-
-      The scope of the metadata template, which can be either `global` for
-      templates that are available to any Box enterprise, or `enterprise_*`
-      for
-      templates that have been created within the enterprise in question.
-
-      The ID of the enterprise will be appended to an enterprise scope.
+      The scope of the metadata template can either be `global` or
+      `enterprise_*`. The `global` scope is used for templates that are
+      available to any Box enterprise. The `enterprise_*` scope represents
+      templates that have been created within a specific enterprise, where `*`
+      will be the ID of that enterprise.
     example: enterprise_123456
 
   templateKey:
@@ -67,7 +66,42 @@ properties:
       field can be a regular text field, date field, number field, as well as a
       single or multi-select list.
     items:
-      $ref: '#/components/schemas/MetadataField'
+      type: object
+
+      description: |-
+        A field within a metadata template. Fields can be a basic text, date, or
+        number field, or a list of options.
+
+      allOf:
+        - $ref: '../attributes/metadata_field--writable.yml'
+        - properties:
+            id:
+              type: string
+              example: "822227e0-47a5-921b-88a8-494760b2e6d2"
+              description: The unique ID of the metadata template field.
+
+            options:
+              description: |-
+                A list of options for this field. This is used in combination
+                with the `enum` and `multiSelect` field types.
+              type: array
+              items:
+                type: object
+                description: |-
+                  An option for a Metadata Template Field.
+
+                  Options are only present for fields of type `enum` and
+                  `multiSelect`. Options represent the value(s) a user can
+                  select for the field either through the UI or through the API.
+
+                allOf:
+                  - $ref: "../attributes/metadata_option--writable.yml"
+                  - properties:
+                      id:
+                        type: string
+                        example: "45dc2849-a4a7-40a9-a751-4a699a589190"
+                        description: |-
+                          The internal unique identifier of the the option.
 
   copyInstanceOnItemCopy:
     type: boolean

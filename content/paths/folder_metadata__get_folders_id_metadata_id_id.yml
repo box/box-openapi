@@ -4,12 +4,14 @@ operationId: get_folders_id_metadata_id_id
 summary: Get metadata instance on folder
 
 tags:
-  - Metadata (Folders)
+  - Metadata instances (Folders)
 
 x-box-reference-category: folder_metadata
+x-box-sanitized: true
 
 description: |-
-  Retrieve a specific metadata template instance for a folder
+  Retrieves the instance of a metadata template that has been applied to a
+  folder. This can not be used on the root folder with ID `0`.
 
 parameters:
   - $ref: '../attributes/folder_id.yml'
@@ -27,10 +29,31 @@ responses:
         schema:
           $ref: '#/components/schemas/Metadata'
 
+  403:
+    description: |-
+      Returned when the request parameters are not valid.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
+
   404:
     description: |-
       Returned if the metadata template specified
-      was not applied to this folder.
+      was not applied to this folder or the user does not have access to the
+      folder.
+
+      * `instance_not_found` - The metadata template was not applied to the
+      folder.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
+
+  405:
+    description: |-
+      Returned when the method was not allowed. This often happens when the
+      folder ID is not valid or the root folder with ID `0`.
     content:
       application/json:
         schema:

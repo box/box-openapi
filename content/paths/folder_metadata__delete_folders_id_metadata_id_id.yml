@@ -4,9 +4,10 @@ operationId: delete_folders_id_metadata_id_id
 summary: Remove metadata instance from folder
 
 tags:
-  - Metadata (Folders)
+  - Metadata instances (Folders)
 
 x-box-reference-category: folder_metadata
+x-box-sanitized: true
 
 description: |-
   Deletes a piece of folder metadata.
@@ -21,6 +22,39 @@ responses:
     description: |-
       Returns an empty response when the metadata is
       successfully deleted.
+
+  400:
+    description: |-
+      Returned when the request parameters are not valid. This may happen of the
+      `scope` is not valid.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
+
+  404:
+    description: |-
+      Returns an error when the folder does not have an instance of the metadata
+      template applied to it, or when the user does not have access to the
+      folder.
+
+      * `instance_not_found` - An instance of the metadata template with the
+      given `scope` and `templateKey` was not found on this folder.
+      * `not_found` - The folder was not found, or the user does not have access
+      to the folder.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
+
+  405:
+    description: |-
+      Returned when the method was not allowed. This often happens when the
+      folder ID is not valid or the root folder with ID `0`.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
 
   default:
     description: |-
