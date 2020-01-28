@@ -1,15 +1,17 @@
 ---
 operationId: get_files_id_metadata
 
-summary: List file's metadata instances
+summary: List metadata instances on file
 
 tags:
-  - Metadata (Files)
+  - Metadata instances (Files)
 
 x-box-reference-category: file_metadata
+x-box-sanitized: true
 
 description: |-
-  Retrieves all metadata for a given file.
+  Retrieves all metadata for a given file. This can not be used on the root
+  file with ID `0`.
 
 parameters:
   - $ref: '../attributes/file_id.yml'
@@ -26,6 +28,22 @@ responses:
       application/json:
         schema:
           $ref: '#/components/schemas/Metadatas'
+
+  403:
+    description: |-
+      Returned when the request parameters are not valid.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
+
+  404:
+    description: |-
+      Returned when the user does not have access to the file.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
 
   default:
     description: |-

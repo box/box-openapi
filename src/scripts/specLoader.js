@@ -36,7 +36,7 @@ class SpecLoader {
    * Load the specification from file and resolve the references
    */
   async loadSpecification() {
-    const root = JSON.parse(fs.readFileSync('./content/openapi.json'))
+    const root = yaml.load(fs.readFileSync('./content/openapi.yml'))
     return await resolver.resolve(root).then(resolved => resolved.result)
   }
 
