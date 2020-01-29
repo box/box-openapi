@@ -7,10 +7,13 @@ tags:
   - Metadata cascade policies (Beta)
 
 x-box-reference-category: metadata_cascade_policies
+x-box-sanitized: true
 
 description: |-
-  If a policy already exists on a folder, this will apply that policy
-  to all existing files and sub-folders within the target folder.
+  Force the metadata on a folder with a metadata cascade policy to be applied to
+  all of its children. This can be used after creating a new cascade policy to
+  enforce the metadata to be cascaded down to all existing files within that
+  folder.
 
 parameters:
   - name: metadata_cascade_policy_id
@@ -18,8 +21,8 @@ parameters:
     in: path
     schema:
       type: string
-    description: The ID of the cascade policy.
-    example: "21312"
+    description: The ID of the cascade policy to force-apply.
+    example: 6fd4ff89-8fc1-42cf-8b29-1890dedd26d7
 
 requestBody:
   content:
@@ -34,28 +37,37 @@ requestBody:
               - none
               - overwrite
             description: |-
-              The desired behavior for conflict-resolution if a template already
-              exists on a given file or folder.
+              Describes the desired behavior when dealing with the conflict
+              where a metadata template already has an instance applied
+              to a child.
 
               * `none` will preserve the existing value on the file
               * `overwrite` will force-apply the templates values over
                 any existing values.
-            example: "overwrite"
+            example: "none"
 
 responses:
   202:
     description: |-
-      Returns the metadata cascade policy when the policy has been
-      applied.
+      Returns an empty response when the API call was successful. The metadata
+      cascade operation will be performed asynchronously.
 
-      The metadata cascade operation will be kicked off asynchronously.
-      The API call will return right away but before the cascade operation
-      is complete. There is currently no way to check for when this
-      operation has finished.
+      The API call will return directly, before the cascade operation
+      is complete. There is currently no API to check for the status of this
+      operation.
+
+  404:
+    description: |-
+      Returns an error when the policy can not be found or the user does not
+      have access to the folder.
+
+      * `instance_not_found` - The policy could not be found
+      * `not_found` - The folder could not be found or the user does not have
+        access to the folder.
     content:
       application/json:
         schema:
-          $ref: '#/components/schemas/MetadataCascadePolicy'
+          $ref: '#/components/schemas/ClientError'
 
   default:
     description: |-

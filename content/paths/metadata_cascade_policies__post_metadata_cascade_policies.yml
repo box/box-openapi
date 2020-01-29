@@ -7,14 +7,15 @@ tags:
   - Metadata cascade policies (Beta)
 
 x-box-reference-category: metadata_cascade_policies
+x-box-sanitized: true
 
 description: |-
   Creates a new metadata cascade policy that applies a given
   metadata template to a given folder and automatically
-  cascades it down to its children.
+  cascades it down to any files within that folder.
 
-  In order for the policy to work, a metadata instance must first
-  be applied to the folder.
+  In order for the policy to be applied a metadata instance must first
+  be applied to the folder the policy is to be applied to.
 
 requestBody:
   content:
@@ -28,13 +29,16 @@ requestBody:
           folder_id:
             type: string
             description: |-
-              The ID of the folder to assign the template to.
-            example: "12321"
+              The ID of the folder to apply the policy to. This folder will
+              need to already have an instance of the targeted metadata
+              template applied to it.
+            example: "1234567"
 
           scope:
             description: |-
-              The scope of the metadata template
-            example: "global"
+              The scope of the targeted metadata template. This template will
+              need to already have an instance applied to the targeted folder.
+            example: "enterprise"
             type: string
             enum:
               - global
@@ -44,7 +48,8 @@ requestBody:
             type: string
             example: productInfo
             description: |-
-              The identifier of the metadata template.
+              The key of the targeted metadata template. This template will
+              need to already have an instance applied to the targeted folder.
 
 responses:
   201:
@@ -54,6 +59,55 @@ responses:
       application/json:
         schema:
           $ref: '#/components/schemas/MetadataCascadePolicy'
+
+  400:
+    description: |-
+      Returns an error when any of the parameters are not in a valid format.
+
+      * `bad_request` - Either the `scope`, `templateKey`, or `folder_id` are
+      not in a valid format.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
+
+  403:
+    description: |-
+      Returns an error when trying to apply a policy to a restricted folder, for
+      example the root folder with ID `0`.
+
+      * `forbidden` - Although the folder ID was valid and the user has access
+      to the folder, the policy could not be applied to this folder.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
+
+  404:
+    description: |-
+      Returns an error when the template or folder can not be found, or when the
+      user does not have access to the folder or template.
+
+      * `instance_tuple_not_found` - The template could not be found or the user
+      does not have access to the template.
+      * `not_found` - The folder could not be found or the user
+      does not have access to the folder.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
+
+  409:
+    description: |-
+      Returns an error when a policy for this folder and template is already in
+      place.
+
+      * `tuple_already_exists` - A cascade policy for this combination of
+      `folder_id`, `scope` and `templateKey` already exists.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ConflictError'
 
   default:
     description: |-

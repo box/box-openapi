@@ -7,10 +7,12 @@ tags:
   - Metadata cascade policies (Beta)
 
 x-box-reference-category: metadata_cascade_policies
+x-box-sanitized: true
 
 description: |-
-  Retrieve a collection of metadata cascade policies
-  within a given folder for the current enterprise.
+  Retrieves a list of all the metadata cascade policies
+  that are applied to a given folder. This can not be used on the root
+  folder with ID `0`.
 
 parameters:
   - name: folder_id
@@ -20,7 +22,8 @@ parameters:
       type: string
     example: '31232'
     description: |-
-      Specifies which folder to return policies for.
+      Specifies which folder to return policies for. This can not be used on the
+      root folder with ID `0`.
 
   - name: owner_enterprise_id
     in: query
@@ -43,6 +46,35 @@ responses:
       application/json:
         schema:
           $ref: '#/components/schemas/MetadataCascadePolicies'
+
+  400:
+    description: |-
+      Returns an error when any of the parameters are not in a valid format.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
+
+  403:
+    description: |-
+      Returns an error when the folder can not be accessed. This error often
+      happens when accessing the root folder with ID `0`.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
+
+  404:
+    description: |-
+      Returns an error when the folder can not be found or the user does not
+      have access to the folder.
+
+      * `not_found` - The folder could not be found or the user does not have
+        access to the folder.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
 
   default:
     description: |-
