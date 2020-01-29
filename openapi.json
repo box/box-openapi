@@ -6364,7 +6364,8 @@
           "Metadata cascade policies (Beta)"
         ],
         "x-box-reference-category": "metadata_cascade_policies",
-        "description": "Retrieve a collection of metadata cascade policies\nwithin a given folder for the current enterprise.",
+        "x-box-sanitized": true,
+        "description": "Retrieves a list of all the metadata cascade policies\nthat are applied to a given folder. This can not be used on the root\nfolder with ID `0`.",
         "parameters": [
           {
             "name": "folder_id",
@@ -6374,7 +6375,7 @@
               "type": "string"
             },
             "example": "31232",
-            "description": "Specifies which folder to return policies for."
+            "description": "Specifies which folder to return policies for. This can not be used on the\nroot folder with ID `0`."
           },
           {
             "name": "owner_enterprise_id",
@@ -6419,6 +6420,36 @@
               }
             }
           },
+          "400": {
+            "description": "Returns an error when any of the parameters are not in a valid format.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Returns an error when the folder can not be accessed. This error often\nhappens when accessing the root folder with ID `0`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Returns an error when the folder can not be found or the user does not\nhave access to the folder.\n\n* `not_found` - The folder could not be found or the user does not have\n  access to the folder.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
           "default": {
             "description": "An unexpected client error.",
             "content": {
@@ -6438,7 +6469,8 @@
           "Metadata cascade policies (Beta)"
         ],
         "x-box-reference-category": "metadata_cascade_policies",
-        "description": "Creates a new metadata cascade policy that applies a given\nmetadata template to a given folder and automatically\ncascades it down to its children.\n\nIn order for the policy to work, a metadata instance must first\nbe applied to the folder.",
+        "x-box-sanitized": true,
+        "description": "Creates a new metadata cascade policy that applies a given\nmetadata template to a given folder and automatically\ncascades it down to any files within that folder.\n\nIn order for the policy to be applied a metadata instance must first\nbe applied to the folder the policy is to be applied to.",
         "requestBody": {
           "content": {
             "application/json": {
@@ -6451,12 +6483,12 @@
                 "properties": {
                   "folder_id": {
                     "type": "string",
-                    "description": "The ID of the folder to assign the template to.",
-                    "example": "12321"
+                    "description": "The ID of the folder to apply the policy to. This folder will\nneed to already have an instance of the targeted metadata\ntemplate applied to it.",
+                    "example": "1234567"
                   },
                   "scope": {
-                    "description": "The scope of the metadata template",
-                    "example": "global",
+                    "description": "The scope of the targeted metadata template. This template will\nneed to already have an instance applied to the targeted folder.",
+                    "example": "enterprise",
                     "type": "string",
                     "enum": [
                       "global",
@@ -6466,7 +6498,7 @@
                   "templateKey": {
                     "type": "string",
                     "example": "productInfo",
-                    "description": "The identifier of the metadata template."
+                    "description": "The key of the targeted metadata template. This template will\nneed to already have an instance applied to the targeted folder."
                   }
                 }
               }
@@ -6480,6 +6512,46 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/MetadataCascadePolicy"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Returns an error when any of the parameters are not in a valid format.\n\n* `bad_request` - Either the `scope`, `templateKey`, or `folder_id` are\nnot in a valid format.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Returns an error when trying to apply a policy to a restricted folder, for\nexample the root folder with ID `0`.\n\n* `forbidden` - Although the folder ID was valid and the user has access\nto the folder, the policy could not be applied to this folder.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Returns an error when the template or folder can not be found, or when the\nuser does not have access to the folder or template.\n\n* `instance_tuple_not_found` - The template could not be found or the user\ndoes not have access to the template.\n* `not_found` - The folder could not be found or the user\ndoes not have access to the folder.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Returns an error when a policy for this folder and template is already in\nplace.\n\n* `tuple_already_exists` - A cascade policy for this combination of\n`folder_id`, `scope` and `templateKey` already exists.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConflictError"
                 }
               }
             }
@@ -6505,12 +6577,13 @@
           "Metadata cascade policies (Beta)"
         ],
         "x-box-reference-category": "metadata_cascade_policies",
-        "description": "Retrieve a metadata cascade policy.",
+        "x-box-sanitized": true,
+        "description": "Retrieve a specific metadata cascade policy assigned to a folder.",
         "parameters": [
           {
             "name": "metadata_cascade_policy_id",
             "description": "The ID of the metadata cascade policy.",
-            "example": "324324",
+            "example": "6fd4ff89-8fc1-42cf-8b29-1890dedd26d7",
             "in": "path",
             "required": true,
             "schema": {
@@ -6520,11 +6593,21 @@
         ],
         "responses": {
           "200": {
-            "description": "Returns a list of metadata cascade policies",
+            "description": "Returns a metadata cascade policy",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/MetadataCascadePolicy"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Returns an error when the policy can not be found or the user does not\nhave access to the folder.\n\n* `instance_not_found` - The policy could not be found\n* `not_found` - The folder could not be found or the user does not have\n  access to the folder.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
                 }
               }
             }
@@ -6548,12 +6631,13 @@
           "Metadata cascade policies (Beta)"
         ],
         "x-box-reference-category": "metadata_cascade_policies",
+        "x-box-sanitized": true,
         "description": "Deletes a metadata cascade policy.",
         "parameters": [
           {
             "name": "metadata_cascade_policy_id",
             "description": "The ID of the metadata cascade policy.",
-            "example": "324324",
+            "example": "6fd4ff89-8fc1-42cf-8b29-1890dedd26d7",
             "in": "path",
             "required": true,
             "schema": {
@@ -6564,6 +6648,16 @@
         "responses": {
           "204": {
             "description": "Returns an empty response when the policy\nis successfully deleted."
+          },
+          "404": {
+            "description": "Returns an error when the policy can not be found or the user does not\nhave access to the folder.\n\n* `instance_not_found` - The policy could not be found\n* `not_found` - The folder could not be found or the user does not have\n  access to the folder.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
           },
           "default": {
             "description": "An unexpected client error.",
@@ -6586,7 +6680,8 @@
           "Metadata cascade policies (Beta)"
         ],
         "x-box-reference-category": "metadata_cascade_policies",
-        "description": "If a policy already exists on a folder, this will apply that policy\nto all existing files and sub-folders within the target folder.",
+        "x-box-sanitized": true,
+        "description": "Force the metadata on a folder with a metadata cascade policy to be applied to\nall of its children. This can be used after creating a new cascade policy to\nenforce the metadata to be cascaded down to all existing files within that\nfolder.",
         "parameters": [
           {
             "name": "metadata_cascade_policy_id",
@@ -6595,8 +6690,8 @@
             "schema": {
               "type": "string"
             },
-            "description": "The ID of the cascade policy.",
-            "example": "21312"
+            "description": "The ID of the cascade policy to force-apply.",
+            "example": "6fd4ff89-8fc1-42cf-8b29-1890dedd26d7"
           }
         ],
         "requestBody": {
@@ -6613,8 +6708,8 @@
                       "none",
                       "overwrite"
                     ],
-                    "description": "The desired behavior for conflict-resolution if a template already\nexists on a given file or folder.\n\n* `none` will preserve the existing value on the file\n* `overwrite` will force-apply the templates values over\n  any existing values.",
-                    "example": "overwrite"
+                    "description": "Describes the desired behavior when dealing with the conflict\nwhere a metadata template already has an instance applied\nto a child.\n\n* `none` will preserve the existing value on the file\n* `overwrite` will force-apply the templates values over\n  any existing values.",
+                    "example": "none"
                   }
                 }
               }
@@ -6623,11 +6718,14 @@
         },
         "responses": {
           "202": {
-            "description": "Returns the metadata cascade policy when the policy has been\napplied.\n\nThe metadata cascade operation will be kicked off asynchronously.\nThe API call will return right away but before the cascade operation\nis complete. There is currently no way to check for when this\noperation has finished.",
+            "description": "Returns an empty response when the API call was successful. The metadata\ncascade operation will be performed asynchronously.\n\nThe API call will return directly, before the cascade operation\nis complete. There is currently no API to check for the status of this\noperation."
+          },
+          "404": {
+            "description": "Returns an error when the policy can not be found or the user does not\nhave access to the folder.\n\n* `instance_not_found` - The policy could not be found\n* `not_found` - The folder could not be found or the user does not have\n  access to the folder.",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/MetadataCascadePolicy"
+                  "$ref": "#/components/schemas/ClientError"
                 }
               }
             }
@@ -20122,16 +20220,24 @@
         "title": "Metadata cascade policy",
         "x-box-resource-id": "metadata_cascade_policy",
         "x-box-reference-category": "metadata_cascade_policies",
-        "description": "A cascade policy that applies to metadata policy template\nto a folder",
+        "description": "A metadata cascade policy automatically applies a metadata template instance\nto all the files and folders within the targeted folder.",
         "properties": {
           "id": {
             "type": "string",
             "example": "6fd4ff89-8fc1-42cf-8b29-1890dedd26d7",
             "description": "The ID of the metadata cascade policy object"
           },
+          "type": {
+            "type": "string",
+            "description": "`metadata_cascade_policy`",
+            "example": "metadata_cascade_policy",
+            "enum": [
+              "metadata_cascade_policy"
+            ]
+          },
           "owner_enterprise": {
             "type": "object",
-            "description": "The enterprise that owns the policy.",
+            "description": "The enterprise that owns this policy.",
             "properties": {
               "type": {
                 "type": "string",
@@ -20150,7 +20256,7 @@
           },
           "parent": {
             "type": "object",
-            "description": "Represent the folder the policy is applied to",
+            "description": "Represent the folder the policy is applied to.",
             "properties": {
               "type": {
                 "type": "string",
@@ -20162,20 +20268,24 @@
               },
               "id": {
                 "type": "string",
-                "example": "690678",
-                "description": "The ID of the folder the policy is applied to"
+                "example": "1234567",
+                "description": "The ID of the folder the policy is applied to."
               }
             }
           },
           "scope": {
             "type": "string",
             "example": "global",
-            "description": "The scope of the target instance that will be cascaded down. The `scope`\nand `templateKey` together identify the metadata on the folder that is\nto be cascaded down. Only `global` and `enterprise` scopes are\nsupported."
+            "description": "The scope of the of the template that is cascaded down to the folder's\nchildren.",
+            "enum": [
+              "global",
+              "enterprise_*"
+            ]
           },
           "templateKey": {
             "type": "string",
-            "example": "demo",
-            "description": "The template key of the target metadata template to cascade down.\nThe `scope` & `templateKey` together identify the metadata on the f\nolder that is to be cascaded down."
+            "example": "productInfo",
+            "description": "The key of the of the template that is cascaded down to the folder's\nchildren."
           }
         }
       },
