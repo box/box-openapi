@@ -16,16 +16,20 @@ The `master` branch of this repository only contains the raw source for the spec
 [![Swagger (en)](https://img.shields.io/static/v1.svg?label=Swagger%202&message=Backported&color=grey&labelColor=0361D4&style=for-the-badge)](https://github.com/box/box-openapi/tree/swagger-2.0)
 [![Swagger (en)](https://img.shields.io/static/v1.svg?label=Swagger%202&message=Legacy%20/%20Incomplete&color=grey&labelColor=lightgrey&style=for-the-badge)](https://github.com/box/box-openapi/tree/legacy-swagger-2.0/v2.0)
 
-## Usage & License
-
-This specification is provided under the [Apache License 2.0](LICENSE) license.
-
-As this project is a work in progress no rights can be derived from 
-this specification and it may change without warning.
-
-Currently the only recognized downstream dependency of this specification is 
-the new Box developer documentation available on [developer.box.com](https://developer.box.com).
-
-# Swagger 2.0
+## Swagger 2.0
 
 The older and incomplete Swagger 2.0 specification is stil available on the [Swagger 2.0](https://github.com/box/box-openapi/tree/swagger_2.0) branch.
+
+## Usage & License
+
+Copyright 2020 Box, Inc. All rights reserved.
+
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use
+this file except in compliance with the License. You may obtain a copy of the
+License at http://www.apache.org/licenses/LICENSE-2.0.
+
+Unless required by applicable law or agreed to in writing, software distributed
+under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+CONDITIONS OF ANY KIND, either express or implied. See the License for the
+specific language governing permissions and limitations under the License.
+
