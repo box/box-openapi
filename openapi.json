@@ -2357,11 +2357,12 @@
       "get": {
         "operationId": "get_files_id_tasks",
         "summary": "List tasks on file",
-        "description": "Retrieves a list of all the tasks for a file. This\nendpoint does not support paging.",
+        "description": "Retrieves a list of all the tasks for a file. This\nendpoint does not support pagination.",
         "tags": [
           "Tasks"
         ],
         "x-box-reference-category": "tasks",
+        "x-box-sanitized": true,
         "parameters": [
           {
             "name": "file_id",
@@ -2376,7 +2377,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Returns a collection of task objects. If there are no\ntasks on this file an empty collection will be returned.",
+            "description": "Returns a list of tasks on a file.\n\nIf there are no tasks on this file an empty collection is returned\ninstead.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2386,7 +2387,27 @@
             }
           },
           "404": {
-            "description": "Returns an error if the file for the given ID does not exist or\nis inaccessible to your account.",
+            "description": "Returns an error when the file could not be found or the user does not\nhave access to the file.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Returns an error when the `file_id` was not provided.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Returns an error when an attempt was made to retrieve tasks for the file\nwith ID `0`.",
             "content": {
               "application/json": {
                 "schema": {
@@ -7757,14 +7778,14 @@
         ],
         "summary": "Create task",
         "x-box-reference-category": "tasks",
-        "description": "Creates a single task on a file.",
+        "x-box-santized": true,
+        "description": "Creates a single task on a file. This task is not assigned to any user and\nwill need to be assigned separately.",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
                 "required": [
-                  "item",
-                  "action"
+                  "item"
                 ],
                 "properties": {
                   "item": {
@@ -7782,7 +7803,7 @@
                       },
                       "type": {
                         "type": "string",
-                        "description": "The type of the item to attach this task to.",
+                        "description": "`file`",
                         "example": "file",
                         "enum": [
                           "file"
@@ -7792,27 +7813,32 @@
                   },
                   "action": {
                     "type": "string",
-                    "description": "The action the task assignee will be prompted to complete.\n\nCurrently only `review` is supported. This will provide the\nassigned user the ability to approve or dismiss the\nassociated request.",
+                    "description": "The action the task assignee will be prompted to do. Must be\n\n* `review` defines an approval task that can be approved or\nrejected\n* `complete` defines a general task which can be completed",
                     "example": "review",
+                    "default": "review",
                     "enum": [
-                      "review"
+                      "review",
+                      "complete"
                     ]
                   },
                   "message": {
                     "type": "string",
-                    "description": "An optional message to include with the task",
+                    "default": "",
+                    "description": "An optional message to include with the task.",
                     "example": "Please review"
                   },
                   "due_at": {
                     "type": "string",
                     "format": "date-time",
-                    "description": "When the task is due",
+                    "default": null,
+                    "description": "Defines when the task is due. Defaults to `null` if not\nprovided.",
                     "example": "2012-12-12T10:53:43-08:00"
                   },
                   "completion_rule": {
                     "type": "string",
-                    "description": "When a task is created with completion rule\n`all_assignees` (default), the task will only\nbe considered completed when all assignees have\ncompleted the task. When a task is created with\ncompletion rule `any_assignee`, the task will be\nconsidered completed when one assignee has\ncompleted the task.",
+                    "description": "Defines which assignees need to complete this task before the task\nis considered completed.\n\n* `all_assignees` (default) requires all assignees to review or\napprove the the task in order for it to be considered completed.\n* `any_assignee` accepts any one assignee to review or\napprove the the task in order for it to be considered completed.",
                     "example": "all_assignees",
+                    "default": "all_assignees",
                     "enum": [
                       "all_assignees",
                       "any_assignee"
@@ -7825,11 +7851,41 @@
         },
         "responses": {
           "201": {
-            "description": "Returns a new task object",
+            "description": "Returns the newly created task.",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Task"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Returned if the request parameters or body is not valid.\n\n* `bad_request` when the body does not contain a valid request. This may\nbe because the `action` or `completion_rule` are not one of the allowed\nvalues.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Returns an error when the user does not have the permission to create a\ntask on the file.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Returns an error when the file could not be found or the user does not\nhave access to the file.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
                 }
               }
             }
@@ -7855,7 +7911,8 @@
           "Tasks"
         ],
         "x-box-reference-category": "tasks",
-        "description": "Fetches a specific task.",
+        "x-box-sanitized": true,
+        "description": "Retrieves information about a specific task.",
         "parameters": [
           {
             "name": "task_id",
@@ -7880,7 +7937,7 @@
             }
           },
           "404": {
-            "description": "Returns an error if the task for the given ID does not exist or\nis inaccessible to your account.",
+            "description": "Returns an error when the task could not be found or the user does not\nhave access to the file the task is assigned to.",
             "content": {
               "application/json": {
                 "schema": {
@@ -7908,7 +7965,8 @@
         ],
         "summary": "Update task",
         "x-box-reference-category": "tasks",
-        "description": "Updates a specific task.",
+        "x-box-sanitized": true,
+        "description": "Updates a task. This can be used to update a task's configuration, or to\nupdate its completion state.",
         "parameters": [
           {
             "name": "task_id",
@@ -7925,32 +7983,30 @@
           "content": {
             "application/json": {
               "schema": {
-                "required": [
-                  "action"
-                ],
                 "properties": {
                   "action": {
                     "type": "string",
-                    "description": "The action the task assignee will be prompted to complete.\n\nCurrently only `review` is supported. This will provide the\nassigned user the ability to approve or dismiss the\nassociated request.",
+                    "description": "The action the task assignee will be prompted to do. Must be\n\n* `review` defines an approval task that can be approved or\nrejected\n* `complete` defines a general task which can be completed",
                     "example": "review",
                     "enum": [
-                      "review"
+                      "review",
+                      "complete"
                     ]
                   },
                   "message": {
                     "type": "string",
-                    "description": "The message included with the task",
+                    "description": "The message included with the task.",
                     "example": "Please review"
                   },
                   "due_at": {
                     "type": "string",
                     "format": "date-time",
-                    "description": "When the task is due",
+                    "description": "When the task is due at.",
                     "example": "2012-12-12T10:53:43-08:00"
                   },
                   "completion_rule": {
                     "type": "string",
-                    "description": "When a task is created with completion rule\n`all_assignees` (default), the task will only\nbe considered completed when all assignees have\ncompleted the task. When a task is created with\ncompletion rule `any_assignee`, the task will be\nconsidered completed when one assignee has\ncompleted the task.",
+                    "description": "Defines which assignees need to complete this task before the task\nis considered completed.\n\n* `all_assignees` (default) requires all assignees to review or\napprove the the task in order for it to be considered completed.\n* `any_assignee` accepts any one assignee to review or\napprove the the task in order for it to be considered completed.",
                     "example": "all_assignees",
                     "enum": [
                       "all_assignees",
@@ -7973,8 +8029,28 @@
               }
             }
           },
+          "400": {
+            "description": "Returned if the request parameters or body is not valid.\n\n* `bad_request` when the body does not contain a valid request. This may\nbe because the `action` or `completion_rule` are not one of the allowed\nvalues.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Returns an error when the user does not have the permission to update a\ntask on the file.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
           "404": {
-            "description": "Returns an error if the task for the given ID does not exist or\nis inaccessible to your account.",
+            "description": "Returns an error when the file could not be found or the user does not\nhave access to the file.",
             "content": {
               "application/json": {
                 "schema": {
@@ -8002,7 +8078,8 @@
         ],
         "summary": "Remove task",
         "x-box-reference-category": "tasks",
-        "description": "Deletes a specific task.",
+        "x-box-sanitized": true,
+        "description": "Removes a task from a file.",
         "parameters": [
           {
             "name": "task_id",
@@ -8017,10 +8094,10 @@
         ],
         "responses": {
           "204": {
-            "description": "An empty response will be returned when the task was successfully deleted."
+            "description": "Returns an empty response when the task was successfully deleted."
           },
           "404": {
-            "description": "Returns an error if the task for the given ID does not exist or\nis inaccessible to your account.",
+            "description": "Returns an error when the task could not be found or the user does not\nhave access to the file the task is assigned to.",
             "content": {
               "application/json": {
                 "schema": {
@@ -8050,7 +8127,8 @@
           "Tasks"
         ],
         "x-box-reference-category": "task_assignments",
-        "description": "Retrieves all of the assignments for a given task.",
+        "x-box-sanitized": true,
+        "description": "Lists all of the assignments for a given task.",
         "parameters": [
           {
             "name": "task_id",
@@ -8065,11 +8143,21 @@
         ],
         "responses": {
           "200": {
-            "description": "Returns a collection of task assignment specifying what task on\na file has been assigned to which users and by who.",
+            "description": "Returns a collection of task assignment defining what task on\na file has been assigned to which users and by who.",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/TaskAssignments"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Returns an error when the task could not be found or the user does not\nhave access to the file the task is assigned to.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
                 }
               }
             }
@@ -8105,7 +8193,8 @@
           "Tasks"
         ],
         "x-box-reference-category": "task_assignments",
-        "description": "Assigns a task to a user.\n\nMultiple assignments to different users\nare allowed per task.",
+        "x-box-sanitized": true,
+        "description": "Assigns a task to a user.\n\nA task can be assigned to more than one user by creating multiple\nassignments.",
         "requestBody": {
           "content": {
             "application/json": {
@@ -8170,6 +8259,36 @@
               }
             }
           },
+          "403": {
+            "description": "Returns an error if a change to a completed task is attempted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Returns an error when the task could not be found or the user does not\nhave access to the file the task is assigned to.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Returns an error if any of the IDs for this request were not valid, or if\nthe targeted user does not have access to the file.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
           "default": {
             "description": "An unexpected client error.",
             "content": {
@@ -8191,7 +8310,8 @@
           "Tasks"
         ],
         "x-box-reference-category": "task_assignments",
-        "description": "Fetches a specific task assignment.",
+        "x-box-sanitized": true,
+        "description": "Retrieves information about a task assignment.",
         "parameters": [
           {
             "name": "task_assignment_id",
@@ -8206,7 +8326,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Returns the requested task assignment, specifying who\nthe task has been assigned to and by whom.",
+            "description": "Returns a task assignment, specifying who the task has been assigned to\nand by whom.",
             "content": {
               "application/json": {
                 "schema": {
@@ -8216,7 +8336,7 @@
             }
           },
           "404": {
-            "description": "Returns an error if the task assignment for the given ID does not exist or\nis inaccessible to your account.",
+            "description": "Returns an error when the task assignment could not be found or the user\ndoes not have access to the file the task is assigned to.",
             "content": {
               "application/json": {
                 "schema": {
@@ -8244,7 +8364,8 @@
           "Tasks"
         ],
         "x-box-reference-category": "task_assignments",
-        "description": "Updates a task assignment. This endpoint can be\nused to update the state of a task.",
+        "x-box-sanitized": true,
+        "description": "Updates a task assignment. This endpoint can be\nused to update the state of a task assigned to a user.",
         "parameters": [
           {
             "name": "task_assignment_id",
@@ -8264,12 +8385,12 @@
                 "properties": {
                   "message": {
                     "type": "string",
-                    "description": "A message from the assignee about this task",
-                    "example": "Please review"
+                    "description": "An optional message by the assignee that can be added to the task.",
+                    "example": "Looks good to me"
                   },
                   "resolution_state": {
                     "type": "string",
-                    "description": "The state of the task. This can be used to\nmark the task as completed.",
+                    "description": "The state of the task assigned to the user.\n\n* For a task with an `action` value of `complete` this can be\n`incomplete` or `completed`.\n* For a task with an `action` of `review` this can be\n`incomplete`, `approved`, or `rejected`.",
                     "example": "completed",
                     "enum": [
                       "completed",
@@ -8295,7 +8416,17 @@
             }
           },
           "400": {
-            "description": "Returns an error if the task assignment for the given ID does not exist or\nis inaccessible to your account.",
+            "description": "Returns an error if a resolution state is incompatible with the action\ntype of the task.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Returns an error when the task assignment could not be found or the user\ndoes not have access to the file the task is assigned to.",
             "content": {
               "application/json": {
                 "schema": {
@@ -8323,6 +8454,7 @@
           "Tasks"
         ],
         "x-box-reference-category": "task_assignments",
+        "x-box-sanitized": true,
         "description": "Deletes a specific task assignment.",
         "parameters": [
           {
@@ -8338,7 +8470,7 @@
         ],
         "responses": {
           "204": {
-            "description": "An empty response will be returned when the task\nassignment was successfully deleted."
+            "description": "Returns an empty response when the task\nassignment was successfully deleted."
           },
           "404": {
             "description": "Returns an error if the task assignment for the given ID does not exist\nor is inaccessible to your account.",
@@ -21130,7 +21262,7 @@
         "title": "Task",
         "x-box-resource-id": "task",
         "x-box-reference-category": "tasks",
-        "description": "Tasks allow for file-centric workflows in Box. Users can\ncreate tasks on files and assign them to collaborators on\nBox.",
+        "description": "A task allows for file-centric workflows within Box. Users can\ncreate tasks on files and assign them to other users for them to complete the\ntasks.",
         "allOf": [
           {
             "title": "Reference",
@@ -21173,9 +21305,10 @@
               "action": {
                 "type": "string",
                 "example": "review",
-                "description": "The action the task assignee will be prompted to\ndo.",
+                "description": "The type of task the task assignee will be prompted to\nperform.",
                 "enum": [
-                  "review"
+                  "review",
+                  "complete"
                 ]
               },
               "message": {
@@ -21216,7 +21349,7 @@
               },
               "completion_rule": {
                 "type": "string",
-                "description": "When a task is created with completion rule\n`all_assignees` (default), the task will only\nbe considered completed when all assignees have\ncompleted the task. When a task is created with\ncompletion rule `any_assignee`, the task will be\nconsidered completed when one assignee has\ncompleted the task.",
+                "description": "Defines which assignees need to complete this task before the task\nis considered completed.\n\n* `all_assignees` requires all assignees to review or\napprove the the task in order for it to be considered completed.\n* `any_assignee` accepts any one assignee to review or\napprove the the task in order for it to be considered completed.",
                 "example": "all_assignees",
                 "enum": [
                   "all_assignees",
@@ -21251,7 +21384,7 @@
         "title": "Task assignment",
         "x-box-resource-id": "task_assignment",
         "x-box-reference-category": "task_assignments",
-        "description": "An assignment of a task to a file and user",
+        "description": "A task assignment defines which task is assigned to which user to complete.",
         "allOf": [
           {
             "title": "Reference",
@@ -21281,7 +21414,7 @@
                     "$ref": "#/components/schemas/File--Mini"
                   },
                   {
-                    "description": "The file the task has been assigned to"
+                    "description": "The file that the task has been assigned to."
                   }
                 ]
               },
@@ -21291,36 +21424,36 @@
                     "$ref": "#/components/schemas/User--Mini"
                   },
                   {
-                    "description": "The user the task has been assigned to"
+                    "description": "The user that the task has been assigned to."
                   }
                 ]
               },
               "message": {
                 "type": "string",
                 "example": "Please review",
-                "description": "A message that will be included with this task\nassignment"
+                "description": "A message that will is included with the task\nassignment. This is visible to the assigned user in the web and mobile\nUI."
               },
               "completed_at": {
                 "type": "string",
                 "format": "date-time",
-                "description": "The date at which this task assignment was\ncompleted",
+                "description": "The date at which this task assignment was\ncompleted. This will be `null` if the task is not completed yet.",
                 "example": "2012-12-12T10:53:43-08:00"
               },
               "assigned_at": {
                 "type": "string",
                 "format": "date-time",
-                "description": "The date at which this task assignment was\nassigned",
+                "description": "The date at which this task was assigned to the user.",
                 "example": "2012-12-12T10:53:43-08:00"
               },
               "reminded_at": {
                 "type": "string",
                 "format": "date-time",
-                "description": "The date at which this task assignment was\nreminded",
+                "description": "The date at which the assigned user was reminded of this task\nassignment.",
                 "example": "2012-12-12T10:53:43-08:00"
               },
               "resolution_state": {
                 "type": "string",
-                "description": "State of this assignment",
+                "description": "The current state of the assignment. The available states depend on\nthe `action` value of the task object.",
                 "example": "incomplete",
                 "enum": [
                   "completed",
@@ -21335,7 +21468,7 @@
                     "$ref": "#/components/schemas/User--Mini"
                   },
                   {
-                    "description": "The user who assigned this task"
+                    "description": "The user who assigned this task."
                   }
                 ]
               }
@@ -21349,66 +21482,20 @@
         "x-box-reference-category": "task_assignments",
         "type": "object",
         "description": "A list of task assignments",
-        "allOf": [
-          {
-            "type": "object",
-            "description": "The part of an API response that describes pagination",
-            "properties": {
-              "total_count": {
-                "description": "One greater than the offset of the last entry in the entire collection.\nThe total number of entries in the collection may be less than\n`total_count`.\n\nThis field is only returned for calls that use offset-based pagination.\nFor marker-based paginated APIs, this field will be omitted.",
-                "example": 5000,
-                "type": "integer",
-                "format": "int64"
-              },
-              "limit": {
-                "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
-                "example": 1000,
-                "type": "integer",
-                "format": "int64"
-              },
-              "offset": {
-                "description": "The 0-based offset of the first entry in this set. This will be the same\nas the `offset` query parameter.\n\nThis field is only returned for calls that use offset-based pagination.\nFor marker-based paginated APIs, this field will be omitted.",
-                "example": 2000,
-                "type": "integer",
-                "format": "int64"
-              },
-              "order": {
-                "description": "The order by which items are returned.\n\nThis field is only returned for calls that use offset-based pagination.\nFor marker-based paginated APIs, this field will be omitted.",
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "description": "The order in which a pagination is ordered",
-                  "properties": {
-                    "by": {
-                      "description": "The field to order by",
-                      "example": "type",
-                      "type": "string"
-                    },
-                    "direction": {
-                      "type": "string",
-                      "description": "The direction to order by, either ascending or descending",
-                      "example": "ASC",
-                      "enum": [
-                        "ASC",
-                        "DESC"
-                      ]
-                    }
-                  }
-                }
-              }
-            }
+        "properties": {
+          "total_count": {
+            "description": "The total number of items in this collection.",
+            "example": 100,
+            "type": "integer",
+            "format": "int64"
           },
-          {
-            "properties": {
-              "entries": {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/TaskAssignment"
-                }
-              }
+          "entries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TaskAssignment"
             }
           }
-        ]
+        }
       },
       "TermsOfService": {
         "title": "Terms of service",
