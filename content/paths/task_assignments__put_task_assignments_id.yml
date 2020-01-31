@@ -29,8 +29,10 @@ requestBody:
           resolution_state:
             type: string
             description: |-
-              The state of the task. This can be used to
-              mark the task as completed.
+              The state of the task. This can be completed or incomplete for
+              general tasks with the `complete` action or it can be approved,
+              rejected, or incomplete for approval tasks with the `review`
+              action.
             example: completed
             enum:
               - completed
@@ -46,7 +48,17 @@ responses:
       application/json:
         schema:
           $ref: '#/components/schemas/TaskAssignment'
+
   400:
+    description: |-
+      Returns an error if a resolution state is incompatible with the action
+      type of the task.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
+
+  404:
     description: |-
       Returns an error if the task assignment for the given ID does not exist or
       is inaccessible to your account.
