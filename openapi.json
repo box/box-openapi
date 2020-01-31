@@ -7694,10 +7694,11 @@
                   },
                   "action": {
                     "type": "string",
-                    "description": "The action the task assignee will be prompted to complete.\n\nCurrently only `review` is supported. This will provide the\nassigned user the ability to approve or dismiss the\nassociated request.",
+                    "description": "The action the task assignee will be prompted to do. Must be\n`review` for an approval task, or `complete` for a general\ntask. This will provide the assignee the ability to `approve` or\n`reject` the associated file or request for approval tasks, and\nthe ability to `complete` general tasks.",
                     "example": "review",
                     "enum": [
-                      "review"
+                      "review",
+                      "complete"
                     ]
                   },
                   "message": {
@@ -7732,6 +7733,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Task"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Returns an error if the date used for `due_at` is in the past",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
                 }
               }
             }
@@ -7833,10 +7844,11 @@
                 "properties": {
                   "action": {
                     "type": "string",
-                    "description": "The action the task assignee will be prompted to complete.\n\nCurrently only `review` is supported. This will provide the\nassigned user the ability to approve or dismiss the\nassociated request.",
+                    "description": "The action the task assignee will be prompted to complete.\n\nThis can be `review` or `complete`. By setting the action as\n`review`, the assigned user will be able to resolve the task by\napproving or dismiss the associated request. A `complete` task\ncan be resolved by completing it.",
                     "example": "review",
                     "enum": [
-                      "review"
+                      "review",
+                      "complete"
                     ]
                   },
                   "message": {
@@ -8072,6 +8084,16 @@
               }
             }
           },
+          "403": {
+            "description": "Returns an error if a change to a completed task is attempted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
           "default": {
             "description": "An unexpected client error.",
             "content": {
@@ -8171,7 +8193,7 @@
                   },
                   "resolution_state": {
                     "type": "string",
-                    "description": "The state of the task. This can be used to\nmark the task as completed.",
+                    "description": "The state of the task. This can be completed or incomplete for\ngeneral tasks with the `complete` action or it can be approved,\nrejected, or incomplete for approval tasks with the `review`\naction.",
                     "example": "completed",
                     "enum": [
                       "completed",
@@ -8197,6 +8219,16 @@
             }
           },
           "400": {
+            "description": "Returns an error if a resolution state is incompatible with the action\ntype of the task.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "404": {
             "description": "Returns an error if the task assignment for the given ID does not exist or\nis inaccessible to your account.",
             "content": {
               "application/json": {
