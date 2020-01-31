@@ -7,12 +7,13 @@ tags:
   - Tasks
 
 x-box-reference-category: task_assignments
+x-box-sanitized: true
 
 description: |-
   Assigns a task to a user.
 
-  Multiple assignments to different users
-  are allowed per task.
+  A task can be assigned to more than one user by creating multiple
+  assignments.
 
 requestBody:
   content:
@@ -40,7 +41,7 @@ requestBody:
                 type: string
                 description:
                   The type of the item to assign.
-                example: task
+                example: "task"
                 enum:
                   - task
 
@@ -81,6 +82,24 @@ responses:
   403:
     description: |-
       Returns an error if a change to a completed task is attempted
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
+
+  404:
+    description: |-
+      Returns an error when the task could not be found or the user does not
+      have access to the file the task is assigned to.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
+
+  500:
+    description: |-
+      Returns an error if any of the IDs for this request were not valid, or if
+      the targeted user does not have access to the file.
     content:
       application/json:
         schema:

@@ -7,9 +7,11 @@ tags:
 summary: Update task
 
 x-box-reference-category: tasks
+x-box-sanitized: true
 
 description: |-
-  Updates a specific task.
+  Updates a task. This can be used to update a task's configuration, or to
+  update its completion state.
 
 parameters:
   - $ref: '../attributes/task_id.yml'
@@ -18,18 +20,15 @@ requestBody:
   content:
     application/json:
       schema:
-        required:
-          - action
         properties:
           action:
             type: string
             description: |-
-              The action the task assignee will be prompted to complete.
+              The action the task assignee will be prompted to do. Must be
 
-              This can be `review` or `complete`. By setting the action as
-              `review`, the assigned user will be able to resolve the task by
-              approving or dismiss the associated request. A `complete` task
-              can be resolved by completing it.
+              * `review` defines an approval task that can be approved or
+              rejected
+              * `complete` defines a general task which can be completed
             example: review
             enum:
               - review
@@ -38,25 +37,25 @@ requestBody:
           message:
             type: string
             description: |-
-              The message included with the task
+              The message included with the task.
             example: "Please review"
 
           due_at:
             type: string
             format: date-time
-            description: When the task is due
+            description: When the task is due at.
             example: '2012-12-12T10:53:43-08:00'
 
           completion_rule:
             type: string
             description: |-
-                      When a task is created with completion rule
-                      `all_assignees` (default), the task will only
-                      be considered completed when all assignees have
-                      completed the task. When a task is created with
-                      completion rule `any_assignee`, the task will be
-                      considered completed when one assignee has
-                      completed the task.
+              Defines which assignees need to complete this task before the task
+              is considered completed.
+
+              * `all_assignees` (default) requires all assignees to review or
+              approve the the task in order for it to be considered completed.
+              * `any_assignee` accepts any one assignee to review or
+              approve the the task in order for it to be considered completed.
             example: all_assignees
             enum:
               - all_assignees
@@ -71,10 +70,31 @@ responses:
         schema:
           $ref: '#/components/schemas/Task'
 
+  400:
+    description: |-
+      Returned if the request parameters or body is not valid.
+
+      * `bad_request` when the body does not contain a valid request. This may
+      be because the `action` or `completion_rule` are not one of the allowed
+      values.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
+
+  403:
+    description: |-
+      Returns an error when the user does not have the permission to update a
+      task on the file.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
+
   404:
     description: |-
-      Returns an error if the task for the given ID does not exist or
-      is inaccessible to your account.
+      Returns an error when the file could not be found or the user does not
+      have access to the file.
     content:
       application/json:
         schema:

@@ -5,12 +5,13 @@ summary: List tasks on file
 
 description: |-
   Retrieves a list of all the tasks for a file. This
-  endpoint does not support paging.
+  endpoint does not support pagination.
 
 tags:
   - Tasks
 
 x-box-reference-category: tasks
+x-box-sanitized: true
 
 parameters:
   - $ref: '../attributes/file_id.yml'
@@ -18,16 +19,36 @@ parameters:
 responses:
   200:
     description: |-
-      Returns a collection of task objects. If there are no
-      tasks on this file an empty collection will be returned.
+      Returns a list of tasks on a file.
+
+      If there are no tasks on this file an empty collection is returned
+      instead.
     content:
       application/json:
         schema:
           $ref: '#/components/schemas/Tasks'
+
   404:
     description: |-
-      Returns an error if the file for the given ID does not exist or
-      is inaccessible to your account.
+      Returns an error when the file could not be found or the user does not
+      have access to the file.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
+
+  405:
+    description: |-
+      Returns an error when the `file_id` was not provided.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
+
+  500:
+    description: |-
+      Returns an error when an attempt was made to retrieve tasks for the file
+      with ID `0`.
     content:
       application/json:
         schema:

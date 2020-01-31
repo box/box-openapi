@@ -7,10 +7,11 @@ tags:
   - Tasks
 
 x-box-reference-category: task_assignments
+x-box-sanitized: true
 
 description: |-
   Updates a task assignment. This endpoint can be
-  used to update the state of a task.
+  used to update the state of a task assigned to a user.
 
 parameters:
   - $ref: '../attributes/task_assignment_id.yml'
@@ -23,16 +24,18 @@ requestBody:
           message:
             type: string
             description: |-
-              A message from the assignee about this task
-            example: "Please review"
+              An optional message by the assignee that can be added to the task.
+            example: "Looks good to me"
 
           resolution_state:
             type: string
             description: |-
-              The state of the task. This can be completed or incomplete for
-              general tasks with the `complete` action or it can be approved,
-              rejected, or incomplete for approval tasks with the `review`
-              action.
+              The state of the task assigned to the user.
+
+              * For a task with an `action` value of `complete` this can be
+              `incomplete` or `completed`.
+              * For a task with an `action` of `review` this can be
+              `incomplete`, `approved`, or `rejected`.
             example: completed
             enum:
               - completed
@@ -60,8 +63,8 @@ responses:
 
   404:
     description: |-
-      Returns an error if the task assignment for the given ID does not exist or
-      is inaccessible to your account.
+      Returns an error when the task assignment could not be found or the user
+      does not have access to the file the task is assigned to.
     content:
       application/json:
         schema:
