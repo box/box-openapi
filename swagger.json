@@ -3210,6 +3210,46 @@
         }
       }
     },
+    "/metadata_templates": {
+      "get": {
+        "operationId": "get_metadata_templates",
+        "summary": "Find metadata template by instance ID",
+        "tags": [
+          "Metadata templates"
+        ],
+        "description": "Finds a metadata template by searching for the ID of an instance of the\ntemplate.",
+        "parameters": [
+          {
+            "name": "metadata_instance_id",
+            "description": "The ID of an instance of the metadata template to find.",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns a list containing the 1 metadata template that matches the\ninstance ID.",
+            "schema": {
+              "$ref": "#/definitions/MetadataTemplates"
+            }
+          },
+          "400": {
+            "description": "Returned when the request parameters are not valid.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          }
+        }
+      }
+    },
     "/metadata_templates/{scope}/{template_key}/schema": {
       "get": {
         "operationId": "get_metadata_templates_id_id_schema",
@@ -11367,6 +11407,43 @@
         }
       ]
     },
+    "MetadataTemplates": {
+      "title": "Metadata templates",
+      "description": "A list of metadata templates",
+      "allOf": [
+        {
+          "type": "object",
+          "description": "The part of an API response that describes marker\nbased pagination",
+          "properties": {
+            "limit": {
+              "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
+              "type": "integer",
+              "format": "int64"
+            },
+            "next_marker": {
+              "description": "The marker for the start of the next page of results.",
+              "type": "integer",
+              "format": "int64"
+            },
+            "prev_marker": {
+              "description": "The marker for the start of the previous page of results.",
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        },
+        {
+          "properties": {
+            "entries": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/MetadataTemplate"
+              }
+            }
+          }
+        }
+      ]
+    },
     "MetadataTemplate": {
       "title": "Metadata template",
       "description": "A template for metadata that can be applied to files and folders",
@@ -11517,43 +11594,6 @@
           "description": "Whether or not to copy the metadata for a file or folder when an it is\ncopied."
         }
       }
-    },
-    "MetadataTemplates": {
-      "title": "Metadata templates",
-      "description": "A list of metadata templates",
-      "allOf": [
-        {
-          "type": "object",
-          "description": "The part of an API response that describes marker\nbased pagination",
-          "properties": {
-            "limit": {
-              "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
-              "type": "integer",
-              "format": "int64"
-            },
-            "next_marker": {
-              "description": "The marker for the start of the next page of results.",
-              "type": "integer",
-              "format": "int64"
-            },
-            "prev_marker": {
-              "description": "The marker for the start of the previous page of results.",
-              "type": "integer",
-              "format": "int64"
-            }
-          }
-        },
-        {
-          "properties": {
-            "entries": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/MetadataTemplate"
-              }
-            }
-          }
-        }
-      ]
     },
     "MetadataCascadePolicies": {
       "title": "Metadata cascade policies",
