@@ -8987,6 +8987,126 @@
         }
       }
     },
+    "/legal_hold_policy_assignments/{legal_hold_policy_assignment_id}/files_on_hold": {
+      "get": {
+        "operationId": "get_legal_hold_policy_assignments_id_files_on_hold",
+        "summary": "List current file versions for legal hold policy assignment",
+        "tags": [
+          "Legal hold policies"
+        ],
+        "description": "Get a list of current file versions for a legal hold\nassignment.\n\nIn some cases you may want to get previous file versions instead. In these\ncases, use the `GET  /legal_hold_policy_assignments/:id/file_versions_on_hold`\nAPI instead to return any previous versions of a file for this legal hold\npolicy assignment.\n\nDue to ongoing re-architecture efforts this API might not return all file\nversions held for this policy ID. Instead, this API will only return the\nlatest file version held in the newly developed architecture. The `GET\n/file_version_legal_holds` API can be used to fetch current and past versions\nof files held within the legacy architecture.\n\nThe `GET /legal_hold_policy_assignments?policy_id={id}` API can be used to\nfind a list of policy assignments for a given policy ID.",
+        "parameters": [
+          {
+            "name": "legal_hold_policy_assignment_id",
+            "description": "The ID of the legal hold policy assignment",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "marker",
+            "description": "Defines the position marker at which to begin returning results. This is\nused when paginating using marker-based pagination.\n\nThis requires `usemarker` to be set to `true`.",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "limit",
+            "description": "The maximum number of items to return per page.",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int64",
+            "default": 100,
+            "maximum": 1000
+          },
+          {
+            "name": "fields",
+            "description": "A comma-separated list of attributes to include in the\nresponse. This can be used to request fields that are\nnot normally returned in a standard response.\n\nBe aware that specifying this parameter will have the\neffect that none of the standard fields are returned in\nthe response unless explicitly specified, instead only\nfields for the mini representation are returned, additional\nto the fields requested.",
+            "in": "query",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns the list of current file versions held under legal hold for a\nspecific legal hold policy assignment.",
+            "schema": {
+              "$ref": "#/definitions/FileVersionLegalHolds"
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          }
+        }
+      }
+    },
+    "/legal_hold_policy_assignments/{legal_hold_policy_assignment_id}/file_versions_on_hold": {
+      "get": {
+        "operationId": "get_legal_hold_policy_assignments_id_file_versions_on_hold",
+        "summary": "List previous file versions for legal hold policy assignment",
+        "tags": [
+          "Legal hold policies"
+        ],
+        "description": "Get a list of previous file versions for a legal hold\nassignment.\n\nIn some cases you may only need the latest file versions instead. In these\ncases, use the `GET  /legal_hold_policy_assignments/:id/files_on_hold` API\ninstead to return any current (latest) versions of a file for this legal hold\npolicy assignment.\n\nDue to ongoing re-architecture efforts this API might not return all files\nheld for this policy ID. Instead, this API will only return past file versions\nheld in the newly developed architecture. The `GET /file_version_legal_holds`\nAPI can be used to fetch current and past versions of files held within the\nlegacy architecture.\n\nThe `GET /legal_hold_policy_assignments?policy_id={id}` API can be used to\nfind a list of policy assignments for a given policy ID.",
+        "parameters": [
+          {
+            "name": "legal_hold_policy_assignment_id",
+            "description": "The ID of the legal hold policy assignment",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "marker",
+            "description": "Defines the position marker at which to begin returning results. This is\nused when paginating using marker-based pagination.\n\nThis requires `usemarker` to be set to `true`.",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "limit",
+            "description": "The maximum number of items to return per page.",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int64",
+            "default": 100,
+            "maximum": 1000
+          },
+          {
+            "name": "fields",
+            "description": "A comma-separated list of attributes to include in the\nresponse. This can be used to request fields that are\nnot normally returned in a standard response.\n\nBe aware that specifying this parameter will have the\neffect that none of the standard fields are returned in\nthe response unless explicitly specified, instead only\nfields for the mini representation are returned, additional\nto the fields requested.",
+            "in": "query",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns the list of previous file versions held under legal hold for a\nspecific legal hold policy assignment.",
+            "schema": {
+              "$ref": "#/definitions/FileVersionLegalHolds"
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          }
+        }
+      }
+    },
     "/file_version_retentions/{file_version_retention_id}": {
       "get": {
         "operationId": "get_file_version_retentions_id",
@@ -9149,7 +9269,7 @@
         "tags": [
           "Legal hold policies"
         ],
-        "description": "Get list of non-deleted legal holds for a single legal\nhold policy.",
+        "description": "Get a list of file versions on legal hold for a legal hold\nassignment.\n\nDue to ongoing re-architecture efforts this API might not return all file\nversions for this policy ID.\n\nInstead, this API will only return file versions held in the legacy\narchitecture. Two new endpoints will available to request any file versions\nheld in the new architecture.\n\nFor file versions held in the new architecture, the `GET\n/legal_hold_policy_assignments/:id/file_versions_on_hold` API can be used to\nreturn all past file versions available for this policy assignment, and the\n`GET /legal_hold_policy_assignments/:id/files_on_hold` API can be used to\nreturn any current (latest) versions of a file under legal hold.\n\nThe `GET /legal_hold_policy_assignments?policy_id={id}` API can be used to\nfind a list of policy assignments for a given policy ID.\n\nOnce the re-architecture is completed this API will be deprecated.",
         "parameters": [
           {
             "name": "policy_id",
@@ -13562,6 +13682,43 @@
         }
       ]
     },
+    "FileVersionLegalHolds": {
+      "title": "File version legal holds",
+      "description": "A list of file version legal holds.",
+      "allOf": [
+        {
+          "type": "object",
+          "description": "The part of an API response that describes marker\nbased pagination",
+          "properties": {
+            "limit": {
+              "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
+              "type": "integer",
+              "format": "int64"
+            },
+            "next_marker": {
+              "description": "The marker for the start of the next page of results.",
+              "type": "integer",
+              "format": "int64"
+            },
+            "prev_marker": {
+              "description": "The marker for the start of the previous page of results.",
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        },
+        {
+          "properties": {
+            "entries": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/FileVersionLegalHold"
+              }
+            }
+          }
+        }
+      ]
+    },
     "FileVersionRetention": {
       "title": "File version retention",
       "description": "A retention policy blocks permanent deletion of content\nfor a specified amount of time. Admins can apply policies to\nspecified folders, or an entire enterprise. A file version retention\nis a  record for a retained file version. To use this feature,\nyou must  have the manage retention policies scope enabled for your\nAPI key via  your application management console. For more information\nabout retention policies, please visit our help documentation",
@@ -13722,43 +13879,6 @@
               "type": "string",
               "format": "date-time",
               "description": "Time that this File-Version-Legal-Hold was\ndeleted."
-            }
-          }
-        }
-      ]
-    },
-    "FileVersionLegalHolds": {
-      "title": "File version legal holds",
-      "description": "A list of file version legal holds.",
-      "allOf": [
-        {
-          "type": "object",
-          "description": "The part of an API response that describes marker\nbased pagination",
-          "properties": {
-            "limit": {
-              "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
-              "type": "integer",
-              "format": "int64"
-            },
-            "next_marker": {
-              "description": "The marker for the start of the next page of results.",
-              "type": "integer",
-              "format": "int64"
-            },
-            "prev_marker": {
-              "description": "The marker for the start of the previous page of results.",
-              "type": "integer",
-              "format": "int64"
-            }
-          }
-        },
-        {
-          "properties": {
-            "entries": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/FileVersionLegalHold"
-              }
             }
           }
         }
