@@ -2357,11 +2357,12 @@
       "get": {
         "operationId": "get_files_id_tasks",
         "summary": "List tasks on file",
-        "description": "Retrieves a list of all the tasks for a file. This\nendpoint does not support paging.",
+        "description": "Retrieves a list of all the tasks for a file. This\nendpoint does not support pagination.",
         "tags": [
           "Tasks"
         ],
         "x-box-reference-category": "tasks",
+        "x-box-sanitized": true,
         "parameters": [
           {
             "name": "file_id",
@@ -2376,7 +2377,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Returns a collection of task objects. If there are no\ntasks on this file an empty collection will be returned.",
+            "description": "Returns a list of tasks on a file.\n\nIf there are no tasks on this file an empty collection is returned\ninstead.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2386,7 +2387,27 @@
             }
           },
           "404": {
-            "description": "Returns an error if the file for the given ID does not exist or\nis inaccessible to your account.",
+            "description": "Returns an error when the file could not be found or the user does not\nhave access to the file.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Returns an error when the `file_id` was not provided.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Returns an error when an attempt was made to retrieve tasks for the file\nwith ID `0`.",
             "content": {
               "application/json": {
                 "schema": {
@@ -5652,6 +5673,63 @@
         }
       }
     },
+    "/metadata_templates": {
+      "get": {
+        "operationId": "get_metadata_templates",
+        "summary": "Find metadata template by instance ID",
+        "tags": [
+          "Metadata templates"
+        ],
+        "x-box-reference-category": "metadata_templates",
+        "x-box-sanitized": true,
+        "description": "Finds a metadata template by searching for the ID of an instance of the\ntemplate.",
+        "parameters": [
+          {
+            "name": "metadata_instance_id",
+            "description": "The ID of an instance of the metadata template to find.",
+            "example": "01234500-12f1-1234-aa12-b1d234cb567e",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns a list containing the 1 metadata template that matches the\ninstance ID.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MetadataTemplates"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Returned when the request parameters are not valid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/metadata_templates/{scope}/{template_key}/schema": {
       "get": {
         "operationId": "get_metadata_templates_id_id_schema",
@@ -6364,7 +6442,8 @@
           "Metadata cascade policies (Beta)"
         ],
         "x-box-reference-category": "metadata_cascade_policies",
-        "description": "Retrieve a collection of metadata cascade policies\nwithin a given folder for the current enterprise.",
+        "x-box-sanitized": true,
+        "description": "Retrieves a list of all the metadata cascade policies\nthat are applied to a given folder. This can not be used on the root\nfolder with ID `0`.",
         "parameters": [
           {
             "name": "folder_id",
@@ -6374,7 +6453,7 @@
               "type": "string"
             },
             "example": "31232",
-            "description": "Specifies which folder to return policies for."
+            "description": "Specifies which folder to return policies for. This can not be used on the\nroot folder with ID `0`."
           },
           {
             "name": "owner_enterprise_id",
@@ -6419,6 +6498,36 @@
               }
             }
           },
+          "400": {
+            "description": "Returns an error when any of the parameters are not in a valid format.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Returns an error when the folder can not be accessed. This error often\nhappens when accessing the root folder with ID `0`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Returns an error when the folder can not be found or the user does not\nhave access to the folder.\n\n* `not_found` - The folder could not be found or the user does not have\n  access to the folder.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
           "default": {
             "description": "An unexpected client error.",
             "content": {
@@ -6438,7 +6547,8 @@
           "Metadata cascade policies (Beta)"
         ],
         "x-box-reference-category": "metadata_cascade_policies",
-        "description": "Creates a new metadata cascade policy that applies a given\nmetadata template to a given folder and automatically\ncascades it down to its children.\n\nIn order for the policy to work, a metadata instance must first\nbe applied to the folder.",
+        "x-box-sanitized": true,
+        "description": "Creates a new metadata cascade policy that applies a given\nmetadata template to a given folder and automatically\ncascades it down to any files within that folder.\n\nIn order for the policy to be applied a metadata instance must first\nbe applied to the folder the policy is to be applied to.",
         "requestBody": {
           "content": {
             "application/json": {
@@ -6451,12 +6561,12 @@
                 "properties": {
                   "folder_id": {
                     "type": "string",
-                    "description": "The ID of the folder to assign the template to.",
-                    "example": "12321"
+                    "description": "The ID of the folder to apply the policy to. This folder will\nneed to already have an instance of the targeted metadata\ntemplate applied to it.",
+                    "example": "1234567"
                   },
                   "scope": {
-                    "description": "The scope of the metadata template",
-                    "example": "global",
+                    "description": "The scope of the targeted metadata template. This template will\nneed to already have an instance applied to the targeted folder.",
+                    "example": "enterprise",
                     "type": "string",
                     "enum": [
                       "global",
@@ -6466,7 +6576,7 @@
                   "templateKey": {
                     "type": "string",
                     "example": "productInfo",
-                    "description": "The identifier of the metadata template."
+                    "description": "The key of the targeted metadata template. This template will\nneed to already have an instance applied to the targeted folder."
                   }
                 }
               }
@@ -6480,6 +6590,46 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/MetadataCascadePolicy"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Returns an error when any of the parameters are not in a valid format.\n\n* `bad_request` - Either the `scope`, `templateKey`, or `folder_id` are\nnot in a valid format.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Returns an error when trying to apply a policy to a restricted folder, for\nexample the root folder with ID `0`.\n\n* `forbidden` - Although the folder ID was valid and the user has access\nto the folder, the policy could not be applied to this folder.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Returns an error when the template or folder can not be found, or when the\nuser does not have access to the folder or template.\n\n* `instance_tuple_not_found` - The template could not be found or the user\ndoes not have access to the template.\n* `not_found` - The folder could not be found or the user\ndoes not have access to the folder.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Returns an error when a policy for this folder and template is already in\nplace.\n\n* `tuple_already_exists` - A cascade policy for this combination of\n`folder_id`, `scope` and `templateKey` already exists.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConflictError"
                 }
               }
             }
@@ -6505,12 +6655,13 @@
           "Metadata cascade policies (Beta)"
         ],
         "x-box-reference-category": "metadata_cascade_policies",
-        "description": "Retrieve a metadata cascade policy.",
+        "x-box-sanitized": true,
+        "description": "Retrieve a specific metadata cascade policy assigned to a folder.",
         "parameters": [
           {
             "name": "metadata_cascade_policy_id",
             "description": "The ID of the metadata cascade policy.",
-            "example": "324324",
+            "example": "6fd4ff89-8fc1-42cf-8b29-1890dedd26d7",
             "in": "path",
             "required": true,
             "schema": {
@@ -6520,11 +6671,21 @@
         ],
         "responses": {
           "200": {
-            "description": "Returns a list of metadata cascade policies",
+            "description": "Returns a metadata cascade policy",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/MetadataCascadePolicy"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Returns an error when the policy can not be found or the user does not\nhave access to the folder.\n\n* `instance_not_found` - The policy could not be found\n* `not_found` - The folder could not be found or the user does not have\n  access to the folder.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
                 }
               }
             }
@@ -6548,12 +6709,13 @@
           "Metadata cascade policies (Beta)"
         ],
         "x-box-reference-category": "metadata_cascade_policies",
+        "x-box-sanitized": true,
         "description": "Deletes a metadata cascade policy.",
         "parameters": [
           {
             "name": "metadata_cascade_policy_id",
             "description": "The ID of the metadata cascade policy.",
-            "example": "324324",
+            "example": "6fd4ff89-8fc1-42cf-8b29-1890dedd26d7",
             "in": "path",
             "required": true,
             "schema": {
@@ -6564,6 +6726,16 @@
         "responses": {
           "204": {
             "description": "Returns an empty response when the policy\nis successfully deleted."
+          },
+          "404": {
+            "description": "Returns an error when the policy can not be found or the user does not\nhave access to the folder.\n\n* `instance_not_found` - The policy could not be found\n* `not_found` - The folder could not be found or the user does not have\n  access to the folder.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
           },
           "default": {
             "description": "An unexpected client error.",
@@ -6586,7 +6758,8 @@
           "Metadata cascade policies (Beta)"
         ],
         "x-box-reference-category": "metadata_cascade_policies",
-        "description": "If a policy already exists on a folder, this will apply that policy\nto all existing files and sub-folders within the target folder.",
+        "x-box-sanitized": true,
+        "description": "Force the metadata on a folder with a metadata cascade policy to be applied to\nall of its children. This can be used after creating a new cascade policy to\nenforce the metadata to be cascaded down to all existing files within that\nfolder.",
         "parameters": [
           {
             "name": "metadata_cascade_policy_id",
@@ -6595,8 +6768,8 @@
             "schema": {
               "type": "string"
             },
-            "description": "The ID of the cascade policy.",
-            "example": "21312"
+            "description": "The ID of the cascade policy to force-apply.",
+            "example": "6fd4ff89-8fc1-42cf-8b29-1890dedd26d7"
           }
         ],
         "requestBody": {
@@ -6613,8 +6786,8 @@
                       "none",
                       "overwrite"
                     ],
-                    "description": "The desired behavior for conflict-resolution if a template already\nexists on a given file or folder.\n\n* `none` will preserve the existing value on the file\n* `overwrite` will force-apply the templates values over\n  any existing values.",
-                    "example": "overwrite"
+                    "description": "Describes the desired behavior when dealing with the conflict\nwhere a metadata template already has an instance applied\nto a child.\n\n* `none` will preserve the existing value on the file\n* `overwrite` will force-apply the templates values over\n  any existing values.",
+                    "example": "none"
                   }
                 }
               }
@@ -6623,11 +6796,14 @@
         },
         "responses": {
           "202": {
-            "description": "Returns the metadata cascade policy when the policy has been\napplied.\n\nThe metadata cascade operation will be kicked off asynchronously.\nThe API call will return right away but before the cascade operation\nis complete. There is currently no way to check for when this\noperation has finished.",
+            "description": "Returns an empty response when the API call was successful. The metadata\ncascade operation will be performed asynchronously.\n\nThe API call will return directly, before the cascade operation\nis complete. There is currently no API to check for the status of this\noperation."
+          },
+          "404": {
+            "description": "Returns an error when the policy can not be found or the user does not\nhave access to the folder.\n\n* `instance_not_found` - The policy could not be found\n* `not_found` - The folder could not be found or the user does not have\n  access to the folder.",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/MetadataCascadePolicy"
+                  "$ref": "#/components/schemas/ClientError"
                 }
               }
             }
@@ -7659,14 +7835,14 @@
         ],
         "summary": "Create task",
         "x-box-reference-category": "tasks",
-        "description": "Creates a single task on a file.",
+        "x-box-santized": true,
+        "description": "Creates a single task on a file. This task is not assigned to any user and\nwill need to be assigned separately.",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
                 "required": [
-                  "item",
-                  "action"
+                  "item"
                 ],
                 "properties": {
                   "item": {
@@ -7684,7 +7860,7 @@
                       },
                       "type": {
                         "type": "string",
-                        "description": "The type of the item to attach this task to.",
+                        "description": "`file`",
                         "example": "file",
                         "enum": [
                           "file"
@@ -7694,8 +7870,9 @@
                   },
                   "action": {
                     "type": "string",
-                    "description": "The action the task assignee will be prompted to do. Must be\n`review` for an approval task, or `complete` for a general\ntask. This will provide the assignee the ability to `approve` or\n`reject` the associated file or request for approval tasks, and\nthe ability to `complete` general tasks.",
+                    "description": "The action the task assignee will be prompted to do. Must be\n\n* `review` defines an approval task that can be approved or\nrejected\n* `complete` defines a general task which can be completed",
                     "example": "review",
+                    "default": "review",
                     "enum": [
                       "review",
                       "complete"
@@ -7703,19 +7880,22 @@
                   },
                   "message": {
                     "type": "string",
-                    "description": "An optional message to include with the task",
+                    "default": "",
+                    "description": "An optional message to include with the task.",
                     "example": "Please review"
                   },
                   "due_at": {
                     "type": "string",
                     "format": "date-time",
-                    "description": "When the task is due",
+                    "default": null,
+                    "description": "Defines when the task is due. Defaults to `null` if not\nprovided.",
                     "example": "2012-12-12T10:53:43-08:00"
                   },
                   "completion_rule": {
                     "type": "string",
-                    "description": "When a task is created with completion rule\n`all_assignees` (default), the task will only\nbe considered completed when all assignees have\ncompleted the task. When a task is created with\ncompletion rule `any_assignee`, the task will be\nconsidered completed when one assignee has\ncompleted the task.",
+                    "description": "Defines which assignees need to complete this task before the task\nis considered completed.\n\n* `all_assignees` (default) requires all assignees to review or\napprove the the task in order for it to be considered completed.\n* `any_assignee` accepts any one assignee to review or\napprove the the task in order for it to be considered completed.",
                     "example": "all_assignees",
+                    "default": "all_assignees",
                     "enum": [
                       "all_assignees",
                       "any_assignee"
@@ -7728,7 +7908,7 @@
         },
         "responses": {
           "201": {
-            "description": "Returns a new task object",
+            "description": "Returns the newly created task.",
             "content": {
               "application/json": {
                 "schema": {
@@ -7738,7 +7918,27 @@
             }
           },
           "400": {
-            "description": "Returns an error if the date used for `due_at` is in the past",
+            "description": "Returned if the request parameters or body is not valid.\n\n* `bad_request` when the body does not contain a valid request. This may\nbe because the `action` or `completion_rule` are not one of the allowed\nvalues.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Returns an error when the user does not have the permission to create a\ntask on the file.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Returns an error when the file could not be found or the user does not\nhave access to the file.",
             "content": {
               "application/json": {
                 "schema": {
@@ -7768,7 +7968,8 @@
           "Tasks"
         ],
         "x-box-reference-category": "tasks",
-        "description": "Fetches a specific task.",
+        "x-box-sanitized": true,
+        "description": "Retrieves information about a specific task.",
         "parameters": [
           {
             "name": "task_id",
@@ -7793,7 +7994,7 @@
             }
           },
           "404": {
-            "description": "Returns an error if the task for the given ID does not exist or\nis inaccessible to your account.",
+            "description": "Returns an error when the task could not be found or the user does not\nhave access to the file the task is assigned to.",
             "content": {
               "application/json": {
                 "schema": {
@@ -7821,7 +8022,8 @@
         ],
         "summary": "Update task",
         "x-box-reference-category": "tasks",
-        "description": "Updates a specific task.",
+        "x-box-sanitized": true,
+        "description": "Updates a task. This can be used to update a task's configuration, or to\nupdate its completion state.",
         "parameters": [
           {
             "name": "task_id",
@@ -7838,13 +8040,10 @@
           "content": {
             "application/json": {
               "schema": {
-                "required": [
-                  "action"
-                ],
                 "properties": {
                   "action": {
                     "type": "string",
-                    "description": "The action the task assignee will be prompted to complete.\n\nThis can be `review` or `complete`. By setting the action as\n`review`, the assigned user will be able to resolve the task by\napproving or dismiss the associated request. A `complete` task\ncan be resolved by completing it.",
+                    "description": "The action the task assignee will be prompted to do. Must be\n\n* `review` defines an approval task that can be approved or\nrejected\n* `complete` defines a general task which can be completed",
                     "example": "review",
                     "enum": [
                       "review",
@@ -7853,18 +8052,18 @@
                   },
                   "message": {
                     "type": "string",
-                    "description": "The message included with the task",
+                    "description": "The message included with the task.",
                     "example": "Please review"
                   },
                   "due_at": {
                     "type": "string",
                     "format": "date-time",
-                    "description": "When the task is due",
+                    "description": "When the task is due at.",
                     "example": "2012-12-12T10:53:43-08:00"
                   },
                   "completion_rule": {
                     "type": "string",
-                    "description": "When a task is created with completion rule\n`all_assignees` (default), the task will only\nbe considered completed when all assignees have\ncompleted the task. When a task is created with\ncompletion rule `any_assignee`, the task will be\nconsidered completed when one assignee has\ncompleted the task.",
+                    "description": "Defines which assignees need to complete this task before the task\nis considered completed.\n\n* `all_assignees` (default) requires all assignees to review or\napprove the the task in order for it to be considered completed.\n* `any_assignee` accepts any one assignee to review or\napprove the the task in order for it to be considered completed.",
                     "example": "all_assignees",
                     "enum": [
                       "all_assignees",
@@ -7887,8 +8086,28 @@
               }
             }
           },
+          "400": {
+            "description": "Returned if the request parameters or body is not valid.\n\n* `bad_request` when the body does not contain a valid request. This may\nbe because the `action` or `completion_rule` are not one of the allowed\nvalues.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Returns an error when the user does not have the permission to update a\ntask on the file.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
           "404": {
-            "description": "Returns an error if the task for the given ID does not exist or\nis inaccessible to your account.",
+            "description": "Returns an error when the file could not be found or the user does not\nhave access to the file.",
             "content": {
               "application/json": {
                 "schema": {
@@ -7916,7 +8135,8 @@
         ],
         "summary": "Remove task",
         "x-box-reference-category": "tasks",
-        "description": "Deletes a specific task.",
+        "x-box-sanitized": true,
+        "description": "Removes a task from a file.",
         "parameters": [
           {
             "name": "task_id",
@@ -7931,10 +8151,10 @@
         ],
         "responses": {
           "204": {
-            "description": "An empty response will be returned when the task was successfully deleted."
+            "description": "Returns an empty response when the task was successfully deleted."
           },
           "404": {
-            "description": "Returns an error if the task for the given ID does not exist or\nis inaccessible to your account.",
+            "description": "Returns an error when the task could not be found or the user does not\nhave access to the file the task is assigned to.",
             "content": {
               "application/json": {
                 "schema": {
@@ -7964,7 +8184,8 @@
           "Tasks"
         ],
         "x-box-reference-category": "task_assignments",
-        "description": "Retrieves all of the assignments for a given task.",
+        "x-box-sanitized": true,
+        "description": "Lists all of the assignments for a given task.",
         "parameters": [
           {
             "name": "task_id",
@@ -7979,11 +8200,21 @@
         ],
         "responses": {
           "200": {
-            "description": "Returns a collection of task assignment specifying what task on\na file has been assigned to which users and by who.",
+            "description": "Returns a collection of task assignment defining what task on\na file has been assigned to which users and by who.",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/TaskAssignments"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Returns an error when the task could not be found or the user does not\nhave access to the file the task is assigned to.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
                 }
               }
             }
@@ -8019,7 +8250,8 @@
           "Tasks"
         ],
         "x-box-reference-category": "task_assignments",
-        "description": "Assigns a task to a user.\n\nMultiple assignments to different users\nare allowed per task.",
+        "x-box-sanitized": true,
+        "description": "Assigns a task to a user.\n\nA task can be assigned to more than one user by creating multiple\nassignments.",
         "requestBody": {
           "content": {
             "application/json": {
@@ -8094,6 +8326,26 @@
               }
             }
           },
+          "404": {
+            "description": "Returns an error when the task could not be found or the user does not\nhave access to the file the task is assigned to.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Returns an error if any of the IDs for this request were not valid, or if\nthe targeted user does not have access to the file.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
           "default": {
             "description": "An unexpected client error.",
             "content": {
@@ -8115,7 +8367,8 @@
           "Tasks"
         ],
         "x-box-reference-category": "task_assignments",
-        "description": "Fetches a specific task assignment.",
+        "x-box-sanitized": true,
+        "description": "Retrieves information about a task assignment.",
         "parameters": [
           {
             "name": "task_assignment_id",
@@ -8130,7 +8383,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Returns the requested task assignment, specifying who\nthe task has been assigned to and by whom.",
+            "description": "Returns a task assignment, specifying who the task has been assigned to\nand by whom.",
             "content": {
               "application/json": {
                 "schema": {
@@ -8140,7 +8393,7 @@
             }
           },
           "404": {
-            "description": "Returns an error if the task assignment for the given ID does not exist or\nis inaccessible to your account.",
+            "description": "Returns an error when the task assignment could not be found or the user\ndoes not have access to the file the task is assigned to.",
             "content": {
               "application/json": {
                 "schema": {
@@ -8168,7 +8421,8 @@
           "Tasks"
         ],
         "x-box-reference-category": "task_assignments",
-        "description": "Updates a task assignment. This endpoint can be\nused to update the state of a task.",
+        "x-box-sanitized": true,
+        "description": "Updates a task assignment. This endpoint can be\nused to update the state of a task assigned to a user.",
         "parameters": [
           {
             "name": "task_assignment_id",
@@ -8188,12 +8442,12 @@
                 "properties": {
                   "message": {
                     "type": "string",
-                    "description": "A message from the assignee about this task",
-                    "example": "Please review"
+                    "description": "An optional message by the assignee that can be added to the task.",
+                    "example": "Looks good to me"
                   },
                   "resolution_state": {
                     "type": "string",
-                    "description": "The state of the task. This can be completed or incomplete for\ngeneral tasks with the `complete` action or it can be approved,\nrejected, or incomplete for approval tasks with the `review`\naction.",
+                    "description": "The state of the task assigned to the user.\n\n* For a task with an `action` value of `complete` this can be\n`incomplete` or `completed`.\n* For a task with an `action` of `review` this can be\n`incomplete`, `approved`, or `rejected`.",
                     "example": "completed",
                     "enum": [
                       "completed",
@@ -8229,7 +8483,7 @@
             }
           },
           "404": {
-            "description": "Returns an error if the task assignment for the given ID does not exist or\nis inaccessible to your account.",
+            "description": "Returns an error when the task assignment could not be found or the user\ndoes not have access to the file the task is assigned to.",
             "content": {
               "application/json": {
                 "schema": {
@@ -8257,6 +8511,7 @@
           "Tasks"
         ],
         "x-box-reference-category": "task_assignments",
+        "x-box-sanitized": true,
         "description": "Deletes a specific task assignment.",
         "parameters": [
           {
@@ -8272,7 +8527,7 @@
         ],
         "responses": {
           "204": {
-            "description": "An empty response will be returned when the task\nassignment was successfully deleted."
+            "description": "Returns an empty response when the task\nassignment was successfully deleted."
           },
           "404": {
             "description": "Returns an error if the task assignment for the given ID does not exist\nor is inaccessible to your account.",
@@ -9594,15 +9849,15 @@
         }
       }
     },
-    "/users/{user_id}/folders/{folder_id}": {
+    "/users/{user_id}/folders/0": {
       "put": {
-        "operationId": "put_users_id_folders_id",
+        "operationId": "put_users_id_folders_0",
         "x-box-reference-category": "transfer",
         "summary": "Transfer owned folders",
         "tags": [
           "Users"
         ],
-        "description": "Move all of the items owned by a user into a\nnew folder in another user’s account.\n\nOnly the root folder (`0`) can be transferred.\n\nFolders can only be moved across users by users with administrative\npermissions.\n\nThis call will be performed synchronously which might lead to a slow response\nwhen the source user has a large number of items in all of its folders.\n\nIf the destination path has a metadata cascade policy attached to any of\nthe parent folders, a metadata cascade operation will be kicked off\nasynchronously.\n\nThere is currently no way to check for when this operation is finished.",
+        "description": "Move all of the items owned by a user into a\nnew folder in another user’s account.\n\nOnly the root folder (`0`) can be transferred.\n\nFolders can only be moved across users by users with administrative\npermissions.\n\nThis call will be performed synchronously which might lead to a slow response\nwhen the source user has a large number of items in all of its folders.\n\nIf the destination path has a metadata cascade policy attached to any of\nthe parent folders, a metadata cascade operation will be kicked off\nasynchronously.\n\nThere is currently no way to check for when this operation is finished.\n\nThe destination folder's name will be in the format `{User}'s Files and\nFolders`, where `{User}` is the display name of the user.",
         "parameters": [
           {
             "name": "user_id",
@@ -9612,17 +9867,6 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
-          },
-          {
-            "name": "folder_id",
-            "description": "The unique identifier that represent a folder.\n\nThe ID for any folder can be determined\nby visiting this folder in the web application\nand copying the ID from the URL. For example,\nfor the URL `https://*.app.box.com/folder/123`\nthe `folder_id` is `123`.\n\nThe root folder of a Box account is\nalways represented by the ID `0`.",
-            "example": "0",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "nullable": false
             }
           },
           {
@@ -10960,7 +11204,7 @@
           "Webhooks"
         ],
         "x-box-reference-category": "webhooks",
-        "description": "Returns all defined webhooks for the requesting application.",
+        "description": "Returns all defined webhooks for the requesting application.\n\nThis API only returns webhooks that are applied to files or folders that are\nowned by the authenticated user. This means that an admin can not see webhooks\ncreated by a service account unless the admin has access to those folders, and\nvice versa.",
         "parameters": [
           {
             "name": "marker",
@@ -11821,19 +12065,17 @@
           },
           {
             "name": "event_type",
-            "description": "A comma-separated list of events to filter by.",
+            "description": "A comma-separated list of events to filter by. This can only be used when\nrequesting the events with a `stream_type` of `admin_logs`. For any other\n`stream_type` this value will be ignored.",
             "in": "query",
             "explode": false,
             "example": [
-              "ADD_LOGIN_ACTIVITY_DEVICE"
+              "ACCESS_GRANTED"
             ],
             "schema": {
               "type": "array",
               "items": {
-                "title": "Event Type",
-                "example": "FILE_MARKED_MALICIOUS",
                 "type": "string",
-                "description": "An event type that can trigger an event",
+                "description": "An event type that can be filtered by",
                 "enum": [
                   "ACCESS_GRANTED",
                   "ACCESS_REVOKED",
@@ -11850,10 +12092,6 @@
                   "COLLABORATION_INVITE",
                   "COLLABORATION_REMOVE",
                   "COLLABORATION_ROLE_CHANGE",
-                  "COLLAB_ADD_COLLABORATOR",
-                  "COLLAB_INVITE_COLLABORATOR",
-                  "COLLAB_REMOVE_COLLABORATOR",
-                  "COLLAB_ROLE_CHANGE",
                   "COMMENT_CREATE",
                   "COMMENT_DELETE",
                   "CONTENT_WORKFLOW_ABNORMAL_DOWNLOAD_ACTIVITY",
@@ -11873,7 +12111,8 @@
                   "EDIT_USER",
                   "EMAIL_ALIAS_CONFIRM",
                   "EMAIL_ALIAS_REMOVE",
-                  "ENABLE_TWO_FACTOR_AUTH",
+                  "ENTERPRISE_APP_AUTHORIZATION_UPDATE",
+                  "EXTERNAL_COLLAB_SECURITY_SETTINGS",
                   "FAILED_LOGIN",
                   "FILE_MARKED_MALICIOUS",
                   "FILE_WATERMARKED_DOWNLOAD",
@@ -11884,35 +12123,18 @@
                   "GROUP_EDITED",
                   "GROUP_REMOVE_ITEM",
                   "GROUP_REMOVE_USER",
-                  "ITEM_COPY",
-                  "ITEM_CREATE",
-                  "ITEM_DOWNLOAD",
-                  "ITEM_MAKE_CURRENT_VERSION",
                   "ITEM_MODIFY",
-                  "ITEM_MOVE",
                   "ITEM_OPEN",
-                  "ITEM_PREVIEW",
-                  "ITEM_RENAME",
-                  "ITEM_SHARED",
-                  "ITEM_SHARED_CREATE",
-                  "ITEM_SHARED_UNSHARE",
                   "ITEM_SHARED_UPDATE",
                   "ITEM_SYNC",
-                  "ITEM_TRASH",
-                  "ITEM_UNDELETE_VIA_TRASH",
                   "ITEM_UNSYNC",
-                  "ITEM_UPLOAD",
                   "LEGAL_HOLD_ASSIGNMENT_CREATE",
                   "LEGAL_HOLD_ASSIGNMENT_DELETE",
                   "LEGAL_HOLD_POLICY_CREATE",
                   "LEGAL_HOLD_POLICY_DELETE",
                   "LEGAL_HOLD_POLICY_UPDATE",
                   "LOCK",
-                  "LOCK_CREATE",
-                  "LOCK_DESTROY",
                   "LOGIN",
-                  "MASTER_INVITE_ACCEPT",
-                  "MASTER_INVITE_REJECT",
                   "METADATA_INSTANCE_CREATE",
                   "METADATA_INSTANCE_DELETE",
                   "METADATA_INSTANCE_UPDATE",
@@ -11930,7 +12152,6 @@
                   "SHARE_EXPIRATION",
                   "SHIELD_ALERT",
                   "STORAGE_EXPIRATION",
-                  "TAG_ITEM_CREATE",
                   "TASK_ASSIGNMENT_CREATE",
                   "TASK_ASSIGNMENT_DELETE",
                   "TASK_ASSIGNMENT_UPDATE",
@@ -13441,6 +13662,178 @@
         }
       }
     },
+    "/legal_hold_policy_assignments/{legal_hold_policy_assignment_id}/files_on_hold": {
+      "get": {
+        "operationId": "get_legal_hold_policy_assignments_id_files_on_hold",
+        "summary": "List current file versions for legal hold policy assignment",
+        "tags": [
+          "Legal hold policies"
+        ],
+        "x-box-reference-category": "legal_hold_policy_assignments",
+        "description": "Get a list of current file versions for a legal hold\nassignment.\n\nIn some cases you may want to get previous file versions instead. In these\ncases, use the `GET  /legal_hold_policy_assignments/:id/file_versions_on_hold`\nAPI instead to return any previous versions of a file for this legal hold\npolicy assignment.\n\nDue to ongoing re-architecture efforts this API might not return all file\nversions held for this policy ID. Instead, this API will only return the\nlatest file version held in the newly developed architecture. The `GET\n/file_version_legal_holds` API can be used to fetch current and past versions\nof files held within the legacy architecture.\n\nThe `GET /legal_hold_policy_assignments?policy_id={id}` API can be used to\nfind a list of policy assignments for a given policy ID.",
+        "parameters": [
+          {
+            "name": "legal_hold_policy_assignment_id",
+            "description": "The ID of the legal hold policy assignment",
+            "example": "753465",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "marker",
+            "description": "Defines the position marker at which to begin returning results. This is\nused when paginating using marker-based pagination.\n\nThis requires `usemarker` to be set to `true`.",
+            "in": "query",
+            "required": false,
+            "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "description": "The maximum number of items to return per page.",
+            "in": "query",
+            "required": false,
+            "example": 1000,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "default": 100,
+              "maximum": 1000
+            }
+          },
+          {
+            "name": "fields",
+            "description": "A comma-separated list of attributes to include in the\nresponse. This can be used to request fields that are\nnot normally returned in a standard response.\n\nBe aware that specifying this parameter will have the\neffect that none of the standard fields are returned in\nthe response unless explicitly specified, instead only\nfields for the mini representation are returned, additional\nto the fields requested.",
+            "in": "query",
+            "example": [
+              "id",
+              "type",
+              "name"
+            ],
+            "required": false,
+            "explode": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns the list of current file versions held under legal hold for a\nspecific legal hold policy assignment.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FileVersionLegalHolds"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/legal_hold_policy_assignments/{legal_hold_policy_assignment_id}/file_versions_on_hold": {
+      "get": {
+        "operationId": "get_legal_hold_policy_assignments_id_file_versions_on_hold",
+        "summary": "List previous file versions for legal hold policy assignment",
+        "tags": [
+          "Legal hold policies"
+        ],
+        "x-box-reference-category": "legal_hold_policy_assignments",
+        "description": "Get a list of previous file versions for a legal hold\nassignment.\n\nIn some cases you may only need the latest file versions instead. In these\ncases, use the `GET  /legal_hold_policy_assignments/:id/files_on_hold` API\ninstead to return any current (latest) versions of a file for this legal hold\npolicy assignment.\n\nDue to ongoing re-architecture efforts this API might not return all files\nheld for this policy ID. Instead, this API will only return past file versions\nheld in the newly developed architecture. The `GET /file_version_legal_holds`\nAPI can be used to fetch current and past versions of files held within the\nlegacy architecture.\n\nThe `GET /legal_hold_policy_assignments?policy_id={id}` API can be used to\nfind a list of policy assignments for a given policy ID.",
+        "parameters": [
+          {
+            "name": "legal_hold_policy_assignment_id",
+            "description": "The ID of the legal hold policy assignment",
+            "example": "753465",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "marker",
+            "description": "Defines the position marker at which to begin returning results. This is\nused when paginating using marker-based pagination.\n\nThis requires `usemarker` to be set to `true`.",
+            "in": "query",
+            "required": false,
+            "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "description": "The maximum number of items to return per page.",
+            "in": "query",
+            "required": false,
+            "example": 1000,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "default": 100,
+              "maximum": 1000
+            }
+          },
+          {
+            "name": "fields",
+            "description": "A comma-separated list of attributes to include in the\nresponse. This can be used to request fields that are\nnot normally returned in a standard response.\n\nBe aware that specifying this parameter will have the\neffect that none of the standard fields are returned in\nthe response unless explicitly specified, instead only\nfields for the mini representation are returned, additional\nto the fields requested.",
+            "in": "query",
+            "example": [
+              "id",
+              "type",
+              "name"
+            ],
+            "required": false,
+            "explode": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns the list of previous file versions held under legal hold for a\nspecific legal hold policy assignment.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FileVersionLegalHolds"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/file_version_retentions/{file_version_retention_id}": {
       "get": {
         "operationId": "get_file_version_retentions_id",
@@ -13661,7 +14054,7 @@
           "Legal hold policies"
         ],
         "x-box-reference-category": "file_version_legal_holds",
-        "description": "Get list of non-deleted legal holds for a single legal\nhold policy.",
+        "description": "Get a list of file versions on legal hold for a legal hold\nassignment.\n\nDue to ongoing re-architecture efforts this API might not return all file\nversions for this policy ID.\n\nInstead, this API will only return file versions held in the legacy\narchitecture. Two new endpoints will available to request any file versions\nheld in the new architecture.\n\nFor file versions held in the new architecture, the `GET\n/legal_hold_policy_assignments/:id/file_versions_on_hold` API can be used to\nreturn all past file versions available for this policy assignment, and the\n`GET /legal_hold_policy_assignments/:id/files_on_hold` API can be used to\nreturn any current (latest) versions of a file under legal hold.\n\nThe `GET /legal_hold_policy_assignments?policy_id={id}` API can be used to\nfind a list of policy assignments for a given policy ID.\n\nOnce the re-architecture is completed this API will be deprecated.",
         "parameters": [
           {
             "name": "policy_id",
@@ -17007,6 +17400,7 @@
                   "EMAIL_ALIAS_CONFIRM",
                   "EMAIL_ALIAS_REMOVE",
                   "ENABLE_TWO_FACTOR_AUTH",
+                  "ENTERPRISE_APP_AUTHORIZATION_UPDATE",
                   "FAILED_LOGIN",
                   "FILE_MARKED_MALICIOUS",
                   "FILE_WATERMARKED_DOWNLOAD",
@@ -20154,16 +20548,24 @@
         "title": "Metadata cascade policy",
         "x-box-resource-id": "metadata_cascade_policy",
         "x-box-reference-category": "metadata_cascade_policies",
-        "description": "A cascade policy that applies to metadata policy template\nto a folder",
+        "description": "A metadata cascade policy automatically applies a metadata template instance\nto all the files and folders within the targeted folder.",
         "properties": {
           "id": {
             "type": "string",
             "example": "6fd4ff89-8fc1-42cf-8b29-1890dedd26d7",
             "description": "The ID of the metadata cascade policy object"
           },
+          "type": {
+            "type": "string",
+            "description": "`metadata_cascade_policy`",
+            "example": "metadata_cascade_policy",
+            "enum": [
+              "metadata_cascade_policy"
+            ]
+          },
           "owner_enterprise": {
             "type": "object",
-            "description": "The enterprise that owns the policy.",
+            "description": "The enterprise that owns this policy.",
             "properties": {
               "type": {
                 "type": "string",
@@ -20182,7 +20584,7 @@
           },
           "parent": {
             "type": "object",
-            "description": "Represent the folder the policy is applied to",
+            "description": "Represent the folder the policy is applied to.",
             "properties": {
               "type": {
                 "type": "string",
@@ -20194,20 +20596,24 @@
               },
               "id": {
                 "type": "string",
-                "example": "690678",
-                "description": "The ID of the folder the policy is applied to"
+                "example": "1234567",
+                "description": "The ID of the folder the policy is applied to."
               }
             }
           },
           "scope": {
             "type": "string",
             "example": "global",
-            "description": "The scope of the target instance that will be cascaded down. The `scope`\nand `templateKey` together identify the metadata on the folder that is\nto be cascaded down. Only `global` and `enterprise` scopes are\nsupported."
+            "description": "The scope of the of the template that is cascaded down to the folder's\nchildren.",
+            "enum": [
+              "global",
+              "enterprise_*"
+            ]
           },
           "templateKey": {
             "type": "string",
-            "example": "demo",
-            "description": "The template key of the target metadata template to cascade down.\nThe `scope` & `templateKey` together identify the metadata on the f\nolder that is to be cascaded down."
+            "example": "productInfo",
+            "description": "The key of the of the template that is cascaded down to the folder's\nchildren."
           }
         }
       },
@@ -21052,7 +21458,7 @@
         "title": "Task",
         "x-box-resource-id": "task",
         "x-box-reference-category": "tasks",
-        "description": "Tasks allow for file-centric workflows in Box. Users can\ncreate tasks on files and assign them to collaborators on\nBox.",
+        "description": "A task allows for file-centric workflows within Box. Users can\ncreate tasks on files and assign them to other users for them to complete the\ntasks.",
         "allOf": [
           {
             "title": "Reference",
@@ -21095,9 +21501,10 @@
               "action": {
                 "type": "string",
                 "example": "review",
-                "description": "The action the task assignee will be prompted to\ndo.",
+                "description": "The type of task the task assignee will be prompted to\nperform.",
                 "enum": [
-                  "review"
+                  "review",
+                  "complete"
                 ]
               },
               "message": {
@@ -21138,7 +21545,7 @@
               },
               "completion_rule": {
                 "type": "string",
-                "description": "When a task is created with completion rule\n`all_assignees` (default), the task will only\nbe considered completed when all assignees have\ncompleted the task. When a task is created with\ncompletion rule `any_assignee`, the task will be\nconsidered completed when one assignee has\ncompleted the task.",
+                "description": "Defines which assignees need to complete this task before the task\nis considered completed.\n\n* `all_assignees` requires all assignees to review or\napprove the the task in order for it to be considered completed.\n* `any_assignee` accepts any one assignee to review or\napprove the the task in order for it to be considered completed.",
                 "example": "all_assignees",
                 "enum": [
                   "all_assignees",
@@ -21173,7 +21580,7 @@
         "title": "Task assignment",
         "x-box-resource-id": "task_assignment",
         "x-box-reference-category": "task_assignments",
-        "description": "An assignment of a task to a file and user",
+        "description": "A task assignment defines which task is assigned to which user to complete.",
         "allOf": [
           {
             "title": "Reference",
@@ -21203,7 +21610,7 @@
                     "$ref": "#/components/schemas/File--Mini"
                   },
                   {
-                    "description": "The file the task has been assigned to"
+                    "description": "The file that the task has been assigned to."
                   }
                 ]
               },
@@ -21213,36 +21620,36 @@
                     "$ref": "#/components/schemas/User--Mini"
                   },
                   {
-                    "description": "The user the task has been assigned to"
+                    "description": "The user that the task has been assigned to."
                   }
                 ]
               },
               "message": {
                 "type": "string",
                 "example": "Please review",
-                "description": "A message that will be included with this task\nassignment"
+                "description": "A message that will is included with the task\nassignment. This is visible to the assigned user in the web and mobile\nUI."
               },
               "completed_at": {
                 "type": "string",
                 "format": "date-time",
-                "description": "The date at which this task assignment was\ncompleted",
+                "description": "The date at which this task assignment was\ncompleted. This will be `null` if the task is not completed yet.",
                 "example": "2012-12-12T10:53:43-08:00"
               },
               "assigned_at": {
                 "type": "string",
                 "format": "date-time",
-                "description": "The date at which this task assignment was\nassigned",
+                "description": "The date at which this task was assigned to the user.",
                 "example": "2012-12-12T10:53:43-08:00"
               },
               "reminded_at": {
                 "type": "string",
                 "format": "date-time",
-                "description": "The date at which this task assignment was\nreminded",
+                "description": "The date at which the assigned user was reminded of this task\nassignment.",
                 "example": "2012-12-12T10:53:43-08:00"
               },
               "resolution_state": {
                 "type": "string",
-                "description": "State of this assignment",
+                "description": "The current state of the assignment. The available states depend on\nthe `action` value of the task object.",
                 "example": "incomplete",
                 "enum": [
                   "completed",
@@ -21257,7 +21664,7 @@
                     "$ref": "#/components/schemas/User--Mini"
                   },
                   {
-                    "description": "The user who assigned this task"
+                    "description": "The user who assigned this task."
                   }
                 ]
               }
@@ -21271,66 +21678,20 @@
         "x-box-reference-category": "task_assignments",
         "type": "object",
         "description": "A list of task assignments",
-        "allOf": [
-          {
-            "type": "object",
-            "description": "The part of an API response that describes pagination",
-            "properties": {
-              "total_count": {
-                "description": "One greater than the offset of the last entry in the entire collection.\nThe total number of entries in the collection may be less than\n`total_count`.\n\nThis field is only returned for calls that use offset-based pagination.\nFor marker-based paginated APIs, this field will be omitted.",
-                "example": 5000,
-                "type": "integer",
-                "format": "int64"
-              },
-              "limit": {
-                "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
-                "example": 1000,
-                "type": "integer",
-                "format": "int64"
-              },
-              "offset": {
-                "description": "The 0-based offset of the first entry in this set. This will be the same\nas the `offset` query parameter.\n\nThis field is only returned for calls that use offset-based pagination.\nFor marker-based paginated APIs, this field will be omitted.",
-                "example": 2000,
-                "type": "integer",
-                "format": "int64"
-              },
-              "order": {
-                "description": "The order by which items are returned.\n\nThis field is only returned for calls that use offset-based pagination.\nFor marker-based paginated APIs, this field will be omitted.",
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "description": "The order in which a pagination is ordered",
-                  "properties": {
-                    "by": {
-                      "description": "The field to order by",
-                      "example": "type",
-                      "type": "string"
-                    },
-                    "direction": {
-                      "type": "string",
-                      "description": "The direction to order by, either ascending or descending",
-                      "example": "ASC",
-                      "enum": [
-                        "ASC",
-                        "DESC"
-                      ]
-                    }
-                  }
-                }
-              }
-            }
+        "properties": {
+          "total_count": {
+            "description": "The total number of items in this collection.",
+            "example": 100,
+            "type": "integer",
+            "format": "int64"
           },
-          {
-            "properties": {
-              "entries": {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/TaskAssignment"
-                }
-              }
+          "entries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TaskAssignment"
             }
           }
-        ]
+        }
       },
       "TermsOfService": {
         "title": "Terms of service",
@@ -22955,7 +23316,7 @@
       "x-box-reference-parent-category": "users_and_groups"
     },
     {
-      "name": "Transferr folders",
+      "name": "Transfer folders",
       "x-box-reference-category": "transfer",
       "x-box-reference-parent-category": "users_and_groups"
     },
