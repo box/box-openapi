@@ -10,10 +10,10 @@
       "email": "devrel@box.com"
     },
     "license": {
-      "name": "Apache 2.0",
+      "name": "Apache-2.0",
       "url": "http://www.apache.org/licenses/LICENSE-2.0"
     },
-    "version": "2.0"
+    "version": "2.0.0"
   },
   "host": "api.box.com",
   "basePath": "/",
@@ -32,6 +32,41 @@
         "operationId": "post_oauth2_token",
         "summary": "Request access token",
         "description": "Request an Access Token using either a client-side obtained OAuth 2.0\nauthorization code or a server-side JWT assertion.\n\nAn Access Token is a string that enables Box to verify that a\nrequest belongs to an authorized session. In the normal order of\noperations you will begin by requesting authentication from the\n[authorize](#get-authorize) endpoint and Box will send you an\nauthorization code.\n\nYou will then send this code to this endpoint to exchange it for\nan Access Token. The returned Access Token can then be used to to make\nBox API calls.",
+        "tags": [
+          "Authorization"
+        ],
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Returns a new Access Token that can be used to make authenticated\nAPI calls by passing along the token in a authorization header as\nfollows `Authorization: Bearer <Token>`.",
+            "schema": {
+              "$ref": "#/definitions/AccessToken"
+            }
+          },
+          "400": {
+            "description": "An authentication error.",
+            "schema": {
+              "$ref": "#/definitions/OAuth2Error"
+            }
+          },
+          "default": {
+            "description": "An authentication error.",
+            "schema": {
+              "$ref": "#/definitions/OAuth2Error"
+            }
+          }
+        },
+        "parameters": [],
+        "consumes": [
+          "application/x-www-form-urlencoded"
+        ]
+      }
+    },
+    "/oauth2/token#refresh": {
+      "post": {
+        "operationId": "post_oauth2_token#refresh",
+        "summary": "Refresh access token",
+        "description": "Refresh an Access Token using its client ID, secret, and refresh token.",
         "tags": [
           "Authorization"
         ],
@@ -168,6 +203,7 @@
     },
     "OAuth2Error": {
       "title": "OAuth 2.0 error",
+      "type": "object",
       "x-box-tag": "authorization",
       "x-box-reference-category": "authorization",
       "description": "An OAuth 2.0 error",
@@ -219,6 +255,7 @@
     },
     "File--Mini": {
       "title": "File (Mini)",
+      "type": "object",
       "x-box-tag": null,
       "x-box-reference-category": null,
       "description": "A mini representation of a file, used when\nnested under another resource.",
@@ -248,6 +285,7 @@
     },
     "File--Base": {
       "title": "File (Base)",
+      "type": "object",
       "description": "The bare basic representation of a file, the minimal\namount of fields returned when using the `fields` query\nparameter.",
       "properties": {
         "id": {

@@ -10,10 +10,10 @@
       "email": "devrel@box.com"
     },
     "license": {
-      "name": "Apache 2.0",
+      "name": "Apache-2.0",
       "url": "http://www.apache.org/licenses/LICENSE-2.0"
     },
-    "version": "2.0"
+    "version": "2.0.0"
   },
   "host": "upload.box.com",
   "basePath": "/api/2.0",
@@ -178,6 +178,7 @@
             "name": "body",
             "in": "body",
             "schema": {
+              "type": "object",
               "required": [
                 "folder_id",
                 "file_size",
@@ -223,6 +224,7 @@
             "name": "body",
             "in": "body",
             "schema": {
+              "type": "object",
               "required": [
                 "file_size"
               ],
@@ -328,7 +330,7 @@
           "200": {
             "description": "Chunk has been uploaded successfully.",
             "schema": {
-              "$ref": "#/definitions/UploadPart"
+              "$ref": "#/definitions/UploadedPart"
             }
           },
           "409": {
@@ -479,14 +481,16 @@
             "name": "body",
             "in": "body",
             "schema": {
+              "type": "object",
               "required": [
                 "parts"
               ],
               "properties": {
                 "parts": {
                   "type": "array",
+                  "description": "The list details for the uploaded parts",
                   "items": {
-                    "$ref": "#/definitions/UploadPart--Mini"
+                    "$ref": "#/definitions/UploadPart"
                   }
                 }
               }
@@ -558,6 +562,7 @@
   "definitions": {
     "Files": {
       "title": "Files",
+      "type": "object",
       "x-box-tag": "files",
       "x-box-reference-category": "files",
       "description": "A list of files",
@@ -578,6 +583,7 @@
     },
     "ClientError": {
       "title": "Client error",
+      "type": "object",
       "description": "A generic error",
       "properties": {
         "type": {
@@ -630,6 +636,7 @@
     },
     "UploadSession": {
       "title": "Upload session",
+      "type": "object",
       "description": "An upload session for chunk uploading a file.",
       "x-box-tag": "chunked_uploads",
       "x-box-reference-category": "chunked_uploads",
@@ -705,27 +712,21 @@
         }
       }
     },
-    "UploadPart": {
-      "title": "Upload part",
-      "description": "A chunk of a file uploaded as part of\nan upload session.",
+    "UploadedPart": {
+      "title": "Uploaded part",
+      "type": "object",
+      "description": "A chunk of a file uploaded as part of\nan upload session, as returned by some endpoints.",
       "x-box-tag": "chunked_uploads",
       "x-box-reference-category": "chunked_uploads",
-      "allOf": [
-        {
-          "$ref": "#/definitions/UploadPart--Mini"
-        },
-        {
-          "properties": {
-            "sha1": {
-              "description": "The SHA1 hash of the chunk.",
-              "type": "string"
-            }
-          }
+      "properties": {
+        "part": {
+          "$ref": "#/definitions/UploadPart"
         }
-      ]
+      }
     },
     "UploadParts": {
       "title": "Upload parts",
+      "type": "object",
       "description": "A list of uploaded chunks for an upload\nsession.",
       "allOf": [
         {
@@ -783,9 +784,10 @@
         }
       ]
     },
-    "UploadPart--Mini": {
-      "title": "Upload part (Mini)",
-      "description": "The basic representation of an upload\nsession chunk.",
+    "UploadPart": {
+      "title": "Upload part",
+      "type": "object",
+      "description": "The representation of an upload\nsession chunk.",
       "properties": {
         "part_id": {
           "description": "The unique ID of the chunk.",
@@ -800,11 +802,16 @@
           "description": "The size of the chunk in bytes.",
           "type": "integer",
           "format": "int64"
+        },
+        "sha1": {
+          "description": "The SHA1 hash of the chunk.",
+          "type": "string"
         }
       }
     },
     "File": {
       "title": "File",
+      "type": "object",
       "x-box-tag": "files",
       "x-box-reference-category": "files",
       "description": "A full representation of a file, as can be returned from any\nfile API endpoints by default",
@@ -1182,6 +1189,7 @@
     },
     "File--Standard": {
       "title": "File (Standard)",
+      "type": "object",
       "x-box-tag": null,
       "x-box-reference-category": null,
       "description": "A standard representation of a file, as returned from any\nfile API endpoints by default",
@@ -1424,6 +1432,7 @@
     },
     "User--Mini": {
       "title": "User (Mini)",
+      "type": "object",
       "description": "A mini representation of a user, used when\nnested within another resource.",
       "allOf": [
         {
@@ -1497,10 +1506,10 @@
     },
     "Metadata": {
       "title": "Metadata instance",
+      "type": "object",
       "description": "A piece of metadata as specified by a metadata template and\napplied to a file or folder.",
       "x-box-tag": "file_metadata",
       "x-box-reference-category": "file_metadata",
-      "type": "object",
       "properties": {
         "$canEdit": {
           "type": "boolean",
@@ -1544,6 +1553,7 @@
     },
     "File--Mini": {
       "title": "File (Mini)",
+      "type": "object",
       "x-box-tag": null,
       "x-box-reference-category": null,
       "description": "A mini representation of a file, used when\nnested under another resource.",
@@ -1573,6 +1583,7 @@
     },
     "Folder--Mini": {
       "title": "Folder (Mini)",
+      "type": "object",
       "x-box-tag": null,
       "x-box-reference-category": null,
       "description": "A mini representation of a file version, used when\nnested under another resource.",
@@ -1602,6 +1613,7 @@
     },
     "FileVersion--Mini": {
       "title": "File version (Mini)",
+      "type": "object",
       "description": "A mini representation of a file version, used when\nnested within another resource.",
       "allOf": [
         {
@@ -1619,6 +1631,7 @@
     },
     "File--Base": {
       "title": "File (Base)",
+      "type": "object",
       "description": "The bare basic representation of a file, the minimal\namount of fields returned when using the `fields` query\nparameter.",
       "properties": {
         "id": {
@@ -1640,6 +1653,7 @@
     },
     "Folder--Base": {
       "title": "Folder (Base)",
+      "type": "object",
       "description": "The bare basic representation of a folder, the minimal\namount of fields returned when using the `fields` query\nparameter.",
       "properties": {
         "id": {
@@ -1661,6 +1675,7 @@
     },
     "FileVersion--Base": {
       "title": "File version (Base)",
+      "type": "object",
       "description": "The bare basic representation of a file version, the minimal\namount of fields returned when using the `fields` query\nparameter.",
       "properties": {
         "id": {
