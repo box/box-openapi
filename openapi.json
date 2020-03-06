@@ -10,10 +10,10 @@
       "email": "devrel@box.com"
     },
     "license": {
-      "name": "Apache 2.0",
+      "name": "Apache-2.0",
       "url": "http://www.apache.org/licenses/LICENSE-2.0"
     },
-    "version": "2.0"
+    "version": "2.0.0"
   },
   "servers": [
     {
@@ -143,14 +143,68 @@
           "content": {
             "application/x-www-form-urlencoded": {
               "schema": {
-                "oneOf": [
-                  {
-                    "$ref": "#/components/schemas/PostOAuth2Token"
-                  },
-                  {
-                    "$ref": "#/components/schemas/PostOAuth2Token--RefreshAccessToken"
-                  }
-                ]
+                "$ref": "#/components/schemas/PostOAuth2Token"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Returns a new Access Token that can be used to make authenticated\nAPI calls by passing along the token in a authorization header as\nfollows `Authorization: Bearer <Token>`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessToken"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "An authentication error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OAuth2Error"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An authentication error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OAuth2Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/oauth2/token#refresh": {
+      "post": {
+        "operationId": "post_oauth2_token#refresh",
+        "summary": "Refresh access token",
+        "description": "Refresh an Access Token using its client ID, secret, and refresh token.",
+        "tags": [
+          "Authorization"
+        ],
+        "servers": [
+          {
+            "url": "https://api.box.com",
+            "description": "Server for server-side authentication"
+          }
+        ],
+        "x-box-tag": "authorization",
+        "x-box-reference-category": "authorization",
+        "x-box-is-variation": true,
+        "security": [],
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/PostOAuth2Token--RefreshAccessToken"
               }
             }
           }
@@ -413,6 +467,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object",
                 "properties": {
                   "name": {
                     "description": "An optional new name for the file.",
@@ -550,6 +605,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object",
                 "properties": {
                   "name": {
                     "type": "string",
@@ -1004,6 +1060,7 @@
           "content": {
             "multipart/form-data": {
               "schema": {
+                "type": "object",
                 "required": [
                   "attributes",
                   "file"
@@ -1087,6 +1144,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object",
                 "properties": {
                   "name": {
                     "type": "string",
@@ -1204,6 +1262,7 @@
           "content": {
             "multipart/form-data": {
               "schema": {
+                "type": "object",
                 "required": [
                   "attributes",
                   "file"
@@ -1314,6 +1373,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object",
                 "required": [
                   "folder_id",
                   "file_size",
@@ -1417,6 +1477,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object",
                 "required": [
                   "file_size"
                 ],
@@ -1574,7 +1635,8 @@
             "application/octet-stream": {
               "schema": {
                 "type": "string",
-                "format": "binary"
+                "format": "binary",
+                "description": "The binary content of the file"
               }
             }
           }
@@ -1585,7 +1647,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UploadPart"
+                  "$ref": "#/components/schemas/UploadedPart"
                 }
               }
             }
@@ -1815,14 +1877,16 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object",
                 "required": [
                   "parts"
                 ],
                 "properties": {
                   "parts": {
                     "type": "array",
+                    "description": "The list details for the uploaded parts",
                     "items": {
-                      "$ref": "#/components/schemas/UploadPart--Mini"
+                      "$ref": "#/components/schemas/UploadPart"
                     }
                   }
                 }
@@ -1931,6 +1995,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object",
                 "required": [
                   "parent"
                 ],
@@ -2837,6 +2902,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object",
                 "description": "The file version to revert to",
                 "properties": {
                   "id": {
@@ -3472,6 +3538,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object",
                 "required": [
                   "watermark"
                 ],
@@ -3732,6 +3799,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object",
                 "properties": {
                   "name": {
                     "description": "An optional new name for the folder.",
@@ -3870,6 +3938,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object",
                 "properties": {
                   "name": {
                     "type": "string",
@@ -4422,6 +4491,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object",
                 "required": [
                   "name",
                   "parent"
@@ -4598,6 +4668,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object",
                 "required": [
                   "parent"
                 ],
@@ -5621,6 +5692,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object",
                 "required": [
                   "watermark"
                 ],
@@ -6344,6 +6416,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object",
                 "required": [
                   "scope",
                   "displayName"
@@ -6619,6 +6692,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object",
                 "required": [
                   "folder_id",
                   "scope",
@@ -6845,6 +6919,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object",
                 "required": [
                   "conflict_resolution"
                 ],
@@ -6996,6 +7071,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object",
                 "properties": {
                   "message": {
                     "type": "string",
@@ -7102,6 +7178,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object",
                 "required": [
                   "message"
                 ],
@@ -7257,6 +7334,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object",
                 "properties": {
                   "role": {
                     "type": "string",
@@ -7504,6 +7582,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object",
                 "required": [
                   "item",
                   "accessible_by",
@@ -7921,6 +8000,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object",
                 "required": [
                   "item"
                 ],
@@ -7967,7 +8047,6 @@
                   "due_at": {
                     "type": "string",
                     "format": "date-time",
-                    "default": null,
                     "description": "Defines when the task is due. Defaults to `null` if not\nprovided.",
                     "example": "2012-12-12T10:53:43-08:00"
                   },
@@ -8122,6 +8201,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object",
                 "properties": {
                   "action": {
                     "type": "string",
@@ -8341,6 +8421,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object",
                 "required": [
                   "task",
                   "assign_to"
@@ -8526,6 +8607,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object",
                 "properties": {
                   "message": {
                     "type": "string",
@@ -8696,7 +8778,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Item"
+                  "$ref": "#/components/schemas/Item--Mini"
                 }
               }
             }
@@ -8731,6 +8813,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object",
                 "required": [
                   "parent",
                   "url"
@@ -8882,6 +8965,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object",
                 "properties": {
                   "name": {
                     "description": "An optional new name for the web link.",
@@ -8989,6 +9073,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object",
                 "properties": {
                   "url": {
                     "type": "string",
@@ -9366,6 +9451,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object",
                 "required": [
                   "name"
                 ],
@@ -9671,6 +9757,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object",
                 "properties": {
                   "enterprise": {
                     "type": "string",
@@ -10006,6 +10093,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object",
                 "required": [
                   "enterprise"
                 ],
@@ -10123,6 +10211,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object",
                 "required": [
                   "email"
                 ],
@@ -10315,6 +10404,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object",
                 "required": [
                   "enterprise",
                   "actionable_by"
@@ -10552,6 +10642,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object",
                 "required": [
                   "name"
                 ],
@@ -10743,6 +10834,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object",
                 "properties": {
                   "name": {
                     "type": "string",
@@ -11038,6 +11130,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object",
                 "required": [
                   "user",
                   "group"
@@ -11228,6 +11321,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object",
                 "properties": {
                   "role": {
                     "type": "string",
@@ -11398,6 +11492,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object",
                 "required": [
                   "target",
                   "triggers",
@@ -11639,6 +11734,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object",
                 "properties": {
                   "target": {
                     "type": "object",
@@ -11868,6 +11964,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object",
                 "required": [
                   "status",
                   "metadata",
@@ -12694,6 +12791,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object",
                 "required": [
                   "policy_name",
                   "policy_type",
@@ -12890,6 +12988,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object",
                 "properties": {
                   "policy_name": {
                     "type": "string",
@@ -13069,6 +13168,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object",
                 "required": [
                   "policy_id",
                   "assign_to"
@@ -13308,6 +13408,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object",
                 "required": [
                   "policy_name"
                 ],
@@ -13462,6 +13563,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object",
                 "properties": {
                   "policy_name": {
                     "description": "The name of the policy.",
@@ -13662,6 +13764,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object",
                 "required": [
                   "policy_id",
                   "assign_to"
@@ -14496,6 +14599,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object",
                 "required": [
                   "status",
                   "text"
@@ -14623,6 +14727,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object",
                 "required": [
                   "status",
                   "text"
@@ -14739,6 +14844,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object",
                 "required": [
                   "tos",
                   "user",
@@ -14851,6 +14957,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object",
                 "required": [
                   "is_accepted"
                 ],
@@ -14960,6 +15067,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object",
                 "required": [
                   "domain",
                   "direction"
@@ -15163,6 +15271,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object",
                 "required": [
                   "user"
                 ],
@@ -15498,6 +15607,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object",
                 "required": [
                   "storage_policy",
                   "assigned_to"
@@ -15649,6 +15759,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object",
                 "required": [
                   "storage_policy"
                 ],
@@ -15769,6 +15880,7 @@
     "schemas": {
       "PostOAuth2Token": {
         "title": "Token request",
+        "type": "object",
         "description": "A request for a new OAuth 2.0 token",
         "required": [
           "grant_type"
@@ -15859,6 +15971,7 @@
       },
       "PostOAuth2Token--RefreshAccessToken": {
         "title": "Refresh access token",
+        "type": "object",
         "description": "A request to refresh an Access Token. Use this API to refresh an expired\nAccess Token using a valid Refresh Token.",
         "required": [
           "grant_type",
@@ -15896,6 +16009,7 @@
       },
       "PostOAuth2Revoke": {
         "title": "Token revocation request",
+        "type": "object",
         "description": "A request to revoke an OAuth 2.0 token",
         "required": [
           "grant_type"
@@ -15921,6 +16035,7 @@
       },
       "ClientError": {
         "title": "Client error",
+        "type": "object",
         "x-box-resource-id": "client_error",
         "description": "A generic error",
         "properties": {
@@ -15985,6 +16100,7 @@
       },
       "ConflictError": {
         "title": "Conflict error",
+        "type": "object",
         "x-box-resource-id": "conflict_error",
         "x-box-tag": "uploads",
         "x-box-reference-category": "uploads",
@@ -16025,6 +16141,7 @@
       },
       "OAuth2Error": {
         "title": "OAuth 2.0 error",
+        "type": "object",
         "x-box-resource-id": "oauth2_error",
         "x-box-tag": "authorization",
         "x-box-reference-category": "authorization",
@@ -16199,6 +16316,7 @@
               },
               "status": {
                 "type": "object",
+                "description": "The details status of this event.",
                 "properties": {
                   "state": {
                     "type": "string",
@@ -16493,6 +16611,7 @@
       },
       "Collaboration": {
         "title": "Collaboration",
+        "type": "object",
         "x-box-resource-id": "collaboration",
         "description": "Collaborations define access permissions for users and groups to files and\nfolders, similar to access control lists. A collaboration object grants a\nuser or group access to a file or folder with permissions defined by a\nspecific role.",
         "x-box-tag": "user_collaborations",
@@ -16523,7 +16642,7 @@
               "item": {
                 "allOf": [
                   {
-                    "$ref": "#/components/schemas/Item"
+                    "$ref": "#/components/schemas/Item--Mini"
                   },
                   {
                     "description": "The file or folder to which access is granted. The field is\n`null` when the collaboration `status` is `pending`."
@@ -16671,6 +16790,7 @@
       },
       "Collaborations": {
         "title": "Collaborations",
+        "type": "object",
         "x-box-resource-id": "collaborations",
         "x-box-tag": "user_collaborations",
         "x-box-reference-category": "user_collaborations",
@@ -16738,6 +16858,7 @@
       },
       "CollaborationWhitelistEntry": {
         "title": "Collaboration whitelist entry",
+        "type": "object",
         "x-box-resource-id": "collaboration_whitelist_entry",
         "x-box-tag": "collaboration_whitelist_entries",
         "x-box-reference-category": "collaboration_whitelist_entries",
@@ -16835,6 +16956,7 @@
       },
       "CollaborationWhitelistEntries": {
         "title": "Collaboration whitelist entries",
+        "type": "object",
         "x-box-resource-id": "collaboration_whitelist_entries",
         "x-box-tag": "collaboration_whitelist_entries",
         "x-box-reference-category": "collaboration_whitelist_entries",
@@ -16878,6 +17000,7 @@
       },
       "CollaborationWhitelistExemptTarget": {
         "title": "Collaboration whitelist exempt target",
+        "type": "object",
         "x-box-resource-id": "collaboration_whitelist_exempt_target",
         "x-box-tag": "collaboration_whitelist_exempt_targets",
         "x-box-reference-category": "collaboration_whitelist_exempt_targets",
@@ -17009,6 +17132,7 @@
       },
       "CollaborationWhitelistExemptTargets": {
         "title": "Collaboration whitelist exempt targets",
+        "type": "object",
         "x-box-resource-id": "collaboration_whitelist_exempt_targets",
         "x-box-tag": "collaboration_whitelist_exempt_targets",
         "x-box-reference-category": "collaboration_whitelist_exempt_targets",
@@ -17052,6 +17176,7 @@
       },
       "Collection": {
         "title": "Collection",
+        "type": "object",
         "x-box-resource-id": "collection",
         "description": "A collection of items, including files and folders.\n\nCurrently, the only collection available\nis the `favorites` collection.\n\nThe contents of a collection can be explored in a\nsimilar way to which the contents of a folder is\nexplored.",
         "x-box-tag": "collections",
@@ -17101,6 +17226,7 @@
       },
       "Collections": {
         "title": "Collections",
+        "type": "object",
         "x-box-resource-id": "collections",
         "x-box-tag": "collections",
         "x-box-reference-category": "collections",
@@ -17168,12 +17294,12 @@
       },
       "Comment": {
         "title": "Comment",
+        "type": "object",
         "x-box-resource-id": "comment",
         "x-box-has-field-variants": true,
         "x-box-tag": "comments",
         "x-box-reference-category": "comments",
         "description": "Comments are messages created on files. Comments\ncan be made independently or created as responses to other\ncomments",
-        "type": "object",
         "allOf": [
           {
             "$ref": "#/components/schemas/Comment--Standard"
@@ -17195,6 +17321,7 @@
       },
       "Comments": {
         "title": "Comments",
+        "type": "object",
         "x-box-resource-id": "comments",
         "x-box-tag": "comments",
         "x-box-reference-category": "comments",
@@ -17262,10 +17389,10 @@
       },
       "Comment--Standard": {
         "title": "Comment (Standard)",
+        "type": "object",
         "x-box-resource-id": "comment--standard",
         "description": "Standard representation of a comment, as returned by the\ncomment API endpoints and when nested within other resources.",
         "x-box-reference-hide": true,
-        "type": "object",
         "allOf": [
           {
             "title": "Reference",
@@ -17357,6 +17484,7 @@
       },
       "DevicePinner": {
         "title": "Device pinner",
+        "type": "object",
         "x-box-resource-id": "device_pinner",
         "x-box-tag": "device_pinners",
         "x-box-reference-category": "device_pinners",
@@ -17417,6 +17545,7 @@
       },
       "DevicePinners": {
         "title": "Device pinners",
+        "type": "object",
         "x-box-resource-id": "device_pinners",
         "x-box-tag": "device_pinners",
         "x-box-reference-category": "device_pinners",
@@ -17460,11 +17589,11 @@
       },
       "EmailAlias": {
         "title": "Email alias",
+        "type": "object",
         "x-box-resource-id": "email_alias",
         "x-box-tag": "email_aliases",
         "x-box-reference-category": "email_aliases",
         "description": "An email alias for a user.",
-        "type": "object",
         "allOf": [
           {
             "title": "Reference",
@@ -17504,6 +17633,7 @@
       },
       "EmailAliases": {
         "title": "Email aliases",
+        "type": "object",
         "x-box-resource-id": "email_aliases",
         "x-box-tag": "email_aliases",
         "x-box-reference-category": "email_aliases",
@@ -17525,6 +17655,7 @@
       },
       "Event": {
         "title": "Event",
+        "type": "object",
         "x-box-resource-id": "event",
         "x-box-tag": "events",
         "x-box-reference-category": "events",
@@ -17684,77 +17815,34 @@
             "description": "The session of the user that performed the action. Not all events will\npopulate this attribute."
           },
           "source": {
-            "type": "object",
-            "nullable": true,
-            "oneOf": [
+            "allOf": [
               {
-                "$ref": "#/components/schemas/User--Mini"
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/User--Mini"
+                  },
+                  {
+                    "$ref": "#/components/schemas/EventSource"
+                  }
+                ]
               },
               {
-                "title": "Event source",
-                "type": "object",
-                "description": "The source file or folder that triggered an event in\nthe event stream.",
-                "properties": {
-                  "item_type": {
-                    "type": "string",
-                    "nullable": false,
-                    "enum": [
-                      "file",
-                      "folder"
-                    ],
-                    "description": "The type of the item that the event\nrepresents. Can be `file` or `folder`.\n",
-                    "example": "file"
-                  },
-                  "item_id": {
-                    "type": "string",
-                    "nullable": false,
-                    "description": "The unique identifier that represents the\nitem.\n",
-                    "example": "560284318361"
-                  },
-                  "item_name": {
-                    "type": "string",
-                    "nullable": false,
-                    "description": "The name of the item.\n",
-                    "example": "report.pdf"
-                  },
-                  "parent": {
-                    "allOf": [
-                      {
-                        "$ref": "#/components/schemas/Folder--Mini"
-                      },
-                      {
-                        "description": "The optional folder that this folder is located within.\n\nThis value may be `null` for some folders such as the\nroot folder or the trash folder."
-                      }
-                    ],
-                    "nullable": true
-                  },
-                  "owned_by": {
-                    "allOf": [
-                      {
-                        "$ref": "#/components/schemas/User--Mini"
-                      },
-                      {
-                        "description": "The user who owns this item."
-                      },
-                      {
-                        "nullable": false
-                      }
-                    ]
-                  }
-                }
+                "description": "The item that triggered this event"
               }
-            ],
-            "description": "The item that triggered this event"
+            ]
           },
           "additional_details": {
             "type": "object",
-            "example": "",
+            "example": {
+              "key": "value"
+            },
             "description": "This object provides additional information about the event if available.\n\nThis can include how a user performed an event as well as additional\ninformation to correlate an event to external KeySafe logs. Not all events\nhave an `additional_details` object.  This object is only available in the\nEnterprise Events."
           }
         }
       },
       "Events": {
         "title": "Events",
+        "type": "object",
         "x-box-resource-id": "events",
         "x-box-tag": "events",
         "x-box-reference-category": "events",
@@ -17781,6 +17869,7 @@
       },
       "File": {
         "title": "File",
+        "type": "object",
         "x-box-resource-id": "file",
         "x-box-has-field-variants": true,
         "x-box-sanitized": true,
@@ -18274,6 +18363,7 @@
       },
       "Files": {
         "title": "Files",
+        "type": "object",
         "x-box-resource-id": "files",
         "x-box-tag": "files",
         "x-box-reference-category": "files",
@@ -18296,6 +18386,7 @@
       },
       "File--Standard": {
         "title": "File (Standard)",
+        "type": "object",
         "x-box-resource-id": "file--standard",
         "x-box-tag": null,
         "x-box-reference-category": null,
@@ -18621,6 +18712,7 @@
       },
       "File--Mini": {
         "title": "File (Mini)",
+        "type": "object",
         "x-box-resource-id": "file--mini",
         "x-box-tag": null,
         "x-box-reference-category": null,
@@ -18661,6 +18753,7 @@
       },
       "File--Base": {
         "title": "File (Base)",
+        "type": "object",
         "x-box-resource-id": "file--base",
         "x-box-sanitized": true,
         "x-box-reference-hide": true,
@@ -18691,6 +18784,7 @@
       },
       "FileVersion": {
         "title": "File version",
+        "type": "object",
         "x-box-resource-id": "file_version",
         "x-box-has-field-variants": true,
         "x-box-tag": "file_versions",
@@ -18801,6 +18895,7 @@
       },
       "FileVersion--Mini": {
         "title": "File version (Mini)",
+        "type": "object",
         "x-box-resource-id": "file_version--mini",
         "x-box-has-field-variants": true,
         "x-box-reference-hide": true,
@@ -18823,6 +18918,7 @@
       },
       "FileVersion--Base": {
         "title": "File version (Base)",
+        "type": "object",
         "x-box-resource-id": "file_version--base",
         "x-box-has-field-variants": true,
         "x-box-reference-hide": true,
@@ -18847,6 +18943,7 @@
       },
       "FileVersions": {
         "title": "File versions",
+        "type": "object",
         "x-box-resource-id": "file_versions",
         "x-box-tag": "file_versions",
         "x-box-reference-category": "file_versions",
@@ -18914,6 +19011,7 @@
       },
       "FileVersionLegalHold": {
         "title": "File version legal hold",
+        "type": "object",
         "x-box-resource-id": "file_version_legal_hold",
         "x-box-tag": "file_version_legal_holds",
         "x-box-reference-category": "file_version_legal_holds",
@@ -18980,6 +19078,7 @@
       },
       "FileVersionLegalHolds": {
         "title": "File version legal holds",
+        "type": "object",
         "x-box-resource-id": "file_version_legal_holds",
         "x-box-tag": "file_version_legal_holds",
         "x-box-reference-category": "file_version_legal_holds",
@@ -19023,6 +19122,7 @@
       },
       "FileVersionRetention": {
         "title": "File version retention",
+        "type": "object",
         "x-box-resource-id": "file_version_retention",
         "x-box-tag": "file_version_retentions",
         "x-box-reference-category": "file_version_retentions",
@@ -19098,6 +19198,7 @@
       },
       "FileVersionRetentions": {
         "title": "File version retentions",
+        "type": "object",
         "x-box-resource-id": "file_version_retentions",
         "x-box-tag": "file_version_retentions",
         "x-box-reference-category": "file_version_retentions",
@@ -19141,6 +19242,7 @@
       },
       "Folder": {
         "title": "Folder",
+        "type": "object",
         "x-box-resource-id": "folder",
         "x-box-has-field-variants": true,
         "x-box-sanitized": true,
@@ -19386,6 +19488,7 @@
       },
       "Folder--Standard": {
         "title": "Folder (Standard)",
+        "type": "object",
         "x-box-resource-id": "folder--standard",
         "x-box-tag": null,
         "x-box-reference-category": null,
@@ -19750,6 +19853,7 @@
       },
       "Folder--Mini": {
         "title": "Folder (Mini)",
+        "type": "object",
         "x-box-resource-id": "folder--mini",
         "x-box-tag": null,
         "x-box-reference-category": null,
@@ -19791,6 +19895,7 @@
       },
       "Folder--Base": {
         "title": "Folder (Base)",
+        "type": "object",
         "x-box-resource-id": "folder--base",
         "x-box-sanitized": true,
         "x-box-reference-hide": true,
@@ -19821,6 +19926,7 @@
       },
       "Group": {
         "title": "Group",
+        "type": "object",
         "x-box-resource-id": "group",
         "x-box-tag": "groups",
         "x-box-reference-category": "groups",
@@ -19883,6 +19989,7 @@
       },
       "Groups": {
         "title": "Groups",
+        "type": "object",
         "x-box-resource-id": "groups",
         "x-box-tag": "groups",
         "x-box-reference-category": "groups",
@@ -19950,6 +20057,7 @@
       },
       "Group--Standard": {
         "title": "Group (Standard)",
+        "type": "object",
         "x-box-resource-id": "group--standard",
         "description": "A standard representation of a group, as returned from any\ngroup API endpoints by default",
         "x-box-reference-hide": true,
@@ -19979,8 +20087,8 @@
       },
       "Group--Mini": {
         "title": "Group (Mini)",
-        "x-box-resource-id": "group--mini",
         "type": "object",
+        "x-box-resource-id": "group--mini",
         "description": "Mini representation of a group, including id and name of\ngroup.",
         "x-box-reference-hide": true,
         "allOf": [
@@ -20028,6 +20136,7 @@
       },
       "GroupMembership": {
         "title": "Group membership",
+        "type": "object",
         "x-box-resource-id": "group_membership",
         "x-box-tag": "memberships",
         "x-box-reference-category": "memberships",
@@ -20102,6 +20211,7 @@
       },
       "GroupMemberships": {
         "title": "Group memberships",
+        "type": "object",
         "x-box-resource-id": "group_memberships",
         "x-box-tag": "memberships",
         "x-box-reference-category": "memberships",
@@ -20169,6 +20279,7 @@
       },
       "Invite": {
         "title": "Invite",
+        "type": "object",
         "x-box-resource-id": "invite",
         "x-box-tag": "invites",
         "x-box-reference-category": "invites",
@@ -20261,6 +20372,31 @@
       },
       "Item": {
         "title": "Item",
+        "type": "object",
+        "x-box-resource-id": "item",
+        "x-box-reference-hide": true,
+        "x-box-tag": null,
+        "x-box-reference-category": null,
+        "description": "A generic representation of a file, folder, user or enterprise",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Item--Mini"
+          },
+          {
+            "properties": {
+              "url": {
+                "type": "string",
+                "example": "https://www.example.com/example/1234",
+                "description": "The URL this item points to",
+                "x-box-field-variant": 1
+              }
+            }
+          }
+        ]
+      },
+      "Item--Mini": {
+        "title": "Item (Mini)",
+        "type": "object",
         "x-box-resource-id": "item_reference",
         "description": "A generic mini representation of a file, folder, user or enterprise",
         "allOf": [
@@ -20281,7 +20417,12 @@
               "type": {
                 "description": "The type of this item",
                 "type": "string",
-                "example": "file"
+                "example": "file",
+                "enum": [
+                  "file",
+                  "folder",
+                  "web_link"
+                ]
               },
               "sequence_id": {
                 "allOf": [
@@ -20315,6 +20456,7 @@
       },
       "Items": {
         "title": "Items",
+        "type": "object",
         "x-box-resource-id": "item_collection",
         "x-box-tag": "folders",
         "x-box-reference-category": "folders",
@@ -20374,17 +20516,7 @@
                 "description": "The items in this collection.",
                 "type": "array",
                 "items": {
-                  "oneOf": [
-                    {
-                      "$ref": "#/components/schemas/File--Mini"
-                    },
-                    {
-                      "$ref": "#/components/schemas/Folder--Mini"
-                    },
-                    {
-                      "$ref": "#/components/schemas/WebLink--Mini"
-                    }
-                  ]
+                  "$ref": "#/components/schemas/Item"
                 }
               }
             }
@@ -20393,6 +20525,7 @@
       },
       "LegalHoldPolicy": {
         "title": "Legal hold policy",
+        "type": "object",
         "x-box-resource-id": "legal_hold_policy",
         "x-box-tag": "legal_hold_policies",
         "x-box-reference-category": "legal_hold_policies",
@@ -20511,6 +20644,7 @@
       },
       "LegalHoldPolicies": {
         "title": "Legal hold policies",
+        "type": "object",
         "x-box-resource-id": "legal_hold_policies",
         "x-box-tag": "legal_hold_policies",
         "x-box-reference-category": "legal_hold_policies",
@@ -20554,6 +20688,7 @@
       },
       "LegalHoldPolicy--Mini": {
         "title": "Legal hold policy (Mini)",
+        "type": "object",
         "x-box-resource-id": "legal_hold_policy--mini",
         "description": "A mini legal hold policy",
         "x-box-reference-hide": true,
@@ -20586,6 +20721,7 @@
       },
       "LegalHoldPolicyAssignment": {
         "title": "Legal hold policy assignment",
+        "type": "object",
         "x-box-resource-id": "legal_hold_policy_assignment",
         "x-box-tag": "legal_hold_policy_assignments",
         "x-box-reference-category": "legal_hold_policy_assignments",
@@ -20626,7 +20762,7 @@
               "assigned_to": {
                 "allOf": [
                   {
-                    "$ref": "#/components/schemas/Item"
+                    "$ref": "#/components/schemas/Item--Mini"
                   },
                   {
                     "description": "The item that the the legal hold policy\nis assigned to. Includes type and ID."
@@ -20661,6 +20797,7 @@
       },
       "LegalHoldPolicyAssignments": {
         "title": "Legal hold policy assignments",
+        "type": "object",
         "x-box-resource-id": "legal_hold_policy_assignments",
         "x-box-tag": "legal_hold_policy_assignments",
         "x-box-reference-category": "legal_hold_policy_assignments",
@@ -20704,11 +20841,11 @@
       },
       "Metadata": {
         "title": "Metadata instance",
+        "type": "object",
         "x-box-resource-id": "metadata",
         "description": "A piece of metadata as specified by a metadata template and\napplied to a file or folder.",
         "x-box-tag": "file_metadata",
         "x-box-reference-category": "file_metadata",
-        "type": "object",
         "properties": {
           "$canEdit": {
             "type": "boolean",
@@ -20761,6 +20898,7 @@
       },
       "Metadatas": {
         "title": "Metadata instances",
+        "type": "object",
         "x-box-resource-id": "metadatas",
         "x-box-tag": "file_metadata",
         "x-box-reference-category": "file_metadata",
@@ -20782,6 +20920,7 @@
       },
       "MetadataCascadePolicy": {
         "title": "Metadata cascade policy",
+        "type": "object",
         "x-box-resource-id": "metadata_cascade_policy",
         "x-box-tag": "metadata_cascade_policies",
         "x-box-reference-category": "metadata_cascade_policies",
@@ -20856,6 +20995,7 @@
       },
       "MetadataCascadePolicies": {
         "title": "Metadata cascade policies",
+        "type": "object",
         "x-box-resource-id": "metadata_cascade_policies",
         "x-box-tag": "metadata_cascade_policies",
         "x-box-reference-category": "metadata_cascade_policies",
@@ -20899,11 +21039,11 @@
       },
       "MetadataTemplate": {
         "title": "Metadata template",
+        "type": "object",
         "x-box-resource-id": "metadata_template",
         "x-box-tag": "metadata_templates",
         "x-box-reference-category": "metadata_templates",
         "description": "A template for metadata that can be applied to files and folders",
-        "type": "object",
         "properties": {
           "id": {
             "type": "string",
@@ -21070,6 +21210,7 @@
       },
       "MetadataTemplates": {
         "title": "Metadata templates",
+        "type": "object",
         "x-box-resource-id": "metadata_templates",
         "x-box-tag": "metadata_templates",
         "x-box-reference-category": "metadata_templates",
@@ -21113,6 +21254,7 @@
       },
       "RealtimeServer": {
         "title": "Real-time server",
+        "type": "object",
         "x-box-resource-id": "realtime_server",
         "description": "A real-time server that can be used for\nlong polling user events",
         "properties": {
@@ -21145,6 +21287,7 @@
       },
       "RealtimeServers": {
         "title": "Real-time servers",
+        "type": "object",
         "x-box-resource-id": "realtime_servers",
         "description": "A list of real-time servers that can\nbe used for long-polling.",
         "x-box-tag": "events",
@@ -21166,6 +21309,7 @@
       },
       "RecentItem": {
         "title": "Recent item",
+        "type": "object",
         "x-box-resource-id": "recent_item",
         "description": "A recent item accessed by a user.",
         "x-box-tag": "recent_items",
@@ -21179,7 +21323,7 @@
           "item": {
             "allOf": [
               {
-                "$ref": "#/components/schemas/Item"
+                "$ref": "#/components/schemas/Item--Mini"
               },
               {
                 "description": "The item that was recently accessed."
@@ -21213,6 +21357,7 @@
       },
       "RecentItems": {
         "title": "Recent items",
+        "type": "object",
         "x-box-resource-id": "recent_items",
         "description": "A list of recent items.",
         "allOf": [
@@ -21254,6 +21399,7 @@
       },
       "RetentionPolicies": {
         "title": "Retention policies",
+        "type": "object",
         "x-box-resource-id": "retention_policies",
         "x-box-tag": "retention_policies",
         "x-box-reference-category": "retention_policies",
@@ -21275,6 +21421,7 @@
       },
       "RetentionPolicy": {
         "title": "Retention policy",
+        "type": "object",
         "x-box-resource-id": "retention_policy",
         "x-box-tag": "retention_policies",
         "x-box-reference-category": "retention_policies",
@@ -21340,6 +21487,7 @@
       },
       "RetentionPolicy--Mini": {
         "title": "Retention policy (Mini)",
+        "type": "object",
         "x-box-resource-id": "retention_policy--mini",
         "x-box-tag": null,
         "x-box-reference-category": null,
@@ -21381,6 +21529,7 @@
       },
       "RetentionPolicy--Base": {
         "title": "Retention policy (Base)",
+        "type": "object",
         "x-box-resource-id": "retention_policy--base",
         "x-box-tag": null,
         "x-box-reference-category": null,
@@ -21407,6 +21556,7 @@
       },
       "RetentionPolicyAssignment": {
         "title": "Retention policy assignment",
+        "type": "object",
         "x-box-resource-id": "retention_policy_assignment",
         "x-box-tag": "retention_policy_assignments",
         "x-box-reference-category": "retention_policy_assignments",
@@ -21485,6 +21635,7 @@
       },
       "RetentionPolicyAssignments": {
         "title": "Retention policy assignments",
+        "type": "object",
         "x-box-resource-id": "retention_policy_assignments",
         "x-box-tag": "retention_policy_assignments",
         "x-box-reference-category": "retention_policy_assignments",
@@ -21528,6 +21679,7 @@
       },
       "StoragePolicy": {
         "title": "Storage policy",
+        "type": "object",
         "x-box-resource-id": "storage_policy",
         "x-box-tag": "storage_policies",
         "x-box-reference-category": "storage_policies",
@@ -21552,6 +21704,7 @@
       },
       "StoragePolicies": {
         "title": "Storage policies",
+        "type": "object",
         "x-box-resource-id": "storage_policies",
         "x-box-tag": "storage_policies",
         "x-box-reference-category": "storage_policies",
@@ -21595,6 +21748,7 @@
       },
       "StoragePolicy--Mini": {
         "title": "Storage policy (Mini)",
+        "type": "object",
         "x-box-resource-id": "storage_policy--mini",
         "description": "A mini description of a Storage Policy object",
         "x-box-reference-hide": true,
@@ -21627,6 +21781,7 @@
       },
       "StoragePolicyAssignment": {
         "title": "Storage policy assignment",
+        "type": "object",
         "x-box-resource-id": "storage_policy_assignment",
         "x-box-tag": "storage_policy_assignments",
         "x-box-reference-category": "storage_policy_assignments",
@@ -21665,6 +21820,7 @@
       },
       "StoragePolicyAssignments": {
         "title": "Storage policy assignments",
+        "type": "object",
         "x-box-resource-id": "storage_policy_assignments",
         "x-box-tag": "storage_policy_assignments",
         "x-box-reference-category": "storage_policy_assignments",
@@ -21708,6 +21864,7 @@
       },
       "Task": {
         "title": "Task",
+        "type": "object",
         "x-box-resource-id": "task",
         "x-box-tag": "tasks",
         "x-box-reference-category": "tasks",
@@ -21811,6 +21968,7 @@
       },
       "Tasks": {
         "title": "Tasks",
+        "type": "object",
         "x-box-resource-id": "tasks",
         "x-box-tag": "tasks",
         "x-box-reference-category": "tasks",
@@ -21832,6 +21990,7 @@
       },
       "TaskAssignment": {
         "title": "Task assignment",
+        "type": "object",
         "x-box-resource-id": "task_assignment",
         "x-box-tag": "task_assignments",
         "x-box-reference-category": "task_assignments",
@@ -21929,10 +22088,10 @@
       },
       "TaskAssignments": {
         "title": "Task assignments",
+        "type": "object",
         "x-box-resource-id": "task_assignments",
         "x-box-tag": "task_assignments",
         "x-box-reference-category": "task_assignments",
-        "type": "object",
         "description": "A list of task assignments",
         "properties": {
           "total_count": {
@@ -21951,6 +22110,7 @@
       },
       "TermsOfService": {
         "title": "Terms of service",
+        "type": "object",
         "x-box-resource-id": "terms_of_service",
         "x-box-tag": "terms_of_services",
         "x-box-reference-category": "terms_of_services",
@@ -22048,6 +22208,7 @@
       },
       "TermsOfServices": {
         "title": "Terms of services",
+        "type": "object",
         "x-box-resource-id": "terms_of_services",
         "x-box-tag": "terms_of_services",
         "x-box-reference-category": "terms_of_services",
@@ -22069,6 +22230,7 @@
       },
       "TermsOfService--Mini": {
         "title": "Terms of service (Mini)",
+        "type": "object",
         "x-box-resource-id": "terms_of_service--mini",
         "description": "The root-level record that is supposed to represent a\nsingle Terms of Service.",
         "x-box-reference-hide": true,
@@ -22101,6 +22263,7 @@
       },
       "TermsOfServiceUserStatus": {
         "title": "Terms of service user status",
+        "type": "object",
         "x-box-resource-id": "terms_of_service_user_status",
         "x-box-tag": "terms_of_service_user_statuses",
         "x-box-reference-category": "terms_of_service_user_statuses",
@@ -22171,6 +22334,7 @@
       },
       "TermsOfServiceUserStatuses": {
         "title": "Terms of service user statuses",
+        "type": "object",
         "x-box-resource-id": "terms_of_services_user_statuses",
         "x-box-tag": "terms_of_service_user_statuses",
         "x-box-reference-category": "terms_of_service_user_statuses",
@@ -22192,30 +22356,9 @@
       },
       "UploadPart": {
         "title": "Upload part",
+        "type": "object",
         "x-box-resource-id": "upload_part",
-        "description": "A chunk of a file uploaded as part of\nan upload session.",
-        "x-box-tag": "chunked_uploads",
-        "x-box-reference-category": "chunked_uploads",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/UploadPart--Mini"
-          },
-          {
-            "properties": {
-              "sha1": {
-                "description": "The SHA1 hash of the chunk.",
-                "type": "string",
-                "example": "134b65991ed521fcfe4724b7d814ab8ded5185dc"
-              }
-            }
-          }
-        ]
-      },
-      "UploadPart--Mini": {
-        "title": "Upload part (Mini)",
-        "x-box-resource-id": "upload_part--mini",
-        "x-box-reference-hide": true,
-        "description": "The basic representation of an upload\nsession chunk.",
+        "description": "The representation of an upload\nsession chunk.",
         "properties": {
           "part_id": {
             "description": "The unique ID of the chunk.",
@@ -22233,11 +22376,30 @@
             "type": "integer",
             "format": "int64",
             "example": 3222784
+          },
+          "sha1": {
+            "description": "The SHA1 hash of the chunk.",
+            "type": "string",
+            "example": "134b65991ed521fcfe4724b7d814ab8ded5185dc"
+          }
+        }
+      },
+      "UploadedPart": {
+        "title": "Uploaded part",
+        "type": "object",
+        "x-box-resource-id": "uploaded_part",
+        "description": "A chunk of a file uploaded as part of\nan upload session, as returned by some endpoints.",
+        "x-box-tag": "chunked_uploads",
+        "x-box-reference-category": "chunked_uploads",
+        "properties": {
+          "part": {
+            "$ref": "#/components/schemas/UploadPart"
           }
         }
       },
       "UploadParts": {
         "title": "Upload parts",
+        "type": "object",
         "x-box-resource-id": "upload_parts",
         "description": "A list of uploaded chunks for an upload\nsession.",
         "allOf": [
@@ -22303,6 +22465,7 @@
       },
       "UploadSession": {
         "title": "Upload session",
+        "type": "object",
         "x-box-resource-id": "upload_session",
         "description": "An upload session for chunk uploading a file.",
         "x-box-tag": "chunked_uploads",
@@ -22393,6 +22556,7 @@
       },
       "UploadUrl": {
         "title": "Upload URL",
+        "type": "object",
         "x-box-resource-id": "upload_url",
         "x-box-tag": "uploads",
         "x-box-reference-category": "uploads",
@@ -22412,6 +22576,7 @@
       },
       "User": {
         "title": "User",
+        "type": "object",
         "x-box-resource-id": "user",
         "x-box-has-field-variants": true,
         "description": "A full representation of a user, as can be returned from any\nuser API endpoint.",
@@ -22595,6 +22760,7 @@
       },
       "Users": {
         "title": "Users",
+        "type": "object",
         "x-box-resource-id": "users",
         "x-box-tag": "users",
         "x-box-reference-category": "users",
@@ -22662,6 +22828,7 @@
       },
       "User--Standard": {
         "title": "User (Standard)",
+        "type": "object",
         "x-box-resource-id": "user--standard",
         "description": "A standard representation of a user, as returned from any\nuser API endpoints by default",
         "x-box-reference-hide": true,
@@ -22762,6 +22929,7 @@
       },
       "User--Mini": {
         "title": "User (Mini)",
+        "type": "object",
         "x-box-resource-id": "user--mini",
         "description": "A mini representation of a user, used when\nnested within another resource.",
         "x-box-reference-hide": true,
@@ -22811,6 +22979,7 @@
       },
       "Watermark": {
         "title": "Watermark",
+        "type": "object",
         "x-box-resource-id": "watermark",
         "x-box-tag": "file_watermarks",
         "x-box-reference-category": "file_watermarks",
@@ -22837,6 +23006,7 @@
       },
       "Webhook": {
         "title": "Webhook",
+        "type": "object",
         "x-box-resource-id": "webhook",
         "x-box-tag": "webhooks",
         "x-box-reference-category": "webhooks",
@@ -22962,6 +23132,7 @@
       },
       "Webhooks": {
         "title": "Webhooks",
+        "type": "object",
         "x-box-resource-id": "webhooks",
         "x-box-tag": "webhooks",
         "x-box-reference-category": "webhooks",
@@ -23005,6 +23176,7 @@
       },
       "WebLink": {
         "title": "Web link",
+        "type": "object",
         "x-box-resource-id": "web_link",
         "x-box-tag": "web_links",
         "x-box-reference-category": "web_links",
@@ -23249,6 +23421,7 @@
       },
       "WebLink--Mini": {
         "title": "Web link (Mini)",
+        "type": "object",
         "x-box-resource-id": "web_link--mini",
         "x-box-reference-hide": true,
         "x-box-tag": null,
@@ -23256,7 +23429,7 @@
         "description": "Web links are objects that point to URLs. These objects\nare also known as bookmarks within the Box web application.\n\nWeb link objects are treated similarly to file objects,\nthey will also support most actions that apply to regular files.",
         "allOf": [
           {
-            "$ref": "#/components/schemas/Item"
+            "$ref": "#/components/schemas/Item--Mini"
           },
           {
             "properties": {
@@ -23340,6 +23513,60 @@
             ]
           }
         }
+      },
+      "EventSource": {
+        "title": "Event source",
+        "type": "object",
+        "x-box-resource-id": "event_source",
+        "description": "The source file or folder that triggered an event in\nthe event stream.",
+        "properties": {
+          "item_type": {
+            "type": "string",
+            "nullable": false,
+            "enum": [
+              "file",
+              "folder"
+            ],
+            "description": "The type of the item that the event\nrepresents. Can be `file` or `folder`.\n",
+            "example": "file"
+          },
+          "item_id": {
+            "type": "string",
+            "nullable": false,
+            "description": "The unique identifier that represents the\nitem.\n",
+            "example": "560284318361"
+          },
+          "item_name": {
+            "type": "string",
+            "nullable": false,
+            "description": "The name of the item.\n",
+            "example": "report.pdf"
+          },
+          "parent": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Folder--Mini"
+              },
+              {
+                "description": "The optional folder that this folder is located within.\n\nThis value may be `null` for some folders such as the\nroot folder or the trash folder."
+              }
+            ],
+            "nullable": true
+          },
+          "owned_by": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/User--Mini"
+              },
+              {
+                "description": "The user who owns this item."
+              },
+              {
+                "nullable": false
+              }
+            ]
+          }
+        }
       }
     }
   },
@@ -23356,129 +23583,14 @@
       "x-box-priority": true
     },
     {
-      "name": "Folders",
-      "x-box-tag": "folders",
-      "x-box-reference-category": "folders"
+      "name": "Collaboration whitelist entries",
+      "x-box-tag": "collaboration_whitelist_entries",
+      "x-box-reference-category": "collaboration_whitelist_entries"
     },
     {
-      "name": "Files",
-      "x-box-tag": "files",
-      "x-box-reference-category": "files"
-    },
-    {
-      "name": "Downloads",
-      "x-box-tag": "downloads",
-      "x-box-reference-category": "downloads"
-    },
-    {
-      "name": "Uploads",
-      "x-box-tag": "uploads",
-      "x-box-reference-category": "uploads"
-    },
-    {
-      "name": "Uploads (Chunked)",
-      "x-box-tag": "chunked_uploads",
-      "x-box-reference-category": "chunked_uploads"
-    },
-    {
-      "name": "Search",
-      "x-box-tag": "search",
-      "x-box-reference-category": "search"
-    },
-    {
-      "name": "Shared links",
-      "x-box-tag": "shared_links",
-      "x-box-reference-category": "shared_links"
-    },
-    {
-      "name": "File versions",
-      "x-box-tag": "file_versions",
-      "x-box-reference-category": "file_versions"
-    },
-    {
-      "name": "Comments",
-      "x-box-tag": "comments",
-      "x-box-reference-category": "comments"
-    },
-    {
-      "name": "Collections",
-      "x-box-tag": "collections",
-      "x-box-reference-category": "collections"
-    },
-    {
-      "name": "Web links",
-      "x-box-tag": "web_links",
-      "x-box-reference-category": "web_links"
-    },
-    {
-      "name": "Trashed items",
-      "x-box-tag": "trashed_items",
-      "x-box-reference-category": "trashed_items"
-    },
-    {
-      "name": "Trashed files",
-      "x-box-tag": "trashed_files",
-      "x-box-reference-category": "trashed_files"
-    },
-    {
-      "name": "Trashed folders",
-      "x-box-tag": "trashed_folders",
-      "x-box-reference-category": "trashed_folders"
-    },
-    {
-      "name": "Trashed web links",
-      "x-box-tag": "trashed_web_links",
-      "x-box-reference-category": "trashed_web_links"
-    },
-    {
-      "name": "Metadata templates",
-      "x-box-tag": "metadata_templates",
-      "x-box-reference-category": "metadata_templates"
-    },
-    {
-      "name": "Metadata instances (Files)",
-      "x-box-tag": "file_metadata",
-      "x-box-reference-category": "file_metadata"
-    },
-    {
-      "name": "Metadata instances (Folders)",
-      "x-box-tag": "folder_metadata",
-      "x-box-reference-category": "folder_metadata"
-    },
-    {
-      "name": "Metadata cascade policies (Beta)",
-      "x-box-tag": "metadata_cascade_policies",
-      "x-box-reference-category": "metadata_cascade_policies"
-    },
-    {
-      "name": "Skills",
-      "x-box-tag": "skills",
-      "x-box-reference-category": "skills"
-    },
-    {
-      "name": "Webhooks",
-      "x-box-tag": "webhooks",
-      "x-box-reference-category": "webhooks"
-    },
-    {
-      "name": "Events",
-      "x-box-tag": "events",
-      "x-box-reference-category": "events"
-    },
-    {
-      "name": "Recent items",
-      "x-box-tag": "recent_items",
-      "x-box-reference-category": "recent_items"
-    },
-    {
-      "name": "Tasks",
-      "x-box-tag": "tasks",
-      "x-box-reference-category": "tasks"
-    },
-    {
-      "name": "Task assignments",
-      "x-box-tag": "task_assignments",
-      "x-box-reference-category": "task_assignments"
+      "name": "Collaboration whitelist exempt targets",
+      "x-box-tag": "collaboration_whitelist_exempt_targets",
+      "x-box-reference-category": "collaboration_whitelist_exempt_targets"
     },
     {
       "name": "Collaborations",
@@ -23491,34 +23603,24 @@
       "x-box-reference-category": "list_collaborations"
     },
     {
-      "name": "Collaboration whitelist entries",
-      "x-box-tag": "collaboration_whitelist_entries",
-      "x-box-reference-category": "collaboration_whitelist_entries"
+      "name": "Collections",
+      "x-box-tag": "collections",
+      "x-box-reference-category": "collections"
     },
     {
-      "name": "Collaboration whitelist exempt targets",
-      "x-box-tag": "collaboration_whitelist_exempt_targets",
-      "x-box-reference-category": "collaboration_whitelist_exempt_targets"
+      "name": "Comments",
+      "x-box-tag": "comments",
+      "x-box-reference-category": "comments"
     },
     {
-      "name": "Users",
-      "x-box-tag": "users",
-      "x-box-reference-category": "users"
+      "name": "Device pinners",
+      "x-box-tag": "device_pinners",
+      "x-box-reference-category": "device_pinners"
     },
     {
-      "name": "Groups",
-      "x-box-tag": "groups",
-      "x-box-reference-category": "groups"
-    },
-    {
-      "name": "Group memberships",
-      "x-box-tag": "memberships",
-      "x-box-reference-category": "memberships"
-    },
-    {
-      "name": "User avatars",
-      "x-box-tag": "avatars",
-      "x-box-reference-category": "avatars"
+      "name": "Downloads",
+      "x-box-tag": "downloads",
+      "x-box-reference-category": "downloads"
     },
     {
       "name": "Email aliases",
@@ -23526,14 +23628,49 @@
       "x-box-reference-category": "email_aliases"
     },
     {
+      "name": "Events",
+      "x-box-tag": "events",
+      "x-box-reference-category": "events"
+    },
+    {
+      "name": "File version legal holds",
+      "x-box-tag": "file_version_legal_holds",
+      "x-box-reference-category": "file_version_legal_holds"
+    },
+    {
+      "name": "File version retentions",
+      "x-box-tag": "file_version_retentions",
+      "x-box-reference-category": "file_version_retentions"
+    },
+    {
+      "name": "File versions",
+      "x-box-tag": "file_versions",
+      "x-box-reference-category": "file_versions"
+    },
+    {
+      "name": "Files",
+      "x-box-tag": "files",
+      "x-box-reference-category": "files"
+    },
+    {
+      "name": "Folders",
+      "x-box-tag": "folders",
+      "x-box-reference-category": "folders"
+    },
+    {
+      "name": "Group memberships",
+      "x-box-tag": "memberships",
+      "x-box-reference-category": "memberships"
+    },
+    {
+      "name": "Groups",
+      "x-box-tag": "groups",
+      "x-box-reference-category": "groups"
+    },
+    {
       "name": "Invites",
       "x-box-tag": "invites",
       "x-box-reference-category": "invites"
-    },
-    {
-      "name": "Transfer folders",
-      "x-box-tag": "transfer",
-      "x-box-reference-category": "transfer"
     },
     {
       "name": "Legal hold policies",
@@ -23546,9 +23683,29 @@
       "x-box-reference-category": "legal_hold_policy_assignments"
     },
     {
-      "name": "File version legal holds",
-      "x-box-tag": "file_version_legal_holds",
-      "x-box-reference-category": "file_version_legal_holds"
+      "name": "Metadata cascade policies (Beta)",
+      "x-box-tag": "metadata_cascade_policies",
+      "x-box-reference-category": "metadata_cascade_policies"
+    },
+    {
+      "name": "Metadata instances (Files)",
+      "x-box-tag": "file_metadata",
+      "x-box-reference-category": "file_metadata"
+    },
+    {
+      "name": "Metadata instances (Folders)",
+      "x-box-tag": "folder_metadata",
+      "x-box-reference-category": "folder_metadata"
+    },
+    {
+      "name": "Metadata templates",
+      "x-box-tag": "metadata_templates",
+      "x-box-reference-category": "metadata_templates"
+    },
+    {
+      "name": "Recent items",
+      "x-box-tag": "recent_items",
+      "x-box-reference-category": "recent_items"
     },
     {
       "name": "Retention policies",
@@ -23561,14 +23718,39 @@
       "x-box-reference-category": "retention_policy_assignments"
     },
     {
-      "name": "File version retentions",
-      "x-box-tag": "file_version_retentions",
-      "x-box-reference-category": "file_version_retentions"
+      "name": "Search",
+      "x-box-tag": "search",
+      "x-box-reference-category": "search"
     },
     {
-      "name": "Device pinners",
-      "x-box-tag": "device_pinners",
-      "x-box-reference-category": "device_pinners"
+      "name": "Shared links",
+      "x-box-tag": "shared_links",
+      "x-box-reference-category": "shared_links"
+    },
+    {
+      "name": "Skills",
+      "x-box-tag": "skills",
+      "x-box-reference-category": "skills"
+    },
+    {
+      "name": "Storage policies",
+      "x-box-tag": "storage_policies",
+      "x-box-reference-category": "storage_policies"
+    },
+    {
+      "name": "Storage policy assignments",
+      "x-box-tag": "storage_policy_assignments",
+      "x-box-reference-category": "storage_policy_assignments"
+    },
+    {
+      "name": "Task assignments",
+      "x-box-tag": "task_assignments",
+      "x-box-reference-category": "task_assignments"
+    },
+    {
+      "name": "Tasks",
+      "x-box-tag": "tasks",
+      "x-box-reference-category": "tasks"
     },
     {
       "name": "Terms of service",
@@ -23581,6 +23763,51 @@
       "x-box-reference-category": "terms_of_service_user_statuses"
     },
     {
+      "name": "Transfer folders",
+      "x-box-tag": "transfer",
+      "x-box-reference-category": "transfer"
+    },
+    {
+      "name": "Trashed files",
+      "x-box-tag": "trashed_files",
+      "x-box-reference-category": "trashed_files"
+    },
+    {
+      "name": "Trashed folders",
+      "x-box-tag": "trashed_folders",
+      "x-box-reference-category": "trashed_folders"
+    },
+    {
+      "name": "Trashed items",
+      "x-box-tag": "trashed_items",
+      "x-box-reference-category": "trashed_items"
+    },
+    {
+      "name": "Trashed web links",
+      "x-box-tag": "trashed_web_links",
+      "x-box-reference-category": "trashed_web_links"
+    },
+    {
+      "name": "Uploads",
+      "x-box-tag": "uploads",
+      "x-box-reference-category": "uploads"
+    },
+    {
+      "name": "Uploads (Chunked)",
+      "x-box-tag": "chunked_uploads",
+      "x-box-reference-category": "chunked_uploads"
+    },
+    {
+      "name": "User avatars",
+      "x-box-tag": "avatars",
+      "x-box-reference-category": "avatars"
+    },
+    {
+      "name": "Users",
+      "x-box-tag": "users",
+      "x-box-reference-category": "users"
+    },
+    {
       "name": "Watermarks (Files)",
       "x-box-tag": "file_watermarks",
       "x-box-reference-category": "file_watermarks"
@@ -23591,14 +23818,14 @@
       "x-box-reference-category": "folder_watermarks"
     },
     {
-      "name": "Storage policies",
-      "x-box-tag": "storage_policies",
-      "x-box-reference-category": "storage_policies"
+      "name": "Web links",
+      "x-box-tag": "web_links",
+      "x-box-reference-category": "web_links"
     },
     {
-      "name": "Storage policy assignments",
-      "x-box-tag": "storage_policy_assignments",
-      "x-box-reference-category": "storage_policy_assignments"
+      "name": "Webhooks",
+      "x-box-tag": "webhooks",
+      "x-box-reference-category": "webhooks"
     }
   ],
   "externalDocs": {
