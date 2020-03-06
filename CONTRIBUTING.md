@@ -143,7 +143,7 @@ properties:
   parent:
     allOf:
       - description: The parent item
-      - $ref: '#/components/schemas/Item'
+      - $ref: '#/components/schemas/Item--Mini'
 ```
 
 This is a bit longer than the alternative syntax (not shown here) but allows for
