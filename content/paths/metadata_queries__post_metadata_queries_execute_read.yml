@@ -29,14 +29,31 @@ responses:
         schema:
           $ref: '#/components/schemas/MetadataSearchResults'
 
+  400:
+    description: |-
+      Returns an error when the request body is not valid.
+
+      * `invalid_query` - Any of the provided body parameters might be
+      incorrect. This can mean the `query` is incorrect, as well as some cases
+      where the `from` value does not represent a valid template.
+      * `unexpected_json_type` - An argument from the `query` string is not
+      present in `query_param`. For example, `query` of `name = :name` requires
+      the `query_param` to include a value for the `name` argument, for example
+      `{ "name": "Box, Inc" }`.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
+
   404:
     description: |-
-      Returns an error when the policy can not be found or the user does not
-      have access to the folder.
+      Returns an error when a metadata template with the given `scope` and
+      `templateKey` can not be found. The error response will include extra
+      details.
 
-      * `instance_not_found` - The policy could not be found
-      * `not_found` - The folder could not be found or the user does not have
-        access to the folder.
+      * `instance_not_found` - The template could not be found. Please make sure
+      to use the full template scope including the enterprise ID, like
+      `enterprise_12345`.
     content:
       application/json:
         schema:
