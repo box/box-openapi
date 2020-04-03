@@ -10,10 +10,10 @@
       "email": "devrel@box.com"
     }, 
     "license": {
-      "name": "Apache 2.0", 
+      "name": "Apache-2.0", 
       "url": "http://www.apache.org/licenses/LICENSE-2.0"
     }, 
-    "version": "2.0"
+    "version": "2.0.0"
   }, 
   "servers": [
     {
@@ -30,6 +30,7 @@
         "tags": [
           "Authorization"
         ], 
+        "x-box-tag": "authorization", 
         "x-box-reference-category": "authorization", 
         "security": [], 
         "servers": [
@@ -135,20 +136,75 @@
             "description": "サーバー側認証に使用するサーバー"
           }
         ], 
+        "x-box-tag": "authorization", 
         "x-box-reference-category": "authorization", 
         "security": [], 
         "requestBody": {
           "content": {
             "application/x-www-form-urlencoded": {
               "schema": {
-                "oneOf": [
-                  {
-                    "$ref": "#/components/schemas/PostOAuth2Token"
-                  }, 
-                  {
-                    "$ref": "#/components/schemas/PostOAuth2Token--RefreshAccessToken"
-                  }
-                ]
+                "$ref": "#/components/schemas/PostOAuth2Token"
+              }
+            }
+          }
+        }, 
+        "responses": {
+          "200": {
+            "description": "`Authorization: Bearer <Token>`のように承認ヘッダー内でトークンを渡すことによって認証済みのAPI呼び出しを行うために使用できる新しいアクセストークンを返します。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessToken"
+                }
+              }
+            }
+          }, 
+          "400": {
+            "description": "認証エラー。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OAuth2Error"
+                }
+              }
+            }
+          }, 
+          "default": {
+            "description": "認証エラー。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OAuth2Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    }, 
+    "/oauth2/token#refresh": {
+      "post": {
+        "operationId": "post_oauth2_token#refresh", 
+        "summary": "アクセストークンを更新", 
+        "description": "クライアントID、シークレット、更新トークンを使用してアクセストークンを更新します。", 
+        "tags": [
+          "Authorization"
+        ], 
+        "servers": [
+          {
+            "url": "https://api.box.com", 
+            "description": "サーバー側認証に使用するサーバー"
+          }
+        ], 
+        "x-box-tag": "authorization", 
+        "x-box-reference-category": "authorization", 
+        "x-box-is-variation": true, 
+        "security": [], 
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/PostOAuth2Token--RefreshAccessToken"
               }
             }
           }
@@ -201,6 +257,7 @@
             "description": "サーバー側認証に使用するサーバー"
           }
         ], 
+        "x-box-tag": "authorization", 
         "x-box-reference-category": "authorization", 
         "security": [], 
         "requestBody": {
@@ -246,6 +303,7 @@
         "tags": [
           "Files"
         ], 
+        "x-box-tag": "files", 
         "x-box-reference-category": "files", 
         "x-box-enable-explorer": true, 
         "description": "ファイルに関する詳細を取得します。", 
@@ -370,8 +428,9 @@
         "operationId": "post_files_id", 
         "summary": "ファイルを復元", 
         "tags": [
-          "Files"
+          "Trashed files"
         ], 
+        "x-box-tag": "trashed_files", 
         "x-box-reference-category": "trashed_files", 
         "description": "ごみ箱に移動されたファイルを復元します。\n\n元のフォルダが削除されている場合にフォルダの復元先となる新しい親ID(省略可)を指定することができます。", 
         "parameters": [
@@ -408,6 +467,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object", 
                 "properties": {
                   "name": {
                     "description": "ファイルの新しい名前(省略可)。", 
@@ -496,6 +556,7 @@
         "tags": [
           "Files"
         ], 
+        "x-box-tag": "files", 
         "x-box-reference-category": "files", 
         "x-box-enable-explorer": true, 
         "x-box-sanitized": true, 
@@ -544,6 +605,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object", 
                 "properties": {
                   "name": {
                     "type": "string", 
@@ -758,6 +820,7 @@
         "tags": [
           "Files"
         ], 
+        "x-box-tag": "files", 
         "x-box-reference-category": "files", 
         "x-box-sanitized": true, 
         "description": "ファイルを削除します(完全に削除するか、ごみ箱に移動します)。\n\n項目がBoxから完全に削除されるか、ごみ箱に移動されるかは、会社の設定により決定されます。", 
@@ -845,8 +908,9 @@
         "operationId": "get_files_id_content", 
         "summary": "ファイルをダウンロード", 
         "tags": [
-          "Files"
+          "Downloads"
         ], 
+        "x-box-tag": "downloads", 
         "x-box-reference-category": "downloads", 
         "description": "ファイルのコンテンツをバイナリ形式で返します。", 
         "parameters": [
@@ -932,6 +996,7 @@
         "tags": [
           "Uploads"
         ], 
+        "x-box-tag": "uploads", 
         "x-box-reference-category": "uploads", 
         "summary": "ファイルバージョンをアップロード", 
         "description": "ファイルのコンテンツを更新します。ファイルサイズが50MBを超える場合は、分割アップロードAPIを使用することをお勧めします。\n\n# リクエスト本文の順序\n\n本文の`attributes`部分は`file`部分の**前**に置く必要があります。ファイルのアップロード時にリクエストがこの形式に従っていない場合は、HTTP `400`エラーと`metadata_after_file_contents`エラーコードが返されます。", 
@@ -995,6 +1060,7 @@
           "content": {
             "multipart/form-data": {
               "schema": {
+                "type": "object", 
                 "required": [
                   "attributes", 
                   "file"
@@ -1071,12 +1137,14 @@
         "tags": [
           "Files"
         ], 
+        "x-box-tag": "uploads", 
         "x-box-reference-category": "uploads", 
         "description": "ファイル全体をアップロードする前に、ファイルがBoxで受け入れられるかどうかをチェックします。", 
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
+                "type": "object", 
                 "properties": {
                   "name": {
                     "type": "string", 
@@ -1150,6 +1218,7 @@
         "tags": [
           "Uploads"
         ], 
+        "x-box-tag": "uploads", 
         "x-box-reference-category": "uploads", 
         "summary": "ファイルをアップロード", 
         "description": "小さいファイルをBoxにアップロードします。ファイルサイズが50MBを超える場合は、分割アップロードAPIを使用することをお勧めします。\n\n# リクエスト本文の順序\n\n本文の`attributes`部分は`file`部分の**前**に置く必要があります。ファイルのアップロード時にリクエストがこの形式に従っていない場合は、HTTP `400`エラーと`metadata_after_file_contents`エラーコードが返されます。", 
@@ -1193,6 +1262,7 @@
           "content": {
             "multipart/form-data": {
               "schema": {
+                "type": "object", 
                 "required": [
                   "attributes", 
                   "file"
@@ -1290,6 +1360,7 @@
         "tags": [
           "Uploads (Chunked)"
         ], 
+        "x-box-tag": "chunked_uploads", 
         "x-box-reference-category": "chunked_uploads", 
         "description": "新しいファイルのアップロードセッションを作成します。", 
         "servers": [
@@ -1302,6 +1373,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object", 
                 "required": [
                   "folder_id", 
                   "file_size", 
@@ -1380,6 +1452,7 @@
         "tags": [
           "Uploads (Chunked)"
         ], 
+        "x-box-tag": "chunked_uploads", 
         "x-box-reference-category": "chunked_uploads", 
         "description": "既存ファイルのアップロードセッションを作成します。", 
         "servers": [
@@ -1404,6 +1477,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object", 
                 "required": [
                   "file_size"
                 ], 
@@ -1466,6 +1540,7 @@
           "Uploads (Chunked)"
         ], 
         "description": "アップロードセッションに関する情報を返します。", 
+        "x-box-tag": "chunked_uploads", 
         "x-box-reference-category": "chunked_uploads", 
         "servers": [
           {
@@ -1514,6 +1589,7 @@
         "tags": [
           "Uploads (Chunked)"
         ], 
+        "x-box-tag": "chunked_uploads", 
         "x-box-reference-category": "chunked_uploads", 
         "description": "ファイルのアップロードセッションのチャンクを更新します。", 
         "servers": [
@@ -1559,7 +1635,8 @@
             "application/octet-stream": {
               "schema": {
                 "type": "string", 
-                "format": "binary"
+                "format": "binary", 
+                "description": "ファイルのバイナリコンテンツ"
               }
             }
           }
@@ -1570,7 +1647,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UploadPart"
+                  "$ref": "#/components/schemas/UploadedPart"
                 }
               }
             }
@@ -1630,6 +1707,7 @@
             "description": "ファイルアップロードに使用するサーバー"
           }
         ], 
+        "x-box-tag": "chunked_uploads", 
         "x-box-reference-category": "chunked_uploads", 
         "parameters": [
           {
@@ -1667,6 +1745,7 @@
         "tags": [
           "Uploads (Chunked)"
         ], 
+        "x-box-tag": "chunked_uploads", 
         "x-box-reference-category": "chunked_uploads", 
         "servers": [
           {
@@ -1743,6 +1822,7 @@
         "tags": [
           "Uploads (Chunked)"
         ], 
+        "x-box-tag": "chunked_uploads", 
         "x-box-reference-category": "chunked_uploads", 
         "servers": [
           {
@@ -1797,14 +1877,16 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object", 
                 "required": [
                   "parts"
                 ], 
                 "properties": {
                   "parts": {
                     "type": "array", 
+                    "description": "アップロードされたパーツのリストの詳細", 
                     "items": {
-                      "$ref": "#/components/schemas/UploadPart--Mini"
+                      "$ref": "#/components/schemas/UploadPart"
                     }
                   }
                 }
@@ -1875,6 +1957,7 @@
         "tags": [
           "Files"
         ], 
+        "x-box-tag": "files", 
         "x-box-reference-category": "files", 
         "x-box-enable-explorer": true, 
         "x-box-sanitized": true, 
@@ -1912,6 +1995,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object", 
                 "required": [
                   "parent"
                 ], 
@@ -2012,6 +2096,7 @@
         "tags": [
           "Files"
         ], 
+        "x-box-tag": "files", 
         "x-box-reference-category": "files", 
         "parameters": [
           {
@@ -2185,9 +2270,10 @@
         "summary": "ファイルのコラボレーションのリストを取得", 
         "description": "ファイルでのコラボレーションのリストを取得します。そのファイルに対するアクセス権限を持つすべてのユーザーを返します。", 
         "tags": [
-          "Collaborations"
+          "Collaborations (List)"
         ], 
-        "x-box-reference-category": "file_collaborations", 
+        "x-box-tag": "list_collaborations", 
+        "x-box-reference-category": "list_collaborations", 
         "parameters": [
           {
             "name": "file_id", 
@@ -2273,6 +2359,7 @@
         "tags": [
           "Comments"
         ], 
+        "x-box-tag": "comments", 
         "x-box-reference-category": "comments", 
         "parameters": [
           {
@@ -2361,6 +2448,7 @@
         "tags": [
           "Tasks"
         ], 
+        "x-box-tag": "tasks", 
         "x-box-reference-category": "tasks", 
         "x-box-sanitized": true, 
         "parameters": [
@@ -2434,8 +2522,9 @@
         "operationId": "get_files_id_trash", 
         "summary": "ごみ箱内のファイルを取得", 
         "tags": [
-          "Trash"
+          "Trashed files"
         ], 
+        "x-box-tag": "trashed_files", 
         "x-box-reference-category": "trashed_files", 
         "description": "ごみ箱に移動されたファイルを取得します。", 
         "parameters": [
@@ -2505,8 +2594,9 @@
         "operationId": "delete_files_id_trash", 
         "summary": "ファイルを完全に削除", 
         "tags": [
-          "Trash"
+          "Trashed files"
         ], 
+        "x-box-tag": "trashed_files", 
         "x-box-reference-category": "trashed_files", 
         "description": "ごみ箱内にあるファイルを完全に削除します。このアクションは取り消せません。", 
         "parameters": [
@@ -2555,8 +2645,9 @@
         "tags": [
           "File versions"
         ], 
+        "x-box-tag": "file_versions", 
         "x-box-reference-category": "file_versions", 
-        "description": "ファイルのすべてのバージョンに関する情報を取得します。このエンドポイントを使用すると、古いバージョンのファイルに関する情報を取得できます。\n\nバージョンが追跡されるのは、プレミアムアカウントを持つBoxユーザーのファイルに関してのみです。", 
+        "description": "ファイルの過去のバージョンのリストを取得します。\n\nバージョンを追跡するのは、プレミアムアカウントを持つBoxユーザーのみです。ファイルの現在のバージョンのIDを取得するには、`GET /file/:id` APIを使用します。", 
         "parameters": [
           {
             "name": "file_id", 
@@ -2614,7 +2705,7 @@
         ], 
         "responses": {
           "200": {
-            "description": "ファイルバージョンの配列を返します。\n\nこのファイルに過去のバージョンがない場合は、空の配列が返されます。", 
+            "description": "このファイルの過去のバージョンの配列を返します。", 
             "content": {
               "application/json": {
                 "schema": {
@@ -2643,8 +2734,9 @@
         "tags": [
           "File versions"
         ], 
+        "x-box-tag": "file_versions", 
         "x-box-reference-category": "file_versions", 
-        "description": "特定の古いファイルバージョンを取得します。\n\nバージョンが追跡されるのは、プレミアムアカウントを持つBoxユーザーのファイルに関してのみです。", 
+        "description": "特定のファイルバージョンを取得します。\n\nバージョンが追跡されるのは、プレミアムアカウントを持つBoxユーザーのファイルに関してのみです。", 
         "parameters": [
           {
             "name": "file_id", 
@@ -2687,7 +2779,7 @@
         ], 
         "responses": {
           "200": {
-            "description": "ファイルオブジェクトを返します。\n\n使用可能なすべてのフィールドがデフォルトで返されるとは限りません。特定のフィールドを明示的にリクエストするには、[fields](#param-fields)クエリパラメータを使用します。", 
+            "description": "特定のファイルバージョンを返します。\n\n使用可能なすべてのフィールドがデフォルトで返されるとは限りません。特定のフィールドを明示的にリクエストするには、[fields](#param-fields)クエリパラメータを使用します。", 
             "content": {
               "application/json": {
                 "schema": {
@@ -2714,6 +2806,7 @@
         "tags": [
           "File versions"
         ], 
+        "x-box-tag": "file_versions", 
         "x-box-reference-category": "file_versions", 
         "description": "特定のファイルバージョンをごみ箱に移動します。\n\nバージョンが追跡されるのは、プレミアムアカウントを持つBoxユーザーのファイルに関してのみです。", 
         "parameters": [
@@ -2772,6 +2865,7 @@
         "tags": [
           "File versions"
         ], 
+        "x-box-tag": "file_versions", 
         "x-box-reference-category": "file_versions", 
         "description": "ファイルの以前のバージョンを復元します。\n\n\n以前のバージョンが存在する場合は、この方法を使用して古いバージョンのいずれかをバージョン履歴の先頭に移動できます。\n\n実際には、古いバージョンの新しいコピーが作成されて、バージョン履歴の先頭に配置されます。このファイルは古いバージョンとまったく同じ内容になり、ハッシュダイジェスト、`etag`、およびファイル名も同じになります。\n\nコメントなど、他のプロパティが以前の値に更新されることはありません。", 
         "parameters": [
@@ -2808,6 +2902,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object", 
                 "description": "復元するファイルバージョン", 
                 "properties": {
                   "id": {
@@ -2859,6 +2954,7 @@
         "tags": [
           "Metadata instances (Files)"
         ], 
+        "x-box-tag": "file_metadata", 
         "x-box-reference-category": "file_metadata", 
         "x-box-sanitized": true, 
         "description": "指定したファイルのすべてのメタデータを取得します。", 
@@ -2925,6 +3021,7 @@
         "tags": [
           "Metadata instances (Files)"
         ], 
+        "x-box-tag": "file_metadata", 
         "x-box-reference-category": "file_metadata", 
         "x-box-sanitized": true, 
         "description": "ファイルに適用されたメタデータテンプレートのインスタンスを取得します。", 
@@ -3023,6 +3120,7 @@
         "tags": [
           "Metadata instances (Files)"
         ], 
+        "x-box-tag": "file_metadata", 
         "x-box-reference-category": "file_metadata", 
         "x-box-sanitized": true, 
         "description": "メタデータテンプレートのインスタンスをファイルに適用します。\n\nほとんどの場合、メタデータテンプレートに存在する値のみを使用できます。ただし、任意のキー/値ペアを使用できる`global.properties`テンプレートは除きます。", 
@@ -3139,6 +3237,7 @@
         "tags": [
           "Metadata instances (Files)"
         ], 
+        "x-box-tag": "file_metadata", 
         "x-box-reference-category": "file_metadata", 
         "x-box-sanitized": true, 
         "description": "ファイルのメタデータを更新します。\n\nメタデータインスタンスを更新できるのは、テンプレートがすでにファイルに適用されている場合のみです。メタデータを編集する際には、メタデータテンプレートのスキーマに一致した値のみを使用できます。\n\n更新はアトミックに適用されます。操作の適用中にエラーが発生した場合、メタデータインスタンスは変更されません。", 
@@ -3272,6 +3371,7 @@
         "tags": [
           "Metadata instances (Files)"
         ], 
+        "x-box-tag": "file_metadata", 
         "x-box-reference-category": "file_metadata", 
         "x-box-sanitized": true, 
         "description": "ファイルメタデータを削除します。", 
@@ -3365,6 +3465,7 @@
         "tags": [
           "Watermarks (Files)"
         ], 
+        "x-box-tag": "file_watermarks", 
         "x-box-reference-category": "file_watermarks", 
         "description": "ファイルの電子すかしを取得します。", 
         "parameters": [
@@ -3418,6 +3519,7 @@
         "tags": [
           "Watermarks (Files)"
         ], 
+        "x-box-tag": "file_watermarks", 
         "x-box-reference-category": "file_watermarks", 
         "description": "ファイルの電子すかしを適用または更新します。", 
         "parameters": [
@@ -3436,6 +3538,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object", 
                 "required": [
                   "watermark"
                 ], 
@@ -3501,6 +3604,7 @@
         "tags": [
           "Watermarks (Files)"
         ], 
+        "x-box-tag": "file_watermarks", 
         "x-box-reference-category": "file_watermarks", 
         "description": "ファイルから電子すかしを削除します。", 
         "parameters": [
@@ -3549,6 +3653,7 @@
         "tags": [
           "Folders"
         ], 
+        "x-box-tag": "folders", 
         "x-box-reference-category": "folders", 
         "x-box-enable-explorer": true, 
         "x-box-sanitized": true, 
@@ -3654,8 +3759,9 @@
         "operationId": "post_folders_id", 
         "summary": "フォルダを復元", 
         "tags": [
-          "Trash"
+          "Trashed folders"
         ], 
+        "x-box-tag": "trashed_folders", 
         "x-box-reference-category": "trashed_folders", 
         "description": "ごみ箱に移動されたフォルダを復元します。\n\n元のフォルダが削除されている場合にフォルダの復元先となる新しい親ID(省略可)を指定することができます。\n\n# フォルダのロック\n\nこの操作の進行中は、ファイルツリーの一部がロックされます。ロックされるのは主に元のフォルダとその子孫フォルダ、および宛先フォルダです。\n\n操作の進行中は、ロックされたどのフォルダに対しても、その他の移動、コピー、削除または復元操作を実行できません。", 
         "parameters": [
@@ -3693,6 +3799,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object", 
                 "properties": {
                   "name": {
                     "description": "フォルダの新しい名前(省略可)。", 
@@ -3782,6 +3889,7 @@
         "tags": [
           "Folders"
         ], 
+        "x-box-tag": "folders", 
         "x-box-reference-category": "folders", 
         "x-box-sanitized": true, 
         "x-box-enable-explorer": true, 
@@ -3830,6 +3938,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object", 
                 "properties": {
                   "name": {
                     "type": "string", 
@@ -4072,6 +4181,7 @@
         "tags": [
           "Folders"
         ], 
+        "x-box-tag": "folders", 
         "x-box-reference-category": "folders", 
         "x-box-sanitized": true, 
         "parameters": [
@@ -4181,6 +4291,7 @@
         "tags": [
           "Folders"
         ], 
+        "x-box-tag": "folders", 
         "x-box-reference-category": "folders", 
         "x-box-sanitized": true, 
         "x-box-enable-explorer": true, 
@@ -4352,6 +4463,7 @@
         "tags": [
           "Folders"
         ], 
+        "x-box-tag": "folders", 
         "x-box-reference-category": "folders", 
         "x-box-enable-explorer": true, 
         "description": "指定した親フォルダ内に空のフォルダを新規に作成します。", 
@@ -4379,6 +4491,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object", 
                 "required": [
                   "name", 
                   "parent"
@@ -4514,6 +4627,7 @@
         "operationId": "post_folders_id_copy", 
         "summary": "フォルダをコピー", 
         "x-box-enable-explorer": true, 
+        "x-box-tag": "folders", 
         "x-box-reference-category": "folders", 
         "description": "フォルダのコピーを宛先フォルダ内に作成します。\n\n元のフォルダは変更されません。", 
         "tags": [
@@ -4554,6 +4668,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object", 
                 "required": [
                   "parent"
                 ], 
@@ -4658,9 +4773,10 @@
         "summary": "フォルダコラボレーションのリストを取得", 
         "description": "フォルダでのコラボレーションのリストを取得します。そのフォルダに対するアクセス権限を持つすべてのユーザーを返します。", 
         "tags": [
-          "Folders"
+          "Collaborations (List)"
         ], 
-        "x-box-reference-category": "folder_collaborations", 
+        "x-box-tag": "list_collaborations", 
+        "x-box-reference-category": "list_collaborations", 
         "parameters": [
           {
             "name": "folder_id", 
@@ -4721,8 +4837,9 @@
         "operationId": "get_folders_id_trash", 
         "summary": "ごみ箱内のフォルダを取得", 
         "tags": [
-          "Trash"
+          "Trashed folders"
         ], 
+        "x-box-tag": "trashed_folders", 
         "x-box-reference-category": "trashed_folders", 
         "description": "ごみ箱に移動されたフォルダを取得します。", 
         "parameters": [
@@ -4793,8 +4910,9 @@
         "operationId": "delete_folders_id_trash", 
         "summary": "フォルダを完全に削除", 
         "tags": [
-          "Trash"
+          "Trashed folders"
         ], 
+        "x-box-tag": "trashed_folders", 
         "x-box-reference-category": "trashed_folders", 
         "description": "ごみ箱内にあるフォルダを完全に削除します。このアクションは取り消せません。", 
         "parameters": [
@@ -4844,6 +4962,7 @@
         "tags": [
           "Metadata instances (Folders)"
         ], 
+        "x-box-tag": "folder_metadata", 
         "x-box-reference-category": "folder_metadata", 
         "x-box-sanitized": true, 
         "description": "指定したフォルダのすべてのメタデータを取得します。これは、IDが`0`のルートフォルダでは使用できません。", 
@@ -4911,6 +5030,7 @@
         "tags": [
           "Metadata instances (Folders)"
         ], 
+        "x-box-tag": "folder_metadata", 
         "x-box-reference-category": "folder_metadata", 
         "x-box-sanitized": true, 
         "description": "フォルダに適用されているメタデータテンプレートのインスタンスを取得します。これは、IDが`0`のルートフォルダでは使用できません。", 
@@ -5010,6 +5130,7 @@
         "tags": [
           "Metadata instances (Folders)"
         ], 
+        "x-box-tag": "folder_metadata", 
         "x-box-reference-category": "folder_metadata", 
         "x-box-sanitized": true, 
         "description": "メタデータテンプレートのインスタンスをフォルダに適用します。\n\nほとんどの場合、メタデータテンプレートに存在する値のみを使用できます。ただし、任意のキー/値ペアを使用できる`global.properties`テンプレートは除きます。\n\nBoxウェブアプリでメタデータテンプレートを表示するために、会社では、管理コンソールでユーザーの[**フォルダレベルメタデータのカスケード**]を有効にするよう設定する必要があります。", 
@@ -5127,6 +5248,7 @@
         "tags": [
           "Metadata instances (Folders)"
         ], 
+        "x-box-tag": "folder_metadata", 
         "x-box-reference-category": "folder_metadata", 
         "x-box-sanitized": true, 
         "description": "フォルダのメタデータを更新します。\n\nメタデータインスタンスを更新できるのは、テンプレートがすでにフォルダに適用されている場合のみです。メタデータを編集する際には、メタデータテンプレートのスキーマに一致した値のみを使用できます。\n\n更新はアトミックに適用されます。操作の適用中にエラーが発生した場合、メタデータインスタンスは変更されません。", 
@@ -5261,6 +5383,7 @@
         "tags": [
           "Metadata instances (Folders)"
         ], 
+        "x-box-tag": "folder_metadata", 
         "x-box-reference-category": "folder_metadata", 
         "x-box-sanitized": true, 
         "description": "フォルダのメタデータを削除します。", 
@@ -5353,8 +5476,9 @@
         "operationId": "get_folders_trash_items", 
         "summary": "ごみ箱内の項目のリストを取得", 
         "tags": [
-          "Trash"
+          "Trashed items"
         ], 
+        "x-box-tag": "trashed_items", 
         "x-box-reference-category": "trashed_items", 
         "description": "ごみ箱に移動されたファイルとフォルダを取得します。\n\n`fields`パラメータを使用して完全版のファイルオブジェクトまたはフォルダオブジェクト内の任意の属性を渡すと、デフォルトでは返されない特定の属性を取得できます。\n\nこのエンドポイントはデフォルトでオフセットベースのページ割りを使用しますが、`marker`パラメータを使用したマーカーベースのページ割りもサポートしています。", 
         "parameters": [
@@ -5493,6 +5617,7 @@
         "tags": [
           "Watermarks (Folders)"
         ], 
+        "x-box-tag": "folder_watermarks", 
         "x-box-reference-category": "folder_watermarks", 
         "description": "フォルダの電子すかしを取得します。", 
         "parameters": [
@@ -5547,6 +5672,7 @@
         "tags": [
           "Watermarks (Folders)"
         ], 
+        "x-box-tag": "folder_watermarks", 
         "x-box-reference-category": "folder_watermarks", 
         "description": "フォルダの電子すかしを適用または更新します。", 
         "parameters": [
@@ -5566,6 +5692,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object", 
                 "required": [
                   "watermark"
                 ], 
@@ -5631,6 +5758,7 @@
         "tags": [
           "Watermarks (Folders)"
         ], 
+        "x-box-tag": "folder_watermarks", 
         "x-box-reference-category": "folder_watermarks", 
         "description": "フォルダから電子すかしを削除します。", 
         "parameters": [
@@ -5680,6 +5808,7 @@
         "tags": [
           "Metadata templates"
         ], 
+        "x-box-tag": "metadata_templates", 
         "x-box-reference-category": "metadata_templates", 
         "x-box-sanitized": true, 
         "description": "テンプレートのインスタンスのIDを検索することにより、メタデータテンプレートを見つけます。", 
@@ -5737,6 +5866,7 @@
         "tags": [
           "Metadata templates"
         ], 
+        "x-box-tag": "metadata_templates", 
         "x-box-reference-category": "metadata_templates", 
         "x-box-sanitized": true, 
         "description": "`scope`と`templateKey`の値でメタデータテンプレートを取得します。\n\nテンプレートの`scope`と`templateKey`を調べるには、会社のすべてのテンプレートまたはグローバルテンプレートのリストを取得するか、ファイルまたはフォルダに適用されているすべてのテンプレートのリストを取得します。", 
@@ -5814,6 +5944,7 @@
         "tags": [
           "Metadata templates"
         ], 
+        "x-box-tag": "metadata_templates", 
         "x-box-reference-category": "metadata_templates", 
         "x-box-sanitized": true, 
         "summary": "メタデータテンプレートを更新", 
@@ -6005,6 +6136,7 @@
         "tags": [
           "Metadata templates"
         ], 
+        "x-box-tag": "metadata_templates", 
         "x-box-reference-category": "metadata_templates", 
         "x-box-sanitized": true, 
         "description": "メタデータテンプレートとそのインスタンスを削除します。\nこれは完全削除であり、元に戻すことはできません。", 
@@ -6078,6 +6210,7 @@
         "tags": [
           "Metadata templates"
         ], 
+        "x-box-tag": "metadata_templates", 
         "x-box-reference-category": "metadata_templates", 
         "x-box-sanitized": true, 
         "description": "IDを指定してメタデータテンプレートを取得します。", 
@@ -6134,6 +6267,7 @@
         "tags": [
           "Metadata templates"
         ], 
+        "x-box-tag": "metadata_templates", 
         "x-box-reference-category": "metadata_templates", 
         "x-box-sanitized": true, 
         "description": "Boxを使用するすべての会社が利用できる、すべての汎用グローバルメタデータテンプレートを取得する場合に使用します。", 
@@ -6203,6 +6337,7 @@
         "tags": [
           "Metadata templates"
         ], 
+        "x-box-tag": "metadata_templates", 
         "x-box-reference-category": "metadata_templates", 
         "x-box-sanitized": true, 
         "description": "特にユーザーの会社内で使用するために作成されたメタデータテンプレートをすべて取得する場合に使用します。", 
@@ -6273,6 +6408,7 @@
           "Metadata templates"
         ], 
         "description": "ファイルやフォルダに適用可能な新しいメタデータテンプレートを作成します。", 
+        "x-box-tag": "metadata_templates", 
         "x-box-reference-category": "metadata_templates", 
         "x-box-requires-admin": true, 
         "x-box-sanitized": true, 
@@ -6280,6 +6416,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object", 
                 "required": [
                   "scope", 
                   "displayName"
@@ -6441,6 +6578,7 @@
         "tags": [
           "Metadata cascade policies (Beta)"
         ], 
+        "x-box-tag": "metadata_cascade_policies", 
         "x-box-reference-category": "metadata_cascade_policies", 
         "x-box-sanitized": true, 
         "description": "指定したフォルダに適用されているすべてのメタデータカスケードポリシーのリストを取得します。これは、IDが`0`のルートフォルダでは使用できません。", 
@@ -6546,6 +6684,7 @@
         "tags": [
           "Metadata cascade policies (Beta)"
         ], 
+        "x-box-tag": "metadata_cascade_policies", 
         "x-box-reference-category": "metadata_cascade_policies", 
         "x-box-sanitized": true, 
         "description": "指定したメタデータテンプレートを指定したフォルダに適用し、そのフォルダ内のすべてのファイルに自動的にカスケードする新しいメタデータカスケードポリシーを作成します。\n\nポリシーを適用するには、まず、ポリシーの適用先となるフォルダにメタデータインスタンスを適用する必要があります。", 
@@ -6553,6 +6692,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object", 
                 "required": [
                   "folder_id", 
                   "scope", 
@@ -6654,6 +6794,7 @@
         "tags": [
           "Metadata cascade policies (Beta)"
         ], 
+        "x-box-tag": "metadata_cascade_policies", 
         "x-box-reference-category": "metadata_cascade_policies", 
         "x-box-sanitized": true, 
         "description": "フォルダに割り当てられた特定のメタデータカスケードポリシーを取得します。", 
@@ -6708,6 +6849,7 @@
         "tags": [
           "Metadata cascade policies (Beta)"
         ], 
+        "x-box-tag": "metadata_cascade_policies", 
         "x-box-reference-category": "metadata_cascade_policies", 
         "x-box-sanitized": true, 
         "description": "メタデータカスケードポリシーを削除します。", 
@@ -6757,6 +6899,7 @@
         "tags": [
           "Metadata cascade policies (Beta)"
         ], 
+        "x-box-tag": "metadata_cascade_policies", 
         "x-box-reference-category": "metadata_cascade_policies", 
         "x-box-sanitized": true, 
         "description": "メタデータカスケードポリシーを持つフォルダのメタデータをそのすべての子に強制的に適用します。これは、新しいカスケードポリシーの作成後、そのフォルダ内にある既存のすべてのファイルにカスケードされるメタデータを適用するのに使用できます。", 
@@ -6776,6 +6919,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object", 
                 "required": [
                   "conflict_resolution"
                 ], 
@@ -6828,6 +6972,7 @@
         "tags": [
           "Comments"
         ], 
+        "x-box-tag": "comments", 
         "x-box-reference-category": "comments", 
         "description": "特定のコメントのメッセージとメタデータに加え、コメントを作成したユーザーに関する情報を取得します。", 
         "parameters": [
@@ -6889,6 +7034,7 @@
         "tags": [
           "Comments"
         ], 
+        "x-box-tag": "comments", 
         "x-box-reference-category": "comments", 
         "description": "コメントのメッセージを更新します。", 
         "parameters": [
@@ -6925,6 +7071,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object", 
                 "properties": {
                   "message": {
                     "type": "string", 
@@ -6965,6 +7112,7 @@
         "tags": [
           "Comments"
         ], 
+        "x-box-tag": "comments", 
         "x-box-reference-category": "comments", 
         "description": "コメントを完全に削除します。", 
         "parameters": [
@@ -7002,6 +7150,7 @@
         "tags": [
           "Comments"
         ], 
+        "x-box-tag": "comments", 
         "x-box-reference-category": "comments", 
         "summary": "コメントを作成", 
         "description": "ユーザーによるコメントを特定のファイルに追加するか、\n他のコメントへの返信としてコメントを追加します。", 
@@ -7029,6 +7178,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object", 
                 "required": [
                   "message"
                 ], 
@@ -7100,6 +7250,7 @@
       "get": {
         "operationId": "get_collaborations_id", 
         "summary": "コラボレーションを取得", 
+        "x-box-tag": "user_collaborations", 
         "x-box-reference-category": "user_collaborations", 
         "tags": [
           "Collaborations"
@@ -7163,6 +7314,7 @@
         "tags": [
           "Collaborations"
         ], 
+        "x-box-tag": "user_collaborations", 
         "x-box-reference-category": "user_collaborations", 
         "summary": "コラボレーションを更新", 
         "description": "コラボレーションを更新します。\n\n項目の所有者を変更したり、コラボレーションへの招待を承認したりする場合に使用します。", 
@@ -7182,6 +7334,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object", 
                 "properties": {
                   "role": {
                     "type": "string", 
@@ -7263,6 +7416,7 @@
         "tags": [
           "Collaborations"
         ], 
+        "x-box-tag": "user_collaborations", 
         "x-box-reference-category": "user_collaborations", 
         "description": "1つのコラボレーションを削除します。", 
         "parameters": [
@@ -7299,9 +7453,10 @@
         "operationId": "get_collaborations", 
         "summary": "保留中のコラボレーションのリストを取得", 
         "tags": [
-          "Collaborations"
+          "Collaborations (List)"
         ], 
-        "x-box-reference-category": "user_collaborations", 
+        "x-box-tag": "list_collaborations", 
+        "x-box-reference-category": "list_collaborations", 
         "description": "このユーザーに関連する保留中のコラボレーション招待をすべて取得します。", 
         "parameters": [
           {
@@ -7389,6 +7544,7 @@
         "tags": [
           "Collaborations"
         ], 
+        "x-box-tag": "user_collaborations", 
         "x-box-reference-category": "user_collaborations", 
         "summary": "コラボレーションを作成", 
         "description": "ファイルまたはフォルダに個々のユーザーまたはグループのコラボレーションを追加します。\n\nコラボレーションは、メールアドレス、ユーザーID、またはグループIDを使用して作成できます。\n\nグループを使用してコラボレーションを作成する場合、このエンドポイントにアクセスできるかどうかは、そのグループを招待できるかどうかによって決まります。", 
@@ -7426,6 +7582,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object", 
                 "required": [
                   "item", 
                   "accessible_by", 
@@ -7539,6 +7696,7 @@
         "tags": [
           "Search"
         ], 
+        "x-box-tag": "search", 
         "x-box-reference-category": "search", 
         "description": "ユーザーまたは会社全体が利用できる項目を検索します。", 
         "parameters": [
@@ -7834,6 +7992,7 @@
           "Tasks"
         ], 
         "summary": "タスクを作成", 
+        "x-box-tag": "tasks", 
         "x-box-reference-category": "tasks", 
         "x-box-santized": true, 
         "description": "ファイルに対する1個のタスクを作成します。このタスクはいずれのユーザーにも割り当てられていないため、個別に割り当てる必要があります。", 
@@ -7841,6 +8000,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object", 
                 "required": [
                   "item"
                 ], 
@@ -7887,7 +8047,6 @@
                   "due_at": {
                     "type": "string", 
                     "format": "date-time", 
-                    "default": null, 
                     "description": "タスクの期限を定義します。指定しない場合は、デフォルトで`null`に設定されます。", 
                     "example": "2012-12-12T10:53:43-08:00"
                   }, 
@@ -7967,6 +8126,7 @@
         "tags": [
           "Tasks"
         ], 
+        "x-box-tag": "tasks", 
         "x-box-reference-category": "tasks", 
         "x-box-sanitized": true, 
         "description": "特定のタスクに関する情報を取得します。", 
@@ -8021,6 +8181,7 @@
           "Tasks"
         ], 
         "summary": "タスクを更新", 
+        "x-box-tag": "tasks", 
         "x-box-reference-category": "tasks", 
         "x-box-sanitized": true, 
         "description": "タスクを更新します。これは、タスクの構成を更新するため、またはその完了状態を更新するために使用できます。", 
@@ -8040,6 +8201,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object", 
                 "properties": {
                   "action": {
                     "type": "string", 
@@ -8134,6 +8296,7 @@
           "Tasks"
         ], 
         "summary": "タスクを削除", 
+        "x-box-tag": "tasks", 
         "x-box-reference-category": "tasks", 
         "x-box-sanitized": true, 
         "description": "ファイルからタスクを削除します。", 
@@ -8181,8 +8344,9 @@
         "operationId": "get_tasks_id_assignments", 
         "summary": "タスク割り当てのリストを取得", 
         "tags": [
-          "Tasks"
+          "Task assignments"
         ], 
+        "x-box-tag": "task_assignments", 
         "x-box-reference-category": "task_assignments", 
         "x-box-sanitized": true, 
         "description": "指定したタスクのすべての割り当てのリストを取得します。", 
@@ -8247,8 +8411,9 @@
         "operationId": "post_task_assignments", 
         "summary": "タスクを割り当て", 
         "tags": [
-          "Tasks"
+          "Task assignments"
         ], 
+        "x-box-tag": "task_assignments", 
         "x-box-reference-category": "task_assignments", 
         "x-box-sanitized": true, 
         "description": "ユーザーにタスクを割り当てます。\n\n複数の割り当てを作成することで、1つのタスクを複数のユーザーに割り当てることができます。", 
@@ -8256,6 +8421,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object", 
                 "required": [
                   "task", 
                   "assign_to"
@@ -8364,8 +8530,9 @@
         "operationId": "get_task_assignments_id", 
         "summary": "タスク割り当てを取得", 
         "tags": [
-          "Tasks"
+          "Task assignments"
         ], 
+        "x-box-tag": "task_assignments", 
         "x-box-reference-category": "task_assignments", 
         "x-box-sanitized": true, 
         "description": "タスク割り当てに関する情報を取得します。", 
@@ -8418,8 +8585,9 @@
         "operationId": "put_task_assignments_id", 
         "summary": "タスク割り当てを更新", 
         "tags": [
-          "Tasks"
+          "Task assignments"
         ], 
+        "x-box-tag": "task_assignments", 
         "x-box-reference-category": "task_assignments", 
         "x-box-sanitized": true, 
         "description": "タスク割り当てを更新します。このエンドポイントは、ユーザーに割り当てられたタスクの状態を更新する場合に使用できます。", 
@@ -8439,6 +8607,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object", 
                 "properties": {
                   "message": {
                     "type": "string", 
@@ -8508,8 +8677,9 @@
         "operationId": "delete_task_assignments_id", 
         "summary": "タスク割り当てを解除", 
         "tags": [
-          "Tasks"
+          "Task assignments"
         ], 
+        "x-box-tag": "task_assignments", 
         "x-box-reference-category": "task_assignments", 
         "x-box-sanitized": true, 
         "description": "特定のタスク割り当てを削除します。", 
@@ -8559,7 +8729,9 @@
         "tags": [
           "Shared links"
         ], 
+        "x-box-tag": "shared_links", 
         "x-box-reference-category": "shared_links", 
+        "x-box-enable-explorer": true, 
         "description": "共有リンクで表されるファイルまたはフォルダを返します。\n\n共有項目は、共有リンクで表されるファイルまたはフォルダであり、現在の会社内に存在する項目である場合も、別の会社内に存在する項目である場合もあります。\n\nアプリケーションからこのエンドポイントを呼び出すと、共有項目についての情報を取得できます(共有リンクが存在する場合のみ)。", 
         "parameters": [
           {
@@ -8607,7 +8779,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Item"
+                  "$ref": "#/components/schemas/Item--Mini"
                 }
               }
             }
@@ -8635,12 +8807,14 @@
         "tags": [
           "Web links"
         ], 
+        "x-box-tag": "web_links", 
         "x-box-reference-category": "web_links", 
         "description": "フォルダ内にウェブリンクオブジェクトを作成します。", 
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
+                "type": "object", 
                 "required": [
                   "parent", 
                   "url"
@@ -8711,6 +8885,7 @@
         "tags": [
           "Web links"
         ], 
+        "x-box-tag": "web_links", 
         "x-box-reference-category": "web_links", 
         "description": "ウェブリンクに関する情報を取得します。", 
         "parameters": [
@@ -8752,8 +8927,9 @@
         "operationId": "post_web_links_id", 
         "summary": "ウェブリンクを復元", 
         "tags": [
-          "Trash"
+          "Trashed web links"
         ], 
+        "x-box-tag": "trashed_web_links", 
         "x-box-reference-category": "trashed_web_links", 
         "description": "ごみ箱に移動されたウェブリンクを復元します。\n\n元のフォルダが削除されている場合にウェブリンクの復元先となる新しい親ID(省略可)を指定することができます。", 
         "parameters": [
@@ -8790,6 +8966,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object", 
                 "properties": {
                   "name": {
                     "description": "ウェブリンクの新しい名前(省略可)。", 
@@ -8878,6 +9055,7 @@
         "tags": [
           "Web links"
         ], 
+        "x-box-tag": "web_links", 
         "x-box-reference-category": "web_links", 
         "description": "ウェブリンクオブジェクトを更新します。", 
         "parameters": [
@@ -8896,6 +9074,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object", 
                 "properties": {
                   "url": {
                     "type": "string", 
@@ -8964,6 +9143,7 @@
         "tags": [
           "Web links"
         ], 
+        "x-box-tag": "web_links", 
         "x-box-reference-category": "web_links", 
         "description": "ウェブリンクを削除します。", 
         "parameters": [
@@ -9000,8 +9180,9 @@
         "operationId": "get_web_links_id_trash", 
         "summary": "ごみ箱に移動されたウェブリンクを取得", 
         "tags": [
-          "Trash"
+          "Trashed web links"
         ], 
+        "x-box-tag": "trashed_web_links", 
         "x-box-reference-category": "trashed_web_links", 
         "description": "ごみ箱に移動されたウェブリンクを取得します。", 
         "parameters": [
@@ -9071,8 +9252,9 @@
         "operationId": "delete_web_links_id_trash", 
         "summary": "ウェブリンクを完全に削除", 
         "tags": [
-          "Trash"
+          "Trashed web links"
         ], 
+        "x-box-tag": "trashed_web_links", 
         "x-box-reference-category": "trashed_web_links", 
         "description": "ごみ箱内にあるウェブリンクを完全に削除します。このアクションは取り消せません。", 
         "parameters": [
@@ -9117,6 +9299,7 @@
     "/users": {
       "get": {
         "operationId": "get_users", 
+        "x-box-tag": "users", 
         "x-box-reference-category": "users", 
         "summary": "会社ユーザーのリストを取得", 
         "tags": [
@@ -9242,6 +9425,7 @@
         "tags": [
           "Users"
         ], 
+        "x-box-tag": "users", 
         "x-box-reference-category": "users", 
         "description": "会社内の管理対象ユーザーを新規に作成します。このエンドポイントを使用できるのは、適切な管理者権限を持つユーザーとアプリケーションのみです。", 
         "parameters": [
@@ -9268,6 +9452,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object", 
                 "required": [
                   "name"
                 ], 
@@ -9415,6 +9600,7 @@
     "/users/me": {
       "get": {
         "operationId": "get_users_me", 
+        "x-box-tag": "users", 
         "x-box-reference-category": "users", 
         "summary": "現在のユーザーを取得", 
         "tags": [
@@ -9468,6 +9654,7 @@
     "/users/{user_id}": {
       "get": {
         "operationId": "get_users_id", 
+        "x-box-tag": "users", 
         "x-box-reference-category": "users", 
         "summary": "ユーザーを取得", 
         "tags": [
@@ -9533,6 +9720,7 @@
         "tags": [
           "Users"
         ], 
+        "x-box-tag": "users", 
         "x-box-reference-category": "users", 
         "x-box-enable-explorer": true, 
         "description": "会社内の管理対象ユーザーを更新します。このエンドポイントを使用できるのは、適切な管理者権限を持つユーザーとアプリケーションのみです。", 
@@ -9570,6 +9758,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object", 
                 "properties": {
                   "enterprise": {
                     "type": "string", 
@@ -9749,6 +9938,7 @@
       }, 
       "delete": {
         "operationId": "delete_users_id", 
+        "x-box-tag": "users", 
         "x-box-reference-category": "users", 
         "summary": "ユーザーを削除", 
         "tags": [
@@ -9805,6 +9995,7 @@
     "/users/{user_id}/avatar": {
       "get": {
         "operationId": "get_users_id_avatar", 
+        "x-box-tag": "avatars", 
         "x-box-reference-category": "avatars", 
         "summary": "ユーザーのアバターを取得", 
         "tags": [
@@ -9852,10 +10043,11 @@
     "/users/{user_id}/folders/0": {
       "put": {
         "operationId": "put_users_id_folders_0", 
+        "x-box-tag": "transfer", 
         "x-box-reference-category": "transfer", 
         "summary": "所有フォルダを移行", 
         "tags": [
-          "Users"
+          "Transfer folders"
         ], 
         "description": "ユーザーが所有するすべての項目を別のユーザーアカウントの新しいフォルダに移動します。\n\n転送できるのは、ルートフォルダ(`0`)のみです。\n\nユーザー間でフォルダを移動できるのは、管理者権限を持つユーザーのみです。\n\nこの呼び出しは同期的に実行されるため、移動元のユーザーのすべてのフォルダに多数の項目がある場合は、応答が遅くなる可能性があります。\n\n宛先パスのいずれかの親フォルダにメタデータカスケードポリシーが適用されている場合は、メタデータカスケード操作が非同期的に開始されます。\n\n現時点では、この操作がいつ終了したのかを確認する方法はありません。\n\n宛先フォルダの名前は、`{User}'s Files and Folders`形式になります。この場合、`{User}`はユーザーの表示名です。", 
         "parameters": [
@@ -9902,6 +10094,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object", 
                 "required": [
                   "enterprise"
                 ], 
@@ -9954,8 +10147,9 @@
         "operationId": "get_users_id_email_aliases", 
         "summary": "ユーザーのメールエイリアスのリストを取得", 
         "tags": [
-          "Users"
+          "Email aliases"
         ], 
+        "x-box-tag": "email_aliases", 
         "x-box-reference-category": "email_aliases", 
         "description": "ユーザーのすべてのメールエイリアスを取得します。コレクションにユーザーのプライマリログインは含まれません。", 
         "parameters": [
@@ -9995,10 +10189,11 @@
       }, 
       "post": {
         "operationId": "post_users_id_email_aliases", 
+        "x-box-tag": "email_aliases", 
         "x-box-reference-category": "email_aliases", 
         "summary": "メールエイリアスを作成", 
         "tags": [
-          "Users"
+          "Email aliases"
         ], 
         "description": "新しいメールエイリアスをユーザーアカウントに追加します。", 
         "parameters": [
@@ -10017,6 +10212,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object", 
                 "required": [
                   "email"
                 ], 
@@ -10058,10 +10254,11 @@
     "/users/{user_id}/email_aliases/{email_alias_id}": {
       "delete": {
         "operationId": "delete_users_id_email_aliases_id", 
+        "x-box-tag": "email_aliases", 
         "x-box-reference-category": "email_aliases", 
         "summary": "メールエイリアスを削除", 
         "tags": [
-          "Users"
+          "Email aliases"
         ], 
         "description": "ユーザーからメールエイリアスを削除します。", 
         "parameters": [
@@ -10107,9 +10304,10 @@
       "get": {
         "operationId": "get_users_id_memberships", 
         "summary": "ユーザーのグループのリストを取得", 
+        "x-box-tag": "memberships", 
         "x-box-reference-category": "memberships", 
         "tags": [
-          "Groups"
+          "Group memberships"
         ], 
         "description": "ユーザーのすべてのグループを取得します。グループを調べるには、API呼び出しを行うユーザーに管理者権限が付与されている必要があります。", 
         "parameters": [
@@ -10178,8 +10376,9 @@
         "operationId": "post_invites", 
         "summary": "ユーザー招待を作成", 
         "tags": [
-          "Users"
+          "Invites"
         ], 
+        "x-box-tag": "invites", 
         "x-box-reference-category": "invites", 
         "description": "既存の外部ユーザーを会社に招待します。\n\nすでに他の会社に所属しているユーザーや、Boxアカウントを持たないユーザーを招待することはできません。招待されたユーザーには、Boxウェブアプリケーションで招待を承認するように促すメールが届きます。\n\nこの方法を使用する場合は、対象アプリケーションに対して「Enterpriseの管理」スコープを有効にする必要があります。これは、開発者コンソールから有効にできます。", 
         "parameters": [
@@ -10206,6 +10405,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object", 
                 "required": [
                   "enterprise", 
                   "actionable_by"
@@ -10273,9 +10473,10 @@
         "operationId": "get_invites_id", 
         "summary": "ユーザー招待ステータスを取得", 
         "tags": [
-          "Users"
+          "Invites"
         ], 
         "description": "ユーザー招待のステータスを返します。", 
+        "x-box-tag": "invites", 
         "x-box-reference-category": "invites", 
         "parameters": [
           {
@@ -10335,6 +10536,7 @@
       "get": {
         "operationId": "get_groups", 
         "summary": "会社のグループのリストを取得", 
+        "x-box-tag": "groups", 
         "x-box-reference-category": "groups", 
         "tags": [
           "Groups"
@@ -10414,6 +10616,7 @@
         "tags": [
           "Groups"
         ], 
+        "x-box-tag": "groups", 
         "x-box-reference-category": "groups", 
         "description": "会社内に新しいユーザーグループを作成します。新しいグループを作成できるのは、管理者権限を持つユーザーのみです。", 
         "parameters": [
@@ -10440,6 +10643,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object", 
                 "required": [
                   "name"
                 ], 
@@ -10532,6 +10736,7 @@
         "tags": [
           "Groups"
         ], 
+        "x-box-tag": "groups", 
         "x-box-reference-category": "groups", 
         "description": "グループに関する情報を取得します。", 
         "parameters": [
@@ -10593,6 +10798,7 @@
         "tags": [
           "Groups"
         ], 
+        "x-box-tag": "groups", 
         "x-box-reference-category": "groups", 
         "description": "特定のグループを更新します。", 
         "parameters": [
@@ -10629,6 +10835,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object", 
                 "properties": {
                   "name": {
                     "type": "string", 
@@ -10716,6 +10923,7 @@
         "tags": [
           "Groups"
         ], 
+        "x-box-tag": "groups", 
         "x-box-reference-category": "groups", 
         "description": "グループを完全に削除します。", 
         "parameters": [
@@ -10751,9 +10959,10 @@
       "get": {
         "operationId": "get_groups_id_memberships", 
         "summary": "グループのメンバーのリストを取得", 
+        "x-box-tag": "memberships", 
         "x-box-reference-category": "memberships", 
         "tags": [
-          "Groups"
+          "Group memberships"
         ], 
         "description": "グループのすべてのメンバーを取得します。会社のグループを調べるには、管理者権限が必要です。", 
         "parameters": [
@@ -10821,9 +11030,10 @@
       "get": {
         "operationId": "get_groups_id_collaborations", 
         "summary": "グループのコラボレーションのリストを取得", 
-        "x-box-reference-category": "group_collaborations", 
+        "x-box-tag": "list_collaborations", 
+        "x-box-reference-category": "list_collaborations", 
         "tags": [
-          "Groups"
+          "Collaborations (List)"
         ], 
         "description": "グループのすべてのコラボレーションを取得します。会社のグループを調べるには、管理者権限が必要です。\n\nそれぞれのコラボレーションオブジェクトには、そのグループがどのファイルやフォルダにアクセスでき、どのロールが使用されるのかに関する詳細情報が含まれています。", 
         "parameters": [
@@ -10892,8 +11102,9 @@
         "operationId": "post_group_memberships", 
         "summary": "ユーザーをグループに追加", 
         "tags": [
-          "Groups"
+          "Group memberships"
         ], 
+        "x-box-tag": "memberships", 
         "x-box-reference-category": "memberships", 
         "description": "グループメンバーシップを作成します", 
         "parameters": [
@@ -10920,6 +11131,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object", 
                 "required": [
                   "user", 
                   "group"
@@ -11009,8 +11221,9 @@
         "operationId": "get_group_memberships_id", 
         "summary": "グループメンバーシップを取得", 
         "tags": [
-          "Groups"
+          "Group memberships"
         ], 
+        "x-box-tag": "memberships", 
         "x-box-reference-category": "memberships", 
         "description": "特定のグループメンバーシップを取得します。", 
         "parameters": [
@@ -11070,8 +11283,9 @@
         "operationId": "put_group_memberships_id", 
         "summary": "グループメンバーシップを更新", 
         "tags": [
-          "Groups"
+          "Group memberships"
         ], 
+        "x-box-tag": "memberships", 
         "x-box-reference-category": "memberships", 
         "description": "ユーザーのグループメンバーシップを更新します。", 
         "parameters": [
@@ -11108,6 +11322,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object", 
                 "properties": {
                   "role": {
                     "type": "string", 
@@ -11163,8 +11378,9 @@
         "operationId": "delete_group_memberships_id", 
         "summary": "ユーザーをグループから削除", 
         "tags": [
-          "Groups"
+          "Group memberships"
         ], 
+        "x-box-tag": "memberships", 
         "x-box-reference-category": "memberships", 
         "description": "特定のグループメンバーシップを削除します。", 
         "parameters": [
@@ -11203,6 +11419,7 @@
         "tags": [
           "Webhooks"
         ], 
+        "x-box-tag": "webhooks", 
         "x-box-reference-category": "webhooks", 
         "description": "リクエスト元のアプリケーションに対して定義されているすべてのWebhookを返します。\n\nこのAPIは、認証済みユーザーが所有するファイルまたはフォルダに適用されているWebhookのみを返します。つまり、管理者は、それらのフォルダにアクセスできない限り、サービスアカウントによって作成されたWebhookを表示することはできません。逆もまた同様です。", 
         "parameters": [
@@ -11269,12 +11486,14 @@
         "tags": [
           "Webhooks"
         ], 
+        "x-box-tag": "webhooks", 
         "x-box-reference-category": "webhooks", 
         "description": "Webhookを作成します。", 
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
+                "type": "object", 
                 "required": [
                   "target", 
                   "triggers", 
@@ -11432,6 +11651,7 @@
         "tags": [
           "Webhooks"
         ], 
+        "x-box-tag": "webhooks", 
         "x-box-reference-category": "webhooks", 
         "summary": "Webhookを取得", 
         "description": "特定のWebhookを取得します", 
@@ -11496,6 +11716,7 @@
         "tags": [
           "Webhooks"
         ], 
+        "x-box-tag": "webhooks", 
         "x-box-reference-category": "webhooks", 
         "description": "Webhookを更新します。", 
         "parameters": [
@@ -11514,6 +11735,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object", 
                 "properties": {
                   "target": {
                     "type": "object", 
@@ -11665,6 +11887,7 @@
         "tags": [
           "Webhooks"
         ], 
+        "x-box-tag": "webhooks", 
         "x-box-reference-category": "webhooks", 
         "description": "Webhookを削除します。", 
         "parameters": [
@@ -11723,6 +11946,7 @@
         "tags": [
           "Skills"
         ], 
+        "x-box-tag": "skills", 
         "x-box-reference-category": "skills", 
         "description": "スキル呼び出しのステータス、利用状況、応答のメタデータを更新します。", 
         "parameters": [
@@ -11741,6 +11965,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object", 
                 "required": [
                   "status", 
                   "metadata", 
@@ -11992,6 +12217,7 @@
         "tags": [
           "Events"
         ], 
+        "x-box-tag": "events", 
         "x-box-reference-category": "events", 
         "description": "[イベントストリーム](#get-events)へのロングポーリング更新に使用できるリアルタイムサーバーのリストを返します。\n\nロングポーリングとは、サーバーが応答を送信するまでHTTPリクエストを開いたままにしておき、そのプロセスを何度も繰り返して更新された応答を受信するというコンセプトです。\n\nイベントストリームのロングポーリングは、ユーザーイベントについてのみ使用でき、エンタープライズイベントについては使用できません。\n\nロングポーリングを使用するには、最初にこのエンドポイントを使用してロングポーリングURLのリストを取得します。次に、取得した任意のURLに対してロングポーリングリクエストを発行します。\n\n監視対象のアカウントでイベントが発生すると、`new_change`という値を持つ応答が送信されます。この応答は、最新の既知の`stream_position`を使用して[eventsエンドポイント](#get-events)にリクエストを送信するなど、さらなるアクションを促すことだけを目的としているため、その他の詳細は含んでいません。\n\nサーバーは、この応答を送信すると接続を閉じます。この時点でイベントのリスト化を再開するには、ロングポーリングプロセスを繰り返す必要があります。\n\nしばらくイベントが発生せずに接続がタイムアウトになると、`reconnect`という値を持つ応答が届きます。この応答を受け取ったら、このエンドポイントを改めて呼び出してプロセスを再開します。\n\n`retry_timeout`秒以内にイベントを受信しなかった場合は、リアルタイムサーバー(このエンドポイントの応答に含まれるURLの1つ)に別のリクエストを送信する必要があります。ネットワークエラーが原因で、これを実行しなければならない場合もあります。\n\nまた、リアルタイムサーバーへのリクエスト時に`max_retries`エラーを受信した場合は、まずこのエンドポイントを呼び出してからやり直す必要があります。", 
         "responses": {
@@ -12023,6 +12249,7 @@
         "tags": [
           "Events"
         ], 
+        "x-box-tag": "events", 
         "x-box-reference-category": "events", 
         "description": "指定したユーザーまたは会社全体の過去のイベントを最大1年間遡って返します。\n\nデフォルトでは、認証済みユーザーのイベントを返します。会社全体のイベントを取得するには、`stream_type`を`admin_logs`に設定します。会社のイベントフィードを取得するには、API呼び出しを行うユーザーが管理者権限を所有していて、アプリケーションがイベントフィードに対するアクセス権限を所有している必要があります。", 
         "parameters": [
@@ -12143,6 +12370,7 @@
                   "METADATA_TEMPLATE_UPDATE", 
                   "MOVE", 
                   "NEW_USER", 
+                  "OAUTH2_ACCESS_TOKEN_REVOKE", 
                   "PREVIEW", 
                   "REMOVE_DEVICE_ASSOCIATION", 
                   "REMOVE_LOGIN_ACTIVITY_DEVICE", 
@@ -12225,6 +12453,7 @@
         "tags": [
           "Collections"
         ], 
+        "x-box-tag": "collections", 
         "x-box-reference-category": "collections", 
         "description": "指定したユーザーのすべてのコレクションを取得します。\n\n現在サポートされているのは、`favorites`コレクションのみです。", 
         "parameters": [
@@ -12303,6 +12532,7 @@
         "tags": [
           "Collections"
         ], 
+        "x-box-tag": "collections", 
         "x-box-reference-category": "collections", 
         "description": "このコレクションに含まれるファイルやフォルダを取得します。", 
         "parameters": [
@@ -12392,6 +12622,7 @@
           "Recent items"
         ], 
         "description": "過去90日間、または最大1,000項目まで遡って、ユーザーが最近アクセスした項目に関する情報を返します。", 
+        "x-box-tag": "recent_items", 
         "x-box-reference-category": "recent_items", 
         "parameters": [
           {
@@ -12467,6 +12698,7 @@
         "tags": [
           "Retention policies"
         ], 
+        "x-box-tag": "retention_policies", 
         "x-box-reference-category": "retention_policies", 
         "description": "会社のすべてのリテンションポリシーを取得します。", 
         "parameters": [
@@ -12554,12 +12786,14 @@
         "tags": [
           "Retention policies"
         ], 
+        "x-box-tag": "retention_policies", 
         "x-box-reference-category": "retention_policies", 
         "description": "リテンションポリシーを作成します。", 
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
+                "type": "object", 
                 "required": [
                   "policy_name", 
                   "policy_type", 
@@ -12693,6 +12927,7 @@
         "tags": [
           "Retention policies"
         ], 
+        "x-box-tag": "retention_policies", 
         "x-box-reference-category": "retention_policies", 
         "description": "リテンションポリシーを取得します。", 
         "parameters": [
@@ -12736,6 +12971,7 @@
         "tags": [
           "Retention policies"
         ], 
+        "x-box-tag": "retention_policies", 
         "x-box-reference-category": "retention_policies", 
         "description": "リテンションポリシーを更新します。", 
         "parameters": [
@@ -12754,6 +12990,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object", 
                 "properties": {
                   "policy_name": {
                     "type": "string", 
@@ -12831,8 +13068,9 @@
         "operationId": "get_retention_policies_id_assignments", 
         "summary": "リテンションポリシー割り当てのリストを取得", 
         "tags": [
-          "Retention policies"
+          "Retention policy assignments"
         ], 
+        "x-box-tag": "retention_policy_assignments", 
         "x-box-reference-category": "retention_policy_assignments", 
         "description": "指定したリテンションポリシーに関連付けられているすべてのリテンションポリシー割り当てのリストを返します。", 
         "parameters": [
@@ -12923,14 +13161,16 @@
         "operationId": "post_retention_policy_assignments", 
         "summary": "リテンションポリシーを割り当て", 
         "tags": [
-          "Retention policies"
+          "Retention policy assignments"
         ], 
+        "x-box-tag": "retention_policy_assignments", 
         "x-box-reference-category": "retention_policy_assignments", 
         "description": "リテンションポリシーを項目に割り当てます。", 
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
+                "type": "object", 
                 "required": [
                   "policy_id", 
                   "assign_to"
@@ -13030,8 +13270,9 @@
         "operationId": "get_retention_policy_assignments_id", 
         "summary": "リテンションポリシー割り当てを取得", 
         "tags": [
-          "Retention policies"
+          "Retention policy assignments"
         ], 
+        "x-box-tag": "retention_policy_assignments", 
         "x-box-reference-category": "retention_policy_assignments", 
         "description": "リテンションポリシー割り当てを取得します", 
         "parameters": [
@@ -13077,6 +13318,7 @@
         "tags": [
           "Legal hold policies"
         ], 
+        "x-box-tag": "legal_hold_policies", 
         "x-box-reference-category": "legal_hold_policies", 
         "description": "会社に属するリーガルホールドポリシーのリストを取得します。", 
         "parameters": [
@@ -13161,12 +13403,14 @@
         "tags": [
           "Legal hold policies"
         ], 
+        "x-box-tag": "legal_hold_policies", 
         "x-box-reference-category": "legal_hold_policies", 
         "description": "新しいリーガルホールドポリシーを作成します。", 
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
+                "type": "object", 
                 "required": [
                   "policy_name"
                 ], 
@@ -13258,6 +13502,7 @@
         "tags": [
           "Legal hold policies"
         ], 
+        "x-box-tag": "legal_hold_policies", 
         "x-box-reference-category": "legal_hold_policies", 
         "description": "リーガルホールドポリシーを取得します。", 
         "parameters": [
@@ -13301,6 +13546,7 @@
         "tags": [
           "Legal hold policies"
         ], 
+        "x-box-tag": "legal_hold_policies", 
         "x-box-reference-category": "legal_hold_policies", 
         "description": "リーガルホールドポリシーを更新します。", 
         "parameters": [
@@ -13319,6 +13565,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object", 
                 "properties": {
                   "policy_name": {
                     "description": "ポリシーの名前。", 
@@ -13378,6 +13625,7 @@
       }, 
       "delete": {
         "operationId": "delete_legal_hold_policies_id", 
+        "x-box-tag": "legal_hold_policies", 
         "x-box-reference-category": "legal_hold_policies", 
         "tags": [
           "Legal hold policies"
@@ -13418,8 +13666,9 @@
         "operationId": "get_legal_hold_policy_assignments", 
         "summary": "リーガルホールドポリシー割り当てのリストを取得", 
         "tags": [
-          "Legal hold policies"
+          "Legal hold policy assignments"
         ], 
+        "x-box-tag": "legal_hold_policy_assignments", 
         "x-box-reference-category": "legal_hold_policy_assignments", 
         "description": "リーガルホールドポリシーが割り当てられている項目のリストを取得します。", 
         "parameters": [
@@ -13508,14 +13757,16 @@
         "operationId": "post_legal_hold_policy_assignments", 
         "summary": "リーガルホールドポリシーを割り当て", 
         "tags": [
-          "Legal hold policies"
+          "Legal hold policy assignments"
         ], 
+        "x-box-tag": "legal_hold_policy_assignments", 
         "x-box-reference-category": "legal_hold_policy_assignments", 
         "description": "ファイル、ファイルバージョン、フォルダ、またはユーザーにリーガルホールドを割り当てます。", 
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
+                "type": "object", 
                 "required": [
                   "policy_id", 
                   "assign_to"
@@ -13586,8 +13837,9 @@
         "operationId": "get_legal_hold_policy_assignments_id", 
         "summary": "リーガルホールドポリシー割り当てを取得", 
         "tags": [
-          "Legal hold policies"
+          "Legal hold policy assignments"
         ], 
+        "x-box-tag": "legal_hold_policy_assignments", 
         "x-box-reference-category": "legal_hold_policy_assignments", 
         "description": "リーガルホールドポリシー割り当てを取得します。", 
         "parameters": [
@@ -13627,9 +13879,10 @@
       }, 
       "delete": {
         "operationId": "delete_legal_hold_policy_assignments_id", 
+        "x-box-tag": "legal_hold_policy_assignments", 
         "x-box-reference-category": "legal_hold_policy_assignments", 
         "tags": [
-          "Legal hold policies"
+          "Legal hold policy assignments"
         ], 
         "summary": "リーガルホールドポリシーの割り当てを解除", 
         "description": "項目からリーガルホールドを削除します。\n\nこれは非同期的プロセスです。応答が返された時点では、ポリシーはまだ完全には削除されていません。", 
@@ -13662,12 +13915,187 @@
         }
       }
     }, 
+    "/legal_hold_policy_assignments/{legal_hold_policy_assignment_id}/files_on_hold": {
+      "get": {
+        "operationId": "get_legal_hold_policy_assignments_id_files_on_hold", 
+        "summary": "リーガルホールドポリシー割り当てに関する現在のファイルバージョンのリストを取得", 
+        "tags": [
+          "Legal hold policy assignments"
+        ], 
+        "x-box-tag": "legal_hold_policy_assignments", 
+        "x-box-reference-category": "legal_hold_policy_assignments", 
+        "description": "リーガルホールド割り当てに関する現在のファイルバージョンのリストを取得します。\n\n場合によっては、代わりに以前のファイルバージョンを取得できます。このような場合は、代わりに`GET /legal_hold_policy_assignments/:id/file_versions_on_hold` APIを使用すると、このリーガルホールドポリシー割り当てに関する以前のファイルバージョンが返されます。\n\n進行中の再構築作業により、このAPIでは、このポリシーIDの保持されているファイルバージョンがすべて返されるとは限りません。代わりに、このAPIで返されるのは、新しく開発されたアーキテクチャで保持されている最新のファイルバージョンのみです。`GET /file_version_legal_holds` APIを使用すると、従来のアーキテクチャ内で保持されているファイルの現在のバージョンと過去のバージョンを取得できます。\n\n`GET /legal_hold_policy_assignments?policy_id={id}` APIを使用すると、指定したポリシーIDのポリシー割り当てのリストを確認できます。", 
+        "parameters": [
+          {
+            "name": "legal_hold_policy_assignment_id", 
+            "description": "リーガルホールドポリシー割り当てのID", 
+            "example": "753465", 
+            "in": "path", 
+            "required": true, 
+            "schema": {
+              "type": "string"
+            }
+          }, 
+          {
+            "name": "marker", 
+            "description": "結果が返される開始位置のマーカー。マーカーベースのページ割りを使用している場合に使用されます。\n\nこれを使用するには、`usemarker`を`true`に設定する必要があります。", 
+            "in": "query", 
+            "required": false, 
+            "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii", 
+            "schema": {
+              "type": "string"
+            }
+          }, 
+          {
+            "name": "limit", 
+            "description": "返す項目の1ページあたりの最大数。", 
+            "in": "query", 
+            "required": false, 
+            "example": 1000, 
+            "schema": {
+              "type": "integer", 
+              "format": "int64", 
+              "default": 100, 
+              "maximum": 1000
+            }
+          }, 
+          {
+            "name": "fields", 
+            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれず、リクエストしたフィールドのほかには、簡易版レプリゼンテーションのフィールドしか返されないことに注意してください。", 
+            "in": "query", 
+            "example": [
+              "id", 
+              "type", 
+              "name"
+            ], 
+            "required": false, 
+            "explode": false, 
+            "schema": {
+              "type": "array", 
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        ], 
+        "responses": {
+          "200": {
+            "description": "特定のリーガルホールドポリシー割り当てに関する、リーガルホールドで保持されている現在のファイルバージョンのリストを返します。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FileVersionLegalHolds"
+                }
+              }
+            }
+          }, 
+          "default": {
+            "description": "予期しないクライアントエラー。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }, 
+    "/legal_hold_policy_assignments/{legal_hold_policy_assignment_id}/file_versions_on_hold": {
+      "get": {
+        "operationId": "get_legal_hold_policy_assignments_id_file_versions_on_hold", 
+        "summary": "リーガルホールドポリシー割り当てに関する以前のファイルバージョンのリストを取得", 
+        "tags": [
+          "Legal hold policy assignments"
+        ], 
+        "x-box-tag": "legal_hold_policy_assignments", 
+        "x-box-reference-category": "legal_hold_policy_assignments", 
+        "description": "リーガルホールド割り当てに関する以前のファイルバージョンのリストを取得します。\n\n場合によっては、代わりに最新のファイルバージョンのみが必要になることもあります。このような場合は、代わりに`GET /legal_hold_policy_assignments/:id/files_on_hold` APIを使用すると、このリーガルホールドポリシー割り当てに関する現在(最新)のファイルバージョンが返されます。\n\n進行中の再構築作業により、このAPIでは、このポリシーIDの保持されているファイルがすべて返されるとは限りません。代わりに、このAPIで返されるのは、新しく開発されたアーキテクチャで保持されている過去のファイルバージョンのみです。`GET /file_version_legal_holds` APIを使用すると、従来のアーキテクチャ内で保持されているファイルの現在のバージョンと過去のバージョンを取得できます。\n\n`GET /legal_hold_policy_assignments?policy_id={id}` APIを使用すると、指定したポリシーIDのポリシー割り当てのリストを確認できます。", 
+        "parameters": [
+          {
+            "name": "legal_hold_policy_assignment_id", 
+            "description": "リーガルホールドポリシー割り当てのID", 
+            "example": "753465", 
+            "in": "path", 
+            "required": true, 
+            "schema": {
+              "type": "string"
+            }
+          }, 
+          {
+            "name": "marker", 
+            "description": "結果が返される開始位置のマーカー。マーカーベースのページ割りを使用している場合に使用されます。\n\nこれを使用するには、`usemarker`を`true`に設定する必要があります。", 
+            "in": "query", 
+            "required": false, 
+            "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii", 
+            "schema": {
+              "type": "string"
+            }
+          }, 
+          {
+            "name": "limit", 
+            "description": "返す項目の1ページあたりの最大数。", 
+            "in": "query", 
+            "required": false, 
+            "example": 1000, 
+            "schema": {
+              "type": "integer", 
+              "format": "int64", 
+              "default": 100, 
+              "maximum": 1000
+            }
+          }, 
+          {
+            "name": "fields", 
+            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれず、リクエストしたフィールドのほかには、簡易版レプリゼンテーションのフィールドしか返されないことに注意してください。", 
+            "in": "query", 
+            "example": [
+              "id", 
+              "type", 
+              "name"
+            ], 
+            "required": false, 
+            "explode": false, 
+            "schema": {
+              "type": "array", 
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        ], 
+        "responses": {
+          "200": {
+            "description": "特定のリーガルホールドポリシー割り当てに関する、リーガルホールドで保持されている以前のファイルバージョンのリストを返します。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FileVersionLegalHolds"
+                }
+              }
+            }
+          }, 
+          "default": {
+            "description": "予期しないクライアントエラー。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }, 
     "/file_version_retentions/{file_version_retention_id}": {
       "get": {
         "operationId": "get_file_version_retentions_id", 
         "tags": [
-          "Retention policies"
+          "File version retentions"
         ], 
+        "x-box-tag": "file_version_retentions", 
         "x-box-reference-category": "file_version_retentions", 
         "summary": "ファイルのリテンションを取得", 
         "description": "ファイルバージョンリテンションに関する情報を返します。", 
@@ -13711,8 +14139,9 @@
       "get": {
         "operationId": "get_file_version_retentions", 
         "tags": [
-          "Retention policies"
+          "File version retentions"
         ], 
+        "x-box-tag": "file_version_retentions", 
         "x-box-reference-category": "file_version_retentions", 
         "summary": "ファイルバージョンリテンションのリストを取得", 
         "description": "指定した会社のすべてのファイルバージョンリテンションを取得します。", 
@@ -13834,8 +14263,9 @@
         "operationId": "get_file_version_legal_holds_id", 
         "summary": "ファイルバージョンのリーガルホールドを取得", 
         "tags": [
-          "Legal hold policies"
+          "File version legal holds"
         ], 
+        "x-box-tag": "file_version_legal_holds", 
         "x-box-reference-category": "file_version_legal_holds", 
         "description": "ファイルバージョンに割り当てられているリーガルホールドポリシーに関する情報を取得します。", 
         "parameters": [
@@ -13879,10 +14309,11 @@
         "operationId": "get_file_version_legal_holds", 
         "summary": "ファイルバージョンのリーガルホールドのリストを取得", 
         "tags": [
-          "Legal hold policies"
+          "File version legal holds"
         ], 
+        "x-box-tag": "file_version_legal_holds", 
         "x-box-reference-category": "file_version_legal_holds", 
-        "description": "特定のリーガルホールドポリシーに適用されている、まだ削除されていないリーガルホールドのリストを取得します。", 
+        "description": "リーガルホールド割り当てに関する、リーガルホールドのファイルバージョンのリストを取得します。\n\n進行中の再構築作業により、このAPIでは、このポリシーIDのファイルバージョンがすべて返されるとは限りません。\n\n代わりに、このAPIで返されるのは、従来のアーキテクチャで保持されているファイルバージョンのみです。新しいアーキテクチャで保持されているすべてのファイルバージョンをリクエストするために2つの新しいエンドポイントが使用可能になります。\n\n新しいアーキテクチャで保持されるファイルバージョンについては、`GET /legal_hold_policy_assignments/:id/file_versions_on_hold` APIを使用すると、このポリシー割り当てに使用できる過去のファイルバージョンをすべて返すことができます。また、`GET /legal_hold_policy_assignments/:id/files_on_hold` APIを使用すると、リーガルホールドにあるファイルの現在(最新)バージョンを返すこともできます。\n\n`GET /legal_hold_policy_assignments?policy_id={id}` APIを使用すると、指定したポリシーIDのポリシー割り当てのリストを確認できます。\n\n再構築が完了すると、このAPIは非推奨になります。", 
         "parameters": [
           {
             "name": "policy_id", 
@@ -13949,6 +14380,7 @@
         "tags": [
           "Device pinners"
         ], 
+        "x-box-tag": "device_pinners", 
         "x-box-reference-category": "device_pinners", 
         "description": "個々のデバイスピンに関する情報を取得します。", 
         "parameters": [
@@ -13992,6 +14424,7 @@
         "tags": [
           "Device pinners"
         ], 
+        "x-box-tag": "device_pinners", 
         "x-box-reference-category": "device_pinners", 
         "description": "個々のデバイスピンを削除します。", 
         "parameters": [
@@ -14030,6 +14463,7 @@
         "tags": [
           "Device pinners"
         ], 
+        "x-box-tag": "device_pinners", 
         "x-box-reference-category": "device_pinners", 
         "description": "会社内のすべてのデバイスピンを取得します。\n\nこの呼び出しを行うにはユーザーに管理者権限が必要で、アプリケーションに「Enterpriseの管理」スコープが必要です。", 
         "parameters": [
@@ -14108,6 +14542,7 @@
     "/terms_of_services": {
       "get": {
         "operationId": "get_terms_of_services", 
+        "x-box-tag": "terms_of_services", 
         "x-box-reference-category": "terms_of_services", 
         "summary": "利用規約のリストを取得", 
         "tags": [
@@ -14159,12 +14594,14 @@
           "Terms of service"
         ], 
         "summary": "利用規約を作成", 
+        "x-box-tag": "terms_of_services", 
         "x-box-reference-category": "terms_of_services", 
         "description": "指定した会社とユーザータイプに適用される利用規約を作成します。", 
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
+                "type": "object", 
                 "required": [
                   "status", 
                   "text"
@@ -14229,6 +14666,7 @@
         "tags": [
           "Terms of service"
         ], 
+        "x-box-tag": "terms_of_services", 
         "x-box-reference-category": "terms_of_services", 
         "description": "特定の利用規約を取得します。", 
         "parameters": [
@@ -14272,6 +14710,7 @@
         "tags": [
           "Terms of service"
         ], 
+        "x-box-tag": "terms_of_services", 
         "x-box-reference-category": "terms_of_services", 
         "description": "特定の利用規約を更新します。", 
         "parameters": [
@@ -14290,6 +14729,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object", 
                 "required": [
                   "status", 
                   "text"
@@ -14343,8 +14783,9 @@
         "operationId": "get_terms_of_service_user_statuses", 
         "summary": "利用規約ユーザーステータスのリストを取得", 
         "tags": [
-          "Terms of service"
+          "Terms of service user statuses"
         ], 
+        "x-box-tag": "terms_of_service_user_statuses", 
         "x-box-reference-category": "terms_of_service_user_statuses", 
         "description": "ユーザーとそのユーザーに適用される利用規約のステータスの概要(ユーザーが利用規約に同意したかどうかや、いつ同意したかなど)を取得します。", 
         "parameters": [
@@ -14396,14 +14837,16 @@
         "operationId": "post_terms_of_service_user_statuses", 
         "summary": "新規ユーザーの利用規約ステータスを作成", 
         "tags": [
-          "Terms of service"
+          "Terms of service user statuses"
         ], 
+        "x-box-tag": "terms_of_service_user_statuses", 
         "x-box-reference-category": "terms_of_service_user_statuses", 
         "description": "ユーザーの利用規約のステータスを設定します。", 
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
+                "type": "object", 
                 "required": [
                   "tos", 
                   "user", 
@@ -14495,8 +14938,9 @@
         "operationId": "put_terms_of_service_user_statuses_id", 
         "summary": "既存ユーザーの利用規約ステータスを更新", 
         "tags": [
-          "Terms of service"
+          "Terms of service user statuses"
         ], 
+        "x-box-tag": "terms_of_service_user_statuses", 
         "x-box-reference-category": "terms_of_service_user_statuses", 
         "description": "ユーザーの利用規約のステータスを更新します。", 
         "parameters": [
@@ -14515,6 +14959,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object", 
                 "required": [
                   "is_accepted"
                 ], 
@@ -14560,6 +15005,7 @@
         "tags": [
           "Collaboration whitelist entries"
         ], 
+        "x-box-tag": "collaboration_whitelist_entries", 
         "x-box-reference-category": "collaboration_whitelist_entries", 
         "description": "現在の会社とのコラボレーションが許可されているドメインを示す、ホワイトリストエントリのリストを返します。", 
         "parameters": [
@@ -14616,12 +15062,14 @@
         "tags": [
           "Collaboration whitelist entries"
         ], 
+        "x-box-tag": "collaboration_whitelist_entries", 
         "x-box-reference-category": "collaboration_whitelist_entries", 
         "description": "コラボレーションが許可されているドメインと方向を示す、コラボレーションホワイトリストのエントリを作成します。", 
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
+                "type": "object", 
                 "required": [
                   "domain", 
                   "direction"
@@ -14678,6 +15126,7 @@
         "tags": [
           "Collaboration whitelist entries"
         ], 
+        "x-box-tag": "collaboration_whitelist_entries", 
         "x-box-reference-category": "collaboration_whitelist_entries", 
         "description": "特定のコラボレーションホワイトリストエントリを返します。", 
         "parameters": [
@@ -14721,6 +15170,7 @@
         "tags": [
           "Collaboration whitelist entries"
         ], 
+        "x-box-tag": "collaboration_whitelist_entries", 
         "x-box-reference-category": "collaboration_whitelist_entries", 
         "description": "コラボレーションホワイトリストの特定のエントリを削除します。", 
         "parameters": [
@@ -14757,8 +15207,9 @@
         "operationId": "get_collaboration_whitelist_exempt_targets", 
         "summary": "コラボレーションホワイトリスト除外対象のリストを取得", 
         "tags": [
-          "Collaboration whitelist entries"
+          "Collaboration whitelist exempt targets"
         ], 
+        "x-box-tag": "collaboration_whitelist_exempt_targets", 
         "x-box-reference-category": "collaboration_whitelist_exempt_targets", 
         "description": "コラボレーションホワイトリストから除外されているユーザーのリストを返します。", 
         "parameters": [
@@ -14813,14 +15264,16 @@
         "operationId": "post_collaboration_whitelist_exempt_targets", 
         "summary": "ホワイトリスト除外対象を作成", 
         "tags": [
-          "Collaboration whitelist entries"
+          "Collaboration whitelist exempt targets"
         ], 
+        "x-box-tag": "collaboration_whitelist_exempt_targets", 
         "x-box-reference-category": "collaboration_whitelist_exempt_targets", 
         "description": "ホワイトリストから除外するユーザーを指定して、コラボレーションホワイトリストのエントリ除外を作成します。", 
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
+                "type": "object", 
                 "required": [
                   "user"
                 ], 
@@ -14873,8 +15326,9 @@
         "operationId": "get_collaboration_whitelist_exempt_targets_id", 
         "summary": "コラボレーションホワイトリスト除外対象を取得", 
         "tags": [
-          "Collaboration whitelist entries"
+          "Collaboration whitelist exempt targets"
         ], 
+        "x-box-tag": "collaboration_whitelist_exempt_targets", 
         "x-box-reference-category": "collaboration_whitelist_exempt_targets", 
         "description": "コラボレーションホワイトリストから除外されているユーザーを返します。", 
         "parameters": [
@@ -14916,8 +15370,9 @@
         "operationId": "delete_collaboration_whitelist_exempt_targets_id", 
         "summary": "コラボレーションホワイトリスト除外対象を削除", 
         "tags": [
-          "Collaboration whitelist entries"
+          "Collaboration whitelist exempt targets"
         ], 
+        "x-box-tag": "collaboration_whitelist_exempt_targets", 
         "x-box-reference-category": "collaboration_whitelist_exempt_targets", 
         "description": "特定のコラボレーションホワイトリスト例外を削除します。", 
         "parameters": [
@@ -14954,8 +15409,9 @@
         "operationId": "get_storage_policies", 
         "summary": "ストレージポリシーのリストを取得", 
         "tags": [
-          "Multi Zones"
+          "Storage policies"
         ], 
+        "x-box-tag": "storage_policies", 
         "x-box-reference-category": "storage_policies", 
         "description": "会社のすべてのストレージポリシーを取得します。", 
         "parameters": [
@@ -15030,8 +15486,9 @@
         "operationId": "get_storage_policies_id", 
         "summary": "ストレージポリシーを取得", 
         "tags": [
-          "Multi Zones"
+          "Storage policies"
         ], 
+        "x-box-tag": "storage_policies", 
         "x-box-reference-category": "storage_policies", 
         "description": "特定のストレージポリシーを取得します。", 
         "parameters": [
@@ -15075,8 +15532,9 @@
         "operationId": "get_storage_policy_assignments", 
         "summary": "ストレージポリシー割り当てのリストを取得", 
         "tags": [
-          "Multi Zones"
+          "Storage policy assignments"
         ], 
+        "x-box-tag": "storage_policy_assignments", 
         "x-box-reference-category": "storage_policy_assignments", 
         "description": "会社またはユーザーのすべてのストレージポリシー割り当てを取得します。", 
         "parameters": [
@@ -15142,14 +15600,16 @@
         "operationId": "post_storage_policy_assignments", 
         "summary": "ストレージポリシーを割り当て", 
         "tags": [
-          "Multi Zones"
+          "Storage policy assignments"
         ], 
+        "x-box-tag": "storage_policy_assignments", 
         "x-box-reference-category": "storage_policy_assignments", 
         "description": "会社またはユーザーに対するストレージポリシー割り当てを作成します。", 
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
+                "type": "object", 
                 "required": [
                   "storage_policy", 
                   "assigned_to"
@@ -15236,8 +15696,9 @@
         "operationId": "get_storage_policy_assignments_id", 
         "summary": "ストレージポリシー割り当てを取得", 
         "tags": [
-          "Multi Zones"
+          "Storage policy assignments"
         ], 
+        "x-box-tag": "storage_policy_assignments", 
         "x-box-reference-category": "storage_policy_assignments", 
         "description": "特定のストレージポリシー割り当てを取得します。", 
         "parameters": [
@@ -15279,8 +15740,9 @@
         "operationId": "put_storage_policy_assignments_id", 
         "summary": "ストレージポリシー割り当てを更新", 
         "tags": [
-          "Multi Zones"
+          "Storage policy assignments"
         ], 
+        "x-box-tag": "storage_policy_assignments", 
         "x-box-reference-category": "storage_policy_assignments", 
         "description": "特定のストレージポリシー割り当てを更新します。", 
         "parameters": [
@@ -15299,6 +15761,7 @@
           "content": {
             "application/json": {
               "schema": {
+                "type": "object", 
                 "required": [
                   "storage_policy"
                 ], 
@@ -15358,8 +15821,9 @@
         "operationId": "delete_storage_policy_assignments_id", 
         "summary": "ストレージポリシーの割り当てを解除", 
         "tags": [
-          "Multi Zones"
+          "Storage policy assignments"
         ], 
+        "x-box-tag": "storage_policy_assignments", 
         "x-box-reference-category": "storage_policy_assignments", 
         "description": "ストレージポリシーの割り当てを削除します。\n\nユーザーに対するストレージポリシーの割り当てを削除すると、そのユーザーは会社のデフォルトのストレージポリシーを継承します。\n\nこのエンドポイントの呼び出しには、24時間につき1ユーザーあたり2回までというレート制限が適用されます。", 
         "parameters": [
@@ -15418,6 +15882,7 @@
     "schemas": {
       "PostOAuth2Token": {
         "title": "トークンリクエスト", 
+        "type": "object", 
         "description": "新しいOAuth 2.0トークンのリクエスト", 
         "required": [
           "grant_type"
@@ -15508,6 +15973,7 @@
       }, 
       "PostOAuth2Token--RefreshAccessToken": {
         "title": "アクセストークンを更新", 
+        "type": "object", 
         "description": "アクセストークンを更新するリクエスト。有効な更新トークンを使用して期限切れのアクセストークンを更新するには、このAPIを使用します。", 
         "required": [
           "grant_type", 
@@ -15545,6 +16011,7 @@
       }, 
       "PostOAuth2Revoke": {
         "title": "トークン無効化リクエスト", 
+        "type": "object", 
         "description": "OAuth 2.0トークンを無効化するためのリクエスト", 
         "required": [
           "grant_type"
@@ -15570,6 +16037,7 @@
       }, 
       "ClientError": {
         "title": "クライアントエラー", 
+        "type": "object", 
         "x-box-resource-id": "client_error", 
         "description": "一般的なエラー", 
         "properties": {
@@ -15634,7 +16102,9 @@
       }, 
       "ConflictError": {
         "title": "競合エラー", 
+        "type": "object", 
         "x-box-resource-id": "conflict_error", 
+        "x-box-tag": "uploads", 
         "x-box-reference-category": "uploads", 
         "description": "競合が原因でファイルを作成できなかったときに発生するエラー。", 
         "allOf": [
@@ -15673,7 +16143,9 @@
       }, 
       "OAuth2Error": {
         "title": "OAuth 2.0エラー", 
+        "type": "object", 
         "x-box-resource-id": "oauth2_error", 
+        "x-box-tag": "authorization", 
         "x-box-reference-category": "authorization", 
         "description": "OAuth 2.0エラー", 
         "properties": {
@@ -15846,6 +16318,7 @@
               }, 
               "status": {
                 "type": "object", 
+                "description": "このイベントの詳細のステータス。", 
                 "properties": {
                   "state": {
                     "type": "string", 
@@ -16091,6 +16564,7 @@
         "type": "object", 
         "x-box-resource-id": "access_token", 
         "description": "認証済みのAPI呼び出しを行うために使用できるトークン。", 
+        "x-box-tag": "authorization", 
         "x-box-reference-category": "authorization", 
         "properties": {
           "access_token": {
@@ -16139,8 +16613,10 @@
       }, 
       "Collaboration": {
         "title": "Collaboration", 
+        "type": "object", 
         "x-box-resource-id": "collaboration", 
         "description": "アクセス制御リストと同様に、コラボレーションではファイルとフォルダに\n対するユーザーおよびグループのアクセス権限が定義されます。コラボレーションオブジェクトは、特定のロールによって定義される権限を含んだファイルまたはフォルダへのアクセス権限をユーザーまたはグループに付与します。", 
+        "x-box-tag": "user_collaborations", 
         "x-box-reference-category": "user_collaborations", 
         "allOf": [
           {
@@ -16168,7 +16644,7 @@
               "item": {
                 "allOf": [
                   {
-                    "$ref": "#/components/schemas/Item"
+                    "$ref": "#/components/schemas/Item--Mini"
                   }, 
                   {
                     "description": "アクセスが許可されているファイルまたはフォルダ。\nコラボレーションの`status`が`pending`の場合、このフィールドは`null`です。"
@@ -16316,7 +16792,9 @@
       }, 
       "Collaborations": {
         "title": "Collaborations", 
+        "type": "object", 
         "x-box-resource-id": "collaborations", 
+        "x-box-tag": "user_collaborations", 
         "x-box-reference-category": "user_collaborations", 
         "description": "コラボレーションのリスト", 
         "allOf": [
@@ -16382,7 +16860,9 @@
       }, 
       "CollaborationWhitelistEntry": {
         "title": "コラボレーションホワイトリストエントリ", 
+        "type": "object", 
         "x-box-resource-id": "collaboration_whitelist_entry", 
+        "x-box-tag": "collaboration_whitelist_entries", 
         "x-box-reference-category": "collaboration_whitelist_entries", 
         "description": "コラボレーションホワイトリストエントリでは、会社とのコラボレーションが承認されているドメインが定義されます", 
         "allOf": [
@@ -16478,7 +16958,9 @@
       }, 
       "CollaborationWhitelistEntries": {
         "title": "コラボレーションホワイトリストエントリ", 
+        "type": "object", 
         "x-box-resource-id": "collaboration_whitelist_entries", 
+        "x-box-tag": "collaboration_whitelist_entries", 
         "x-box-reference-category": "collaboration_whitelist_entries", 
         "description": "コラボレーションホワイトリストエントリのリスト。", 
         "allOf": [
@@ -16520,7 +17002,9 @@
       }, 
       "CollaborationWhitelistExemptTarget": {
         "title": "コラボレーションホワイトリストからの除外ターゲット", 
+        "type": "object", 
         "x-box-resource-id": "collaboration_whitelist_exempt_target", 
+        "x-box-tag": "collaboration_whitelist_exempt_targets", 
         "x-box-reference-category": "collaboration_whitelist_exempt_targets", 
         "description": "コラボレーションホワイトリストから除外されるターゲットユーザーを表すレコード。", 
         "allOf": [
@@ -16650,7 +17134,9 @@
       }, 
       "CollaborationWhitelistExemptTargets": {
         "title": "コラボレーションホワイトリストからの除外ターゲット", 
+        "type": "object", 
         "x-box-resource-id": "collaboration_whitelist_exempt_targets", 
+        "x-box-tag": "collaboration_whitelist_exempt_targets", 
         "x-box-reference-category": "collaboration_whitelist_exempt_targets", 
         "description": "コラボレーションホワイトリスト例外のリスト。", 
         "allOf": [
@@ -16692,8 +17178,10 @@
       }, 
       "Collection": {
         "title": "Collection", 
+        "type": "object", 
         "x-box-resource-id": "collection", 
         "description": "ファイルやフォルダなどの項目のコレクション。\n\n現時点で利用可能なコレクションは、`favorites`コレクションのみです。\n\nコレクションのコンテンツは、フォルダのコンテンツと同じ方法で調べることができます。", 
+        "x-box-tag": "collections", 
         "x-box-reference-category": "collections", 
         "allOf": [
           {
@@ -16740,7 +17228,9 @@
       }, 
       "Collections": {
         "title": "Collections", 
+        "type": "object", 
         "x-box-resource-id": "collections", 
+        "x-box-tag": "collections", 
         "x-box-reference-category": "collections", 
         "description": "コレクションのリスト", 
         "allOf": [
@@ -16806,11 +17296,12 @@
       }, 
       "Comment": {
         "title": "Comment", 
+        "type": "object", 
         "x-box-resource-id": "comment", 
         "x-box-has-field-variants": true, 
+        "x-box-tag": "comments", 
         "x-box-reference-category": "comments", 
         "description": "コメントとは、ファイルに関して作成されるメッセージです。コメントは単独で作成することも、他のコメントへの返答として作成することもできます", 
-        "type": "object", 
         "allOf": [
           {
             "$ref": "#/components/schemas/Comment--Standard"
@@ -16832,7 +17323,9 @@
       }, 
       "Comments": {
         "title": "Comments", 
+        "type": "object", 
         "x-box-resource-id": "comments", 
+        "x-box-tag": "comments", 
         "x-box-reference-category": "comments", 
         "description": "コメントのリスト", 
         "allOf": [
@@ -16898,10 +17391,10 @@
       }, 
       "Comment--Standard": {
         "title": "Comment (Standard)", 
+        "type": "object", 
         "x-box-resource-id": "comment--standard", 
         "description": "コメントAPIエンドポイントから返され、他のリソース内にネストされたときにも使用される、コメントの標準レプリゼンテーション。", 
         "x-box-reference-hide": true, 
-        "type": "object", 
         "allOf": [
           {
             "title": "Reference", 
@@ -16993,7 +17486,9 @@
       }, 
       "DevicePinner": {
         "title": "Device Pinner", 
+        "type": "object", 
         "x-box-resource-id": "device_pinner", 
+        "x-box-tag": "device_pinners", 
         "x-box-reference-category": "device_pinners", 
         "description": "デバイスピンを使用すると、どのデバイスでネイティブBoxアプリケーションの使用を許可するかを会社レベルで制御できます。", 
         "allOf": [
@@ -17052,7 +17547,9 @@
       }, 
       "DevicePinners": {
         "title": "Device Pinner", 
+        "type": "object", 
         "x-box-resource-id": "device_pinners", 
+        "x-box-tag": "device_pinners", 
         "x-box-reference-category": "device_pinners", 
         "description": "デバイスピンのリスト", 
         "allOf": [
@@ -17094,10 +17591,11 @@
       }, 
       "EmailAlias": {
         "title": "メールエイリアス", 
+        "type": "object", 
         "x-box-resource-id": "email_alias", 
+        "x-box-tag": "email_aliases", 
         "x-box-reference-category": "email_aliases", 
         "description": "ユーザーのメールエイリアス。", 
-        "type": "object", 
         "allOf": [
           {
             "title": "Reference", 
@@ -17137,7 +17635,9 @@
       }, 
       "EmailAliases": {
         "title": "メールエイリアス", 
+        "type": "object", 
         "x-box-resource-id": "email_aliases", 
+        "x-box-tag": "email_aliases", 
         "x-box-reference-category": "email_aliases", 
         "description": "メールエイリアスのリスト", 
         "properties": {
@@ -17157,7 +17657,9 @@
       }, 
       "Event": {
         "title": "Event", 
+        "type": "object", 
         "x-box-resource-id": "event", 
+        "x-box-tag": "events", 
         "x-box-reference-category": "events", 
         "description": "Box内で発生したイベントの説明", 
         "properties": {
@@ -17315,78 +17817,36 @@
             "description": "アクションを実行したユーザーのセッション。この属性にすべてのイベントが入るわけではありません。"
           }, 
           "source": {
-            "type": "object", 
-            "nullable": true, 
-            "oneOf": [
+            "allOf": [
               {
-                "$ref": "#/components/schemas/User--Mini"
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/User--Mini"
+                  }, 
+                  {
+                    "$ref": "#/components/schemas/EventSource"
+                  }
+                ]
               }, 
               {
-                "title": "イベントソース", 
-                "type": "object", 
-                "description": "イベントストリーム内のイベントを開始させるソースファイルまたはフォルダ。", 
-                "properties": {
-                  "item_type": {
-                    "type": "string", 
-                    "nullable": false, 
-                    "enum": [
-                      "file", 
-                      "folder"
-                    ], 
-                    "description": "イベントを表す項目の種類。`file`または`folder`になります。", 
-                    "example": "file"
-                  }, 
-                  "item_id": {
-                    "type": "string", 
-                    "nullable": false, 
-                    "description": "項目を表す一意の識別子。", 
-                    "example": "560284318361"
-                  }, 
-                  "item_name": {
-                    "type": "string", 
-                    "nullable": false, 
-                    "description": "項目の名前。", 
-                    "example": "report.pdf"
-                  }, 
-                  "parent": {
-                    "allOf": [
-                      {
-                        "$ref": "#/components/schemas/Folder--Mini"
-                      }, 
-                      {
-                        "description": "このフォルダが配置されているフォルダ(省略可)\n\nルートフォルダやごみ箱フォルダなど、一部のフォルダの場合、\nこの値は`null`になることがあります。"
-                      }
-                    ], 
-                    "nullable": true
-                  }, 
-                  "owned_by": {
-                    "allOf": [
-                      {
-                        "$ref": "#/components/schemas/User--Mini"
-                      }, 
-                      {
-                        "description": "この項目を所有するユーザー"
-                      }, 
-                      {
-                        "nullable": false
-                      }
-                    ]
-                  }
-                }
+                "description": "このイベントを開始させる項目"
               }
-            ], 
-            "description": "このイベントを開始させる項目"
+            ]
           }, 
           "additional_details": {
             "type": "object", 
-            "example": "", 
+            "example": {
+              "key": "value"
+            }, 
             "description": "このオブジェクトは、イベントに関する追加情報を提供します(利用可能な場合)。\n\nこれには、ユーザーがイベントを実行した方法に加え、イベントを外部のKeySafeログに関連付けるための追加情報が含まれます。すべてのイベントに`additional_details`オブジェクトがあるわけではありません。このオブジェクトは、エンタープライズイベントのみに存在します。"
           }
         }
       }, 
       "Events": {
         "title": "Events", 
+        "type": "object", 
         "x-box-resource-id": "events", 
+        "x-box-tag": "events", 
         "x-box-reference-category": "events", 
         "description": "イベントオブジェクトのリスト", 
         "properties": {
@@ -17411,9 +17871,11 @@
       }, 
       "File": {
         "title": "File", 
+        "type": "object", 
         "x-box-resource-id": "file", 
         "x-box-has-field-variants": true, 
         "x-box-sanitized": true, 
+        "x-box-tag": "files", 
         "x-box-reference-category": "files", 
         "description": "任意のファイルAPIエンドポイントからデフォルトで返される可能性がある、ファイルの完全版レプリゼンテーション", 
         "allOf": [
@@ -17903,7 +18365,9 @@
       }, 
       "Files": {
         "title": "Files", 
+        "type": "object", 
         "x-box-resource-id": "files", 
+        "x-box-tag": "files", 
         "x-box-reference-category": "files", 
         "description": "ファイルのリスト", 
         "properties": {
@@ -17924,7 +18388,9 @@
       }, 
       "File--Standard": {
         "title": "File (Standard)", 
+        "type": "object", 
         "x-box-resource-id": "file--standard", 
+        "x-box-tag": null, 
         "x-box-reference-category": null, 
         "x-box-sanitized": true, 
         "description": "任意のファイルAPIエンドポイントからデフォルトで返される、ファイルの標準レプリゼンテーション", 
@@ -18228,6 +18694,19 @@
                 ], 
                 "nullable": false, 
                 "example": "active"
+              }, 
+              "file_version": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/FileVersion--Mini"
+                  }, 
+                  {
+                    "description": "ファイルの現在のバージョンに関する情報。"
+                  }, 
+                  {
+                    "x-box-field-variant": 2
+                  }
+                ]
               }
             }
           }
@@ -18235,7 +18714,9 @@
       }, 
       "File--Mini": {
         "title": "File (Mini)", 
+        "type": "object", 
         "x-box-resource-id": "file--mini", 
+        "x-box-tag": null, 
         "x-box-reference-category": null, 
         "x-box-sanitized": true, 
         "description": "他のリソースの下にネストされたときに使用される、ファイルの簡易版レプリゼンテーション。", 
@@ -18274,6 +18755,7 @@
       }, 
       "File--Base": {
         "title": "ファイル(ベース)", 
+        "type": "object", 
         "x-box-resource-id": "file--base", 
         "x-box-sanitized": true, 
         "x-box-reference-hide": true, 
@@ -18304,8 +18786,10 @@
       }, 
       "FileVersion": {
         "title": "ファイルバージョン", 
+        "type": "object", 
         "x-box-resource-id": "file_version", 
         "x-box-has-field-variants": true, 
+        "x-box-tag": "file_versions", 
         "x-box-reference-category": "file_versions", 
         "description": "ファイルバージョンの標準レプリゼンテーション", 
         "allOf": [
@@ -18413,6 +18897,7 @@
       }, 
       "FileVersion--Mini": {
         "title": "File version (Mini)", 
+        "type": "object", 
         "x-box-resource-id": "file_version--mini", 
         "x-box-has-field-variants": true, 
         "x-box-reference-hide": true, 
@@ -18435,6 +18920,7 @@
       }, 
       "FileVersion--Base": {
         "title": "ファイルバージョン(ベース)", 
+        "type": "object", 
         "x-box-resource-id": "file_version--base", 
         "x-box-has-field-variants": true, 
         "x-box-reference-hide": true, 
@@ -18459,7 +18945,9 @@
       }, 
       "FileVersions": {
         "title": "ファイルバージョン", 
+        "type": "object", 
         "x-box-resource-id": "file_versions", 
+        "x-box-tag": "file_versions", 
         "x-box-reference-category": "file_versions", 
         "description": "ファイルバージョンのリスト", 
         "allOf": [
@@ -18525,7 +19013,9 @@
       }, 
       "FileVersionLegalHold": {
         "title": "ファイルバージョンのリーガルホールド", 
+        "type": "object", 
         "x-box-resource-id": "file_version_legal_hold", 
+        "x-box-tag": "file_version_legal_holds", 
         "x-box-reference-category": "file_version_legal_holds", 
         "description": "File-Version-Legal-Holdは、ファイルバージョンのすべてのリテンションを表すエンティティです。", 
         "allOf": [
@@ -18590,7 +19080,9 @@
       }, 
       "FileVersionLegalHolds": {
         "title": "ファイルバージョンのリーガルホールド", 
+        "type": "object", 
         "x-box-resource-id": "file_version_legal_holds", 
+        "x-box-tag": "file_version_legal_holds", 
         "x-box-reference-category": "file_version_legal_holds", 
         "description": "ファイルバージョンのリーガルホールドのリスト。", 
         "allOf": [
@@ -18632,7 +19124,9 @@
       }, 
       "FileVersionRetention": {
         "title": "ファイルバージョンリテンション", 
+        "type": "object", 
         "x-box-resource-id": "file_version_retention", 
+        "x-box-tag": "file_version_retentions", 
         "x-box-reference-category": "file_version_retentions", 
         "description": "リテンションポリシーは、指定した期間にわたってコンテンツが完全に消去されるのを防止します。管理者はポリシーを特定のフォルダや会社全体に適用できます。ファイルバージョンリテンションとは、保持されているファイルバージョンのレコードです。この機能を使用するには、アプリケーション管理コンソールから、APIキーに対してリテンションポリシーを管理スコープを有効にする必要があります。リテンションポリシーについて詳しくは、Boxのヘルプドキュメントをご覧ください", 
         "allOf": [
@@ -18706,7 +19200,9 @@
       }, 
       "FileVersionRetentions": {
         "title": "ファイルバージョンリテンション", 
+        "type": "object", 
         "x-box-resource-id": "file_version_retentions", 
+        "x-box-tag": "file_version_retentions", 
         "x-box-reference-category": "file_version_retentions", 
         "description": "ファイルバージョンリテンションのリスト。", 
         "allOf": [
@@ -18748,10 +19244,12 @@
       }, 
       "Folder": {
         "title": "Folder", 
+        "type": "object", 
         "x-box-resource-id": "folder", 
         "x-box-has-field-variants": true, 
         "x-box-sanitized": true, 
         "description": "任意のフォルダAPIエンドポイントからデフォルトで返される可能性がある、フォルダの完全版表記。", 
+        "x-box-tag": "folders", 
         "x-box-reference-category": "folders", 
         "allOf": [
           {
@@ -18992,7 +19490,9 @@
       }, 
       "Folder--Standard": {
         "title": "Folder (Standard)", 
+        "type": "object", 
         "x-box-resource-id": "folder--standard", 
+        "x-box-tag": null, 
         "x-box-reference-category": null, 
         "x-box-reference-hide": true, 
         "x-box-sanitized": true, 
@@ -19355,7 +19855,9 @@
       }, 
       "Folder--Mini": {
         "title": "Folder (Mini)", 
+        "type": "object", 
         "x-box-resource-id": "folder--mini", 
+        "x-box-tag": null, 
         "x-box-reference-category": null, 
         "description": "他のリソースの下にネストされたときに使用される、ファイルバージョンの簡易版レプリゼンテーション。", 
         "x-box-reference-hide": true, 
@@ -19395,6 +19897,7 @@
       }, 
       "Folder--Base": {
         "title": "フォルダ(ベース)", 
+        "type": "object", 
         "x-box-resource-id": "folder--base", 
         "x-box-sanitized": true, 
         "x-box-reference-hide": true, 
@@ -19425,7 +19928,9 @@
       }, 
       "Group": {
         "title": "Group", 
+        "type": "object", 
         "x-box-resource-id": "group", 
+        "x-box-tag": "groups", 
         "x-box-reference-category": "groups", 
         "x-box-has-field-variants": true, 
         "description": "グループは複数のユーザーを含み、グループを使用するとコラボレーションなどの一部の操作をユーザーの代わりに実行できます。", 
@@ -19486,7 +19991,9 @@
       }, 
       "Groups": {
         "title": "Groups", 
+        "type": "object", 
         "x-box-resource-id": "groups", 
+        "x-box-tag": "groups", 
         "x-box-reference-category": "groups", 
         "description": "グループのリスト。", 
         "allOf": [
@@ -19552,6 +20059,7 @@
       }, 
       "Group--Standard": {
         "title": "グループ(標準)", 
+        "type": "object", 
         "x-box-resource-id": "group--standard", 
         "description": "任意のグループAPIエンドポイントからデフォルトで返される、グループの標準レプリゼンテーション", 
         "x-box-reference-hide": true, 
@@ -19581,8 +20089,8 @@
       }, 
       "Group--Mini": {
         "title": "Group (Mini)", 
-        "x-box-resource-id": "group--mini", 
         "type": "object", 
+        "x-box-resource-id": "group--mini", 
         "description": "グループのIDや名前を含む、グループの簡易版レプリゼンテーション。", 
         "x-box-reference-hide": true, 
         "allOf": [
@@ -19630,7 +20138,9 @@
       }, 
       "GroupMembership": {
         "title": "グループメンバーシップ", 
+        "type": "object", 
         "x-box-resource-id": "group_membership", 
+        "x-box-tag": "memberships", 
         "x-box-reference-category": "memberships", 
         "description": "メンバーシップは、ユーザーがグループに属していることを示すために使用されます。", 
         "allOf": [
@@ -19703,7 +20213,9 @@
       }, 
       "GroupMemberships": {
         "title": "グループメンバーシップ", 
+        "type": "object", 
         "x-box-resource-id": "group_memberships", 
+        "x-box-tag": "memberships", 
         "x-box-reference-category": "memberships", 
         "description": "グループメンバーシップのリスト。", 
         "allOf": [
@@ -19769,7 +20281,9 @@
       }, 
       "Invite": {
         "title": "Invite", 
+        "type": "object", 
         "x-box-resource-id": "invite", 
+        "x-box-tag": "invites", 
         "x-box-reference-category": "invites", 
         "description": "会社へのユーザーの招待。", 
         "allOf": [
@@ -19860,6 +20374,31 @@
       }, 
       "Item": {
         "title": "Item", 
+        "type": "object", 
+        "x-box-resource-id": "item", 
+        "x-box-reference-hide": true, 
+        "x-box-tag": null, 
+        "x-box-reference-category": null, 
+        "description": "ファイル、フォルダ、ユーザー、会社の一般的なレプリゼンテーション", 
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Item--Mini"
+          }, 
+          {
+            "properties": {
+              "url": {
+                "type": "string", 
+                "example": "https://www.example.com/example/1234", 
+                "description": "この項目が指すURL", 
+                "x-box-field-variant": 1
+              }
+            }
+          }
+        ]
+      }, 
+      "Item--Mini": {
+        "title": "Item (Mini)", 
+        "type": "object", 
         "x-box-resource-id": "item_reference", 
         "description": "ファイル、フォルダ、ユーザー、会社の一般的な簡易版レプリゼンテーション", 
         "allOf": [
@@ -19880,7 +20419,12 @@
               "type": {
                 "description": "この項目のタイプ", 
                 "type": "string", 
-                "example": "file"
+                "example": "file", 
+                "enum": [
+                  "file", 
+                  "folder", 
+                  "web_link"
+                ]
               }, 
               "sequence_id": {
                 "allOf": [
@@ -19914,7 +20458,9 @@
       }, 
       "Items": {
         "title": "Items", 
+        "type": "object", 
         "x-box-resource-id": "item_collection", 
+        "x-box-tag": "folders", 
         "x-box-reference-category": "folders", 
         "description": "簡易版レプリゼンテーション内のファイル、フォルダ、およびウェブリンクのリスト。", 
         "allOf": [
@@ -19972,17 +20518,7 @@
                 "description": "このコレクション内の項目。", 
                 "type": "array", 
                 "items": {
-                  "oneOf": [
-                    {
-                      "$ref": "#/components/schemas/File--Mini"
-                    }, 
-                    {
-                      "$ref": "#/components/schemas/Folder--Mini"
-                    }, 
-                    {
-                      "$ref": "#/components/schemas/WebLink--Mini"
-                    }
-                  ]
+                  "$ref": "#/components/schemas/Item"
                 }
               }
             }
@@ -19991,7 +20527,9 @@
       }, 
       "LegalHoldPolicy": {
         "title": "リーガルホールドポリシー", 
+        "type": "object", 
         "x-box-resource-id": "legal_hold_policy", 
+        "x-box-tag": "legal_hold_policies", 
         "x-box-reference-category": "legal_hold_policies", 
         "description": "リーガルホールドポリシー情報には、名前、説明、フィルタ日付など、ポリシーの基本的な特性が記載されています。", 
         "allOf": [
@@ -20108,7 +20646,9 @@
       }, 
       "LegalHoldPolicies": {
         "title": "リーガルホールドポリシー", 
+        "type": "object", 
         "x-box-resource-id": "legal_hold_policies", 
+        "x-box-tag": "legal_hold_policies", 
         "x-box-reference-category": "legal_hold_policies", 
         "description": "リーガルホールドポリシーのリスト。", 
         "allOf": [
@@ -20150,6 +20690,7 @@
       }, 
       "LegalHoldPolicy--Mini": {
         "title": "Legal hold policy (Mini)", 
+        "type": "object", 
         "x-box-resource-id": "legal_hold_policy--mini", 
         "description": "簡易版のリーガルホールドポリシー", 
         "x-box-reference-hide": true, 
@@ -20182,7 +20723,9 @@
       }, 
       "LegalHoldPolicyAssignment": {
         "title": "リーガルホールドポリシー割り当て", 
+        "type": "object", 
         "x-box-resource-id": "legal_hold_policy_assignment", 
+        "x-box-tag": "legal_hold_policy_assignments", 
         "x-box-reference-category": "legal_hold_policy_assignments", 
         "description": "リーガルホールド割り当ては、ユーザー、フォルダ、ファイル、またはファイルバージョンにリーガルホールドポリシーを割り当てる目的に使用されます。\n\nリーガルホールド割り当てを作成すると、その割り当ての'apply-to'エンティティに属するファイルバージョンにホールドが適用されます。", 
         "allOf": [
@@ -20221,7 +20764,7 @@
               "assigned_to": {
                 "allOf": [
                   {
-                    "$ref": "#/components/schemas/Item"
+                    "$ref": "#/components/schemas/Item--Mini"
                   }, 
                   {
                     "description": "リーガルホールドポリシーを割り当てる項目。タイプとIDを含みます。"
@@ -20256,7 +20799,9 @@
       }, 
       "LegalHoldPolicyAssignments": {
         "title": "リーガルホールドポリシー割り当て", 
+        "type": "object", 
         "x-box-resource-id": "legal_hold_policy_assignments", 
+        "x-box-tag": "legal_hold_policy_assignments", 
         "x-box-reference-category": "legal_hold_policy_assignments", 
         "description": "リーガルホールドポリシー割り当てのリスト。", 
         "allOf": [
@@ -20298,10 +20843,11 @@
       }, 
       "Metadata": {
         "title": "メタデータインスタンス", 
+        "type": "object", 
         "x-box-resource-id": "metadata", 
         "description": "メタデータテンプレートで指定され、ファイルまたはフォルダに適用されるメタデータ。", 
+        "x-box-tag": "file_metadata", 
         "x-box-reference-category": "file_metadata", 
-        "type": "object", 
         "properties": {
           "$canEdit": {
             "type": "boolean", 
@@ -20354,7 +20900,9 @@
       }, 
       "Metadatas": {
         "title": "メタデータインスタンス", 
+        "type": "object", 
         "x-box-resource-id": "metadatas", 
+        "x-box-tag": "file_metadata", 
         "x-box-reference-category": "file_metadata", 
         "description": "ファイルまたはフォルダに適用されているメタデータインスタンスのリスト。", 
         "properties": {
@@ -20374,7 +20922,9 @@
       }, 
       "MetadataCascadePolicy": {
         "title": "メタデータカスケードポリシー", 
+        "type": "object", 
         "x-box-resource-id": "metadata_cascade_policy", 
+        "x-box-tag": "metadata_cascade_policies", 
         "x-box-reference-category": "metadata_cascade_policies", 
         "description": "メタデータカスケードポリシーにより、メタデータテンプレートインスタンスが自動的にターゲットフォルダ内のすべてのファイルとフォルダに適用されます。", 
         "properties": {
@@ -20447,7 +20997,9 @@
       }, 
       "MetadataCascadePolicies": {
         "title": "メタデータカスケードポリシー", 
+        "type": "object", 
         "x-box-resource-id": "metadata_cascade_policies", 
+        "x-box-tag": "metadata_cascade_policies", 
         "x-box-reference-category": "metadata_cascade_policies", 
         "description": "メタデータカスケードポリシーのリスト。", 
         "allOf": [
@@ -20489,10 +21041,11 @@
       }, 
       "MetadataTemplate": {
         "title": "メタデータテンプレート", 
+        "type": "object", 
         "x-box-resource-id": "metadata_template", 
+        "x-box-tag": "metadata_templates", 
         "x-box-reference-category": "metadata_templates", 
         "description": "ファイルやフォルダに適用可能なメタデータのテンプレート", 
-        "type": "object", 
         "properties": {
           "id": {
             "type": "string", 
@@ -20659,7 +21212,9 @@
       }, 
       "MetadataTemplates": {
         "title": "メタデータテンプレート", 
+        "type": "object", 
         "x-box-resource-id": "metadata_templates", 
+        "x-box-tag": "metadata_templates", 
         "x-box-reference-category": "metadata_templates", 
         "description": "メタデータテンプレートのリスト", 
         "allOf": [
@@ -20701,6 +21256,7 @@
       }, 
       "RealtimeServer": {
         "title": "リアルタイムサーバー", 
+        "type": "object", 
         "x-box-resource-id": "realtime_server", 
         "description": "ロングポーリングユーザーイベントに使用できるリアルタイムサーバー", 
         "properties": {
@@ -20733,8 +21289,10 @@
       }, 
       "RealtimeServers": {
         "title": "リアルタイムサーバー", 
+        "type": "object", 
         "x-box-resource-id": "realtime_servers", 
         "description": "ロングポーリングに使用できるリアルタイムサーバーのリスト。", 
+        "x-box-tag": "events", 
         "x-box-reference-category": "events", 
         "properties": {
           "chunk_size": {
@@ -20753,8 +21311,10 @@
       }, 
       "RecentItem": {
         "title": "最近使用した項目", 
+        "type": "object", 
         "x-box-resource-id": "recent_item", 
         "description": "ユーザーが最近アクセスした項目。", 
+        "x-box-tag": "recent_items", 
         "x-box-reference-category": "recent_items", 
         "properties": {
           "type": {
@@ -20765,7 +21325,7 @@
           "item": {
             "allOf": [
               {
-                "$ref": "#/components/schemas/Item"
+                "$ref": "#/components/schemas/Item--Mini"
               }, 
               {
                 "description": "最近アクセスされた項目。"
@@ -20799,6 +21359,7 @@
       }, 
       "RecentItems": {
         "title": "最近使用した項目", 
+        "type": "object", 
         "x-box-resource-id": "recent_items", 
         "description": "最近使用した項目のリスト。", 
         "allOf": [
@@ -20840,7 +21401,9 @@
       }, 
       "RetentionPolicies": {
         "title": "リテンションポリシー", 
+        "type": "object", 
         "x-box-resource-id": "retention_policies", 
+        "x-box-tag": "retention_policies", 
         "x-box-reference-category": "retention_policies", 
         "description": "リテンションポリシーのリスト", 
         "properties": {
@@ -20860,7 +21423,9 @@
       }, 
       "RetentionPolicy": {
         "title": "リテンションポリシー", 
+        "type": "object", 
         "x-box-resource-id": "retention_policy", 
+        "x-box-tag": "retention_policies", 
         "x-box-reference-category": "retention_policies", 
         "x-box-has-field-variants": true, 
         "x-box-reference-hide": false, 
@@ -20924,7 +21489,9 @@
       }, 
       "RetentionPolicy--Mini": {
         "title": "Retention policy (Mini)", 
+        "type": "object", 
         "x-box-resource-id": "retention_policy--mini", 
+        "x-box-tag": null, 
         "x-box-reference-category": null, 
         "x-box-has-field-variants": true, 
         "x-box-reference-hide": true, 
@@ -20964,7 +21531,9 @@
       }, 
       "RetentionPolicy--Base": {
         "title": "リテンションポリシー(ベース)", 
+        "type": "object", 
         "x-box-resource-id": "retention_policy--base", 
+        "x-box-tag": null, 
         "x-box-reference-category": null, 
         "x-box-has-field-variants": true, 
         "x-box-reference-hide": true, 
@@ -20989,7 +21558,9 @@
       }, 
       "RetentionPolicyAssignment": {
         "title": "リテンションポリシー割り当て", 
+        "type": "object", 
         "x-box-resource-id": "retention_policy_assignment", 
+        "x-box-tag": "retention_policy_assignments", 
         "x-box-reference-category": "retention_policy_assignments", 
         "description": "管理者はリテンションポリシー割り当てエンドポイントを使用して、フォルダごとにリテンションポリシーを適用したり、会社全体を対象とした包括的なポリシーを設定したりすることができます。", 
         "allOf": [
@@ -21066,7 +21637,9 @@
       }, 
       "RetentionPolicyAssignments": {
         "title": "リテンションポリシー割り当て", 
+        "type": "object", 
         "x-box-resource-id": "retention_policy_assignments", 
+        "x-box-tag": "retention_policy_assignments", 
         "x-box-reference-category": "retention_policy_assignments", 
         "description": "リテンションポリシー割り当てのリスト", 
         "allOf": [
@@ -21108,7 +21681,9 @@
       }, 
       "StoragePolicy": {
         "title": "ストレージポリシー", 
+        "type": "object", 
         "x-box-resource-id": "storage_policy", 
+        "x-box-tag": "storage_policies", 
         "x-box-reference-category": "storage_policies", 
         "description": "ストレージゾーンを示すストレージポリシーオブジェクト。", 
         "allOf": [
@@ -21131,7 +21706,9 @@
       }, 
       "StoragePolicies": {
         "title": "ストレージポリシー", 
+        "type": "object", 
         "x-box-resource-id": "storage_policies", 
+        "x-box-tag": "storage_policies", 
         "x-box-reference-category": "storage_policies", 
         "description": "ストレージポリシーのリスト。", 
         "allOf": [
@@ -21173,6 +21750,7 @@
       }, 
       "StoragePolicy--Mini": {
         "title": "ストレージポリシー(簡易)", 
+        "type": "object", 
         "x-box-resource-id": "storage_policy--mini", 
         "description": "ストレージポリシーオブジェクトの簡易版の説明", 
         "x-box-reference-hide": true, 
@@ -21205,7 +21783,9 @@
       }, 
       "StoragePolicyAssignment": {
         "title": "ストレージポリシー割り当て", 
+        "type": "object", 
         "x-box-resource-id": "storage_policy_assignment", 
+        "x-box-tag": "storage_policy_assignments", 
         "x-box-reference-category": "storage_policy_assignments", 
         "description": "ユーザーまたは会社へのストレージポリシーの割り当て", 
         "properties": {
@@ -21242,7 +21822,9 @@
       }, 
       "StoragePolicyAssignments": {
         "title": "ストレージポリシー割り当て", 
+        "type": "object", 
         "x-box-resource-id": "storage_policy_assignments", 
+        "x-box-tag": "storage_policy_assignments", 
         "x-box-reference-category": "storage_policy_assignments", 
         "description": "ストレージポリシー割り当てのリスト。", 
         "allOf": [
@@ -21284,7 +21866,9 @@
       }, 
       "Task": {
         "title": "Task", 
+        "type": "object", 
         "x-box-resource-id": "task", 
+        "x-box-tag": "tasks", 
         "x-box-reference-category": "tasks", 
         "description": "タスクを使用すると、Boxでファイル中心のワークフローを実現できます。ユーザーはファイルに関連するタスクを作成し、タスクを完了するために他のユーザーに割り当てることができます。", 
         "allOf": [
@@ -21386,7 +21970,9 @@
       }, 
       "Tasks": {
         "title": "Tasks", 
+        "type": "object", 
         "x-box-resource-id": "tasks", 
+        "x-box-tag": "tasks", 
         "x-box-reference-category": "tasks", 
         "description": "タスクのリスト", 
         "properties": {
@@ -21406,7 +21992,9 @@
       }, 
       "TaskAssignment": {
         "title": "タスク割り当て", 
+        "type": "object", 
         "x-box-resource-id": "task_assignment", 
+        "x-box-tag": "task_assignments", 
         "x-box-reference-category": "task_assignments", 
         "description": "タスク割り当てでは、完了するためにどのタスクをどのユーザーに割り当てるかを定義します。", 
         "allOf": [
@@ -21502,9 +22090,10 @@
       }, 
       "TaskAssignments": {
         "title": "タスク割り当て", 
-        "x-box-resource-id": "task_assignments", 
-        "x-box-reference-category": "task_assignments", 
         "type": "object", 
+        "x-box-resource-id": "task_assignments", 
+        "x-box-tag": "task_assignments", 
+        "x-box-reference-category": "task_assignments", 
         "description": "タスク割り当てのリスト", 
         "properties": {
           "total_count": {
@@ -21523,7 +22112,9 @@
       }, 
       "TermsOfService": {
         "title": "利用規約", 
+        "type": "object", 
         "x-box-resource-id": "terms_of_service", 
+        "x-box-tag": "terms_of_services", 
         "x-box-reference-category": "terms_of_services", 
         "description": "1つの利用規約に該当するとみなされるルートレベルのレコード。", 
         "allOf": [
@@ -21619,7 +22210,9 @@
       }, 
       "TermsOfServices": {
         "title": "利用規約", 
+        "type": "object", 
         "x-box-resource-id": "terms_of_services", 
+        "x-box-tag": "terms_of_services", 
         "x-box-reference-category": "terms_of_services", 
         "description": "利用規約のリスト", 
         "properties": {
@@ -21639,6 +22232,7 @@
       }, 
       "TermsOfService--Mini": {
         "title": "Terms of service (Mini)", 
+        "type": "object", 
         "x-box-resource-id": "terms_of_service--mini", 
         "description": "1つの利用規約に該当するとみなされるルートレベルのレコード。", 
         "x-box-reference-hide": true, 
@@ -21671,7 +22265,9 @@
       }, 
       "TermsOfServiceUserStatus": {
         "title": "利用規約ユーザーステータス", 
+        "type": "object", 
         "x-box-resource-id": "terms_of_service_user_status", 
+        "x-box-tag": "terms_of_service_user_statuses", 
         "x-box-reference-category": "terms_of_service_user_statuses", 
         "description": "利用規約とユーザーの関連付け", 
         "allOf": [
@@ -21740,7 +22336,9 @@
       }, 
       "TermsOfServiceUserStatuses": {
         "title": "利用規約ユーザーステータス", 
+        "type": "object", 
         "x-box-resource-id": "terms_of_services_user_statuses", 
+        "x-box-tag": "terms_of_service_user_statuses", 
         "x-box-reference-category": "terms_of_service_user_statuses", 
         "description": "利用規約に対するユーザーステータスのリスト", 
         "properties": {
@@ -21760,29 +22358,9 @@
       }, 
       "UploadPart": {
         "title": "Upload part", 
+        "type": "object", 
         "x-box-resource-id": "upload_part", 
-        "description": "アップロードセッションの一部としてアップロードされたファイルのチャンク。", 
-        "x-box-reference-category": "chunked_uploads", 
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/UploadPart--Mini"
-          }, 
-          {
-            "properties": {
-              "sha1": {
-                "description": "チャンクのSHA1ハッシュ。", 
-                "type": "string", 
-                "example": "134b65991ed521fcfe4724b7d814ab8ded5185dc"
-              }
-            }
-          }
-        ]
-      }, 
-      "UploadPart--Mini": {
-        "title": "Upload part (Mini)", 
-        "x-box-resource-id": "upload_part--mini", 
-        "x-box-reference-hide": true, 
-        "description": "アップロードセッションチャンクの基本レプリゼンテーション。", 
+        "description": "アップロードセッションチャンクのレプリゼンテーション。", 
         "properties": {
           "part_id": {
             "description": "チャンクの一意のID。", 
@@ -21800,11 +22378,30 @@
             "type": "integer", 
             "format": "int64", 
             "example": 3222784
+          }, 
+          "sha1": {
+            "description": "チャンクのSHA1ハッシュ。", 
+            "type": "string", 
+            "example": "134b65991ed521fcfe4724b7d814ab8ded5185dc"
+          }
+        }
+      }, 
+      "UploadedPart": {
+        "title": "アップロードされたパーツ", 
+        "type": "object", 
+        "x-box-resource-id": "uploaded_part", 
+        "description": "いくつかのエンドポイントで返されるように、アップロードセッションの一部としてアップロードされたファイルのチャンク。", 
+        "x-box-tag": "chunked_uploads", 
+        "x-box-reference-category": "chunked_uploads", 
+        "properties": {
+          "part": {
+            "$ref": "#/components/schemas/UploadPart"
           }
         }
       }, 
       "UploadParts": {
         "title": "Upload part", 
+        "type": "object", 
         "x-box-resource-id": "upload_parts", 
         "description": "アップロードセッションのアップロード済みチャンクのリスト。", 
         "allOf": [
@@ -21870,8 +22467,10 @@
       }, 
       "UploadSession": {
         "title": "アップロードセッション", 
+        "type": "object", 
         "x-box-resource-id": "upload_session", 
         "description": "ファイルをアップロードするチャンクのアップロードセッション。", 
+        "x-box-tag": "chunked_uploads", 
         "x-box-reference-category": "chunked_uploads", 
         "properties": {
           "id": {
@@ -21959,7 +22558,9 @@
       }, 
       "UploadUrl": {
         "title": "アップロードURL", 
+        "type": "object", 
         "x-box-resource-id": "upload_url", 
+        "x-box-tag": "uploads", 
         "x-box-reference-category": "uploads", 
         "description": "ファイルのアップロードセッションの詳細。", 
         "properties": {
@@ -21977,9 +22578,11 @@
       }, 
       "User": {
         "title": "User", 
+        "type": "object", 
         "x-box-resource-id": "user", 
         "x-box-has-field-variants": true, 
         "description": "任意のユーザーAPIエンドポイントから返される可能性がある、ユーザーの完全版レプリゼンテーション。", 
+        "x-box-tag": "users", 
         "x-box-reference-category": "users", 
         "allOf": [
           {
@@ -22159,7 +22762,9 @@
       }, 
       "Users": {
         "title": "Users", 
+        "type": "object", 
         "x-box-resource-id": "users", 
+        "x-box-tag": "users", 
         "x-box-reference-category": "users", 
         "description": "ユーザーのリスト。", 
         "allOf": [
@@ -22225,6 +22830,7 @@
       }, 
       "User--Standard": {
         "title": "ユーザー(標準)", 
+        "type": "object", 
         "x-box-resource-id": "user--standard", 
         "description": "任意のユーザーAPIエンドポイントからデフォルトで返される、ユーザーの標準版表記", 
         "x-box-reference-hide": true, 
@@ -22325,6 +22931,7 @@
       }, 
       "User--Mini": {
         "title": "User (Mini)", 
+        "type": "object", 
         "x-box-resource-id": "user--mini", 
         "description": "他のリソース内にネストされたときに使用される、ユーザーの簡易版レプリゼンテーション。", 
         "x-box-reference-hide": true, 
@@ -22374,7 +22981,9 @@
       }, 
       "Watermark": {
         "title": "Watermark", 
+        "type": "object", 
         "x-box-resource-id": "watermark", 
+        "x-box-tag": "file_watermarks", 
         "x-box-reference-category": "file_watermarks", 
         "description": "電子すかしとは、埋め込みファイルのプレビューに適用される半透明のオーバーレイです。電子すかしには、ビューアーのメールアドレスまたはユーザーIDと、ファイルのコンテンツのアクセス日時が表示されます", 
         "properties": {
@@ -22399,7 +23008,9 @@
       }, 
       "Webhook": {
         "title": "Webhook", 
+        "type": "object", 
         "x-box-resource-id": "webhook", 
+        "x-box-tag": "webhooks", 
         "x-box-reference-category": "webhooks", 
         "description": "設定されたWebhookを表します。", 
         "allOf": [
@@ -22523,7 +23134,9 @@
       }, 
       "Webhooks": {
         "title": "Webhooks", 
+        "type": "object", 
         "x-box-resource-id": "webhooks", 
+        "x-box-tag": "webhooks", 
         "x-box-reference-category": "webhooks", 
         "description": "Webhookのリスト。", 
         "allOf": [
@@ -22565,7 +23178,9 @@
       }, 
       "WebLink": {
         "title": "ウェブリンク", 
+        "type": "object", 
         "x-box-resource-id": "web_link", 
+        "x-box-tag": "web_links", 
         "x-box-reference-category": "web_links", 
         "x-box-has-field-variants": true, 
         "description": "ウェブリンクとは、URLを指すオブジェクトです。これらのオブジェクトはBoxウェブアプリケーション内ではブックマークとも呼ばれます。\n\nウェブリンクオブジェクトはファイルオブジェクトと同様に扱われ、通常のファイルに適用されるアクションの大部分もサポートしています。", 
@@ -22808,13 +23423,15 @@
       }, 
       "WebLink--Mini": {
         "title": "Web link (Mini)", 
+        "type": "object", 
         "x-box-resource-id": "web_link--mini", 
         "x-box-reference-hide": true, 
+        "x-box-tag": null, 
         "x-box-reference-category": null, 
         "description": "ウェブリンクとは、URLを指すオブジェクトです。これらのオブジェクトはBoxウェブアプリケーション内ではブックマークとも呼ばれます。\n\nウェブリンクオブジェクトはファイルオブジェクトと同様に扱われ、通常のファイルに適用されるアクションの大部分もサポートしています。", 
         "allOf": [
           {
-            "$ref": "#/components/schemas/Item"
+            "$ref": "#/components/schemas/Item--Mini"
           }, 
           {
             "properties": {
@@ -22898,6 +23515,60 @@
             ]
           }
         }
+      }, 
+      "EventSource": {
+        "title": "イベントソース", 
+        "type": "object", 
+        "x-box-resource-id": "event_source", 
+        "description": "イベントストリーム内のイベントを開始させるソースファイルまたはフォルダ。", 
+        "properties": {
+          "item_type": {
+            "type": "string", 
+            "nullable": false, 
+            "enum": [
+              "file", 
+              "folder"
+            ], 
+            "description": "イベントを表す項目の種類。`file`または`folder`になります。", 
+            "example": "file"
+          }, 
+          "item_id": {
+            "type": "string", 
+            "nullable": false, 
+            "description": "項目を表す一意の識別子。", 
+            "example": "560284318361"
+          }, 
+          "item_name": {
+            "type": "string", 
+            "nullable": false, 
+            "description": "項目の名前。", 
+            "example": "report.pdf"
+          }, 
+          "parent": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Folder--Mini"
+              }, 
+              {
+                "description": "このフォルダが配置されているフォルダ(省略可)\n\nルートフォルダやごみ箱フォルダなど、一部のフォルダの場合、\nこの値は`null`になることがあります。"
+              }
+            ], 
+            "nullable": true
+          }, 
+          "owned_by": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/User--Mini"
+              }, 
+              {
+                "description": "この項目を所有するユーザー"
+              }, 
+              {
+                "nullable": false
+              }
+            ]
+          }
+        }
       }
     }
   }, 
@@ -22908,310 +23579,255 @@
   ], 
   "tags": [
     {
-      "name": "基礎", 
-      "x-box-reference-category": "basics"
-    }, 
-    {
-      "name": "ダウンロードとアップロード", 
-      "x-box-reference-category": "downloads_and_uploads"
-    }, 
-    {
-      "name": "ファイルとフォルダの詳細設定", 
-      "x-box-reference-category": "advanced_files_and_folders"
-    }, 
-    {
-      "name": "ごみ箱", 
-      "x-box-reference-category": "trash"
-    }, 
-    {
-      "name": "Metadata", 
-      "x-box-reference-category": "metadata"
-    }, 
-    {
-      "name": "自動化とイベント", 
-      "x-box-reference-category": "automation_and_events"
-    }, 
-    {
-      "name": "Collaborations", 
-      "x-box-reference-category": "collaborations"
-    }, 
-    {
-      "name": "ユーザーとグループ", 
-      "x-box-reference-category": "users_and_groups"
-    }, 
-    {
-      "name": "ガバナンス", 
-      "x-box-reference-category": "governance"
-    }, 
-    {
-      "name": "セキュリティとコンプライアンス", 
-      "x-box-reference-category": "security_and_compliance"
-    }, 
-    {
-      "name": "マルチゾーン", 
-      "x-box-reference-category": "multizones"
-    }, 
-    {
       "name": "承認", 
+      "x-box-tag": "authorization", 
       "x-box-reference-category": "authorization", 
-      "x-box-reference-parent-category": "basics", 
-      "x-box-prioritize": true
-    }, 
-    {
-      "name": "Folders", 
-      "x-box-reference-category": "folders", 
-      "x-box-reference-parent-category": "basics", 
-      "x-box-reference-description": "フォルダは、ファイル、ウェブリンク、他のフォルダの集合を表します。フォルダは、Box Platformを使用する上で基本となる構成要素の1つです。\n\nフォルダには、それ自体に関するメタデータ(フォルダの所有者、作成日時、最終更新日時など)も含まれます。"
-    }, 
-    {
-      "name": "Files", 
-      "x-box-reference-category": "files", 
-      "x-box-reference-parent-category": "basics"
-    }, 
-    {
-      "name": "ダウンロード", 
-      "x-box-reference-category": "downloads", 
-      "x-box-reference-parent-category": "downloads_and_uploads"
-    }, 
-    {
-      "name": "アップロード", 
-      "x-box-reference-category": "uploads", 
-      "x-box-reference-parent-category": "downloads_and_uploads"
-    }, 
-    {
-      "name": "アップロード(分割)", 
-      "x-box-reference-category": "chunked_uploads", 
-      "x-box-reference-parent-category": "downloads_and_uploads"
-    }, 
-    {
-      "name": "検索", 
-      "x-box-reference-category": "search", 
-      "x-box-reference-parent-category": "advanced_files_and_folders"
-    }, 
-    {
-      "name": "共有リンク", 
-      "x-box-reference-category": "shared_links", 
-      "x-box-reference-parent-category": "advanced_files_and_folders"
-    }, 
-    {
-      "name": "ファイルバージョン", 
-      "x-box-reference-category": "file_versions", 
-      "x-box-reference-parent-category": "advanced_files_and_folders"
-    }, 
-    {
-      "name": "Comments", 
-      "x-box-reference-category": "comments", 
-      "x-box-reference-parent-category": "advanced_files_and_folders"
-    }, 
-    {
-      "name": "Collections", 
-      "x-box-reference-category": "collections", 
-      "x-box-reference-parent-category": "advanced_files_and_folders"
-    }, 
-    {
-      "name": "ウェブリンク", 
-      "x-box-reference-category": "web_links", 
-      "x-box-reference-parent-category": "advanced_files_and_folders"
-    }, 
-    {
-      "name": "ごみ箱内の項目", 
-      "x-box-reference-category": "trashed_items", 
-      "x-box-reference-parent-category": "trash"
-    }, 
-    {
-      "name": "ごみ箱内のファイル", 
-      "x-box-reference-category": "trashed_files", 
-      "x-box-reference-parent-category": "trash"
-    }, 
-    {
-      "name": "ごみ箱内のフォルダ", 
-      "x-box-reference-category": "trashed_folders", 
-      "x-box-reference-parent-category": "trash"
-    }, 
-    {
-      "name": "ごみ箱内のウェブリンク", 
-      "x-box-reference-category": "trashed_web_links", 
-      "x-box-reference-parent-category": "trash"
-    }, 
-    {
-      "name": "メタデータテンプレート", 
-      "x-box-reference-category": "metadata_templates", 
-      "x-box-reference-parent-category": "metadata"
-    }, 
-    {
-      "name": "メタデータインスタンス(ファイル)", 
-      "x-box-reference-category": "file_metadata", 
-      "x-box-reference-parent-category": "metadata"
-    }, 
-    {
-      "name": "メタデータインスタンス(フォルダ)", 
-      "x-box-reference-category": "folder_metadata", 
-      "x-box-reference-parent-category": "metadata"
-    }, 
-    {
-      "name": "メタデータカスケードポリシー(ベータ)", 
-      "x-box-reference-category": "metadata_cascade_policies", 
-      "x-box-reference-parent-category": "metadata"
-    }, 
-    {
-      "name": "Skills", 
-      "x-box-reference-category": "skills", 
-      "x-box-reference-parent-category": "automation_and_events"
-    }, 
-    {
-      "name": "Webhooks", 
-      "x-box-reference-category": "webhooks", 
-      "x-box-reference-parent-category": "automation_and_events"
-    }, 
-    {
-      "name": "Events", 
-      "x-box-reference-category": "events", 
-      "x-box-reference-parent-category": "automation_and_events"
-    }, 
-    {
-      "name": "最近使用した項目", 
-      "x-box-reference-category": "recent_items", 
-      "x-box-reference-parent-category": "automation_and_events"
-    }, 
-    {
-      "name": "Tasks", 
-      "x-box-reference-category": "tasks", 
-      "x-box-reference-parent-category": "automation_and_events"
-    }, 
-    {
-      "name": "タスク割り当て", 
-      "x-box-reference-category": "task_assignments", 
-      "x-box-reference-parent-category": "automation_and_events"
-    }, 
-    {
-      "name": "コラボレーション(ユーザー)", 
-      "x-box-reference-category": "user_collaborations", 
-      "x-box-reference-parent-category": "collaborations"
-    }, 
-    {
-      "name": "コラボレーション(ファイル)", 
-      "x-box-reference-category": "file_collaborations", 
-      "x-box-reference-parent-category": "collaborations"
-    }, 
-    {
-      "name": "コラボレーション(フォルダ)", 
-      "x-box-reference-category": "folder_collaborations", 
-      "x-box-reference-parent-category": "collaborations"
-    }, 
-    {
-      "name": "コラボレーション(グループ)", 
-      "x-box-reference-category": "group_collaborations", 
-      "x-box-reference-parent-category": "collaborations"
+      "x-box-priority": true
     }, 
     {
       "name": "コラボレーションホワイトリストエントリ", 
-      "x-box-reference-category": "collaboration_whitelist_entries", 
-      "x-box-reference-parent-category": "collaborations"
+      "x-box-tag": "collaboration_whitelist_entries", 
+      "x-box-reference-category": "collaboration_whitelist_entries"
     }, 
     {
       "name": "コラボレーションホワイトリストからの除外ターゲット", 
-      "x-box-reference-category": "collaboration_whitelist_exempt_targets", 
-      "x-box-reference-parent-category": "collaborations"
+      "x-box-tag": "collaboration_whitelist_exempt_targets", 
+      "x-box-reference-category": "collaboration_whitelist_exempt_targets"
     }, 
     {
-      "name": "Users", 
-      "x-box-reference-category": "users", 
-      "x-box-reference-parent-category": "users_and_groups"
+      "name": "Collaborations", 
+      "x-box-tag": "user_collaborations", 
+      "x-box-reference-category": "user_collaborations"
     }, 
     {
-      "name": "Groups", 
-      "x-box-reference-category": "groups", 
-      "x-box-reference-parent-category": "users_and_groups"
+      "name": "コラボレーション(リスト)", 
+      "x-box-tag": "list_collaborations", 
+      "x-box-reference-category": "list_collaborations"
     }, 
     {
-      "name": "グループメンバーシップ", 
-      "x-box-reference-category": "memberships", 
-      "x-box-reference-parent-category": "users_and_groups"
+      "name": "Collections", 
+      "x-box-tag": "collections", 
+      "x-box-reference-category": "collections"
     }, 
     {
-      "name": "ユーザーのアバター", 
-      "x-box-reference-category": "avatars", 
-      "x-box-reference-parent-category": "users_and_groups"
-    }, 
-    {
-      "name": "メールエイリアス", 
-      "x-box-reference-category": "email_aliases", 
-      "x-box-reference-parent-category": "users_and_groups"
-    }, 
-    {
-      "name": "Invites", 
-      "x-box-reference-category": "invites", 
-      "x-box-reference-parent-category": "users_and_groups"
-    }, 
-    {
-      "name": "フォルダを移行", 
-      "x-box-reference-category": "transfer", 
-      "x-box-reference-parent-category": "users_and_groups"
-    }, 
-    {
-      "name": "リーガルホールドポリシー", 
-      "x-box-reference-category": "legal_hold_policies", 
-      "x-box-reference-parent-category": "governance"
-    }, 
-    {
-      "name": "リーガルホールドポリシー割り当て", 
-      "x-box-reference-category": "legal_hold_policy_assignments", 
-      "x-box-reference-parent-category": "governance"
-    }, 
-    {
-      "name": "ファイルバージョンのリーガルホールド", 
-      "x-box-reference-category": "file_version_legal_holds", 
-      "x-box-reference-parent-category": "governance"
-    }, 
-    {
-      "name": "リテンションポリシー", 
-      "x-box-reference-category": "retention_policies", 
-      "x-box-reference-parent-category": "governance"
-    }, 
-    {
-      "name": "リテンションポリシー割り当て", 
-      "x-box-reference-category": "retention_policy_assignments", 
-      "x-box-reference-parent-category": "governance"
-    }, 
-    {
-      "name": "ファイルバージョンリテンション", 
-      "x-box-reference-category": "file_version_retentions", 
-      "x-box-reference-parent-category": "governance"
+      "name": "Comments", 
+      "x-box-tag": "comments", 
+      "x-box-reference-category": "comments"
     }, 
     {
       "name": "Device Pinner", 
-      "x-box-reference-category": "device_pinners", 
-      "x-box-reference-parent-category": "security_and_compliance"
+      "x-box-tag": "device_pinners", 
+      "x-box-reference-category": "device_pinners"
     }, 
     {
-      "name": "利用規約", 
-      "x-box-reference-category": "terms_of_services", 
-      "x-box-reference-parent-category": "security_and_compliance"
+      "name": "ダウンロード", 
+      "x-box-tag": "downloads", 
+      "x-box-reference-category": "downloads"
     }, 
     {
-      "name": "利用規約ユーザーステータス", 
-      "x-box-reference-category": "terms_of_service_user_statuses", 
-      "x-box-reference-parent-category": "security_and_compliance"
+      "name": "メールエイリアス", 
+      "x-box-tag": "email_aliases", 
+      "x-box-reference-category": "email_aliases"
     }, 
     {
-      "name": "電子透かし(ファイル)", 
-      "x-box-reference-category": "file_watermarks", 
-      "x-box-reference-parent-category": "security_and_compliance"
+      "name": "Events", 
+      "x-box-tag": "events", 
+      "x-box-reference-category": "events"
     }, 
     {
-      "name": "電子すかし(フォルダ)", 
-      "x-box-reference-category": "folder_watermarks", 
-      "x-box-reference-parent-category": "security_and_compliance"
+      "name": "ファイルバージョンのリーガルホールド", 
+      "x-box-tag": "file_version_legal_holds", 
+      "x-box-reference-category": "file_version_legal_holds"
+    }, 
+    {
+      "name": "ファイルバージョンリテンション", 
+      "x-box-tag": "file_version_retentions", 
+      "x-box-reference-category": "file_version_retentions"
+    }, 
+    {
+      "name": "ファイルバージョン", 
+      "x-box-tag": "file_versions", 
+      "x-box-reference-category": "file_versions"
+    }, 
+    {
+      "name": "Files", 
+      "x-box-tag": "files", 
+      "x-box-reference-category": "files"
+    }, 
+    {
+      "name": "Folders", 
+      "x-box-tag": "folders", 
+      "x-box-reference-category": "folders"
+    }, 
+    {
+      "name": "グループメンバーシップ", 
+      "x-box-tag": "memberships", 
+      "x-box-reference-category": "memberships"
+    }, 
+    {
+      "name": "Groups", 
+      "x-box-tag": "groups", 
+      "x-box-reference-category": "groups"
+    }, 
+    {
+      "name": "Invites", 
+      "x-box-tag": "invites", 
+      "x-box-reference-category": "invites"
+    }, 
+    {
+      "name": "リーガルホールドポリシー", 
+      "x-box-tag": "legal_hold_policies", 
+      "x-box-reference-category": "legal_hold_policies"
+    }, 
+    {
+      "name": "リーガルホールドポリシー割り当て", 
+      "x-box-tag": "legal_hold_policy_assignments", 
+      "x-box-reference-category": "legal_hold_policy_assignments"
+    }, 
+    {
+      "name": "メタデータカスケードポリシー(ベータ)", 
+      "x-box-tag": "metadata_cascade_policies", 
+      "x-box-reference-category": "metadata_cascade_policies"
+    }, 
+    {
+      "name": "メタデータインスタンス(ファイル)", 
+      "x-box-tag": "file_metadata", 
+      "x-box-reference-category": "file_metadata"
+    }, 
+    {
+      "name": "メタデータインスタンス(フォルダ)", 
+      "x-box-tag": "folder_metadata", 
+      "x-box-reference-category": "folder_metadata"
+    }, 
+    {
+      "name": "メタデータテンプレート", 
+      "x-box-tag": "metadata_templates", 
+      "x-box-reference-category": "metadata_templates"
+    }, 
+    {
+      "name": "最近使用した項目", 
+      "x-box-tag": "recent_items", 
+      "x-box-reference-category": "recent_items"
+    }, 
+    {
+      "name": "リテンションポリシー", 
+      "x-box-tag": "retention_policies", 
+      "x-box-reference-category": "retention_policies"
+    }, 
+    {
+      "name": "リテンションポリシー割り当て", 
+      "x-box-tag": "retention_policy_assignments", 
+      "x-box-reference-category": "retention_policy_assignments"
+    }, 
+    {
+      "name": "検索", 
+      "x-box-tag": "search", 
+      "x-box-reference-category": "search"
+    }, 
+    {
+      "name": "共有リンク", 
+      "x-box-tag": "shared_links", 
+      "x-box-reference-category": "shared_links"
+    }, 
+    {
+      "name": "Skills", 
+      "x-box-tag": "skills", 
+      "x-box-reference-category": "skills"
     }, 
     {
       "name": "ストレージポリシー", 
-      "x-box-reference-category": "storage_policies", 
-      "x-box-reference-parent-category": "multizones"
+      "x-box-tag": "storage_policies", 
+      "x-box-reference-category": "storage_policies"
     }, 
     {
       "name": "ストレージポリシー割り当て", 
-      "x-box-reference-category": "storage_policy_assignments", 
-      "x-box-reference-parent-category": "multizones"
+      "x-box-tag": "storage_policy_assignments", 
+      "x-box-reference-category": "storage_policy_assignments"
+    }, 
+    {
+      "name": "タスク割り当て", 
+      "x-box-tag": "task_assignments", 
+      "x-box-reference-category": "task_assignments"
+    }, 
+    {
+      "name": "Tasks", 
+      "x-box-tag": "tasks", 
+      "x-box-reference-category": "tasks"
+    }, 
+    {
+      "name": "利用規約", 
+      "x-box-tag": "terms_of_services", 
+      "x-box-reference-category": "terms_of_services"
+    }, 
+    {
+      "name": "利用規約ユーザーステータス", 
+      "x-box-tag": "terms_of_service_user_statuses", 
+      "x-box-reference-category": "terms_of_service_user_statuses"
+    }, 
+    {
+      "name": "フォルダを移行", 
+      "x-box-tag": "transfer", 
+      "x-box-reference-category": "transfer"
+    }, 
+    {
+      "name": "ごみ箱内のファイル", 
+      "x-box-tag": "trashed_files", 
+      "x-box-reference-category": "trashed_files"
+    }, 
+    {
+      "name": "ごみ箱内のフォルダ", 
+      "x-box-tag": "trashed_folders", 
+      "x-box-reference-category": "trashed_folders"
+    }, 
+    {
+      "name": "ごみ箱内の項目", 
+      "x-box-tag": "trashed_items", 
+      "x-box-reference-category": "trashed_items"
+    }, 
+    {
+      "name": "ごみ箱内のウェブリンク", 
+      "x-box-tag": "trashed_web_links", 
+      "x-box-reference-category": "trashed_web_links"
+    }, 
+    {
+      "name": "アップロード", 
+      "x-box-tag": "uploads", 
+      "x-box-reference-category": "uploads"
+    }, 
+    {
+      "name": "アップロード(分割)", 
+      "x-box-tag": "chunked_uploads", 
+      "x-box-reference-category": "chunked_uploads"
+    }, 
+    {
+      "name": "ユーザーのアバター", 
+      "x-box-tag": "avatars", 
+      "x-box-reference-category": "avatars"
+    }, 
+    {
+      "name": "Users", 
+      "x-box-tag": "users", 
+      "x-box-reference-category": "users"
+    }, 
+    {
+      "name": "電子透かし(ファイル)", 
+      "x-box-tag": "file_watermarks", 
+      "x-box-reference-category": "file_watermarks"
+    }, 
+    {
+      "name": "電子すかし(フォルダ)", 
+      "x-box-tag": "folder_watermarks", 
+      "x-box-reference-category": "folder_watermarks"
+    }, 
+    {
+      "name": "ウェブリンク", 
+      "x-box-tag": "web_links", 
+      "x-box-reference-category": "web_links"
+    }, 
+    {
+      "name": "Webhooks", 
+      "x-box-tag": "webhooks", 
+      "x-box-reference-category": "webhooks"
     }
   ], 
   "externalDocs": {
