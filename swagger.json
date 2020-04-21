@@ -3978,6 +3978,51 @@
         }
       }
     },
+    "/metadata_queries/execute_read": {
+      "post": {
+        "operationId": "post_metadata_queries_execute_read",
+        "summary": "Query files/folders by metadata",
+        "tags": [
+          "Search"
+        ],
+        "description": "Create a search using SQL-like syntax to return items that match specific\nmetadata.\n\nThis feature currently has limited availability. To enable this feature,\ncontact our [Metadata Query team](mailto:metadata-query-feedback@box.com).",
+        "responses": {
+          "200": {
+            "description": "Returns a list of files and folders that match this metadata query.",
+            "schema": {
+              "$ref": "#/definitions/MetadataQueryResults"
+            }
+          },
+          "400": {
+            "description": "Returns an error when the request body is not valid.\n\n* `invalid_query` - Any of the provided body parameters might be\nincorrect. This can mean the `query` is incorrect, as well as some cases\nwhere the `from` value does not represent a valid template.\n* `unexpected_json_type` - An argument from the `query` string is not\npresent in `query_param`. For example, `query` of `name = :name` requires\nthe `query_param` to include a value for the `name` argument, for example\n`{ \"name\": \"Box, Inc\" }`.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "404": {
+            "description": "Returns an error when a metadata template with the given `scope` and\n`templateKey` can not be found. The error response will include extra\ndetails.\n\n* `instance_not_found` - The template could not be found. Please make sure\nto use the full template scope including the enterprise ID, like\n`enterprise_12345`.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/MetadataQuery"
+            }
+          }
+        ]
+      }
+    },
     "/comments/{comment_id}": {
       "get": {
         "operationId": "get_comments_id",
@@ -11885,6 +11930,101 @@
         }
       }
     },
+    "MetadataQueryResults": {
+      "title": "Metadata query search results",
+      "type": "object",
+      "description": "A page of files and folders that are returned for a metadata query.",
+      "properties": {
+        "entries": {
+          "description": "The files and folders that match the search terms, including their\nmetadata.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/MetadataQueryResult"
+          }
+        },
+        "limit": {
+          "description": "The limit that was used for this search. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed.",
+          "default": 100,
+          "type": "integer",
+          "format": "int64"
+        },
+        "next_marker": {
+          "description": "The marker for the start of the next page of results.",
+          "type": "string"
+        }
+      }
+    },
+    "MetadataQuery": {
+      "title": "Metadata query search request",
+      "type": "object",
+      "description": "Create a search using SQL-like syntax to return items that match specific\nmetadata.",
+      "required": [
+        "from",
+        "ancestor_folder_id"
+      ],
+      "properties": {
+        "from": {
+          "type": "string",
+          "description": "Specifies the template used in the query. Must be in the form\n`scope.templateKey`."
+        },
+        "query": {
+          "type": "string",
+          "description": "The query to perform. A query is a logical expression that is very similar\nto a SQL `SELECT` statement. Values in the search query can be turned into\nparameters specified in the `query_param` arguments list to prevent having\nto manually insert search values into the query string.\n\nFor example, a value of `:amount` would represent the `amount` value in\n`query_params` object."
+        },
+        "query_params": {
+          "type": "object",
+          "description": "Set of arguments corresponding to the parameters specified in the\n`query`. The type of each parameter used in the `query_params` must match\nthe type of the corresponding metadata template field.",
+          "additionalProperties": {
+            "type": "string",
+            "description": "The value for the argument being used in the metadata search.\n\nThe type of this parameter must match the type of the corresponding\nmetadata template field.",
+            "x-box-example-key": "amount"
+          }
+        },
+        "ancestor_folder_id": {
+          "type": "string",
+          "description": "The ID of the folder that you are restricting the query to. A\nvalue of zero will return results from all folders you have access\nto. A non-zero value will only return results found in the folder\ncorresponding to the ID or in any of its subfolders."
+        },
+        "use_index": {
+          "type": "string",
+          "description": "The name of the search index to use for this query. A search index is\nrequired when a metadata template is assigned to more than 10,000 files\nand folders.\n\nPlease contact our\n[Metadata Query team](mailto:metadata-query-feedback@box.com)\nto create a search index."
+        },
+        "order_by": {
+          "type": "array",
+          "description": "A list of template fields and directions to sort the metadata query\nresults by.\n\nThe ordering `direction` must be the same for each item in the array.",
+          "items": {
+            "type": "object",
+            "description": "An object representing one of the metadata template fields to sort the\nmetadata query results by.",
+            "properties": {
+              "field_key": {
+                "type": "string",
+                "description": "The metadata template field to order by.\n\nThe `field_key` represents the `key` value of a field from the\nmetadata template being searched for."
+              },
+              "direction": {
+                "type": "string",
+                "description": "The direction to order by, either ascending or descending.\n\nThe `ordering` direction must be the same for each item in the\narray.",
+                "enum": [
+                  "ASC",
+                  "DESC",
+                  "asc",
+                  "desc"
+                ]
+              }
+            }
+          }
+        },
+        "limit": {
+          "type": "integer",
+          "description": "A value between 0 and 100 that indicates the maximum number of results\nto return for a single request. This only specifies a maximum\nboundary and will not guarantee the minimum number of results\nreturned.",
+          "default": 100,
+          "minimum": 0,
+          "maximum": 100
+        },
+        "marker": {
+          "type": "string",
+          "description": "Marker to use for requesting the next page."
+        }
+      }
+    },
     "Comment": {
       "title": "Comment",
       "type": "object",
@@ -15384,6 +15524,34 @@
           }
         }
       ]
+    },
+    "MetadataQueryResult": {
+      "title": "Metadata query search result",
+      "type": "object",
+      "description": "A single file or folder that is returned for a metadata query, including its\nmetadata that matched the query.",
+      "properties": {
+        "item": {
+          "allOf": [
+            {
+              "description": "A standard representation of a file or folder that matched the search\nquery."
+            },
+            {
+              "$ref": "#/definitions/File--Standard"
+            }
+          ]
+        },
+        "metadata": {
+          "type": "object",
+          "description": "The metadata objects that matched the search query for the associated file\nor folder.",
+          "additionalProperties": {
+            "type": "object",
+            "description": "The key of the metadata template",
+            "additionalProperties": {
+              "$ref": "#/definitions/Metadata"
+            }
+          }
+        }
+      }
     },
     "Comment--Standard": {
       "title": "Comment (Standard)",
