@@ -6957,6 +6957,70 @@
         }
       }
     },
+    "/metadata_queries/execute_read": {
+      "post": {
+        "operationId": "post_metadata_queries_execute_read",
+        "summary": "Query files/folders by metadata",
+        "tags": [
+          "Search"
+        ],
+        "x-box-tag": "search",
+        "x-box-reference-category": "search",
+        "x-box-sanitized": true,
+        "description": "Create a search using SQL-like syntax to return items that match specific\nmetadata.\n\nThis feature currently has limited availability. To enable this feature,\ncontact our [Metadata Query team](mailto:metadata-query-feedback@box.com).",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MetadataQuery"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Returns a list of files and folders that match this metadata query.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MetadataQueryResults"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Returns an error when the request body is not valid.\n\n* `invalid_query` - Any of the provided body parameters might be\nincorrect. This can mean the `query` is incorrect, as well as some cases\nwhere the `from` value does not represent a valid template.\n* `unexpected_json_type` - An argument from the `query` string is not\npresent in `query_param`. For example, `query` of `name = :name` requires\nthe `query_param` to include a value for the `name` argument, for example\n`{ \"name\": \"Box, Inc\" }`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Returns an error when a metadata template with the given `scope` and\n`templateKey` can not be found. The error response will include extra\ndetails.\n\n* `instance_not_found` - The template could not be found. Please make sure\nto use the full template scope including the enterprise ID, like\n`enterprise_12345`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/comments/{comment_id}": {
       "get": {
         "operationId": "get_comments_id",
@@ -16011,6 +16075,86 @@
           }
         }
       },
+      "MetadataQuery": {
+        "title": "Metadata query search request",
+        "type": "object",
+        "description": "Create a search using SQL-like syntax to return items that match specific\nmetadata.",
+        "required": [
+          "from",
+          "ancestor_folder_id"
+        ],
+        "properties": {
+          "from": {
+            "type": "string",
+            "description": "Specifies the template used in the query. Must be in the form\n`scope.templateKey`.",
+            "example": "enterprise_123456.someTemplate"
+          },
+          "query": {
+            "type": "string",
+            "description": "The query to perform. A query is a logical expression that is very similar\nto a SQL `SELECT` statement. Values in the search query can be turned into\nparameters specified in the `query_param` arguments list to prevent having\nto manually insert search values into the query string.\n\nFor example, a value of `:amount` would represent the `amount` value in\n`query_params` object.",
+            "example": "value >= :amount"
+          },
+          "query_params": {
+            "type": "object",
+            "description": "Set of arguments corresponding to the parameters specified in the\n`query`. The type of each parameter used in the `query_params` must match\nthe type of the corresponding metadata template field.",
+            "additionalProperties": {
+              "type": "string",
+              "description": "The value for the argument being used in the metadata search.\n\nThe type of this parameter must match the type of the corresponding\nmetadata template field.",
+              "example": "100",
+              "x-box-example-key": "amount"
+            }
+          },
+          "ancestor_folder_id": {
+            "type": "string",
+            "description": "The ID of the folder that you are restricting the query to. A\nvalue of zero will return results from all folders you have access\nto. A non-zero value will only return results found in the folder\ncorresponding to the ID or in any of its subfolders.",
+            "example": "0"
+          },
+          "use_index": {
+            "type": "string",
+            "description": "The name of the search index to use for this query. A search index is\nrequired when a metadata template is assigned to more than 10,000 files\nand folders.\n\nPlease contact our\n[Metadata Query team](mailto:metadata-query-feedback@box.com)\nto create a search index.",
+            "example": "amountAsc"
+          },
+          "order_by": {
+            "type": "array",
+            "description": "A list of template fields and directions to sort the metadata query\nresults by.\n\nThe ordering `direction` must be the same for each item in the array.",
+            "items": {
+              "type": "object",
+              "description": "An object representing one of the metadata template fields to sort the\nmetadata query results by.",
+              "properties": {
+                "field_key": {
+                  "type": "string",
+                  "description": "The metadata template field to order by.\n\nThe `field_key` represents the `key` value of a field from the\nmetadata template being searched for.",
+                  "example": "amount"
+                },
+                "direction": {
+                  "type": "string",
+                  "description": "The direction to order by, either ascending or descending.\n\nThe `ordering` direction must be the same for each item in the\narray.",
+                  "example": "asc",
+                  "enum": [
+                    "ASC",
+                    "DESC",
+                    "asc",
+                    "desc"
+                  ]
+                }
+              }
+            }
+          },
+          "limit": {
+            "type": "integer",
+            "description": "A value between 0 and 100 that indicates the maximum number of results\nto return for a single request. This only specifies a maximum\nboundary and will not guarantee the minimum number of results\nreturned.",
+            "default": 100,
+            "minimum": 0,
+            "maximum": 100,
+            "example": 50
+          },
+          "marker": {
+            "type": "string",
+            "description": "Marker to use for requesting the next page.",
+            "example": "\"AAAAAmVYB1FWec8GH6yWu2nwmanfMh07IyYInaa7DZDYjgO1H4KoLW29vPlLY173OKsci6h6xGh61gG73gnaxoS+o0BbI1/h6le6cikjlupVhASwJ2Cj0tOD9wlnrUMHHw3/ISf+uuACzrOMhN6d5fYrbidPzS6MdhJOejuYlvsg4tcBYzjauP3+VU51p77HFAIuObnJT0ff\""
+          }
+        }
+      },
       "ClientError": {
         "title": "Client error",
         "type": "object",
@@ -18213,7 +18357,7 @@
                 "type": "object",
                 "description": "A list of key-value pairs of metadata objects within their\nscopes.\n\nTo access the metadata for a file, first use the\nMetadata-endpoints to determine\nthe metadata templates available to your enterprise.\n\nThen use the `GET /files/:id` endpoint with\nthe `fields` query parameter to get the metadata by ID.\n\nThe ID for a metadata template will be in the format\n`metadata.<scope>.<templatename>`, for example\n`metadata.global.properties`.",
                 "example": {
-                  "global": {
+                  "enterprise_27335": {
                     "marketingCollateral": {
                       "$canEdit": true,
                       "$id": "01234500-12f1-1234-aa12-b1d234cb567e",
@@ -21026,6 +21170,95 @@
             }
           }
         ]
+      },
+      "MetadataQueryResult": {
+        "title": "Metadata query search result",
+        "type": "object",
+        "x-box-resource-id": "metadata_query_result",
+        "description": "A single file or folder that is returned for a metadata query, including its\nmetadata that matched the query.",
+        "properties": {
+          "item": {
+            "allOf": [
+              {
+                "description": "A standard representation of a file or folder that matched the search\nquery."
+              },
+              {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/File--Standard"
+                  },
+                  {
+                    "$ref": "#/components/schemas/Folder--Standard"
+                  }
+                ]
+              }
+            ]
+          },
+          "metadata": {
+            "type": "object",
+            "description": "The metadata objects that matched the search query for the associated file\nor folder.",
+            "example": {
+              "enterprise_27335": {
+                "marketingCollateral": {
+                  "$canEdit": true,
+                  "$id": "01234500-12f1-1234-aa12-b1d234cb567e",
+                  "$parent": "folder_59449484661",
+                  "$scope": "enterprise_27335",
+                  "$template": "properties",
+                  "$type": "properties-6bcba49f-ca6d-4d2a-a758-57fe6edf44d0",
+                  "$typeVersion": 2,
+                  "$version": 1
+                }
+              }
+            },
+            "additionalProperties": {
+              "type": "object",
+              "description": "The key of the metadata template",
+              "example": {
+                "marketingCollateral": {
+                  "$canEdit": true,
+                  "$id": "01234500-12f1-1234-aa12-b1d234cb567e",
+                  "$parent": "folder_59449484661",
+                  "$scope": "enterprise_27335",
+                  "$template": "properties",
+                  "$type": "properties-6bcba49f-ca6d-4d2a-a758-57fe6edf44d0",
+                  "$typeVersion": 2,
+                  "$version": 1
+                }
+              },
+              "additionalProperties": {
+                "$ref": "#/components/schemas/Metadata"
+              }
+            }
+          }
+        }
+      },
+      "MetadataQueryResults": {
+        "title": "Metadata query search results",
+        "type": "object",
+        "x-box-resource-id": "metadata_query_results",
+        "description": "A page of files and folders that are returned for a metadata query.",
+        "properties": {
+          "entries": {
+            "description": "The files and folders that match the search terms, including their\nmetadata.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MetadataQueryResult"
+            }
+          },
+          "limit": {
+            "description": "The limit that was used for this search. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed.",
+            "default": 100,
+            "example": 100,
+            "type": "integer",
+            "format": "int64"
+          },
+          "next_marker": {
+            "description": "The marker for the start of the next page of results.",
+            "example": "0!-M7487OpVfBTNBV-XsQjU50gQFlbFFu5nArMWD7Ck61GH_Qo40M1S2xN5zWZPBzEjaQS1SOjJiQoo5BsXEl1bCVLRZ2pTqo4SKp9tyqzWQK2L51KR_nC1EgF5I_TJSFw7uO2Bx4HweGETOjh5_2oPSWw5iMkM-OvGApeR0lGFO48FDKoyzJyLgz5aogxoKd8VE09CesOOnTnmZvrW0puylDc-hFjY5YLmWFBKox3SOWiSDwKFkmZGNHyjEzza1nSwbZg6CYsAdGsDwGJhuCeTNsFzP5Mo5qx9wMloS0lSPuf2CcBInbIJzl2CKlXF3FvqhANttpm2nzdBTQRSoJyJnjVBpf4Q_HjV2eb4KIZBBlLy067UCVdv2AAWQFd5E2i6s1YiGRTtgMEZntOSUYD4IYLMWWm5Ra7ke_SP32SL3GSjbBQYIyCVQ..",
+            "type": "string"
+          }
+        }
       },
       "MetadataTemplate": {
         "title": "Metadata template",
