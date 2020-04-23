@@ -1,0 +1,128 @@
+---
+title: Metadata query search request
+
+type: object
+
+description: |-
+  Create a search using SQL-like syntax to return items that match specific
+  metadata.
+
+required:
+  - from
+  - ancestor_folder_id
+
+properties:
+  from:
+    type: string
+    description: |-
+      Specifies the template used in the query. Must be in the form
+      `scope.templateKey`.
+    example: enterprise_123456.someTemplate
+
+  query:
+    type: string
+    description: |-
+      The query to perform. A query is a logical expression that is very similar
+      to a SQL `SELECT` statement. Values in the search query can be turned into
+      parameters specified in the `query_param` arguments list to prevent having
+      to manually insert search values into the query string.
+
+      For example, a value of `:amount` would represent the `amount` value in
+      `query_params` object.
+    example: "value >= :amount"
+
+  query_params:
+    type: object
+    description: |-
+      Set of arguments corresponding to the parameters specified in the
+      `query`. The type of each parameter used in the `query_params` must match
+      the type of the corresponding metadata template field.
+    example:
+      amount: "100"
+    additionalProperties:
+      type: string
+      description: |-
+        The value for the argument being used in the metadata search.
+
+        The type of this parameter must match the type of the corresponding
+        metadata template field.
+      example: "100"
+      x-box-example-key: amount
+
+  ancestor_folder_id:
+    type: string
+    description: |-
+      The ID of the folder that you are restricting the query to. A
+      value of zero will return results from all folders you have access
+      to. A non-zero value will only return results found in the folder
+      corresponding to the ID or in any of its subfolders.
+    example: "0"
+
+  use_index:
+    type: string
+    description: |-
+      The name of the search index to use for this query. A search index is
+      required when a metadata template is assigned to more than 10,000 files
+      and folders.
+
+      Please contact our
+      [Metadata Query team](mailto:metadata-query-feedback@box.com)
+      to create a search index.
+    example: "amountAsc"
+
+  order_by:
+    type: array
+    description: |-
+      A list of template fields and directions to sort the metadata query
+      results by.
+
+      The ordering `direction` must be the same for each item in the array.
+    items:
+      type: object
+      description: |-
+        An object representing one of the metadata template fields to sort the
+        metadata query results by.
+      properties:
+        field_key:
+          type: string
+          description: |-
+            The metadata template field to order by.
+
+            The `field_key` represents the `key` value of a field from the
+            metadata template being searched for.
+          example: "amount"
+        direction:
+          type: string
+          description: |-
+            The direction to order by, either ascending or descending.
+
+            The `ordering` direction must be the same for each item in the
+            array.
+          example: "asc"
+          enum:
+            - "ASC"
+            - "DESC"
+            - "asc"
+            - "desc"
+
+  limit:
+    type: integer
+    description: |-
+      A value between 0 and 100 that indicates the maximum number of results
+      to return for a single request. This only specifies a maximum
+      boundary and will not guarantee the minimum number of results
+      returned.
+    default: 100
+    minimum: 0
+    maximum: 100
+    example: 50
+
+  marker:
+    type: string
+    description: |-
+      Marker to use for requesting the next page.
+    # yamllint disable rule:line-length
+    example: |-
+      "AAAAAmVYB1FWec8GH6yWu2nwmanfMh07IyYInaa7DZDYjgO1H4KoLW29vPlLY173OKsci6h6xGh61gG73gnaxoS+o0BbI1/h6le6cikjlupVhASwJ2Cj0tOD9wlnrUMHHw3/ISf+uuACzrOMhN6d5fYrbidPzS6MdhJOejuYlvsg4tcBYzjauP3+VU51p77HFAIuObnJT0ff"
+
+    # yamllint disable rule:line-length
