@@ -23,6 +23,8 @@ requestBody:
     application/json:
       schema:
         type: object
+        required:
+          - role
         properties:
           role:
             type: string
@@ -55,8 +57,19 @@ requestBody:
             type: string
             format: date-time
             description: |-
-              Set the expiration date for the collaboration. At this date, the
-              collaboration will be automatically removed from the item.
+              Update the expiration date for the collaboration. At this date,
+              the collaboration will be automatically removed from the item.
+
+              This feature will only work if the **Automatically remove invited
+              collaborators: Allow folder owners to extend the expiry date**
+              setting has been enabled in the **Enterprise Settings**
+              of the **Admin Console**. When the setting is not enabled,
+              collaborations can not have an expiry date and a value for this
+              field will be result in an error.
+
+              Additionally, a collaboration can only be given an
+              expiration if it was created after the **Automatically remove
+              invited collaborator** setting was enabled.
             example: '2019-08-29T23:59:00-07:00'
 
           can_view_path:
@@ -80,6 +93,20 @@ responses:
       application/json:
         schema:
           $ref: '#/components/schemas/Collaboration'
+
+  403:
+    description: |-
+      Returns an error if the authenticated user does not have the right
+      permissions to update the collaboration.
+
+      Additionally, this error may occur when attempting to update the
+      `expires_at` field for the collaboration without the **Automatically
+      remove invited collaborators: Allow folder owners to extend the expiry
+      date** setting enabled in the admin dashboard of the enterprise.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
 
   default:
     description: |-
