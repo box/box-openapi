@@ -103,6 +103,15 @@ jobs:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
           SLACK_MESSAGE: "Pushed update to OpenAPI `en` branch"
 
+      - name: Notify other repositories of update
+        uses: peter-evans/repository-dispatch@v1
+        with:
+          token: ${{ secrets.REPO_ACCESS_TOKEN }}
+          repository: box/box-postman
+          event-type: openapi-update
+          client-payload: '{}'
+          
+
   # The deploy task actually deploys any changes to the en branch
   deploy-staging:
     # We run this on the latest ubuntu
