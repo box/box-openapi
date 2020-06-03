@@ -16,20 +16,26 @@ jobs:
     # We run this on the latest ubuntu
     runs-on: ubuntu-latest
 
-    # We use node 14.X
+    # We use node 14 and Python 3.8
     strategy:
       matrix:
         node-version: [14.x]
+        python-version: [3.8]
 
     # The following steps are performed for each lint job 
     steps:
     - name: Check out the repo
       uses: actions/checkout@v2
 
-    - name: Lint the yaml files in ./content
-      uses: karancode/yamllint-github-action@master
+    - name: Use Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
       with:
-        yamllint_file_or_dir: ./content
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install --user yamllint
 
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v1
@@ -39,7 +45,7 @@ jobs:
     - name: Lint the content
       run: |
         yarn install
-        yarn ci
+        yarn test
 
   # # The test job ensures that the markdown and yaml compilers
   # # work according to specifiction
