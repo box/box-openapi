@@ -1,6 +1,6 @@
 # Box OpenAPI 3.0 Specification
 
-![CI](https://github.com/box/box-openapi/workflows/CI/badge.svg) [![Project Status](https://opensource.box.com/badges/active.svg)](http://opensource.box.com/badges) [![Greenkeeper badge](https://badges.greenkeeper.io/box/box-openapi.svg)](https://greenkeeper.io/)
+![CI](https://github.com/box/box-openapi/workflows/CI/badge.svg) [![Project Status](https://opensource.box.com/badges/active.svg)](http://opensource.box.com/badges)
 
 This repository contains the build system for the Box OpenAPI 3.0 Specification (OAS3) of the
 [Box Platform API](https://developers.box.com/).
