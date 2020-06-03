@@ -50,61 +50,34 @@ jobs:
       run: |
         yarn test
 
-  # # The test job ensures that the markdown and yaml compilers
-  # # work according to specifiction
-  # test:
-  #   # We run this on the latest ubuntu
-  #   runs-on: ubuntu-latest
+  # The deploy task actually deploys any changes to the en branch
+  deploy:
+    # We run this on the latest ubuntu
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master'
 
-  #   # We use node 14.X
-  #   strategy:
-  #     matrix:
-  #       node-version: [14.x]
+    # We use node 14.X
+    strategy:
+      matrix:
+        node-version: [14.x]
 
-  #   # The following steps are performed for each lint job
-  #   steps:
-  #   - name: Check out the repo
-  #     uses: actions/checkout@v2
+    # Requires the lint and test jobs to pass first
+    needs:
+      - lint
 
-  #   - name: Use Node.js ${{ matrix.node-version }}
-  #     uses: actions/setup-node@v1
-  #     with:
-  #       node-version: ${{ matrix.node-version }}
+    # The following steps are performed for each lint job
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v2
 
-  #   - name: Run the test
-  #     run: |
-  #       yarn install
-  #       yarn test:compiler
+      - name: Compile the content
+        run: |
+          yarn install
+          yarn build
 
-
-  # # The deploy task actually deploys any changes to the en branch
-  # deploy:
-  #   # We run this on the latest ubuntu
-  #   runs-on: ubuntu-latest
-
-  #   # We use node 14.X
-  #   strategy:
-  #     matrix:
-  #       node-version: [14.x]
-
-  #   # Requires the lint and test jobs to pass first
-  #   needs:
-  #     - lint
-  #     - test
-
-  #   # The following steps are performed for each lint job
-  #   steps:
-  #     - name: Check out the repo
-  #       uses: actions/checkout@v2
-
-  #     - name: Compile the content
-  #       run: |
-  #         yarn install
-  #         yarn build
-
-  #     - name: Push compiled content
-  #       uses: JamesIves/github-pages-deploy-action@releases/v3
-  #       with:
-  #         ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  #         BRANCH: en
-  #         FOLDER: compiled
+      - name: Push compiled content
+        uses: JamesIves/github-pages-deploy-action@releases/v3
+        with:
+          ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH: en
+          FOLDER: build
