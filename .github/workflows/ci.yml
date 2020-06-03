@@ -80,4 +80,50 @@ jobs:
         with:
           ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BRANCH: en
-          FOLDER: build
+          FOLDER: build/openapi
+
+      - name: Push GH pages for redundancy
+        uses: JamesIves/github-pages-deploy-action@releases/v3
+        with:
+          ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH: gh-pages
+          FOLDER: build/openapi
+
+      - name: Push Swagger 2.0 backport
+        uses: JamesIves/github-pages-deploy-action@releases/v3
+        with:
+          ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH: swagger-2.0
+          FOLDER: build/swagger
+
+    # The deploy task actually deploys any changes to the en branch
+  deploy-staging:
+    # We run this on the latest ubuntu
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/staging'
+
+    # We use node 14.X
+    strategy:
+      matrix:
+        node-version: [14.x]
+
+    # Requires the lint and test jobs to pass first
+    needs:
+      - lint
+
+    # The following steps are performed for each lint job
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v2
+
+      - name: Compile the content
+        run: |
+          yarn install
+          yarn build
+
+      - name: Push compiled content
+        uses: JamesIves/github-pages-deploy-action@releases/v3
+        with:
+          ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH: en-staging
+          FOLDER: build/openapi
