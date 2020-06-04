@@ -904,6 +904,100 @@
       }
     },
     "/files/{file_id}/content": {
+      "options": {
+        "operationId": "options_files_id_content",
+        "summary": "Preflight check before new version upload",
+        "tags": [
+          "Files"
+        ],
+        "x-box-tag": "uploads",
+        "x-box-reference-category": "uploads",
+        "description": "Performs a check to verify that a file will be accepted by Box\nbefore you upload a new version of a file.",
+        "parameters": [
+          {
+            "name": "file_id",
+            "description": "The unique identifier that represent a file.\n\nThe ID for any file can be determined\nby visiting a file in the web application\nand copying the ID from the URL. For example,\nfor the URL `https://*.app.box.com/files/123`\nthe `file_id` is `123`.",
+            "example": "12345",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "The optional new name for the file. When not provided\nthe preflight check will not verify if the name is\na valid file name.",
+                    "example": "File.mp4"
+                  },
+                  "size": {
+                    "type": "integer",
+                    "format": "int32",
+                    "description": "The optional size of the file in bytes. When not provided\nthe preflight check will not verify if the user still has\nspace in their account for the file.",
+                    "example": 1024
+                  },
+                  "parent": {
+                    "allOf": [
+                      {
+                        "type": "object",
+                        "description": "The parent for this item",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "description": "The ID of parent item",
+                            "example": "123"
+                          }
+                        }
+                      },
+                      {
+                        "description": "The optional different parent folder to upload the file to.\nWhen not provided the preflight check will not verify if the\nuser has upload access to the destination folder."
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "If the check passed, the response will include a session URL that\ncan be used to upload the file to.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UploadUrl"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "If the check did not pass, the response will include some details on\nwhy it did not pass.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConflictError"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        }
+      },
       "get": {
         "operationId": "get_files_id_content",
         "summary": "Download file",
@@ -1142,19 +1236,19 @@
         "description": "Performs a check to verify that a file will be accepted by Box\nbefore you upload the entire file.",
         "requestBody": {
           "content": {
-            "application/json": {
+            "multipart/form-data": {
               "schema": {
                 "type": "object",
                 "properties": {
                   "name": {
                     "type": "string",
-                    "description": "The name for the file",
+                    "description": "The optional name for the file. When not provided\nthe preflight check will not verify if the name is\na valid file name.",
                     "example": "File.mp4"
                   },
                   "size": {
                     "type": "integer",
                     "format": "int32",
-                    "description": "The size of the file in bytes",
+                    "description": "The optional size of the file in bytes. When not provided\nthe preflight check will not verify if the user still has\nspace in their account for the file.",
                     "example": 1024
                   },
                   "parent": {
@@ -1171,7 +1265,7 @@
                         }
                       },
                       {
-                        "description": "The parent folder to upload the file to"
+                        "description": "The optional parent folder to upload the file to. When\nnot provided the preflight check will not verify if the\nuser has upload access to the destination folder."
                       }
                     ]
                   }
