@@ -462,6 +462,43 @@
       }
     },
     "/files/{file_id}/content": {
+      "options": {
+        "operationId": "options_files_id_content",
+        "summary": "Preflight check before new version upload",
+        "tags": [
+          "Files"
+        ],
+        "description": "Performs a check to verify that a file will be accepted by Box\nbefore you upload a new version of a file.",
+        "parameters": [
+          {
+            "name": "file_id",
+            "description": "The unique identifier that represent a file.\n\nThe ID for any file can be determined\nby visiting a file in the web application\nand copying the ID from the URL. For example,\nfor the URL `https://*.app.box.com/files/123`\nthe `file_id` is `123`.",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "If the check passed, the response will include a session URL that\ncan be used to upload the file to.",
+            "schema": {
+              "$ref": "#/definitions/UploadUrl"
+            }
+          },
+          "409": {
+            "description": "If the check did not pass, the response will include some details on\nwhy it did not pass.",
+            "schema": {
+              "$ref": "#/definitions/ConflictError"
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          }
+        }
+      },
       "get": {
         "operationId": "get_files_id_content",
         "summary": "Download file",
@@ -556,43 +593,7 @@
             }
           }
         },
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "name": {
-                  "type": "string",
-                  "description": "The name for the file"
-                },
-                "size": {
-                  "type": "integer",
-                  "format": "int32",
-                  "description": "The size of the file in bytes"
-                },
-                "parent": {
-                  "allOf": [
-                    {
-                      "type": "object",
-                      "description": "The parent for this item",
-                      "properties": {
-                        "id": {
-                          "type": "string",
-                          "description": "The ID of parent item"
-                        }
-                      }
-                    },
-                    {
-                      "description": "The parent folder to upload the file to"
-                    }
-                  ]
-                }
-              }
-            }
-          }
-        ]
+        "parameters": []
       }
     },
     "/files/{file_id}/copy": {
