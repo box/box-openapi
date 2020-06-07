@@ -7,7 +7,7 @@ This repository contains the build system for the Box OpenAPI 3.0 Specification 
 
 ## Downloads
 
-The `master` branch of this repository only contains the raw source for the specification. For a combined, resolved version please have a look at the following builds.
+The `default` branch of this repository only contains the raw source for the specification. For a combined, resolved version please have a look at the following builds.
 
 [![OpenAPI (en)](https://img.shields.io/static/v1.svg?label=OpenAPI%203&message=Download&color=grey&labelColor=0361D4&style=for-the-badge&logoColor=white)](https://raw.githubusercontent.com/box/box-openapi/en/openapi.json)
 [![OpenAPI (en)](https://img.shields.io/static/v1.svg?label=OpenAPI%203&message=ダウンロード&color=grey&labelColor=0361D4&style=for-the-badge&logoColor=white)](https://raw.githubusercontent.com/box/box-openapi/jp/openapi.json)

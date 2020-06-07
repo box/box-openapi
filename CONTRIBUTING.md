@@ -232,7 +232,7 @@ Before sending a pull request, rebase against upstream, such as:
 
 ```
 git fetch upstream
-git rebase upstream/master
+git rebase upstream/default
 ```
 
 This will add your changes on top of what's already in upstream, minimizing
