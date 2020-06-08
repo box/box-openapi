@@ -1,0 +1,45 @@
+---
+operationId: post_zip_downloads
+
+summary: Create zip download
+
+tags:
+  - Zip Downloads
+
+x-box-tag: zip_downloads
+x-box-reference-category: zip_downloads
+
+description: |-
+  Creates a request to download multiple files and folders as a single `zip`
+  archive file. This API does not return the archive but instead performs all
+  the checks to ensure that the user has access to all the items, and then
+  returns a `download_url` and a `status_url` that can be used to download the
+  archive.
+
+  The limit for an archive is either 32GB or 10,000 files, whichever
+  limitation is met first.
+
+requestBody:
+  content:
+    application/x-www-form-urlencoded:
+      schema:
+        $ref: "#/components/schemas/PostZipDownloads"
+
+responses:
+  202:
+    description: |-
+      If the `zip` archive is ready to be downloaded, the API will return a
+      response that will include a `download_url`, a `status_url`, as well as
+      any conflicts that might have occurred when creating the request.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ZipDownload'
+
+  default:
+    description: |-
+      An unexpected client error.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'

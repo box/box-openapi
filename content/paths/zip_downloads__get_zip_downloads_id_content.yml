@@ -1,0 +1,65 @@
+---
+operationId: get_zip_downloads_id_content
+
+summary: Download zip archive
+
+tags:
+  - Zip Downloads
+
+x-box-tag: zip_downloads
+x-box-reference-category: zip_downloads
+
+description: |-
+    Returns the contents of a `zip` archive in binary format.
+
+servers:
+  - url: https://{domain}/{path}
+    description: |-
+      An opaque server URL for downloading zip downloads.
+    variables:
+      domain:
+        default: dl.boxcloud.com
+        description: The domain for this URL
+      path:
+        default: "2.0"
+        description: The first part of the path for this URL
+
+parameters:
+  - name: zip_download_id
+    description: |-
+      The unique identifier that represent this `zip` archive.
+    example: |-
+      "Lu6fA9Ob-jyysp3AAvMF4AkLEwZwAYbL=tgj2zIC=eK9RvJnJbjJl9rNh2qBgHDpyOCAOhpM=vajg2mKq8Mdd"
+    in: path
+    required: true
+    schema:
+      type: string
+
+responses:
+  200:
+    description: |-
+      Returns the content of the items requested for this download, formatted as
+      a stream of files and folders in a `zip` archive.
+    headers:
+      Content-Disposition:
+        description: |-
+          The name of the archive to be downloaded
+        schema:
+          type: string
+          example: filename=Archive.zip
+    content:
+      application/octet-stream:
+        schema:
+          type: string
+          format: binary
+          description: |-
+            The binary content of the archive, which will include the items
+            requested for this download.
+
+  default:
+    description: |-
+      An unexpected client error.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'

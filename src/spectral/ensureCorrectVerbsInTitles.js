@@ -7,10 +7,11 @@ module.exports = (item, _, paths) => {
   const verb = item.operationId.split('_')[0]
   const endWithId = item.operationId.endsWith('_id')
   const endsWithS = item.operationId.endsWith('s')
+  const endsWithStatus = item.operationId.endsWith('status')
   const firstWord = item.summary.split(' ')[0]
 
   // When getting an item by ID, use "Get"
-  if (verb === 'get' && endWithId && firstWord !== 'Get') {
+  if (verb === 'get' && (endWithId || endsWithStatus) && firstWord !== 'Get') {
     return [
       {
         message: `${paths.target.join('.')} - summary should start with "Get"`,
@@ -18,7 +19,7 @@ module.exports = (item, _, paths) => {
     ]
   } 
   // When getting all items, try to use "List" and reject "Get"
-  else if (verb === 'get' && !endWithId && endsWithS && firstWord === 'Get') {
+  else if (verb === 'get' && !(endWithId || endsWithStatus) && endsWithS && firstWord === 'Get') {
     return [
       {
         message: `${paths.target.join('.')} - summary should not start with "Get". Please use "List" where possible.`,
