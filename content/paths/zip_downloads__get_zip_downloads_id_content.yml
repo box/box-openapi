@@ -10,19 +10,21 @@ x-box-tag: zip_downloads
 x-box-reference-category: zip_downloads
 
 description: |-
-    Returns the contents of a `zip` archive in binary format.
+    Returns the contents of a `zip` archive in binary format. This URL does not
+    require any form of authentication.
+
+    The URL of this endpoint should not be considered as fixed. Instead, use
+    the [Create zip download](e://post_zip_downloads) API to request to create a
+    `zip` archive, and then follow the `download_url` field in the response to
+    this endpoint.
+
+security: []
 
 servers:
-  - url: https://{domain}/{path}
+  - url: https://dl.boxcloud.com/2.0
     description: |-
-      An opaque server URL for downloading zip downloads.
-    variables:
-      domain:
-        default: dl.boxcloud.com
-        description: The domain for this URL
-      path:
-        default: "2.0"
-        description: The first part of the path for this URL
+      An opaque server URL for downloading zip downloads. The format
+      of this URL might change over time.
 
 parameters:
   - name: zip_download_id
@@ -55,6 +57,21 @@ responses:
           description: |-
             The binary content of the archive, which will include the items
             requested for this download.
+
+  429:
+    description: |-
+      Returns an error if the number of concurrent zip downloads has been
+      reached for either the user or the enterprise.
+
+      * `user_too_many_concurrent_downloads` - the maximum of 5 parallel
+      downloads of zip archives per user has been met.
+      * `enterprise_too_many_concurrent_downloads` - the maximum of 10 parallel
+      downloads of zip archives per enterprise has been met.
+
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
 
   default:
     description: |-

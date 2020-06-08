@@ -21,9 +21,9 @@ description: |-
 
 requestBody:
   content:
-    application/x-www-form-urlencoded:
+    application/json:
       schema:
-        $ref: "#/components/schemas/PostZipDownloads"
+        $ref: "#/components/schemas/ZipDownloadRequest"
 
 responses:
   202:
@@ -35,6 +35,37 @@ responses:
       application/json:
         schema:
           $ref: '#/components/schemas/ZipDownload'
+
+  400:
+    description: |-
+      Returns an error if some of the parameters are missing or
+      not valid.
+
+      * `bad_request` - the request body is missing, or both the list of files
+      and folders are empty. Additionally, the root folder with ID `0` can not
+      be added to an archive.
+      * `zip_download_file_count_exceeded_limit` - the requested files and
+      folders would result in an archive with more than 10,000 files. The
+      request will have to be split into multiple requests to reduce the number
+      of files per archive.
+      * `zip_download_pre_compressed_bytes_exceeded_limit` - the requested files
+      and folders would result in an archive with more than 32GB of content. The
+      request will have to be split into multiple requests to reduce the size of
+      the archive.
+
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
+
+  401:
+    description: |-
+      Returned when the access token provided in the `Authorization` header
+      is not recognized or not provided.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
 
   default:
     description: |-
