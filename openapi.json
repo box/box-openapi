@@ -15949,7 +15949,7 @@
             }
           },
           "400": {
-            "description": "Returns an error if some of the parameters are missing or\nnot valid.\n\n* `bad_request` - the request body is missing, or both the list of files\nand folders are empty. Additionally, the root folder with ID `0` can not\nbe added to an archive.\n* `zip_download_file_count_exceeded_limit` - the requested files and\nfolders would result in an archive with more than 10,000 files. The\nrequest will have to be split into multiple requests to reduce the number\nof files per archive.\n* `zip_download_pre_compressed_bytes_exceeded_limit` - the requested files\nand folders would result in an archive with more than 32GB of content. The\nrequest will have to be split into multiple requests to reduce the size of\nthe archive.",
+            "description": "Returns an error if some of the parameters are missing or\nnot valid.\n\nIn most cases, this error might happen because the JSON request body is\nnot valid JSON, any of the items has an incorrect or missing ID, any of\nthe items is not a file or folder, or the root folder with ID `0` has been\nadded to the list of folders to add to the archive.\n\nThe following is a list of common error codes for this response.\n\n* `bad_request` - the request body is missing, invalid, or both the list\nof files and folders are empty. Additionally, it this error might be\nreturned when attempting to add the root folder with ID `0` to an archive.\n* `zip_download_file_count_exceeded_limit` - the requested files and\nfolders would result in an archive with more than 10,000 files. The\nrequest will have to be split into multiple requests to reduce the number\nof files per archive.\n* `zip_download_pre_compressed_bytes_exceeded_limit` - the requested files\nand folders would result in an archive with more than 32GB of content. The\nrequest will have to be split into multiple requests to reduce the size of\nthe archive.",
             "content": {
               "application/json": {
                 "schema": {
@@ -16018,7 +16018,7 @@
                 "description": "The name of the archive to be downloaded",
                 "schema": {
                   "type": "string",
-                  "example": "filename=Archive.zip"
+                  "example": "attachment;filename=\"Avatars.zip\";filename*=UTF-8''Avatars.zip"
                 }
               }
             },
@@ -16028,6 +16028,16 @@
                   "type": "string",
                   "format": "binary",
                   "description": "The binary content of the archive, which will include the items\nrequested for this download."
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Returns an error if the ID of this download request is not valid. This\nerror can also be returned if this URL has been called before. To\nre-download this archive, please create a new request for a zip download.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
                 }
               }
             }
@@ -16084,6 +16094,26 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ZipDownloadStatus"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Returned when the access token provided in the `Authorization` header\nis not recognized or not provided.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Returns an error if the ID of this download request is not valid, or if\nthe status of a download is requested before the download has been\nstarted.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
                 }
               }
             }
@@ -24121,26 +24151,26 @@
             "type": "integer",
             "description": "The total number of files in the archive.",
             "example": 20,
-            "minimum": 1,
+            "minimum": 0,
             "maximum": 10000
           },
           "downloaded_file_count": {
             "type": "integer",
             "description": "The number of files that have already been downloaded.",
             "example": 10,
-            "minimum": 1
+            "minimum": 0
           },
           "skipped_file_count": {
             "type": "integer",
             "description": "The number of files that have been skipped as they could not be\ndownloaded. In many cases this is due to permission issues that have\nsurfaced between the creation of the request for the archive and the\narchive being downloaded.",
             "example": 5,
-            "minimum": 1
+            "minimum": 0
           },
           "skipped_folder_count": {
             "type": "integer",
             "description": "The number of folders that have been skipped as they could not be\ndownloaded. In many cases this is due to permission issues that have\nsurfaced between the creation of the request for the archive and the\narchive being downloaded.",
             "example": 5,
-            "minimum": 1
+            "minimum": 0
           },
           "state": {
             "type": "string",
