@@ -1,0 +1,79 @@
+---
+operationId: get_zip_downloads_id_status
+
+summary: Get zip download status
+
+tags:
+  - Zip Downloads
+
+x-box-tag: zip_downloads
+x-box-reference-category: zip_downloads
+
+description: |-
+    Returns the download status of a `zip` archive, allowing an application to
+    inspect the progress of the download as well as the number of items that
+    might have been skipped.
+
+    This endpoint can only be accessed once the download has started.
+    Subsequently this endpoint is valid for 12 hours from the start of the
+    download.
+
+    The URL of this endpoint should not be considered as fixed. Instead, use
+    the [Create zip download](e://post_zip_downloads) API to request to create a
+    `zip` archive, and then follow the `status_url` field in the response to
+    this endpoint.
+
+parameters:
+  - name: zip_download_id
+    description: |-
+      The unique identifier that represent this `zip` archive.
+    example: |-
+      Lu6fA9Ob-jyysp3AAvMF4AkLEwZwAYbL=tgj2zIC=eK9RvJnJbjJl9rNh2qBgHDpyOCAOhpM=vajg2mKq8Mdd
+    in: path
+    required: true
+    schema:
+      type: string
+
+responses:
+  200:
+    description: |-
+      Returns the status of the `zip` archive that is being downloaded.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ZipDownloadStatus'
+
+  401:
+    description: |-
+      Returned when the access token provided in the `Authorization` header
+      is not recognized or not provided.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
+
+  403:
+    description: |-
+      Returned when no `Authorization` header is is provided.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
+
+  404:
+    description: |-
+      Returns an error if the ID of this download request is not valid, or if
+      the status of a download is requested before the download has been
+      started.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
+
+  default:
+    description: |-
+      An unexpected client error.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
