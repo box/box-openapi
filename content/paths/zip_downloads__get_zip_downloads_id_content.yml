@@ -14,10 +14,10 @@ description: |-
     require any form of authentication and could be used in a user's browser to
     download the archive to a user's device.
 
-    By default, this URL is only valid for 25 seconds from the creation of the
-    request for this archive. Once a download has started it can not be stopped
-    and resumed, instead a new request for a zip archive would need to be
-    created.
+    By default, this URL is only valid for a few seconds from the creation of
+    the request for this archive. Once a download has started it can not be
+    stopped and resumed, instead a new request for a zip archive would need to
+    be created.
 
     The URL of this endpoint should not be considered as fixed. Instead, use
     the [Create zip download](e://post_zip_downloads) API to request to create a
@@ -65,6 +65,16 @@ responses:
             The binary content of the archive, which will include the items
             requested for this download.
 
+  404:
+    description: |-
+      Returns an error if the ID of this download request is not valid. This
+      error can also be returned if this URL has been called before. To
+      re-download this archive, please create a new request for a zip download.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
+
   429:
     description: |-
       Returns an error if the number of concurrent zip downloads has been
@@ -75,16 +85,6 @@ responses:
       * `enterprise_too_many_concurrent_downloads` - the maximum of 10 parallel
       downloads of zip archives per enterprise has been met.
 
-    content:
-      application/json:
-        schema:
-          $ref: '#/components/schemas/ClientError'
-
-  404:
-    description: |-
-      Returns an error if the ID of this download request is not valid. This
-      error can also be returned if this URL has been called before. To
-      re-download this archive, please create a new request for a zip download.
     content:
       application/json:
         schema:
