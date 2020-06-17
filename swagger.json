@@ -11063,22 +11063,11 @@
               "type": "object",
               "properties": {
                 "conflicts": {
-                  "allOf": [
-                    {
-                      "$ref": "#/definitions/File--Mini"
-                    },
-                    {
-                      "properties": {
-                        "sha1": {
-                          "type": "string",
-                          "description": "The SHA1 hash of the file."
-                        },
-                        "file_version": {
-                          "$ref": "#/definitions/FileVersion--Mini"
-                        }
-                      }
-                    }
-                  ]
+                  "type": "array",
+                  "description": "A list of the file conflicts that caused this error.",
+                  "items": {
+                    "$ref": "#/definitions/FileConflict"
+                  }
                 }
               }
             }
@@ -11201,7 +11190,7 @@
             "entries": {
               "type": "array",
               "items": {
-                "$ref": "#/definitions/Comment--Standard"
+                "$ref": "#/definitions/Comment"
               }
             }
           }
@@ -11472,8 +11461,8 @@
     "Folder": {
       "title": "Folder",
       "type": "object",
-      "description": "A full representation of a folder, as can be returned from any\nfolder API endpoints by default",
       "x-box-tag": "folders",
+      "description": "A full representation of a folder, as can be returned from any\nfolder API endpoints by default",
       "allOf": [
         {
           "$ref": "#/definitions/Folder--Standard"
@@ -12148,8 +12137,8 @@
     "Collaboration": {
       "title": "Collaboration",
       "type": "object",
-      "description": "Collaborations define access permissions for users and groups to files and\nfolders, similar to access control lists. A collaboration object grants a\nuser or group access to a file or folder with permissions defined by a\nspecific role.",
       "x-box-tag": "user_collaborations",
+      "description": "Collaborations define access permissions for users and groups to files and\nfolders, similar to access control lists. A collaboration object grants a\nuser or group access to a file or folder with permissions defined by a\nspecific role.",
       "allOf": [
         {
           "title": "Reference",
@@ -12747,7 +12736,7 @@
             "entries": {
               "type": "array",
               "items": {
-                "$ref": "#/definitions/User--Mini"
+                "$ref": "#/definitions/User"
               }
             }
           }
@@ -12757,8 +12746,8 @@
     "User": {
       "title": "User",
       "type": "object",
-      "description": "A full representation of a user, as can be returned from any\nuser API endpoint.",
       "x-box-tag": "users",
+      "description": "A full representation of a user, as can be returned from any\nuser API endpoint.",
       "allOf": [
         {
           "$ref": "#/definitions/User--Standard"
@@ -13584,7 +13573,7 @@
         "entries": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/RetentionPolicy--Mini"
+            "$ref": "#/definitions/RetentionPolicy"
           }
         }
       }
@@ -15241,30 +15230,24 @@
         }
       }
     },
-    "File--Mini": {
-      "title": "File (Mini)",
+    "FileConflict": {
+      "title": "File (Conflict)",
       "type": "object",
       "x-box-tag": null,
-      "description": "A mini representation of a file, used when\nnested under another resource.",
+      "description": "A representation of a file that is used to show",
       "allOf": [
         {
-          "$ref": "#/definitions/File--Base"
+          "$ref": "#/definitions/File--Mini"
         },
+        {},
         {
           "properties": {
-            "sequence_id": {
-              "allOf": [
-                {
-                  "type": "string",
-                  "description": "A numeric identifier that represents the most recent user event\nthat has been applied to this item.\n\nThis can be used in combination with the `GET /events`-endpoint\nto filter out user events that would have occurred before this\nidentifier was read.\n\nAn example would be where a Box Drive-like application\nwould fetch an item via the API, and then listen to incoming\nuser events for changes to the item. The application would\nignore any user events where the `sequence_id` in the event\nis smaller than or equal to the `sequence_id` in the originally\nfetched resource."
-                },
-                {},
-                {}
-              ]
-            },
-            "name": {
+            "sha1": {
               "type": "string",
-              "description": "The name of the file"
+              "description": "The SHA1 hash of the file."
+            },
+            "file_version": {
+              "$ref": "#/definitions/FileVersion--Mini"
             }
           }
         }
@@ -15283,83 +15266,6 @@
             "sha1": {
               "type": "string",
               "description": "The SHA1 hash of this version of the file."
-            }
-          }
-        }
-      ]
-    },
-    "Comment--Standard": {
-      "title": "Comment (Standard)",
-      "type": "object",
-      "description": "Standard representation of a comment, as returned by the\ncomment API endpoints and when nested within other resources.",
-      "allOf": [
-        {
-          "title": "Reference",
-          "description": "The bare basic reference for an object",
-          "type": "object",
-          "properties": {
-            "id": {
-              "type": "string",
-              "description": "The unique identifier for this object"
-            }
-          }
-        },
-        {
-          "properties": {
-            "type": {
-              "type": "string",
-              "description": "`comment`",
-              "enum": [
-                "comment"
-              ]
-            },
-            "is_reply_comment": {
-              "type": "boolean",
-              "description": "Whether or not this comment is a reply to another\ncomment"
-            },
-            "message": {
-              "type": "string",
-              "description": "The text of the comment, as provided by the user"
-            },
-            "created_by": {
-              "allOf": [
-                {
-                  "$ref": "#/definitions/User--Mini"
-                },
-                {
-                  "description": "A mini user object representing the author of the\ncomment"
-                },
-                {}
-              ]
-            },
-            "created_at": {
-              "type": "string",
-              "format": "date-time",
-              "description": "The time this comment was created"
-            },
-            "modified_at": {
-              "type": "string",
-              "format": "date-time",
-              "description": "The time this comment was last modified"
-            },
-            "item": {
-              "allOf": [
-                {
-                  "title": "Reference",
-                  "description": "The bare basic reference for an object",
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "type": "string",
-                      "description": "The unique identifier for this object"
-                    }
-                  }
-                },
-                {
-                  "description": "The object this comment was placed on"
-                },
-                {}
-              ]
             }
           }
         }
@@ -15680,6 +15586,83 @@
         }
       }
     },
+    "Comment--Standard": {
+      "title": "Comment (Standard)",
+      "type": "object",
+      "description": "Standard representation of a comment, as returned by the\ncomment API endpoints and when nested within other resources.",
+      "allOf": [
+        {
+          "title": "Reference",
+          "description": "The bare basic reference for an object",
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "The unique identifier for this object"
+            }
+          }
+        },
+        {
+          "properties": {
+            "type": {
+              "type": "string",
+              "description": "`comment`",
+              "enum": [
+                "comment"
+              ]
+            },
+            "is_reply_comment": {
+              "type": "boolean",
+              "description": "Whether or not this comment is a reply to another\ncomment"
+            },
+            "message": {
+              "type": "string",
+              "description": "The text of the comment, as provided by the user"
+            },
+            "created_by": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/User--Mini"
+                },
+                {
+                  "description": "A mini user object representing the author of the\ncomment"
+                },
+                {}
+              ]
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time",
+              "description": "The time this comment was created"
+            },
+            "modified_at": {
+              "type": "string",
+              "format": "date-time",
+              "description": "The time this comment was last modified"
+            },
+            "item": {
+              "allOf": [
+                {
+                  "title": "Reference",
+                  "description": "The bare basic reference for an object",
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "The unique identifier for this object"
+                    }
+                  }
+                },
+                {
+                  "description": "The object this comment was placed on"
+                },
+                {}
+              ]
+            }
+          }
+        }
+      ]
+    },
     "Item--Mini": {
       "title": "Item (Mini)",
       "type": "object",
@@ -15753,6 +15736,35 @@
               "enum": [
                 "terms_of_service"
               ]
+            }
+          }
+        }
+      ]
+    },
+    "File--Mini": {
+      "title": "File (Mini)",
+      "type": "object",
+      "x-box-tag": null,
+      "description": "A mini representation of a file, used when\nnested under another resource.",
+      "allOf": [
+        {
+          "$ref": "#/definitions/File--Base"
+        },
+        {
+          "properties": {
+            "sequence_id": {
+              "allOf": [
+                {
+                  "type": "string",
+                  "description": "A numeric identifier that represents the most recent user event\nthat has been applied to this item.\n\nThis can be used in combination with the `GET /events`-endpoint\nto filter out user events that would have occurred before this\nidentifier was read.\n\nAn example would be where a Box Drive-like application\nwould fetch an item via the API, and then listen to incoming\nuser events for changes to the item. The application would\nignore any user events where the `sequence_id` in the event\nis smaller than or equal to the `sequence_id` in the originally\nfetched resource."
+                },
+                {},
+                {}
+              ]
+            },
+            "name": {
+              "type": "string",
+              "description": "The name of the file"
             }
           }
         }
@@ -16155,7 +16167,7 @@
         "source": {
           "allOf": [
             {
-              "$ref": "#/definitions/User--Mini"
+              "$ref": "#/definitions/User"
             },
             {
               "description": "The item that triggered this event"
@@ -16345,6 +16357,24 @@
         }
       ]
     },
+    "FileVersion--Base": {
+      "title": "File version (Base)",
+      "type": "object",
+      "description": "The bare basic representation of a file version, the minimal\namount of fields returned when using the `fields` query\nparameter.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The unique identifier that represent a file version."
+        },
+        "type": {
+          "type": "string",
+          "description": "`file_version`",
+          "enum": [
+            "file_version"
+          ]
+        }
+      }
+    },
     "File--Base": {
       "title": "File (Base)",
       "type": "object",
@@ -16363,24 +16393,6 @@
           "description": "`file`",
           "enum": [
             "file"
-          ]
-        }
-      }
-    },
-    "FileVersion--Base": {
-      "title": "File version (Base)",
-      "type": "object",
-      "description": "The bare basic representation of a file version, the minimal\namount of fields returned when using the `fields` query\nparameter.",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "The unique identifier that represent a file version."
-        },
-        "type": {
-          "type": "string",
-          "description": "`file_version`",
-          "enum": [
-            "file_version"
           ]
         }
       }
