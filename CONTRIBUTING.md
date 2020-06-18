@@ -18,7 +18,7 @@ contributing.
 1. [The OpenAPI structure and custom attributes](./docs/structure.md)
 1. [Adding a new API resource](./docs/add-resource.md)
 1. [Base, mini, standard, and full API resources](./docs/variants.md)
-1. [Adding a new API endpoints](./docs/add-endpoint.md)
+1. [Adding a new API endpoint](./docs/add-endpoint.md)
 1. [Contributing a pull request](./docs/pull-request.md)
 
 ==============================
