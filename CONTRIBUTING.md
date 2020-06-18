@@ -20,12 +20,10 @@ please see the [Wikipedia entry][1].
 
 This project requires Node for testing, linting, and compilation.
 
-It also needs `hunspell` for spell checking to be installed, as this is what is used when running on Travis.
-
-Additionally, we use `yamllint` to lint the yaml files.
+It also needs `yamllint` to lint the yaml files.
 
 ```sh
-brew install hunspell yamllint
+brew install yamllint
 ```
 
 Finally, this project depends on Yarn, the Node package manager.
@@ -59,7 +57,7 @@ watch and run the linter and tests.
 
 Resources are automatically linted by `yamllinter`, ensuring that they are valid
 YAML. Resources are not automatically included into the spec, as
-you will need to explicitly add them to the `content/responses/_index.json` file.
+you will need to explicitly add them to the `content/schemas.yml` file.
 
 Once resources have been added to this file, they are automatically tested
 to ensure they are valid OpenAPI Specification 3.0, as well spell checking, and
@@ -151,16 +149,13 @@ specifying a description specific to this nesting.
 
 ### Known issues
 
-1. As Hunspell uses a different dictionary on development than on Travis the results 
-   will vary. As such, Travis spell checks might fail where they pass on a Mac. Inspect
-   the errors and add any missing words to the `accepted_words.yml`.
-2. You may see many warnings or erors when a reference doesn't resolve properly. Make
+1. You may see many warnings or erors when a reference doesn't resolve properly. Make
    sure to see if there's an unresolved specification before paying attention to other 
    warnings.
 
 ## Deployment of compiled source
 
-The Yaml files are automatically tested and compiled using [Travis CI](https://travis-ci.com/box/box-openapi/builds/113026758). The compiled 
+The Yaml files are automatically tested and compiled using GitHub Actions. The compiled 
 JSON specification is then published to the `en` branch here on GitHub. 
 
 For a combined, resolved version please have a look at this [fully build specification](https://opensource.box.com/box-openapi/openapi.json).
