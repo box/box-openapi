@@ -723,6 +723,7 @@
     "UploadParts": {
       "title": "Upload parts",
       "type": "object",
+      "x-box-tag": "chunked_uploads",
       "description": "A list of uploaded chunks for an upload\nsession.",
       "allOf": [
         {
@@ -783,27 +784,21 @@
     "UploadPart": {
       "title": "Upload part",
       "type": "object",
+      "x-box-tag": "chunked_uploads",
       "description": "The representation of an upload\nsession chunk.",
-      "properties": {
-        "part_id": {
-          "description": "The unique ID of the chunk.",
-          "type": "string"
+      "allOf": [
+        {
+          "$ref": "#/definitions/UploadPart--Mini"
         },
-        "offset": {
-          "description": "The offset of the chunk within the file\nin bytes. The lower bound of the position\nof the chunk within the file.",
-          "type": "integer",
-          "format": "int64"
-        },
-        "size": {
-          "description": "The size of the chunk in bytes.",
-          "type": "integer",
-          "format": "int64"
-        },
-        "sha1": {
-          "description": "The SHA1 hash of the chunk.",
-          "type": "string"
+        {
+          "properties": {
+            "sha1": {
+              "description": "The SHA1 hash of the chunk.",
+              "type": "string"
+            }
+          }
         }
-      }
+      ]
     },
     "File": {
       "title": "File",
@@ -814,7 +809,6 @@
         {
           "$ref": "#/definitions/File--Standard"
         },
-        {},
         {
           "properties": {
             "version_number": {
@@ -919,54 +913,43 @@
                   "title": "Lock",
                   "type": "object",
                   "description": "The lock held on a file. A lock prevents a file from being moved,\nrenamed, or otherwise changed by anyone else than the user who created the\nlock.",
-                  "allOf": [
-                    {
-                      "title": "Reference",
-                      "description": "The bare basic reference for an object",
-                      "type": "object",
-                      "properties": {
-                        "id": {
-                          "type": "string",
-                          "description": "The unique identifier for this object"
-                        }
-                      }
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "The unique identifier for this lock"
                     },
-                    {
-                      "properties": {
-                        "type": {
-                          "type": "string",
-                          "description": "`lock`",
-                          "enum": [
-                            "lock"
-                          ]
+                    "type": {
+                      "type": "string",
+                      "description": "`lock`",
+                      "enum": [
+                        "lock"
+                      ]
+                    },
+                    "created_by": {
+                      "allOf": [
+                        {
+                          "$ref": "#/definitions/User--Mini"
                         },
-                        "created_by": {
-                          "allOf": [
-                            {
-                              "$ref": "#/definitions/User--Mini"
-                            },
-                            {
-                              "description": "The user who created the lock."
-                            }
-                          ]
-                        },
-                        "created_at": {
-                          "type": "string",
-                          "format": "date-time",
-                          "description": "The time this lock was created at."
-                        },
-                        "expired_at": {
-                          "type": "string",
-                          "format": "date-time",
-                          "description": "The time this lock is to expire at, which might be in the past."
-                        },
-                        "is_download_prevented": {
-                          "type": "boolean",
-                          "description": "Whether or not the file can be downloaded while locked."
+                        {
+                          "description": "The user who created the lock."
                         }
-                      }
+                      ]
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "The time this lock was created at."
+                    },
+                    "expired_at": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "The time this lock is to expire at, which might be in the past."
+                    },
+                    "is_download_prevented": {
+                      "type": "boolean",
+                      "description": "Whether or not the file can be downloaded while locked."
                     }
-                  ]
+                  }
                 },
                 {
                   "description": "The lock held on this file. If there is no lock, this can either\nbe `null` or have a timestamp in the past."
@@ -1219,10 +1202,30 @@
         }
       ]
     },
+    "UploadPart--Mini": {
+      "title": "Upload part (Mini)",
+      "type": "object",
+      "description": "The basic representation of an upload\nsession chunk.",
+      "properties": {
+        "part_id": {
+          "description": "The unique ID of the chunk.",
+          "type": "string"
+        },
+        "offset": {
+          "description": "The offset of the chunk within the file\nin bytes. The lower bound of the position\nof the chunk within the file.",
+          "type": "integer",
+          "format": "int64"
+        },
+        "size": {
+          "description": "The size of the chunk in bytes.",
+          "type": "integer",
+          "format": "int64"
+        }
+      }
+    },
     "File--Standard": {
       "title": "File (Standard)",
       "type": "object",
-      "x-box-tag": null,
       "description": "A standard representation of a file, as returned from any\nfile API endpoints by default",
       "allOf": [
         {
@@ -1230,11 +1233,6 @@
         },
         {
           "properties": {
-            "sha1": {
-              "type": "string",
-              "format": "digest",
-              "description": "The SHA1 hash of the file. This can be used to compare the contents\nof a file on Box with a local file."
-            },
             "description": {
               "type": "string",
               "description": "The optional description of this file",
@@ -1445,17 +1443,6 @@
                 "trashed",
                 "deleted"
               ]
-            },
-            "file_version": {
-              "allOf": [
-                {
-                  "$ref": "#/definitions/FileVersion--Mini"
-                },
-                {
-                  "description": "The information about the current version of the file."
-                },
-                {}
-              ]
             }
           }
         }
@@ -1465,40 +1452,29 @@
       "title": "User (Mini)",
       "type": "object",
       "description": "A mini representation of a user, used when\nnested within another resource.",
-      "allOf": [
-        {
-          "title": "Reference",
-          "description": "The bare basic reference for an object",
-          "type": "object",
-          "properties": {
-            "id": {
-              "type": "string",
-              "description": "The unique identifier for this object"
-            }
-          }
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The unique identifier for this user"
         },
-        {
-          "properties": {
-            "type": {
-              "type": "string",
-              "description": "`user`",
-              "enum": [
-                "user"
-              ]
-            },
-            "name": {
-              "type": "string",
-              "description": "The display name of this user",
-              "maxLength": 50
-            },
-            "login": {
-              "type": "string",
-              "format": "email",
-              "description": "The primary email address of this user"
-            }
-          }
+        "type": {
+          "type": "string",
+          "description": "`user`",
+          "enum": [
+            "user"
+          ]
+        },
+        "name": {
+          "type": "string",
+          "description": "The display name of this user",
+          "maxLength": 50
+        },
+        "login": {
+          "type": "string",
+          "format": "email",
+          "description": "The primary email address of this user"
         }
-      ]
+      }
     },
     "FileScope": {
       "title": "File scope",
@@ -1584,7 +1560,6 @@
     "File--Mini": {
       "title": "File (Mini)",
       "type": "object",
-      "x-box-tag": null,
       "description": "A mini representation of a file, used when\nnested under another resource.",
       "allOf": [
         {
@@ -1605,6 +1580,22 @@
             "name": {
               "type": "string",
               "description": "The name of the file"
+            },
+            "sha1": {
+              "type": "string",
+              "format": "digest",
+              "description": "The SHA1 hash of the file. This can be used to compare the contents\nof a file on Box with a local file."
+            },
+            "file_version": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/FileVersion--Mini"
+                },
+                {
+                  "description": "The information about the current version of the file."
+                },
+                {}
+              ]
             }
           }
         }
@@ -1613,7 +1604,6 @@
     "Folder--Mini": {
       "title": "Folder (Mini)",
       "type": "object",
-      "x-box-tag": null,
       "description": "A mini representation of a file version, used when\nnested under another resource.",
       "allOf": [
         {
@@ -1634,24 +1624,6 @@
             "name": {
               "type": "string",
               "description": "The name of the folder."
-            }
-          }
-        }
-      ]
-    },
-    "FileVersion--Mini": {
-      "title": "File version (Mini)",
-      "type": "object",
-      "description": "A mini representation of a file version, used when\nnested within another resource.",
-      "allOf": [
-        {
-          "$ref": "#/definitions/FileVersion--Base"
-        },
-        {
-          "properties": {
-            "sha1": {
-              "type": "string",
-              "description": "The SHA1 hash of this version of the file."
             }
           }
         }
@@ -1678,6 +1650,24 @@
           ]
         }
       }
+    },
+    "FileVersion--Mini": {
+      "title": "File version (Mini)",
+      "type": "object",
+      "description": "A mini representation of a file version, used when\nnested within another resource.",
+      "allOf": [
+        {
+          "$ref": "#/definitions/FileVersion--Base"
+        },
+        {
+          "properties": {
+            "sha1": {
+              "type": "string",
+              "description": "The SHA1 hash of this version of the file."
+            }
+          }
+        }
+      ]
     },
     "Folder--Base": {
       "title": "Folder (Base)",
