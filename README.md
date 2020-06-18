@@ -19,6 +19,11 @@ The `default` branch of this repository only contains the raw source for the spe
 
 The older and incomplete Swagger 2.0 specification is stil available on the [Swagger 2.0](https://github.com/box/box-openapi/tree/swagger_2.0) branch.
 
+## Development & Contribution
+
+Please follow the [contribution guidelines](./CONTRIBUTING.md) when contributing to
+the source of this project.
+
 ## Usage & License
 
 Copyright 2020 Box, Inc. All rights reserved.

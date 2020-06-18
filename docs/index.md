@@ -3,6 +3,8 @@
 **[Previous: Contribution guidelines](../CONTRIBUTING.md)** |
 **[Next: Notes for Box employees](./boxers.md)**
 
+---
+
 ## Prerequisites
 
 This project has a few prerequisites.
