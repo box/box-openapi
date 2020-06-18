@@ -1,50 +1,28 @@
-Contributing
-============
+# Contributing
 
 All contributions are welcome to this project.
 
-Contributor License Agreement
------------------------------
+## Contributor License Agreement
 
 Before a contribution can be merged into this project, please fill out the
-Contributor License Agreement (CLA) located at:
-
-http://opensource.box.com/cla
-
-To learn more about CLAs and why they are important to open source projects,
-please see the [Wikipedia entry][1].
+Contributor License Agreement (CLA). Any new contributor will be prompted to
+sign the CLA by our CLA bot upon creating a pull request.
 
 ## Development
 
-### Prerequisites
+To contribute to this project we highly recommend reading our guides on
+contributing.
 
-This project requires Node for testing, linting, and compilation.
+1. [Installation & setup](./docs/index.md)
+1. [Notes for Box employees](./docs/boxers.md)
+1. [The OpenAPI structure and custom attributes](./docs/structure.md)
+1. [Adding a new API resource](./docs/add-resource.md)
+1. [Base, mini, standard, and full API resources](./docs/variants.md)
+1. [Adding a new API endpoints](./docs/add-endpoint.md)
+1. [Contributing a pull request](./docs/pull-request.md)
 
-It also needs `yamllint` to lint the yaml files.
+==============================
 
-```sh
-brew install yamllint
-```
-
-Finally, this project depends on Yarn, the Node package manager.
-
-```sh
-npm install -g yarn
-```
-
-### Local Development
-
-To work on the source, install the dependencies, start the local web server, and watch for changes.
-
-```bash
-git clone git@github.com:box/box-openapi.git
-cd box-openapi
-yarn install
-yarn start
-```
-
-This will open a Swagger UI preview on [localhost:8080/](http://localhost:8080/),
-watch for changes, and automatically run the linter, spell checker, and all other tests.
 
 ### How To: Add a response resource
 
