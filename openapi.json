@@ -2843,7 +2843,7 @@
           "File versions"
         ],
         "x-box-tag": "file_versions",
-        "description": "Revert to a previous version of a file.\n\n\nIf previous versions exist, this method can be used to\npromote one of the older versions to the top of the version history.\n\nThis actually creates a new copy of the old version and puts it at the\ntop of the versions history. The file will have the exact same contents\nas the older version, with the the same hash digest, `etag`, and\nname as the original.\n\nOther properties such as comments do not get updated to their\nformer values.",
+        "description": "Revert to a previous version of a file.\n\nIf previous versions exist, this method can be used to\npromote one of the older versions to the top of the version history.\n\nThis actually creates a new copy of the old version and puts it at the\ntop of the versions history. The file will have the exact same contents\nas the older version, with the the same hash digest, `etag`, and\nname as the original.\n\nOther properties such as comments do not get updated to their\nformer values.",
         "parameters": [
           {
             "name": "file_id",
@@ -4051,7 +4051,14 @@
                         "id": {
                           "type": "string",
                           "description": "The unique identifier for this object",
-                          "example": "11446498"
+                          "example": "11446498",
+                          "x-box-field-variant": 0
+                        },
+                        "type": {
+                          "type": "string",
+                          "description": "The type for this object",
+                          "example": "file",
+                          "x-box-field-variant": 0
                         }
                       }
                     }
@@ -5974,6 +5981,7 @@
                       "description": "The type of change to perform on the template. Some\nof these are hazardous as they will change existing templates."
                     },
                     "data": {
+                      "type": "object",
                       "description": "The data for the operation. This will vary depending on the\noperation being performed.",
                       "example": {
                         "name": "Aaron Levie"
@@ -8800,6 +8808,9 @@
                     },
                     {
                       "$ref": "#/components/schemas/Folder"
+                    },
+                    {
+                      "$ref": "#/components/schemas/WebLink"
                     }
                   ]
                 }
@@ -16313,6 +16324,20 @@
             "type": "string",
             "description": "Marker to use for requesting the next page.",
             "example": "AAAAAmVYB1FWec8GH6yWu2nwmanfMh07IyYInaa7DZDYjgO1H4KoLW29vPlLY173OKsci6h6xGh61gG73gnaxoS+o0BbI1/h6le6cikjlupVhASwJ2Cj0tOD9wlnrUMHHw3/ISf+uuACzrOMhN6d5fYrbidPzS6MdhJOejuYlvsg4tcBYzjauP3+VU51p77HFAIuObnJT0ff"
+          },
+          "fields": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The item and metadata fields to return. You may request metadata.<scope>.<templateKey> and get back\nthe mini representation of metadata or request metadata.<scope>.<templateKey>.<field> to get the mini\nrepresentation plus that field.",
+            "example": [
+              "extension",
+              "created_at",
+              "item_status",
+              "metadata.enterprise_1234.contracts",
+              "metadata.enterprise_1234.regions.location"
+            ]
           }
         }
       },
@@ -16433,396 +16458,347 @@
         "x-box-resource-id": "skill_invocation",
         "x-box-tag": "skills",
         "description": "The payload of a Box skill as sent to a Custom Skill's\n`invocation_url`.",
-        "allOf": [
-          {
-            "title": "Reference",
-            "description": "The bare basic reference for an object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "`skill_invocation`",
+            "example": "skill_invocation",
+            "enum": [
+              "skill_invocation"
+            ]
+          },
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for the invocation request.",
+            "example": "fd1d2e53-35f5-41fb-9c25-4ba326daf2f9_341016304"
+          },
+          "skill": {
+            "allOf": [
+              {
+                "title": "Skill",
+                "description": "An object representing a skill",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "The unique identifier for this skill",
+                    "example": "11446498"
+                  },
+                  "type": {
+                    "type": "string",
+                    "description": "`skill`",
+                    "example": "skill",
+                    "enum": [
+                      "skill"
+                    ]
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "The name of the skill",
+                    "example": "Hello World Skill"
+                  },
+                  "api_key": {
+                    "type": "string",
+                    "description": "The client ID of the application",
+                    "example": "hxel2s12wd2h9r8ne103c4gjbqefofih"
+                  }
+                }
+              },
+              {
+                "description": "The skill that triggered this invocation"
+              }
+            ]
+          },
+          "token": {
             "type": "object",
+            "description": "The read-only and read-write access tokens for this item",
             "properties": {
-              "id": {
-                "type": "string",
-                "description": "The unique identifier for this object",
-                "example": "11446498"
+              "read": {
+                "type": "object",
+                "description": "The basics of an access token",
+                "properties": {
+                  "access_token": {
+                    "type": "string",
+                    "format": "token",
+                    "example": "c3FIOG9vSGV4VHo4QzAyg5T1JvNnJoZ3ExaVNyQWw6WjRsanRKZG5lQk9qUE1BVQ",
+                    "description": "The requested access token."
+                  },
+                  "expires_in": {
+                    "type": "integer",
+                    "format": "int64",
+                    "example": 3600,
+                    "description": "The time in seconds in seconds by which this token will expire."
+                  },
+                  "token_type": {
+                    "type": "string",
+                    "enum": [
+                      "bearer"
+                    ],
+                    "example": "bearer",
+                    "description": "The type of access token returned."
+                  },
+                  "restricted_to": {
+                    "type": "array",
+                    "description": "The permissions that this access token permits,\nproviding a list of resources (files, folders, etc)\nand the scopes permitted for each of those resources.",
+                    "items": {
+                      "$ref": "#/components/schemas/FileScope"
+                    }
+                  }
+                }
+              },
+              "write": {
+                "type": "object",
+                "description": "The basics of an access token",
+                "properties": {
+                  "access_token": {
+                    "type": "string",
+                    "format": "token",
+                    "example": "c3FIOG9vSGV4VHo4QzAyg5T1JvNnJoZ3ExaVNyQWw6WjRsanRKZG5lQk9qUE1BVQ",
+                    "description": "The requested access token."
+                  },
+                  "expires_in": {
+                    "type": "integer",
+                    "format": "int64",
+                    "example": 3600,
+                    "description": "The time in seconds in seconds by which this token will expire."
+                  },
+                  "token_type": {
+                    "type": "string",
+                    "enum": [
+                      "bearer"
+                    ],
+                    "example": "bearer",
+                    "description": "The type of access token returned."
+                  },
+                  "restricted_to": {
+                    "type": "array",
+                    "description": "The permissions that this access token permits,\nproviding a list of resources (files, folders, etc)\nand the scopes permitted for each of those resources.",
+                    "items": {
+                      "$ref": "#/components/schemas/FileScope"
+                    }
+                  }
+                }
               }
             }
           },
-          {
+          "status": {
+            "type": "object",
+            "description": "The details status of this event.",
             "properties": {
-              "type": {
+              "state": {
                 "type": "string",
-                "description": "`skill_invocation`",
-                "example": "skill_invocation",
+                "example": "invoked",
+                "description": "The state of this event.\n\n* `invoked` - Triggered the skill with event details to start\n  applying skill on the file.\n* `processing` - Currently processing.\n* `success` - Completed processing with a success.\n* `transient_failure` - Encountered an issue which can be\n  retried.\n* `permanent_failure` -  Encountered a permanent issue and\n  retry would not help.",
                 "enum": [
-                  "skill_invocation"
+                  "invoked",
+                  "processing",
+                  "success",
+                  "transient_failure",
+                  "permanent_failure"
                 ]
               },
-              "id": {
+              "message": {
                 "type": "string",
-                "description": "Unique identifier for the invocation request.",
-                "example": "fd1d2e53-35f5-41fb-9c25-4ba326daf2f9_341016304"
+                "example": "Example",
+                "description": "Status information"
               },
-              "skill": {
-                "allOf": [
-                  {
-                    "title": "Skill",
-                    "description": "An object representing a skill",
-                    "allOf": [
-                      {
-                        "title": "Reference",
-                        "description": "The bare basic reference for an object",
-                        "type": "object",
-                        "properties": {
-                          "id": {
-                            "type": "string",
-                            "description": "The unique identifier for this object",
-                            "example": "11446498"
-                          }
-                        }
-                      },
-                      {
-                        "properties": {
-                          "type": {
-                            "type": "string",
-                            "description": "`skill`",
-                            "example": "skill",
-                            "enum": [
-                              "skill"
-                            ]
-                          },
-                          "name": {
-                            "type": "string",
-                            "description": "The name of the skill",
-                            "example": "Hello World Skill"
-                          },
-                          "api_key": {
-                            "type": "string",
-                            "description": "The client ID of the application",
-                            "example": "hxel2s12wd2h9r8ne103c4gjbqefofih"
-                          }
-                        }
-                      }
-                    ]
-                  },
-                  {
-                    "description": "The skill that triggered this invocation"
-                  }
-                ]
-              },
-              "token": {
-                "type": "object",
-                "description": "The read-only and read-write access tokens for this item",
-                "properties": {
-                  "read": {
-                    "type": "object",
-                    "description": "The basics of an access token",
-                    "properties": {
-                      "access_token": {
-                        "type": "string",
-                        "format": "token",
-                        "example": "c3FIOG9vSGV4VHo4QzAyg5T1JvNnJoZ3ExaVNyQWw6WjRsanRKZG5lQk9qUE1BVQ",
-                        "description": "The requested access token."
-                      },
-                      "expires_in": {
-                        "type": "integer",
-                        "format": "int64",
-                        "example": 3600,
-                        "description": "The time in seconds in seconds by which this token will expire."
-                      },
-                      "token_type": {
-                        "type": "string",
-                        "enum": [
-                          "bearer"
-                        ],
-                        "example": "bearer",
-                        "description": "The type of access token returned."
-                      },
-                      "restricted_to": {
-                        "type": "array",
-                        "description": "The permissions that this access token permits,\nproviding a list of resources (files, folders, etc)\nand the scopes permitted for each of those resources.",
-                        "items": {
-                          "$ref": "#/components/schemas/FileScope"
-                        }
-                      }
-                    }
-                  },
-                  "write": {
-                    "type": "object",
-                    "description": "The basics of an access token",
-                    "properties": {
-                      "access_token": {
-                        "type": "string",
-                        "format": "token",
-                        "example": "c3FIOG9vSGV4VHo4QzAyg5T1JvNnJoZ3ExaVNyQWw6WjRsanRKZG5lQk9qUE1BVQ",
-                        "description": "The requested access token."
-                      },
-                      "expires_in": {
-                        "type": "integer",
-                        "format": "int64",
-                        "example": 3600,
-                        "description": "The time in seconds in seconds by which this token will expire."
-                      },
-                      "token_type": {
-                        "type": "string",
-                        "enum": [
-                          "bearer"
-                        ],
-                        "example": "bearer",
-                        "description": "The type of access token returned."
-                      },
-                      "restricted_to": {
-                        "type": "array",
-                        "description": "The permissions that this access token permits,\nproviding a list of resources (files, folders, etc)\nand the scopes permitted for each of those resources.",
-                        "items": {
-                          "$ref": "#/components/schemas/FileScope"
-                        }
-                      }
-                    }
-                  }
-                }
-              },
-              "status": {
-                "type": "object",
-                "description": "The details status of this event.",
-                "properties": {
-                  "state": {
-                    "type": "string",
-                    "example": "invoked",
-                    "description": "The state of this event.\n\n* `invoked` - Triggered the skill with event details to start\n  applying skill on the file.\n* `processing` - Currently processing.\n* `success` - Completed processing with a success.\n* `transient_failure` - Encountered an issue which can be\n  retried.\n* `permanent_failure` -  Encountered a permanent issue and\n  retry would not help.",
-                    "enum": [
-                      "invoked",
-                      "processing",
-                      "success",
-                      "transient_failure",
-                      "permanent_failure"
-                    ]
-                  },
-                  "message": {
-                    "type": "string",
-                    "example": "Example",
-                    "description": "Status information"
-                  },
-                  "error_code": {
-                    "type": "string",
-                    "example": "400",
-                    "description": "Error code information, if error occurred."
-                  },
-                  "additional_info": {
-                    "type": "string",
-                    "example": "Example",
-                    "description": "Additional status information."
-                  }
-                }
-              },
-              "created_at": {
+              "error_code": {
                 "type": "string",
-                "format": "date-time",
-                "description": "The time this invocation was created.",
-                "example": "2012-12-12T10:53:43-08:00"
+                "example": "400",
+                "description": "Error code information, if error occurred."
               },
-              "trigger": {
+              "additional_info": {
                 "type": "string",
-                "example": "FILE_CONTENT",
-                "description": "Action that triggered the invocation"
-              },
-              "enterprise": {
-                "allOf": [
-                  {
-                    "title": "Enterprise",
-                    "type": "object",
-                    "description": "A representation of a Box enterprise",
-                    "allOf": [
-                      {
-                        "title": "Reference",
-                        "description": "The bare basic reference for an object",
-                        "type": "object",
-                        "properties": {
-                          "id": {
-                            "type": "string",
-                            "description": "The unique identifier for this object",
-                            "example": "11446498"
-                          }
-                        }
-                      },
-                      {
-                        "properties": {
-                          "type": {
-                            "type": "string",
-                            "description": "`enterprise`",
-                            "example": "enterprise",
-                            "enum": [
-                              "enterprise"
-                            ]
-                          },
-                          "name": {
-                            "description": "The name of the enterprise",
-                            "example": "Acme Inc.",
-                            "type": "string"
-                          }
-                        }
-                      }
-                    ]
-                  },
-                  {
-                    "description": "The enterprise that this invocation was triggered for"
-                  }
-                ]
-              },
-              "source": {
-                "allOf": [
-                  {
-                    "oneOf": [
-                      {
-                        "$ref": "#/components/schemas/File--Standard"
-                      },
-                      {
-                        "$ref": "#/components/schemas/Folder--Standard"
-                      }
-                    ]
-                  },
-                  {
-                    "description": "The item that caused the invocation to trigger"
-                  }
-                ]
-              },
-              "event": {
-                "allOf": [
-                  {
-                    "$ref": "#/components/schemas/Event"
-                  },
-                  {
-                    "description": "The event that triggered this invocation"
-                  }
-                ]
+                "example": "Example",
+                "description": "Additional status information."
               }
             }
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The time this invocation was created.",
+            "example": "2012-12-12T10:53:43-08:00"
+          },
+          "trigger": {
+            "type": "string",
+            "example": "FILE_CONTENT",
+            "description": "Action that triggered the invocation"
+          },
+          "enterprise": {
+            "allOf": [
+              {
+                "title": "Enterprise",
+                "type": "object",
+                "description": "A representation of a Box enterprise",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "The unique identifier for this enterprise.",
+                    "example": "11446498"
+                  },
+                  "type": {
+                    "type": "string",
+                    "description": "`enterprise`",
+                    "example": "enterprise",
+                    "enum": [
+                      "enterprise"
+                    ]
+                  },
+                  "name": {
+                    "description": "The name of the enterprise",
+                    "example": "Acme Inc.",
+                    "type": "string"
+                  }
+                }
+              },
+              {
+                "description": "The enterprise that this invocation was triggered for"
+              }
+            ]
+          },
+          "source": {
+            "allOf": [
+              {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/File"
+                  },
+                  {
+                    "$ref": "#/components/schemas/Folder"
+                  }
+                ]
+              },
+              {
+                "description": "The item that caused the invocation to trigger"
+              }
+            ]
+          },
+          "event": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Event"
+              },
+              {
+                "description": "The event that triggered this invocation"
+              }
+            ]
           }
-        ]
+        }
       },
       "WebhookInvocation": {
         "title": "Webhook invocation",
         "x-box-resource-id": "webhook_invocation",
         "x-box-tag": "webhooks",
         "description": "The event that is sent to a webhook address when an event happens.",
-        "allOf": [
-          {
-            "title": "Reference",
-            "description": "The bare basic reference for an object",
-            "type": "object",
-            "properties": {
-              "id": {
-                "type": "string",
-                "description": "The unique identifier for this object",
-                "example": "11446498"
-              }
-            }
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The unique identifier for this webhook invocation",
+            "example": "11446498"
           },
-          {
-            "properties": {
-              "type": {
-                "type": "string",
-                "description": "`webhook_event`",
-                "example": "webhook_event",
-                "enum": [
-                  "webhook_event"
-                ]
+          "type": {
+            "type": "string",
+            "description": "`webhook_event`",
+            "example": "webhook_event",
+            "enum": [
+              "webhook_event"
+            ]
+          },
+          "webhook": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Webhook"
               },
-              "webhook": {
-                "allOf": [
-                  {
-                    "$ref": "#/components/schemas/Webhook"
-                  },
-                  {
-                    "description": "The webhook object that triggered this event"
-                  }
-                ]
-              },
-              "created_by": {
-                "allOf": [
-                  {
-                    "$ref": "#/components/schemas/User--Mini"
-                  },
-                  {
-                    "description": "The user that triggered this event"
-                  }
-                ]
-              },
-              "created_at": {
-                "type": "string",
-                "format": "date-time",
-                "description": "A timestamp identifying the time that\nthe webhook event was triggered.",
-                "example": "2012-12-12T10:53:43-08:00"
-              },
-              "trigger": {
-                "allOf": [
-                  {
-                    "title": "Webhook Trigger",
-                    "example": "FILE.UPLOADED",
-                    "type": "string",
-                    "description": "The event name that triggered this webhook",
-                    "enum": [
-                      "FILE.UPLOADED",
-                      "FILE.PREVIEWED",
-                      "FILE.DOWNLOADED",
-                      "FILE.TRASHED",
-                      "FILE.DELETED",
-                      "FILE.RESTORED",
-                      "FILE.COPIED",
-                      "FILE.MOVED",
-                      "FILE.LOCKED",
-                      "FILE.UNLOCKED",
-                      "FILE.RENAMED",
-                      "COMMENT.CREATED",
-                      "COMMENT.UPDATED",
-                      "COMMENT.DELETED",
-                      "TASK_ASSIGNMENT.CREATED",
-                      "TASK_ASSIGNMENT.UPDATED",
-                      "METADATA_INSTANCE.CREATED",
-                      "METADATA_INSTANCE.UPDATED",
-                      "METADATA_INSTANCE.DELETED",
-                      "FOLDER.CREATED",
-                      "FOLDER.RENAMED",
-                      "FOLDER.DOWNLOADED",
-                      "FOLDER.RESTORED",
-                      "FOLDER.DELETED",
-                      "FOLDER.COPIED",
-                      "FOLDER.MOVED",
-                      "FOLDER.TRASHED",
-                      "WEBHOOK.DELETED",
-                      "COLLABORATION.CREATED",
-                      "COLLABORATION.ACCEPTED",
-                      "COLLABORATION.REJECTED",
-                      "COLLABORATION.REMOVED",
-                      "COLLABORATION.UPDATED",
-                      "SHARED_LINK.DELETED",
-                      "SHARED_LINK.CREATED",
-                      "SHARED_LINK.UPDATED"
-                    ]
-                  },
-                  {
-                    "description": "The event name that triggered this webhook"
-                  }
-                ]
-              },
-              "source": {
-                "allOf": [
-                  {
-                    "oneOf": [
-                      {
-                        "$ref": "#/components/schemas/File--Standard"
-                      },
-                      {
-                        "$ref": "#/components/schemas/Folder--Standard"
-                      }
-                    ]
-                  },
-                  {
-                    "description": "The item that caused the event to trigger"
-                  }
-                ]
+              {
+                "description": "The webhook object that triggered this event"
               }
-            }
+            ]
+          },
+          "created_by": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/User--Mini"
+              },
+              {
+                "description": "The user that triggered this event"
+              }
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "A timestamp identifying the time that\nthe webhook event was triggered.",
+            "example": "2012-12-12T10:53:43-08:00"
+          },
+          "trigger": {
+            "allOf": [
+              {
+                "title": "Webhook Trigger",
+                "example": "FILE.UPLOADED",
+                "type": "string",
+                "description": "The event name that triggered this webhook",
+                "enum": [
+                  "FILE.UPLOADED",
+                  "FILE.PREVIEWED",
+                  "FILE.DOWNLOADED",
+                  "FILE.TRASHED",
+                  "FILE.DELETED",
+                  "FILE.RESTORED",
+                  "FILE.COPIED",
+                  "FILE.MOVED",
+                  "FILE.LOCKED",
+                  "FILE.UNLOCKED",
+                  "FILE.RENAMED",
+                  "COMMENT.CREATED",
+                  "COMMENT.UPDATED",
+                  "COMMENT.DELETED",
+                  "TASK_ASSIGNMENT.CREATED",
+                  "TASK_ASSIGNMENT.UPDATED",
+                  "METADATA_INSTANCE.CREATED",
+                  "METADATA_INSTANCE.UPDATED",
+                  "METADATA_INSTANCE.DELETED",
+                  "FOLDER.CREATED",
+                  "FOLDER.RENAMED",
+                  "FOLDER.DOWNLOADED",
+                  "FOLDER.RESTORED",
+                  "FOLDER.DELETED",
+                  "FOLDER.COPIED",
+                  "FOLDER.MOVED",
+                  "FOLDER.TRASHED",
+                  "WEBHOOK.DELETED",
+                  "COLLABORATION.CREATED",
+                  "COLLABORATION.ACCEPTED",
+                  "COLLABORATION.REJECTED",
+                  "COLLABORATION.REMOVED",
+                  "COLLABORATION.UPDATED",
+                  "SHARED_LINK.DELETED",
+                  "SHARED_LINK.CREATED",
+                  "SHARED_LINK.UPDATED"
+                ]
+              },
+              {
+                "description": "The event name that triggered this webhook"
+              }
+            ]
+          },
+          "source": {
+            "allOf": [
+              {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/File"
+                  },
+                  {
+                    "$ref": "#/components/schemas/Folder"
+                  }
+                ]
+              },
+              {
+                "description": "The item that caused the event to trigger"
+              }
+            ]
           }
-        ]
+        }
       },
       "AccessToken": {
         "title": "Access token",
@@ -16881,177 +16857,176 @@
         "x-box-resource-id": "collaboration",
         "x-box-tag": "user_collaborations",
         "description": "Collaborations define access permissions for users and groups to files and\nfolders, similar to access control lists. A collaboration object grants a\nuser or group access to a file or folder with permissions defined by a\nspecific role.",
-        "allOf": [
-          {
-            "title": "Reference",
-            "description": "The bare basic reference for an object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The unique identifier for this collaboration.",
+            "example": "11446498"
+          },
+          "type": {
+            "type": "string",
+            "description": "`collaboration`",
+            "example": "collaboration",
+            "enum": [
+              "collaboration"
+            ]
+          },
+          "item": {
+            "allOf": [
+              {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/File"
+                  },
+                  {
+                    "$ref": "#/components/schemas/Folder"
+                  },
+                  {
+                    "$ref": "#/components/schemas/WebLink"
+                  }
+                ]
+              },
+              {
+                "description": "The file or folder to which access is granted. The field is\n`null` when the collaboration `status` is `pending`."
+              }
+            ],
+            "nullable": true
+          },
+          "accessible_by": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/User--Mini"
+              },
+              {
+                "description": "The user or group that is granted access"
+              }
+            ]
+          },
+          "invite_email": {
+            "type": "string",
+            "nullable": true,
+            "example": "john@example.com",
+            "description": "The email address used to invite an unregistered collaborator, if\nthey are not a registered user."
+          },
+          "role": {
+            "type": "string",
+            "example": "editor",
+            "enum": [
+              "editor",
+              "viewer",
+              "previewer",
+              "uploader",
+              "previewer uploader",
+              "viewer uploader",
+              "co-owner",
+              "owner"
+            ],
+            "description": "The level of access granted."
+          },
+          "expires_at": {
+            "type": "string",
+            "nullable": true,
+            "format": "date-time",
+            "example": "2012-12-12T10:53:43-08:00",
+            "description": "When the collaboration will expire, or `null` if no expiration\ndate is set."
+          },
+          "status": {
+            "type": "string",
+            "example": "accepted",
+            "enum": [
+              "accepted",
+              "pending",
+              "rejected"
+            ],
+            "description": "The status of the collaboration invitation."
+          },
+          "acknowledged_at": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2012-12-12T10:53:43-08:00",
+            "description": "When the `status` of the collaboration object changed to\n`accepted` or `rejected`"
+          },
+          "created_by": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/User--Mini"
+              },
+              {
+                "description": "The user who created the collaboration object"
+              }
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2012-12-12T10:53:43-08:00",
+            "description": "When the collaboration object was created"
+          },
+          "modified_at": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2012-12-12T10:53:43-08:00",
+            "description": "When the collaboration object was last modified"
+          },
+          "acceptance_requirements_status": {
             "type": "object",
             "properties": {
-              "id": {
-                "type": "string",
-                "description": "The unique identifier for this object",
-                "example": "11446498"
-              }
-            }
-          },
-          {
-            "properties": {
-              "type": {
-                "type": "string",
-                "description": "`collaboration`",
-                "example": "collaboration",
-                "enum": [
-                  "collaboration"
-                ]
-              },
-              "item": {
-                "allOf": [
-                  {
-                    "$ref": "#/components/schemas/Item--Mini"
-                  },
-                  {
-                    "description": "The file or folder to which access is granted. The field is\n`null` when the collaboration `status` is `pending`."
-                  }
-                ],
-                "nullable": true
-              },
-              "accessible_by": {
-                "allOf": [
-                  {
-                    "$ref": "#/components/schemas/User--Mini"
-                  },
-                  {
-                    "description": "The user or group that is granted access"
-                  }
-                ]
-              },
-              "invite_email": {
-                "type": "string",
-                "nullable": true,
-                "example": "john@example.com",
-                "description": "The email address used to invite an unregistered collaborator, if\nthey are not a registered user."
-              },
-              "role": {
-                "type": "string",
-                "example": "editor",
-                "enum": [
-                  "editor",
-                  "viewer",
-                  "previewer",
-                  "uploader",
-                  "previewer uploader",
-                  "viewer uploader",
-                  "co-owner",
-                  "owner"
-                ],
-                "description": "The level of access granted."
-              },
-              "expires_at": {
-                "type": "string",
-                "nullable": true,
-                "format": "date-time",
-                "example": "2012-12-12T10:53:43-08:00",
-                "description": "When the collaboration will expire, or `null` if no expiration\ndate is set."
-              },
-              "status": {
-                "type": "string",
-                "example": "accepted",
-                "enum": [
-                  "accepted",
-                  "pending",
-                  "rejected"
-                ],
-                "description": "The status of the collaboration invitation."
-              },
-              "acknowledged_at": {
-                "type": "string",
-                "format": "date-time",
-                "example": "2012-12-12T10:53:43-08:00",
-                "description": "When the `status` of the collaboration object changed to\n`accepted` or `rejected`"
-              },
-              "created_by": {
-                "allOf": [
-                  {
-                    "$ref": "#/components/schemas/User--Mini"
-                  },
-                  {
-                    "description": "The user who created the collaboration object"
-                  }
-                ]
-              },
-              "created_at": {
-                "type": "string",
-                "format": "date-time",
-                "example": "2012-12-12T10:53:43-08:00",
-                "description": "When the collaboration object was created"
-              },
-              "modified_at": {
-                "type": "string",
-                "format": "date-time",
-                "example": "2012-12-12T10:53:43-08:00",
-                "description": "When the collaboration object was last modified"
-              },
-              "acceptance_requirements_status": {
+              "terms_of_service_requirement": {
                 "type": "object",
                 "properties": {
-                  "terms_of_service_requirement": {
-                    "type": "object",
-                    "properties": {
-                      "is_accepted": {
-                        "type": "boolean",
-                        "nullable": true,
-                        "example": true,
-                        "description": "Whether or not the terms of service have been accepted.  The\nfield is `null` when there is no terms of service required."
-                      },
-                      "terms_of_service": {
-                        "allOf": [
-                          {
-                            "$ref": "#/components/schemas/TermsOfService--Mini"
-                          },
-                          {
-                            "description": "The terms of service that must be accepted before the\ncollaboration can be accepted. The field is `null` when\nthere is no terms of service required."
-                          }
-                        ]
-                      }
-                    }
+                  "is_accepted": {
+                    "type": "boolean",
+                    "nullable": true,
+                    "example": true,
+                    "description": "Whether or not the terms of service have been accepted.  The\nfield is `null` when there is no terms of service required."
                   },
-                  "strong_password_requirement": {
-                    "type": "object",
-                    "properties": {
-                      "enterprise_has_strong_password_required_for_external_users": {
-                        "type": "boolean",
-                        "example": true,
-                        "description": "Whether or not the enterprise that owns the content requires\na strong password to collaborate on the content."
+                  "terms_of_service": {
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/TermsOfService--Mini"
                       },
-                      "user_has_strong_password": {
-                        "type": "boolean",
-                        "nullable": true,
-                        "example": true,
-                        "description": "Whether or not the user has a strong password set for their\naccount. The field is `null` when a strong password is not\nrequired."
+                      {
+                        "description": "The terms of service that must be accepted before the\ncollaboration can be accepted. The field is `null` when\nthere is no terms of service required."
                       }
-                    }
+                    ]
+                  }
+                }
+              },
+              "strong_password_requirement": {
+                "type": "object",
+                "properties": {
+                  "enterprise_has_strong_password_required_for_external_users": {
+                    "type": "boolean",
+                    "example": true,
+                    "description": "Whether or not the enterprise that owns the content requires\na strong password to collaborate on the content."
                   },
-                  "two_factor_authentication_requirement": {
-                    "type": "object",
-                    "properties": {
-                      "enterprise_has_two_factor_auth_enabled": {
-                        "type": "boolean",
-                        "example": true,
-                        "description": "Whether or not the enterprise that owns the content requires\ntwo-factor authentication to be enabled in order to\ncollaborate on the content."
-                      },
-                      "user_has_two_factor_authentication_enabled": {
-                        "type": "boolean",
-                        "nullable": true,
-                        "example": true,
-                        "description": "Whether or not the user has two-factor authentication\nenabled. The field is `null` when two-factor\nauthentication is not required."
-                      }
-                    }
+                  "user_has_strong_password": {
+                    "type": "boolean",
+                    "nullable": true,
+                    "example": true,
+                    "description": "Whether or not the user has a strong password set for their\naccount. The field is `null` when a strong password is not\nrequired."
+                  }
+                }
+              },
+              "two_factor_authentication_requirement": {
+                "type": "object",
+                "properties": {
+                  "enterprise_has_two_factor_auth_enabled": {
+                    "type": "boolean",
+                    "example": true,
+                    "description": "Whether or not the enterprise that owns the content requires\ntwo-factor authentication to be enabled in order to\ncollaborate on the content."
+                  },
+                  "user_has_two_factor_authentication_enabled": {
+                    "type": "boolean",
+                    "nullable": true,
+                    "example": true,
+                    "description": "Whether or not the user has two-factor authentication\nenabled. The field is `null` when two-factor\nauthentication is not required."
                   }
                 }
               }
             }
           }
-        ]
+        }
       },
       "Collaborations": {
         "title": "Collaborations",
@@ -17126,96 +17101,74 @@
         "x-box-resource-id": "collaboration_whitelist_entry",
         "x-box-tag": "collaboration_whitelist_entries",
         "description": "A Collaboration Whitelist entry describes an\napproved domain that can collaborate with your enterprise",
-        "allOf": [
-          {
-            "title": "Reference",
-            "description": "The bare basic reference for an object",
-            "type": "object",
-            "properties": {
-              "id": {
-                "type": "string",
-                "description": "The unique identifier for this object",
-                "example": "11446498"
-              }
-            }
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The unique identifier for this entry",
+            "example": "11446498"
           },
-          {
-            "properties": {
-              "type": {
-                "type": "string",
-                "description": "`collaboration_whitelist_entry`",
-                "example": "collaboration_whitelist_entry",
-                "enum": [
-                  "collaboration_whitelist_entry"
-                ]
-              },
-              "domain": {
-                "type": "string",
-                "example": "example.com",
-                "description": "The whitelisted domain"
-              },
-              "direction": {
-                "type": "string",
-                "example": "both",
-                "description": "The direction of the collaborations to whitelist",
-                "enum": [
-                  "inbound",
-                  "outbound",
-                  "both"
-                ]
-              },
-              "enterprise": {
-                "allOf": [
-                  {
-                    "title": "Enterprise",
-                    "type": "object",
-                    "description": "A representation of a Box enterprise",
-                    "allOf": [
-                      {
-                        "title": "Reference",
-                        "description": "The bare basic reference for an object",
-                        "type": "object",
-                        "properties": {
-                          "id": {
-                            "type": "string",
-                            "description": "The unique identifier for this object",
-                            "example": "11446498"
-                          }
-                        }
-                      },
-                      {
-                        "properties": {
-                          "type": {
-                            "type": "string",
-                            "description": "`enterprise`",
-                            "example": "enterprise",
-                            "enum": [
-                              "enterprise"
-                            ]
-                          },
-                          "name": {
-                            "description": "The name of the enterprise",
-                            "example": "Acme Inc.",
-                            "type": "string"
-                          }
-                        }
-                      }
+          "type": {
+            "type": "string",
+            "description": "`collaboration_whitelist_entry`",
+            "example": "collaboration_whitelist_entry",
+            "enum": [
+              "collaboration_whitelist_entry"
+            ]
+          },
+          "domain": {
+            "type": "string",
+            "example": "example.com",
+            "description": "The whitelisted domain"
+          },
+          "direction": {
+            "type": "string",
+            "example": "both",
+            "description": "The direction of the collaborations to whitelist",
+            "enum": [
+              "inbound",
+              "outbound",
+              "both"
+            ]
+          },
+          "enterprise": {
+            "allOf": [
+              {
+                "title": "Enterprise",
+                "type": "object",
+                "description": "A representation of a Box enterprise",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "The unique identifier for this enterprise.",
+                    "example": "11446498"
+                  },
+                  "type": {
+                    "type": "string",
+                    "description": "`enterprise`",
+                    "example": "enterprise",
+                    "enum": [
+                      "enterprise"
                     ]
                   },
-                  {
-                    "description": "The enterprise this whitelist is applied to"
+                  "name": {
+                    "description": "The name of the enterprise",
+                    "example": "Acme Inc.",
+                    "type": "string"
                   }
-                ]
+                }
               },
-              "created_at": {
-                "type": "string",
-                "format": "date-time",
-                "description": "The time the whitelist entry was created",
-                "example": "2012-12-12T10:53:43-08:00"
+              {
+                "description": "The enterprise this whitelist is applied to"
               }
-            }
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The time the whitelist entry was created",
+            "example": "2012-12-12T10:53:43-08:00"
           }
-        ]
+        }
       },
       "CollaborationWhitelistEntries": {
         "title": "Collaboration whitelist entries",
@@ -17266,130 +17219,97 @@
         "x-box-resource-id": "collaboration_whitelist_exempt_target",
         "x-box-tag": "collaboration_whitelist_exempt_targets",
         "description": "The record that represents a target user that is exempt from the\ncollaboration whitelist.",
-        "allOf": [
-          {
-            "title": "Reference",
-            "description": "The bare basic reference for an object",
-            "type": "object",
-            "properties": {
-              "id": {
-                "type": "string",
-                "description": "The unique identifier for this object",
-                "example": "11446498"
-              }
-            }
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The unique identifier for this exemption",
+            "example": "11446498"
           },
-          {
-            "properties": {
-              "type": {
-                "type": "string",
-                "description": "`collaboration_whitelist`",
-                "example": "collaboration_whitelist",
-                "enum": [
-                  "collaboration_whitelist"
-                ]
-              },
-              "enterprise": {
-                "allOf": [
-                  {
-                    "title": "Enterprise",
-                    "type": "object",
-                    "description": "A representation of a Box enterprise",
-                    "allOf": [
-                      {
-                        "title": "Reference",
-                        "description": "The bare basic reference for an object",
-                        "type": "object",
-                        "properties": {
-                          "id": {
-                            "type": "string",
-                            "description": "The unique identifier for this object",
-                            "example": "11446498"
-                          }
-                        }
-                      },
-                      {
-                        "properties": {
-                          "type": {
-                            "type": "string",
-                            "description": "`enterprise`",
-                            "example": "enterprise",
-                            "enum": [
-                              "enterprise"
-                            ]
-                          },
-                          "name": {
-                            "description": "The name of the enterprise",
-                            "example": "Acme Inc.",
-                            "type": "string"
-                          }
-                        }
-                      }
+          "type": {
+            "type": "string",
+            "description": "`collaboration_whitelist`",
+            "example": "collaboration_whitelist",
+            "enum": [
+              "collaboration_whitelist"
+            ]
+          },
+          "enterprise": {
+            "allOf": [
+              {
+                "title": "Enterprise",
+                "type": "object",
+                "description": "A representation of a Box enterprise",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "The unique identifier for this enterprise.",
+                    "example": "11446498"
+                  },
+                  "type": {
+                    "type": "string",
+                    "description": "`enterprise`",
+                    "example": "enterprise",
+                    "enum": [
+                      "enterprise"
                     ]
                   },
-                  {
-                    "description": "The enterprise this entry belongs to"
+                  "name": {
+                    "description": "The name of the enterprise",
+                    "example": "Acme Inc.",
+                    "type": "string"
                   }
-                ]
+                }
               },
-              "user": {
-                "allOf": [
-                  {
-                    "title": "Enterprise",
-                    "type": "object",
-                    "description": "A representation of a Box enterprise",
-                    "allOf": [
-                      {
-                        "title": "Reference",
-                        "description": "The bare basic reference for an object",
-                        "type": "object",
-                        "properties": {
-                          "id": {
-                            "type": "string",
-                            "description": "The unique identifier for this object",
-                            "example": "11446498"
-                          }
-                        }
-                      },
-                      {
-                        "properties": {
-                          "type": {
-                            "type": "string",
-                            "description": "`enterprise`",
-                            "example": "enterprise",
-                            "enum": [
-                              "enterprise"
-                            ]
-                          },
-                          "name": {
-                            "description": "The name of the enterprise",
-                            "example": "Acme Inc.",
-                            "type": "string"
-                          }
-                        }
-                      }
-                    ]
-                  },
-                  {
-                    "description": "The user that has been exempt"
-                  }
-                ]
-              },
-              "created_at": {
-                "type": "string",
-                "format": "date-time",
-                "description": "The time the entry was created",
-                "example": "2012-12-12T10:53:43-08:00"
-              },
-              "modified_at": {
-                "type": "string",
-                "format": "date-time",
-                "description": "The time the entry was modified",
-                "example": "2012-12-12T10:53:43-08:00"
+              {
+                "description": "The enterprise this entry belongs to"
               }
-            }
+            ]
+          },
+          "user": {
+            "allOf": [
+              {
+                "title": "Enterprise",
+                "type": "object",
+                "description": "A representation of a Box enterprise",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "The unique identifier for this enterprise.",
+                    "example": "11446498"
+                  },
+                  "type": {
+                    "type": "string",
+                    "description": "`enterprise`",
+                    "example": "enterprise",
+                    "enum": [
+                      "enterprise"
+                    ]
+                  },
+                  "name": {
+                    "description": "The name of the enterprise",
+                    "example": "Acme Inc.",
+                    "type": "string"
+                  }
+                }
+              },
+              {
+                "description": "The user that has been exempt"
+              }
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The time the entry was created",
+            "example": "2012-12-12T10:53:43-08:00"
+          },
+          "modified_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The time the entry was modified",
+            "example": "2012-12-12T10:53:43-08:00"
           }
-        ]
+        }
       },
       "CollaborationWhitelistExemptTargets": {
         "title": "Collaboration whitelist exempt targets",
@@ -17438,50 +17358,39 @@
         "title": "Collection",
         "type": "object",
         "x-box-resource-id": "collection",
-        "description": "A collection of items, including files and folders.\n\nCurrently, the only collection available\nis the `favorites` collection.\n\nThe contents of a collection can be explored in a\nsimilar way to which the contents of a folder is\nexplored.",
         "x-box-tag": "collections",
-        "allOf": [
-          {
-            "title": "Reference",
-            "description": "The bare basic reference for an object",
-            "type": "object",
-            "properties": {
-              "id": {
-                "type": "string",
-                "description": "The unique identifier for this object",
-                "example": "11446498"
-              }
-            }
+        "description": "A collection of items, including files and folders.\n\nCurrently, the only collection available\nis the `favorites` collection.\n\nThe contents of a collection can be explored in a\nsimilar way to which the contents of a folder is\nexplored.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The unique identifier for this collection.",
+            "example": "11446498"
           },
-          {
-            "properties": {
-              "type": {
-                "type": "string",
-                "description": "`collection`",
-                "example": "collection",
-                "enum": [
-                  "collection"
-                ]
-              },
-              "name": {
-                "type": "string",
-                "description": "The name of the collection.",
-                "enum": [
-                  "Favorites"
-                ],
-                "example": "Favorites"
-              },
-              "collection_type": {
-                "type": "string",
-                "description": "The type of the collection. This is used to\ndetermine the proper visual treatment for\ncollections.",
-                "enum": [
-                  "favorites"
-                ],
-                "example": "favorites"
-              }
-            }
+          "type": {
+            "type": "string",
+            "description": "`collection`",
+            "example": "collection",
+            "enum": [
+              "collection"
+            ]
+          },
+          "name": {
+            "type": "string",
+            "description": "The name of the collection.",
+            "enum": [
+              "Favorites"
+            ],
+            "example": "Favorites"
+          },
+          "collection_type": {
+            "type": "string",
+            "description": "The type of the collection. This is used to\ndetermine the proper visual treatment for\ncollections.",
+            "enum": [
+              "favorites"
+            ],
+            "example": "favorites"
           }
-        ]
+        }
       },
       "Collections": {
         "title": "Collections",
@@ -17562,9 +17471,6 @@
             "$ref": "#/components/schemas/Comment--Standard"
           },
           {
-            "x-box-reference-hide": false
-          },
-          {
             "properties": {
               "tagged_message": {
                 "x-box-field-variant": 3,
@@ -17581,7 +17487,6 @@
         "type": "object",
         "x-box-resource-id": "comments",
         "x-box-tag": "comments",
-        "x-box-reference-hide": false,
         "description": "A list of comments",
         "allOf": [
           {
@@ -17644,35 +17549,38 @@
           }
         ]
       },
+      "Comment--Base": {
+        "title": "Comment (Base)",
+        "type": "object",
+        "description": "Base representation of a comment.",
+        "properties": {
+          "id": {
+            "x-box-field-variant": 0,
+            "type": "string",
+            "description": "The unique identifier for this comment.",
+            "example": "11446498"
+          },
+          "type": {
+            "x-box-field-variant": 0,
+            "type": "string",
+            "description": "`comment`",
+            "example": "comment",
+            "enum": [
+              "comment"
+            ]
+          }
+        }
+      },
       "Comment--Standard": {
         "title": "Comment (Standard)",
         "type": "object",
-        "x-box-reference-hide": true,
-        "description": "Standard representation of a comment, as returned by the\ncomment API endpoints and when nested within other resources.",
+        "description": "Standard representation of a comment.",
         "allOf": [
           {
-            "title": "Reference",
-            "description": "The bare basic reference for an object",
-            "type": "object",
-            "properties": {
-              "id": {
-                "type": "string",
-                "description": "The unique identifier for this object",
-                "example": "11446498"
-              }
-            }
+            "$ref": "#/components/schemas/Comment--Base"
           },
           {
             "properties": {
-              "type": {
-                "x-box-field-variant": 0,
-                "type": "string",
-                "description": "`comment`",
-                "example": "comment",
-                "enum": [
-                  "comment"
-                ]
-              },
               "is_reply_comment": {
                 "x-box-field-variant": 2,
                 "type": "boolean",
@@ -17722,12 +17630,19 @@
                       "id": {
                         "type": "string",
                         "description": "The unique identifier for this object",
-                        "example": "11446498"
+                        "example": "11446498",
+                        "x-box-field-variant": 0
+                      },
+                      "type": {
+                        "type": "string",
+                        "description": "The type for this object",
+                        "example": "file",
+                        "x-box-field-variant": 0
                       }
                     }
                   },
                   {
-                    "description": "The object this comment was placed on"
+                    "description": "The file this comment was placed on"
                   },
                   {
                     "x-box-field-variant": 2
@@ -17744,59 +17659,48 @@
         "x-box-resource-id": "device_pinner",
         "x-box-tag": "device_pinners",
         "description": "Device pins allow enterprises to control what devices can\nuse native Box applications.",
-        "allOf": [
-          {
-            "title": "Reference",
-            "description": "The bare basic reference for an object",
-            "type": "object",
-            "properties": {
-              "id": {
-                "type": "string",
-                "description": "The unique identifier for this object",
-                "example": "11446498"
-              }
-            }
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The unique identifier for this device pin.",
+            "example": "11446498"
           },
-          {
-            "properties": {
-              "type": {
-                "type": "string",
-                "description": "`device_pinner`",
-                "example": "device_pinner",
-                "enum": [
-                  "device_pinner"
-                ]
+          "type": {
+            "type": "string",
+            "description": "`device_pinner`",
+            "example": "device_pinner",
+            "enum": [
+              "device_pinner"
+            ]
+          },
+          "owned_by": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/User--Mini"
               },
-              "owned_by": {
-                "allOf": [
-                  {
-                    "$ref": "#/components/schemas/User--Mini"
-                  },
-                  {
-                    "description": "The user that the device pin belongs to"
-                  }
-                ]
-              },
-              "product_name": {
-                "type": "string",
-                "description": "The type of device being pinned",
-                "example": "iPad"
-              },
-              "created_at": {
-                "type": "string",
-                "format": "date-time",
-                "description": "The time the device pin was created",
-                "example": "2012-12-12T10:53:43-08:00"
-              },
-              "modified_at": {
-                "type": "string",
-                "format": "date-time",
-                "description": "The time the device pin was modified",
-                "example": "2012-12-12T10:53:43-08:00"
+              {
+                "description": "The user that the device pin belongs to"
               }
-            }
+            ]
+          },
+          "product_name": {
+            "type": "string",
+            "description": "The type of device being pinned",
+            "example": "iPad"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The time the device pin was created",
+            "example": "2012-12-12T10:53:43-08:00"
+          },
+          "modified_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The time the device pin was modified",
+            "example": "2012-12-12T10:53:43-08:00"
           }
-        ]
+        }
       },
       "DevicePinners": {
         "title": "Device pinners",
@@ -17859,42 +17763,31 @@
         "x-box-resource-id": "email_alias",
         "x-box-tag": "email_aliases",
         "description": "An email alias for a user.",
-        "allOf": [
-          {
-            "title": "Reference",
-            "description": "The bare basic reference for an object",
-            "type": "object",
-            "properties": {
-              "id": {
-                "type": "string",
-                "description": "The unique identifier for this object",
-                "example": "11446498"
-              }
-            }
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The unique identifier for this object",
+            "example": "11446498"
           },
-          {
-            "properties": {
-              "type": {
-                "type": "string",
-                "description": "`email_alias`",
-                "example": "email_alias",
-                "enum": [
-                  "email_alias"
-                ]
-              },
-              "email": {
-                "type": "string",
-                "description": "The email address",
-                "example": "alias@example.com"
-              },
-              "is_confirmed": {
-                "type": "boolean",
-                "description": "Whether the email address has been confirmed",
-                "example": true
-              }
-            }
+          "type": {
+            "type": "string",
+            "description": "`email_alias`",
+            "example": "email_alias",
+            "enum": [
+              "email_alias"
+            ]
+          },
+          "email": {
+            "type": "string",
+            "description": "The email address",
+            "example": "alias@example.com"
+          },
+          "is_confirmed": {
+            "type": "boolean",
+            "description": "Whether the email address has been confirmed",
+            "example": true
           }
-        ]
+        }
       },
       "EmailAliases": {
         "title": "Email aliases",
@@ -18142,9 +18035,6 @@
             "$ref": "#/components/schemas/File--Standard"
           },
           {
-            "x-box-reference-hide": false
-          },
-          {
             "properties": {
               "version_number": {
                 "x-box-field-variant": 3,
@@ -18287,59 +18177,48 @@
                     "title": "Lock",
                     "type": "object",
                     "description": "The lock held on a file. A lock prevents a file from being moved,\nrenamed, or otherwise changed by anyone else than the user who created the\nlock.",
-                    "allOf": [
-                      {
-                        "title": "Reference",
-                        "description": "The bare basic reference for an object",
-                        "type": "object",
-                        "properties": {
-                          "id": {
-                            "type": "string",
-                            "description": "The unique identifier for this object",
-                            "example": "11446498"
-                          }
-                        }
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "description": "The unique identifier for this lock",
+                        "example": "11446498"
                       },
-                      {
-                        "properties": {
-                          "type": {
-                            "type": "string",
-                            "description": "`lock`",
-                            "example": "lock",
-                            "enum": [
-                              "lock"
-                            ]
+                      "type": {
+                        "type": "string",
+                        "description": "`lock`",
+                        "example": "lock",
+                        "enum": [
+                          "lock"
+                        ]
+                      },
+                      "created_by": {
+                        "allOf": [
+                          {
+                            "$ref": "#/components/schemas/User--Mini"
                           },
-                          "created_by": {
-                            "allOf": [
-                              {
-                                "$ref": "#/components/schemas/User--Mini"
-                              },
-                              {
-                                "description": "The user who created the lock."
-                              }
-                            ]
-                          },
-                          "created_at": {
-                            "type": "string",
-                            "format": "date-time",
-                            "example": "2012-12-12T10:53:43-08:00",
-                            "description": "The time this lock was created at."
-                          },
-                          "expired_at": {
-                            "type": "string",
-                            "format": "date-time",
-                            "example": "2012-12-12T10:53:43-08:00",
-                            "description": "The time this lock is to expire at, which might be in the past."
-                          },
-                          "is_download_prevented": {
-                            "type": "boolean",
-                            "example": true,
-                            "description": "Whether or not the file can be downloaded while locked."
+                          {
+                            "description": "The user who created the lock."
                           }
-                        }
+                        ]
+                      },
+                      "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2012-12-12T10:53:43-08:00",
+                        "description": "The time this lock was created at."
+                      },
+                      "expired_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2012-12-12T10:53:43-08:00",
+                        "description": "The time this lock is to expire at, which might be in the past."
+                      },
+                      "is_download_prevented": {
+                        "type": "boolean",
+                        "example": true,
+                        "description": "Whether or not the file can be downloaded while locked."
                       }
-                    ]
+                    }
                   },
                   {
                     "description": "The lock held on this file. If there is no lock, this can either\nbe `null` or have a timestamp in the past."
@@ -18480,42 +18359,38 @@
                 "description": "Specifies if this folder has any other collaborators."
               },
               "metadata": {
-                "x-box-field-variant": 3,
-                "type": "object",
-                "description": "A list of key-value pairs of metadata objects within their\nscopes.\n\nTo access the metadata for a file, first use the\nMetadata-endpoints to determine\nthe metadata templates available to your enterprise.\n\nThen use the `GET /files/:id` endpoint with\nthe `fields` query parameter to get the metadata by ID.\n\nThe ID for a metadata template will be in the format\n`metadata.<scope>.<templatename>`, for example\n`metadata.global.properties`.",
-                "example": {
-                  "enterprise_27335": {
-                    "marketingCollateral": {
-                      "$canEdit": true,
-                      "$id": "01234500-12f1-1234-aa12-b1d234cb567e",
-                      "$parent": "folder_59449484661",
-                      "$scope": "enterprise_27335",
-                      "$template": "properties",
-                      "$type": "properties-6bcba49f-ca6d-4d2a-a758-57fe6edf44d0",
-                      "$typeVersion": 2,
-                      "$version": 1
-                    }
-                  }
-                },
-                "additionalProperties": {
-                  "type": "object",
-                  "description": "The name of the metadata template",
-                  "example": {
-                    "marketingCollateral": {
-                      "$canEdit": true,
-                      "$id": "01234500-12f1-1234-aa12-b1d234cb567e",
-                      "$parent": "folder_59449484661",
-                      "$scope": "enterprise_27335",
-                      "$template": "properties",
-                      "$type": "properties-6bcba49f-ca6d-4d2a-a758-57fe6edf44d0",
-                      "$typeVersion": 2,
-                      "$version": 1
+                "allOf": [
+                  {
+                    "title": "Item metadata instances",
+                    "type": "object",
+                    "description": "A list of metadata instances, nested within key-value pairs of their `scope`\nand `templateKey`.\n\nTo access the metadata for a file or folder, first use the\nmetadata endpoints to determine the metadata templates available to your\nenterprise.\n\nThen use the `GET /files/:id` or `GET /folder/:id`\nendpoint with the `fields` query parameter to get\nthe metadata by ID.\n\nTo request a metadata instance for a particular `scope` and `templateKey`\nuse the following format for the `fields` parameter:\n`metadata.<scope>.<templateKey>`\n\nFor example, `?fields=metadata.enterprise_27335.marketingCollateral`.",
+                    "additionalProperties": {
+                      "type": "object",
+                      "description": "A list of metadata instances, nested within key-value pairs of their `scope`\nand `templateKey`.",
+                      "example": {
+                        "marketingCollateral": {
+                          "$canEdit": true,
+                          "$id": "01234500-12f1-1234-aa12-b1d234cb567e",
+                          "$parent": "folder_59449484661",
+                          "$scope": "enterprise_27335",
+                          "$template": "marketingCollateral",
+                          "$type": "properties-6bcba49f-ca6d-4d2a-a758-57fe6edf44d0",
+                          "$typeVersion": 2,
+                          "$version": 1
+                        }
+                      },
+                      "additionalProperties": {
+                        "$ref": "#/components/schemas/Metadata"
+                      }
                     }
                   },
-                  "additionalProperties": {
-                    "$ref": "#/components/schemas/Metadata"
+                  {
+                    "description": "An object containing the metadata instances that have been\nattached to this file.\n\nEach metadata instance is uniquely identified by its `scope` and\n`templateKey`. There can only be one instance of any metadata\ntemplate attached to each file. Each metadata instance is nested\nwithin an object with the `templateKey` as the key, which again\nitself is nested in an object with the `scope` as the key."
+                  },
+                  {
+                    "x-box-field-variant": 3
                   }
-                }
+                ]
               },
               "expires_at": {
                 "x-box-field-variant": 3,
@@ -18673,16 +18548,12 @@
       "FileConflict": {
         "title": "File (Conflict)",
         "type": "object",
-        "x-box-tag": null,
         "x-box-sanitized": true,
         "x-box-resource-id": "file_conflict",
         "description": "A representation of a file that is used to show",
         "allOf": [
           {
             "$ref": "#/components/schemas/File--Mini"
-          },
-          {
-            "x-box-reference-hide": false
           },
           {
             "properties": {
@@ -18723,9 +18594,7 @@
       "File--Standard": {
         "title": "File (Standard)",
         "type": "object",
-        "x-box-tag": null,
         "x-box-sanitized": true,
-        "x-box-reference-hide": true,
         "description": "A standard representation of a file, as returned from any\nfile API endpoints by default",
         "allOf": [
           {
@@ -18733,14 +18602,6 @@
           },
           {
             "properties": {
-              "sha1": {
-                "x-box-field-variant": 2,
-                "type": "string",
-                "format": "digest",
-                "nullable": false,
-                "example": "85136C79CBF9FE36BB9D05D0639C70C265C18D37",
-                "description": "The SHA1 hash of the file. This can be used to compare the contents\nof a file on Box with a local file."
-              },
               "description": {
                 "x-box-field-variant": 2,
                 "type": "string",
@@ -19026,19 +18887,6 @@
                 ],
                 "nullable": false,
                 "example": "active"
-              },
-              "file_version": {
-                "allOf": [
-                  {
-                    "$ref": "#/components/schemas/FileVersion--Mini"
-                  },
-                  {
-                    "description": "The information about the current version of the file."
-                  },
-                  {
-                    "x-box-field-variant": 2
-                  }
-                ]
               }
             }
           }
@@ -19047,9 +18895,7 @@
       "File--Mini": {
         "title": "File (Mini)",
         "type": "object",
-        "x-box-tag": null,
         "x-box-sanitized": true,
-        "x-box-reference-hide": true,
         "description": "A mini representation of a file, used when\nnested under another resource.",
         "allOf": [
           {
@@ -19078,6 +18924,27 @@
                 "x-box-field-variant": 1,
                 "description": "The name of the file",
                 "example": "Contract.pdf"
+              },
+              "sha1": {
+                "x-box-field-variant": 1,
+                "type": "string",
+                "format": "digest",
+                "nullable": false,
+                "example": "85136C79CBF9FE36BB9D05D0639C70C265C18D37",
+                "description": "The SHA1 hash of the file. This can be used to compare the contents\nof a file on Box with a local file."
+              },
+              "file_version": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/FileVersion--Mini"
+                  },
+                  {
+                    "description": "The information about the current version of the file."
+                  },
+                  {
+                    "x-box-field-variant": 1
+                  }
+                ]
               }
             }
           }
@@ -19087,7 +18954,6 @@
         "title": "File (Base)",
         "type": "object",
         "x-box-sanitized": true,
-        "x-box-reference-hide": true,
         "description": "The bare basic representation of a file, the minimal\namount of fields returned when using the `fields` query\nparameter.",
         "properties": {
           "id": {
@@ -19123,9 +18989,6 @@
         "allOf": [
           {
             "$ref": "#/components/schemas/FileVersion--Mini"
-          },
-          {
-            "x-box-reference-hide": false
           },
           {
             "properties": {
@@ -19240,8 +19103,6 @@
       "FileVersion--Mini": {
         "title": "File version (Mini)",
         "type": "object",
-        "x-box-has-field-variants": true,
-        "x-box-reference-hide": true,
         "description": "A mini representation of a file version, used when\nnested within another resource.",
         "allOf": [
           {
@@ -19262,8 +19123,6 @@
       "FileVersion--Base": {
         "title": "File version (Base)",
         "type": "object",
-        "x-box-has-field-variants": true,
-        "x-box-reference-hide": true,
         "description": "The bare basic representation of a file version, the minimal\namount of fields returned when using the `fields` query\nparameter.",
         "properties": {
           "id": {
@@ -19356,65 +19215,54 @@
         "x-box-resource-id": "file_version_legal_hold",
         "x-box-tag": "file_version_legal_holds",
         "description": "File-Version-Legal-Hold is an entity representing all\nholds on a File Version.",
-        "allOf": [
-          {
-            "title": "Reference",
-            "description": "The bare basic reference for an object",
-            "type": "object",
-            "properties": {
-              "id": {
-                "type": "string",
-                "description": "The unique identifier for this object",
-                "example": "11446498"
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The unique identifier for this file version legal hold",
+            "example": "11446498"
+          },
+          "type": {
+            "type": "string",
+            "description": "`file_version_legal_hold`",
+            "example": "file_version_legal_hold",
+            "enum": [
+              "file_version_legal_hold"
+            ]
+          },
+          "file_version": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FileVersion--Mini"
+              },
+              {
+                "description": "The file version that is held"
               }
+            ]
+          },
+          "file": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/File--Mini"
+              },
+              {
+                "description": "The file for the file version held.\nNote that there is no guarantee that the current\nversion of this file is held."
+              }
+            ]
+          },
+          "legal_hold_policy_assignments": {
+            "description": "List of assignments contributing to this Hold.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LegalHoldPolicyAssignment"
             }
           },
-          {
-            "properties": {
-              "type": {
-                "type": "string",
-                "description": "`file_version_legal_hold`",
-                "example": "file_version_legal_hold",
-                "enum": [
-                  "file_version_legal_hold"
-                ]
-              },
-              "file_version": {
-                "allOf": [
-                  {
-                    "$ref": "#/components/schemas/FileVersion--Mini"
-                  },
-                  {
-                    "description": "The file version that is held"
-                  }
-                ]
-              },
-              "file": {
-                "allOf": [
-                  {
-                    "$ref": "#/components/schemas/File--Mini"
-                  },
-                  {
-                    "description": "The file for the file version held.\nNote that there is no guarantee that the current\nversion of this file is held."
-                  }
-                ]
-              },
-              "legal_hold_policy_assignments": {
-                "description": "List of assignments contributing to this Hold.",
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/LegalHoldPolicyAssignment"
-                }
-              },
-              "deleted_at": {
-                "type": "string",
-                "format": "date-time",
-                "description": "Time that this File-Version-Legal-Hold was\ndeleted.",
-                "example": "2012-12-12T10:53:43-08:00"
-              }
-            }
+          "deleted_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Time that this File-Version-Legal-Hold was\ndeleted.",
+            "example": "2012-12-12T10:53:43-08:00"
           }
-        ]
+        }
       },
       "FileVersionLegalHolds": {
         "title": "File version legal holds",
@@ -19465,74 +19313,63 @@
         "x-box-resource-id": "file_version_retention",
         "x-box-tag": "file_version_retentions",
         "description": "A retention policy blocks permanent deletion of content\nfor a specified amount of time. Admins can apply policies to\nspecified folders, or an entire enterprise. A file version retention\nis a  record for a retained file version. To use this feature,\nyou must  have the manage retention policies scope enabled for your\nAPI key via  your application management console. For more information\nabout retention policies, please visit our help documentation",
-        "allOf": [
-          {
-            "title": "Reference",
-            "description": "The bare basic reference for an object",
-            "type": "object",
-            "properties": {
-              "id": {
-                "type": "string",
-                "description": "The unique identifier for this object",
-                "example": "11446498"
-              }
-            }
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The unique identifier for this file version retention.",
+            "example": "11446498"
           },
-          {
-            "properties": {
-              "type": {
-                "type": "string",
-                "description": "`file_version_retention`",
-                "example": "file_version_retention",
-                "enum": [
-                  "file_version_retention"
-                ]
+          "type": {
+            "type": "string",
+            "description": "`file_version_retention`",
+            "example": "file_version_retention",
+            "enum": [
+              "file_version_retention"
+            ]
+          },
+          "file_version": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FileVersion--Mini"
               },
-              "file_version": {
-                "allOf": [
-                  {
-                    "$ref": "#/components/schemas/FileVersion--Mini"
-                  },
-                  {
-                    "description": "The file version this file version retention was\napplied to"
-                  }
-                ]
-              },
-              "file": {
-                "allOf": [
-                  {
-                    "$ref": "#/components/schemas/File--Mini"
-                  },
-                  {
-                    "description": "The file this file version retention was applied to"
-                  }
-                ]
-              },
-              "applied_at": {
-                "type": "string",
-                "format": "date-time",
-                "description": "When this file version retention object was\ncreated",
-                "example": "2012-12-12T10:53:43-08:00"
-              },
-              "disposition_at": {
-                "type": "string",
-                "format": "date-time",
-                "description": "When the retention expires on this file\nversion retention",
-                "example": "2012-12-12T10:53:43-08:00"
-              },
-              "winning_retention_policy": {
-                "allOf": [
-                  {
-                    "$ref": "#/components/schemas/RetentionPolicy--Mini"
-                  },
-                  {
-                    "description": "The winning retention policy applied to this file\nversion retention. A file version can have multiple\nretention policies applied."
-                  }
-                ]
+              {
+                "description": "The file version this file version retention was\napplied to"
               }
-            }
+            ]
+          },
+          "file": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/File--Mini"
+              },
+              {
+                "description": "The file this file version retention was applied to"
+              }
+            ]
+          },
+          "applied_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When this file version retention object was\ncreated",
+            "example": "2012-12-12T10:53:43-08:00"
+          },
+          "disposition_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the retention expires on this file\nversion retention",
+            "example": "2012-12-12T10:53:43-08:00"
+          },
+          "winning_retention_policy": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RetentionPolicy--Mini"
+              },
+              {
+                "description": "The winning retention policy applied to this file\nversion retention. A file version can have multiple\nretention policies applied."
+              }
+            ]
           }
-        ]
+        }
       },
       "FileVersionRetentions": {
         "title": "File version retentions",
@@ -19588,9 +19425,6 @@
         "allOf": [
           {
             "$ref": "#/components/schemas/Folder--Standard"
-          },
-          {
-            "x-box-reference-hide": false
           },
           {
             "properties": {
@@ -19734,6 +19568,40 @@
                 "nullable": false,
                 "description": "Specifies if this folder is owned by a user outside of the\nauthenticated enterprise."
               },
+              "metadata": {
+                "allOf": [
+                  {
+                    "title": "Item metadata instances",
+                    "type": "object",
+                    "description": "A list of metadata instances, nested within key-value pairs of their `scope`\nand `templateKey`.\n\nTo access the metadata for a file or folder, first use the\nmetadata endpoints to determine the metadata templates available to your\nenterprise.\n\nThen use the `GET /files/:id` or `GET /folder/:id`\nendpoint with the `fields` query parameter to get\nthe metadata by ID.\n\nTo request a metadata instance for a particular `scope` and `templateKey`\nuse the following format for the `fields` parameter:\n`metadata.<scope>.<templateKey>`\n\nFor example, `?fields=metadata.enterprise_27335.marketingCollateral`.",
+                    "additionalProperties": {
+                      "type": "object",
+                      "description": "A list of metadata instances, nested within key-value pairs of their `scope`\nand `templateKey`.",
+                      "example": {
+                        "marketingCollateral": {
+                          "$canEdit": true,
+                          "$id": "01234500-12f1-1234-aa12-b1d234cb567e",
+                          "$parent": "folder_59449484661",
+                          "$scope": "enterprise_27335",
+                          "$template": "marketingCollateral",
+                          "$type": "properties-6bcba49f-ca6d-4d2a-a758-57fe6edf44d0",
+                          "$typeVersion": 2,
+                          "$version": 1
+                        }
+                      },
+                      "additionalProperties": {
+                        "$ref": "#/components/schemas/Metadata"
+                      }
+                    }
+                  },
+                  {
+                    "description": "An object containing the metadata instances that have been\nattached to this folder.\n\nEach metadata instance is uniquely identified by its `scope` and\n`templateKey`. There can only be one instance of any metadata\ntemplate attached to each folder. Each metadata instance is nested\nwithin an object with the `templateKey` as the key, which again\nitself is nested in an object with the `scope` as the key."
+                  },
+                  {
+                    "x-box-field-variant": 3
+                  }
+                ]
+              },
               "is_collaboration_restricted_to_enterprise": {
                 "allOf": [
                   {
@@ -19859,8 +19727,6 @@
       "Folder--Standard": {
         "title": "Folder (Standard)",
         "type": "object",
-        "x-box-tag": null,
-        "x-box-reference-hide": true,
         "x-box-sanitized": true,
         "description": "A standard representation of a folder, as returned from any\nfolder API endpoints by default",
         "allOf": [
@@ -20222,8 +20088,6 @@
       "Folder--Mini": {
         "title": "Folder (Mini)",
         "type": "object",
-        "x-box-tag": null,
-        "x-box-reference-hide": true,
         "x-box-sanitized": true,
         "description": "A mini representation of a file version, used when\nnested under another resource.",
         "allOf": [
@@ -20263,7 +20127,6 @@
         "title": "Folder (Base)",
         "type": "object",
         "x-box-sanitized": true,
-        "x-box-reference-hide": true,
         "description": "The bare basic representation of a folder, the minimal\namount of fields returned when using the `fields` query\nparameter.",
         "properties": {
           "id": {
@@ -20299,9 +20162,6 @@
         "allOf": [
           {
             "$ref": "#/components/schemas/Group--Standard"
-          },
-          {
-            "x-box-reference-hide": false
           },
           {
             "properties": {
@@ -20418,10 +20278,31 @@
           }
         ]
       },
+      "Group--Base": {
+        "title": "Group (Base)",
+        "type": "object",
+        "description": "Base representation of a group.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The unique identifier for this object",
+            "example": "11446498",
+            "x-box-field-variant": 0
+          },
+          "type": {
+            "type": "string",
+            "description": "`group`",
+            "example": "group",
+            "enum": [
+              "group"
+            ],
+            "x-box-field-variant": 0
+          }
+        }
+      },
       "Group--Standard": {
         "title": "Group (Standard)",
         "type": "object",
-        "x-box-reference-hide": true,
         "description": "A standard representation of a group, as returned from any\ngroup API endpoints by default",
         "allOf": [
           {
@@ -20450,31 +20331,13 @@
       "Group--Mini": {
         "title": "Group (Mini)",
         "type": "object",
-        "x-box-reference-hide": true,
         "description": "Mini representation of a group, including id and name of\ngroup.",
         "allOf": [
           {
-            "title": "Reference",
-            "description": "The bare basic reference for an object",
-            "type": "object",
-            "properties": {
-              "id": {
-                "type": "string",
-                "description": "The unique identifier for this object",
-                "example": "11446498"
-              }
-            }
+            "$ref": "#/components/schemas/Group--Base"
           },
           {
             "properties": {
-              "type": {
-                "type": "string",
-                "description": "`group`",
-                "example": "group",
-                "enum": [
-                  "group"
-                ]
-              },
               "name": {
                 "type": "string",
                 "description": "The name of the group",
@@ -20501,73 +20364,62 @@
         "x-box-resource-id": "group_membership",
         "x-box-tag": "memberships",
         "description": "Membership is used to signify that a user is part of a\ngroup.",
-        "allOf": [
-          {
-            "title": "Reference",
-            "description": "The bare basic reference for an object",
-            "type": "object",
-            "properties": {
-              "id": {
-                "type": "string",
-                "description": "The unique identifier for this object",
-                "example": "11446498"
-              }
-            }
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The unique identifier for this group membership",
+            "example": "11446498"
           },
-          {
-            "properties": {
-              "type": {
-                "type": "string",
-                "description": "`group_membership`",
-                "example": "group_membership",
-                "enum": [
-                  "group_membership"
-                ]
+          "type": {
+            "type": "string",
+            "description": "`group_membership`",
+            "example": "group_membership",
+            "enum": [
+              "group_membership"
+            ]
+          },
+          "user": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/User--Mini"
               },
-              "user": {
-                "allOf": [
-                  {
-                    "$ref": "#/components/schemas/User--Mini"
-                  },
-                  {
-                    "description": "The user that the membership applies to"
-                  }
-                ]
-              },
-              "group": {
-                "allOf": [
-                  {
-                    "$ref": "#/components/schemas/Group--Mini"
-                  },
-                  {
-                    "description": "The group that the membership applies to"
-                  }
-                ]
-              },
-              "role": {
-                "type": "string",
-                "example": "member",
-                "description": "The role of the user in the group.",
-                "enum": [
-                  "member",
-                  "admin"
-                ]
-              },
-              "created_at": {
-                "type": "string",
-                "format": "date-time",
-                "description": "The time this membership was created.",
-                "example": "2012-12-12T10:53:43-08:00"
-              },
-              "modified_at": {
-                "type": "string",
-                "format": "date-time",
-                "description": "The time this membership was last modified.",
-                "example": "2012-12-12T10:53:43-08:00"
+              {
+                "description": "The user that the membership applies to"
               }
-            }
+            ]
+          },
+          "group": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Group--Mini"
+              },
+              {
+                "description": "The group that the membership applies to"
+              }
+            ]
+          },
+          "role": {
+            "type": "string",
+            "example": "member",
+            "description": "The role of the user in the group.",
+            "enum": [
+              "member",
+              "admin"
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The time this membership was created.",
+            "example": "2012-12-12T10:53:43-08:00"
+          },
+          "modified_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The time this membership was last modified.",
+            "example": "2012-12-12T10:53:43-08:00"
           }
-        ]
+        }
       },
       "GroupMemberships": {
         "title": "Group memberships",
@@ -20642,98 +20494,74 @@
         "x-box-resource-id": "invite",
         "x-box-tag": "invites",
         "description": "An invite for a user to an enterprise.",
-        "allOf": [
-          {
-            "title": "Reference",
-            "description": "The bare basic reference for an object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The unique identifier for this invite",
+            "example": "11446498"
+          },
+          "type": {
+            "type": "string",
+            "description": "`invite`",
+            "example": "invite",
+            "enum": [
+              "invite"
+            ]
+          },
+          "invited_to": {
+            "title": "Enterprise",
             "type": "object",
+            "description": "A representation of a Box enterprise",
             "properties": {
               "id": {
                 "type": "string",
-                "description": "The unique identifier for this object",
+                "description": "The unique identifier for this enterprise.",
                 "example": "11446498"
+              },
+              "type": {
+                "type": "string",
+                "description": "`enterprise`",
+                "example": "enterprise",
+                "enum": [
+                  "enterprise"
+                ]
+              },
+              "name": {
+                "description": "The name of the enterprise",
+                "example": "Acme Inc.",
+                "type": "string"
               }
             }
           },
-          {
-            "properties": {
-              "type": {
-                "type": "string",
-                "description": "`invite`",
-                "example": "invite",
-                "enum": [
-                  "invite"
-                ]
-              },
-              "invited_to": {
-                "title": "Enterprise",
-                "type": "object",
-                "description": "A representation of a Box enterprise",
-                "allOf": [
-                  {
-                    "title": "Reference",
-                    "description": "The bare basic reference for an object",
-                    "type": "object",
-                    "properties": {
-                      "id": {
-                        "type": "string",
-                        "description": "The unique identifier for this object",
-                        "example": "11446498"
-                      }
-                    }
-                  },
-                  {
-                    "properties": {
-                      "type": {
-                        "type": "string",
-                        "description": "`enterprise`",
-                        "example": "enterprise",
-                        "enum": [
-                          "enterprise"
-                        ]
-                      },
-                      "name": {
-                        "description": "The name of the enterprise",
-                        "example": "Acme Inc.",
-                        "type": "string"
-                      }
-                    }
-                  }
-                ]
-              },
-              "actionable_by": {
-                "$ref": "#/components/schemas/User--Mini"
-              },
-              "invited_by": {
-                "$ref": "#/components/schemas/User--Mini"
-              },
-              "status": {
-                "description": "The status of the invite",
-                "type": "string",
-                "example": "pending"
-              },
-              "created_at": {
-                "type": "string",
-                "format": "date-time",
-                "description": "When the invite was created",
-                "example": "2012-12-12T10:53:43-08:00"
-              },
-              "modified_at": {
-                "type": "string",
-                "format": "date-time",
-                "description": "When the invite was modified.",
-                "example": "2012-12-12T10:53:43-08:00"
-              }
-            }
+          "actionable_by": {
+            "$ref": "#/components/schemas/User--Mini"
+          },
+          "invited_by": {
+            "$ref": "#/components/schemas/User--Mini"
+          },
+          "status": {
+            "description": "The status of the invite",
+            "type": "string",
+            "example": "pending"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the invite was created",
+            "example": "2012-12-12T10:53:43-08:00"
+          },
+          "modified_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the invite was modified.",
+            "example": "2012-12-12T10:53:43-08:00"
           }
-        ]
+        }
       },
       "Item": {
         "title": "Item",
         "type": "object",
-        "x-box-reference-hide": true,
-        "x-box-tag": null,
-        "description": "A generic representation of a file, folder, user or enterprise",
+        "description": "A generic representation of a File, Folder, or Web Link.",
         "allOf": [
           {
             "$ref": "#/components/schemas/Item--Mini"
@@ -20753,67 +20581,55 @@
       "Item--Mini": {
         "title": "Item (Mini)",
         "type": "object",
-        "x-box-reference-hide": true,
-        "description": "A generic mini representation of a file, folder, user or enterprise",
-        "allOf": [
-          {
-            "title": "Reference",
-            "description": "The bare basic reference for an object",
-            "type": "object",
-            "properties": {
-              "id": {
-                "type": "string",
-                "description": "The unique identifier for this object",
-                "example": "11446498"
-              }
-            }
+        "description": "A generic mini representation of a file, folder, or web link.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The unique identifier for this item",
+            "example": "11446498"
           },
-          {
-            "properties": {
-              "type": {
-                "description": "The type of this item",
+          "type": {
+            "description": "The type of this item",
+            "type": "string",
+            "example": "file",
+            "enum": [
+              "file",
+              "folder",
+              "web_link"
+            ]
+          },
+          "sequence_id": {
+            "allOf": [
+              {
                 "type": "string",
-                "example": "file",
-                "enum": [
-                  "file",
-                  "folder",
-                  "web_link"
-                ]
+                "example": "3",
+                "nullable": false,
+                "description": "A numeric identifier that represents the most recent user event\nthat has been applied to this item.\n\nThis can be used in combination with the `GET /events`-endpoint\nto filter out user events that would have occurred before this\nidentifier was read.\n\nAn example would be where a Box Drive-like application\nwould fetch an item via the API, and then listen to incoming\nuser events for changes to the item. The application would\nignore any user events where the `sequence_id` in the event\nis smaller than or equal to the `sequence_id` in the originally\nfetched resource."
               },
-              "sequence_id": {
-                "allOf": [
-                  {
-                    "type": "string",
-                    "example": "3",
-                    "nullable": false,
-                    "description": "A numeric identifier that represents the most recent user event\nthat has been applied to this item.\n\nThis can be used in combination with the `GET /events`-endpoint\nto filter out user events that would have occurred before this\nidentifier was read.\n\nAn example would be where a Box Drive-like application\nwould fetch an item via the API, and then listen to incoming\nuser events for changes to the item. The application would\nignore any user events where the `sequence_id` in the event\nis smaller than or equal to the `sequence_id` in the originally\nfetched resource."
-                  },
-                  {
-                    "x-box-field-variant": 1
-                  },
-                  {
-                    "nullable": false
-                  }
-                ]
+              {
+                "x-box-field-variant": 1
               },
-              "etag": {
-                "type": "string",
-                "example": "1",
-                "description": "The entity tag of this item. Used with If-Match headers.\nMay be `null` for some folders such as root or trash."
-              },
-              "name": {
-                "type": "string",
-                "description": "The name of the item.",
-                "example": "Pictures"
+              {
+                "nullable": false
               }
-            }
+            ]
+          },
+          "etag": {
+            "type": "string",
+            "example": "1",
+            "description": "The entity tag of this item. Used with `If-Match` headers.\nMay be `null` for some folders such as root or trash."
+          },
+          "name": {
+            "type": "string",
+            "description": "The name of the item.",
+            "example": "Pictures"
           }
-        ]
+        }
       },
       "Items": {
         "title": "Items",
         "type": "object",
-        "x-box-resource-id": "item_collection",
+        "x-box-resource-id": "items",
         "x-box-tag": "folders",
         "description": "A list of files, folders, and web links in\ntheir mini representation.",
         "allOf": [
@@ -20871,7 +20687,17 @@
                 "description": "The items in this collection.",
                 "type": "array",
                 "items": {
-                  "$ref": "#/components/schemas/Item"
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/File"
+                    },
+                    {
+                      "$ref": "#/components/schemas/Folder"
+                    },
+                    {
+                      "$ref": "#/components/schemas/WebLink"
+                    }
+                  ]
                 }
               }
             }
@@ -20883,13 +20709,11 @@
         "type": "object",
         "x-box-resource-id": "legal_hold_policy",
         "x-box-tag": "legal_hold_policies",
+        "x-box-has-field-variants": true,
         "description": "Legal Hold Policy information describes the basic\ncharacteristics of the Policy, such as name, description,\nand filter dates.",
         "allOf": [
           {
             "$ref": "#/components/schemas/LegalHoldPolicy--Mini"
-          },
-          {
-            "x-box-reference-hide": false
           },
           {
             "properties": {
@@ -20897,17 +20721,20 @@
                 "type": "string",
                 "example": "Policy 4",
                 "description": "Name of the legal hold policy.",
-                "maxLength": 254
+                "maxLength": 254,
+                "x-box-field-variant": 2
               },
               "description": {
                 "type": "string",
                 "description": "Description of the legal hold policy. Optional\nproperty with a 500 character limit.",
                 "maxLength": 500,
-                "example": "Postman created policy"
+                "example": "Postman created policy",
+                "x-box-field-variant": 2
               },
               "status": {
                 "type": "string",
                 "example": "active",
+                "x-box-field-variant": 2,
                 "enum": [
                   "active",
                   "applying",
@@ -20918,6 +20745,7 @@
               },
               "assignment_counts": {
                 "type": "object",
+                "x-box-field-variant": 2,
                 "description": "Counts of assignments within this a legal hold policy by item type",
                 "properties": {
                   "user": {
@@ -20953,6 +20781,9 @@
                   },
                   {
                     "description": "The user who created the legal hold policy object"
+                  },
+                  {
+                    "x-box-field-variant": 2
                   }
                 ]
               },
@@ -20960,37 +20791,43 @@
                 "type": "string",
                 "format": "date-time",
                 "description": "When the legal hold policy object was created",
-                "example": "2012-12-12T10:53:43-08:00"
+                "example": "2012-12-12T10:53:43-08:00",
+                "x-box-field-variant": 2
               },
               "modified_at": {
                 "type": "string",
                 "format": "date-time",
                 "description": "When the legal hold policy object was modified.\nDoes not update when assignments are added or removed.",
-                "example": "2012-12-12T10:53:43-08:00"
+                "example": "2012-12-12T10:53:43-08:00",
+                "x-box-field-variant": 2
               },
               "deleted_at": {
                 "type": "string",
                 "format": "date-time",
                 "description": "When the policy release request was sent. (Because\nit can take time for a policy to fully delete, this\nisn't quite the same time that the policy is fully deleted).\n\nIf `null`, the policy was not deleted.",
-                "example": "2012-12-12T10:53:43-08:00"
+                "example": "2012-12-12T10:53:43-08:00",
+                "x-box-field-variant": 2
               },
               "filter_started_at": {
                 "type": "string",
                 "format": "date-time",
                 "description": "User-specified, optional date filter applies to\nCustodian assignments only",
-                "example": "2012-12-12T10:53:43-08:00"
+                "example": "2012-12-12T10:53:43-08:00",
+                "x-box-field-variant": 2
               },
               "filter_ended_at": {
                 "type": "string",
                 "format": "date-time",
                 "description": "User-specified, optional date filter applies to\nCustodian assignments only",
-                "example": "2012-12-12T10:53:43-08:00"
+                "example": "2012-12-12T10:53:43-08:00",
+                "x-box-field-variant": 2
               },
               "release_notes": {
                 "type": "string",
                 "example": "Example",
                 "description": "Optional notes about why the policy was created.",
-                "maxLength": 500
+                "maxLength": 500,
+                "x-box-field-variant": 2
               }
             }
           }
@@ -21042,34 +20879,23 @@
       "LegalHoldPolicy--Mini": {
         "title": "Legal hold policy (Mini)",
         "type": "object",
-        "x-box-reference-hide": true,
         "description": "A mini legal hold policy",
-        "allOf": [
-          {
-            "title": "Reference",
-            "description": "The bare basic reference for an object",
-            "type": "object",
-            "properties": {
-              "id": {
-                "type": "string",
-                "description": "The unique identifier for this object",
-                "example": "11446498"
-              }
-            }
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The unique identifier for this legal hold policy",
+            "example": "11446498"
           },
-          {
-            "properties": {
-              "type": {
-                "type": "string",
-                "description": "`legal_hold_policy`",
-                "example": "legal_hold_policy",
-                "enum": [
-                  "legal_hold_policy"
-                ]
-              }
-            }
+          "type": {
+            "type": "string",
+            "description": "`legal_hold_policy`",
+            "example": "legal_hold_policy",
+            "enum": [
+              "legal_hold_policy"
+            ],
+            "x-box-field-variant": 1
           }
-        ]
+        }
       },
       "LegalHoldPolicyAssignment": {
         "title": "Legal hold policy assignment",
@@ -21077,74 +20903,73 @@
         "x-box-resource-id": "legal_hold_policy_assignment",
         "x-box-tag": "legal_hold_policy_assignments",
         "description": "Legal Hold Assignments are used to assign Legal Hold\nPolicies to Users, Folders, Files, or File Versions.\n\nCreating a Legal Hold Assignment puts a hold\non the File-Versions that belong to the Assignment's\n'apply-to' entity.",
-        "allOf": [
-          {
-            "title": "Reference",
-            "description": "The bare basic reference for an object",
-            "type": "object",
-            "properties": {
-              "id": {
-                "type": "string",
-                "description": "The unique identifier for this object",
-                "example": "11446498"
-              }
-            }
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The unique identifier for this legal hold assignment",
+            "example": "11446498"
           },
-          {
-            "properties": {
-              "type": {
-                "type": "string",
-                "description": "`legal_hold_policy_assignment`",
-                "example": "legal_hold_policy_assignment",
-                "enum": [
-                  "legal_hold_policy_assignment"
-                ]
+          "type": {
+            "type": "string",
+            "description": "`legal_hold_policy_assignment`",
+            "example": "legal_hold_policy_assignment",
+            "enum": [
+              "legal_hold_policy_assignment"
+            ]
+          },
+          "legal_hold_policy": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/LegalHoldPolicy--Mini"
               },
-              "legal_hold_policy": {
-                "allOf": [
-                  {
-                    "$ref": "#/components/schemas/LegalHoldPolicy--Mini"
-                  },
-                  {
-                    "description": "The policy that the legal hold policy assignment\nis part of"
-                  }
-                ]
-              },
-              "assigned_to": {
-                "allOf": [
-                  {
-                    "$ref": "#/components/schemas/Item--Mini"
-                  },
-                  {
-                    "description": "The item that the the legal hold policy\nis assigned to. Includes type and ID."
-                  }
-                ]
-              },
-              "assigned_by": {
-                "allOf": [
-                  {
-                    "$ref": "#/components/schemas/User--Mini"
-                  },
-                  {
-                    "description": "The user who created the legal hold policy\nassignment"
-                  }
-                ]
-              },
-              "assigned_at": {
-                "type": "string",
-                "format": "date-time",
-                "description": "When the legal hold policy assignment object was\ncreated",
-                "example": "2012-12-12T10:53:43-08:00"
-              },
-              "deleted_at": {
-                "type": "string",
-                "format": "date-time",
-                "description": "When the assignment release request was sent.\n(Because it can take time for an assignment to fully\ndelete, this isn't quite the same time that the\nassignment is fully deleted). If null, Assignment\nwas not deleted.",
-                "example": "2012-12-12T10:53:43-08:00"
+              {
+                "description": "The policy that the legal hold policy assignment\nis part of"
               }
-            }
+            ]
+          },
+          "assigned_to": {
+            "allOf": [
+              {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/File"
+                  },
+                  {
+                    "$ref": "#/components/schemas/Folder"
+                  },
+                  {
+                    "$ref": "#/components/schemas/WebLink"
+                  }
+                ]
+              },
+              {
+                "description": "The item that the the legal hold policy\nis assigned to. Includes type and ID."
+              }
+            ]
+          },
+          "assigned_by": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/User--Mini"
+              },
+              {
+                "description": "The user who created the legal hold policy\nassignment"
+              }
+            ]
+          },
+          "assigned_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the legal hold policy assignment object was\ncreated",
+            "example": "2012-12-12T10:53:43-08:00"
+          },
+          "deleted_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the assignment release request was sent.\n(Because it can take time for an assignment to fully\ndelete, this isn't quite the same time that the\nassignment is fully deleted). If null, Assignment\nwas not deleted.",
+            "example": "2012-12-12T10:53:43-08:00"
           }
-        ]
+        }
       },
       "LegalHoldPolicyAssignments": {
         "title": "Legal hold policy assignments",
@@ -21193,56 +21018,72 @@
         "title": "Metadata instance",
         "type": "object",
         "x-box-resource-id": "metadata",
-        "description": "A piece of metadata as specified by a metadata template and\napplied to a file or folder.",
         "x-box-tag": "file_metadata",
+        "x-box-has-field-variants": true,
+        "description": "An instance of a metadata template, which has been applied to a file or\nfolder.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Metadata--Base"
+          },
+          {
+            "properties": {
+              "$canEdit": {
+                "type": "boolean",
+                "example": true,
+                "description": "Whether the user can edit this metadata instance."
+              },
+              "$id": {
+                "type": "string",
+                "format": "uuid",
+                "example": "01234500-12f1-1234-aa12-b1d234cb567e",
+                "maxLength": 36,
+                "description": "A UUID to identify the metadata instance."
+              },
+              "$type": {
+                "type": "string",
+                "example": "properties-6bcba49f-ca6d-4d2a-a758-57fe6edf44d0",
+                "description": "A unique identifier for the \"type\" of this instance. This is an\ninternal system property and should not be used by a client\napplication."
+              },
+              "$typeVersion": {
+                "type": "integer",
+                "example": 2,
+                "description": "The last-known version of the template of the object. This is an\ninternal system property and should not be used by a client\napplication."
+              }
+            }
+          },
+          {
+            "additionalProperties": {
+              "example": "Aaron Levie",
+              "x-box-example-key": "name"
+            }
+          }
+        ]
+      },
+      "Metadata--Base": {
+        "title": "Metadata (Base)",
+        "type": "object",
+        "description": "The base representation of a metadata instance.",
         "properties": {
-          "$canEdit": {
-            "type": "boolean",
-            "example": true,
-            "description": "Whether the user can edit this metadata"
-          },
-          "$id": {
-            "type": "string",
-            "format": "uuid",
-            "example": "01234500-12f1-1234-aa12-b1d234cb567e",
-            "maxLength": 36,
-            "description": "A UUID to identify the metadata object"
-          },
           "$parent": {
             "type": "string",
             "example": "folder_59449484661,",
-            "description": "An ID for the parent folder"
+            "description": "The identifier of the item that this metadata instance\nhas been attached to. This combines the `type` and the `id`\nof the parent in the form `{type}_{id}`."
+          },
+          "$template": {
+            "type": "string",
+            "example": "marketingCollateral",
+            "description": "The name of the template"
           },
           "$scope": {
             "type": "string",
             "example": "enterprise_27335",
-            "description": "An ID for the scope in which this template\nhas been applied"
-          },
-          "$template": {
-            "type": "string",
-            "example": "properties",
-            "description": "The name of the template"
-          },
-          "$type": {
-            "type": "string",
-            "example": "properties-6bcba49f-ca6d-4d2a-a758-57fe6edf44d0",
-            "description": "A unique identifier for the \"type\" of this instance. This is an internal\nsystem property and should not be used by a client application."
-          },
-          "$typeVersion": {
-            "type": "integer",
-            "example": 2,
-            "description": "The last-known version of the template of the object. This is an internal\nsystem property and should not be used by a client application."
+            "description": "An ID for the scope in which this template\nhas been applied. This will be `enterprise_{enterprise_id}` for templates\ndefined for use in this enterprise, and `global` for general templates\nthat are available to all enterprises using Box."
           },
           "$version": {
             "type": "integer",
             "example": 1,
-            "description": "The version of the metadata object. Starts at 0 and increases every time\na user-defined property is modified."
+            "description": "The version of the metadata instance. This version starts at 0 and\nincreases every time a user-defined property is modified."
           }
-        },
-        "additionalProperties": {
-          "type": "string",
-          "example": "Aaron Levie",
-          "x-box-example-key": "name"
         }
       },
       "Metadatas": {
@@ -21383,69 +21224,6 @@
           }
         ]
       },
-      "MetadataQueryResult": {
-        "title": "Metadata query search result",
-        "type": "object",
-        "x-box-tag": "search",
-        "x-box-resource-id": "metadata_query_result",
-        "description": "A single file or folder that is returned for a metadata query, including its\nmetadata that matched the query.",
-        "properties": {
-          "item": {
-            "allOf": [
-              {
-                "description": "A standard representation of a file or folder that matched the search\nquery."
-              },
-              {
-                "oneOf": [
-                  {
-                    "$ref": "#/components/schemas/File--Standard"
-                  },
-                  {
-                    "$ref": "#/components/schemas/Folder--Standard"
-                  }
-                ]
-              }
-            ]
-          },
-          "metadata": {
-            "type": "object",
-            "description": "The metadata objects that matched the search query for the associated file\nor folder.",
-            "example": {
-              "enterprise_27335": {
-                "marketingCollateral": {
-                  "$canEdit": true,
-                  "$id": "01234500-12f1-1234-aa12-b1d234cb567e",
-                  "$parent": "folder_59449484661",
-                  "$scope": "enterprise_27335",
-                  "$template": "properties",
-                  "$type": "properties-6bcba49f-ca6d-4d2a-a758-57fe6edf44d0",
-                  "$typeVersion": 2,
-                  "$version": 1
-                }
-              }
-            },
-            "additionalProperties": {
-              "type": "object",
-              "description": "The key of the metadata template",
-              "example": {
-                "marketingCollateral": {
-                  "$canEdit": true,
-                  "$id": "01234500-12f1-1234-aa12-b1d234cb567e",
-                  "$parent": "folder_59449484661",
-                  "$scope": "enterprise_27335",
-                  "$template": "properties",
-                  "$type": "properties-6bcba49f-ca6d-4d2a-a758-57fe6edf44d0",
-                  "$typeVersion": 2,
-                  "$version": 1
-                }
-              },
-              "additionalProperties": {
-                "$ref": "#/components/schemas/Metadata"
-              }
-            }
-          }
-        }
-      },
       "MetadataQueryResults": {
         "title": "Metadata query search results",
         "type": "object",
@@ -21457,7 +21235,14 @@
             "description": "The files and folders that match the search terms, including their\nmetadata.",
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/MetadataQueryResult"
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/File"
+                },
+                {
+                  "$ref": "#/components/schemas/Folder"
+                }
+              ]
             }
           },
           "limit": {
@@ -21756,7 +21541,17 @@
           "item": {
             "allOf": [
               {
-                "$ref": "#/components/schemas/Item--Mini"
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/File"
+                  },
+                  {
+                    "$ref": "#/components/schemas/Folder"
+                  },
+                  {
+                    "$ref": "#/components/schemas/WebLink"
+                  }
+                ]
               },
               {
                 "description": "The item that was recently accessed."
@@ -21857,14 +21652,10 @@
         "x-box-resource-id": "retention_policy",
         "x-box-tag": "retention_policies",
         "x-box-has-field-variants": true,
-        "x-box-reference-hide": false,
         "description": "A retention policy blocks permanent deletion of content\nfor a specified amount of time. Admins can create retention\npolicies and then later assign them to specific folders\nor their entire enterprise.  To use this feature, you must\nhave the manage retention policies scope enabled\nfor your API key via your application management console.",
         "allOf": [
           {
             "$ref": "#/components/schemas/RetentionPolicy--Mini"
-          },
-          {
-            "x-box-reference-hide": false
           },
           {
             "properties": {
@@ -21919,9 +21710,6 @@
       "RetentionPolicy--Mini": {
         "title": "Retention policy (Mini)",
         "type": "object",
-        "x-box-tag": null,
-        "x-box-has-field-variants": true,
-        "x-box-reference-hide": true,
         "description": "A mini representation of a retention policy, used when\nnested within another resource.",
         "allOf": [
           {
@@ -21960,16 +21748,14 @@
       "RetentionPolicy--Base": {
         "title": "Retention policy (Base)",
         "type": "object",
-        "x-box-tag": null,
-        "x-box-has-field-variants": true,
-        "x-box-reference-hide": true,
         "description": "The bare basic representation of a file version, the minimal\namount of fields returned when using the `fields` query\nparameter.",
         "properties": {
           "id": {
             "type": "string",
             "nullable": false,
             "description": "The unique identifier that represent a file version.",
-            "example": "12345"
+            "example": "12345",
+            "x-box-field-variant": 0
           },
           "type": {
             "type": "string",
@@ -21978,7 +21764,8 @@
             "enum": [
               "file_version"
             ],
-            "nullable": false
+            "nullable": false,
+            "x-box-field-variant": 0
           }
         }
       },
@@ -21988,77 +21775,73 @@
         "x-box-resource-id": "retention_policy_assignment",
         "x-box-tag": "retention_policy_assignments",
         "description": "The retention policy assignment endpoint provides a way\nfor admins to apply a retention policy on a per-folder\nbasis, or place a blanket policy over the entire\nenterprise.",
-        "allOf": [
-          {
-            "title": "Reference",
-            "description": "The bare basic reference for an object",
-            "type": "object",
-            "properties": {
-              "id": {
-                "type": "string",
-                "description": "The unique identifier for this object",
-                "example": "11446498"
-              }
-            }
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The unique identifier for this retention policy assignment",
+            "example": "11446498"
           },
-          {
-            "properties": {
-              "type": {
-                "type": "string",
-                "description": "`retention_policy_assignment`",
-                "example": "retention_policy_assignment",
-                "enum": [
-                  "retention_policy_assignment"
-                ]
+          "type": {
+            "type": "string",
+            "description": "`retention_policy_assignment`",
+            "example": "retention_policy_assignment",
+            "enum": [
+              "retention_policy_assignment"
+            ]
+          },
+          "retention_policy": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RetentionPolicy--Mini"
               },
-              "retention_policy": {
-                "allOf": [
-                  {
-                    "$ref": "#/components/schemas/RetentionPolicy--Mini"
-                  },
-                  {
-                    "description": "A mini retention policy object representing the\nretention policy that has been assigned to this content"
-                  }
-                ]
-              },
-              "assigned_to": {
-                "allOf": [
-                  {
-                    "title": "Reference",
-                    "description": "The bare basic reference for an object",
-                    "type": "object",
-                    "properties": {
-                      "id": {
-                        "type": "string",
-                        "description": "The unique identifier for this object",
-                        "example": "11446498"
-                      }
-                    }
-                  },
-                  {
-                    "description": "The `type` and `id` of the content that is under\nretention. The `type` can either be `folder` or `\nenterprise`."
-                  }
-                ]
-              },
-              "assigned_by": {
-                "allOf": [
-                  {
-                    "$ref": "#/components/schemas/User--Mini"
-                  },
-                  {
-                    "description": "A mini user object representing the user that\ncreated the retention policy assignment object"
-                  }
-                ]
-              },
-              "assigned_at": {
-                "type": "string",
-                "format": "date-time",
-                "description": "When the retention policy assignment object was\ncreated",
-                "example": "2012-12-12T10:53:43-08:00"
+              {
+                "description": "A mini retention policy object representing the\nretention policy that has been assigned to this content"
               }
-            }
+            ]
+          },
+          "assigned_to": {
+            "allOf": [
+              {
+                "title": "Reference",
+                "description": "The bare basic reference for an object",
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "The unique identifier for this object",
+                    "example": "11446498",
+                    "x-box-field-variant": 0
+                  },
+                  "type": {
+                    "type": "string",
+                    "description": "The type for this object",
+                    "example": "file",
+                    "x-box-field-variant": 0
+                  }
+                }
+              },
+              {
+                "description": "The `type` and `id` of the content that is under\nretention. The `type` can either be `folder` or `\nenterprise`."
+              }
+            ]
+          },
+          "assigned_by": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/User--Mini"
+              },
+              {
+                "description": "A mini user object representing the user that\ncreated the retention policy assignment object"
+              }
+            ]
+          },
+          "assigned_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the retention policy assignment object was\ncreated",
+            "example": "2012-12-12T10:53:43-08:00"
           }
-        ]
+        }
       },
       "RetentionPolicyAssignments": {
         "title": "Retention policy assignments",
@@ -22108,20 +21891,19 @@
         "type": "object",
         "x-box-resource-id": "storage_policy",
         "x-box-tag": "storage_policies",
+        "x-box-has-field-variants": true,
         "description": "The Storage Policy object describes the storage zone.",
         "allOf": [
           {
             "$ref": "#/components/schemas/StoragePolicy--Mini"
           },
           {
-            "x-box-reference-hide": false
-          },
-          {
             "properties": {
               "name": {
                 "description": "A descriptive name of the region",
                 "type": "string",
-                "example": "Montreal / Dublin"
+                "example": "Montreal / Dublin",
+                "x-box-field-variant": 2
               }
             }
           }
@@ -22173,34 +21955,23 @@
       "StoragePolicy--Mini": {
         "title": "Storage policy (Mini)",
         "type": "object",
-        "x-box-reference-hide": true,
         "description": "A mini description of a Storage Policy object",
-        "allOf": [
-          {
-            "title": "Reference",
-            "description": "The bare basic reference for an object",
-            "type": "object",
-            "properties": {
-              "id": {
-                "type": "string",
-                "description": "The unique identifier for this object",
-                "example": "11446498"
-              }
-            }
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The unique identifier for this storage policy",
+            "example": "11446498"
           },
-          {
-            "properties": {
-              "type": {
-                "type": "string",
-                "description": "`storage_policy`",
-                "example": "storage_policy",
-                "enum": [
-                  "storage_policy"
-                ]
-              }
-            }
+          "type": {
+            "type": "string",
+            "description": "`storage_policy`",
+            "example": "storage_policy",
+            "x-box-field-variant": 1,
+            "enum": [
+              "storage_policy"
+            ]
           }
-        ]
+        }
       },
       "StoragePolicyAssignment": {
         "title": "Storage policy assignment",
@@ -22229,7 +22000,14 @@
                   "id": {
                     "type": "string",
                     "description": "The unique identifier for this object",
-                    "example": "11446498"
+                    "example": "11446498",
+                    "x-box-field-variant": 0
+                  },
+                  "type": {
+                    "type": "string",
+                    "description": "The type for this object",
+                    "example": "file",
+                    "x-box-field-variant": 0
                   }
                 }
               },
@@ -22289,102 +22067,91 @@
         "x-box-resource-id": "task",
         "x-box-tag": "tasks",
         "description": "A task allows for file-centric workflows within Box. Users can\ncreate tasks on files and assign them to other users for them to complete the\ntasks.",
-        "allOf": [
-          {
-            "title": "Reference",
-            "description": "The bare basic reference for an object",
-            "type": "object",
-            "properties": {
-              "id": {
-                "type": "string",
-                "description": "The unique identifier for this object",
-                "example": "11446498"
-              }
-            }
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The unique identifier for this task",
+            "example": "11446498"
           },
-          {
-            "properties": {
-              "type": {
-                "type": "string",
-                "description": "`task`",
-                "example": "task",
-                "enum": [
-                  "task"
-                ]
+          "type": {
+            "type": "string",
+            "description": "`task`",
+            "example": "task",
+            "enum": [
+              "task"
+            ]
+          },
+          "item": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/File--Mini"
               },
-              "item": {
-                "allOf": [
-                  {
-                    "$ref": "#/components/schemas/File--Mini"
-                  },
-                  {
-                    "description": "The file associated with the task"
-                  }
-                ]
-              },
-              "due_at": {
-                "type": "string",
-                "format": "date-time",
-                "description": "When the task is due",
-                "example": "2012-12-12T10:53:43-08:00"
-              },
-              "action": {
-                "type": "string",
-                "example": "review",
-                "description": "The type of task the task assignee will be prompted to\nperform.",
-                "enum": [
-                  "review",
-                  "complete"
-                ]
-              },
-              "message": {
-                "type": "string",
-                "description": "A message that will be included with the task",
-                "example": "Legal review"
-              },
-              "task_assignment_collection": {
-                "allOf": [
-                  {
-                    "$ref": "#/components/schemas/TaskAssignments"
-                  },
-                  {
-                    "description": "A collection of task assignment objects\nassociated with the task"
-                  }
-                ]
-              },
-              "is_completed": {
-                "type": "boolean",
-                "description": "Whether the task has been completed",
-                "example": true
-              },
-              "created_by": {
-                "allOf": [
-                  {
-                    "$ref": "#/components/schemas/User--Mini"
-                  },
-                  {
-                    "description": "The user who created the task"
-                  }
-                ]
-              },
-              "created_at": {
-                "type": "string",
-                "format": "date-time",
-                "description": "When the task object was created",
-                "example": "2012-12-12T10:53:43-08:00"
-              },
-              "completion_rule": {
-                "type": "string",
-                "description": "Defines which assignees need to complete this task before the task\nis considered completed.\n\n* `all_assignees` requires all assignees to review or\napprove the the task in order for it to be considered completed.\n* `any_assignee` accepts any one assignee to review or\napprove the the task in order for it to be considered completed.",
-                "example": "all_assignees",
-                "enum": [
-                  "all_assignees",
-                  "any_assignee"
-                ]
+              {
+                "description": "The file associated with the task"
               }
-            }
+            ]
+          },
+          "due_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the task is due",
+            "example": "2012-12-12T10:53:43-08:00"
+          },
+          "action": {
+            "type": "string",
+            "example": "review",
+            "description": "The type of task the task assignee will be prompted to\nperform.",
+            "enum": [
+              "review",
+              "complete"
+            ]
+          },
+          "message": {
+            "type": "string",
+            "description": "A message that will be included with the task",
+            "example": "Legal review"
+          },
+          "task_assignment_collection": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TaskAssignments"
+              },
+              {
+                "description": "A collection of task assignment objects\nassociated with the task"
+              }
+            ]
+          },
+          "is_completed": {
+            "type": "boolean",
+            "description": "Whether the task has been completed",
+            "example": true
+          },
+          "created_by": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/User--Mini"
+              },
+              {
+                "description": "The user who created the task"
+              }
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the task object was created",
+            "example": "2012-12-12T10:53:43-08:00"
+          },
+          "completion_rule": {
+            "type": "string",
+            "description": "Defines which assignees need to complete this task before the task\nis considered completed.\n\n* `all_assignees` requires all assignees to review or\napprove the the task in order for it to be considered completed.\n* `any_assignee` accepts any one assignee to review or\napprove the the task in order for it to be considered completed.",
+            "example": "all_assignees",
+            "enum": [
+              "all_assignees",
+              "any_assignee"
+            ]
           }
-        ]
+        }
       },
       "Tasks": {
         "title": "Tasks",
@@ -22413,96 +22180,85 @@
         "x-box-resource-id": "task_assignment",
         "x-box-tag": "task_assignments",
         "description": "A task assignment defines which task is assigned to which user to complete.",
-        "allOf": [
-          {
-            "title": "Reference",
-            "description": "The bare basic reference for an object",
-            "type": "object",
-            "properties": {
-              "id": {
-                "type": "string",
-                "description": "The unique identifier for this object",
-                "example": "11446498"
-              }
-            }
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The unique identifier for this task assignment",
+            "example": "11446498"
           },
-          {
-            "properties": {
-              "type": {
-                "type": "string",
-                "description": "`task_assignment`",
-                "example": "task_assignment",
-                "enum": [
-                  "task_assignment"
-                ]
+          "type": {
+            "type": "string",
+            "description": "`task_assignment`",
+            "example": "task_assignment",
+            "enum": [
+              "task_assignment"
+            ]
+          },
+          "item": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/File--Mini"
               },
-              "item": {
-                "allOf": [
-                  {
-                    "$ref": "#/components/schemas/File--Mini"
-                  },
-                  {
-                    "description": "The file that the task has been assigned to."
-                  }
-                ]
-              },
-              "assigned_to": {
-                "allOf": [
-                  {
-                    "$ref": "#/components/schemas/User--Mini"
-                  },
-                  {
-                    "description": "The user that the task has been assigned to."
-                  }
-                ]
-              },
-              "message": {
-                "type": "string",
-                "example": "Please review",
-                "description": "A message that will is included with the task\nassignment. This is visible to the assigned user in the web and mobile\nUI."
-              },
-              "completed_at": {
-                "type": "string",
-                "format": "date-time",
-                "description": "The date at which this task assignment was\ncompleted. This will be `null` if the task is not completed yet.",
-                "example": "2012-12-12T10:53:43-08:00"
-              },
-              "assigned_at": {
-                "type": "string",
-                "format": "date-time",
-                "description": "The date at which this task was assigned to the user.",
-                "example": "2012-12-12T10:53:43-08:00"
-              },
-              "reminded_at": {
-                "type": "string",
-                "format": "date-time",
-                "description": "The date at which the assigned user was reminded of this task\nassignment.",
-                "example": "2012-12-12T10:53:43-08:00"
-              },
-              "resolution_state": {
-                "type": "string",
-                "description": "The current state of the assignment. The available states depend on\nthe `action` value of the task object.",
-                "example": "incomplete",
-                "enum": [
-                  "completed",
-                  "incomplete",
-                  "approved",
-                  "rejected"
-                ]
-              },
-              "assigned_by": {
-                "allOf": [
-                  {
-                    "$ref": "#/components/schemas/User--Mini"
-                  },
-                  {
-                    "description": "The user who assigned this task."
-                  }
-                ]
+              {
+                "description": "The file that the task has been assigned to."
               }
-            }
+            ]
+          },
+          "assigned_to": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/User--Mini"
+              },
+              {
+                "description": "The user that the task has been assigned to."
+              }
+            ]
+          },
+          "message": {
+            "type": "string",
+            "example": "Please review",
+            "description": "A message that will is included with the task\nassignment. This is visible to the assigned user in the web and mobile\nUI."
+          },
+          "completed_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date at which this task assignment was\ncompleted. This will be `null` if the task is not completed yet.",
+            "example": "2012-12-12T10:53:43-08:00"
+          },
+          "assigned_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date at which this task was assigned to the user.",
+            "example": "2012-12-12T10:53:43-08:00"
+          },
+          "reminded_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date at which the assigned user was reminded of this task\nassignment.",
+            "example": "2012-12-12T10:53:43-08:00"
+          },
+          "resolution_state": {
+            "type": "string",
+            "description": "The current state of the assignment. The available states depend on\nthe `action` value of the task object.",
+            "example": "incomplete",
+            "enum": [
+              "completed",
+              "incomplete",
+              "approved",
+              "rejected"
+            ]
+          },
+          "assigned_by": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/User--Mini"
+              },
+              {
+                "description": "The user who assigned this task."
+              }
+            ]
           }
-        ]
+        }
       },
       "TaskAssignments": {
         "title": "Task assignments",
@@ -22530,13 +22286,11 @@
         "type": "object",
         "x-box-resource-id": "terms_of_service",
         "x-box-tag": "terms_of_services",
+        "x-box-has-field-variants": true,
         "description": "The root-level record that is supposed to represent a\nsingle Terms of Service.",
         "allOf": [
           {
             "$ref": "#/components/schemas/TermsOfService--Mini"
-          },
-          {
-            "x-box-reference-hide": false
           },
           {
             "properties": {
@@ -22547,7 +22301,8 @@
                 "enum": [
                   "enabled",
                   "disabled"
-                ]
+                ],
+                "x-box-field-variant": 2
               },
               "enterprise": {
                 "allOf": [
@@ -22555,40 +22310,32 @@
                     "title": "Enterprise",
                     "type": "object",
                     "description": "A representation of a Box enterprise",
-                    "allOf": [
-                      {
-                        "title": "Reference",
-                        "description": "The bare basic reference for an object",
-                        "type": "object",
-                        "properties": {
-                          "id": {
-                            "type": "string",
-                            "description": "The unique identifier for this object",
-                            "example": "11446498"
-                          }
-                        }
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "description": "The unique identifier for this enterprise.",
+                        "example": "11446498"
                       },
-                      {
-                        "properties": {
-                          "type": {
-                            "type": "string",
-                            "description": "`enterprise`",
-                            "example": "enterprise",
-                            "enum": [
-                              "enterprise"
-                            ]
-                          },
-                          "name": {
-                            "description": "The name of the enterprise",
-                            "example": "Acme Inc.",
-                            "type": "string"
-                          }
-                        }
+                      "type": {
+                        "type": "string",
+                        "description": "`enterprise`",
+                        "example": "enterprise",
+                        "enum": [
+                          "enterprise"
+                        ]
+                      },
+                      "name": {
+                        "description": "The name of the enterprise",
+                        "example": "Acme Inc.",
+                        "type": "string"
                       }
-                    ]
+                    }
                   },
                   {
                     "description": "The enterprise these terms apply to"
+                  },
+                  {
+                    "x-box-field-variant": 2
                   }
                 ]
               },
@@ -22599,24 +22346,28 @@
                 "enum": [
                   "managed",
                   "external"
-                ]
+                ],
+                "x-box-field-variant": 2
               },
               "text": {
                 "description": "The text for your terms and conditions. This text could be\nempty if the `status` is set to `disabled`.",
                 "type": "string",
-                "example": "By using this service, you agree to ..."
+                "example": "By using this service, you agree to ...",
+                "x-box-field-variant": 2
               },
               "created_at": {
                 "type": "string",
                 "format": "date-time",
                 "description": "When the legal item was created",
-                "example": "2012-12-12T10:53:43-08:00"
+                "example": "2012-12-12T10:53:43-08:00",
+                "x-box-field-variant": 2
               },
               "modified_at": {
                 "type": "string",
                 "format": "date-time",
                 "description": "When the legal item was modified.",
-                "example": "2012-12-12T10:53:43-08:00"
+                "example": "2012-12-12T10:53:43-08:00",
+                "x-box-field-variant": 2
               }
             }
           }
@@ -22646,34 +22397,22 @@
       "TermsOfService--Mini": {
         "title": "Terms of service (Mini)",
         "type": "object",
-        "x-box-reference-hide": true,
         "description": "The root-level record that is supposed to represent a\nsingle Terms of Service.",
-        "allOf": [
-          {
-            "title": "Reference",
-            "description": "The bare basic reference for an object",
-            "type": "object",
-            "properties": {
-              "id": {
-                "type": "string",
-                "description": "The unique identifier for this object",
-                "example": "11446498"
-              }
-            }
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The unique identifier for this terms of service.",
+            "example": "11446498"
           },
-          {
-            "properties": {
-              "type": {
-                "type": "string",
-                "description": "`terms_of_service`",
-                "example": "terms_of_service",
-                "enum": [
-                  "terms_of_service"
-                ]
-              }
-            }
+          "type": {
+            "type": "string",
+            "description": "`terms_of_service`",
+            "example": "terms_of_service",
+            "enum": [
+              "terms_of_service"
+            ]
           }
-        ]
+        }
       },
       "TermsOfServiceUserStatus": {
         "title": "Terms of service user status",
@@ -22681,69 +22420,58 @@
         "x-box-resource-id": "terms_of_service_user_status",
         "x-box-tag": "terms_of_service_user_statuses",
         "description": "The association between a Terms of Service and a user",
-        "allOf": [
-          {
-            "title": "Reference",
-            "description": "The bare basic reference for an object",
-            "type": "object",
-            "properties": {
-              "id": {
-                "type": "string",
-                "description": "The unique identifier for this object",
-                "example": "11446498"
-              }
-            }
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The unique identifier for this terms of service user status",
+            "example": "11446498"
           },
-          {
-            "properties": {
-              "type": {
-                "type": "string",
-                "description": "`terms_of_service_user_status`",
-                "example": "terms_of_service_user_status",
-                "enum": [
-                  "terms_of_service_user_status"
-                ]
+          "type": {
+            "type": "string",
+            "description": "`terms_of_service_user_status`",
+            "example": "terms_of_service_user_status",
+            "enum": [
+              "terms_of_service_user_status"
+            ]
+          },
+          "tos": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TermsOfService--Mini"
               },
-              "tos": {
-                "allOf": [
-                  {
-                    "$ref": "#/components/schemas/TermsOfService--Mini"
-                  },
-                  {
-                    "description": "The terms of service"
-                  }
-                ]
-              },
-              "user": {
-                "allOf": [
-                  {
-                    "$ref": "#/components/schemas/User--Mini"
-                  },
-                  {
-                    "description": "The user"
-                  }
-                ]
-              },
-              "is_accepted": {
-                "type": "boolean",
-                "example": true,
-                "description": "If the user has accepted the terms of services"
-              },
-              "created_at": {
-                "type": "string",
-                "format": "date-time",
-                "description": "When the legal item was created",
-                "example": "2012-12-12T10:53:43-08:00"
-              },
-              "modified_at": {
-                "type": "string",
-                "format": "date-time",
-                "description": "When the legal item was modified.",
-                "example": "2012-12-12T10:53:43-08:00"
+              {
+                "description": "The terms of service"
               }
-            }
+            ]
+          },
+          "user": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/User--Mini"
+              },
+              {
+                "description": "The user"
+              }
+            ]
+          },
+          "is_accepted": {
+            "type": "boolean",
+            "example": true,
+            "description": "If the user has accepted the terms of services"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the legal item was created",
+            "example": "2012-12-12T10:53:43-08:00"
+          },
+          "modified_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the legal item was modified.",
+            "example": "2012-12-12T10:53:43-08:00"
           }
-        ]
+        }
       },
       "TermsOfServiceUserStatuses": {
         "title": "Terms of service user statuses",
@@ -22770,29 +22498,49 @@
         "title": "Upload part",
         "type": "object",
         "x-box-resource-id": "upload_part",
+        "x-box-has-field-variants": true,
+        "x-box-tag": "chunked_uploads",
         "description": "The representation of an upload\nsession chunk.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/UploadPart--Mini"
+          },
+          {
+            "properties": {
+              "sha1": {
+                "description": "The SHA1 hash of the chunk.",
+                "type": "string",
+                "example": "134b65991ed521fcfe4724b7d814ab8ded5185dc",
+                "x-box-field-variant": 2
+              }
+            }
+          }
+        ]
+      },
+      "UploadPart--Mini": {
+        "title": "Upload part (Mini)",
+        "type": "object",
+        "description": "The basic representation of an upload\nsession chunk.",
         "properties": {
           "part_id": {
             "description": "The unique ID of the chunk.",
             "type": "string",
-            "example": "6F2D3486"
+            "example": "6F2D3486",
+            "x-box-field-variant": 1
           },
           "offset": {
             "description": "The offset of the chunk within the file\nin bytes. The lower bound of the position\nof the chunk within the file.",
             "type": "integer",
             "format": "int64",
-            "example": 16777216
+            "example": 16777216,
+            "x-box-field-variant": 1
           },
           "size": {
             "description": "The size of the chunk in bytes.",
             "type": "integer",
             "format": "int64",
-            "example": 3222784
-          },
-          "sha1": {
-            "description": "The SHA1 hash of the chunk.",
-            "type": "string",
-            "example": "134b65991ed521fcfe4724b7d814ab8ded5185dc"
+            "example": 3222784,
+            "x-box-field-variant": 1
           }
         }
       },
@@ -22812,6 +22560,7 @@
         "title": "Upload parts",
         "type": "object",
         "x-box-resource-id": "upload_parts",
+        "x-box-tag": "chunked_uploads",
         "description": "A list of uploaded chunks for an upload\nsession.",
         "allOf": [
           {
@@ -22995,9 +22744,6 @@
             "$ref": "#/components/schemas/User--Standard"
           },
           {
-            "x-box-reference-hide": false
-          },
-          {
             "properties": {
               "role": {
                 "x-box-field-variant": 3,
@@ -23075,37 +22821,26 @@
                     "title": "Enterprise",
                     "type": "object",
                     "description": "A representation of a Box enterprise",
-                    "allOf": [
-                      {
-                        "title": "Reference",
-                        "description": "The bare basic reference for an object",
-                        "type": "object",
-                        "properties": {
-                          "id": {
-                            "type": "string",
-                            "description": "The unique identifier for this object",
-                            "example": "11446498"
-                          }
-                        }
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "description": "The unique identifier for this enterprise.",
+                        "example": "11446498"
                       },
-                      {
-                        "properties": {
-                          "type": {
-                            "type": "string",
-                            "description": "`enterprise`",
-                            "example": "enterprise",
-                            "enum": [
-                              "enterprise"
-                            ]
-                          },
-                          "name": {
-                            "description": "The name of the enterprise",
-                            "example": "Acme Inc.",
-                            "type": "string"
-                          }
-                        }
+                      "type": {
+                        "type": "string",
+                        "description": "`enterprise`",
+                        "example": "enterprise",
+                        "enum": [
+                          "enterprise"
+                        ]
+                      },
+                      "name": {
+                        "description": "The name of the enterprise",
+                        "example": "Acme Inc.",
+                        "type": "string"
                       }
-                    ]
+                    }
                   },
                   {
                     "description": "Representation of the user’s enterprise"
@@ -23237,7 +22972,6 @@
         "title": "User (Standard)",
         "type": "object",
         "description": "A standard representation of a user, as returned from any\nuser API endpoints by default",
-        "x-box-reference-hide": true,
         "allOf": [
           {
             "$ref": "#/components/schemas/User--Mini"
@@ -23336,50 +23070,39 @@
         "title": "User (Mini)",
         "type": "object",
         "description": "A mini representation of a user, used when\nnested within another resource.",
-        "x-box-reference-hide": true,
-        "allOf": [
-          {
-            "title": "Reference",
-            "description": "The bare basic reference for an object",
-            "type": "object",
-            "properties": {
-              "id": {
-                "type": "string",
-                "description": "The unique identifier for this object",
-                "example": "11446498"
-              }
-            }
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The unique identifier for this user",
+            "example": "11446498"
           },
-          {
-            "properties": {
-              "type": {
-                "type": "string",
-                "description": "`user`",
-                "example": "user",
-                "nullable": false,
-                "enum": [
-                  "user"
-                ]
-              },
-              "name": {
-                "type": "string",
-                "description": "The display name of this user",
-                "example": "Aaron Levie",
-                "maxLength": 50,
-                "nullable": false,
-                "x-box-field-variant": 1
-              },
-              "login": {
-                "type": "string",
-                "format": "email",
-                "description": "The primary email address of this user",
-                "example": "ceo@example.com",
-                "nullable": false,
-                "x-box-field-variant": 1
-              }
-            }
+          "type": {
+            "type": "string",
+            "description": "`user`",
+            "example": "user",
+            "nullable": false,
+            "enum": [
+              "user"
+            ],
+            "x-box-field-variant": 0
+          },
+          "name": {
+            "type": "string",
+            "description": "The display name of this user",
+            "example": "Aaron Levie",
+            "maxLength": 50,
+            "nullable": false,
+            "x-box-field-variant": 1
+          },
+          "login": {
+            "type": "string",
+            "format": "email",
+            "description": "The primary email address of this user",
+            "example": "ceo@example.com",
+            "nullable": false,
+            "x-box-field-variant": 1
           }
-        ]
+        }
       },
       "Watermark": {
         "title": "Watermark",
@@ -23413,124 +23136,113 @@
         "x-box-resource-id": "webhook",
         "x-box-tag": "webhooks",
         "description": "Represents a configured webhook.",
-        "allOf": [
-          {
-            "title": "Reference",
-            "description": "The bare basic reference for an object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The unique identifier for this webhook.",
+            "example": "11446498"
+          },
+          "type": {
+            "type": "string",
+            "description": "`webhook`",
+            "example": "webhook",
+            "enum": [
+              "webhook"
+            ]
+          },
+          "target": {
             "type": "object",
+            "description": "The item that will trigger the webhook",
             "properties": {
               "id": {
+                "description": "The ID of the item to trigger a webhook",
                 "type": "string",
-                "description": "The unique identifier for this object",
-                "example": "11446498"
+                "example": "1231232"
+              },
+              "type": {
+                "description": "The type of item to trigger a webhook",
+                "type": "string",
+                "example": "file",
+                "enum": [
+                  "file",
+                  "folder"
+                ]
               }
             }
           },
-          {
-            "properties": {
-              "type": {
-                "type": "string",
-                "description": "`webhook`",
-                "example": "webhook",
-                "enum": [
-                  "webhook"
-                ]
+          "created_by": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/User--Mini"
               },
-              "target": {
-                "type": "object",
-                "description": "The item that will trigger the webhook",
-                "properties": {
-                  "id": {
-                    "description": "The ID of the item to trigger a webhook",
-                    "type": "string",
-                    "example": "1231232"
-                  },
-                  "type": {
-                    "description": "The type of item to trigger a webhook",
-                    "type": "string",
-                    "example": "file",
-                    "enum": [
-                      "file",
-                      "folder"
-                    ]
-                  }
-                }
-              },
-              "created_by": {
-                "allOf": [
-                  {
-                    "$ref": "#/components/schemas/User--Mini"
-                  },
-                  {
-                    "description": "The user who created the webhook"
-                  }
-                ]
-              },
-              "created_at": {
-                "type": "string",
-                "format": "date-time",
-                "description": "A timestamp identifying the time that\nthe webhook was created.",
-                "example": "2012-12-12T10:53:43-08:00"
-              },
-              "address": {
-                "type": "string",
-                "example": "https://example.com/webhooks",
-                "description": "The URL that is notified by this webhook"
-              },
-              "triggers": {
-                "type": "array",
-                "example": [
-                  "FILE.UPLOADED"
-                ],
-                "description": "An array of event names that this webhook is\nto be triggered for",
-                "items": {
-                  "title": "Webhook Trigger",
-                  "example": "FILE.UPLOADED",
-                  "type": "string",
-                  "description": "The event name that triggered this webhook",
-                  "enum": [
-                    "FILE.UPLOADED",
-                    "FILE.PREVIEWED",
-                    "FILE.DOWNLOADED",
-                    "FILE.TRASHED",
-                    "FILE.DELETED",
-                    "FILE.RESTORED",
-                    "FILE.COPIED",
-                    "FILE.MOVED",
-                    "FILE.LOCKED",
-                    "FILE.UNLOCKED",
-                    "FILE.RENAMED",
-                    "COMMENT.CREATED",
-                    "COMMENT.UPDATED",
-                    "COMMENT.DELETED",
-                    "TASK_ASSIGNMENT.CREATED",
-                    "TASK_ASSIGNMENT.UPDATED",
-                    "METADATA_INSTANCE.CREATED",
-                    "METADATA_INSTANCE.UPDATED",
-                    "METADATA_INSTANCE.DELETED",
-                    "FOLDER.CREATED",
-                    "FOLDER.RENAMED",
-                    "FOLDER.DOWNLOADED",
-                    "FOLDER.RESTORED",
-                    "FOLDER.DELETED",
-                    "FOLDER.COPIED",
-                    "FOLDER.MOVED",
-                    "FOLDER.TRASHED",
-                    "WEBHOOK.DELETED",
-                    "COLLABORATION.CREATED",
-                    "COLLABORATION.ACCEPTED",
-                    "COLLABORATION.REJECTED",
-                    "COLLABORATION.REMOVED",
-                    "COLLABORATION.UPDATED",
-                    "SHARED_LINK.DELETED",
-                    "SHARED_LINK.CREATED",
-                    "SHARED_LINK.UPDATED"
-                  ]
-                }
+              {
+                "description": "The user who created the webhook"
               }
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "A timestamp identifying the time that\nthe webhook was created.",
+            "example": "2012-12-12T10:53:43-08:00"
+          },
+          "address": {
+            "type": "string",
+            "example": "https://example.com/webhooks",
+            "description": "The URL that is notified by this webhook"
+          },
+          "triggers": {
+            "type": "array",
+            "example": [
+              "FILE.UPLOADED"
+            ],
+            "description": "An array of event names that this webhook is\nto be triggered for",
+            "items": {
+              "title": "Webhook Trigger",
+              "example": "FILE.UPLOADED",
+              "type": "string",
+              "description": "The event name that triggered this webhook",
+              "enum": [
+                "FILE.UPLOADED",
+                "FILE.PREVIEWED",
+                "FILE.DOWNLOADED",
+                "FILE.TRASHED",
+                "FILE.DELETED",
+                "FILE.RESTORED",
+                "FILE.COPIED",
+                "FILE.MOVED",
+                "FILE.LOCKED",
+                "FILE.UNLOCKED",
+                "FILE.RENAMED",
+                "COMMENT.CREATED",
+                "COMMENT.UPDATED",
+                "COMMENT.DELETED",
+                "TASK_ASSIGNMENT.CREATED",
+                "TASK_ASSIGNMENT.UPDATED",
+                "METADATA_INSTANCE.CREATED",
+                "METADATA_INSTANCE.UPDATED",
+                "METADATA_INSTANCE.DELETED",
+                "FOLDER.CREATED",
+                "FOLDER.RENAMED",
+                "FOLDER.DOWNLOADED",
+                "FOLDER.RESTORED",
+                "FOLDER.DELETED",
+                "FOLDER.COPIED",
+                "FOLDER.MOVED",
+                "FOLDER.TRASHED",
+                "WEBHOOK.DELETED",
+                "COLLABORATION.CREATED",
+                "COLLABORATION.ACCEPTED",
+                "COLLABORATION.REJECTED",
+                "COLLABORATION.REMOVED",
+                "COLLABORATION.UPDATED",
+                "SHARED_LINK.DELETED",
+                "SHARED_LINK.CREATED",
+                "SHARED_LINK.UPDATED"
+              ]
             }
           }
-        ]
+        }
       },
       "Webhooks": {
         "title": "Webhooks",
@@ -23585,9 +23297,6 @@
         "allOf": [
           {
             "$ref": "#/components/schemas/WebLink--Mini"
-          },
-          {
-            "x-box-reference-hide": false
           },
           {
             "properties": {
@@ -23819,15 +23528,41 @@
           }
         ]
       },
+      "WebLink--Base": {
+        "title": "Web link (Base)",
+        "type": "object",
+        "description": "Web links are objects that point to URLs. These objects\nare also known as bookmarks within the Box web application.\n\nWeb link objects are treated similarly to file objects,\nthey will also support most actions that apply to regular files.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The unique identifier for this web link",
+            "example": "11446498",
+            "x-box-field-variant": 0
+          },
+          "type": {
+            "type": "string",
+            "description": "`web_link`",
+            "example": "web_link",
+            "enum": [
+              "web_link"
+            ],
+            "x-box-field-variant": 0
+          },
+          "etag": {
+            "type": "string",
+            "example": "1",
+            "description": "The entity tag of this web link. Used with `If-Match`\nheaders.",
+            "x-box-field-variant": 0
+          }
+        }
+      },
       "WebLink--Mini": {
         "title": "Web link (Mini)",
         "type": "object",
-        "x-box-reference-hide": true,
-        "x-box-tag": null,
         "description": "Web links are objects that point to URLs. These objects\nare also known as bookmarks within the Box web application.\n\nWeb link objects are treated similarly to file objects,\nthey will also support most actions that apply to regular files.",
         "allOf": [
           {
-            "$ref": "#/components/schemas/Item--Mini"
+            "$ref": "#/components/schemas/WebLink--Base"
           },
           {
             "properties": {
@@ -23836,14 +23571,6 @@
                 "example": "https://www.example.com/example/1234",
                 "description": "The URL this web link points to",
                 "x-box-field-variant": 1
-              },
-              "type": {
-                "type": "string",
-                "description": "`web_link`",
-                "example": "web_link",
-                "enum": [
-                  "web_link"
-                ]
               },
               "sequence_id": {
                 "allOf": [
@@ -23860,11 +23587,6 @@
                     "nullable": false
                   }
                 ]
-              },
-              "etag": {
-                "type": "string",
-                "example": "1",
-                "description": "The entity tag of this web link. Used with `If-Match`\nheaders."
               },
               "name": {
                 "type": "string",
