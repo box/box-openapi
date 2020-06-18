@@ -1,7 +1,7 @@
 # Notes for Box employees
 
-**[Previous: Contribution guidelines](./index.md)** |
-**[Next: The OpenAPI structure and custom attributes](./structure.md)**
+[**Previous:** Contribution guidelines](./index.md) |
+[**Next:** The OpenAPI structure and custom attributes](./structure.md)
 
 ---
 
@@ -46,4 +46,4 @@ When working on the API specification we recommend the following best practices:
  
 ---
 
-**[Next: The OpenAPI structure and custom attributes](./structure.md)**
+[**Next:** The OpenAPI structure and custom attributes](./structure.md)

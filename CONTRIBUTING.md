@@ -6,7 +6,7 @@ All contributions are welcome to this project.
 
 Before a contribution can be merged into this project, please fill out the
 Contributor License Agreement (CLA). Any new contributor will be prompted to
-sign the CLA by our CLA bot upon creating a pull request.
+sign this agreement our CLA bot upon creating a pull request.
 
 ## Development
 

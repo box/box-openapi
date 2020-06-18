@@ -1,7 +1,7 @@
 # Installation & setup
 
-**[Previous: Contribution guidelines](../CONTRIBUTING.md)** |
-**[Next: Notes for Box employees](./boxers.md)**
+[**Previous:** Contribution guidelines](../CONTRIBUTING.md) |
+[**Next:** Notes for Box employees](./boxers.md)
 
 ---
 
@@ -64,4 +64,4 @@ yarn build
 
 ---
 
-**[Next: Notes for Box employees](./boxers.md)**
+[**Next:** Notes for Box employees](./boxers.md)
