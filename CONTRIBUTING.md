@@ -24,37 +24,6 @@ contributing.
 ==============================
 
 
-### How To: Add a response resource
-
-Response resources are located in the
-`/content/responses/` folder. They are written in [YAML](https://en.wikipedia.org/wiki/YAML).
-
-Before editing any fules, run `yarn start` to start the dev server, Swagger UI
-and tests watcher. Alternatively, just run `npm run watch` to run automatically
-watch and run the linter and tests.
-
-Resources are automatically linted by `yamllinter`, ensuring that they are valid
-YAML. Resources are not automatically included into the spec, as
-you will need to explicitly add them to the `content/schemas.yml` file.
-
-Once resources have been added to this file, they are automatically tested
-to ensure they are valid OpenAPI Specification 3.0, as well spell checking, and
-some other tests.
-
-#### Tips & Tricks
-
-Please make sure:
-
-* Every resource parameter has a type (and optional format)
-* Every resource parameter has a description and example
-* Every resource parameter passes the YAML linter
-* Every resource parameter is separated by a new line to improve readability
-
-Some useful resources:
-
-* [OpenAPI Specification 3.0 (OAS3)](https://swagger.io/specification/)
-* [OAS3 data types](https://swagger.io/docs/specification/data-models/data-types/)
-
 ### How To: Add an endpoint
 
 Endpoints are located in the

@@ -63,7 +63,6 @@ class Swagger {
     this.deleteAllAttributes(swagger, 'x-box-resource-id')
     this.deleteAllAttributes(swagger, 'x-box-field-variant')
     this.deleteAllAttributes(swagger, 'x-tag')
-    this.deleteAllAttributes(swagger, 'x-box-reference-hide')
     this.deleteAllAttributes(swagger, 'x-box-sanitized')
     this.deleteAllAttributes(swagger, 'x-box-has-field-variants')
 
