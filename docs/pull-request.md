@@ -57,7 +57,7 @@ for each feature.
 
 Before sending a pull request, rebase against upstream, such as:
 
-```
+```bash
 git fetch upstream
 git rebase upstream/default
 ```
@@ -87,4 +87,3 @@ helps keep our git history clean and we can more easily track down issues.
 ---
 
 [**Next:** Markdown style guide](./markdown.md)
-

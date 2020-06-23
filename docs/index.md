@@ -9,14 +9,14 @@
 
 This project has a few prerequisites.
 
-* [Git](https://git-scm.com/) to download the source code
-* [Node.js](https://nodejs.org/) for compilation and linting of the API
+* [`Git`](https://git-scm.com/) to download the source code
+* [`Node.js`](https://nodejs.org/) for compilation and linting of the API
   specification. Ideally Node 12 or above.
-* [Yarn] is the Node package manager for this project. It can be installed with
+* [`Yarn`] is the Node package manager for this project. It can be installed with
   `npm i -g yarn` if Node is installed.
-* [Yaml Lint](https://github.com/adrienverge/yamllint) is the linter to validate
-  Yaml files. It can be installed with `brew install yamllint` if your machine
-  has [Homebrew](https://brew.sh) installed.
+* [`YamlLint`](https://github.com/adrienverge/yamllint) is the linter to validate
+  `Yaml` files. It can be installed with `brew install yamllint` if your machine
+  has [`Homebrew`](https://brew.sh) installed.
 
 ## Download and install dependencies
 
@@ -46,12 +46,16 @@ yarn test
 
 Additionally, each of the lint steps can be run individually.
 
+<!-- markdownlint-disable line-length -->
+
 ```sh
 yarn test:spectral # validates the API spec if valid OpenAPI spec
 yarn test:spelling # checks the spelling in the titles and descriptions 
-yarn test:sensitivity # checks the titles and descriptions to ensure we do not use an insensitive language
+yarn test:sensitivity # checks the titles and descriptions to ensure we do not use an insensitive language 
 yarn lint:yaml # validates all *.yml files to ensure they are valid Yaml
 ```
+
+<!-- markdownlint-enable line-length -->
 
 ## Compile the specification
 

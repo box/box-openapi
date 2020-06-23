@@ -12,7 +12,7 @@ issues.
 
 As descriptions get longer then will be easier to read on multiple lines.
 
-Yaml supports multi-line syntax with the `|-` syntax:
+`Yaml` supports multi-line syntax with the `|-` syntax:
 
 ```yaml
 description: |-
@@ -52,15 +52,15 @@ file at the root of the project.
 Ideally the title of an endpoint should start with
 a verb. 
 
-| Endpoint                                  | Verb      | Example          |
-|-------------------------------------------|-----------|------------------|
-| `GET` to get multiple resources           | List      | List comments    |
-| `GET` to get 1 resource                   | Get       | Get comment      |
-| `POST` to create a resource               | Create    | Create comment   |
-| `POST` to create a relationship           | Assign    | Assign policy    |
-| `PUT`/`PATCH` to update a resource        | Update    | Update comment   |
-| `DELETE` to delete a resource permanently | Remove    | Remove comment   |
-| `DELETE` to delete a relationship         | Un-assign | Un-assign policy |
+| Endpoint                                  | Verb     | Example         |
+|-------------------------------------------|----------|-----------------|
+| `GET` to get multiple resources           | List     | List comments   |
+| `GET` to get 1 resource                   | Get      | Get comment     |
+| `POST` to create a resource               | Create   | Create comment  |
+| `POST` to create a relationship           | Assign   | Assign policy   |
+| `PUT`/`PATCH` to update a resource        | Update   | Update comment  |
+| `DELETE` to delete a resource permanently | Remove   | Remove comment  |
+| `DELETE` to delete a relationship         | Unassign | Unassign policy |
 
 ## Add syntax highlighting 
 
@@ -68,12 +68,16 @@ When writing longer code-blocks, add the language of the sample in the
 definition of the code block. This will enable syntax highlighting for the
 sample.
 
+<!-- markdownlint-disable code-fence-style fenced-code-language -->
+
 ~~~
 ```yaml
 ---
 - title: This is Yaml
 ```
 ~~~
+
+<!-- markdownlint-enable code-fence-style fenced-code-language -->
 
 ## Avoid using `a`, `an` and `the` in titles
 

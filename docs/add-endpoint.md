@@ -13,22 +13,25 @@ is written as a [YAML](https://en.wikipedia.org/wiki/YAML) file.
 1. Determine the `operationId` and `tag` of the `endpoint`.
 2. Based on those answer, create a file in `content/paths/{tag}__{operationId}.yml`
 3. Add the default content to the file:
-  * The `operationId`
-  * A short `title` to give the endpoint a short human-readable name. Please do
-    not use `a`, `an`, or `the` in the title, and ideally start the title with
-    `Create`, `Update`, `List`, `Get`, or `Delete`.
-  * A `description` to further elaborate on the title.
-  * A single tag listed under `tags`, and a reference to the same tag in
-    `x-box-tag`. These tags need to match the name and ID of a tags listed in
-    `content/common/tags.yml`.
-  * A list of query, header, or path `parameters`
-  * An optional `requestBody` for any `POST` or `PUT` endpoints.
-  * A list of responses, with at least 1 response in the `2XX` range, and a
-    `default` response that points to a `ClientError`.
+
+   * The `operationId`
+   * A short `title` to give the endpoint a short human-readable name. Please do
+     not use `a`, `an`, or `the` in the title, and ideally start the title with
+     `Create`, `Update`, `List`, `Get`, or `Delete`.
+   * A `description` to further elaborate on the title.
+   * A single tag listed under `tags`, and a reference to the same tag in
+     `x-box-tag`. These tags need to match the name and ID of a tags listed in
+     `content/common/tags.yml`.
+   * A list of query, header, or path `parameters`
+   * An optional `requestBody` for any `POST` or `PUT` endpoints.
+   * A list of responses, with at least 1 response in the `2XX` range, and a
+     `default` response that points to a `ClientError`.
 
 ## `operationId` syntax
 
 The `operationId` is determined as follows:
+
+<!-- markdownlint-disable line-length -->
 
 | Steps                                                 |                                                   |
 |-------------------------------------------------------|---------------------------------------------------|
@@ -36,7 +39,9 @@ The `operationId` is determined as follows:
 | Remove the version number.                            | `GET /files/{file_id}/metadata/{metadata_id}`     |
 | Replace any variable in the path with `id`.           | `GET /files/id/metadata/id`                       |
 | Replace any `/` (except for trailing one) with a `_`. | `GET _files_id_metadata_id`                       |
-| Downcase the `verb` and append to the path.           | `get_files_id_metadata_id`                        |
+| Lower case the `verb` and append to the path.           | `get_files_id_metadata_id`                        |
+
+<!-- markdownlint-enable line-length -->
 
 ## Example
 
@@ -93,9 +98,9 @@ responses:
 ### Parameters & Properties
 
 Almost every endpoint has a list of `parameters` or a `requestBody` with a list
-of `properties. Please make sure that every parameter or property:
+of `properties`. Please make sure that every parameter or property:
 
-* has a `type` and optional `format`, for example `string` and `date-time`.
+* has a `type` and an optional `format`, for example `string` and `date*time`.
 * has a `description` and a realistic `example`
 * has an `enum` of values if the returned values are only a limited list
 

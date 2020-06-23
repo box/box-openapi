@@ -17,12 +17,16 @@ consider trade offs when defining the formats. The formats should be defined in
 a way that balances the chattiness of the client against the cost to generate
 the fields in the response.
 
+<!-- markdownlint-disable line-length -->
+
 | Format     | Variant | File name                                      | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
 |------------|---------|------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `Base`     | `0`     | `<resource>--base.yml`                         | This format includes the basic fields that are always returned for this resource. For most resources these fields are just `type` and `id`. They represent the fields that always appear for this resource, regardless of which `fields` the client requests.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
 | `Mini`     | `1`     | `<resource>--mini.yml`                         | This format includes the most useful fields for a resource that are almost always needed to understand what the resource represents. This format appears in collections, and as sub-resources in a parent resource. For most resources these fields are the Base fields plus anything additional that uniquely represents this item. An example would be the email address of a user, or the name of a folder. It is recommended to restrict this set of fields to the ones that are inexpensive to compute.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | `Standard` | `2`     | `<resource>.yml` or `<resource>--standard.yml` | This format includes the standard set of fields for a resource that are returned by default when the resource is explicitly requested.  This format appears when the client explicitly calls the endpoint to get this resource.  For most resources these fields are the `Mini` fields plus anything any additional that the client would generally need. It is recommended to include fields that most clients would typically find useful for this resource, yet exclude any fields that are expensive to compute.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
 | `Full`     | `3`     | `<resource>.yml`                               | This format represents all the possible fields for a resource that could be returned. This format is generally used in the same endpoints as the `Standard` format, allowing a client to request any fields in the Full response with the help of the fields query parameter. For most resources this format represents the Standard format plus any additional field that is expensive to compute, or has been introduced since the API was released and did not warrant a backwards incompatible change to the API. It is important to note that by using the fields query parameter clients can request individual attributes of the Full format, yet rarely do clients requests all the fields in this format at once. It also worth noting that together with the specified fields in the query, this response will always include the Base fields for the object. In other words, when requesting the tags and label fields of a `Discussion`, the client will also receive the `id` and the `type` in the response. |
+
+<!-- markdownlint-enable line-length -->
 
 ## Cheat sheet
 
@@ -65,8 +69,8 @@ If you answered:
     This will make sure only the full resource gets displayed in the UI.
 * **Yes** to both questions:
   * The resource has a `Base`, `Standard`, `Mini`, and `Full` variant.
-  * Create a `<resource>.yml`, `<resource>--standard.yml`, `<resource>--mini.yml` and
-    `<resource>--base.yml` file.
+  * Create a `<resource>.yml`, `<resource>--standard.yml`,
+    `<resource>--mini.yml` and `<resource>--base.yml` file.
   * The `Full` file inherits from the `Standard` file, which inherits from the
     `Mini` file, which inherits from the `Base` file.
   * List the relevant fields in each variant, and set their
@@ -79,11 +83,11 @@ If you answered:
 
 ## File Names
 
-For every resource, at least the `<resource>.yml` (e.g. `file.yml`) version
-needs to exist. For a resource that supports all 4 variants, the files would
-inherit each other as follows.
+For every resource, at least the `<resource>.yml` (for example `file.yml`)
+version needs to exist. For a resource that supports all 4 variants, the files
+would inherit each other as follows.
 
-```
+```sh
 file.yml -> file--standard.yml -> file-mini.yml -> file-base.yml
 ```
 
@@ -91,7 +95,7 @@ In some cases, there might only be a `Standard` and a `Mini` variant of a
 resource, in these cases the `Standard` file with have the `<resource>.yml`
 name, and the other variants can be omitted.
 
-```
+```sh
 file.yml -> file-mini.yml 
 ```
 
@@ -118,7 +122,6 @@ allOf:
 Within each file it's important to specify a `x-box-field-variant` for each
 property in a schema. This tells the developer documentation what version a
 field belongs to.
-
 
 ## Used variant resources
 
@@ -147,7 +150,7 @@ rendered in-line in the developer documentation, which is desired.
 ### API responses
 
 An API endpoint that supports a `field` query parameter by default returns a
-standard object, but allows for querying additonal fields. The OpenAPI standard
+standard object, but allows for querying additional fields. The OpenAPI standard
 doesn't support specifying which fields are returned by default. 
 
 In our specification we recommend to simply point at the `Full` resource in

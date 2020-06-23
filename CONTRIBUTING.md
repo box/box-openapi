@@ -33,9 +33,9 @@ sites, as well as the Postman collections.
 
 ## Translation
 
-Once every few weeks the `en` branch is snapshotted to the `en-snapshot` branch
-and imported into out our in-house translation system (Moji) and sent off for
-translation.
+Once every few weeks a snapshot of the `en` branch is created on the
+`en-snapshot` branch and imported into out our in-house translation system
+(`Moji`) and sent off for translation.
 
 Once the translation is completed, the translated content is pushed to the `jp`
 branch, which then triggers a rebuild of the Japanese developer documentation.
