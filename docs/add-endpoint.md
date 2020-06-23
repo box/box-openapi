@@ -90,6 +90,15 @@ responses:
 
 ```
 
+### Parameters & Properties
+
+Almost every endpoint has a list of `parameters` or a `requestBody` with a list
+of `properties. Please make sure that every parameter or property:
+
+* has a `type` and optional `format`, for example `string` and `date-time`.
+* has a `description` and a realistic `example`
+* has an `enum` of values if the returned values are only a limited list
+
 ## Additional reads
 
 To learn more about the OpenAPI specification and creating endpoints, we

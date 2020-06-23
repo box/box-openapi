@@ -73,7 +73,6 @@ reading the following resources.
 * [OpenAPI Specification 3.0 (OAS3)](https://swagger.io/specification/)
 * [OAS3 data types](https://swagger.io/docs/specification/data-models/data-types/)
 
-
 ---
 
 [**Next:** Base, mini, standard, and full API resources](./variants.md)

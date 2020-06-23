@@ -21,8 +21,18 @@ The older and incomplete Swagger 2.0 specification is stil available on the [Swa
 
 ## Development & Contribution
 
-Please follow the [contribution guidelines](./CONTRIBUTING.md) when contributing to
-the source of this project.
+Please follow the [contribution guidelines](./CONTRIBUTING.md) when contributing
+to the source of this project.
+
+1. [Installation & setup](./docs/index.md)
+1. [Notes for Box employees](./docs/boxers.md)
+1. [The OpenAPI structure and custom attributes](./docs/structure.md)
+1. [Adding a new API resource](./docs/add-resource.md)
+1. [Base, mini, standard, and full API resources](./docs/variants.md)
+1. [Adding a new API endpoint](./docs/add-endpoint.md)
+1. [Contributing a pull request](./docs/pull-request.md)
+1. [Markdown styleguide](./docs/markdown.md)
+
 
 ## Usage & License
 
