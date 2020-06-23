@@ -108,10 +108,11 @@ allOf:
   - title: Typed Item
   - description: A typed item
   # Add another field
-  - type: 
-      type: string
-      description: The type of this item
-      example: file
+  - properties:
+      type: 
+        type: string
+        description: The type of this item
+        example: file
 ```
 
 ## Custom OpenAPI attributes

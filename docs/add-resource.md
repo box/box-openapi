@@ -8,23 +8,31 @@
 Response schemas are located in the `content/responses/` folder. Every response
 is written as a [YAML](https://en.wikipedia.org/wiki/YAML) file.
 
-## Steps to add a resource schema
+## Quick start
 
-1. Determine the type of the resource, either a request, response, callback, or
-   other schema.
-2. Based on that answer, create a file in `content/schemas/*`, `content/errors/*`,
-   `content/requests/*` ore `content/responses/*`. An example would be
-   `content/responses/file.yml`.
+1. Determine the type of the `resource`, either a
+  - `request`
+  - `response`
+  - `error`
+  - `callback`
+  - or generic `schema`
+2. Based on that answer, create a file in 
+  - `content/requests/*`
+  - `content/responses/*`
+  - `content/errors/*`,
+  - `content/callbacks/*`
+  - or `content/schemas/*`
+  - An example would be `content/responses/file.yml`.
 3. Add the default content to the file:
-   * A short `title` to give the resource a short human-readable name. Please do
-     not use `a`, `an`, or `the` in the title.
-   * A `description` to further elaborate on the title.
-   * A `type`, which in most cases is either an `object` or an `array`.
-   * A unique `x-box-resource-id` if you want the schema to be listed in the
-     public developer documentation. Ommitting this will hide the resource.
-   * A a list of `properties` for each of the fields of the resource.
+  * A short `title` to give the resource a short human-readable name. Please do
+    not use `a`, `an`, or `the` in the title.
+  * A `description` to further elaborate on the title.
+  * A `type`, which in most cases is either an `object` or an `array`.
+  * A unique `x-box-resource-id` if you want the schema to be listed in the
+    public developer documentation. Ommitting this will hide the resource.
+  * A a list of `properties` for each of the fields of the resource.
 
-## Resource example
+### Example
 
 ```yml
 ---
@@ -47,7 +55,7 @@ properties:
       - file
 ```
 
-## Properties
+### Properties
 
 Almost every schema has a list of `properties`. Please make sure that every
 property:
@@ -57,7 +65,7 @@ property:
 * has an `enum` of values if the returned values are only a limited list
 * is separated by a new line to improve readability
 
-## Useful things to read
+## Additional reads
 
 To learn more about the OpenAPI specification and creating schemas, we recommend
 reading the following resources.
