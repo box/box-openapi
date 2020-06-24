@@ -69,7 +69,7 @@
             "description": "ユーザーがアプリケーション権限を許可または拒否した後にブラウザがリダイレクトされるURL。このURLは、アプリケーションの設定に含まれるダイレクトURLと一致している必要があります。このURLは有効なHTTPS URLでなければならず、OAuth 2.0フローの次の手順を完了するには、このリダイレクトを処理できる状態になっている必要があります。", 
             "in": "query", 
             "example": "http://example.com/auth/callback", 
-            "required": true, 
+            "required": false, 
             "schema": {
               "type": "string", 
               "format": "url"
@@ -7242,12 +7242,12 @@
                 "properties": {
                   "message": {
                     "type": "string", 
-                    "description": "コメントのテキスト。\n\n特定のユーザーにメンションするには、\n代わりに`tagged_message`パラメータを使用します。", 
+                    "description": "コメントのテキスト。\n\n特定のユーザーをメンションするには、\n代わりに`tagged_message`パラメータを使用します。", 
                     "example": "Review completed!"
                   }, 
                   "tagged_message": {
                     "type": "string", 
-                    "description": "メッセージ内のどこかで`@[user_id:name]`を使用して他のユーザーにメンションしているコメントのテキスト。メンションされたユーザーには、メンションされたことを知らせるメール通知が送信されます。\n\n`user_id`はターゲットユーザーのIDで、`name`には任意のカスタムフレーズを使用できます。Box UIでは、この名前がユーザーのプロフィールにリンクされます。\n\n他のユーザーにメンションしていない場合は、代わりに`message`を使用します。", 
+                    "description": "メッセージ内のどこかで`@[user_id:name]`を使用して他のユーザーをメンションしているコメントのテキスト。メンションされたユーザーには、メンションされたことを知らせるメール通知が送信されます。\n\n`user_id`はターゲットユーザーのIDで、`name`には任意のカスタムフレーズを使用できます。Box UIでは、この名前がユーザーのプロフィールにリンクされます。\n\n他のユーザーをメンションしていない場合は、代わりに`message`を使用します。", 
                     "example": "@[1234:John] Review completed!"
                   }, 
                   "item": {
@@ -7392,6 +7392,9 @@
             "application/json": {
               "schema": {
                 "type": "object", 
+                "required": [
+                  "role"
+                ], 
                 "properties": {
                   "role": {
                     "type": "string", 
@@ -7421,7 +7424,7 @@
                   "expires_at": {
                     "type": "string", 
                     "format": "date-time", 
-                    "description": "コラボレーションの有効期限を設定します。この日付になると、項目から自動的にコラボレーションが削除されます。", 
+                    "description": "コレボレーションの有効期限を更新します。この日付になると、項目から自動的にコラボレーションが削除されます。\n\nこの機能が動作するのは、**管理コンソール**の[**Enterprise設定**]で**[招待したコラボレータを自動的に削除する]の[フォルダの所有者に有効期限の延長を許可する]**の設定が有効になっている場合のみです。この設定が有効になっていない場合、コラボレーションに有効期限を設定できず、このフィールドの値によってエラーが返されます。\n\nさらに、コラボレーションに有効期限を指定できるのは、[招待したコラボレータを自動的に削除する]の設定を有効にした後に作成した場合のみです。", 
                     "example": "2019-08-29T23:59:00-07:00"
                   }, 
                   "can_view_path": {
@@ -7451,6 +7454,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Collaboration"
+                }
+              }
+            }
+          }, 
+          "403": {
+            "description": "認証済みユーザーにコラボレーションを更新するための適切な権限がない場合にエラーを返します。\n\nさらに、このエラーは、会社の管理ダッシュボードで**[招待したコラボレータを自動的に削除する]の[フォルダの所有者に有効期限の延長を許可する]**の設定が有効になっていない場合にコラボレーションの`expires_at`フィールドを更新しようとすると発生する可能性があります。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
                 }
               }
             }
@@ -7715,6 +7728,12 @@
                     "type": "boolean", 
                     "description": "招待されたユーザーが招待に関連付けられているフォルダへの親パス全体を見ることができるかどうかを示します。招待されたユーザーには親フォルダ内の権限が付与されないため、自身が参加しているコラボレーションに関係しないコンテンツを閲覧することはできません。\n\nこれにより、招待されたユーザーの[**すべてのファイル**]ページの読み込みに必要な時間が有意に増加することに注意してください。`can_view_path`が有効になっているコラボレーションの数を1ユーザーあたり1,000に制限することをお勧めします。", 
                     "example": true
+                  }, 
+                  "expires_at": {
+                    "type": "string", 
+                    "format": "date-time", 
+                    "description": "コレボレーションの有効期限を設定します。この日付になると、項目から自動的にコラボレーションが削除されます。\n\nこの機能が動作するのは、**管理コンソール**の[**Enterprise設定**]で**[招待したコラボレータを自動的に削除する]の[フォルダの所有者に有効期限の延長を許可する]**の設定が有効になっている場合のみです。この設定が有効になっていない場合、コラボレーションに有効期限を設定できず、このフィールドの値によってエラーが返されます。", 
+                    "example": "2019-08-29T23:59:00-07:00"
                   }
                 }
               }
@@ -12880,7 +12899,8 @@
                   "retention_length": {
                     "type": "string", 
                     "format": "int32", 
-                    "example": "0", 
+                    "example": "365", 
+                    "minimum": 1, 
                     "description": "リテンションポリシーの期間。これはリテンションポリシーがコンテンツに割り当てられた後、有効である日数を示します。ポリシーの`policy_type`が`indefinite`である場合は、`retention_length`も`indefinite`になります。"
                   }, 
                   "can_owner_extend_retention": {
@@ -16157,7 +16177,7 @@
           "marker": {
             "type": "string", 
             "description": "次ページをリクエストするために使用するマーカー。", 
-            "example": "\"AAAAAmVYB1FWec8GH6yWu2nwmanfMh07IyYInaa7DZDYjgO1H4KoLW29vPlLY173OKsci6h6xGh61gG73gnaxoS+o0BbI1/h6le6cikjlupVhASwJ2Cj0tOD9wlnrUMHHw3/ISf+uuACzrOMhN6d5fYrbidPzS6MdhJOejuYlvsg4tcBYzjauP3+VU51p77HFAIuObnJT0ff\""
+            "example": "AAAAAmVYB1FWec8GH6yWu2nwmanfMh07IyYInaa7DZDYjgO1H4KoLW29vPlLY173OKsci6h6xGh61gG73gnaxoS+o0BbI1/h6le6cikjlupVhASwJ2Cj0tOD9wlnrUMHHw3/ISf+uuACzrOMhN6d5fYrbidPzS6MdhJOejuYlvsg4tcBYzjauP3+VU51p77HFAIuObnJT0ff"
           }
         }
       }, 
@@ -16287,50 +16307,11 @@
           }
         }
       }, 
-      "Skill": {
-        "title": "スキル", 
-        "x-box-resource-id": "skill", 
-        "description": "スキルを表すオブジェクト", 
-        "allOf": [
-          {
-            "title": "Reference", 
-            "description": "オブジェクトの最も基本的な参照", 
-            "type": "object", 
-            "properties": {
-              "id": {
-                "type": "string", 
-                "description": "このオブジェクトの一意の識別子", 
-                "example": "11446498"
-              }
-            }
-          }, 
-          {
-            "properties": {
-              "type": {
-                "type": "string", 
-                "description": "`skill`", 
-                "example": "skill", 
-                "enum": [
-                  "skill"
-                ]
-              }, 
-              "name": {
-                "type": "string", 
-                "description": "スキルの名前", 
-                "example": "Hello World Skill"
-              }, 
-              "api_key": {
-                "type": "string", 
-                "description": "アプリケーションのクライアントID", 
-                "example": "hxel2s12wd2h9r8ne103c4gjbqefofih"
-              }
-            }
-          }
-        ]
-      }, 
       "SkillInvocation": {
         "title": "スキル呼び出し", 
         "x-box-resource-id": "skill_invocation", 
+        "x-box-tag": "skills", 
+        "x-box-reference-category": "skills", 
         "description": "カスタムスキルの`invocation_url`に送信されるBoxスキルのペイロード。", 
         "allOf": [
           {
@@ -16363,7 +16344,44 @@
               "skill": {
                 "allOf": [
                   {
-                    "$ref": "#/components/schemas/Skill"
+                    "title": "スキル", 
+                    "description": "スキルを表すオブジェクト", 
+                    "allOf": [
+                      {
+                        "title": "Reference", 
+                        "description": "オブジェクトの最も基本的な参照", 
+                        "type": "object", 
+                        "properties": {
+                          "id": {
+                            "type": "string", 
+                            "description": "このオブジェクトの一意の識別子", 
+                            "example": "11446498"
+                          }
+                        }
+                      }, 
+                      {
+                        "properties": {
+                          "type": {
+                            "type": "string", 
+                            "description": "`skill`", 
+                            "example": "skill", 
+                            "enum": [
+                              "skill"
+                            ]
+                          }, 
+                          "name": {
+                            "type": "string", 
+                            "description": "スキルの名前", 
+                            "example": "Hello World Skill"
+                          }, 
+                          "api_key": {
+                            "type": "string", 
+                            "description": "アプリケーションのクライアントID", 
+                            "example": "hxel2s12wd2h9r8ne103c4gjbqefofih"
+                          }
+                        }
+                      }
+                    ]
                   }, 
                   {
                     "description": "この呼び出しをトリガーしたスキル"
@@ -16560,9 +16578,11 @@
           }
         ]
       }, 
-      "WebhookEvent": {
+      "WebhookInvocation": {
         "title": "Webhook呼び出し", 
         "x-box-resource-id": "webhook_invocation", 
+        "x-box-tag": "webhooks", 
+        "x-box-reference-category": "webhooks", 
         "description": "イベント発生時にWebhookアドレスに送信されるイベント。", 
         "allOf": [
           {
@@ -18514,24 +18534,9 @@
                         "description": "この分類の意味の説明。"
                       }, 
                       "color": {
-                        "type": "object", 
-                        "example": {
-                          "background": "#FF0000", 
-                          "foreground": "#FF00CC"
-                        }, 
-                        "description": "ユーザーインターフェイスでの分類ラベルの表示に使用できる前景色と背景色。色は、Boxウェブアプリで分類を作成した管理者または共同管理者によって定義されます。", 
-                        "properties": {
-                          "background": {
-                            "type": "string", 
-                            "example": "#FF0000", 
-                            "description": "ユーザーインターフェイスでの分類の表示に使用できる16進数で表される背景色。"
-                          }, 
-                          "forefround": {
-                            "type": "string", 
-                            "example": "#FF00CC", 
-                            "description": "ユーザーインターフェイスでの分類の表示に使用できる16進数で表される前景色(またはテキストの色)。"
-                          }
-                        }
+                        "type": "string", 
+                        "example": "#FF0000", 
+                        "description": "ユーザーインターフェイスでの分類ラベルの表示に使用される色。色は、Boxウェブアプリで分類を作成した管理者または共同管理者によって定義されます。"
                       }
                     }
                   }, 
@@ -18553,7 +18558,7 @@
                     "type": "string", 
                     "example": "Ellis Wiggins", 
                     "nullable": false, 
-                    "description": "ファイルをアップロードしたユーザーの表示名。ほとんどの場合、これはアップロード時点のログインユーザーの名前です。\n\nこのファイルをアップロードしたのがログアウトしていたユーザーで、アップロード時にメールアドレスが指定された場合は、このフィールドによってそのメールアドレスが返されます。\n\nメールアドレスが指定されなかったその他すべての匿名のケースでは、このフィールドの値は、デフォルトで「匿名アップロードユーザー」になります。"
+                    "description": "ファイルをアップロードしたユーザーの表示名。ほとんどの場合、これはアップロード時点のログインユーザーの名前です。\n\nこのファイルをアップロードしたのがログアウトしていたユーザーで、アップロード時にメールアドレスが指定された場合は、このフィールドによってそのメールアドレスが返されます。\n\nこのファイルが**ファイルリクエストフォーム**を使用してアップロードされた場合、このフィールドは、`File Request`という値を返すように設定されます。メールアドレスは追加されません。\n\nメールアドレスが指定されなかったその他すべての匿名のケースでは、このフィールドの値は、デフォルトで「匿名アップロードユーザー」になります。"
                   }, 
                   {
                     "x-box-field-variant": 3
@@ -19099,7 +19104,7 @@
                     "type": "string", 
                     "example": "Ellis Wiggins", 
                     "nullable": false, 
-                    "description": "ファイルをアップロードしたユーザーの表示名。ほとんどの場合、これはアップロード時点のログインユーザーの名前です。\n\nこのファイルをアップロードしたのがログアウトしていたユーザーで、アップロード時にメールアドレスが指定された場合は、このフィールドによってそのメールアドレスが返されます。\n\nメールアドレスが指定されなかったその他すべての匿名のケースでは、このフィールドの値は、デフォルトで「匿名アップロードユーザー」になります。"
+                    "description": "ファイルをアップロードしたユーザーの表示名。ほとんどの場合、これはアップロード時点のログインユーザーの名前です。\n\nこのファイルをアップロードしたのがログアウトしていたユーザーで、アップロード時にメールアドレスが指定された場合は、このフィールドによってそのメールアドレスが返されます。\n\nこのファイルが**ファイルリクエストフォーム**を使用してアップロードされた場合、このフィールドは、`File Request`という値を返すように設定されます。メールアドレスは追加されません。\n\nメールアドレスが指定されなかったその他すべての匿名のケースでは、このフィールドの値は、デフォルトで「匿名アップロードユーザー」になります。"
                   }, 
                   {
                     "x-box-field-variant": 2
@@ -19716,24 +19721,9 @@
                         "description": "この分類の意味の説明。"
                       }, 
                       "color": {
-                        "type": "object", 
-                        "example": {
-                          "background": "#FF0000", 
-                          "foreground": "#FF00CC"
-                        }, 
-                        "description": "ユーザーインターフェイスでの分類ラベルの表示に使用できる前景色と背景色。色は、Boxウェブアプリで分類を作成した管理者または共同管理者によって定義されます。", 
-                        "properties": {
-                          "background": {
-                            "type": "string", 
-                            "example": "#FF0000", 
-                            "description": "ユーザーインターフェイスでの分類の表示に使用できる16進数で表される背景色。"
-                          }, 
-                          "forefround": {
-                            "type": "string", 
-                            "example": "#FF00CC", 
-                            "description": "ユーザーインターフェイスでの分類の表示に使用できる16進数で表される前景色(またはテキストの色)。"
-                          }
-                        }
+                        "type": "string", 
+                        "example": "#FF0000", 
+                        "description": "ユーザーインターフェイスでの分類ラベルの表示に使用される色。色は、Boxウェブアプリで分類を作成した管理者または共同管理者によって定義されます。"
                       }
                     }
                   }, 
@@ -21864,7 +21854,8 @@
               "retention_length": {
                 "type": "string", 
                 "format": "int32", 
-                "example": "0", 
+                "example": "365", 
+                "minimum": 1, 
                 "description": "リテンションポリシーの期間。これはリテンションポリシーがコンテンツに割り当てられた後、有効である日数を示します。ポリシーの`policy_type`が`indefinite`である場合は、`retention_length`も`indefinite`になります。", 
                 "x-box-field-variant": 1
               }, 
