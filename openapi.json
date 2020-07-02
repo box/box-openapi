@@ -20241,27 +20241,7 @@
       "Item": {
         "title": "Item",
         "type": "object",
-        "description": "A generic representation of a file, folder, user or enterprise",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/Item--Mini"
-          },
-          {
-            "properties": {
-              "url": {
-                "type": "string",
-                "example": "https://www.example.com/example/1234",
-                "description": "The URL this item points to",
-                "x-box-field-variant": 1
-              }
-            }
-          }
-        ]
-      },
-      "Item--Mini": {
-        "title": "Item (Mini)",
-        "type": "object",
-        "description": "A generic mini representation of a file, folder, or web link.",
+        "description": "A generic representation of a file, folder, or web link.",
         "properties": {
           "id": {
             "type": "string",
@@ -20303,6 +20283,28 @@
             "type": "string",
             "description": "The name of the item.",
             "example": "Pictures"
+          },
+          "sha1": {
+            "type": "string",
+            "format": "digest",
+            "nullable": false,
+            "example": "85136C79CBF9FE36BB9D05D0639C70C265C18D37",
+            "description": "The SHA1 hash of the item. This can be used to compare the contents\nof a file or web link with another item."
+          },
+          "file_version": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FileVersion--Mini"
+              },
+              {
+                "description": "The information about the current version of the file. This is only\nreturned for items of type `file`."
+              }
+            ]
+          },
+          "url": {
+            "type": "string",
+            "example": "https://www.example.com/example/1234",
+            "description": "The URL this item points to. This is only\nreturned for items of type `web_link`."
           }
         }
       },
@@ -20367,17 +20369,7 @@
                 "description": "The items in this collection.",
                 "type": "array",
                 "items": {
-                  "oneOf": [
-                    {
-                      "$ref": "#/components/schemas/File"
-                    },
-                    {
-                      "$ref": "#/components/schemas/Folder"
-                    },
-                    {
-                      "$ref": "#/components/schemas/WebLink"
-                    }
-                  ]
+                  "$ref": "#/components/schemas/Item"
                 }
               }
             }
@@ -22598,24 +22590,6 @@
                 "type": "string",
                 "example": "my-user-1234",
                 "description": "An external identifier for an app user, which can be used to look up\nthe user. This can be used to tie user IDs from external identity\nproviders to Box users."
-              },
-              "notification_email": {
-                "x-box-field-variant": 2,
-                "type": "object",
-                "description": "An alternate notification email address to which email\nnotifications are sent. When it's confirmed, this will be\nthe email address to which notifications are sent instead of\nto the primary email address.",
-                "nullable": true,
-                "properties": {
-                  "email": {
-                    "type": "string",
-                    "example": "notifications@example.com",
-                    "description": "The email address to send the notifications to."
-                  },
-                  "is_confirmed": {
-                    "type": "boolean",
-                    "example": true,
-                    "description": "Specifies if this email address has been confirmed."
-                  }
-                }
               }
             }
           }
@@ -22781,6 +22755,24 @@
                 "type": "string",
                 "description": "URL of the user’s avatar image",
                 "example": "https://www.box.com/api/avatar/large/181216415"
+              },
+              "notification_email": {
+                "x-box-field-variant": 2,
+                "type": "object",
+                "description": "An alternate notification email address to which email\nnotifications are sent. When it's confirmed, this will be\nthe email address to which notifications are sent instead of\nto the primary email address.",
+                "nullable": true,
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "example": "notifications@example.com",
+                    "description": "The email address to send the notifications to."
+                  },
+                  "is_confirmed": {
+                    "type": "boolean",
+                    "example": true,
+                    "description": "Specifies if this email address has been confirmed."
+                  }
+                }
               }
             }
           }
