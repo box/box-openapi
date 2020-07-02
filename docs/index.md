@@ -12,8 +12,8 @@ This project has a few prerequisites.
 * [`Git`](https://git-scm.com/) to download the source code
 * [`Node.js`](https://nodejs.org/) for compilation and linting of the API
   specification. Ideally Node 12 or above.
-* [`Yarn`] is the Node package manager for this project. It can be installed with
-  `npm i -g yarn` if Node is installed.
+* [`Yarn`](https://yarnpkg.com/) is the Node package manager for this project.
+  It can be installed with `npm i -g yarn` if Node is installed.
 * [`YamlLint`](https://github.com/adrienverge/yamllint) is the linter to validate
   `Yaml` files. It can be installed with `brew install yamllint` if your machine
   has [`Homebrew`](https://brew.sh) installed.

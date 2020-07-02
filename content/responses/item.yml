@@ -4,13 +4,61 @@ title: Item
 type: object
 
 description: |-
-  A generic representation of a file, folder, user or enterprise
+  A generic representation of a file, folder, or web link.
 
-allOf:
-  - $ref: '#/components/schemas/Item--Mini'
-  - properties:
-      url:
-        type: string
-        example: https://www.example.com/example/1234
-        description: The URL this item points to
-        x-box-field-variant: 1
+properties:
+  id:
+    type: string
+    description: The unique identifier for this item
+    example: "11446498"
+
+  type:
+    description: |-
+      The type of this item
+    type: string
+    example: file
+    enum:
+      - file
+      - folder
+      - web_link
+
+  sequence_id:
+    allOf:
+      - $ref: "../attributes/sequence_id.yml"
+      - x-box-field-variant: 1
+      - nullable: false
+
+  etag:
+    type: string
+    example: "1"
+    description: |-
+      The entity tag of this item. Used with `If-Match` headers.
+      May be `null` for some folders such as root or trash.
+
+  name:
+    type: string
+    description: The name of the item.
+    example: "Pictures"
+
+  sha1:
+    type: string
+    format: digest
+    nullable: false
+    example: 85136C79CBF9FE36BB9D05D0639C70C265C18D37
+    description: |-
+      The SHA1 hash of the item. This can be used to compare the contents
+      of a file or web link with another item.
+
+  file_version:
+    allOf:
+      - $ref: '#/components/schemas/FileVersion--Mini'
+      - description: |-
+          The information about the current version of the file. This is only
+          returned for items of type `file`.
+
+  url:
+    type: string
+    example: https://www.example.com/example/1234
+    description: |-
+      The URL this item points to. This is only
+      returned for items of type `web_link`.
