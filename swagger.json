@@ -11707,7 +11707,7 @@
               "description": "The items in this collection.",
               "type": "array",
               "items": {
-                "$ref": "#/definitions/File"
+                "$ref": "#/definitions/Item"
               }
             }
           }
@@ -12812,20 +12812,6 @@
             "external_app_user_id": {
               "type": "string",
               "description": "An external identifier for an app user, which can be used to look up\nthe user. This can be used to tie user IDs from external identity\nproviders to Box users."
-            },
-            "notification_email": {
-              "type": "object",
-              "description": "An alternate notification email address to which email\nnotifications are sent. When it's confirmed, this will be\nthe email address to which notifications are sent instead of\nto the primary email address.",
-              "properties": {
-                "email": {
-                  "type": "string",
-                  "description": "The email address to send the notifications to."
-                },
-                "is_confirmed": {
-                  "type": "boolean",
-                  "description": "Specifies if this email address has been confirmed."
-                }
-              }
             }
           }
         }
@@ -15270,6 +15256,63 @@
         }
       ]
     },
+    "Item": {
+      "title": "Item",
+      "type": "object",
+      "description": "A generic representation of a file, folder, or web link.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The unique identifier for this item"
+        },
+        "type": {
+          "description": "The type of this item",
+          "type": "string",
+          "enum": [
+            "file",
+            "folder",
+            "web_link"
+          ]
+        },
+        "sequence_id": {
+          "allOf": [
+            {
+              "type": "string",
+              "description": "A numeric identifier that represents the most recent user event\nthat has been applied to this item.\n\nThis can be used in combination with the `GET /events`-endpoint\nto filter out user events that would have occurred before this\nidentifier was read.\n\nAn example would be where a Box Drive-like application\nwould fetch an item via the API, and then listen to incoming\nuser events for changes to the item. The application would\nignore any user events where the `sequence_id` in the event\nis smaller than or equal to the `sequence_id` in the originally\nfetched resource."
+            },
+            {},
+            {}
+          ]
+        },
+        "etag": {
+          "type": "string",
+          "description": "The entity tag of this item. Used with `If-Match` headers.\nMay be `null` for some folders such as root or trash."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the item."
+        },
+        "sha1": {
+          "type": "string",
+          "format": "digest",
+          "description": "The SHA1 hash of the item. This can be used to compare the contents\nof a file or web link with another item."
+        },
+        "file_version": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/FileVersion--Mini"
+            },
+            {
+              "description": "The information about the current version of the file. This is only\nreturned for items of type `file`."
+            }
+          ]
+        },
+        "url": {
+          "type": "string",
+          "description": "The URL this item points to. This is only\nreturned for items of type `web_link`."
+        }
+      }
+    },
     "MetadataQueryResult": {
       "title": "Metadata query search result",
       "type": "object",
@@ -15556,6 +15599,20 @@
             "avatar_url": {
               "type": "string",
               "description": "URL of the user’s avatar image"
+            },
+            "notification_email": {
+              "type": "object",
+              "description": "An alternate notification email address to which email\nnotifications are sent. When it's confirmed, this will be\nthe email address to which notifications are sent instead of\nto the primary email address.",
+              "properties": {
+                "email": {
+                  "type": "string",
+                  "description": "The email address to send the notifications to."
+                },
+                "is_confirmed": {
+                  "type": "boolean",
+                  "description": "Specifies if this email address has been confirmed."
+                }
+              }
             }
           }
         }
