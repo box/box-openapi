@@ -8,7 +8,7 @@ class SwaggerConverter {
    * to a Swagger 2.0 file
    */
   async writeSpecification(folder) {
-    const openapiFilename = `build/openapi/openapi.json`
+    const openapiFilename = `compiled/openapi/openapi.json`
     if (!fs.existsSync(openapiFilename)) { return }
 
     let openapi = JSON.parse(fs.readFileSync(openapiFilename))

@@ -11,7 +11,7 @@ endpoint (**path**) and every object model (**schema**).
 
 The OpenAPI specification is **build** by starting at the `content/openapi.yml`
 file, resolving every reference (signified by `$ref` fields) to other files, and
-writing out the compiled specification to `build/openapi.json`
+writing out the compiled specification to `compiled/openapi/openapi.json`
 
 ## Project structure
 
@@ -51,7 +51,7 @@ The following is the rough layout of this project.
   - `attributes.` - A list of re-usable fields, parameters, and other little
       tidbits. The do not represent entire schemas, but instead only represent
       smaller parts of the API spec.
-- `build/` - This is where the compiled `openapi.json` is written to after
+- `compiled/` - This is where the compiled `openapi.json` is written to after
   running `yarn build`.
 - `src/` - The code base that includes our linting code, as well as our
   functional tests.
@@ -63,7 +63,8 @@ Across the API spec we use references (`$ref`) to other files as well as other
 parts of the OpenAPI spec.
 
 - To link to a request, response, error, callback, or other schema you can use
-  the following syntax `$ref: '#/components/schemas/User'`. This requires `User`
+  the following syntax `$ref: '#/components/schemas/User'`. This
+  requires `User`
   to exist in the `content/schemas.yml`, and for it to have a reference to a
   valid file itself. These references will **not** be resolved during the build
   process, and the final `openapi.json` will have all these references in place.

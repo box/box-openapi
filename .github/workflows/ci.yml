@@ -10,8 +10,6 @@ on:
     branches: [ default, staging ]
 
 jobs:
-
-
   # The lint job checks that all content is sanitized,
   # spell checked, and without any obvious dead links
   lint:
@@ -51,7 +49,7 @@ jobs:
 
     - name: Lint the content
       run: |
-        yarn test
+        yarn lint
 
   # The deploy task actually deploys any changes to the en branch
   deploy:
@@ -85,21 +83,21 @@ jobs:
         with:
           ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BRANCH: en
-          FOLDER: build/openapi
+          FOLDER: compiled/openapi
 
       - name: Push GH pages for redundancy
         uses: JamesIves/github-pages-deploy-action@releases/v3
         with:
           ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BRANCH: gh-pages
-          FOLDER: build/openapi
+          FOLDER: compiled/openapi
 
       - name: Push Swagger 2.0 backport
         uses: JamesIves/github-pages-deploy-action@releases/v3
         with:
           ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BRANCH: swagger-2.0
-          FOLDER: build/swagger
+          FOLDER: compiled/swagger
 
       - name: Notify other repositories of update
         uses: peter-evans/repository-dispatch@v1
@@ -165,7 +163,7 @@ jobs:
         with:
           ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BRANCH: en-staging
-          FOLDER: build/openapi
+          FOLDER: compiled/openapi
 
       - name: 'Trigger Netlify deployment'
         uses: jasongitmail/fast-webhook@v1

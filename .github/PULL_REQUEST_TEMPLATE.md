@@ -14,7 +14,7 @@ Re `APIWG-#` (`Jira` ticket)
 
 - [ ] My code follows the style guidelines of this project
 - [ ] I have performed a self-review of my own changes
-- [ ] I have run `yarn test` to make sure my changes pass all linters
+- [ ] I have run `yarn lint` to make sure my changes pass all linters
 - [ ] I have pulled the latest changes from the upstream developer branch
 
 ## Contribution guidelines

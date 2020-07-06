@@ -70,7 +70,7 @@ merge issues.
 Before opening a pull request, make sure to run the linters and spell checkers.
 
 ```bash
-yarn test
+yarn lint
 ```
 
 Resolve any warnings and errors before making a pull request.

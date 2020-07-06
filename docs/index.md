@@ -41,7 +41,7 @@ validates the API specification is correct, has no spelling mistakes, and that
 there are no obvious incorrect links.
 
 ```sh
-yarn test
+yarn lint
 ```
 
 Additionally, each of the lint steps can be run individually.
@@ -49,9 +49,9 @@ Additionally, each of the lint steps can be run individually.
 <!-- markdownlint-disable line-length -->
 
 ```sh
-yarn test:spectral # validates the API spec if valid OpenAPI spec
-yarn test:spelling # checks the spelling in the titles and descriptions 
-yarn test:sensitivity # checks the titles and descriptions to ensure we do not use an insensitive language 
+yarn lint:spectral # validates the API spec if valid OpenAPI spec
+yarn lint:spelling # checks the spelling in the titles and descriptions 
+yarn lint:sensitivity # checks the titles and descriptions to ensure we do not use an insensitive language 
 yarn lint:yaml # validates all *.yml files to ensure they are valid Yaml
 ```
 
