@@ -52,7 +52,7 @@ jobs:
         yarn lint
 
   # The deploy task actually deploys any changes to the en branch
-  deploy:
+  push-to-en:
     # We run this on the latest ubuntu
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/default'
@@ -79,25 +79,28 @@ jobs:
           yarn build:swagger
 
       - name: Push compiled content
-        uses: JamesIves/github-pages-deploy-action@releases/v3
-        with:
-          ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: s0/git-publish-subdir-action@develop
+        env:
+          REPO: self
           BRANCH: en
           FOLDER: compiled/openapi
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Push GH pages for redundancy
-        uses: JamesIves/github-pages-deploy-action@releases/v3
-        with:
-          ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: s0/git-publish-subdir-action@develop
+        env:
+          REPO: self
           BRANCH: gh-pages
           FOLDER: compiled/openapi
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Push Swagger 2.0 backport
-        uses: JamesIves/github-pages-deploy-action@releases/v3
-        with:
-          ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: s0/git-publish-subdir-action@develop
+        env:
+          REPO: self
           BRANCH: swagger-2.0
           FOLDER: compiled/swagger
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Notify other repositories of update
         uses: peter-evans/repository-dispatch@v1
@@ -133,7 +136,7 @@ jobs:
           args: "Error running `deploy` job in OpenAPI CI"
 
   # The deploy task actually deploys any changes to the en-staging branch
-  deploy-staging:
+  push-to-en-staging:
     # We run this on the latest ubuntu
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/staging'
@@ -159,11 +162,12 @@ jobs:
           yarn build
 
       - name: Push compiled content
-        uses: JamesIves/github-pages-deploy-action@releases/v3
-        with:
-          ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: s0/git-publish-subdir-action@develop
+        env:
+          REPO: self
           BRANCH: en-staging
           FOLDER: compiled/openapi
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 'Trigger Netlify deployment'
         uses: jasongitmail/fast-webhook@v1
@@ -191,7 +195,7 @@ jobs:
           args: "Error running `deploy-staging` job in OpenAPI CI"
 
   # The deploy task actually deploys any changes to the jp branch
-  deploy-jp:
+  notify-from-jp:
     # We run this on the latest ubuntu
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/jp'
