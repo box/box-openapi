@@ -1,0 +1,219 @@
+# The name of this GH action
+name: CI
+
+# Defines when this action should be run
+on:
+  # Run on any Push
+  push: {}
+  # Run for PRs on default and staging
+  pull_request:
+    branches: [ default, staging ]
+
+jobs:
+  # The lint job checks that all content is sanitized,
+  # spell checked, and without any obvious dead links
+  lint:
+    # We run this on the latest ubuntu
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+
+    # We use node 14 and Python 3.8
+    strategy:
+      matrix:
+        node-version: [14.x]
+        python-version: [3.8]
+
+    # The following steps are performed for each lint job
+    steps:
+    - name: Check out the repository
+      uses: actions/checkout@v2
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install yamllint
+
+    - name: Set up Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
+
+    - name: Install Node dependencies
+      run: |
+        yarn install
+
+    - name: Lint the content
+      run: |
+        yarn lint
+
+  # The deploy task actually deploys any changes to the en branch
+  push-to-en:
+    # We run this on the latest ubuntu
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/default'
+    timeout-minutes: 3
+
+    # We use node 14.X
+    strategy:
+      matrix:
+        node-version: [14.x]
+
+    # Requires the lint and test jobs to pass first
+    needs:
+      - lint
+
+    # The following steps are performed for each lint job
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v2
+
+      - name: Compile the content
+        run: |
+          yarn install
+          yarn build
+          yarn build:swagger
+
+      - name: Push compiled content
+        uses: s0/git-publish-subdir-action@develop
+        env:
+          REPO: self
+          BRANCH: en
+          FOLDER: compiled/openapi
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push GH pages for redundancy
+        uses: s0/git-publish-subdir-action@develop
+        env:
+          REPO: self
+          BRANCH: gh-pages
+          FOLDER: compiled/openapi
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push Swagger 2.0 backport
+        uses: s0/git-publish-subdir-action@develop
+        env:
+          REPO: self
+          BRANCH: swagger-2.0
+          FOLDER: compiled/swagger
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Notify other repositories of update
+        uses: peter-evans/repository-dispatch@v1
+        with:
+          token: ${{ secrets.REPO_ACCESS_TOKEN }}
+          repository: box/box-postman
+          event-type: openapi-update
+          client-payload: '{}'
+
+      - name: 'Trigger Netlify deployment'
+        uses: jasongitmail/fast-webhook@v1
+        with:
+          url: ${{ secrets.NETLIFY_BOXDEV_WEBHOOK }}
+          json: '{}'
+
+      - name: Send Slack notification
+        uses: Ilshidur/action-slack@2.0.2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_USERNAME: GitHub Actions
+          SLACK_AVATAR: "https://avatars3.githubusercontent.com/u/8659759?s=200&v=4"
+        with:
+          args: "Pushed latest OpenAPI changes to `en` branch :rocket:"
+
+      - name: Send Slack notification
+        uses: Ilshidur/action-slack@2.0.2
+        if: ${{ failure() }}
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_USERNAME: GitHub Actions
+          SLACK_AVATAR: "https://avatars3.githubusercontent.com/u/8659759?s=200&v=4"
+        with:
+          args: "Error running `deploy` job in OpenAPI CI"
+
+  # The deploy task actually deploys any changes to the en-staging branch
+  push-to-en-staging:
+    # We run this on the latest ubuntu
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/staging'
+    timeout-minutes: 3
+
+    # We use node 14.X
+    strategy:
+      matrix:
+        node-version: [14.x]
+
+    # Requires the lint and test jobs to pass first
+    needs:
+      - lint
+
+    # The following steps are performed for each lint job
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v2
+
+      - name: Compile the content
+        run: |
+          yarn install
+          yarn build
+
+      - name: Push compiled content
+        uses: s0/git-publish-subdir-action@develop
+        env:
+          REPO: self
+          BRANCH: en-staging
+          FOLDER: compiled/openapi
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 'Trigger Netlify deployment'
+        uses: jasongitmail/fast-webhook@v1
+        with:
+          url: ${{ secrets.NETLIFY_BOXDEV_STAGING_WEBHOOK }}
+          json: '{}'
+
+      - name: Send Slack notification
+        uses: Ilshidur/action-slack@2.0.2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_USERNAME: GitHub Actions
+          SLACK_AVATAR: "https://avatars3.githubusercontent.com/u/8659759?s=200&v=4"
+        with:
+          args: "Pushed latest OpenAPI changes to `en-staging` branch :rocket:"
+
+      - name: Send Slack notification
+        uses: Ilshidur/action-slack@2.0.2
+        if: ${{ failure() }}
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_USERNAME: GitHub Actions
+          SLACK_AVATAR: "https://avatars3.githubusercontent.com/u/8659759?s=200&v=4"
+        with:
+          args: "Error running `deploy-staging` job in OpenAPI CI"
+
+  # The deploy task actually deploys any changes to the jp branch
+  notify-from-jp:
+    # We run this on the latest ubuntu
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/jp'
+    timeout-minutes: 3
+
+    steps:
+      - name: 'Trigger Netlify deployment'
+        uses: jasongitmail/fast-webhook@v1
+        with:
+          url: ${{ secrets.NETLIFY_BOXDEV_JP_WEBHOOK }}
+          json: '{}'
+
+      - name: Send Slack notification
+        uses: Ilshidur/action-slack@2.0.2
+        if: ${{ failure() }}
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_USERNAME: GitHub Actions
+          SLACK_AVATAR: "https://avatars3.githubusercontent.com/u/8659759?s=200&v=4"
+        with:
+          args: "Error running `deploy-jp` job in OpenAPI CI"
