@@ -49,10 +49,10 @@ jobs:
 
     - name: Lint the content
       run: |
-        yarn test
+        yarn lint
 
   # The deploy task actually deploys any changes to the en branch
-  deploy:
+  push-to-en:
     # We run this on the latest ubuntu
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/default'
@@ -79,25 +79,42 @@ jobs:
           yarn build:swagger
 
       - name: Push compiled content
-        uses: JamesIves/github-pages-deploy-action@releases/v3
-        with:
-          ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: s0/git-publish-subdir-action@develop
+        env:
+          REPO: self
           BRANCH: en
-          FOLDER: build/openapi
+          FOLDER: compiled/openapi
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Push GH pages for redundancy
-        uses: JamesIves/github-pages-deploy-action@releases/v3
-        with:
-          ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: s0/git-publish-subdir-action@develop
+        env:
+          REPO: self
           BRANCH: gh-pages
-          FOLDER: build/openapi
+          FOLDER: compiled/openapi
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Push Swagger 2.0 backport
-        uses: JamesIves/github-pages-deploy-action@releases/v3
-        with:
-          ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: s0/git-publish-subdir-action@develop
+        env:
+          REPO: self
           BRANCH: swagger-2.0
-          FOLDER: build/swagger
+          FOLDER: compiled/swagger
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Notify other repositories of update
+        uses: peter-evans/repository-dispatch@v1
+        with:
+          token: ${{ secrets.REPO_ACCESS_TOKEN }}
+          repository: box/box-postman
+          event-type: openapi-update
+          client-payload: '{}'
+
+      - name: 'Trigger Netlify deployment'
+        uses: jasongitmail/fast-webhook@v1
+        with:
+          url: ${{ secrets.NETLIFY_BOXDEV_WEBHOOK }}
+          json: '{}'
 
       - name: Send Slack notification
         uses: Ilshidur/action-slack@2.0.2
@@ -108,17 +125,18 @@ jobs:
         with:
           args: "Pushed latest OpenAPI changes to `en` branch :rocket:"
 
-      - name: Notify other repositories of update
-        uses: peter-evans/repository-dispatch@v1
+      - name: Send Slack notification
+        uses: Ilshidur/action-slack@2.0.2
+        if: ${{ failure() }}
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_USERNAME: GitHub Actions
+          SLACK_AVATAR: "https://avatars3.githubusercontent.com/u/8659759?s=200&v=4"
         with:
-          token: ${{ secrets.REPO_ACCESS_TOKEN }}
-          repository: box/box-postman
-          event-type: openapi-update
-          client-payload: '{}'
-          
+          args: "Error running `deploy` job in OpenAPI CI"
 
-  # The deploy task actually deploys any changes to the en branch
-  deploy-staging:
+  # The deploy task actually deploys any changes to the en-staging branch
+  push-to-en-staging:
     # We run this on the latest ubuntu
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/staging'
@@ -144,11 +162,18 @@ jobs:
           yarn build
 
       - name: Push compiled content
-        uses: JamesIves/github-pages-deploy-action@releases/v3
-        with:
-          ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: s0/git-publish-subdir-action@develop
+        env:
+          REPO: self
           BRANCH: en-staging
-          FOLDER: build/openapi
+          FOLDER: compiled/openapi
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 'Trigger Netlify deployment'
+        uses: jasongitmail/fast-webhook@v1
+        with:
+          url: ${{ secrets.NETLIFY_BOXDEV_STAGING_WEBHOOK }}
+          json: '{}'
 
       - name: Send Slack notification
         uses: Ilshidur/action-slack@2.0.2
@@ -158,3 +183,37 @@ jobs:
           SLACK_AVATAR: "https://avatars3.githubusercontent.com/u/8659759?s=200&v=4"
         with:
           args: "Pushed latest OpenAPI changes to `en-staging` branch :rocket:"
+
+      - name: Send Slack notification
+        uses: Ilshidur/action-slack@2.0.2
+        if: ${{ failure() }}
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_USERNAME: GitHub Actions
+          SLACK_AVATAR: "https://avatars3.githubusercontent.com/u/8659759?s=200&v=4"
+        with:
+          args: "Error running `deploy-staging` job in OpenAPI CI"
+
+  # The deploy task actually deploys any changes to the jp branch
+  notify-from-jp:
+    # We run this on the latest ubuntu
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/jp'
+    timeout-minutes: 3
+
+    steps:
+      - name: 'Trigger Netlify deployment'
+        uses: jasongitmail/fast-webhook@v1
+        with:
+          url: ${{ secrets.NETLIFY_BOXDEV_JP_WEBHOOK }}
+          json: '{}'
+
+      - name: Send Slack notification
+        uses: Ilshidur/action-slack@2.0.2
+        if: ${{ failure() }}
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_USERNAME: GitHub Actions
+          SLACK_AVATAR: "https://avatars3.githubusercontent.com/u/8659759?s=200&v=4"
+        with:
+          args: "Error running `deploy-jp` job in OpenAPI CI"
