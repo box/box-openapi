@@ -954,6 +954,16 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "access_token",
+            "description": "An optional access token that can be used to pre-authenticate this request, which means that a download link can be shared with a browser or a third party service without them needing to know how to handle the authentication.\nWhen using this parameter, please make sure that the access token is sufficiently scoped down to only allow read access to that file and no other files or folders.",
+            "example": "c3FIOG9vSGV4VHo4QzAyg5T1JvNnJoZ3ExaVNyQWw6WjRsanRKZG5lQk9qUE1BVQ",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -3398,6 +3408,653 @@
           },
           "404": {
             "description": "Returns an error when the file does not have an instance of the metadata\ntemplate applied to it, or when the user does not have access to the\nfile.\n\n* `instance_not_found` - An instance of the metadata template with the\ngiven `scope` and `templateKey` was not found on this file.\n* `not_found` - The file was not found, or the user does not have access\nto the file.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Returned when the method was not allowed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/files/{file_id}/metadata/global/boxSkillsCards": {
+      "get": {
+        "operationId": "get_files_id_metadata_global_boxSkillsCards",
+        "summary": "List Box Skill cards on file",
+        "tags": [
+          "Skills"
+        ],
+        "x-box-tag": "skills",
+        "description": "List the Box Skills metadata cards that are attached to a file.",
+        "parameters": [
+          {
+            "name": "file_id",
+            "description": "The unique identifier that represent a file.\n\nThe ID for any file can be determined\nby visiting a file in the web application\nand copying the ID from the URL. For example,\nfor the URL `https://*.app.box.com/files/123`\nthe `file_id` is `123`.",
+            "example": "12345",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns all the metadata associated with a file.\n\nThis API does not support pagination and will therefore always return\nall of the metadata associated to the file.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Metadata"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "post_files_id_metadata_global_boxSkillsCards",
+        "summary": "Create Box Skill cards on file",
+        "tags": [
+          "Skills"
+        ],
+        "x-box-tag": "skills",
+        "description": "Applies one or more Box Skills metadata cards to a file.",
+        "parameters": [
+          {
+            "name": "file_id",
+            "description": "The unique identifier that represent a file.\n\nThe ID for any file can be determined\nby visiting a file in the web application\nand copying the ID from the URL. For example,\nfor the URL `https://*.app.box.com/files/123`\nthe `file_id` is `123`.",
+            "example": "12345",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "cards"
+                ],
+                "properties": {
+                  "cards": {
+                    "type": "array",
+                    "description": "A list of Box Skill cards to apply to this file.",
+                    "items": {
+                      "type": "object",
+                      "description": "A single metadata card to apply to a file.",
+                      "required": [
+                        "type",
+                        "skill_card_type",
+                        "skill",
+                        "invocation"
+                      ],
+                      "properties": {
+                        "created_at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "example": "2018-04-13T13:53:23-07:00",
+                          "description": "The optional date and time this card was created at."
+                        },
+                        "type": {
+                          "type": "string",
+                          "description": "`skill_card`",
+                          "example": "skill_card",
+                          "enum": [
+                            "skill_card"
+                          ]
+                        },
+                        "skill_card_type": {
+                          "description": "The type of card to add to the file.",
+                          "example": "status",
+                          "enum": [
+                            "transcript",
+                            "keyword",
+                            "timeline",
+                            "status"
+                          ]
+                        },
+                        "skill_card_title": {
+                          "type": "object",
+                          "description": "The title of the card.",
+                          "required": [
+                            "message"
+                          ],
+                          "properties": {
+                            "code": {
+                              "type": "string",
+                              "example": "my_transcripts",
+                              "description": "An optional identifier for the title."
+                            },
+                            "message": {
+                              "type": "string",
+                              "example": "My Transcripts",
+                              "description": "The actual title to show in the UI."
+                            }
+                          }
+                        },
+                        "status": {
+                          "type": "object",
+                          "description": "Used with a card of type `status` to set the status of the skill. This can be used to show a message to the user while the Skill is processing the data.",
+                          "required": [
+                            "code"
+                          ],
+                          "properties": {
+                            "code": {
+                              "type": "string",
+                              "description": "A code for the status of this Skill invocation. By\ndefault each of these will have their own accompanied\nmessages. These can be adjusted by setting the `message`\nvalue on this object.",
+                              "example": "success",
+                              "enum": [
+                                "invoked",
+                                "processing",
+                                "success",
+                                "transient_failure",
+                                "permanent_failure"
+                              ]
+                            },
+                            "message": {
+                              "type": "string",
+                              "description": "A custom message that can be provided with this status.\nThis will be shown in the web app to the end user.",
+                              "example": "We're preparing to process your file. Please hold on!"
+                            }
+                          }
+                        },
+                        "skill": {
+                          "type": "object",
+                          "description": "The service that applied this metadata.",
+                          "required": [
+                            "type",
+                            "id"
+                          ],
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "example": "service",
+                              "description": "`service`",
+                              "enum": [
+                                "service"
+                              ]
+                            },
+                            "id": {
+                              "type": "string",
+                              "example": "image-recognition-service",
+                              "description": "A custom identifier that represent the service that\napplied this metadata."
+                            },
+                            "invocation": {
+                              "type": "object",
+                              "description": "The invocation of this service, used to track\nwhich instance of a service applied the metadata.",
+                              "required": [
+                                "type",
+                                "id"
+                              ],
+                              "properties": {
+                                "type": {
+                                  "type": "string",
+                                  "example": "skill_invocation",
+                                  "description": "`skill_invocation`",
+                                  "enum": [
+                                    "skill_invocation"
+                                  ]
+                                },
+                                "id": {
+                                  "type": "string",
+                                  "example": "abc123",
+                                  "description": "A custom identifier that represent the instance of\nthe service that applied this metadata. For example,\nif your `image-recognition-service` runs on multiple\nnodes, this field can be used to identify the ID of\nthe node that was used to apply the metadata."
+                                }
+                              }
+                            },
+                            "duration": {
+                              "type": "integer",
+                              "example": 1000,
+                              "description": "An optional total duration in seconds.\n\nUsed with a `skill_card_type` of `transcript` or\n`timeline`."
+                            },
+                            "entries": {
+                              "type": "array",
+                              "description": "An optional list of entries in the metadata card.\n\nThis field is used with a `skill_card_type` of\n`transcript`, `keyword` or `timeline`.",
+                              "items": {
+                                "type": "object",
+                                "description": "An entry in the `entries` attribute of a metadata card",
+                                "properties": {
+                                  "text": {
+                                    "type": "string",
+                                    "example": "keyword1",
+                                    "description": "The text of the entry. This would be the actual\nkeyword in a `keyword` card, the line of a\ntranscript in a `transcript` card, or the display\nname for an item when using the `timeline` entry."
+                                  },
+                                  "appears": {
+                                    "type": "array",
+                                    "description": "Defines a list of timestamps for an entry. This is\nused with a `skill_card_type` of `transcript` as\nwell as `timeline` to place items on a timeline.\n\nFor a `skill_card_type` of `transcript` there can\nonly be one entry in this list for each item, and\nonly the `start` time is used to place the\ntranscript on the timeline.",
+                                    "required": [
+                                      "start",
+                                      "end"
+                                    ],
+                                    "items": {
+                                      "type": "object",
+                                      "description": "The timestamp for an entry.",
+                                      "properties": {
+                                        "start": {
+                                          "type": "integer",
+                                          "example": 1,
+                                          "description": "The time in seconds when an\nentry should start appearing on a timeline."
+                                        },
+                                        "end": {
+                                          "type": "integer",
+                                          "example": 20,
+                                          "description": "The time in seconds when an\nentry should stop appearing on a timeline. For\na `skill_card_type` of `transcript` this value\nis ignored."
+                                        }
+                                      }
+                                    }
+                                  },
+                                  "image_url": {
+                                    "type": "string",
+                                    "description": "The image to show on a for an entry that appears\non a timeline. This image URL is required for any\n`timeline` cards. The image will be shown in a\nlist of items (for example faces), and clicking\nthe image will show the user where that entry\nappears during the duration of this entry.",
+                                    "example": "https://example.com/image1.jpg"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Returns the instance of the template that was applied to the file,\nincluding the data that was applied to the template.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Metadata"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Returns an error when the request body is not valid.\n\n* `schema_validation_failed` - The request body contains a value for a for\na field that either does not exist, or for which the value or type does\nnot match the expected field type. An example might be an unknown option\nfor an `enum` or `multiSelect` field.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Returns an error when the file or metadata template could not be found.\n\n* `not_found` - The file could not be found, or the user does not have\naccess to the file.\n* `instance_tuple_not_found` - The metadata template could not be found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Returns an error when an instance of this metadata template is already\npresent on the file.\n\n* `tuple_already_exists` - An instance of them metadata template already\nexists on the file.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "operationId": "put_files_id_metadata_global_boxSkillsCards",
+        "summary": "Update Box Skill cards on file",
+        "tags": [
+          "Skills"
+        ],
+        "x-box-tag": "skills",
+        "description": "Updates one or more Box Skills metadata cards to a file.",
+        "parameters": [
+          {
+            "name": "file_id",
+            "description": "The unique identifier that represent a file.\n\nThe ID for any file can be determined\nby visiting a file in the web application\nand copying the ID from the URL. For example,\nfor the URL `https://*.app.box.com/files/123`\nthe `file_id` is `123`.",
+            "example": "12345",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "description": "A [JSON-Patch](https://tools.ietf.org/html/rfc6902)\nspecification for the changes to make to the metadata\ntemplate.\n\nThe changes are represented as a JSON array of\noperation objects.",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "description": "An operation that replaces an existing card.",
+                  "properties": {
+                    "op": {
+                      "type": "string",
+                      "description": "`replace`",
+                      "example": "replace",
+                      "enum": [
+                        "replace"
+                      ]
+                    },
+                    "path": {
+                      "type": "string",
+                      "description": "The JSON Path that represents the card to replace. In most cases\nthis will be in the format `/cards/{index}` where `index` is the\nzero-indexed position of the card in the list of cards.",
+                      "example": "/cards/0"
+                    },
+                    "value": {
+                      "type": "object",
+                      "description": "A single metadata card to apply to a file.",
+                      "required": [
+                        "type",
+                        "skill_card_type",
+                        "skill",
+                        "invocation"
+                      ],
+                      "properties": {
+                        "created_at": {
+                          "type": "string",
+                          "format": "date-time",
+                          "example": "2018-04-13T13:53:23-07:00",
+                          "description": "The optional date and time this card was created at."
+                        },
+                        "type": {
+                          "type": "string",
+                          "description": "`skill_card`",
+                          "example": "skill_card",
+                          "enum": [
+                            "skill_card"
+                          ]
+                        },
+                        "skill_card_type": {
+                          "description": "The type of card to add to the file.",
+                          "example": "status",
+                          "enum": [
+                            "transcript",
+                            "keyword",
+                            "timeline",
+                            "status"
+                          ]
+                        },
+                        "skill_card_title": {
+                          "type": "object",
+                          "description": "The title of the card.",
+                          "required": [
+                            "message"
+                          ],
+                          "properties": {
+                            "code": {
+                              "type": "string",
+                              "example": "my_transcripts",
+                              "description": "An optional identifier for the title."
+                            },
+                            "message": {
+                              "type": "string",
+                              "example": "My Transcripts",
+                              "description": "The actual title to show in the UI."
+                            }
+                          }
+                        },
+                        "status": {
+                          "type": "object",
+                          "description": "Used with a card of type `status` to set the status of the skill. This can be used to show a message to the user while the Skill is processing the data.",
+                          "required": [
+                            "code"
+                          ],
+                          "properties": {
+                            "code": {
+                              "type": "string",
+                              "description": "A code for the status of this Skill invocation. By\ndefault each of these will have their own accompanied\nmessages. These can be adjusted by setting the `message`\nvalue on this object.",
+                              "example": "success",
+                              "enum": [
+                                "invoked",
+                                "processing",
+                                "success",
+                                "transient_failure",
+                                "permanent_failure"
+                              ]
+                            },
+                            "message": {
+                              "type": "string",
+                              "description": "A custom message that can be provided with this status.\nThis will be shown in the web app to the end user.",
+                              "example": "We're preparing to process your file. Please hold on!"
+                            }
+                          }
+                        },
+                        "skill": {
+                          "type": "object",
+                          "description": "The service that applied this metadata.",
+                          "required": [
+                            "type",
+                            "id"
+                          ],
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "example": "service",
+                              "description": "`service`",
+                              "enum": [
+                                "service"
+                              ]
+                            },
+                            "id": {
+                              "type": "string",
+                              "example": "image-recognition-service",
+                              "description": "A custom identifier that represent the service that\napplied this metadata."
+                            },
+                            "invocation": {
+                              "type": "object",
+                              "description": "The invocation of this service, used to track\nwhich instance of a service applied the metadata.",
+                              "required": [
+                                "type",
+                                "id"
+                              ],
+                              "properties": {
+                                "type": {
+                                  "type": "string",
+                                  "example": "skill_invocation",
+                                  "description": "`skill_invocation`",
+                                  "enum": [
+                                    "skill_invocation"
+                                  ]
+                                },
+                                "id": {
+                                  "type": "string",
+                                  "example": "abc123",
+                                  "description": "A custom identifier that represent the instance of\nthe service that applied this metadata. For example,\nif your `image-recognition-service` runs on multiple\nnodes, this field can be used to identify the ID of\nthe node that was used to apply the metadata."
+                                }
+                              }
+                            },
+                            "duration": {
+                              "type": "integer",
+                              "example": 1000,
+                              "description": "An optional total duration in seconds.\n\nUsed with a `skill_card_type` of `transcript` or\n`timeline`."
+                            },
+                            "entries": {
+                              "type": "array",
+                              "description": "An optional list of entries in the metadata card.\n\nThis field is used with a `skill_card_type` of\n`transcript`, `keyword` or `timeline`.",
+                              "items": {
+                                "type": "object",
+                                "description": "An entry in the `entries` attribute of a metadata card",
+                                "properties": {
+                                  "text": {
+                                    "type": "string",
+                                    "example": "keyword1",
+                                    "description": "The text of the entry. This would be the actual\nkeyword in a `keyword` card, the line of a\ntranscript in a `transcript` card, or the display\nname for an item when using the `timeline` entry."
+                                  },
+                                  "appears": {
+                                    "type": "array",
+                                    "description": "Defines a list of timestamps for an entry. This is\nused with a `skill_card_type` of `transcript` as\nwell as `timeline` to place items on a timeline.\n\nFor a `skill_card_type` of `transcript` there can\nonly be one entry in this list for each item, and\nonly the `start` time is used to place the\ntranscript on the timeline.",
+                                    "required": [
+                                      "start",
+                                      "end"
+                                    ],
+                                    "items": {
+                                      "type": "object",
+                                      "description": "The timestamp for an entry.",
+                                      "properties": {
+                                        "start": {
+                                          "type": "integer",
+                                          "example": 1,
+                                          "description": "The time in seconds when an\nentry should start appearing on a timeline."
+                                        },
+                                        "end": {
+                                          "type": "integer",
+                                          "example": 20,
+                                          "description": "The time in seconds when an\nentry should stop appearing on a timeline. For\na `skill_card_type` of `transcript` this value\nis ignored."
+                                        }
+                                      }
+                                    }
+                                  },
+                                  "image_url": {
+                                    "type": "string",
+                                    "description": "The image to show on a for an entry that appears\non a timeline. This image URL is required for any\n`timeline` cards. The image will be shown in a\nlist of items (for example faces), and clicking\nthe image will show the user where that entry\nappears during the duration of this entry.",
+                                    "example": "https://example.com/image1.jpg"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Returns the updated metadata template, with the\ncustom template data included.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MetadataTemplate"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The request body does not contain a valid metadata schema.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The request body contains a scope that the user is not\nallowed to create templates for.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The requested template could not be found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "delete_files_id_metadata_global_boxSkillsCards",
+        "summary": "Remove Box Skill cards from file",
+        "tags": [
+          "Skills"
+        ],
+        "x-box-tag": "skills",
+        "x-box-sanitized": true,
+        "description": "Removes any Box Skills cards metadata from a file.",
+        "parameters": [
+          {
+            "name": "file_id",
+            "description": "The unique identifier that represent a file.\n\nThe ID for any file can be determined\nby visiting a file in the web application\nand copying the ID from the URL. For example,\nfor the URL `https://*.app.box.com/files/123`\nthe `file_id` is `123`.",
+            "example": "12345",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Returns an empty response when the cards are\nsuccessfully deleted."
+          },
+          "404": {
+            "description": "Returns an error when the file does not have an instance of the Box Skill\ncards applied to it, or when the user does not have access to the file.\n\n* `instance_not_found` - An instance of the metadata template for Box\nSkill cards was not found on this file.\n* `not_found` - The file was not found, or the user does not have access\nto the file.",
             "content": {
               "application/json": {
                 "schema": {
@@ -11937,19 +12594,19 @@
         }
       }
     },
-    "/skill_invocations/{skill_invocation_id}": {
+    "/skill_invocations/{skill_id}": {
       "put": {
         "operationId": "put_skill_invocations_id",
-        "summary": "Update skill invocation",
+        "summary": "Update all Box Skill cards on file",
         "tags": [
           "Skills"
         ],
         "x-box-tag": "skills",
-        "description": "Updates the status, usage and response metadata of a\nskill invocation.",
+        "description": "An alternative method that can be used to overwrite and update all Box Skill\nmetadata cards on a file.",
         "parameters": [
           {
-            "name": "skill_invocation_id",
-            "description": "The ID of the skill invocation.",
+            "name": "skill_id",
+            "description": "The ID of the skill to apply this metadata for.",
             "example": "33243242",
             "in": "path",
             "required": true,
@@ -11971,7 +12628,7 @@
                 "properties": {
                   "status": {
                     "type": "string",
-                    "description": "Sets the status of the skill invocation.",
+                    "description": "Defines the status of this invocation. Set this to `success` when setting Skill cards.",
                     "example": "success",
                     "enum": [
                       "invoked",
@@ -11983,50 +12640,93 @@
                   },
                   "metadata": {
                     "type": "object",
-                    "description": "The metadata to set for this skill",
+                    "description": "The metadata to set for this skill. This is a list of\nBox Skills cards. These cards will overwrite any existing Box\nskill cards on the file.",
                     "properties": {
                       "cards": {
-                        "description": "The metadata cards to set on the file.",
                         "type": "array",
+                        "description": "A list of Box Skill cards to apply to this file.",
                         "items": {
                           "type": "object",
-                          "description": "A Box Skills card that is applied to the metadata\nof a file.",
+                          "description": "A single metadata card to apply to a file.",
                           "required": [
                             "type",
-                            "created_at",
+                            "skill_card_type",
                             "skill",
-                            "skill_card_title"
+                            "invocation"
                           ],
                           "properties": {
+                            "created_at": {
+                              "type": "string",
+                              "format": "date-time",
+                              "example": "2018-04-13T13:53:23-07:00",
+                              "description": "The optional date and time this card was created at."
+                            },
                             "type": {
                               "type": "string",
-                              "example": "skill_card",
                               "description": "`skill_card`",
+                              "example": "skill_card",
                               "enum": [
                                 "skill_card"
                               ]
                             },
-                            "created_at": {
-                              "type": "string",
-                              "format": "date-time",
-                              "description": "The time the card was created at",
-                              "example": "2012-12-12T10:53:43-08:00"
-                            },
                             "skill_card_type": {
-                              "type": "string",
-                              "description": "The type of card to create",
+                              "description": "The type of card to add to the file.",
                               "example": "status",
                               "enum": [
                                 "transcript",
                                 "keyword",
                                 "timeline",
-                                "status",
-                                "error"
+                                "status"
                               ]
+                            },
+                            "skill_card_title": {
+                              "type": "object",
+                              "description": "The title of the card.",
+                              "required": [
+                                "message"
+                              ],
+                              "properties": {
+                                "code": {
+                                  "type": "string",
+                                  "example": "my_transcripts",
+                                  "description": "An optional identifier for the title."
+                                },
+                                "message": {
+                                  "type": "string",
+                                  "example": "My Transcripts",
+                                  "description": "The actual title to show in the UI."
+                                }
+                              }
+                            },
+                            "status": {
+                              "type": "object",
+                              "description": "Used with a card of type `status` to set the status of the skill. This can be used to show a message to the user while the Skill is processing the data.",
+                              "required": [
+                                "code"
+                              ],
+                              "properties": {
+                                "code": {
+                                  "type": "string",
+                                  "description": "A code for the status of this Skill invocation. By\ndefault each of these will have their own accompanied\nmessages. These can be adjusted by setting the `message`\nvalue on this object.",
+                                  "example": "success",
+                                  "enum": [
+                                    "invoked",
+                                    "processing",
+                                    "success",
+                                    "transient_failure",
+                                    "permanent_failure"
+                                  ]
+                                },
+                                "message": {
+                                  "type": "string",
+                                  "description": "A custom message that can be provided with this status.\nThis will be shown in the web app to the end user.",
+                                  "example": "We're preparing to process your file. Please hold on!"
+                                }
+                              }
                             },
                             "skill": {
                               "type": "object",
-                              "description": "The skill that is updating the cards",
+                              "description": "The service that applied this metadata.",
                               "required": [
                                 "type",
                                 "id"
@@ -12042,105 +12742,82 @@
                                 },
                                 "id": {
                                   "type": "string",
-                                  "example": "43342423234",
-                                  "description": "The ID of the skill."
-                                }
-                              }
-                            },
-                            "skill_card_title": {
-                              "type": "object",
-                              "description": "The title of the card",
-                              "required": [
-                                "code",
-                                "message"
-                              ],
-                              "properties": {
-                                "code": {
-                                  "type": "string",
-                                  "example": "my_transcripts",
-                                  "description": "An identifier for your title"
+                                  "example": "image-recognition-service",
+                                  "description": "A custom identifier that represent the service that\napplied this metadata."
                                 },
-                                "message": {
-                                  "type": "string",
-                                  "example": "My Transcripts",
-                                  "description": "The actual title to show in the UI"
-                                }
-                              }
-                            },
-                            "invocation": {
-                              "type": "object",
-                              "description": "The current invocation of the skill",
-                              "required": [
-                                "type",
-                                "id"
-                              ],
-                              "properties": {
-                                "type": {
-                                  "type": "string",
-                                  "example": "skill_invocation",
-                                  "description": "`skill_invocation`",
-                                  "enum": [
-                                    "skill_invocation"
-                                  ]
-                                },
-                                "id": {
-                                  "type": "string",
-                                  "example": "33243242",
-                                  "description": "The ID of the skill invocation."
-                                }
-                              }
-                            },
-                            "status": {
-                              "type": "object",
-                              "description": "Optional status. Used with a `card_type` of `status`.",
-                              "properties": {
-                                "code": {
-                                  "type": "string",
-                                  "description": "The type of status being set",
-                                  "enum": [
-                                    "skills_pending_status",
-                                    "custom_error"
+                                "invocation": {
+                                  "type": "object",
+                                  "description": "The invocation of this service, used to track\nwhich instance of a service applied the metadata.",
+                                  "required": [
+                                    "type",
+                                    "id"
                                   ],
-                                  "example": "skills_pending_status"
+                                  "properties": {
+                                    "type": {
+                                      "type": "string",
+                                      "example": "skill_invocation",
+                                      "description": "`skill_invocation`",
+                                      "enum": [
+                                        "skill_invocation"
+                                      ]
+                                    },
+                                    "id": {
+                                      "type": "string",
+                                      "example": "abc123",
+                                      "description": "A custom identifier that represent the instance of\nthe service that applied this metadata. For example,\nif your `image-recognition-service` runs on multiple\nnodes, this field can be used to identify the ID of\nthe node that was used to apply the metadata."
+                                    }
+                                  }
                                 },
-                                "message": {
-                                  "type": "string",
-                                  "description": "The message for the status to show in the UI.",
-                                  "example": "We're preparing to process your file. Please hold on!"
-                                }
-                              }
-                            },
-                            "entries": {
-                              "description": "An optional list of entries.\n\nUsed with a `card_type` of`transcript`, `keyword` or\n`timeline`.",
-                              "type": "array",
-                              "items": {
-                                "type": "object",
-                                "description": "An entry in the `entries` attribute of a metadata card",
-                                "required": [
-                                  "type",
-                                  "text"
-                                ],
-                                "properties": {
-                                  "type": {
-                                    "type": "string",
-                                    "example": "text",
-                                    "description": "`text`",
-                                    "enum": [
-                                      "text"
-                                    ]
-                                  },
-                                  "text": {
-                                    "type": "string",
-                                    "example": "keyword1",
-                                    "description": "The text of the entry"
+                                "duration": {
+                                  "type": "integer",
+                                  "example": 1000,
+                                  "description": "An optional total duration in seconds.\n\nUsed with a `skill_card_type` of `transcript` or\n`timeline`."
+                                },
+                                "entries": {
+                                  "type": "array",
+                                  "description": "An optional list of entries in the metadata card.\n\nThis field is used with a `skill_card_type` of\n`transcript`, `keyword` or `timeline`.",
+                                  "items": {
+                                    "type": "object",
+                                    "description": "An entry in the `entries` attribute of a metadata card",
+                                    "properties": {
+                                      "text": {
+                                        "type": "string",
+                                        "example": "keyword1",
+                                        "description": "The text of the entry. This would be the actual\nkeyword in a `keyword` card, the line of a\ntranscript in a `transcript` card, or the display\nname for an item when using the `timeline` entry."
+                                      },
+                                      "appears": {
+                                        "type": "array",
+                                        "description": "Defines a list of timestamps for an entry. This is\nused with a `skill_card_type` of `transcript` as\nwell as `timeline` to place items on a timeline.\n\nFor a `skill_card_type` of `transcript` there can\nonly be one entry in this list for each item, and\nonly the `start` time is used to place the\ntranscript on the timeline.",
+                                        "required": [
+                                          "start",
+                                          "end"
+                                        ],
+                                        "items": {
+                                          "type": "object",
+                                          "description": "The timestamp for an entry.",
+                                          "properties": {
+                                            "start": {
+                                              "type": "integer",
+                                              "example": 1,
+                                              "description": "The time in seconds when an\nentry should start appearing on a timeline."
+                                            },
+                                            "end": {
+                                              "type": "integer",
+                                              "example": 20,
+                                              "description": "The time in seconds when an\nentry should stop appearing on a timeline. For\na `skill_card_type` of `transcript` this value\nis ignored."
+                                            }
+                                          }
+                                        }
+                                      },
+                                      "image_url": {
+                                        "type": "string",
+                                        "description": "The image to show on a for an entry that appears\non a timeline. This image URL is required for any\n`timeline` cards. The image will be shown in a\nlist of items (for example faces), and clicking\nthe image will show the user where that entry\nappears during the duration of this entry.",
+                                        "example": "https://example.com/image1.jpg"
+                                      }
+                                    }
                                   }
                                 }
                               }
-                            },
-                            "duration": {
-                              "type": "integer",
-                              "example": 1000,
-                              "description": "An optional duration.\n\nUsed with a `card_type` of`transcript`, or\n`timeline`."
                             }
                           }
                         }
@@ -12149,7 +12826,7 @@
                   },
                   "file": {
                     "type": "object",
-                    "description": "The file to assign this metadata to",
+                    "description": "The file to assign the cards to.",
                     "properties": {
                       "type": {
                         "type": "string",
@@ -12168,7 +12845,7 @@
                   },
                   "file_version": {
                     "type": "object",
-                    "description": "The file version to assign this metadata to",
+                    "description": "The optional file version to assign the cards to.",
                     "properties": {
                       "type": {
                         "type": "string",
@@ -12181,7 +12858,23 @@
                       "id": {
                         "type": "string",
                         "description": "The ID of the file version",
-                        "example": "3"
+                        "example": "731381601045"
+                      }
+                    }
+                  },
+                  "usage": {
+                    "type": "object",
+                    "description": "A descriptor that defines what items are affected by this call.\n\nSet this to the default values when setting a card to a `success`\nstate, and leave it out in most other situations.",
+                    "properties": {
+                      "unit": {
+                        "type": "string",
+                        "example": "file",
+                        "description": "`file`"
+                      },
+                      "value": {
+                        "type": "number",
+                        "example": 1,
+                        "description": "`1`"
                       }
                     }
                   }
@@ -12192,7 +12885,27 @@
         },
         "responses": {
           "200": {
-            "description": "Returns an empty response."
+            "description": "Returns an empty response when the card has been successfully updated."
+          },
+          "400": {
+            "description": "Returns an error when the request body is not valid.\n\n* `schema_validation_failed` - The request body contains a value for a for\na field that either does not exist, or for which the value or type does\nnot match the expected field type. An example might be an unknown option\nfor an `enum` or `multiSelect` field.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Returns an error when the file could not be found or the user does not\nhave access.\n\n* `not_found` - The file could not be found, or the user does not have\naccess to the file.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
           },
           "default": {
             "description": "An unexpected client error.",
@@ -16454,10 +17167,10 @@
         }
       },
       "SkillInvocation": {
-        "title": "Skill invocation",
+        "title": "Skill webhook payload",
         "x-box-resource-id": "skill_invocation",
         "x-box-tag": "skills",
-        "description": "The payload of a Box skill as sent to a Custom Skill's\n`invocation_url`.",
+        "description": "The payload of a Box skill as sent to a skill's\n`invocation_url`.",
         "properties": {
           "type": {
             "type": "string",
@@ -16686,7 +17399,7 @@
         }
       },
       "WebhookInvocation": {
-        "title": "Webhook invocation",
+        "title": "Webhook (V2) payload",
         "x-box-resource-id": "webhook_invocation",
         "x-box-tag": "webhooks",
         "description": "The event that is sent to a webhook address when an event happens.",
