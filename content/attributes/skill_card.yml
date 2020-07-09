@@ -1,0 +1,198 @@
+---
+type: object
+description: A single metadata card to apply to a file.
+required:
+  - type
+  - skill_card_type
+  - skill
+  - invocation
+properties:
+  created_at:
+    type: string
+    format: date-time
+    example: "2018-04-13T13:53:23-07:00"
+    description: |-
+      The optional date and time this card was created at.
+  type:
+    type: string
+    description: "`skill_card`"
+    example: 'skill_card'
+    enum:
+      - skill_card
+  skill_card_type:
+    description: The type of card to add to the file.
+    example: status
+    enum:
+      - transcript
+      - keyword
+      - timeline
+      - status
+  skill_card_title:
+    type: object
+    description: The title of the card.
+    required:
+      - message
+    properties:
+      code:
+        type: string
+        example: "my_transcripts"
+        description: An optional identifier for the title.
+
+      message:
+        type: string
+        example: "My Transcripts"
+        description: The actual title to show in the UI.
+
+  status:
+    type: object
+    description:
+      Used with a card of type `status` to set the status of the
+      skill. This can be used to show a message to the user while
+      the Skill is processing the data.
+    required:
+      - code
+    properties:
+      code:
+        type: string
+        description: |-
+          A code for the status of this Skill invocation. By
+          default each of these will have their own accompanied
+          messages. These can be adjusted by setting the `message`
+          value on this object.
+        example: success
+        enum:
+          - invoked
+          - processing
+          - success
+          - transient_failure
+          - permanent_failure
+      message:
+        type: string
+        description: |-
+          A custom message that can be provided with this status.
+          This will be shown in the web app to the end user.
+        example: |-
+          We're preparing to process your file. Please hold on!
+
+  skill:
+    type: object
+    description: The service that applied this metadata.
+    required:
+      - type
+      - id
+    properties:
+      type:
+        type: string
+        example: "service"
+        description: "`service`"
+        enum:
+          - service
+
+      id:
+        type: string
+        example: "image-recognition-service"
+        description: |-
+          A custom identifier that represent the service that
+          applied this metadata.
+
+      invocation:
+        type: object
+        description: |-
+          The invocation of this service, used to track
+          which instance of a service applied the metadata.
+        required:
+          - type
+          - id
+        properties:
+          type:
+            type: string
+            example: "skill_invocation"
+            description: "`skill_invocation`"
+            enum:
+              - skill_invocation
+
+          id:
+            type: string
+            example: "abc123"
+            description: |-
+              A custom identifier that represent the instance of
+              the service that applied this metadata. For example,
+              if your `image-recognition-service` runs on multiple
+              nodes, this field can be used to identify the ID of
+              the node that was used to apply the metadata.
+
+      duration:
+        type: integer
+        example: 1000
+        description: |-
+          An optional total duration in seconds.
+
+          Used with a `skill_card_type` of `transcript` or
+          `timeline`.
+
+      entries:
+        type: array
+        description: |-
+          An optional list of entries in the metadata card.
+
+          This field is used with a `skill_card_type` of
+          `transcript`, `keyword` or `timeline`.
+        items:
+          type: object
+
+          description: |-
+            An entry in the `entries` attribute of a metadata card
+          properties:
+            text:
+              type: string
+              example: "keyword1"
+              description: |-
+                The text of the entry. This would be the actual
+                keyword in a `keyword` card, the line of a
+                transcript in a `transcript` card, or the display
+                name for an item when using the `timeline` entry.
+
+            appears:
+              type: array
+              description: |-
+                Defines a list of timestamps for an entry. This is
+                used with a `skill_card_type` of `transcript` as
+                well as `timeline` to place items on a timeline.
+
+                For a `skill_card_type` of `transcript` there can
+                only be one entry in this list for each item, and
+                only the `start` time is used to place the
+                transcript on the timeline.
+              required:
+                - start
+                - end
+              items:
+                type: object
+                description: |-
+                  The timestamp for an entry.
+                properties:
+                  start:
+                    type: integer
+                    example: 1
+                    description: |-
+                      The time in seconds when an
+                      entry should start appearing on a timeline.
+                  end:
+                    type: integer
+                    example: 20
+                    description: |-
+                      The time in seconds when an
+                      entry should stop appearing on a timeline. For
+                      a `skill_card_type` of `transcript` this value
+                      is ignored.
+
+            image_url:
+              type: string
+              description: |-
+                The image to show on a for an entry that appears
+                on a timeline. This image URL is required for any
+                `timeline` cards. The image will be shown in a
+                list of items (for example faces), and clicking
+                the image will show the user where that entry
+                appears during the duration of this entry.
+              example: https://example.com/image1.jpg
