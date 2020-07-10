@@ -1,16 +1,16 @@
 ---
 type: object
-x-box-resource-id: transcript_skill_card
+x-box-resource-id: status_skill_card
 x-box-tag: skills
-title: Transcript Skill Card
+title: Status Skill Card
 description: |-
-  A Box Skill metadata card that adds a transcript to a file.
+  A Box Skill metadata card that puts a status message in the metadata sidebar.
 required:
   - type
   - skill_card_type
   - skill
   - invocation
-  - entries
+  - status
 properties:
   created_at:
     type: string
@@ -26,10 +26,10 @@ properties:
       - skill_card
   skill_card_type:
     type: string
-    description: "`transcript`"
-    example: transcript
+    description: "`status`"
+    example: status
     enum:
-      - transcript
+      - status
   skill_card_title:
     type: object
     description: The title of the card.
@@ -38,13 +38,44 @@ properties:
     properties:
       code:
         type: string
-        example: "my_transcripts"
+        example: "status"
         description: An optional identifier for the title.
 
       message:
         type: string
-        example: "My Transcripts"
+        example: "Status"
         description: The actual title to show in the UI.
+
+  status:
+    type: object
+    description:
+      Sets the status of the skill. This can be used to show a message to the
+      user while the Skill is processing the data, or if it was not able to
+      process the file.
+    required:
+      - code
+    properties:
+      code:
+        type: string
+        description: |-
+          A code for the status of this Skill invocation. By
+          default each of these will have their own accompanied
+          messages. These can be adjusted by setting the `message`
+          value on this object.
+        example: success
+        enum:
+          - invoked
+          - processing
+          - success
+          - transient_failure
+          - permanent_failure
+      message:
+        type: string
+        description: |-
+          A custom message that can be provided with this status.
+          This will be shown in the web app to the end user.
+        example: |-
+          We're preparing to process your file. Please hold on!
 
   skill:
     type: object
@@ -62,7 +93,7 @@ properties:
 
       id:
         type: string
-        example: "transciption-service"
+        example: "image-recognition-service"
         description: |-
           A custom identifier that represent the service that
           applied this metadata.
@@ -85,56 +116,10 @@ properties:
 
       id:
         type: string
-        example: "transciption-service-123"
+        example: "image-recognition-service-123"
         description: |-
           A custom identifier that represent the instance of
           the service that applied this metadata. For example,
           if your `image-recognition-service` runs on multiple
           nodes, this field can be used to identify the ID of
           the node that was used to apply the metadata.
-
-  duration:
-    type: integer
-    example: 1000
-    description: |-
-      An optional total duration in seconds.
-
-      Used with a `skill_card_type` of `transcript` or
-      `timeline`.
-
-  entries:
-    type: array
-    description: |-
-      An list of entries for the card. This represents the individual entries of
-      the transcription.
-    items:
-      type: object
-
-      description: |-
-        An entry in the `entries` attribute of a metadata card
-      properties:
-        text:
-          type: string
-          example: "Hi, and welcome to this video..."
-          description: |-
-            The text of the entry. This would be the transcribed text assigned
-            to the entry on the timeline.
-
-        appears:
-          type: array
-          description: |-
-            Defines when a transcribed bit of text appears. This only includes a
-            start time and no end time.
-          required:
-            - start
-          items:
-            type: object
-            description: |-
-              The timestamp for an entry.
-            properties:
-              start:
-                type: integer
-                example: 1
-                description: |-
-                  The time in seconds when an
-                  entry should start appearing on a timeline.
