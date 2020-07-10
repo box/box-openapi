@@ -4,129 +4,104 @@ title: User
 type: object
 
 x-box-resource-id: user
-x-box-has-field-variants: true
-x-box-tag: users
+x-box-variant: standard
 
 description: |-
-  A full representation of a user, as can be returned from any
-  user API endpoint.
+  A standard representation of a user, as returned from any
+  user API endpoints by default
 
 allOf:
-  - $ref: '#/components/schemas/User--Standard'
+  - $ref: '#/components/schemas/User--Mini'
   - properties:
-      role:
-        x-box-field-variant: 3
+      created_at:
+        type: string
+        format: date-time
+        description: When the user object was created
+        example: "2012-12-12T10:53:43-08:00"
+
+      modified_at:
+        type: string
+        format: date-time
+        description: When the user object was last modified
+        example: "2012-12-12T10:53:43-08:00"
+
+      language:
+        type: string
+        description: |-
+          The language of the user, formatted in modified version of the
+          [ISO 639-1](/guides/api-calls/language-codes) format.
+        example: en
+
+      timezone:
+        type: string
+        format: timezone
+        description: The user's timezone
+        example: Africa/Bujumbura
+
+      space_amount:
+        type: integer
+        description: The user’s total available space amount in bytes
+        example: 11345156112
+
+      space_used:
+        type: integer
+        description: The amount of space in use by the user
+        example: 1237009912
+
+      max_upload_size:
+        type: integer
+        description: |-
+          The maximum individual file size in bytes the user can have
+        example: 2147483648
+
+      status:
         type: string
         enum:
-          - admin
-          - coadmin
-          - user
-        description: The user’s enterprise role
-        example: admin
+          - active
+          - inactive
+          - cannot_delete_edit
+          - cannot_delete_edit_upload
+        description: The user's account status
+        example: active
 
-      tracking_codes:
-        x-box-field-variant: 3
-        type: array
-        description: |-
-          Tracking codes allow an admin to generate reports from the
-          admin console and assign an attribute to a specific group
-          of users. This setting must be enabled for an enterprise
-          before it can be used.
-        items:
-          type: object
-
-          description: |-
-            Custom tracking code for a user.
-
-          properties:
-            type:
-              type: string
-              description: "`tracking_code`"
-              example: tracking_code
-              enum:
-                - tracking_code
-
-            name:
-              type: string
-              description: |-
-                The name of the tracking code, which must be preconfigured in
-                the Admin Console
-              example: department
-
-            value:
-              type: string
-              description: The value of the tracking code
-              example: Sales
-
-      can_see_managed_users:
-        x-box-field-variant: 3
-        type: boolean
-        example: true
-        description: |-
-          Whether the user can see other enterprise users in their contact list
-
-      is_sync_enabled:
-        x-box-field-variant: 3
-        type: boolean
-        description: Whether the user can use Box Sync
-        example: true
-
-      is_external_collab_restricted:
-        x-box-field-variant: 3
-        type: boolean
-        example: true
-        description: |-
-          Whether the user is allowed to collaborate with users outside their
-          enterprise
-
-      is_exempt_from_device_limits:
-        x-box-field-variant: 3
-        type: boolean
-        example: true
-        description: Whether to exempt the user from Enterprise device limits
-
-      is_exempt_from_login_verification:
-        x-box-field-variant: 3
-        type: boolean
-        example: true
-        description: Whether the user must use two-factor authentication
-
-      enterprise:
-        allOf:
-          - $ref: '../attributes/enterprise.yml'
-          - description: Representation of the user’s enterprise
-          - x-box-field-variant: 3
-
-      my_tags:
-        x-box-field-variant: 3
-        type: array
-        items:
-          type: string
-        example:
-          - important
-        description: |-
-          Tags for all files and folders owned by the user. Values returned
-          will only contain tags that were set by the requester.
-
-      hostname:
-        x-box-field-variant: 3
+      job_title:
         type: string
-        example: "https://example.app.box.com/"
-        description: |-
-          The root (protocol, subdomain, domain) of any links that need to be
-          generated for the user
+        description: The user’s job title
+        maxLength: 100
+        example: CEO
 
-      is_platform_access_only:
-        x-box-field-variant: 3
-        type: boolean
-        example: true
-        description: Whether the user is an App User
-
-      external_app_user_id:
-        x-box-field-variant: 3
+      phone:
         type: string
-        example: my-user-1234
+        description: The user’s phone number
+        maxLength: 100
+        example: "6509241374"
+
+      address:
+        type: string
+        description: The user’s address
+        maxLength: 255
+        example: 900 Jefferson Ave, Redwood City, CA 94063
+
+      avatar_url:
+        type: string
+        description: URL of the user’s avatar image
+        example: https://www.box.com/api/avatar/large/181216415
+
+      notification_email:
+        type: object
         description: |-
-          An external identifier for an app user, which can be used to look up
-          the user. This can be used to tie user IDs from external identity
-          providers to Box users.
+          An alternate notification email address to which email
+          notifications are sent. When it's confirmed, this will be
+          the email address to which notifications are sent instead of
+          to the primary email address.
+        nullable: true
+        properties:
+          email:
+            type: string
+            example: notifications@example.com
+            description: The email address to send the notifications to.
+
+          is_confirmed:
+            type: boolean
+            example: true
+            description: Specifies if this email address has been confirmed.

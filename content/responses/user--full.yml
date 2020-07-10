@@ -1,0 +1,119 @@
+---
+title: User (Full)
+
+type: object
+
+x-box-resource-id: user--full
+x-box-variant: full
+
+description: |-
+  A full representation of a user, as can be returned from any
+  user API endpoint.
+
+allOf:
+  - $ref: '#/components/schemas/User'
+  - properties:
+      role:
+        type: string
+        enum:
+          - admin
+          - coadmin
+          - user
+        description: The user’s enterprise role
+        example: admin
+
+      tracking_codes:
+        type: array
+        description: |-
+          Tracking codes allow an admin to generate reports from the
+          admin console and assign an attribute to a specific group
+          of users. This setting must be enabled for an enterprise
+          before it can be used.
+        items:
+          type: object
+
+          description: |-
+            Custom tracking code for a user.
+
+          properties:
+            type:
+              type: string
+              description: "`tracking_code`"
+              example: tracking_code
+              enum:
+                - tracking_code
+
+            name:
+              type: string
+              description: |-
+                The name of the tracking code, which must be preconfigured in
+                the Admin Console
+              example: department
+
+            value:
+              type: string
+              description: The value of the tracking code
+              example: Sales
+
+      can_see_managed_users:
+        type: boolean
+        example: true
+        description: |-
+          Whether the user can see other enterprise users in their contact list
+
+      is_sync_enabled:
+        type: boolean
+        description: Whether the user can use Box Sync
+        example: true
+
+      is_external_collab_restricted:
+        type: boolean
+        example: true
+        description: |-
+          Whether the user is allowed to collaborate with users outside their
+          enterprise
+
+      is_exempt_from_device_limits:
+        type: boolean
+        example: true
+        description: Whether to exempt the user from Enterprise device limits
+
+      is_exempt_from_login_verification:
+        type: boolean
+        example: true
+        description: Whether the user must use two-factor authentication
+
+      enterprise:
+        allOf:
+          - $ref: '../attributes/enterprise.yml'
+          - description: Representation of the user’s enterprise
+
+      my_tags:
+        type: array
+        items:
+          type: string
+        example:
+          - important
+        description: |-
+          Tags for all files and folders owned by the user. Values returned
+          will only contain tags that were set by the requester.
+
+      hostname:
+        type: string
+        example: "https://example.app.box.com/"
+        description: |-
+          The root (protocol, subdomain, domain) of any links that need to be
+          generated for the user
+
+      is_platform_access_only:
+        type: boolean
+        example: true
+        description: Whether the user is an App User
+
+      external_app_user_id:
+        type: string
+        example: my-user-1234
+        description: |-
+          An external identifier for an app user, which can be used to look up
+          the user. This can be used to tie user IDs from external identity
+          providers to Box users.

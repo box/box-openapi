@@ -46,8 +46,16 @@ requestBody:
                 this will be in the format `/cards/{index}` where `index` is the
                 zero-indexed position of the card in the list of cards.
               example: "/cards/0"
+
             value:
-              $ref: '../attributes/skill_card.yml'
+              allOf:
+                - oneOf:
+                    - $ref: '#/components/schemas/SkillCard'
+                    - $ref: '#/components/schemas/KeywordSkillCard'
+                    - $ref: '#/components/schemas/TimelineSkillCard'
+                - description: |-
+                    The card to insert into the list of cards at the
+                    position defined by `path`.
 
 responses:
   200:
@@ -57,27 +65,10 @@ responses:
     content:
       application/json:
         schema:
-          $ref: '#/components/schemas/MetadataTemplate'
-
-  400:
-    description: |-
-      The request body does not contain a valid metadata schema.
-    content:
-      application/json:
-        schema:
-          $ref: '#/components/schemas/ClientError'
-
-  403:
-    description: |-
-      The request body contains a scope that the user is not
-      allowed to create templates for.
-    content:
-      application/json:
-        schema:
-          $ref: '#/components/schemas/ClientError'
+          $ref: '#/components/schemas/SkillCardsMetadata'
 
   404:
-    description: The requested template could not be found
+    description: The requested file could not be found
     content:
       application/json:
         schema:
