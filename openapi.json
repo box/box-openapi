@@ -3525,6 +3525,12 @@
                         },
                         {
                           "$ref": "#/components/schemas/TimelineSkillCard"
+                        },
+                        {
+                          "$ref": "#/components/schemas/TranscriptSkillCard"
+                        },
+                        {
+                          "$ref": "#/components/schemas/StatusSkillCard"
                         }
                       ]
                     }
@@ -3642,6 +3648,12 @@
                             },
                             {
                               "$ref": "#/components/schemas/TimelineSkillCard"
+                            },
+                            {
+                              "$ref": "#/components/schemas/TranscriptSkillCard"
+                            },
+                            {
+                              "$ref": "#/components/schemas/StatusSkillCard"
                             }
                           ]
                         },
@@ -12314,6 +12326,12 @@
                             },
                             {
                               "$ref": "#/components/schemas/TimelineSkillCard"
+                            },
+                            {
+                              "$ref": "#/components/schemas/TranscriptSkillCard"
+                            },
+                            {
+                              "$ref": "#/components/schemas/StatusSkillCard"
                             }
                           ]
                         }
@@ -21672,6 +21690,12 @@
                 },
                 {
                   "$ref": "#/components/schemas/TimelineSkillCard"
+                },
+                {
+                  "$ref": "#/components/schemas/TranscriptSkillCard"
+                },
+                {
+                  "$ref": "#/components/schemas/StatusSkillCard"
                 }
               ]
             }
@@ -23902,6 +23926,276 @@
                   "description": "The image to show on a for an entry that appears\non a timeline. This image URL is required for every entry.\n\nThe image will be shown in a\nlist of items (for example faces), and clicking\nthe image will show the user where that entry\nappears during the duration of this entry.",
                   "example": "https://example.com/image1.jpg"
                 }
+              }
+            }
+          }
+        }
+      },
+      "TranscriptSkillCard": {
+        "type": "object",
+        "x-box-resource-id": "transcript_skill_card",
+        "x-box-tag": "skills",
+        "title": "Transcript Skill Card",
+        "description": "A Box Skill metadata card that adds a transcript to a file.",
+        "required": [
+          "type",
+          "skill_card_type",
+          "skill",
+          "invocation",
+          "entries"
+        ],
+        "properties": {
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2018-04-13T13:53:23-07:00",
+            "description": "The optional date and time this card was created at."
+          },
+          "type": {
+            "type": "string",
+            "description": "`skill_card`",
+            "example": "skill_card",
+            "enum": [
+              "skill_card"
+            ]
+          },
+          "skill_card_type": {
+            "type": "string",
+            "description": "`transcript`",
+            "example": "transcript",
+            "enum": [
+              "transcript"
+            ]
+          },
+          "skill_card_title": {
+            "type": "object",
+            "description": "The title of the card.",
+            "required": [
+              "message"
+            ],
+            "properties": {
+              "code": {
+                "type": "string",
+                "example": "my_transcripts",
+                "description": "An optional identifier for the title."
+              },
+              "message": {
+                "type": "string",
+                "example": "My Transcripts",
+                "description": "The actual title to show in the UI."
+              }
+            }
+          },
+          "skill": {
+            "type": "object",
+            "description": "The service that applied this metadata.",
+            "required": [
+              "type",
+              "id"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "example": "service",
+                "description": "`service`",
+                "enum": [
+                  "service"
+                ]
+              },
+              "id": {
+                "type": "string",
+                "example": "transciption-service",
+                "description": "A custom identifier that represent the service that\napplied this metadata."
+              }
+            }
+          },
+          "invocation": {
+            "type": "object",
+            "description": "The invocation of this service, used to track\nwhich instance of a service applied the metadata.",
+            "required": [
+              "type",
+              "id"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "example": "skill_invocation",
+                "description": "`skill_invocation`",
+                "enum": [
+                  "skill_invocation"
+                ]
+              },
+              "id": {
+                "type": "string",
+                "example": "transciption-service-123",
+                "description": "A custom identifier that represent the instance of\nthe service that applied this metadata. For example,\nif your `image-recognition-service` runs on multiple\nnodes, this field can be used to identify the ID of\nthe node that was used to apply the metadata."
+              }
+            }
+          },
+          "duration": {
+            "type": "integer",
+            "example": 1000,
+            "description": "An optional total duration in seconds.\n\nUsed with a `skill_card_type` of `transcript` or\n`timeline`."
+          },
+          "entries": {
+            "type": "array",
+            "description": "An list of entries for the card. This represents the individual entries of\nthe transcription.",
+            "items": {
+              "type": "object",
+              "description": "An entry in the `entries` attribute of a metadata card",
+              "properties": {
+                "text": {
+                  "type": "string",
+                  "example": "Hi, and welcome to this video...",
+                  "description": "The text of the entry. This would be the transcribed text assigned\nto the entry on the timeline."
+                },
+                "appears": {
+                  "type": "array",
+                  "description": "Defines when a transcribed bit of text appears. This only includes a\nstart time and no end time.",
+                  "required": [
+                    "start"
+                  ],
+                  "items": {
+                    "type": "object",
+                    "description": "The timestamp for an entry.",
+                    "properties": {
+                      "start": {
+                        "type": "integer",
+                        "example": 1,
+                        "description": "The time in seconds when an\nentry should start appearing on a timeline."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "StatusSkillCard": {
+        "type": "object",
+        "x-box-resource-id": "status_skill_card",
+        "x-box-tag": "skills",
+        "title": "Status Skill Card",
+        "description": "A Box Skill metadata card that puts a status message in the metadata sidebar.",
+        "required": [
+          "type",
+          "skill_card_type",
+          "skill",
+          "invocation",
+          "status"
+        ],
+        "properties": {
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2018-04-13T13:53:23-07:00",
+            "description": "The optional date and time this card was created at."
+          },
+          "type": {
+            "type": "string",
+            "description": "`skill_card`",
+            "example": "skill_card",
+            "enum": [
+              "skill_card"
+            ]
+          },
+          "skill_card_type": {
+            "type": "string",
+            "description": "`status`",
+            "example": "status",
+            "enum": [
+              "status"
+            ]
+          },
+          "skill_card_title": {
+            "type": "object",
+            "description": "The title of the card.",
+            "required": [
+              "message"
+            ],
+            "properties": {
+              "code": {
+                "type": "string",
+                "example": "status",
+                "description": "An optional identifier for the title."
+              },
+              "message": {
+                "type": "string",
+                "example": "Status",
+                "description": "The actual title to show in the UI."
+              }
+            }
+          },
+          "status": {
+            "type": "object",
+            "description": "Sets the status of the skill. This can be used to show a message to the user while the Skill is processing the data, or if it was not able to process the file.",
+            "required": [
+              "code"
+            ],
+            "properties": {
+              "code": {
+                "type": "string",
+                "description": "A code for the status of this Skill invocation. By\ndefault each of these will have their own accompanied\nmessages. These can be adjusted by setting the `message`\nvalue on this object.",
+                "example": "success",
+                "enum": [
+                  "invoked",
+                  "processing",
+                  "success",
+                  "transient_failure",
+                  "permanent_failure"
+                ]
+              },
+              "message": {
+                "type": "string",
+                "description": "A custom message that can be provided with this status.\nThis will be shown in the web app to the end user.",
+                "example": "We're preparing to process your file. Please hold on!"
+              }
+            }
+          },
+          "skill": {
+            "type": "object",
+            "description": "The service that applied this metadata.",
+            "required": [
+              "type",
+              "id"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "example": "service",
+                "description": "`service`",
+                "enum": [
+                  "service"
+                ]
+              },
+              "id": {
+                "type": "string",
+                "example": "image-recognition-service",
+                "description": "A custom identifier that represent the service that\napplied this metadata."
+              }
+            }
+          },
+          "invocation": {
+            "type": "object",
+            "description": "The invocation of this service, used to track\nwhich instance of a service applied the metadata.",
+            "required": [
+              "type",
+              "id"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "example": "skill_invocation",
+                "description": "`skill_invocation`",
+                "enum": [
+                  "skill_invocation"
+                ]
+              },
+              "id": {
+                "type": "string",
+                "example": "image-recognition-service-123",
+                "description": "A custom identifier that represent the instance of\nthe service that applied this metadata. For example,\nif your `image-recognition-service` runs on multiple\nnodes, this field can be used to identify the ID of\nthe node that was used to apply the metadata."
               }
             }
           }
