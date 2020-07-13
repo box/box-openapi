@@ -3,24 +3,48 @@ title: Comment
 
 type: object
 
-x-box-resource-id: comment
-x-box-has-field-variants: true
-x-box-tag: comments
-
 description: |-
-  Comments are messages created on files. Comments
-  can be made independently or created as responses to other
-  comments
+  Standard representation of a comment.
+
+x-box-resource-id: comment
+x-box-variant: standard
 
 allOf:
-  - $ref: '#/components/schemas/Comment--Standard'
+  - $ref: '#/components/schemas/Comment--Base'
   - properties:
-      tagged_message:
-        x-box-field-variant: 3
-        type: string
-        example: "@[1234567:Aaron Levie] these tigers are cool!"
+      is_reply_comment:
+        type: boolean
         description: |-
-          The string representing the comment text with
-          @mentions included. @mention format is @[id:username]
-          where `id` is user's Box ID and `username` is
-          their display name.
+          Whether or not this comment is a reply to another
+          comment
+        example: true
+
+      message:
+        type: string
+        example: "@Aaron Levie these tigers are cool!"
+        description: |-
+          The text of the comment, as provided by the user
+
+      created_by:
+        allOf:
+          - $ref: '#/components/schemas/User--Mini'
+          - description: |-
+              A mini user object representing the author of the
+              comment
+
+      created_at:
+        type: string
+        format: date-time
+        description: The time this comment was created
+        example: '2012-12-12T10:53:43-08:00'
+
+      modified_at:
+        type: string
+        format: date-time
+        description: The time this comment was last modified
+        example: '2012-12-12T10:53:43-08:00'
+
+      item:
+        allOf:
+          - $ref: "../attributes/reference.yml"
+          - description: The file this comment was placed on
