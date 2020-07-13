@@ -1,0 +1,191 @@
+---
+title: File (Full)
+
+type: object
+
+x-box-resource-id: file--full
+x-box-variant: full
+
+description: |-
+  A full representation of a file, as can be returned from any
+  file API endpoints by default
+
+allOf:
+  - $ref: '#/components/schemas/File'
+  - properties:
+      version_number:
+        type: string
+        example: "1"
+        description: The version number of this file
+
+      comment_count:
+        type: integer
+        example: 10
+        description: The number of comments on this file
+
+      permissions:
+        allOf:
+          - $ref: "../attributes/file_permissions.yml"
+          - description: |-
+              Describes the permissions that the current user has
+              for this file.
+          - nullable: false
+
+      tags:
+        allOf:
+          - $ref: "../attributes/tags.yml"
+          - nullable: false
+
+      lock:
+        allOf:
+          - $ref: '../attributes/lock.yml'
+          - description: |-
+              The lock held on this file. If there is no lock, this can either
+              be `null` or have a timestamp in the past.
+        nullable: true
+
+      extension:
+        type: string
+        example: pdf
+        description: |-
+          Indicates the (optional) file extension for this file. By default,
+          this is set to an empty string.
+
+      is_package:
+        type: boolean
+        example: true
+        description: |-
+          Indicates if the file is a package. Packages are commonly used
+          by Mac Applications and can include iWork files.
+
+      expiring_embed_link:
+        allOf:
+          - $ref: '../attributes/expiring_embed_link.yml'
+          - description: |-
+              Requesting this field creates an expiring Box Embed URL for an
+              embedded preview session in an `iframe`.
+
+              This URL will expire after 60 seconds and the session will
+              expire after 60 minutes.
+
+              Not all file types are supported for these embed URLs. Box Embed
+              is not optimized for mobile browsers and should not be used in web
+              experiences designed for mobile devices. Many UI elements, like
+              the **download** and **print** options might not show in mobile
+              browsers.
+
+      watermark_info:
+        allOf:
+          - $ref: '../attributes/watermark_info.yml'
+          - description: |-
+              Details about the watermark applied to this folder
+
+      allowed_invitee_roles:
+        type: array
+        example:
+          - editor
+        nullable: false
+        description: |-
+          A list of the types of roles that user can be invited at
+          when sharing this file.
+        items:
+          type: string
+          enum:
+            - editor
+            - viewer
+            - previewer
+            - uploader
+            - previewer uploader
+            - viewer uploader
+            - co-owner
+
+      is_externally_owned:
+        type: boolean
+        example: true
+        nullable: false
+        description: |-
+          Specifies if this folder is owned by a user outside of the
+          authenticated enterprise.
+
+      has_collaborations:
+        type: boolean
+        example: true
+        nullable: false
+        description: |-
+          Specifies if this folder has any other collaborators.
+
+      metadata:
+        type: object
+        description: |-
+          A list of key-value pairs of metadata objects within their
+          scopes.
+
+          To access the metadata for a file, first use the
+          Metadata-endpoints to determine
+          the metadata templates available to your enterprise.
+
+          Then use the `GET /files/:id` endpoint with
+          the `fields` query parameter to get the metadata by ID.
+
+          The ID for a metadata template will be in the format
+          `metadata.<scope>.<templatename>`, for example
+          `metadata.global.properties`.
+
+        example:
+          enterprise_27335:
+            marketingCollateral:
+              $canEdit: true
+              $id: 01234500-12f1-1234-aa12-b1d234cb567e
+              $parent: folder_59449484661
+              $scope: enterprise_27335
+              $template: properties
+              $type: properties-6bcba49f-ca6d-4d2a-a758-57fe6edf44d0
+              $typeVersion: 2
+              $version: 1
+
+        additionalProperties:
+          type: object
+          description: |-
+            The name of the metadata template
+
+          example:
+            marketingCollateral:
+              $canEdit: true
+              $id: 01234500-12f1-1234-aa12-b1d234cb567e
+              $parent: folder_59449484661
+              $scope: enterprise_27335
+              $template: properties
+              $type: properties-6bcba49f-ca6d-4d2a-a758-57fe6edf44d0
+              $typeVersion: 2
+              $version: 1
+          additionalProperties:
+            $ref: "#/components/schemas/Metadata"
+
+      expires_at:
+        type: string
+        format: date-time
+        nullable: true
+        description: |-
+          When the file will automatically be deleted
+        example: "2012-12-12T10:53:43-08:00"
+
+      representations:
+        allOf:
+          - $ref: '../attributes/representations.yml'
+          - description: |-
+              A list of representations for a file that can be used to
+              display a placeholder of the file in your application. By default
+              this returns all representations and we recommend using the
+              `X-Rep-Hints` header to further customize the desired
+              representations.
+
+      classification:
+        allOf:
+          - $ref: '../attributes/classification.yml'
+          - description: |-
+              Details about the classification applied to this file.
+          - nullable: true
+
+      uploader_display_name:
+        allOf:
+          - $ref: '../attributes/uploader_display_name.yml'

@@ -4,207 +4,133 @@ title: File
 type: object
 
 x-box-resource-id: file
-x-box-has-field-variants: true
-x-box-sanitized: true
-x-box-tag: files
+x-box-variant: standard
 
 description: |-
-  A full representation of a file, as can be returned from any
+  A standard representation of a file, as returned from any
   file API endpoints by default
 
 allOf:
-  - $ref: '#/components/schemas/File--Standard'
+  - $ref: '#/components/schemas/File--Mini'
   - properties:
-      version_number:
-        x-box-field-variant: 3
+      description:
         type: string
-        example: "1"
-        description: The version number of this file
+        nullable: false
+        description: The optional description of this file
+        maxLength: 256
+        example: "Contract for Q1 renewal"
 
-      comment_count:
-        x-box-field-variant: 3
+      size:
         type: integer
-        example: 10
-        description: The number of comments on this file
+        nullable: false
+        description: |-
+          The file size in bytes. Be careful parsing this integer as it can
+          get very large and cause an integer overflow.
+        example: 629644
 
-      permissions:
+      path_collection:
         allOf:
-          - $ref: "../attributes/file_permissions.yml"
+          - $ref: '../attributes/path_collection.yml'
           - description: |-
-              Describes the permissions that the current user has
-              for this file.
-          - x-box-field-variant: 3
+              The tree of folders that this file is contained in,
+              starting at the root.
           - nullable: false
 
-      tags:
-        allOf:
-          - $ref: "../attributes/tags.yml"
-          - x-box-field-variant: 3
-          - nullable: false
-
-      lock:
-        allOf:
-          - $ref: '../attributes/lock.yml'
-          - description: |-
-              The lock held on this file. If there is no lock, this can either
-              be `null` or have a timestamp in the past.
-          - x-box-field-variant: 3
-        nullable: true
-
-      extension:
-        x-box-field-variant: 3
+      created_at:
         type: string
-        example: pdf
-        description: |-
-          Indicates the (optional) file extension for this file. By default,
-          this is set to an empty string.
-
-      is_package:
-        x-box-field-variant: 3
-        type: boolean
-        example: true
-        description: |-
-          Indicates if the file is a package. Packages are commonly used
-          by Mac Applications and can include iWork files.
-
-      expiring_embed_link:
-        allOf:
-          - $ref: '../attributes/expiring_embed_link.yml'
-          - description: |-
-              Requesting this field creates an expiring Box Embed URL for an
-              embedded preview session in an `iframe`.
-
-              This URL will expire after 60 seconds and the session will
-              expire after 60 minutes.
-
-              Not all file types are supported for these embed URLs. Box Embed
-              is not optimized for mobile browsers and should not be used in web
-              experiences designed for mobile devices. Many UI elements, like
-              the **download** and **print** options might not show in mobile
-              browsers.
-          - x-box-field-variant: 3
-
-      watermark_info:
-        allOf:
-          - $ref: '../attributes/watermark_info.yml'
-          - description: |-
-              Details about the watermark applied to this folder
-          - x-box-field-variant: 3
-
-      allowed_invitee_roles:
-        x-box-field-variant: 2
-        type: array
-        example:
-          - editor
+        format: date-time
         nullable: false
         description: |-
-          A list of the types of roles that user can be invited at
-          when sharing this file.
-        items:
-          type: string
-          enum:
-            - editor
-            - viewer
-            - previewer
-            - uploader
-            - previewer uploader
-            - viewer uploader
-            - co-owner
+          The date and time when the file was created on Box.
+        example: "2012-12-12T10:53:43-08:00"
 
-      is_externally_owned:
-        x-box-field-variant: 2
-        type: boolean
-        example: true
+      modified_at:
+        type: string
+        format: date-time
         nullable: false
         description: |-
-          Specifies if this folder is owned by a user outside of the
-          authenticated enterprise.
+          The date and time when the folder was last updated on Box.
+        example: "2012-12-12T10:53:43-08:00"
 
-      has_collaborations:
-        x-box-field-variant: 2
-        type: boolean
-        example: true
-        nullable: false
-        description: |-
-          Specifies if this folder has any other collaborators.
-
-      metadata:
-        x-box-field-variant: 3
-        type: object
-        description: |-
-          A list of key-value pairs of metadata objects within their
-          scopes.
-
-          To access the metadata for a file, first use the
-          Metadata-endpoints to determine
-          the metadata templates available to your enterprise.
-
-          Then use the `GET /files/:id` endpoint with
-          the `fields` query parameter to get the metadata by ID.
-
-          The ID for a metadata template will be in the format
-          `metadata.<scope>.<templatename>`, for example
-          `metadata.global.properties`.
-
-        example:
-          enterprise_27335:
-            marketingCollateral:
-              $canEdit: true
-              $id: 01234500-12f1-1234-aa12-b1d234cb567e
-              $parent: folder_59449484661
-              $scope: enterprise_27335
-              $template: properties
-              $type: properties-6bcba49f-ca6d-4d2a-a758-57fe6edf44d0
-              $typeVersion: 2
-              $version: 1
-
-        additionalProperties:
-          type: object
-          description: |-
-            The name of the metadata template
-
-          example:
-            marketingCollateral:
-              $canEdit: true
-              $id: 01234500-12f1-1234-aa12-b1d234cb567e
-              $parent: folder_59449484661
-              $scope: enterprise_27335
-              $template: properties
-              $type: properties-6bcba49f-ca6d-4d2a-a758-57fe6edf44d0
-              $typeVersion: 2
-              $version: 1
-          additionalProperties:
-            $ref: "#/components/schemas/Metadata"
-
-      expires_at:
-        x-box-field-variant: 3
+      trashed_at:
         type: string
         format: date-time
         nullable: true
         description: |-
-          When the file will automatically be deleted
+          The time at which this file was put in the trash.
         example: "2012-12-12T10:53:43-08:00"
 
-      representations:
-        allOf:
-          - $ref: '../attributes/representations.yml'
-          - description: |-
-              A list of representations for a file that can be used to
-              display a placeholder of the file in your application. By default
-              this returns all representations and we recommend using the
-              `X-Rep-Hints` header to further customize the desired
-              representations.
-          - x-box-field-variant: 3
+      purged_at:
+        type: string
+        format: date-time
+        nullable: true
+        description: |-
+          The time at which this file is expected to be purged
+          from the trash.
+        example: "2012-12-12T10:53:43-08:00"
 
-      classification:
+      content_created_at:
+        type: string
+        format: date-time
+        nullable: true
+        description: |-
+          The date and time at which this file was originally
+          created, which might be before it was uploaded to Box.
+        example: "2012-12-12T10:53:43-08:00"
+
+      content_modified_at:
+        type: string
+        format: date-time
+        nullable: true
+        description: |-
+          The date and time at which this folder was last updated,
+          which might be before it was uploaded to Box.
+        example: "2012-12-12T10:53:43-08:00"
+
+      created_by:
         allOf:
-          - $ref: '../attributes/classification.yml'
+          - $ref: '#/components/schemas/User--Mini'
+          - description: The user who created this file
+
+      modified_by:
+        allOf:
+          - $ref: '#/components/schemas/User--Mini'
+          - description: The user who last modified this file
+          - nullable: false
+
+      owned_by:
+        allOf:
+          - $ref: '#/components/schemas/User--Mini'
+          - description: The user who owns this file
+          - nullable: false
+
+      shared_link:
+        allOf:
+          - $ref: '../attributes/shared_link.yml'
           - description: |-
-              Details about the classification applied to this file.
-          - x-box-field-variant: 3
+              The shared link for this file. This will be
+              `null` if no shared link has been created for this
+              file.
           - nullable: true
 
-      uploader_display_name:
+      parent:
         allOf:
-          - $ref: '../attributes/uploader_display_name.yml'
-          - x-box-field-variant: 3
+          - $ref: '#/components/schemas/Folder--Mini'
+          - description: |-
+              The folder that this file is located within.
+        nullable: true
+
+      item_status:
+        type: string
+        description: |-
+          Defines if this item has been deleted or not.
+
+          * `active` when the item has is not in the trash
+          * `trashed` when the item has been moved to the trash but not deleted
+          * `deleted` when the item has been permanently deleted.
+        enum:
+          - active
+          - trashed
+          - deleted
+        nullable: false
+        example: "active"
