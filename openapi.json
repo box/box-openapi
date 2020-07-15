@@ -7263,7 +7263,7 @@
         "x-box-tag": "search",
         "x-box-sanitized": true,
         "x-box-enable-explorer": true,
-        "description": "Create a search using SQL-like syntax to return items that match specific\nmetadata.\n\nThis feature currently has limited availability. To enable this feature,\ncontact our [Metadata Query team](mailto:metadata-query-feedback@box.com).",
+        "description": "Create a search using SQL-like syntax to return items that match specific\nmetadata.\n\nBy default, this endpoint returns only the most basic info about the items for\nwhich the query matches. To get additional fields for each item, including any\nof the metadata, use the `fields` attribute in the query.\n\nThis feature currently has limited availability. To enable this feature,\ncontact our [Metadata Query team](mailto:metadata-query-feedback@box.com).",
         "requestBody": {
           "content": {
             "application/json": {
@@ -16275,6 +16275,20 @@
             "type": "string",
             "description": "Marker to use for requesting the next page.",
             "example": "AAAAAmVYB1FWec8GH6yWu2nwmanfMh07IyYInaa7DZDYjgO1H4KoLW29vPlLY173OKsci6h6xGh61gG73gnaxoS+o0BbI1/h6le6cikjlupVhASwJ2Cj0tOD9wlnrUMHHw3/ISf+uuACzrOMhN6d5fYrbidPzS6MdhJOejuYlvsg4tcBYzjauP3+VU51p77HFAIuObnJT0ff"
+          },
+          "fields": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "By default, this endpoint returns only the most basic info about the items for\nwhich the query matches. This attribute can be used to specify a list of\nadditional attributes to return for any item, including its metadata.\n\nThis attribute takes a list of item fields, metadata template identifiers,\nor metadata template field identifiers.\n\nFor example:\n\n* `created_by` will add the details of the user who created the item to\nthe response.\n* `metadata.<scope>.<templateKey>` will return the mini-representation\nof the metadata instance identified by the `scope` and `templateKey`.\n* `metadata.<scope>.<templateKey>.<field>` will return all the mini-representation\nof the metadata instance identified by the `scope` and `templateKey` plus\nthe field specified by the `field` name. Multiple fields for the same\n`scope` and `templateKey` can be defined.",
+            "example": [
+              "extension",
+              "created_at",
+              "item_status",
+              "metadata.enterprise_1234.contracts",
+              "metadata.enterprise_1234.regions.location"
+            ]
           }
         }
       },
@@ -18589,41 +18603,35 @@
                 "description": "Specifies if this folder has any other collaborators."
               },
               "metadata": {
-                "type": "object",
-                "description": "A list of key-value pairs of metadata objects within their\nscopes.\n\nTo access the metadata for a file, first use the\nMetadata-endpoints to determine\nthe metadata templates available to your enterprise.\n\nThen use the `GET /files/:id` endpoint with\nthe `fields` query parameter to get the metadata by ID.\n\nThe ID for a metadata template will be in the format\n`metadata.<scope>.<templatename>`, for example\n`metadata.global.properties`.",
-                "example": {
-                  "enterprise_27335": {
-                    "marketingCollateral": {
-                      "$canEdit": true,
-                      "$id": "01234500-12f1-1234-aa12-b1d234cb567e",
-                      "$parent": "folder_59449484661",
-                      "$scope": "enterprise_27335",
-                      "$template": "properties",
-                      "$type": "properties-6bcba49f-ca6d-4d2a-a758-57fe6edf44d0",
-                      "$typeVersion": 2,
-                      "$version": 1
-                    }
-                  }
-                },
-                "additionalProperties": {
-                  "type": "object",
-                  "description": "The name of the metadata template",
-                  "example": {
-                    "marketingCollateral": {
-                      "$canEdit": true,
-                      "$id": "01234500-12f1-1234-aa12-b1d234cb567e",
-                      "$parent": "folder_59449484661",
-                      "$scope": "enterprise_27335",
-                      "$template": "properties",
-                      "$type": "properties-6bcba49f-ca6d-4d2a-a758-57fe6edf44d0",
-                      "$typeVersion": 2,
-                      "$version": 1
+                "allOf": [
+                  {
+                    "title": "Item metadata instances",
+                    "type": "object",
+                    "description": "A list of metadata instances, nested within key-value pairs of their `scope`\nand `templateKey`.\n\nTo access the metadata for a file or folder, first use the\nmetadata endpoints to determine the metadata templates available to your\nenterprise.\n\nThen use the `GET /files/:id` or `GET /folder/:id`\nendpoint with the `fields` query parameter to get\nthe metadata by ID.\n\nTo request a metadata instance for a particular `scope` and `templateKey`\nuse the following format for the `fields` parameter:\n`metadata.<scope>.<templateKey>`\n\nFor example, `?fields=metadata.enterprise_27335.marketingCollateral`.",
+                    "additionalProperties": {
+                      "type": "object",
+                      "description": "A list of metadata instances, nested within key-value pairs of their `scope`\nand `templateKey`.",
+                      "example": {
+                        "marketingCollateral": {
+                          "$canEdit": true,
+                          "$id": "01234500-12f1-1234-aa12-b1d234cb567e",
+                          "$parent": "folder_59449484661",
+                          "$scope": "enterprise_27335",
+                          "$template": "marketingCollateral",
+                          "$type": "properties-6bcba49f-ca6d-4d2a-a758-57fe6edf44d0",
+                          "$typeVersion": 2,
+                          "$version": 1
+                        }
+                      },
+                      "additionalProperties": {
+                        "$ref": "#/components/schemas/Metadata"
+                      }
                     }
                   },
-                  "additionalProperties": {
-                    "$ref": "#/components/schemas/Metadata"
+                  {
+                    "description": "An object containing the metadata instances that have been\nattached to this file.\n\nEach metadata instance is uniquely identified by its `scope` and\n`templateKey`. There can only be one instance of any metadata\ntemplate attached to each file. Each metadata instance is nested\nwithin an object with the `templateKey` as the key, which again\nitself is nested in an object with the `scope` as the key."
                   }
-                }
+                ]
               },
               "expires_at": {
                 "type": "string",
@@ -19746,6 +19754,37 @@
                 "nullable": false,
                 "description": "Specifies if this folder is owned by a user outside of the\nauthenticated enterprise."
               },
+              "metadata": {
+                "allOf": [
+                  {
+                    "title": "Item metadata instances",
+                    "type": "object",
+                    "description": "A list of metadata instances, nested within key-value pairs of their `scope`\nand `templateKey`.\n\nTo access the metadata for a file or folder, first use the\nmetadata endpoints to determine the metadata templates available to your\nenterprise.\n\nThen use the `GET /files/:id` or `GET /folder/:id`\nendpoint with the `fields` query parameter to get\nthe metadata by ID.\n\nTo request a metadata instance for a particular `scope` and `templateKey`\nuse the following format for the `fields` parameter:\n`metadata.<scope>.<templateKey>`\n\nFor example, `?fields=metadata.enterprise_27335.marketingCollateral`.",
+                    "additionalProperties": {
+                      "type": "object",
+                      "description": "A list of metadata instances, nested within key-value pairs of their `scope`\nand `templateKey`.",
+                      "example": {
+                        "marketingCollateral": {
+                          "$canEdit": true,
+                          "$id": "01234500-12f1-1234-aa12-b1d234cb567e",
+                          "$parent": "folder_59449484661",
+                          "$scope": "enterprise_27335",
+                          "$template": "marketingCollateral",
+                          "$type": "properties-6bcba49f-ca6d-4d2a-a758-57fe6edf44d0",
+                          "$typeVersion": 2,
+                          "$version": 1
+                        }
+                      },
+                      "additionalProperties": {
+                        "$ref": "#/components/schemas/Metadata"
+                      }
+                    }
+                  },
+                  {
+                    "description": "An object containing the metadata instances that have been\nattached to this folder.\n\nEach metadata instance is uniquely identified by its `scope` and\n`templateKey`. There can only be one instance of any metadata\ntemplate attached to each folder. Each metadata instance is nested\nwithin an object with the `templateKey` as the key, which again\nitself is nested in an object with the `scope` as the key."
+                  }
+                ]
+              },
               "is_collaboration_restricted_to_enterprise": {
                 "allOf": [
                   {
@@ -20721,56 +20760,92 @@
         "title": "Metadata instance",
         "type": "object",
         "x-box-resource-id": "metadata",
+        "x-box-variant": "standard",
+        "description": "An instance of a metadata template, which has been applied to a file or\nfolder.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Metadata--Base"
+          }
+        ]
+      },
+      "Metadata--Full": {
+        "title": "Metadata instance (Full)",
+        "type": "object",
+        "x-box-resource-id": "metadata--full",
+        "x-box-variant": "full",
+        "description": "An instance of a metadata template, which has been applied to a file or\nfolder.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Metadata"
+          },
+          {
+            "properties": {
+              "$canEdit": {
+                "type": "boolean",
+                "example": true,
+                "description": "Whether the user can edit this metadata instance."
+              },
+              "$id": {
+                "type": "string",
+                "format": "uuid",
+                "example": "01234500-12f1-1234-aa12-b1d234cb567e",
+                "maxLength": 36,
+                "description": "A UUID to identify the metadata instance."
+              },
+              "$type": {
+                "type": "string",
+                "example": "properties-6bcba49f-ca6d-4d2a-a758-57fe6edf44d0",
+                "description": "A unique identifier for the \"type\" of this instance. This is an\ninternal system property and should not be used by a client\napplication."
+              },
+              "$typeVersion": {
+                "type": "integer",
+                "example": 2,
+                "description": "The last-known version of the template of the object. This is an\ninternal system property and should not be used by a client\napplication."
+              }
+            }
+          },
+          {
+            "additionalProperties": {
+              "example": "Aaron Levie",
+              "x-box-example-key": "name"
+            }
+          }
+        ]
+      },
+      "Metadata--Base": {
+        "title": "Metadata instance (Base)",
+        "type": "object",
+        "x-box-resource-id": "metadata--base",
+        "x-box-sanitized": true,
         "x-box-tag": "file_metadata",
-        "description": "A piece of metadata as specified by a metadata template and\napplied to a file or folder.",
+        "x-box-variants": [
+          "base",
+          "standard",
+          "full"
+        ],
+        "x-box-variant": "base",
+        "description": "The base representation of a metadata instance.",
         "properties": {
-          "$canEdit": {
-            "type": "boolean",
-            "example": true,
-            "description": "Whether the user can edit this metadata"
-          },
-          "$id": {
-            "type": "string",
-            "format": "uuid",
-            "example": "01234500-12f1-1234-aa12-b1d234cb567e",
-            "maxLength": 36,
-            "description": "A UUID to identify the metadata object"
-          },
           "$parent": {
             "type": "string",
             "example": "folder_59449484661,",
-            "description": "An ID for the parent folder"
+            "description": "The identifier of the item that this metadata instance\nhas been attached to. This combines the `type` and the `id`\nof the parent in the form `{type}_{id}`."
+          },
+          "$template": {
+            "type": "string",
+            "example": "marketingCollateral",
+            "description": "The name of the template"
           },
           "$scope": {
             "type": "string",
             "example": "enterprise_27335",
-            "description": "An ID for the scope in which this template\nhas been applied"
-          },
-          "$template": {
-            "type": "string",
-            "example": "properties",
-            "description": "The name of the template"
-          },
-          "$type": {
-            "type": "string",
-            "example": "properties-6bcba49f-ca6d-4d2a-a758-57fe6edf44d0",
-            "description": "A unique identifier for the \"type\" of this instance. This is an internal\nsystem property and should not be used by a client application."
-          },
-          "$typeVersion": {
-            "type": "integer",
-            "example": 2,
-            "description": "The last-known version of the template of the object. This is an internal\nsystem property and should not be used by a client application."
+            "description": "An ID for the scope in which this template\nhas been applied. This will be `enterprise_{enterprise_id}` for templates\ndefined for use in this enterprise, and `global` for general templates\nthat are available to all enterprises using Box."
           },
           "$version": {
             "type": "integer",
             "example": 1,
-            "description": "The version of the metadata object. Starts at 0 and increases every time\na user-defined property is modified."
+            "description": "The version of the metadata instance. This version starts at 0 and\nincreases every time a user-defined property is modified."
           }
-        },
-        "additionalProperties": {
-          "type": "string",
-          "example": "Aaron Levie",
-          "x-box-example-key": "name"
         }
       },
       "Metadatas": {
@@ -20911,81 +20986,26 @@
           }
         ]
       },
-      "MetadataQueryResult": {
-        "title": "Metadata query search result",
-        "type": "object",
-        "x-box-tag": "search",
-        "x-box-resource-id": "metadata_query_result",
-        "description": "A single file or folder that is returned for a metadata query, including its\nmetadata that matched the query.",
-        "properties": {
-          "item": {
-            "allOf": [
-              {
-                "description": "A standard representation of a file or folder that matched the search\nquery."
-              },
-              {
-                "oneOf": [
-                  {
-                    "$ref": "#/components/schemas/File"
-                  },
-                  {
-                    "$ref": "#/components/schemas/Folder"
-                  }
-                ]
-              }
-            ]
-          },
-          "metadata": {
-            "type": "object",
-            "description": "The metadata objects that matched the search query for the associated file\nor folder.",
-            "example": {
-              "enterprise_27335": {
-                "marketingCollateral": {
-                  "$canEdit": true,
-                  "$id": "01234500-12f1-1234-aa12-b1d234cb567e",
-                  "$parent": "folder_59449484661",
-                  "$scope": "enterprise_27335",
-                  "$template": "properties",
-                  "$type": "properties-6bcba49f-ca6d-4d2a-a758-57fe6edf44d0",
-                  "$typeVersion": 2,
-                  "$version": 1
-                }
-              }
-            },
-            "additionalProperties": {
-              "type": "object",
-              "description": "The key of the metadata template",
-              "example": {
-                "marketingCollateral": {
-                  "$canEdit": true,
-                  "$id": "01234500-12f1-1234-aa12-b1d234cb567e",
-                  "$parent": "folder_59449484661",
-                  "$scope": "enterprise_27335",
-                  "$template": "properties",
-                  "$type": "properties-6bcba49f-ca6d-4d2a-a758-57fe6edf44d0",
-                  "$typeVersion": 2,
-                  "$version": 1
-                }
-              },
-              "additionalProperties": {
-                "$ref": "#/components/schemas/Metadata"
-              }
-            }
-          }
-        }
-      },
       "MetadataQueryResults": {
         "title": "Metadata query search results",
         "type": "object",
         "x-box-tag": "search",
         "x-box-resource-id": "metadata_query_results",
-        "description": "A page of files and folders that are returned for a metadata query.",
+        "description": "A page of files and folders that matched the metadata query.",
         "properties": {
           "entries": {
-            "description": "The files and folders that match the search terms, including their\nmetadata.",
+            "description": "The mini representation of the files and folders that match the search\nterms.\n\nBy default, this endpoint returns only the most basic info about the\nitems. To get additional fields for each item, including any of the\nmetadata, use the `fields` attribute in the query.",
             "type": "array",
+            "x-box-resource-variant": 1,
             "items": {
-              "$ref": "#/components/schemas/MetadataQueryResult"
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/File"
+                },
+                {
+                  "$ref": "#/components/schemas/Folder"
+                }
+              ]
             }
           },
           "limit": {
