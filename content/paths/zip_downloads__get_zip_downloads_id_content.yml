@@ -1,0 +1,99 @@
+---
+operationId: get_zip_downloads_id_content
+
+summary: Download zip archive
+
+tags:
+  - Zip Downloads
+
+x-box-tag: zip_downloads
+x-box-reference-category: zip_downloads
+
+description: |-
+    Returns the contents of a `zip` archive in binary format. This URL does not
+    require any form of authentication and could be used in a user's browser to
+    download the archive to a user's device.
+
+    By default, this URL is only valid for a few seconds from the creation of
+    the request for this archive. Once a download has started it can not be
+    stopped and resumed, instead a new request for a zip archive would need to
+    be created.
+
+    The URL of this endpoint should not be considered as fixed. Instead, use
+    the [Create zip download](e://post_zip_downloads) API to request to create a
+    `zip` archive, and then follow the `download_url` field in the response to
+    this endpoint.
+
+security: []
+
+servers:
+  - url: https://dl.boxcloud.com/2.0
+    description: |-
+      An opaque server URL for downloading zip downloads. The format
+      of this URL might change over time.
+
+parameters:
+  - name: zip_download_id
+    description: |-
+      The unique identifier that represent this `zip` archive.
+    example: |-
+      Lu6fA9Ob-jyysp3AAvMF4AkLEwZwAYbL=tgj2zIC=eK9RvJnJbjJl9rNh2qBgHDpyOCAOhpM=vajg2mKq8Mdd
+    in: path
+    required: true
+    schema:
+      type: string
+
+responses:
+  200:
+    description: |-
+      Returns the content of the items requested for this download, formatted as
+      a stream of files and folders in a `zip` archive.
+    headers:
+      Content-Disposition:
+        description: |-
+          The name of the archive to be downloaded
+        schema:
+          type: string
+          example: |-
+            attachment;filename="Avatars.zip";filename*=UTF-8''Avatars.zip
+    content:
+      application/octet-stream:
+        schema:
+          type: string
+          format: binary
+          description: |-
+            The binary content of the archive, which will include the items
+            requested for this download.
+
+  404:
+    description: |-
+      Returns an error if the ID of this download request is not valid. This
+      error can also be returned if this URL has been called before. To
+      re-download this archive, please create a new request for a zip download.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
+
+  429:
+    description: |-
+      Returns an error if the number of concurrent zip downloads has been
+      reached for either the user or the enterprise.
+
+      * `user_too_many_concurrent_downloads` - the maximum of 5 parallel
+      downloads of zip archives per user has been met.
+      * `enterprise_too_many_concurrent_downloads` - the maximum of 10 parallel
+      downloads of zip archives per enterprise has been met.
+
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
+
+  default:
+    description: |-
+      An unexpected client error.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'

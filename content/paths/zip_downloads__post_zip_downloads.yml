@@ -1,0 +1,92 @@
+---
+operationId: post_zip_downloads
+
+summary: Create zip download
+
+tags:
+  - Zip Downloads
+
+x-box-tag: zip_downloads
+x-box-reference-category: zip_downloads
+
+description: |-
+  Creates a request to download multiple files and folders as a single `zip`
+  archive file. This API does not return the archive but instead performs all
+  the checks to ensure that the user has access to all the items, and then
+  returns a `download_url` and a `status_url` that can be used to download the
+  archive.
+
+  The limit for an archive is either 32GB or 10,000 files, whichever
+  limitation is met first.
+
+requestBody:
+  content:
+    application/json:
+      schema:
+        $ref: "#/components/schemas/ZipDownloadRequest"
+
+responses:
+  202:
+    description: |-
+      If the `zip` archive is ready to be downloaded, the API will return a
+      response that will include a `download_url`, a `status_url`, as well as
+      any conflicts that might have occurred when creating the request.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ZipDownload'
+
+  400:
+    description: |-
+      Returns an error if some of the parameters are missing or
+      not valid.
+
+      In most cases, this error might happen because the JSON request body is
+      not valid JSON, any of the items has an incorrect or missing ID, any of
+      the items is not a file or folder, or the root folder with ID `0` has been
+      added to the list of folders to add to the archive.
+
+      The following is a list of common error codes for this response.
+
+      * `bad_request` - the request body is missing, invalid, or both the list
+      of files and folders are empty. Additionally, it this error might be
+      returned when attempting to add the root folder with ID `0` to an archive.
+      * `zip_download_file_count_exceeded_limit` - the requested files and
+      folders would result in an archive with more than 10,000 files. The
+      request will have to be split into multiple requests to reduce the number
+      of files per archive.
+      * `zip_download_pre_compressed_bytes_exceeded_limit` - the requested files
+      and folders would result in an archive with more than 32GB of content. The
+      request will have to be split into multiple requests to reduce the size of
+      the archive.
+
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
+
+  401:
+    description: |-
+      Returned when the access token provided in the `Authorization` header
+      is not recognized or not provided.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
+
+  403:
+    description: |-
+      Returned when an authorization header is provided but the user does not
+      have access to the items.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
+
+  default:
+    description: |-
+      An unexpected client error.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
