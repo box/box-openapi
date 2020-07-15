@@ -3,145 +3,175 @@ title: Folder
 
 type: object
 
-x-box-tag: folders
 x-box-resource-id: folder
-x-box-has-field-variants: true
-x-box-sanitized: true
+x-box-variant: standard
 
 description: |-
-  A full representation of a folder, as can be returned from any
+  A standard representation of a folder, as returned from any
   folder API endpoints by default
 
 allOf:
-  - $ref: '#/components/schemas/Folder--Standard'
+  - $ref: '#/components/schemas/Folder--Mini'
   - properties:
-      sync_state:
-        allOf:
-          - $ref: "../attributes/folder__sync_state.yml"
-          - x-box-field-variant: 3
+      created_at:
+        type: string
+        format: date-time
+        nullable: true
+        description: |-
+          The date and time when the folder was created. This value may
+          be `null` for some folders such as the root folder or the trash
+          folder.
+        example: "2012-12-12T10:53:43-08:00"
 
-      has_collaborations:
-        x-box-field-variant: 3
-        type: boolean
-        example: true
+      modified_at:
+        type: string
+        format: date-time
+        description: |-
+          The date and time when the folder was last updated. This value may
+          be `null` for some folders such as the root folder or the trash
+          folder.
+        example: "2012-12-12T10:53:43-08:00"
+        nullable: true
+
+      description:
+        allOf:
+          - $ref: "../attributes/folder__description.yml"
+          - nullable: false
+
+      size:
+        type: integer
+        format: int64
+        description: |-
+          The folder size in bytes.
+
+          Be careful parsing this integer as its
+          value can get very large.
+        example: 629644
         nullable: false
-        description: |-
-          Specifies if this folder has any other collaborators.
 
-      permissions:
+      path_collection:
         allOf:
-          - $ref: "../attributes/folder_permissions.yml"
+          - $ref: '../attributes/path_collection.yml'
           - description: |-
-              Describes the permissions that the current user has
-              for this folder
-          - x-box-field-variant: 3
+              The tree of folders that this folder is contained in,
+              starting at the root.
           - nullable: false
 
-      tags:
+      created_by:
         allOf:
-          - $ref: "../attributes/tags.yml"
-          - x-box-field-variant: 3
+          - $ref: '#/components/schemas/User--Mini'
+          - description: The user who created this folder
           - nullable: false
 
-      can_non_owners_invite:
+      modified_by:
         allOf:
-          - $ref: "../attributes/folder__can_non_owners_invite.yml"
-          - x-box-field-variant: 3
+          - $ref: '#/components/schemas/User--Mini'
+          - description: The user who last modified this folder.
           - nullable: false
 
-      is_externally_owned:
-        x-box-field-variant: 3
-        type: boolean
-        example: true
+      trashed_at:
+        type: string
+        format: date-time
+        description: |-
+          The time at which this folder was put in the trash.
+        example: "2012-12-12T10:53:43-08:00"
+        nullable: true
+
+      purged_at:
+        type: string
+        format: date-time
+        description: |-
+          The time at which this folder is expected to be purged
+          from the trash.
+        example: "2012-12-12T10:53:43-08:00"
+        nullable: true
+
+      content_created_at:
+        type: string
+        format: date-time
+        nullable: true
+        description: |-
+          The date and time at which this folder was originally
+          created.
+        example: "2012-12-12T10:53:43-08:00"
+
+      content_modified_at:
+        type: string
+        format: date-time
+        nullable: true
+        description: |-
+          The date and time at which this folder was last updated.
+        example: "2012-12-12T10:53:43-08:00"
+
+      expires_at:
+        type: string
+        format: date-time
+        nullable: true
+        description: |-
+          The time and which the folder will be automatically be deleted.
+        example: "2012-12-12T10:53:43-08:00"
+
+      owned_by:
+        allOf:
+          - $ref: '#/components/schemas/User--Mini'
+          - description: The user who owns this folder.
+          - nullable: false
+
+      shared_link:
+        allOf:
+          - $ref: '../attributes/shared_link.yml'
+          - description: |-
+              The shared link for this folder. This will be
+              `null` if no shared link has been created for this
+              folder.
+        nullable: true
+
+      folder_upload_email:
+        type: object
+        nullable: true
+        properties:
+          access:
+            $ref: "../attributes/folder_upload_email__access.yml"
+
+          email:
+            description: |-
+              The optional upload email address for this folder.
+            type: string
+            format: email
+            example: upload.Contracts.asd7asd@u.box.com
+            nullable: false
+
+      parent:
+        allOf:
+          - $ref: '#/components/schemas/Folder--Mini'
+          - description: |-
+              The optional folder that this folder is located within.
+
+              This value may be `null` for some folders such as the
+              root folder or the trash folder.
+        nullable: true
+
+      item_status:
+        type: string
+        description: |-
+          Defines if this item has been deleted or not.
+
+          * `active` when the item has is not in the trash
+          * `trashed` when the item has been moved to the trash but not deleted
+          * `deleted` when the item has been permanently deleted.
+        enum:
+          - active
+          - trashed
+          - deleted
         nullable: false
-        description: |-
-          Specifies if this folder is owned by a user outside of the
-          authenticated enterprise.
+        example: "active"
 
-      metadata:
+      item_collection:
         allOf:
-          - $ref: '../attributes/metadata_instances.yml'
+          - $ref: '#/components/schemas/Items'
           - description: |-
-              An object containing the metadata instances that have been
-              attached to this folder.
+              A page of the items that are in the folder.
 
-              Each metadata instance is uniquely identified by its `scope` and
-              `templateKey`. There can only be one instance of any metadata
-              template attached to each folder. Each metadata instance is nested
-              within an object with the `templateKey` as the key, which again
-              itself is nested in an object with the `scope` as the key.
-          - x-box-field-variant: 3
-
-      is_collaboration_restricted_to_enterprise:
-        allOf:
-          - $ref:
-              "../attributes/folder__is_collaboration_restricted_to_enterprise.yml"
-          - x-box-field-variant: 3
+              This field can only be requested when querying a folder's
+              information, not when querying a folder's items.
           - nullable: false
-
-      allowed_shared_link_access_levels:
-        x-box-field-variant: 3
-        type: array
-        example:
-          - open
-        items:
-          type: string
-          enum:
-            - open
-            - company
-            - collaborators
-        nullable: false
-        description: |-
-          A list of access levels that are available
-          for this folder.
-
-          For some folders, like the root folder, this will always
-          be an empty list as sharing is not allowed at that level.
-
-      allowed_invitee_roles:
-        x-box-field-variant: 3
-        type: array
-        example:
-          - editor
-        nullable: false
-        description: |-
-          A list of the types of roles that user can be invited at
-          when sharing this folder.
-        items:
-          type: string
-          enum:
-            - editor
-            - viewer
-            - previewer
-            - uploader
-            - previewer uploader
-            - viewer uploader
-            - co-owner
-
-      watermark_info:
-        allOf:
-          - $ref: '../attributes/watermark_info.yml'
-          - description: |-
-              Details about the watermark applied to this folder
-          - x-box-field-variant: 3
-          - nullable: false
-
-      can_non_owners_view_collaborators:
-        x-box-field-variant: 3
-        type: boolean
-        example: true
-        description: |-
-          Specifies if collaborators who are not owners
-          of this folder are restricted from viewing other
-          collaborations on this folder.
-
-          It also restricts non-owners from inviting new
-          collaborators.
-
-      classification:
-        allOf:
-          - $ref: '../attributes/classification.yml'
-          - description: |-
-              Details about the classification applied to this folder.
-          - x-box-field-variant: 3
-          - nullable: true

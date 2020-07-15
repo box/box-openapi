@@ -1,0 +1,125 @@
+---
+type: object
+x-box-resource-id: status_skill_card
+x-box-tag: skills
+title: Status Skill Card
+description: |-
+  A Box Skill metadata card that puts a status message in the metadata sidebar.
+required:
+  - type
+  - skill_card_type
+  - skill
+  - invocation
+  - status
+properties:
+  created_at:
+    type: string
+    format: date-time
+    example: "2018-04-13T13:53:23-07:00"
+    description: |-
+      The optional date and time this card was created at.
+  type:
+    type: string
+    description: "`skill_card`"
+    example: 'skill_card'
+    enum:
+      - skill_card
+  skill_card_type:
+    type: string
+    description: "`status`"
+    example: status
+    enum:
+      - status
+  skill_card_title:
+    type: object
+    description: The title of the card.
+    required:
+      - message
+    properties:
+      code:
+        type: string
+        example: "status"
+        description: An optional identifier for the title.
+
+      message:
+        type: string
+        example: "Status"
+        description: The actual title to show in the UI.
+
+  status:
+    type: object
+    description:
+      Sets the status of the skill. This can be used to show a message to the
+      user while the Skill is processing the data, or if it was not able to
+      process the file.
+    required:
+      - code
+    properties:
+      code:
+        type: string
+        description: |-
+          A code for the status of this Skill invocation. By
+          default each of these will have their own accompanied
+          messages. These can be adjusted by setting the `message`
+          value on this object.
+        example: success
+        enum:
+          - invoked
+          - processing
+          - success
+          - transient_failure
+          - permanent_failure
+      message:
+        type: string
+        description: |-
+          A custom message that can be provided with this status.
+          This will be shown in the web app to the end user.
+        example: |-
+          We're preparing to process your file. Please hold on!
+
+  skill:
+    type: object
+    description: The service that applied this metadata.
+    required:
+      - type
+      - id
+    properties:
+      type:
+        type: string
+        example: "service"
+        description: "`service`"
+        enum:
+          - service
+
+      id:
+        type: string
+        example: "image-recognition-service"
+        description: |-
+          A custom identifier that represent the service that
+          applied this metadata.
+
+  invocation:
+    type: object
+    description: |-
+      The invocation of this service, used to track
+      which instance of a service applied the metadata.
+    required:
+      - type
+      - id
+    properties:
+      type:
+        type: string
+        example: "skill_invocation"
+        description: "`skill_invocation`"
+        enum:
+          - skill_invocation
+
+      id:
+        type: string
+        example: "image-recognition-service-123"
+        description: |-
+          A custom identifier that represent the instance of
+          the service that applied this metadata. For example,
+          if your `image-recognition-service` runs on multiple
+          nodes, this field can be used to identify the ID of
+          the node that was used to apply the metadata.

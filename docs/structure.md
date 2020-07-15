@@ -11,7 +11,7 @@ endpoint (**path**) and every object model (**schema**).
 
 The OpenAPI specification is **build** by starting at the `content/openapi.yml`
 file, resolving every reference (signified by `$ref` fields) to other files, and
-writing out the compiled specification to `build/openapi.json`
+writing out the compiled specification to `compiled/openapi/openapi.json`
 
 ## Project structure
 
@@ -51,7 +51,7 @@ The following is the rough layout of this project.
   - `attributes.` - A list of re-usable fields, parameters, and other little
       tidbits. The do not represent entire schemas, but instead only represent
       smaller parts of the API spec.
-- `build/` - This is where the compiled `openapi.json` is written to after
+- `compiled/` - This is where the compiled `openapi.json` is written to after
   running `yarn build`.
 - `src/` - The code base that includes our linting code, as well as our
   functional tests.
@@ -63,7 +63,8 @@ Across the API spec we use references (`$ref`) to other files as well as other
 parts of the OpenAPI spec.
 
 - To link to a request, response, error, callback, or other schema you can use
-  the following syntax `$ref: '#/components/schemas/User'`. This requires `User`
+  the following syntax `$ref: '#/components/schemas/User'`. This
+  requires `User`
   to exist in the `content/schemas.yml`, and for it to have a reference to a
   valid file itself. These references will **not** be resolved during the build
   process, and the final `openapi.json` will have all these references in place.
@@ -121,15 +122,14 @@ We use a few custom attributes in our API specification.
 
 <!-- markdownlint-disable line-length -->
 
-| Name                       | Description                                                                                                                                                                                                                                  |
-|----------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `x-box-tag`                | Used to assign a response schema or endpoint/path to a `Tag`. Must match one of the values in `content/common/tags.yml`.                                                                                                                     |
-| `x-box-resource-id`        | Used to define specify that a resource needs to be listed in the API documentation. This ID needs to be unique is part of the slug of the resource. Without this ID the resource will be hidden from the documentation.                      |
-| `x-box-enable-explorer`    | Used to explicitly turn the API explorer in the documentation on or off for this API endpoint. Defaults to `true` for all non-`DELETE` endpoints                                                                                             |
-| `x-box-sanitized`          | Used to mark of an endpoint has ever been sanitized. As we imported a lot of this spec from an old specification, we are not always 100% sure of the quality of an endpoint. A sanitized endpoint has been reviewed by a human since import. |
-| `x-box-has-field-variants` | Used to define if a response resource has different variants, like a `Base`, `Mini`, `Standard`, and `Full` variant. See [`variants.md`](./variants.md) for more details.                                                                    |
-| `x-box-field-variant`      | Used to define what resource variant a field belongs to: a `Base` (`0`), `Mini`, (`1`), `Standard` (`2`), pr `Full` (`3`) variant. See [`variants.md`](./variants.md) for more details.                                                      |
-| `x-box-resource-variant`   | Used to send a hint to the API documentation as to what variant a nested resource would appear as by default.                                                                                                                                |
+| Name                     | Description                                                                                                                                                                                                                                  |
+|--------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `x-box-tag`              | Used to assign a response schema or endpoint/path to a `Tag`. Must match one of the values in `content/common/tags.yml`.                                                                                                                     |
+| `x-box-resource-id`      | Used to define specify that a resource needs to be listed in the API documentation. This ID needs to be unique is part of the slug of the resource. Without this ID the resource will be hidden from the documentation.                      |
+| `x-box-enable-explorer`  | Used to explicitly turn the API explorer in the documentation on or off for this API endpoint. Defaults to `true` for all non-`DELETE` endpoints                                                                                             |
+| `x-box-sanitized`        | Used to mark of an endpoint has ever been sanitized. As we imported a lot of this spec from an old specification, we are not always 100% sure of the quality of an endpoint. A sanitized endpoint has been reviewed by a human since import. |
+| `x-box-variants`         | Used to define if a response resource has different variants, like a `base`, `mini`, `standard`, and `full` variant. See [`variants.md`](./variants.md) for more details.                                                                    |
+| `x-box-variant`          | Used to define what variant a resource belongs to. See [`variants.md`](./variants.md) for more details.                                                                                                                                      |
 
 <!-- markdownlint-enable line-length -->
 

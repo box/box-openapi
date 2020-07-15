@@ -13,13 +13,14 @@ functions:
   - ensureNoArticlesInTitles
   - ensureTagExists
   - ensureSchemaHasType
+  - ensureNoCircularReferences
 
 rules:
   tag-description: false
   example-value-or-externalValue: false
   operation-summary-formatted: false
   oas3-unused-components-schema: false
-
+  
   ensure-endpoint-summary:
     description: Endpoints must have a summary.
     given: $.paths[*][*]
@@ -110,15 +111,15 @@ rules:
     then:
       function: ensureAllOfOrder
 
-  ensure-local-references-in-allof:
-    description: Ensures order of items in an allOf for properties
-    given: '$.paths..*.properties..*'
-    severity: error
-    recommended: true
-    resolved: false
-    message: "{{error}}"
-    then:
-      function: ensureLocalReferencesInAllOf
+  # ensure-local-references-in-allof:
+  #   description: Ensures order of items in an allOf for properties
+  #   given: '$.paths..*.properties..*'
+  #   severity: error
+  #   recommended: true
+  #   resolved: false
+  #   message: "{{error}}"
+  #   then:
+  #     function: ensureLocalReferencesInAllOf
 
   ensure-array-properties-have-items-with-type:
     description: Ensures all array properties have an items attribute with a type
@@ -195,3 +196,12 @@ rules:
     message: "{{error}}"
     then:
       function: ensureSchemaHasType
+
+  ensure-no-circular-references:
+    description: Should not contain any cicular references
+    given: $
+    severity: error
+    recommended: true
+    message: "{{error}}"
+    then:
+      function: ensureNoCircularReferences

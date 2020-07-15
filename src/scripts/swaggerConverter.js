@@ -8,7 +8,7 @@ class SwaggerConverter {
    * to a Swagger 2.0 file
    */
   async writeSpecification(folder) {
-    const openapiFilename = `build/openapi/openapi.json`
+    const openapiFilename = `compiled/openapi/openapi.json`
     if (!fs.existsSync(openapiFilename)) { return }
 
     let openapi = JSON.parse(fs.readFileSync(openapiFilename))
@@ -61,10 +61,9 @@ class Swagger {
     this.deleteAllAttributes(swagger, 'explode')
     this.deleteAllAttributes(swagger, 'nullable')
     this.deleteAllAttributes(swagger, 'x-box-resource-id')
-    this.deleteAllAttributes(swagger, 'x-box-field-variant')
+    this.deleteAllAttributes(swagger, 'x-box-tag')
     this.deleteAllAttributes(swagger, 'x-tag')
     this.deleteAllAttributes(swagger, 'x-box-sanitized')
-    this.deleteAllAttributes(swagger, 'x-box-has-field-variants')
 
     return swagger
   }
