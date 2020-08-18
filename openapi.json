@@ -13948,6 +13948,24 @@
               "format": "int64",
               "maximum": 1000
             }
+          },
+          {
+            "name": "fields",
+            "description": "A comma-separated list of attributes to include in the\nresponse. This can be used to request fields that are\nnot normally returned in a standard response.\n\nBe aware that specifying this parameter will have the\neffect that none of the standard fields are returned in\nthe response unless explicitly specified, instead only\nfields for the mini representation are returned, additional\nto the fields requested.",
+            "in": "query",
+            "example": [
+              "id",
+              "type",
+              "name"
+            ],
+            "required": false,
+            "explode": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
           }
         ],
         "responses": {
@@ -20993,6 +21011,80 @@
         "x-box-resource-id": "legal_hold_policy_assignment",
         "x-box-tag": "legal_hold_policy_assignments",
         "description": "Legal Hold Assignments are used to assign Legal Hold\nPolicies to Users, Folders, Files, or File Versions.\n\nCreating a Legal Hold Assignment puts a hold\non the File-Versions that belong to the Assignment's\n'apply-to' entity.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/LegalHoldPolicyAssignment--Base"
+          },
+          {
+            "properties": {
+              "legal_hold_policy": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/LegalHoldPolicy--Mini"
+                  },
+                  {
+                    "description": "The policy that the legal hold policy assignment\nis part of"
+                  }
+                ]
+              },
+              "assigned_to": {
+                "allOf": [
+                  {
+                    "oneOf": [
+                      {
+                        "$ref": "#/components/schemas/File"
+                      },
+                      {
+                        "$ref": "#/components/schemas/Folder"
+                      },
+                      {
+                        "$ref": "#/components/schemas/WebLink"
+                      }
+                    ]
+                  },
+                  {
+                    "description": "The item that the the legal hold policy\nis assigned to. Includes type and ID."
+                  }
+                ]
+              },
+              "assigned_by": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/User--Mini"
+                  },
+                  {
+                    "description": "The user who created the legal hold policy\nassignment"
+                  }
+                ]
+              },
+              "assigned_at": {
+                "type": "string",
+                "format": "date-time",
+                "description": "When the legal hold policy assignment object was\ncreated",
+                "example": "2012-12-12T10:53:43-08:00"
+              },
+              "deleted_at": {
+                "type": "string",
+                "format": "date-time",
+                "description": "When the assignment release request was sent.\n(Because it can take time for an assignment to fully\ndelete, this isn't quite the same time that the\nassignment is fully deleted). If null, Assignment\nwas not deleted.",
+                "example": "2012-12-12T10:53:43-08:00"
+              }
+            }
+          }
+        ]
+      },
+      "LegalHoldPolicyAssignment--Base": {
+        "title": "Legal hold policy assignment (Base)",
+        "type": "object",
+        "x-box-resource-id": "legal_hold_policy_assignment--base",
+        "x-box-sanitized": true,
+        "x-box-tag": "legal_hold_policy_assignments",
+        "x-box-variants": [
+          "base",
+          "standard"
+        ],
+        "x-box-variant": "base",
+        "description": "Legal Hold Assignments are used to assign Legal Hold\nPolicies to Users, Folders, Files, or File Versions.\n\nCreating a Legal Hold Assignment puts a hold\non the File-Versions that belong to the Assignment's\n'apply-to' entity.",
         "properties": {
           "id": {
             "type": "string",
@@ -21006,58 +21098,6 @@
             "enum": [
               "legal_hold_policy_assignment"
             ]
-          },
-          "legal_hold_policy": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/LegalHoldPolicy--Mini"
-              },
-              {
-                "description": "The policy that the legal hold policy assignment\nis part of"
-              }
-            ]
-          },
-          "assigned_to": {
-            "allOf": [
-              {
-                "oneOf": [
-                  {
-                    "$ref": "#/components/schemas/File"
-                  },
-                  {
-                    "$ref": "#/components/schemas/Folder"
-                  },
-                  {
-                    "$ref": "#/components/schemas/WebLink"
-                  }
-                ]
-              },
-              {
-                "description": "The item that the the legal hold policy\nis assigned to. Includes type and ID."
-              }
-            ]
-          },
-          "assigned_by": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/User--Mini"
-              },
-              {
-                "description": "The user who created the legal hold policy\nassignment"
-              }
-            ]
-          },
-          "assigned_at": {
-            "type": "string",
-            "format": "date-time",
-            "description": "When the legal hold policy assignment object was\ncreated",
-            "example": "2012-12-12T10:53:43-08:00"
-          },
-          "deleted_at": {
-            "type": "string",
-            "format": "date-time",
-            "description": "When the assignment release request was sent.\n(Because it can take time for an assignment to fully\ndelete, this isn't quite the same time that the\nassignment is fully deleted). If null, Assignment\nwas not deleted.",
-            "example": "2012-12-12T10:53:43-08:00"
           }
         }
       },
@@ -21097,7 +21137,7 @@
               "entries": {
                 "type": "array",
                 "items": {
-                  "$ref": "#/components/schemas/LegalHoldPolicyAssignment"
+                  "$ref": "#/components/schemas/LegalHoldPolicyAssignment--Base"
                 }
               }
             }
