@@ -8081,9 +8081,9 @@
         "parameters": [
           {
             "name": "query",
-            "description": "The string to search for. This query is matched against item names,\ndescriptions, text content of files, and various other fields of\nthe different item types.",
+            "description": "The string to search for. This query is matched against item names,\ndescriptions, text content of files, and various other fields of\nthe different item types.\n\nRequired unless `mdfilters` parameter is defined.",
             "in": "query",
-            "required": true,
+            "required": false,
             "example": "sales",
             "schema": {
               "type": "string"
@@ -8196,8 +8196,7 @@
               "type": "string",
               "enum": [
                 "file",
-                "folder",
-                "web_link"
+                "folder"
               ]
             }
           },
@@ -8217,58 +8216,39 @@
           },
           {
             "name": "mdfilters",
-            "description": "Limits search results to items that match the\nmetadata template name and content.",
+            "description": "A list of metadata templates to filter\nsearch results by.\n\nRequired unless `query` is defined.",
             "in": "query",
-            "required": false,
             "example": [
               {
                 "scope": "enterprise",
-                "templateKey": "marketingCollateral",
+                "templateKey": "contractTemplate",
                 "filters": {
-                  "documentType": "datasheet"
+                  "category": "online"
                 }
               }
             ],
+            "x-example": [
+              {
+                "scope": "enterprise",
+                "templateKey": "contractTemplate",
+                "filters": {
+                  "category": "online",
+                  "contractValue": 1000000
+                }
+              }
+            ],
+            "required": false,
             "schema": {
               "type": "array",
               "items": {
-                "type": "object",
-                "description": "A metadata filter used for searching by metadata\ntemplate",
-                "properties": {
-                  "scope": {
-                    "description": "Specifies the scope of the template to search for.",
-                    "type": "string",
-                    "example": "global",
-                    "enum": [
-                      "global",
-                      "enterprise"
-                    ]
-                  },
-                  "templateKey": {
-                    "description": "The key name of the template to search for. Only\none template name can be specified per filter.",
-                    "type": "string",
-                    "example": "marketingCollateral"
-                  },
-                  "filters": {
-                    "type": "object",
-                    "description": "Additional key/value pairs for the template to search for.\n\nFor floats and dates, you can include an (inclusive) upper\nbound parameter `lt` or (inclusive) lower bound parameter\n`gt`, or both.\n\nAn example filter for a `contractExpiration` on or before\n`08-01-16 UTC` would be listed as follow.\n\n`{\"contractExpiration\":{\"lt\":\"2016-08-01T00:00:00Z\"}}`",
-                    "example": {
-                      "documentType": "datasheet"
-                    },
-                    "additionalProperties": {
-                      "description": "The value for the custom field",
-                      "type": "string",
-                      "example": "datasheet",
-                      "x-box-example-key": "documentType"
-                    }
-                  }
-                }
-              }
+                "$ref": "#/components/schemas/MetadataFilter"
+              },
+              "description": "A list of metadata templates to filter the search results by.\n\nRequired unless `query` parameter is defined."
             }
           },
           {
             "name": "sort",
-            "description": "Defines the order in which results are returned. Defaults to `relevance`.\n\n* `relevance` (default) returns the results sorted by relevance to the\nquery search term.\n* `modified_at`  returns the results ordered in descending order by date\nat which the item was last modified.",
+            "description": "Defines the order in which results are returned. Defaults to `relevance`.\n\n* `relevance` (default) returns the results sorted by relevance to the\nquery search term.\n* `modified_at` returns the results ordered in descending order by date\nat which the item was last modified.",
             "in": "query",
             "required": false,
             "schema": {
@@ -8346,7 +8326,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Items"
+                  "$ref": "#/components/schemas/SearchResults"
                 }
               }
             }
@@ -13947,6 +13927,24 @@
               "type": "integer",
               "format": "int64",
               "maximum": 1000
+            }
+          },
+          {
+            "name": "fields",
+            "description": "A comma-separated list of attributes to include in the\nresponse. This can be used to request fields that are\nnot normally returned in a standard response.\n\nBe aware that specifying this parameter will have the\neffect that none of the standard fields are returned in\nthe response unless explicitly specified, instead only\nfields for the mini representation are returned, additional\nto the fields requested.",
+            "in": "query",
+            "example": [
+              "id",
+              "type",
+              "name"
+            ],
+            "required": false,
+            "explode": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
             }
           }
         ],
@@ -20993,6 +20991,80 @@
         "x-box-resource-id": "legal_hold_policy_assignment",
         "x-box-tag": "legal_hold_policy_assignments",
         "description": "Legal Hold Assignments are used to assign Legal Hold\nPolicies to Users, Folders, Files, or File Versions.\n\nCreating a Legal Hold Assignment puts a hold\non the File-Versions that belong to the Assignment's\n'apply-to' entity.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/LegalHoldPolicyAssignment--Base"
+          },
+          {
+            "properties": {
+              "legal_hold_policy": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/LegalHoldPolicy--Mini"
+                  },
+                  {
+                    "description": "The policy that the legal hold policy assignment\nis part of"
+                  }
+                ]
+              },
+              "assigned_to": {
+                "allOf": [
+                  {
+                    "oneOf": [
+                      {
+                        "$ref": "#/components/schemas/File"
+                      },
+                      {
+                        "$ref": "#/components/schemas/Folder"
+                      },
+                      {
+                        "$ref": "#/components/schemas/WebLink"
+                      }
+                    ]
+                  },
+                  {
+                    "description": "The item that the the legal hold policy\nis assigned to. Includes type and ID."
+                  }
+                ]
+              },
+              "assigned_by": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/User--Mini"
+                  },
+                  {
+                    "description": "The user who created the legal hold policy\nassignment"
+                  }
+                ]
+              },
+              "assigned_at": {
+                "type": "string",
+                "format": "date-time",
+                "description": "When the legal hold policy assignment object was\ncreated",
+                "example": "2012-12-12T10:53:43-08:00"
+              },
+              "deleted_at": {
+                "type": "string",
+                "format": "date-time",
+                "description": "When the assignment release request was sent.\n(Because it can take time for an assignment to fully\ndelete, this isn't quite the same time that the\nassignment is fully deleted). If null, Assignment\nwas not deleted.",
+                "example": "2012-12-12T10:53:43-08:00"
+              }
+            }
+          }
+        ]
+      },
+      "LegalHoldPolicyAssignment--Base": {
+        "title": "Legal hold policy assignment (Base)",
+        "type": "object",
+        "x-box-resource-id": "legal_hold_policy_assignment--base",
+        "x-box-sanitized": true,
+        "x-box-tag": "legal_hold_policy_assignments",
+        "x-box-variants": [
+          "base",
+          "standard"
+        ],
+        "x-box-variant": "base",
+        "description": "Legal Hold Assignments are used to assign Legal Hold\nPolicies to Users, Folders, Files, or File Versions.\n\nCreating a Legal Hold Assignment puts a hold\non the File-Versions that belong to the Assignment's\n'apply-to' entity.",
         "properties": {
           "id": {
             "type": "string",
@@ -21006,58 +21078,6 @@
             "enum": [
               "legal_hold_policy_assignment"
             ]
-          },
-          "legal_hold_policy": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/LegalHoldPolicy--Mini"
-              },
-              {
-                "description": "The policy that the legal hold policy assignment\nis part of"
-              }
-            ]
-          },
-          "assigned_to": {
-            "allOf": [
-              {
-                "oneOf": [
-                  {
-                    "$ref": "#/components/schemas/File"
-                  },
-                  {
-                    "$ref": "#/components/schemas/Folder"
-                  },
-                  {
-                    "$ref": "#/components/schemas/WebLink"
-                  }
-                ]
-              },
-              {
-                "description": "The item that the the legal hold policy\nis assigned to. Includes type and ID."
-              }
-            ]
-          },
-          "assigned_by": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/User--Mini"
-              },
-              {
-                "description": "The user who created the legal hold policy\nassignment"
-              }
-            ]
-          },
-          "assigned_at": {
-            "type": "string",
-            "format": "date-time",
-            "description": "When the legal hold policy assignment object was\ncreated",
-            "example": "2012-12-12T10:53:43-08:00"
-          },
-          "deleted_at": {
-            "type": "string",
-            "format": "date-time",
-            "description": "When the assignment release request was sent.\n(Because it can take time for an assignment to fully\ndelete, this isn't quite the same time that the\nassignment is fully deleted). If null, Assignment\nwas not deleted.",
-            "example": "2012-12-12T10:53:43-08:00"
           }
         }
       },
@@ -21097,7 +21117,7 @@
               "entries": {
                 "type": "array",
                 "items": {
-                  "$ref": "#/components/schemas/LegalHoldPolicyAssignment"
+                  "$ref": "#/components/schemas/LegalHoldPolicyAssignment--Base"
                 }
               }
             }
@@ -21996,6 +22016,47 @@
             }
           }
         ]
+      },
+      "SearchResults": {
+        "title": "Search Results",
+        "type": "object",
+        "x-box-resource-id": "search_results",
+        "x-box-tag": "search",
+        "description": "A list of files and folders that matched the search query.",
+        "properties": {
+          "total_count": {
+            "description": "One greater than the offset of the last entry in the search results.\nThe total number of entries in the collection may be less than\n`total_count`.",
+            "example": 5000,
+            "type": "integer",
+            "format": "int64"
+          },
+          "limit": {
+            "description": "The limit that was used for this search. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed.",
+            "example": 1000,
+            "type": "integer",
+            "format": "int64"
+          },
+          "offset": {
+            "description": "The 0-based offset of the first entry in this set. This will be the same\nas the `offset` query parameter used.",
+            "example": 2000,
+            "type": "integer",
+            "format": "int64"
+          },
+          "entries": {
+            "description": "The search results for the query provided.",
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/File"
+                },
+                {
+                  "$ref": "#/components/schemas/Folder"
+                }
+              ]
+            }
+          }
+        }
       },
       "SkillCardsMetadata": {
         "title": "Skills metadata instance",
@@ -24697,6 +24758,184 @@
                 "example": "image-recognition-service-123",
                 "description": "A custom identifier that represent the instance of\nthe service that applied this metadata. For example,\nif your `image-recognition-service` runs on multiple\nnodes, this field can be used to identify the ID of\nthe node that was used to apply the metadata."
               }
+            }
+          }
+        }
+      },
+      "MetadataFilter": {
+        "title": "Metadata filter",
+        "type": "object",
+        "x-box-resource-id": "metadata_filter",
+        "x-box-tag": "search",
+        "description": "A metadata template to filter the search results by.",
+        "properties": {
+          "scope": {
+            "description": "Specifies the scope of the template to filter search results by.\n\nThis will be `enterprise_{enterprise_id}` for templates defined\nfor use in this enterprise, and `global` for general templates\nthat are available to all enterprises using Box.",
+            "type": "string",
+            "example": "enterprise",
+            "enum": [
+              "global",
+              "enterprise",
+              "enterprise_{enterprise_id}"
+            ]
+          },
+          "templateKey": {
+            "description": "The key of the template to filter search results by.",
+            "type": "string",
+            "example": "contractTemplate"
+          },
+          "filters": {
+            "allOf": [
+              {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/MetadataFieldFilterString"
+                  },
+                  {
+                    "$ref": "#/components/schemas/MetadataFieldFilterFloat"
+                  },
+                  {
+                    "$ref": "#/components/schemas/MetadataFieldFilterMultiSelect"
+                  },
+                  {
+                    "$ref": "#/components/schemas/MetadataFieldFilterFloatRange"
+                  },
+                  {
+                    "$ref": "#/components/schemas/MetadataFieldFilterDateRange"
+                  }
+                ]
+              },
+              {
+                "description": "Specifies which fields on the template to filter the search\nresults by."
+              },
+              {
+                "example": {
+                  "category": "online",
+                  "contractValue": 1000000
+                }
+              }
+            ]
+          }
+        }
+      },
+      "MetadataFieldFilterString": {
+        "title": "Metadata field filter (string)",
+        "type": "object",
+        "x-box-resource-id": "metadata_field_filter_string",
+        "description": "Specifies which text field on the template to filter the search\nresults by.",
+        "example": {
+          "category": "online"
+        },
+        "additionalProperties": {
+          "type": "string",
+          "description": "A mapping between a metadata `string` field key and\nthe value to match search results on.",
+          "example": "online",
+          "x-box-example-key": "category"
+        }
+      },
+      "MetadataFieldFilterFloat": {
+        "title": "Metadata field filter (float)",
+        "type": "object",
+        "x-box-resource-id": "metadata_field_filter_float",
+        "description": "Specifies which `float` field on the template to filter the search\nresults by.",
+        "example": {
+          "contractValue": 10000
+        },
+        "additionalProperties": {
+          "type": "number",
+          "description": "A mapping between a metadata `float` field key and\nthe value to match search results on.",
+          "example": 10000,
+          "x-box-example-key": "contractValue"
+        }
+      },
+      "MetadataFieldFilterMultiSelect": {
+        "title": "Metadata field filter (multi-select)",
+        "type": "object",
+        "x-box-resource-id": "metadata_field_filter_multi_select",
+        "description": "Specifies the values to match for a `multiSelect` metadata\nfield",
+        "example": {
+          "category": [
+            "online",
+            "enterprise"
+          ]
+        },
+        "additionalProperties": {
+          "type": "array",
+          "description": "A mapping between a metadata `multiSelect` field key and\nthe one or more values to match search results on.",
+          "example": [
+            "online",
+            "enterprise"
+          ],
+          "items": {
+            "type": "string"
+          },
+          "x-box-example-key": "category"
+        }
+      },
+      "MetadataFieldFilterFloatRange": {
+        "title": "Metadata field filter (float range)",
+        "type": "object",
+        "x-box-resource-id": "metadata_field_filter_float_range",
+        "description": "Specifies which `float` field on the template to filter the search\nresults by, specifying a range of values that can match.",
+        "example": {
+          "contractValue": {
+            "gt": 100000,
+            "lt": 200000
+          }
+        },
+        "additionalProperties": {
+          "type": "object",
+          "description": "Specifies which `float` field on the template to filter the search\nresults by, specifying a range of values that can match.",
+          "example": {
+            "gt": 100000,
+            "lt": 200000
+          },
+          "x-box-example-key": "value",
+          "properties": {
+            "lt": {
+              "description": "Specifies the (inclusive) upper bound for the metadata field\nvalue. The value of a field must be lower than (`lt`) or\nequal to this value for the search query to match this\ntemplate.",
+              "type": "number",
+              "example": 200000
+            },
+            "gt": {
+              "description": "Specifies the (inclusive) lower bound for the metadata field\nvalue. The value of a field must be greater than (`gt`) or\nequal to this value for the search query to match this\ntemplate.",
+              "type": "number",
+              "example": 100000
+            }
+          }
+        }
+      },
+      "MetadataFieldFilterDateRange": {
+        "title": "Metadata field filter (date range)",
+        "type": "object",
+        "x-box-resource-id": "metadata_field_filter_date_range",
+        "description": "Specifies which `date` field on the template to filter the search\nresults by, specifying a range of dates that can match.",
+        "example": {
+          "expirationDate": {
+            "lt": "2017-08-01T00:00:00Z",
+            "gt": "2016-08-01T00:00:00Z"
+          }
+        },
+        "additionalProperties": {
+          "type": "object",
+          "description": "Match a `date` metadata field to a range of values.",
+          "example": {
+            "lt": "2017-08-01T00:00:00Z",
+            "gt": "2016-08-01T00:00:00Z"
+          },
+          "x-box-example-key": "expirationDate",
+          "properties": {
+            "lt": {
+              "description": "Specifies the (inclusive) upper bound for the metadata field\nvalue. The value of a field must be lower than (`lt`) or\nequal to this value for the search query to match this\ntemplate.",
+              "type": "string",
+              "format": "date-time",
+              "example": "2017-08-01T00:00:00Z"
+            },
+            "gt": {
+              "description": "Specifies the (inclusive) lower bound for the metadata field\nvalue. The value of a field must be greater than (`gt`) or\nequal to this value for the search query to match this\ntemplate.",
+              "type": "string",
+              "format": "date-time",
+              "example": "2016-08-01T00:00:00Z"
             }
           }
         }
