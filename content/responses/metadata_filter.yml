@@ -1,0 +1,146 @@
+---
+title: Metadata Filter
+
+type: object
+
+x-box-resource-id: metadata_filter
+
+x-box-tag: search
+
+description: |-
+  A metadata template to filter the search results by.
+
+properties:
+  scope:
+    description: |-
+      Specifies the scope of the template to filter search results by.
+
+      This will be `enterprise_{enterprise_id}` for templates defined
+      for use in this enterprise, and `global` for general templates
+      that are available to all enterprises using Box.
+    type: string
+    example: enterprise
+    enum:
+      - global
+      - enterprise
+      - enterprise_{enterprise_id}
+
+  templateKey:
+    description: |-
+      The key of the template to filter search results by.
+    type: string
+    example: contractTemplate
+
+  filters:
+    type: object
+    description: |-
+      Specifies which fields on the template to filter the search
+      results by.
+
+      Contains a list of key-value pairs that map to keys on
+      the metadata template and their associated values.
+
+      For floats and dates, a search can include an (inclusive) upper
+      bound parameter `lt`, a (inclusive) lower bound parameter
+      `gt`, or both.
+
+      An example, to filter for a `expirationDate` value before
+      August 1st, 2016 (UTC) filter for
+      `{"expirationDate":{"lt":"2016-08-01T00:00:00Z"}}`
+      could be applied.
+
+    example:
+      category: online
+    additionalProperties:
+      oneOf:
+        - type: string
+          description: Match a metadata field to its string value.
+          example: "online"
+          x-box-example-key: category
+
+        - type: number
+          description: Match a `float` metadata field to its numerical value.
+          example: 100000
+          x-box-example-key: value
+
+        - type: array
+          description: |-
+            Match a metadata `multiSelect` field to one or more of its values.
+          example: ["online", "enterprise"]
+          items:
+            type: string
+          x-box-example-key: category
+
+        - type: object
+          description: Match a `float` metadata field to a range of values.
+          example:
+            gt: 100000
+            lt: 200000
+          x-box-example-key: value
+          properties:
+            lt:
+              description: |-
+                Specifies the (inclusive) upper bound for the metadata field
+                value. The value of a field must be lower than (`lt`) or
+                equal to this value for the search query to match this
+                template.
+              type: number
+              example: 200000
+            gt:
+              description: |-
+                Specifies the (inclusive) lower bound for the metadata field
+                value. The value of a field must be greater than (`gt`) or
+                equal to this value for the search query to match this
+                template.
+              type: number
+              example: 100000
+
+        - type: object
+          description: Match a `date` metadata field to a range of values.
+          example:
+            lt: "2017-08-01T00:00:00Z"
+            gt: "2016-08-01T00:00:00Z"
+          x-box-example-key: expirationDate
+          properties:
+            lt:
+              description: |-
+                Specifies the (inclusive) upper bound for the metadata field
+                value. The value of a field must be lower than (`lt`) or
+                equal to this value for the search query to match this
+                template.
+              type: string
+              format: date-time
+              example: "2017-08-01T00:00:00Z"
+            gt:
+              description: |-
+                Specifies the (inclusive) lower bound for the metadata field
+                value. The value of a field must be greater than (`gt`) or
+                equal to this value for the search query to match this
+                template.
+              type: string
+              format: date-time
+              example: "2016-08-01T00:00:00Z"
+
+        - type: object
+          description: Match a `float` metadata field to a range of values.
+          example:
+            lt: 200000
+            gt: 100000
+          x-box-example-key: value
+          properties:
+            lt:
+              description: |-
+                Specifies the (inclusive) upper bound for the metadata field
+                value. The value of a field must be lower than (`lt`) or
+                equal to this value for the search query to match this
+                template.
+              type: number
+              example: 200000
+            gt:
+              description: |-
+                Specifies the (inclusive) lower bound for the metadata field
+                value. The value of a field must be greater than (`gt`) or
+                equal to this value for the search query to match this
+                template.
+              type: number
+              example: 100000
