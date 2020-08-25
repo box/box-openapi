@@ -17,6 +17,8 @@ module.exports =(item, _, paths) => {
       // skip if the property as a reference
       item['$ref'] !== undefined ||
       item.allOf !== undefined ||
+      // if this is a list 
+      item.oneOf !== undefined ||
       // allow an explicit example value of null
       item.example === null ) { return }
   
