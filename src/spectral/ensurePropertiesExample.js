@@ -24,7 +24,7 @@ module.exports =(item, _, paths) => {
   
   // if the item does not have an example
   // throw an error
-  if (!item.example) {
+  if (!item.example && item.example !== false) {
     return [
       {
         message: `${paths.target ? paths.target.join('.') : 'property'} is not truthy`,

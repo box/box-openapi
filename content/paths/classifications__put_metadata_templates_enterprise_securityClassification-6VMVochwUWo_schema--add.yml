@@ -1,0 +1,110 @@
+---
+operationId: |-
+  put_metadata_templates_enterprise_securityClassification-6VMVochwUWo_schema#add
+
+summary: Add classification
+
+tags:
+  - Classifications
+
+x-box-tag: classifications
+x-box-sanitized: true
+
+description: |-
+  Adds one or more new classifications to the list of classifications
+  available to the enterprise.
+
+requestBody:
+  content:
+    application/json-patch+json:
+      schema:
+        description: |-
+          An array that contains one or more classifications to add to
+          the enterprise's list of classifications.
+        type: array
+
+        items:
+          type: object
+          description: |-
+            A single classification to add to the enterprise.
+          required:
+            - op
+            - fieldKey
+            - data
+          properties:
+            op:
+              type: string
+              example: addEnumOption
+              description: "`addEnumOption`"
+
+            fieldKey:
+              type: string
+              example: Box__Security__Classification__Key
+              description: "`Box__Security__Classification__Key`"
+
+            data:
+              type: object
+              description: The details of the classification to add.
+              required:
+                - key
+              properties:
+                key:
+                  type: string
+                  example: Sensitive
+                  description: |-
+                    The label of the classification as shown in the web and
+                    mobile interfaces. This is the only field required to
+                    add a classification.
+
+                classification:
+                  type: object
+                  description: Additional details for the classification.
+                  properties:
+                    classificationDefinition:
+                      type: string
+                      example: Sensitive information that must not be shared.
+                      description: |-
+                        A longer description of the classification.
+
+                    colorID:
+                      type: number
+                      example: 4
+                      description: |-
+                        An internal Box identifier used to assign a color to
+                        a classification label.
+
+responses:
+  200:
+    description: |-
+      Returns the updated `securityClassification` metadata template, which
+      contains a `Box__Security__Classification__Key` field that lists all
+      the classifications available to this enterprise.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClassificationTemplate'
+
+  400:
+    description: |-
+      Returned if any of the request parameters are not valid.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
+
+  404:
+    description: |-
+      Returned when a template name is not correct. Please make sure
+      the URL for the request is correct.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
+
+  default:
+    description: |-
+      An unexpected client error.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
