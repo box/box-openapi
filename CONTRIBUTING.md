@@ -24,7 +24,7 @@ making contributions.
 
 ## Deployment
 
-When pushing to the `default` or `staging` branch, GitHub actions will run the
+When pushing to the `main` or `staging` branch, GitHub actions will run the
 linter and tests and will push the compiled OpenAPI spec to the `en` and
 `en-staging` branches respectively.
 

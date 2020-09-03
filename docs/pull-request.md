@@ -59,7 +59,7 @@ Before sending a pull request, rebase against upstream, such as:
 
 ```bash
 git fetch upstream
-git rebase upstream/default
+git rebase upstream/main
 ```
 
 This will add your changes on top of what's already in upstream, minimizing
