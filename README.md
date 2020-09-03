@@ -8,7 +8,7 @@ This repository contains the build system for the Box OpenAPI 3.0 Specification
 
 ## Downloads
 
-The `default` branch of this repository only contains the raw source for the
+The `main` branch of this repository only contains the raw source for the
 specification. For a combined, resolved version please have a look at the
 following builds.
 

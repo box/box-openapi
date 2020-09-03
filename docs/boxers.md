@@ -31,7 +31,7 @@ There are a few internal sources that are of interest to Box employees.
 
 When working on the API specification we recommend the following best practices:
 
-* **Branches:** Please only work on a feature branch, as the default branch is
+* **Branches:** Please only work on a feature branch, as the `main` branch is
   protected. Please use a descriptive name for your branch that mentions both
   the `Jira` ticket this relates to, as well as a human description of the change.
   For example: `ddoc-123/add-ice-cream-api`
