@@ -2285,7 +2285,7 @@
       "get": {
         "operationId": "get_files_id_collaborations",
         "summary": "List file collaborations",
-        "description": "Retrieves a list of collaborations for a file. This\nreturns all the users that have access to the file.",
+        "description": "Retrieves a list of pending and active collaborations for a\nfile. This returns all the users that have access to the file\nor have been invited to the file.",
         "tags": [
           "Collaborations (List)"
         ],
@@ -2344,7 +2344,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Returns a collection of collaboration objects. If there are no\ncollaborations on this file an empty collection will be returned.",
+            "description": "Returns a collection of collaboration objects. If there are no\ncollaborations on this file an empty collection will be returned.\n\nThis list includes pending collaborations, for which the `status`\nis set to `pending`, indicating invitations that have been sent but not\nyet accepted.",
             "content": {
               "application/json": {
                 "schema": {
@@ -5438,7 +5438,7 @@
       "get": {
         "operationId": "get_folders_id_collaborations",
         "summary": "List folder collaborations",
-        "description": "Retrieves a list of collaborations for a folder. This\nreturns all the users that have access to the folder.",
+        "description": "Retrieves a list of pending and active collaborations for a\nfolder. This returns all the users that have access to the folder\nor have been invited to the folder.",
         "tags": [
           "Collaborations (List)"
         ],
@@ -5476,7 +5476,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Returns a collection of collaboration objects. If there are no\ncollaborations on this folder an empty collection will be returned.",
+            "description": "Returns a collection of collaboration objects. If there are no\ncollaborations on this folder an empty collection will be returned.\n\nThis list includes pending collaborations, for which the `status`\nis set to `pending`, indicating invitations that have been sent but not\nyet accepted.",
             "content": {
               "application/json": {
                 "schema": {
@@ -6902,6 +6902,31 @@
             }
           }
         }
+      },
+      "delete": {
+        "operationId": "delete_metadata_templates_enterprise_securityClassification-6VMVochwUWo_schema",
+        "summary": "Delete all classifications",
+        "tags": [
+          "Classifications"
+        ],
+        "x-box-tag": "classifications",
+        "x-box-sanitized": true,
+        "description": "Delete all classifications by deleting the classification\nmetadata template.",
+        "responses": {
+          "204": {
+            "description": "Returns an empty response when the metadata\ntemplate for classifications is successfully deleted."
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/metadata_templates/enterprise/securityClassification-6VMVochwUWo/schema#add": {
@@ -6963,7 +6988,7 @@
                             "colorID": {
                               "type": "number",
                               "example": 4,
-                              "description": "An internal Box identifier used to assign a color to\na classification label."
+                              "description": "An internal Box identifier used to assign a color to\na classification label.\n\nMapping between a `colorID` and a color may change\nwithout notice. Currently, the color mappings are as\nfollows.\n\n* `0`: Yellow\n* `1`: Orange\n* `2`: Watermelon red\n* `3`: Purple rain\n* `4`: Light blue\n* `5`: Dark blue\n* `6`: Light green\n* `7`: Gray"
                             }
                           }
                         }
@@ -7084,7 +7109,7 @@
                             "colorID": {
                               "type": "number",
                               "example": 4,
-                              "description": "An internal Box identifier used to assign a color to\na classification label."
+                              "description": "An internal Box identifier used to assign a color to\na classification label.\n\nMapping between a `colorID` and a color may change\nwithout notice. Currently, the color mappings are as\nfollows.\n\n* `0`: Yellow\n* `1`: Orange\n* `2`: Watermelon red\n* `3`: Purple rain\n* `4`: Light blue\n* `5`: Dark blue\n* `6`: Light green\n* `7`: Gray"
                             }
                           }
                         }
@@ -7913,6 +7938,194 @@
           },
           "403": {
             "description": "Returned when the user does not have the permission to create the metadata\ntemplate. This can happen for a few reasons, most commonly when the user\ndoes not have (co-)admin permissions, or the application tries to create a\ntemplate with the `global` scope.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/metadata_templates/schema#classifications": {
+      "post": {
+        "operationId": "post_metadata_templates_schema#classifications",
+        "summary": "Add initial classifications",
+        "tags": [
+          "Classifications"
+        ],
+        "x-box-tag": "classifications",
+        "x-box-sanitized": true,
+        "description": "When an enterprise does not yet have any classifications, this API call\ninitializes the classification template with an initial set of\nclassifications.\n\nIf an enterprise already has a classification, the template will already\nexist and instead an API call should be made to add additional\nclassifications.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "scope",
+                  "displayName"
+                ],
+                "properties": {
+                  "scope": {
+                    "type": "string",
+                    "description": "The scope in which to create the classifications. This should\nbe `enterprise` or `enterprise_{id}` where `id` is the unique\nID of the enterprise.",
+                    "example": "enterprise",
+                    "enum": [
+                      "enterprise"
+                    ]
+                  },
+                  "templateKey": {
+                    "type": "string",
+                    "example": "securityClassification-6VMVochwUWo",
+                    "description": "`securityClassification-6VMVochwUWo`",
+                    "enum": [
+                      "securityClassification-6VMVochwUWo"
+                    ]
+                  },
+                  "displayName": {
+                    "type": "string",
+                    "description": "`Classification`",
+                    "example": "Classification",
+                    "enum": [
+                      "Classification"
+                    ]
+                  },
+                  "hidden": {
+                    "type": "boolean",
+                    "example": false,
+                    "description": "`false`",
+                    "enum": [
+                      false
+                    ]
+                  },
+                  "copyInstanceOnItemCopy": {
+                    "type": "boolean",
+                    "example": false,
+                    "description": "`false`",
+                    "enum": [
+                      false
+                    ]
+                  },
+                  "fields": {
+                    "type": "array",
+                    "description": "The classification template holds one field, which holds\nall the valid classification values.",
+                    "items": {
+                      "type": "object",
+                      "description": "The `enum` field which holds all the valid classification\nvalues.",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "example": "enum",
+                          "description": "`enum`",
+                          "enum": [
+                            "enum"
+                          ]
+                        },
+                        "key": {
+                          "type": "string",
+                          "example": "Box__Security__Classification__Key",
+                          "description": "`Box__Security__Classification__Key`",
+                          "enum": [
+                            "Box__Security__Classification__Key"
+                          ]
+                        },
+                        "displayName": {
+                          "type": "string",
+                          "example": "Classification",
+                          "description": "`Classification`",
+                          "enum": [
+                            "Classification"
+                          ]
+                        },
+                        "hidden": {
+                          "type": "boolean",
+                          "example": false,
+                          "description": "`false`",
+                          "enum": [
+                            false
+                          ]
+                        },
+                        "options": {
+                          "type": "array",
+                          "description": "The actual list of classifications that are present on\nthis template.",
+                          "items": {
+                            "type": "object",
+                            "description": "An individual classification.",
+                            "properties": {
+                              "key": {
+                                "type": "string",
+                                "description": "The display name and key this classification. This\nwill be show in the Box UI.",
+                                "example": "Sensitive"
+                              },
+                              "staticConfig": {
+                                "type": "object",
+                                "description": "Additional information about the classification.",
+                                "properties": {
+                                  "classification": {
+                                    "type": "object",
+                                    "description": "Additional information about the classification.",
+                                    "properties": {
+                                      "classificationDefinition": {
+                                        "type": "string",
+                                        "example": "Sensitive information",
+                                        "description": "A longer description of the classification."
+                                      },
+                                      "colorID": {
+                                        "type": "number",
+                                        "example": 4,
+                                        "description": "An identifier used to assign a color to\na classification label.\n\nMapping between a `colorID` and a color may\nchange without notice. Currently, the color\nmappings are as follows.\n\n* `0`: Yellow\n* `1`: Orange\n* `2`: Watermelon red\n* `3`: Purple rain\n* `4`: Light blue\n* `5`: Dark blue\n* `6`: Light green\n* `7`: Gray"
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Returns a new `securityClassification` metadata template, which\ncontains a `Box__Security__Classification__Key` field that lists all\nthe classifications available to this enterprise.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClassificationTemplate"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Returned if any of the request parameters are not valid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Returned when a template name is not correct. Please make sure\nthe URL for the request is correct.",
             "content": {
               "application/json": {
                 "schema": {
@@ -10735,7 +10948,7 @@
           },
           {
             "name": "user_type",
-            "description": "Limits the results to the kind  of user specified.\n\n* `all` returns every kind of user for whom the\n  `login` or `name` partially matches the\n  `filter_term`. It will only return an external user\n  if the login matches the `filter_term` completely,\n  and in that case it will only return that user.\n* `managed` returns all managed and app users for whom\n  the `login` or `name` partially matches the\n  `filter_term`.\n* `external` returns all external users for whom the\n  `login` matches the `filter_term` exactly.",
+            "description": "Limits the results to the kind of user specified.\n\n* `all` returns every kind of user for whom the\n  `login` or `name` partially matches the\n  `filter_term`. It will only return an external user\n  if the login matches the `filter_term` completely,\n  and in that case it will only return that user.\n* `managed` returns all managed and app users for whom\n  the `login` or `name` partially matches the\n  `filter_term`.\n* `external` returns all external users for whom the\n  `login` matches the `filter_term` exactly.",
             "in": "query",
             "required": false,
             "example": "managed",
@@ -10747,6 +10960,16 @@
                 "external"
               ]
             }
+          },
+          {
+            "name": "external_app_user_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "my-user-1234",
+            "description": "Limits the results to app users with the given\n`external_app_user_id` value.\n\nWhen creating an app user, an\n`external_app_user_id` value can be set. This value can\nthen be used in this endpoint to find any users that\nmatch that `external_app_user_id` value."
           },
           {
             "name": "fields",
@@ -17122,13 +17345,13 @@
                       "name_conflicts": [
                         [
                           {
-                            "id": 12345,
+                            "id": "12345",
                             "type": "file",
                             "original_name": "Report.pdf",
                             "download_name": "3aa6a7.pdf"
                           },
                           {
-                            "id": 34325,
+                            "id": "34325",
                             "type": "file",
                             "original_name": "Report.pdf",
                             "download_name": "5d53f2.pdf"
@@ -18325,7 +18548,7 @@
                 "hidden": {
                   "type": "boolean",
                   "example": false,
-                  "description": "`false`",
+                  "description": "Classifications are always visible to web and mobile users.",
                   "enum": [
                     false
                   ]
@@ -18364,7 +18587,7 @@
                               "colorID": {
                                 "type": "number",
                                 "example": 4,
-                                "description": "An internal Box identifier used to assign a color to\na classification label."
+                                "description": "An internal Box identifier used to assign a color to\na classification label.\n\nMapping between a `colorID` and a color may change\nwithout notice. Currently, the color mappings are as\nfollows.\n\n* `0`: Yellow\n* `1`: Orange\n* `2`: Watermelon red\n* `3`: Purple rain\n* `4`: Light blue\n* `5`: Dark blue\n* `6`: Light green\n* `7`: Gray"
                               }
                             }
                           }
