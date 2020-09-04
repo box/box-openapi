@@ -4,84 +4,143 @@ title: File Request
 type: object
 
 x-box-resource-id: file_request
-x-box-variant: standard
 
 description: |-
-  A standard representation of a file request, as returned from any file request API endpoints by default
+  A standard representation of a file request, as returned
+  from any file request API endpoints by default.
 
 properties:
   id:
     type: string
-    description: Id of the file request. System generated field.
+    description: The unique identifier for this file request.
     readOnly: true
+    example: "42037322"
+
   type:
     type: string
-    description: Static string 'file-request'. System generated field.
+    description: "`file-request`"
+    example: "file-request"
+    enum:
+      - file-request
     readOnly: true
+
   title:
     type: string
-    description: Title of file request. Defaults to title of file request being copied.
+    description: |-
+      The title of file request. This is shown
+      in the Box UI to users uploading files.
+
+      This defaults to title of the file request that was
+      copied to create this file request.
     example: "Please upload documents"
+
   description:
     type: string
     nullable: true
-    description: The optional description of this file request. 
+    description: |-
+      The optional description of this file request. This is
+      shown in the Box UI to users uploading files.
+
+      This defaults to description of the file request that was
+      copied to create this file request.
     example: "Following documents are requested for your process"
+
   status:
     type: string
+    example:
     description: |-
-      Status of file request. Defaults to Active. Setting status as Inactive will return 404 for submitter.
+      The status of the file request. This defaults
+      to `ACTIVE`.
+
+      When the status is set to `INACTIVE`, the file request
+      will no longer accept new submissions, and any visitor
+      to the file request URL will receive a `HTTP 404` status
+      code.
+
+      This defaults to status of file request that was
+      copied to create this file request.
     enum:
       - ACTIVE
       - INACTIVE
+
   is_email_required:
     type: boolean
+    example: true
     description: |-
-      Is a submitter required to provide their email address? Setting this to
-      true shows an email field on file request form.
+      Whether a file request submitter is required to provide
+      their email address.
+
+      When this setting is set to true, the Box UI will show
+      an email field on the file request form.
+
+      This defaults to setting of file request that was
+      copied to create this file request.
+
   is_description_required:
     type: boolean
+    example: true
     description: |-
-      Is a submitter required to provide a description of files they are
-      submitting. Setting this to true shows a description field on file request
-      form.
+      Whether a file request submitter is required to provide
+      a description of the files they are submitting.
+
+      When this setting is set to true, the Box UI will show
+      a description field on the file request form.
+
+      This defaults to setting of file request that was
+      copied to create this file request.
+
   expires_at:
     type: string
     format: date-time
-    description: >-
-      Date after which file request will not accept new submissions i.e. status
-      will change to inactive.
+    description: |-
+      The date after which a file request will no longer accept new
+      submissions.
+
+      After this date, the `status` will automatically be set to
+      `INACTIVE`.
     example: "2020-09-28T10:53:43-08:00"
-  url:
-    type: string
-    description: URL for each file request. System generated field.
-    readOnly: true
+
   folder:
     allOf:
       - $ref: '#/components/schemas/Folder--Mini'
       - description: |-
           The folder that this file request is associated with.
+
+          Files submitted through the file request form will be
+          uploaded to this folder.
     nullable: false
+
+  url:
+    type: string
+    description: |-
+      The generated URL for this file request. This URL can be shared
+      with users to let them upload files to the associated folder.
+    example: https://app.box.com/filerequest/42037322
+    readOnly: true
+
   created_by:
     allOf:
       - $ref: "#/components/schemas/User--Mini"
-      - description: The user who created this file request
+      - description: The user who created this file request.
+
   created_at:
     type: string
     format: date-time
     nullable: false
     description: |-
-      The date and time when the file request was created on Box.
+      The date and time when the file request was created.
     example: "2020-09-28T10:53:43-08:00"
+
   updated_by:
     allOf:
       - $ref: "#/components/schemas/User--Mini"
-      - description: The user who last modified this file request
+      - description: The user who last modified this file request.
       - nullable: false
+
   updated_at:
     type: string
     format: date-time
     nullable: false
     description: |-
-      The date and time when the file request was last updated on Box.
+      The date and time when the file request was last updated.
     example: "2020-09-28T10:53:43-08:00"
