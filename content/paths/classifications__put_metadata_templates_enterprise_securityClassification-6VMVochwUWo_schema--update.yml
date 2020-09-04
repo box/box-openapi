@@ -1,0 +1,132 @@
+---
+operationId: |-
+  put_metadata_templates_enterprise_securityClassification-6VMVochwUWo_schema#update
+
+summary: Update classification
+
+tags:
+  - Classifications
+
+x-box-tag: classifications
+x-box-sanitized: true
+
+description: |-
+  Updates the labels and descriptions of one or more classifications
+  available to the enterprise.
+
+  This API can also be called by including the enterprise ID in the
+  URL explicitly, for example
+  `/metadata_templates/enterprise_12345/securityClassification-6VMVochwUWo/schema`.
+
+requestBody:
+  content:
+    application/json-patch+json:
+      schema:
+        description: |-
+          An array that contains one or more classifications to update.
+        type: array
+
+        items:
+          type: object
+          description: |-
+            A single classification to update.
+          required:
+            - op
+            - fieldKey
+            - enumOptionKey
+            - data
+          properties:
+            op:
+              type: string
+              example: editEnumOption
+              description: "`editEnumOption`"
+
+            fieldKey:
+              type: string
+              example: Box__Security__Classification__Key
+              description: "`Box__Security__Classification__Key`"
+
+            enumOptionKey:
+              type: string
+              example: Sensitive
+              description: |-
+                The original label of the classification to change.
+
+            data:
+              type: object
+              description: The details of the updated classification.
+              required:
+                - key
+              properties:
+                key:
+                  type: string
+                  example: Very Sensitive
+                  description: |-
+                    A new label for the classification, as it will be
+                    shown in the web and mobile interfaces.
+
+                classification:
+                  type: object
+                  description: Additional details for the classification.
+                  properties:
+                    classificationDefinition:
+                      type: string
+                      example: Sensitive information that must not be shared.
+                      description: |-
+                        A longer description of the classification.
+
+                    colorID:
+                      type: number
+                      example: 4
+                      description: |-
+                        An internal Box identifier used to assign a color to
+                        a classification label.
+
+                        Mapping between a `colorID` and a color may change
+                        without notice. Currently, the color mappings are as
+                        follows.
+
+                        * `0`: Yellow
+                        * `1`: Orange
+                        * `2`: Watermelon red
+                        * `3`: Purple rain
+                        * `4`: Light blue
+                        * `5`: Dark blue
+                        * `6`: Light green
+                        * `7`: Gray
+
+responses:
+  200:
+    description: |-
+      Returns the updated `securityClassification` metadata template, which
+      contains a `Box__Security__Classification__Key` field that lists all
+      the classifications available to this enterprise.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClassificationTemplate'
+
+  400:
+    description: |-
+      Returned if any of the request parameters are not valid.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
+
+  404:
+    description: |-
+      Returned when a template name is not correct. Please make sure
+      the URL for the request is correct.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
+
+  default:
+    description: |-
+      An unexpected client error.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
