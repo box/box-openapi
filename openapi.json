@@ -315,7 +315,7 @@
           }, 
           {
             "name": "fields", 
-            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれず、リクエストしたフィールドのほかには、簡易版レプリゼンテーションのフィールドしか返されないことに注意してください。", 
+            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれず、リクエストしたフィールドのほかには、簡易版レプリゼンテーションのフィールドしか返されないことに注意してください。\n\nまた、このフィールドを使用すると、ファイルに適用されている任意のメタデータに対してクエリを実行できます。その際、`metadata`フィールドのほか、取得するテンプレートのスコープとキー (例: `?field=metadata.enterprise_12345.contractTemplate`) も指定します。", 
             "in": "query", 
             "example": [
               "id", 
@@ -1419,7 +1419,27 @@
             }
           }, 
           "400": {
-            "description": "一部のパラメータが指定されていないか無効な場合はエラーを返します。\n\n* `missing_destination`: `folder_id`が指定されていません\n* `invalid_folder_id`: `folder_id`が無効です\n* `invalid_file_name`: `file_name`が無効です\n* `missing_file_size`: `file_size`が指定されていません\n* `invalid_file_size`: `file_size`が有効な数値ではありません\n* `file_size_too_small`: `file_size`が、このAPIを介したアップロードの最小ファイルサイズを下回っています\n* `missing_file_name`: `file_name`が指定されていません", 
+            "description": "一部のパラメータが指定されていないか無効な場合はエラーを返します。\n\n* `missing_destination`: `folder_id`が指定されていません\n* `invalid_folder_id`: `folder_id`が無効です\n* `item_name_invalid`: `file_name`が無効です\n* `missing_file_size`: `file_size`が指定されていません\n* `invalid_file_size`: `file_size`が有効な数値ではありません\n* `file_size_too_small`: `file_size`が、このAPIを介したアップロードの最小ファイルサイズを下回っています\n* `missing_file_name`: `file_name`が指定されていません", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }, 
+          "403": {
+            "description": "何らかの理由で操作が許可されていない場合にエラーを返します。\n\n* `storage_limit_exceeded`: アカウントのストレージサイズの上限に達しました", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }, 
+          "404": {
+            "description": "親フォルダが見つからないか、認証済みユーザーが親フォルダにアクセスできない場合はエラーを返します。\n\n* `invalid_parameter`: `folder_id`値は、ユーザーがアクセスできないフォルダまたは存在しないフォルダを表します。", 
             "content": {
               "application/json": {
                 "schema": {
@@ -2517,7 +2537,7 @@
           "Trashed files"
         ], 
         "x-box-tag": "trashed_files", 
-        "description": "ごみ箱に移動されたファイルを取得します。", 
+        "description": "ごみ箱に移動されたファイルを取得します。\n\nそのファイル自体がゴミ箱に移動されている場合のみ、このAPI呼び出しを使用して取得できることに注意してください。そうではなく、その親フォルダのいずれかがゴミ箱に移動された場合、[`GET /folders/:id/trash`](e://get_folders_id_trash) APIを使用して調べることができるのは、そのフォルダのみです。\n\nゴミ箱に移動されたすべての項目のリストを取得するには、[`GET /folders/trash/items`](e://get-folders-trash-items/) APIを使用します。", 
         "parameters": [
           {
             "name": "file_id", 
@@ -2560,7 +2580,7 @@
             }
           }, 
           "404": {
-            "description": "ファイルがごみ箱内にない場合は、エラーを返します。", 
+            "description": "ファイルがゴミ箱で直接見つからない場合にエラーを返します。\n\nそのファイルの親フォルダのいずれかがゴミ箱に移動されている場合も、`HTTP 404`が返されることに注意してください。\n\nその場合、[`GET /folders/:id/trash`](e://get_folders_id_trash) APIを使用して調べることができるのは、その親フォルダのみです。", 
             "content": {
               "application/json": {
                 "schema": {
@@ -3968,7 +3988,7 @@
           }, 
           {
             "name": "fields", 
-            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれず、リクエストしたフィールドのほかには、簡易版レプリゼンテーションのフィールドしか返されないことに注意してください。", 
+            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれず、リクエストしたフィールドのほかには、簡易版レプリゼンテーションのフィールドしか返されないことに注意してください。\n\nまた、このフィールドを使用すると、ファイルに適用されている任意のメタデータに対してクエリを実行できます。その際、`metadata`フィールドのほか、取得するテンプレートのスコープとキー (例: `?field=metadata.enterprise_12345.contractTemplate`) も指定します。", 
             "in": "query", 
             "example": [
               "id", 
@@ -4616,7 +4636,7 @@
           }, 
           {
             "name": "fields", 
-            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれず、リクエストしたフィールドのほかには、簡易版レプリゼンテーションのフィールドしか返されないことに注意してください。", 
+            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれず、リクエストしたフィールドのほかには、簡易版レプリゼンテーションのフィールドしか返されないことに注意してください。\n\nまた、このフィールドを使用すると、ファイルに適用されている任意のメタデータに対してクエリを実行できます。その際、`metadata`フィールドのほか、取得するテンプレートのスコープとキー (例: `?field=metadata.enterprise_12345.contractTemplate`) も指定します。", 
             "in": "query", 
             "example": [
               "id", 
@@ -5152,7 +5172,7 @@
           "Trashed folders"
         ], 
         "x-box-tag": "trashed_folders", 
-        "description": "ごみ箱に移動されたフォルダを取得します。", 
+        "description": "ごみ箱に移動されたフォルダを取得します。\n\nそのフォルダ自体がゴミ箱に移動されている場合のみ、このAPI呼び出しを使用して取得できることに注意してください。そうではなく、その親フォルダのいずれかがゴミ箱に移動された場合、[`GET /folders/:id/trash`](e://get_folders_id_trash) APIを使用して調べることができるのは、そのフォルダのみです。\n\nゴミ箱に移動されたすべての項目のリストを取得するには、[`GET /folders/trash/items`](e://get-folders-trash-items/) APIを使用します。", 
         "parameters": [
           {
             "name": "folder_id", 
@@ -5196,7 +5216,7 @@
             }
           }, 
           "404": {
-            "description": "フォルダがごみ箱内にない場合は、エラーを返します。", 
+            "description": "フォルダがゴミ箱で直接見つからない場合にエラーを返します。\n\nそのフォルダの親フォルダのいずれかがゴミ箱に移動されている場合も、`HTTP 404`が返されることに注意してください。\n\nその場合、[`GET /folders/:id/trash`](e://get_folders_id_trash) APIを使用して調べることができるのは、その親フォルダのみです。", 
             "content": {
               "application/json": {
                 "schema": {
@@ -7005,7 +7025,7 @@
                   "templateKey": {
                     "type": "string", 
                     "example": "productInfo", 
-                    "description": "ターゲットメタデータテンプレートのキー。このテンプレートでは、ターゲットフォルダにすでにインスタンスが適用されている必要があります。"
+                    "description": "ターゲットメタデータテンプレートのキー。このテンプレートでは、ターゲットフォルダにすでにインスタンスが適用されている必要があります。\n\n多くの場合、テンプレートキーはその表示名から自動的に派生します。たとえば、`Contract Template`の場合は`contractTemplate`となります。場合によっては、テンプレートの作成者が独自のテンプレートキーを指定することもあります。\n\nテンプレートのキーを調べるには、[会社のテンプレートのリストを取得する][list]か、[ファイル][file]または[フォルダ][folder]上のすべてのインスタンスを取得してください。\n\n[list]: e://get-metadata-templates-enterprise\n[file]: e://get-files-id-metadata\n[folder]: e://get-folders-id-metadata"
                   }
                 }
               }
@@ -7261,7 +7281,7 @@
         "x-box-tag": "search", 
         "x-box-sanitized": true, 
         "x-box-enable-explorer": true, 
-        "description": "SQLに似た構文で特定のメタデータと一致する項目を返す検索を作成します。\n\nデフォルトでは、このエンドポイントによって、クエリに一致する項目に関する最も基本的な情報のみが返されます。各項目のその他のフィールド (メタデータのいずれかを含む) を取得するには、クエリで`fields`属性を使用します。\n\nこの機能は、現在使用が制限されています。この機能を有効にするには、[メタデータクエリチーム](mailto:metadata-query-feedback@box.com)までお問い合わせください。", 
+        "description": "SQLに似た構文で特定のメタデータと一致する項目を返す検索を作成します。\n\nデフォルトでは、このエンドポイントによって、クエリに一致する項目に関する最も基本的な情報のみが返されます。各項目のその他のフィールド (メタデータのいずれかを含む) を取得するには、クエリで`fields`属性を使用します。", 
         "requestBody": {
           "content": {
             "application/json": {
@@ -8061,9 +8081,9 @@
         "parameters": [
           {
             "name": "query", 
-            "description": "検索する文字列。このクエリは、項目名、説明、ファイルの\nテキストコンテンツなど、さまざまな項目タイプのフィールドと照合されます。", 
+            "description": "検索する文字列。このクエリは、項目名、説明、ファイルのテキストコンテンツなど、さまざまな項目タイプのフィールドと照合されます。\n\n`mdfilters`パラメータが定義されていない場合は必須です。", 
             "in": "query", 
-            "required": true, 
+            "required": false, 
             "example": "sales", 
             "schema": {
               "type": "string"
@@ -8197,58 +8217,41 @@
           }, 
           {
             "name": "mdfilters", 
-            "description": "メタデータテンプレートの名前とコンテンツに一致する項目のみに検索結果を絞り込みます。", 
+            "description": "検索結果のフィルタに使用する1つのメタデータテンプレートを含むリスト。現在、このリストに含めることができるエントリは1つのみです。\n\n`query`パラメータが定義されていない場合は必須です。", 
             "in": "query", 
-            "required": false, 
             "example": [
               {
                 "scope": "enterprise", 
-                "templateKey": "marketingCollateral", 
+                "templateKey": "contract", 
                 "filters": {
-                  "documentType": "datasheet"
+                  "category": "online"
                 }
               }
             ], 
-            "schema": {
-              "type": "array", 
-              "items": {
-                "type": "object", 
-                "description": "メタデータテンプレートによる検索で使用されるメタデータフィルタ", 
-                "properties": {
-                  "scope": {
-                    "description": "検索するテンプレートのスコープを指定します。", 
-                    "type": "string", 
-                    "example": "global", 
-                    "enum": [
-                      "global", 
-                      "enterprise"
-                    ]
-                  }, 
-                  "templateKey": {
-                    "description": "検索するテンプレートのキー名。フィルタごとに指定できるテンプレート名は1つのみです。", 
-                    "type": "string", 
-                    "example": "marketingCollateral"
-                  }, 
-                  "filters": {
-                    "type": "object", 
-                    "description": "検索するテンプレートの追加のキー/値ペア。\n\n浮動小数点および日付データを指定する場合は、上限パラメータ`lt`(その値を含む)または下限パラメータ`gt`(その値を含む)、あるいはその両方を含めることができます。\n\n`08-01-16 UTC`以前の`contractExpiration`のフィルタは、次のようになります。\n\n`{\"contractExpiration\":{\"lt\":\"2016-08-01T00:00:00Z\"}}`", 
-                    "example": {
-                      "documentType": "datasheet"
-                    }, 
-                    "additionalProperties": {
-                      "description": "カスタムフィールドの値", 
-                      "type": "string", 
-                      "example": "datasheet", 
-                      "x-box-example-key": "documentType"
-                    }
-                  }
+            "x-example": [
+              {
+                "scope": "enterprise", 
+                "templateKey": "contract", 
+                "filters": {
+                  "category": "online", 
+                  "contractValue": 1000000
                 }
               }
+            ], 
+            "required": false, 
+            "schema": {
+              "type": "array", 
+              "minItems": 1, 
+              "maxItems": 1, 
+              "items": {
+                "$ref": "#/components/schemas/MetadataFilter"
+              }, 
+              "description": "検索結果のフィルタに使用するメタデータテンプレートのリスト。\n\n`query`パラメータが定義されていない場合は必須です。"
             }
           }, 
           {
             "name": "sort", 
-            "description": "結果が返される順序を定義します。デフォルトでは、`relevance`になっています。\n\n* `relevance` (デフォルト)を指定すると、クエリの検索語との関連性を基準として並べ替えられた結果が返されます。\n* `modified_at`を指定すると、項目が最後に変更された日付の降順で並べ替えられた結果が返されます。", 
+            "description": "結果が返される順序を定義します。デフォルトでは、`relevance`になっています。\n\n* `relevance` (デフォルト) を指定すると、クエリの検索語との関連性を基準として並べ替えられた結果が返されます。\n* `modified_at`を指定すると、項目が最後に変更された日付の降順で並べ替えられた結果が返されます。", 
             "in": "query", 
             "required": false, 
             "schema": {
@@ -8326,7 +8329,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Items"
+                  "$ref": "#/components/schemas/SearchResults"
                 }
               }
             }
@@ -13928,6 +13931,24 @@
               "format": "int64", 
               "maximum": 1000
             }
+          }, 
+          {
+            "name": "fields", 
+            "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれず、リクエストしたフィールドのほかには、簡易版レプリゼンテーションのフィールドしか返されないことに注意してください。", 
+            "in": "query", 
+            "example": [
+              "id", 
+              "type", 
+              "name"
+            ], 
+            "required": false, 
+            "explode": false, 
+            "schema": {
+              "type": "array", 
+              "items": {
+                "type": "string"
+              }
+            }
           }
         ], 
         "responses": {
@@ -17111,7 +17132,7 @@
           "id": {
             "type": "string", 
             "description": "このコラボレーションの一意の識別子。", 
-            "example": "11446498"
+            "example": "12345678"
           }, 
           "type": {
             "type": "string", 
@@ -17177,7 +17198,7 @@
             "type": "string", 
             "nullable": true, 
             "format": "date-time", 
-            "example": "2012-12-12T10:53:43-08:00", 
+            "example": "2012-12-26T10:53:43-08:00", 
             "description": "コラボレーションの有効期限。有効期限が設定されていない\n場合は`null`。"
           }, 
           "status": {
@@ -17193,7 +17214,7 @@
           "acknowledged_at": {
             "type": "string", 
             "format": "date-time", 
-            "example": "2012-12-12T10:53:43-08:00", 
+            "example": "2012-12-12T10:55:20-08:00", 
             "description": "コラボレーションオブジェクトの`status`が`accepted`または`rejected`に変更された日時"
           }, 
           "created_by": {
@@ -17203,6 +17224,22 @@
               }, 
               {
                 "description": "コラボレーションオブジェクトを作成したユーザー"
+              }, 
+              {
+                "example": [
+                  {
+                    "id": 33224412
+                  }, 
+                  {
+                    "type": "user"
+                  }, 
+                  {
+                    "login": "dylan@example.com"
+                  }, 
+                  {
+                    "name": "Dylan Smith"
+                  }
+                ]
               }
             ]
           }, 
@@ -20973,6 +21010,80 @@
         "x-box-resource-id": "legal_hold_policy_assignment", 
         "x-box-tag": "legal_hold_policy_assignments", 
         "description": "リーガルホールド割り当ては、ユーザー、フォルダ、ファイル、またはファイルバージョンにリーガルホールドポリシーを割り当てる目的に使用されます。\n\nリーガルホールド割り当てを作成すると、その割り当ての'apply-to'エンティティに属するファイルバージョンにホールドが適用されます。", 
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/LegalHoldPolicyAssignment--Base"
+          }, 
+          {
+            "properties": {
+              "legal_hold_policy": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/LegalHoldPolicy--Mini"
+                  }, 
+                  {
+                    "description": "そのリーガルホールドポリシー割り当てを含むポリシー"
+                  }
+                ]
+              }, 
+              "assigned_to": {
+                "allOf": [
+                  {
+                    "oneOf": [
+                      {
+                        "$ref": "#/components/schemas/File"
+                      }, 
+                      {
+                        "$ref": "#/components/schemas/Folder"
+                      }, 
+                      {
+                        "$ref": "#/components/schemas/WebLink"
+                      }
+                    ]
+                  }, 
+                  {
+                    "description": "リーガルホールドポリシーを割り当てる項目。タイプとIDを含みます。"
+                  }
+                ]
+              }, 
+              "assigned_by": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/User--Mini"
+                  }, 
+                  {
+                    "description": "リーガルホールドポリシー割り当てを作成したユーザー"
+                  }
+                ]
+              }, 
+              "assigned_at": {
+                "type": "string", 
+                "format": "date-time", 
+                "description": "リーガルホールドポリシー割り当てオブジェクトが作成された日時", 
+                "example": "2012-12-12T10:53:43-08:00"
+              }, 
+              "deleted_at": {
+                "type": "string", 
+                "format": "date-time", 
+                "description": "割り当て解除リクエストが送信された日時(割り当てが完全に削除されるまでに時間がかかる場合があるため、この日時は割り当てが完全に削除された日時と一致しない場合があります)。nullの場合、割り当ては削除されていません。", 
+                "example": "2012-12-12T10:53:43-08:00"
+              }
+            }
+          }
+        ]
+      }, 
+      "LegalHoldPolicyAssignment--Base": {
+        "title": "リーガルホールドポリシー割り当て (ベース)", 
+        "type": "object", 
+        "x-box-resource-id": "legal_hold_policy_assignment--base", 
+        "x-box-sanitized": true, 
+        "x-box-tag": "legal_hold_policy_assignments", 
+        "x-box-variants": [
+          "base", 
+          "standard"
+        ], 
+        "x-box-variant": "base", 
+        "description": "リーガルホールド割り当ては、ユーザー、フォルダ、ファイル、またはファイルバージョンにリーガルホールドポリシーを割り当てる目的に使用されます。\n\nリーガルホールド割り当てを作成すると、その割り当ての'apply-to'エンティティに属するファイルバージョンにホールドが適用されます。", 
         "properties": {
           "id": {
             "type": "string", 
@@ -20986,58 +21097,6 @@
             "enum": [
               "legal_hold_policy_assignment"
             ]
-          }, 
-          "legal_hold_policy": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/LegalHoldPolicy--Mini"
-              }, 
-              {
-                "description": "そのリーガルホールドポリシー割り当てを含むポリシー"
-              }
-            ]
-          }, 
-          "assigned_to": {
-            "allOf": [
-              {
-                "oneOf": [
-                  {
-                    "$ref": "#/components/schemas/File"
-                  }, 
-                  {
-                    "$ref": "#/components/schemas/Folder"
-                  }, 
-                  {
-                    "$ref": "#/components/schemas/WebLink"
-                  }
-                ]
-              }, 
-              {
-                "description": "リーガルホールドポリシーを割り当てる項目。タイプとIDを含みます。"
-              }
-            ]
-          }, 
-          "assigned_by": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/User--Mini"
-              }, 
-              {
-                "description": "リーガルホールドポリシー割り当てを作成したユーザー"
-              }
-            ]
-          }, 
-          "assigned_at": {
-            "type": "string", 
-            "format": "date-time", 
-            "description": "リーガルホールドポリシー割り当てオブジェクトが作成された日時", 
-            "example": "2012-12-12T10:53:43-08:00"
-          }, 
-          "deleted_at": {
-            "type": "string", 
-            "format": "date-time", 
-            "description": "割り当て解除リクエストが送信された日時(割り当てが完全に削除されるまでに時間がかかる場合があるため、この日時は割り当てが完全に削除された日時と一致しない場合があります)。nullの場合、割り当ては削除されていません。", 
-            "example": "2012-12-12T10:53:43-08:00"
           }
         }
       }, 
@@ -21077,7 +21136,7 @@
               "entries": {
                 "type": "array", 
                 "items": {
-                  "$ref": "#/components/schemas/LegalHoldPolicyAssignment"
+                  "$ref": "#/components/schemas/LegalHoldPolicyAssignment--Base"
                 }
               }
             }
@@ -21268,7 +21327,7 @@
           "templateKey": {
             "type": "string", 
             "example": "productInfo", 
-            "description": "フォルダの子にカスケードされるテンプレートのキー。"
+            "description": "フォルダの子にカスケードされるテンプレートのキー。\n\n多くの場合、テンプレートキーはその表示名から自動的に派生します。たとえば、`Contract Template`の場合は`contractTemplate`となります。場合によっては、テンプレートの作成者が独自のテンプレートキーを指定することもあります。\n\nテンプレートのキーを調べるには、[会社のテンプレートのリストを取得する][list]か、[ファイル][file]または[フォルダ][folder]上のすべてのインスタンスを取得してください。\n\n[list]: e://get-metadata-templates-enterprise\n[file]: e://get-files-id-metadata\n[folder]: e://get-folders-id-metadata"
           }
         }
       }, 
@@ -21976,6 +22035,50 @@
             }
           }
         ]
+      }, 
+      "SearchResults": {
+        "title": "検索結果", 
+        "type": "object", 
+        "x-box-resource-id": "search_results", 
+        "x-box-tag": "search", 
+        "description": "検索クエリに一致するファイル、フォルダ、およびウェブリンクのリスト。", 
+        "properties": {
+          "total_count": {
+            "description": "検索結果の最後のエントリのオフセットに1を加算をした値。\nコレクション内のエントリの合計数は、`total_count`よりも少ない場合があります。", 
+            "example": 5000, 
+            "type": "integer", 
+            "format": "int64"
+          }, 
+          "limit": {
+            "description": "この検索で使用された制限値。許容される最大値を超えていない限り、クエリパラメータの`limit`と等しくなります。", 
+            "example": 1000, 
+            "type": "integer", 
+            "format": "int64"
+          }, 
+          "offset": {
+            "description": "このセットに含まれる最初のエントリのゼロから始まるオフセット。これは、`offset`クエリパラメータを使用した場合と同じになります。", 
+            "example": 2000, 
+            "type": "integer", 
+            "format": "int64"
+          }, 
+          "entries": {
+            "description": "指定されたクエリの検索結果。", 
+            "type": "array", 
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/File"
+                }, 
+                {
+                  "$ref": "#/components/schemas/Folder"
+                }, 
+                {
+                  "$ref": "#/components/schemas/WebLink"
+                }
+              ]
+            }
+          }
+        }
       }, 
       "SkillCardsMetadata": {
         "title": "Skillsメタデータインスタンス", 
@@ -24677,6 +24780,184 @@
                 "example": "image-recognition-service-123", 
                 "description": "このメタデータを適用したサービスのインスタンスを表すカスタム識別子。例えば、`image-recognition-service`が複数のノードで動作する場合、このフィールドを使用すると、メタデータの適用に使用されたノードのIDを識別できます。"
               }
+            }
+          }
+        }
+      }, 
+      "MetadataFilter": {
+        "title": "メタデータフィルタ", 
+        "type": "object", 
+        "x-box-resource-id": "metadata_filter", 
+        "x-box-tag": "search", 
+        "description": "検索結果のフィルタに使用するメタデータテンプレート。", 
+        "properties": {
+          "scope": {
+            "description": "検索結果のフィルタに使用する、テンプレートのスコープを指定します。\n\nこれは、この会社で使用するために定義されたテンプレートの場合は`enterprise_{enterprise_id}`、Boxを使用するすべての会社が利用できる一般的なテンプレートの場合は`global`になります。", 
+            "type": "string", 
+            "example": "enterprise", 
+            "enum": [
+              "global", 
+              "enterprise", 
+              "enterprise_{enterprise_id}"
+            ]
+          }, 
+          "templateKey": {
+            "description": "検索結果のフィルタに使用するテンプレートのキー。\n\n多くの場合、テンプレートキーはその表示名から自動的に派生します。たとえば、`Contract Template`の場合は`contractTemplate`となります。場合によっては、テンプレートの作成者が独自のテンプレートキーを指定することもあります。\n\nテンプレートのキーを調べるには、[会社のテンプレートのリストを取得する][list]か、[ファイル][file]または[フォルダ][folder]上のすべてのインスタンスを取得してください。\n\n[list]: e://get-metadata-templates-enterprise\n[file]: e://get-files-id-metadata\n[folder]: e://get-folders-id-metadata", 
+            "type": "string", 
+            "example": "contract"
+          }, 
+          "filters": {
+            "allOf": [
+              {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/MetadataFieldFilterString"
+                  }, 
+                  {
+                    "$ref": "#/components/schemas/MetadataFieldFilterFloat"
+                  }, 
+                  {
+                    "$ref": "#/components/schemas/MetadataFieldFilterMultiSelect"
+                  }, 
+                  {
+                    "$ref": "#/components/schemas/MetadataFieldFilterFloatRange"
+                  }, 
+                  {
+                    "$ref": "#/components/schemas/MetadataFieldFilterDateRange"
+                  }
+                ]
+              }, 
+              {
+                "description": "検索結果のフィルタに使用するテンプレートのフィールドを指定します。複数のフィールドを指定すると、クエリでは論理`AND`が実行され、指定された各フィールドに一致するテンプレートのインスタンスが取得されます。"
+              }, 
+              {
+                "example": {
+                  "category": "online", 
+                  "contractValue": 1000000
+                }
+              }
+            ]
+          }
+        }
+      }, 
+      "MetadataFieldFilterString": {
+        "title": "メタデータフィールドのフィルタ (文字列)", 
+        "type": "object", 
+        "x-box-resource-id": "metadata_field_filter_string", 
+        "description": "検索結果のフィルタに使用する、テンプレートのテキストフィールドを指定します。", 
+        "example": {
+          "category": "online"
+        }, 
+        "additionalProperties": {
+          "type": "string", 
+          "description": "メタデータの`string`フィールドキーと検索結果の照合に使用する値のマッピング。", 
+          "example": "online", 
+          "x-box-example-key": "category"
+        }
+      }, 
+      "MetadataFieldFilterFloat": {
+        "title": "メタデータフィールドのフィルタ (浮動小数点)", 
+        "type": "object", 
+        "x-box-resource-id": "metadata_field_filter_float", 
+        "description": "検索結果のフィルタに使用する、テンプレートの`float`フィールドを指定します。", 
+        "example": {
+          "contractValue": 10000
+        }, 
+        "additionalProperties": {
+          "type": "number", 
+          "description": "メタデータの`float`フィールドキーと検索結果の照合に使用する値のマッピング。", 
+          "example": 10000, 
+          "x-box-example-key": "contractValue"
+        }
+      }, 
+      "MetadataFieldFilterMultiSelect": {
+        "title": "メタデータフィールドのフィルタ (複数選択)", 
+        "type": "object", 
+        "x-box-resource-id": "metadata_field_filter_multi_select", 
+        "description": "`multiSelect`メタデータフィールドと照合する値を指定します。検索を実行すると、クエリでは基本的に`OR`演算が実行され、指定した値のいずれかがこのフィールドと一致するテンプレートが取得されます。", 
+        "example": {
+          "category": [
+            "online", 
+            "enterprise"
+          ]
+        }, 
+        "additionalProperties": {
+          "type": "array", 
+          "description": "メタデータの`multiSelect`フィールドキーと検索結果の照合に使用する1つ以上の値のマッピング。\n\n検索を実行すると、クエリでは基本的に`OR`演算が実行され、指定した値のいずれかがこのフィールドと一致するテンプレートが取得されます。", 
+          "example": [
+            "online", 
+            "enterprise"
+          ], 
+          "items": {
+            "type": "string"
+          }, 
+          "x-box-example-key": "category"
+        }
+      }, 
+      "MetadataFieldFilterFloatRange": {
+        "title": "メタデータフィールドのフィルタ (浮動小数点の範囲)", 
+        "type": "object", 
+        "x-box-resource-id": "metadata_field_filter_float_range", 
+        "description": "検索結果のフィルタに使用するテンプレートの`float`フィールドを指定して、照合する値の範囲を指定します。", 
+        "example": {
+          "contractValue": {
+            "gt": 100000, 
+            "lt": 200000
+          }
+        }, 
+        "additionalProperties": {
+          "type": "object", 
+          "description": "検索結果のフィルタに使用するテンプレートの`float`フィールドを指定して、照合する値の範囲を指定します。", 
+          "example": {
+            "gt": 100000, 
+            "lt": 200000
+          }, 
+          "x-box-example-key": "value", 
+          "properties": {
+            "lt": {
+              "description": "メタデータフィールド値の上限 (その値を含む) を指定します。検索クエリがこのテンプレートに一致するには、フィールドの値をこの値より小さくする (`lt`) かこの値と等しくする必要があります。", 
+              "type": "number", 
+              "example": 200000
+            }, 
+            "gt": {
+              "description": "メタデータフィールド値の下限 (その値を含む) を指定します。検索クエリがこのテンプレートに一致するには、フィールドの値をこの値より大きくする (`gt`) かこの値と等しくする必要があります。", 
+              "type": "number", 
+              "example": 100000
+            }
+          }
+        }
+      }, 
+      "MetadataFieldFilterDateRange": {
+        "title": "メタデータフィールドのフィルタ (日付範囲)", 
+        "type": "object", 
+        "x-box-resource-id": "metadata_field_filter_date_range", 
+        "description": "検索結果のフィルタに使用するテンプレートの`date`フィールドを指定して、照合する日付の範囲を指定します。", 
+        "example": {
+          "expirationDate": {
+            "lt": "2017-08-01T00:00:00Z", 
+            "gt": "2016-08-01T00:00:00Z"
+          }
+        }, 
+        "additionalProperties": {
+          "type": "object", 
+          "description": "`date`メタデータフィールドをある範囲の値と照合します。", 
+          "example": {
+            "lt": "2017-08-01T00:00:00Z", 
+            "gt": "2016-08-01T00:00:00Z"
+          }, 
+          "x-box-example-key": "expirationDate", 
+          "properties": {
+            "lt": {
+              "description": "メタデータフィールド値の上限 (その値を含む) を指定します。検索クエリがこのテンプレートに一致するには、フィールドの値をこの値より小さくする (`lt`) かこの値と等しくする必要があります。", 
+              "type": "string", 
+              "format": "date-time", 
+              "example": "2017-08-01T00:00:00Z"
+            }, 
+            "gt": {
+              "description": "メタデータフィールド値の下限 (その値を含む) を指定します。検索クエリがこのテンプレートに一致するには、フィールドの値をこの値より大きくする (`gt`) かこの値と等しくする必要があります。", 
+              "type": "string", 
+              "format": "date-time", 
+              "example": "2016-08-01T00:00:00Z"
             }
           }
         }
