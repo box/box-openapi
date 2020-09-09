@@ -17,12 +17,14 @@ module.exports =(item, _, paths) => {
       // skip if the property as a reference
       item['$ref'] !== undefined ||
       item.allOf !== undefined ||
+      // if this is a list 
+      item.oneOf !== undefined ||
       // allow an explicit example value of null
       item.example === null ) { return }
   
   // if the item does not have an example
   // throw an error
-  if (!item.example) {
+  if (!item.example && item.example !== false) {
     return [
       {
         message: `${paths.target ? paths.target.join('.') : 'property'} is not truthy`,

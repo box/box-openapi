@@ -11,6 +11,16 @@ x-box-tag: trashed_folders
 description: |-
   Retrieves a folder that has been moved to the trash.
 
+  Please note that only if the folder itself has been moved to the
+  trash can it be retrieved with this API call. If instead one of
+  its parent folders was moved to the trash, only that folder
+  can be inspected using the
+  [`GET /folders/:id/trash`](e://get_folders_id_trash) API.
+
+  To list all items that have been moved to the trash, please
+  use the [`GET /folders/trash/items`](e://get-folders-trash-items/)
+  API.
+
 parameters:
   - $ref: '../attributes/folder_id.yml'
   - $ref: '../attributes/fields.yml'
@@ -28,7 +38,14 @@ responses:
 
   404:
     description: |-
-      Returns an error if the folder is not in the trash.
+      Returns an error if the folder can not be found directly
+      in the trash.
+
+      Please note that a `HTTP 404` is also returned if any of
+      the folder's parent folders have been moved to the trash.
+
+      In that case, only that parent folder can be inspected using
+      the [`GET /folders/:id/trash`](e://get_folders_id_trash) API.
     content:
       application/json:
         schema:
