@@ -4392,6 +4392,16 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "if-match",
+            "description": "Ensures this item hasn't recently changed before\nmaking changes.\n\nPass in the item's last observed `etag` value\ninto this header and the endpoint will fail\nwith a `412 Precondition Failed` if it\nhas changed since.",
+            "in": "header",
+            "required": false,
+            "example": "1",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "requestBody": {
@@ -4446,6 +4456,16 @@
           },
           "405": {
             "description": "Returned if the `file_request_id` is not in a recognized format.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "412": {
+            "description": "Returns an error when the `If-Match` header does not match\nthe current `etag` value of the file request. This indicates that the\nfile request has changed since it was last requested.",
             "content": {
               "application/json": {
                 "schema": {
@@ -18228,11 +18248,11 @@
           },
           "status": {
             "type": "string",
-            "description": "An optional new status of the file request.\n\nWhen the status is set to `INACTIVE`, the file request\nwill no longer accept new submissions, and any visitor\nto the file request URL will receive a `HTTP 404` status\ncode.\n\nThis will default to the value on the existing file request.",
-            "example": "ACTIVE",
+            "description": "An optional new status of the file request.\n\nWhen the status is set to `inactive`, the file request\nwill no longer accept new submissions, and any visitor\nto the file request URL will receive a `HTTP 404` status\ncode.\n\nThis will default to the value on the existing file request.",
+            "example": "active",
             "enum": [
-              "ACTIVE",
-              "INACTIVE"
+              "active",
+              "inactive"
             ]
           },
           "is_email_required": {
@@ -18248,7 +18268,7 @@
           "expires_at": {
             "type": "string",
             "format": "date-time",
-            "description": "The date after which a file request will no longer accept new\nsubmissions.\n\nAfter this date, the `status` will automatically be set to\n`INACTIVE`.\n\nThis will default to the value on the existing file request.",
+            "description": "The date after which a file request will no longer accept new\nsubmissions.\n\nAfter this date, the `status` will automatically be set to\n`inactive`.\n\nThis will default to the value on the existing file request.",
             "example": "2020-09-28T10:53:43-08:00"
           }
         }
@@ -21118,11 +21138,11 @@
           },
           "status": {
             "type": "string",
-            "example": "ACTIVE",
-            "description": "The status of the file request. This defaults\nto `ACTIVE`.\n\nWhen the status is set to `INACTIVE`, the file request\nwill no longer accept new submissions, and any visitor\nto the file request URL will receive a `HTTP 404` status\ncode.\n\nThis defaults to status of file request that was\ncopied to create this file request.",
+            "example": "active",
+            "description": "The status of the file request. This defaults\nto `active`.\n\nWhen the status is set to `inactive`, the file request\nwill no longer accept new submissions, and any visitor\nto the file request URL will receive a `HTTP 404` status\ncode.\n\nThis defaults to status of file request that was\ncopied to create this file request.",
             "enum": [
-              "ACTIVE",
-              "INACTIVE"
+              "active",
+              "inactive"
             ]
           },
           "is_email_required": {
@@ -21138,7 +21158,7 @@
           "expires_at": {
             "type": "string",
             "format": "date-time",
-            "description": "The date after which a file request will no longer accept new\nsubmissions.\n\nAfter this date, the `status` will automatically be set to\n`INACTIVE`.",
+            "description": "The date after which a file request will no longer accept new\nsubmissions.\n\nAfter this date, the `status` will automatically be set to\n`inactive`.",
             "example": "2020-09-28T10:53:43-08:00"
           },
           "folder": {
@@ -21155,8 +21175,14 @@
           "url": {
             "type": "string",
             "description": "The generated URL for this file request. This URL can be shared\nwith users to let them upload files to the associated folder.",
-            "example": "https://app.box.com/filerequest/42037322",
+            "example": "https://cloud.app.box.com/f/19e57f40ace247278a8e3d336678c64a",
             "readOnly": true
+          },
+          "etag": {
+            "type": "string",
+            "example": "1",
+            "nullable": true,
+            "description": "The HTTP `etag` of this file. This can be used within some API\nendpoints in the `If-Match` and `If-None-Match` headers to only\nperform changes on the file request if (no) changes have happened."
           },
           "created_by": {
             "allOf": [
@@ -23308,7 +23334,7 @@
           "templateKey": {
             "type": "string",
             "example": "productInfo",
-            "description": "The key of the of the template that is cascaded down to the folder's\nchildren.\n\nIn many cases the template key is automatically derived\nof its display name, for example `Contract Template` would\nbecome `contractTemplate`. In some cases the creator of the\ntemplate will have provided its own template key.\n\nPlease [list the templates for an enterprise][list], or\nget all instances on a [file][file] or [folder][folder]\nto inspect a template's key.\n\n[list]: e://get-metadata-templates-enterprise\n[file]: e://get-files-id-metadata\n[folder]: e://get-folders-id-metadata"
+            "description": "The key of the template that is cascaded down to the folder's\nchildren.\n\nIn many cases the template key is automatically derived\nof its display name, for example `Contract Template` would\nbecome `contractTemplate`. In some cases the creator of the\ntemplate will have provided its own template key.\n\nPlease [list the templates for an enterprise][list], or\nget all instances on a [file][file] or [folder][folder]\nto inspect a template's key.\n\n[list]: e://get-metadata-templates-enterprise\n[file]: e://get-files-id-metadata\n[folder]: e://get-folders-id-metadata"
           }
         }
       },
