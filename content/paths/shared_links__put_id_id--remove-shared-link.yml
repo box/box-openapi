@@ -1,0 +1,97 @@
+---
+operationId: put_id_id#remove-shared-link
+
+summary: Remove shared link
+
+tags:
+  - Shared links
+
+x-box-tag: shared_links
+x-box-enable-explorer: true
+x-box-sanitized: true
+
+description: |-
+  Removes a shared link on a file or folder.
+
+parameters:
+  - $ref: '../attributes/shared_item_type.yml'
+  - $ref: '../attributes/shared_item_id.yml'
+  - $ref: '../attributes/shared_item_fields.yml'
+
+requestBody:
+  content:
+    application/json:
+      schema:
+        type: object
+        properties:
+          shared_link:
+            description: |-
+              By setting this value to `null`, the shared link
+              is removed from the item.
+            type: object
+            example: null
+            nullable: true
+
+responses:
+  200:
+    description: |-
+      Returns the item with the updated shared link attached.
+    content:
+      application/json:
+        schema:
+          oneOf:
+            - $ref: '#/components/schemas/File'
+            - $ref: '#/components/schemas/Folder'
+
+  401:
+    description: |-
+      Returned when the access token provided in the `Authorization` header
+      is not recognized or not provided.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
+
+  403:
+    description: |-
+      Returned if the user does not have all the permissions to complete the
+      update.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
+
+  404:
+    description: |-
+      Returned if the item is not found, or the user does not
+      have access to the item.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
+
+  405:
+    description: |-
+      Returned if the `shared_item_id` is not in a recognized format.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
+
+  412:
+    description: |-
+      Returns an error when the `If-Match` header does not match
+      the current `etag` value of the item. This indicates that the item
+      has changed since it was last requested.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
+
+  default:
+    description: |-
+      An unexpected client error.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
