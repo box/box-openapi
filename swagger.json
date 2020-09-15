@@ -2136,6 +2136,242 @@
         }
       }
     },
+    "/file_requests/{file_request_id}": {
+      "get": {
+        "operationId": "get_file_requests_id",
+        "summary": "Get file request",
+        "tags": [
+          "File requests"
+        ],
+        "description": "Retrieves the information about a file request.",
+        "parameters": [
+          {
+            "name": "file_request_id",
+            "description": "The unique identifier that represent a file request.\n\nThe ID for any file request can be determined\nby visiting a file request builder in the web application\nand copying the ID from the URL. For example,\nfor the URL `https://*.app.box.com/filerequest/123`\nthe `file_request_id` is `123`.",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns a file request object.",
+            "schema": {
+              "$ref": "#/definitions/FileRequest"
+            }
+          },
+          "401": {
+            "description": "Returned when the access token provided in the `Authorization` header\nis not recognized or not provided.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "404": {
+            "description": "Returned if the file request is not found, or the user does not\nhave access to the associated folder.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "405": {
+            "description": "Returned if the `file_request_id` is not in a recognized format.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          }
+        }
+      },
+      "put": {
+        "operationId": "put_file_requests_id",
+        "summary": "Update file request",
+        "tags": [
+          "File requests"
+        ],
+        "description": "Updates a file request. This can be used to activate or\ndeactivate a file request.",
+        "parameters": [
+          {
+            "name": "file_request_id",
+            "description": "The unique identifier that represent a file request.\n\nThe ID for any file request can be determined\nby visiting a file request builder in the web application\nand copying the ID from the URL. For example,\nfor the URL `https://*.app.box.com/filerequest/123`\nthe `file_request_id` is `123`.",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "if-match",
+            "description": "Ensures this item hasn't recently changed before\nmaking changes.\n\nPass in the item's last observed `etag` value\ninto this header and the endpoint will fail\nwith a `412 Precondition Failed` if it\nhas changed since.",
+            "in": "header",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/FileRequestUpdateRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns the updated file request object.",
+            "schema": {
+              "$ref": "#/definitions/FileRequest"
+            }
+          },
+          "401": {
+            "description": "Returned when the access token provided in the `Authorization` header\nis not recognized or not provided.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "403": {
+            "description": "Returned if the user does not have all the permissions to complete the\nupdate.\n\n* `access_denied_insufficient_permissions` when the authenticated user\ndoes not have access to update the file request.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "404": {
+            "description": "Returned if the file request is not found, or the user does not\nhave access to the associated folder.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "405": {
+            "description": "Returned if the `file_request_id` is not in a recognized format.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "412": {
+            "description": "Returns an error when the `If-Match` header does not match\nthe current `etag` value of the file request. This indicates that the\nfile request has changed since it was last requested.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "delete_file_requests_id",
+        "summary": "Delete file request",
+        "tags": [
+          "File requests"
+        ],
+        "description": "Deletes a file request permanently.",
+        "parameters": [
+          {
+            "name": "file_request_id",
+            "description": "The unique identifier that represent a file request.\n\nThe ID for any file request can be determined\nby visiting a file request builder in the web application\nand copying the ID from the URL. For example,\nfor the URL `https://*.app.box.com/filerequest/123`\nthe `file_request_id` is `123`.",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Returns an empty response when the file request has been successfully\ndeleted."
+          },
+          "401": {
+            "description": "Returned when the access token provided in the `Authorization` header\nis not recognized or not provided.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "404": {
+            "description": "Returned if the file request is not found or has already been deleted,\nor the user does not have access to the associated folder.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "405": {
+            "description": "Returned if the `file_request_id` is not in a recognized format.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          }
+        }
+      }
+    },
+    "/file_requests/{file_request_id}/copy": {
+      "post": {
+        "operationId": "post_file_requests_id_copy",
+        "summary": "Copy file request",
+        "tags": [
+          "File requests"
+        ],
+        "description": "Copies an existing file request that is already present on one folder,\nand applies it to another folder.",
+        "parameters": [
+          {
+            "name": "file_request_id",
+            "description": "The unique identifier that represent a file request.\n\nThe ID for any file request can be determined\nby visiting a file request builder in the web application\nand copying the ID from the URL. For example,\nfor the URL `https://*.app.box.com/filerequest/123`\nthe `file_request_id` is `123`.",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/FileRequestCopyRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns updated file request object.",
+            "schema": {
+              "$ref": "#/definitions/FileRequest"
+            }
+          },
+          "401": {
+            "description": "Returned when the access token provided in the `Authorization` header\nis not recognized or not provided.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "403": {
+            "description": "Returned if the user does not have all the permissions to complete the\nupdate.\n\n* `access_denied_insufficient_permissions` when the authenticated user\ndoes not have access to update the file request.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "404": {
+            "description": "Returned if the file request is not found, or the user does not\nhave access to the associated folder.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "405": {
+            "description": "Returned if the `file_request_id` is not in a recognized format.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          }
+        }
+      }
+    },
     "/folders/{folder_id}": {
       "get": {
         "operationId": "get_folders_id",
@@ -6235,11 +6471,11 @@
     "/shared_items": {
       "get": {
         "operationId": "get_shared_items",
-        "summary": "Find item for shared link",
+        "summary": "Find file for shared link",
         "tags": [
-          "Shared links"
+          "Shared links (Files)"
         ],
-        "description": "Return the file or folder represented by a shared link.\n\nShared items are any files or folders that are represented by a shared link,\nwhich can originate within the current enterprise or within another one.\n\nThis endpoint allows an application to retrieve information about a\nshared item when only given a shared link.",
+        "description": "Return the file represented by a shared link.\n\nA shared file can be represented by a shared link,\nwhich can originate within the current enterprise or within another.\n\nThis endpoint allows an application to retrieve information about a\nshared file when only given a shared link.",
         "parameters": [
           {
             "name": "if-none-match",
@@ -6268,13 +6504,972 @@
         ],
         "responses": {
           "200": {
-            "description": "Returns a full file or folder object if the shared link is valid and\nthe user has access to it.",
+            "description": "Returns a full file resource if the shared link is valid and\nthe user has access to it.",
             "schema": {
               "$ref": "#/definitions/File"
             }
           },
           "304": {
             "description": "Returns an empty response when the `If-None-Match` header matches\nthe current `etag` value of the folder. This indicates that the folder\nhas not changed since it was last requested."
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          }
+        }
+      }
+    },
+    "/files/{file_id}#get_shared_link": {
+      "get": {
+        "operationId": "get_files_id#get_shared_link",
+        "summary": "Get shared link for file",
+        "tags": [
+          "Shared links (Files)"
+        ],
+        "description": "Gets the information for a shared link on a file.",
+        "parameters": [
+          {
+            "name": "file_id",
+            "description": "The unique identifier that represent a file.\n\nThe ID for any file can be determined\nby visiting a file in the web application\nand copying the ID from the URL. For example,\nfor the URL `https://*.app.box.com/files/123`\nthe `file_id` is `123`.",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "fields",
+            "description": "Explicitly request the `shared_link` fields\nto be returned for this item.",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns the base representation of a file with the\nadditional shared link information.",
+            "schema": {
+              "$ref": "#/definitions/File"
+            },
+            "examples": {
+              "default": {
+                "value": {
+                  "id": "12345",
+                  "type": "file",
+                  "etag": "1",
+                  "shared_link": {
+                    "url": "https://app.box.com/s/kwio6b4ovt1264rnfbyqo1",
+                    "download_url": "https://app.box.com/shared/static/kwio6b4ovt1264rnfbyqo1.pdf",
+                    "vanity_url": null,
+                    "vanity_name": null,
+                    "effective_access": "open",
+                    "effective_permission": "can_download",
+                    "is_password_enabled": false,
+                    "unshared_at": "2020-09-21T10:34:41-07:00",
+                    "download_count": 0,
+                    "preview_count": 0,
+                    "access": "open",
+                    "permissions": {
+                      "can_preview": true,
+                      "can_download": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Returned when the access token provided in the `Authorization` header\nis not recognized or not provided.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "404": {
+            "description": "Returned if the file is not found, or the user does not\nhave access to the file.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "405": {
+            "description": "Returned if the `file_id` is not in a recognized format.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          }
+        }
+      }
+    },
+    "/files/{file_id}#add_shared_link": {
+      "put": {
+        "operationId": "put_files_id#add_shared_link",
+        "summary": "Add shared link to file",
+        "tags": [
+          "Shared links (Files)"
+        ],
+        "description": "Adds a shared link to a file.",
+        "parameters": [
+          {
+            "name": "file_id",
+            "description": "The unique identifier that represent a file.\n\nThe ID for any file can be determined\nby visiting a file in the web application\nand copying the ID from the URL. For example,\nfor the URL `https://*.app.box.com/files/123`\nthe `file_id` is `123`.",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "fields",
+            "description": "Explicitly request the `shared_link` fields\nto be returned for this item.",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "shared_link": {
+                  "description": "The settings for the shared link to create on the file.\n\nUse an empty object (`{}`) to use the default settings for shared\nlinks.",
+                  "type": "object",
+                  "properties": {
+                    "access": {
+                      "type": "string",
+                      "description": "The level of access for the shared link. This can be\nrestricted to anyone with the link (`open`), only people\nwithin the company (`company`) and only those who\nhave been invited to the file (`collaborators`).\n\nIf not set, this field defaults to the access level specified\nby the enterprise admin. To create a shared link with this\ndefault setting pass the `shared_link` object with\nno `access` field, for example `{ \"shared_link\": {} }`.\n\nThe `company` access level is only available to paid\naccounts.",
+                      "enum": [
+                        "open",
+                        "company",
+                        "collaborators"
+                      ]
+                    },
+                    "password": {
+                      "type": "string",
+                      "description": "The password required to access the shared link. Set the\npassword to `null` to remove it.\n\nA password can only be set when `access` is set to `open`."
+                    },
+                    "unshared_at": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "The timestamp at which this shared link will\nexpire. This field can only be set by\nusers with paid accounts."
+                    },
+                    "permissions": {
+                      "type": "object",
+                      "properties": {
+                        "can_download": {
+                          "type": "boolean",
+                          "description": "If the shared link allows for downloading of files.\nThis can only be set when `access` is set to\n`open` or `company`."
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns the base representation of a file with a new shared\nlink attached.",
+            "schema": {
+              "$ref": "#/definitions/File"
+            },
+            "examples": {
+              "default": {
+                "value": {
+                  "id": "12345",
+                  "type": "file",
+                  "etag": "1",
+                  "shared_link": {
+                    "url": "https://app.box.com/s/kwio6b4ovt1264rnfbyqo1",
+                    "download_url": "https://app.box.com/shared/static/kwio6b4ovt1264rnfbyqo1.pdf",
+                    "vanity_url": null,
+                    "vanity_name": null,
+                    "effective_access": "open",
+                    "effective_permission": "can_download",
+                    "is_password_enabled": false,
+                    "unshared_at": "2020-09-21T10:34:41-07:00",
+                    "download_count": 0,
+                    "preview_count": 0,
+                    "access": "open",
+                    "permissions": {
+                      "can_preview": true,
+                      "can_download": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Returned when the access token provided in the `Authorization` header\nis not recognized or not provided.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "403": {
+            "description": "Returned if the user does not have all the permissions to complete the\nupdate.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "404": {
+            "description": "Returned if the file is not found, or the user does not\nhave access to the file.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "405": {
+            "description": "Returned if the `file_id` is not in a recognized format.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "412": {
+            "description": "Returns an error when the `If-Match` header does not match\nthe current `etag` value of the file. This indicates that the file\nhas changed since it was last requested.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          }
+        }
+      }
+    },
+    "/files/{file_id}#update_shared_link": {
+      "put": {
+        "operationId": "put_files_id#update_shared_link",
+        "summary": "Update shared link on file",
+        "tags": [
+          "Shared links (Files)"
+        ],
+        "description": "Updates a shared link on a file.",
+        "parameters": [
+          {
+            "name": "file_id",
+            "description": "The unique identifier that represent a file.\n\nThe ID for any file can be determined\nby visiting a file in the web application\nand copying the ID from the URL. For example,\nfor the URL `https://*.app.box.com/files/123`\nthe `file_id` is `123`.",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "fields",
+            "description": "Explicitly request the `shared_link` fields\nto be returned for this item.",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "shared_link": {
+                  "description": "The settings for the shared link to update.",
+                  "type": "object",
+                  "properties": {
+                    "access": {
+                      "type": "string",
+                      "description": "The level of access for the shared link. This can be\nrestricted to anyone with the link (`open`), only people\nwithin the company (`company`) and only those who\nhave been invited to the folder (`collaborators`).\n\nIf not set, this field defaults to the access level specified\nby the enterprise admin. To create a shared link with this\ndefault setting pass the `shared_link` object with\nno `access` field, for example `{ \"shared_link\": {} }`.\n\nThe `company` access level is only available to paid\naccounts.",
+                      "enum": [
+                        "open",
+                        "company",
+                        "collaborators"
+                      ]
+                    },
+                    "password": {
+                      "type": "string",
+                      "description": "The password required to access the shared link. Set the\npassword to `null` to remove it.\n\nA password can only be set when `access` is set to `open`."
+                    },
+                    "unshared_at": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "The timestamp at which this shared link will\nexpire. This field can only be set by\nusers with paid accounts."
+                    },
+                    "permissions": {
+                      "type": "object",
+                      "properties": {
+                        "can_download": {
+                          "type": "boolean",
+                          "description": "If the shared link allows for downloading of files.\nThis can only be set when `access` is set to\n`open` or `company`."
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns a basic representation of the file, with the updated shared\nlink attached.",
+            "schema": {
+              "$ref": "#/definitions/File"
+            },
+            "examples": {
+              "default": {
+                "value": {
+                  "id": "12345",
+                  "type": "file",
+                  "etag": "1",
+                  "shared_link": {
+                    "url": "https://app.box.com/s/kwio6b4ovt1264rnfbyqo1",
+                    "download_url": "https://app.box.com/shared/static/kwio6b4ovt1264rnfbyqo1.pdf",
+                    "vanity_url": null,
+                    "vanity_name": null,
+                    "effective_access": "open",
+                    "effective_permission": "can_download",
+                    "is_password_enabled": false,
+                    "unshared_at": "2020-09-21T10:34:41-07:00",
+                    "download_count": 0,
+                    "preview_count": 0,
+                    "access": "open",
+                    "permissions": {
+                      "can_preview": true,
+                      "can_download": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Returned when the access token provided in the `Authorization` header\nis not recognized or not provided.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "403": {
+            "description": "Returned if the user does not have all the permissions to complete the\nupdate.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "404": {
+            "description": "Returned if the file is not found, or the user does not\nhave access to the file.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "405": {
+            "description": "Returned if the `file_id` is not in a recognized format.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "412": {
+            "description": "Returns an error when the `If-Match` header does not match\nthe current `etag` value of the file. This indicates that the file\nhas changed since it was last requested.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          }
+        }
+      }
+    },
+    "/files/{file_id}#remove_shared_link": {
+      "put": {
+        "operationId": "put_files_id#remove_shared_link",
+        "summary": "Remove shared link from file",
+        "tags": [
+          "Shared links (Files)"
+        ],
+        "description": "Removes a shared link from a file.",
+        "parameters": [
+          {
+            "name": "file_id",
+            "description": "The unique identifier that represent a file.\n\nThe ID for any file can be determined\nby visiting a file in the web application\nand copying the ID from the URL. For example,\nfor the URL `https://*.app.box.com/files/123`\nthe `file_id` is `123`.",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "fields",
+            "description": "Explicitly request the `shared_link` fields\nto be returned for this item.",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "shared_link": {
+                  "description": "By setting this value to `null`, the shared link\nis removed from the file.",
+                  "type": "object"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns a basic representation of a file, with the shared link removed.",
+            "schema": {
+              "$ref": "#/definitions/File"
+            },
+            "examples": {
+              "default": {
+                "value": {
+                  "id": "12345",
+                  "type": "file",
+                  "etag": "1",
+                  "shared_link": null
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Returned when the access token provided in the `Authorization` header\nis not recognized or not provided.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "403": {
+            "description": "Returned if the user does not have all the permissions to complete the\nupdate.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "404": {
+            "description": "Returned if the file is not found, or the user does not\nhave access to the file.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "405": {
+            "description": "Returned if the `file_id` is not in a recognized format.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "412": {
+            "description": "Returns an error when the `If-Match` header does not match\nthe current `etag` value of the file. This indicates that the file\nhas changed since it was last requested.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          }
+        }
+      }
+    },
+    "/shared_items#folders": {
+      "get": {
+        "operationId": "get_shared_items#folders",
+        "summary": "Find folder for shared link",
+        "tags": [
+          "Shared links (Folders)"
+        ],
+        "description": "Return the folder represented by a shared link.\n\nA shared folder can be represented by a shared link,\nwhich can originate within the current enterprise or within another.\n\nThis endpoint allows an application to retrieve information about a\nshared folder when only given a shared link.",
+        "parameters": [
+          {
+            "name": "if-none-match",
+            "description": "Ensures an item is only returned if it has changed.\n\nPass in the item's last observed `etag` value\ninto this header and the endpoint will fail\nwith a `304 Not Modified` if the item has not\nchanged since.",
+            "in": "header",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "fields",
+            "description": "A comma-separated list of attributes to include in the\nresponse. This can be used to request fields that are\nnot normally returned in a standard response.\n\nBe aware that specifying this parameter will have the\neffect that none of the standard fields are returned in\nthe response unless explicitly specified, instead only\nfields for the mini representation are returned, additional\nto the fields requested.",
+            "in": "query",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "boxapi",
+            "description": "A header containing the shared link and optional password for the\nshared link.\n\nThe format for this header is as follows.\n\n`shared_link=[link]&shared_link_password=[password]`",
+            "in": "header",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns a full folder resource if the shared link is valid and\nthe user has access to it.",
+            "schema": {
+              "$ref": "#/definitions/Folder"
+            }
+          },
+          "304": {
+            "description": "Returns an empty response when the `If-None-Match` header matches\nthe current `etag` value of the folder. This indicates that the folder\nhas not changed since it was last requested."
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          }
+        }
+      }
+    },
+    "/folders/{folder_id}#get_shared_link": {
+      "get": {
+        "operationId": "get_folders_id#get_shared_link",
+        "summary": "Get shared link for folder",
+        "tags": [
+          "Shared links (Folders)"
+        ],
+        "description": "Gets the information for a shared link on a folder.",
+        "parameters": [
+          {
+            "name": "folder_id",
+            "description": "The unique identifier that represent a folder.\n\nThe ID for any folder can be determined\nby visiting this folder in the web application\nand copying the ID from the URL. For example,\nfor the URL `https://*.app.box.com/folder/123`\nthe `folder_id` is `123`.\n\nThe root folder of a Box account is\nalways represented by the ID `0`.",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "fields",
+            "description": "Explicitly request the `shared_link` fields\nto be returned for this item.",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns the base representation of a folder with the\nadditional shared link information.",
+            "schema": {
+              "$ref": "#/definitions/Folder"
+            },
+            "examples": {
+              "default": {
+                "value": {
+                  "id": "12345",
+                  "type": "folder",
+                  "etag": "1",
+                  "shared_link": {
+                    "url": "https://app.box.com/s/kwio6b4ovt1264rnfbyqo1",
+                    "download_url": "https://app.box.com/shared/static/kwio6b4ovt1264rnfbyqo1.pdf",
+                    "vanity_url": null,
+                    "vanity_name": null,
+                    "effective_access": "open",
+                    "effective_permission": "can_download",
+                    "is_password_enabled": false,
+                    "unshared_at": "2020-09-21T10:34:41-07:00",
+                    "download_count": 0,
+                    "preview_count": 0,
+                    "access": "open",
+                    "permissions": {
+                      "can_preview": true,
+                      "can_download": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Returned when the access token provided in the `Authorization` header\nis not recognized or not provided.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "404": {
+            "description": "Returned if the folder is not found, or the user does not\nhave access to the folder.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "405": {
+            "description": "Returned if the `folder_id` is not in a recognized format.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          }
+        }
+      }
+    },
+    "/folders/{folder_id}#add_shared_link": {
+      "put": {
+        "operationId": "put_folders_id#add_shared_link",
+        "summary": "Add shared link to folder",
+        "tags": [
+          "Shared links (Folders)"
+        ],
+        "description": "Adds a shared link to a folder.",
+        "parameters": [
+          {
+            "name": "folder_id",
+            "description": "The unique identifier that represent a folder.\n\nThe ID for any folder can be determined\nby visiting this folder in the web application\nand copying the ID from the URL. For example,\nfor the URL `https://*.app.box.com/folder/123`\nthe `folder_id` is `123`.\n\nThe root folder of a Box account is\nalways represented by the ID `0`.",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "fields",
+            "description": "Explicitly request the `shared_link` fields\nto be returned for this item.",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "shared_link": {
+                  "description": "The settings for the shared link to create on the folder.\n\nUse an empty object (`{}`) to use the default settings for shared\nlinks.",
+                  "type": "object",
+                  "properties": {
+                    "access": {
+                      "type": "string",
+                      "description": "The level of access for the shared link. This can be\nrestricted to anyone with the link (`open`), only people\nwithin the company (`company`) and only those who\nhave been invited to the folder (`collaborators`).\n\nIf not set, this field defaults to the access level specified\nby the enterprise admin. To create a shared link with this\ndefault setting pass the `shared_link` object with\nno `access` field, for example `{ \"shared_link\": {} }`.\n\nThe `company` access level is only available to paid\naccounts.",
+                      "enum": [
+                        "open",
+                        "company",
+                        "collaborators"
+                      ]
+                    },
+                    "password": {
+                      "type": "string",
+                      "description": "The password required to access the shared link. Set the\npassword to `null` to remove it.\n\nA password can only be set when `access` is set to `open`."
+                    },
+                    "unshared_at": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "The timestamp at which this shared link will\nexpire. This field can only be set by\nusers with paid accounts."
+                    },
+                    "permissions": {
+                      "type": "object",
+                      "properties": {
+                        "can_download": {
+                          "type": "boolean",
+                          "description": "If the shared link allows for downloading of folders.\nThis can only be set when `access` is set to\n`open` or `company`."
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns the base representation of a folder with a new shared\nlink attached.",
+            "schema": {
+              "$ref": "#/definitions/Folder"
+            },
+            "examples": {
+              "default": {
+                "value": {
+                  "id": "12345",
+                  "type": "folder",
+                  "etag": "1",
+                  "shared_link": {
+                    "url": "https://app.box.com/s/kwio6b4ovt1264rnfbyqo1",
+                    "download_url": "https://app.box.com/shared/static/kwio6b4ovt1264rnfbyqo1.pdf",
+                    "vanity_url": null,
+                    "vanity_name": null,
+                    "effective_access": "open",
+                    "effective_permission": "can_download",
+                    "is_password_enabled": false,
+                    "unshared_at": "2020-09-21T10:34:41-07:00",
+                    "download_count": 0,
+                    "preview_count": 0,
+                    "access": "open",
+                    "permissions": {
+                      "can_preview": true,
+                      "can_download": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Returned when the access token provided in the `Authorization` header\nis not recognized or not provided.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "403": {
+            "description": "Returned if the user does not have all the permissions to complete the\nupdate.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "404": {
+            "description": "Returned if the folder is not found, or the user does not\nhave access to the folder.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "405": {
+            "description": "Returned if the `folder_id` is not in a recognized format.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "412": {
+            "description": "Returns an error when the `If-Match` header does not match\nthe current `etag` value of the folder. This indicates that the folder\nhas changed since it was last requested.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          }
+        }
+      }
+    },
+    "/folders/{folder_id}#update_shared_link": {
+      "put": {
+        "operationId": "put_folders_id#update_shared_link",
+        "summary": "Update shared link on folder",
+        "tags": [
+          "Shared links (Folders)"
+        ],
+        "description": "Updates a shared link on a folder.",
+        "parameters": [
+          {
+            "name": "folder_id",
+            "description": "The unique identifier that represent a folder.\n\nThe ID for any folder can be determined\nby visiting this folder in the web application\nand copying the ID from the URL. For example,\nfor the URL `https://*.app.box.com/folder/123`\nthe `folder_id` is `123`.\n\nThe root folder of a Box account is\nalways represented by the ID `0`.",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "fields",
+            "description": "Explicitly request the `shared_link` fields\nto be returned for this item.",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "shared_link": {
+                  "description": "The settings for the shared link to update.",
+                  "type": "object",
+                  "properties": {
+                    "access": {
+                      "type": "string",
+                      "description": "The level of access for the shared link. This can be\nrestricted to anyone with the link (`open`), only people\nwithin the company (`company`) and only those who\nhave been invited to the folder (`collaborators`).\n\nIf not set, this field defaults to the access level specified\nby the enterprise admin. To create a shared link with this\ndefault setting pass the `shared_link` object with\nno `access` field, for example `{ \"shared_link\": {} }`.\n\nThe `company` access level is only available to paid\naccounts.",
+                      "enum": [
+                        "open",
+                        "company",
+                        "collaborators"
+                      ]
+                    },
+                    "password": {
+                      "type": "string",
+                      "description": "The password required to access the shared link. Set the\npassword to `null` to remove it.\n\nA password can only be set when `access` is set to `open`."
+                    },
+                    "unshared_at": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "The timestamp at which this shared link will\nexpire. This field can only be set by\nusers with paid accounts."
+                    },
+                    "permissions": {
+                      "type": "object",
+                      "properties": {
+                        "can_download": {
+                          "type": "boolean",
+                          "description": "If the shared link allows for downloading of folders.\nThis can only be set when `access` is set to\n`open` or `company`."
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns a basic representation of the folder, with the updated shared\nlink attached.",
+            "schema": {
+              "$ref": "#/definitions/Folder"
+            },
+            "examples": {
+              "default": {
+                "value": {
+                  "id": "12345",
+                  "type": "folder",
+                  "etag": "1",
+                  "shared_link": {
+                    "url": "https://app.box.com/s/kwio6b4ovt1264rnfbyqo1",
+                    "download_url": "https://app.box.com/shared/static/kwio6b4ovt1264rnfbyqo1.pdf",
+                    "vanity_url": null,
+                    "vanity_name": null,
+                    "effective_access": "open",
+                    "effective_permission": "can_download",
+                    "is_password_enabled": false,
+                    "unshared_at": "2020-09-21T10:34:41-07:00",
+                    "download_count": 0,
+                    "preview_count": 0,
+                    "access": "open",
+                    "permissions": {
+                      "can_preview": true,
+                      "can_download": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Returned when the access token provided in the `Authorization` header\nis not recognized or not provided.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "403": {
+            "description": "Returned if the user does not have all the permissions to complete the\nupdate.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "404": {
+            "description": "Returned if the folder is not found, or the user does not\nhave access to the folder.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "405": {
+            "description": "Returned if the `folder_id` is not in a recognized format.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "412": {
+            "description": "Returns an error when the `If-Match` header does not match\nthe current `etag` value of the folder. This indicates that the folder\nhas changed since it was last requested.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          }
+        }
+      }
+    },
+    "/folders/{folder_id}#remove_shared_link": {
+      "put": {
+        "operationId": "put_folders_id#remove_shared_link",
+        "summary": "Remove shared link from folder",
+        "tags": [
+          "Shared links (Folders)"
+        ],
+        "description": "Removes a shared link from a folder.",
+        "parameters": [
+          {
+            "name": "folder_id",
+            "description": "The unique identifier that represent a folder.\n\nThe ID for any folder can be determined\nby visiting this folder in the web application\nand copying the ID from the URL. For example,\nfor the URL `https://*.app.box.com/folder/123`\nthe `folder_id` is `123`.\n\nThe root folder of a Box account is\nalways represented by the ID `0`.",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "fields",
+            "description": "Explicitly request the `shared_link` fields\nto be returned for this item.",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "shared_link": {
+                  "description": "By setting this value to `null`, the shared link\nis removed from the folder.",
+                  "type": "object"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns a basic representation of a folder, with the shared link removed.",
+            "schema": {
+              "$ref": "#/definitions/Folder"
+            },
+            "examples": {
+              "default": {
+                "value": {
+                  "id": "12345",
+                  "type": "folder",
+                  "etag": "1",
+                  "shared_link": null
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Returned when the access token provided in the `Authorization` header\nis not recognized or not provided.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "403": {
+            "description": "Returned if the user does not have all the permissions to complete the\nupdate.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "404": {
+            "description": "Returned if the folder is not found, or the user does not\nhave access to the folder.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "405": {
+            "description": "Returned if the `folder_id` is not in a recognized format.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "412": {
+            "description": "Returns an error when the `If-Match` header does not match\nthe current `etag` value of the folder. This indicates that the folder\nhas changed since it was last requested.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
           },
           "default": {
             "description": "An unexpected client error.",
@@ -12910,6 +14105,171 @@
           }
         }
       }
+    },
+    "FileRequest": {
+      "title": "File Request",
+      "type": "object",
+      "description": "A standard representation of a file request, as returned\nfrom any file request API endpoints by default.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The unique identifier for this file request.",
+          "readOnly": true
+        },
+        "type": {
+          "type": "string",
+          "description": "`file-request`",
+          "enum": [
+            "file-request"
+          ],
+          "readOnly": true
+        },
+        "title": {
+          "type": "string",
+          "description": "The title of file request. This is shown\nin the Box UI to users uploading files.\n\nThis defaults to title of the file request that was\ncopied to create this file request."
+        },
+        "description": {
+          "type": "string",
+          "description": "The optional description of this file request. This is\nshown in the Box UI to users uploading files.\n\nThis defaults to description of the file request that was\ncopied to create this file request."
+        },
+        "status": {
+          "type": "string",
+          "description": "The status of the file request. This defaults\nto `active`.\n\nWhen the status is set to `inactive`, the file request\nwill no longer accept new submissions, and any visitor\nto the file request URL will receive a `HTTP 404` status\ncode.\n\nThis defaults to status of file request that was\ncopied to create this file request.",
+          "enum": [
+            "active",
+            "inactive"
+          ]
+        },
+        "is_email_required": {
+          "type": "boolean",
+          "description": "Whether a file request submitter is required to provide\ntheir email address.\n\nWhen this setting is set to true, the Box UI will show\nan email field on the file request form.\n\nThis defaults to setting of file request that was\ncopied to create this file request."
+        },
+        "is_description_required": {
+          "type": "boolean",
+          "description": "Whether a file request submitter is required to provide\na description of the files they are submitting.\n\nWhen this setting is set to true, the Box UI will show\na description field on the file request form.\n\nThis defaults to setting of file request that was\ncopied to create this file request."
+        },
+        "expires_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The date after which a file request will no longer accept new\nsubmissions.\n\nAfter this date, the `status` will automatically be set to\n`inactive`."
+        },
+        "folder": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/Folder--Mini"
+            },
+            {
+              "description": "The folder that this file request is associated with.\n\nFiles submitted through the file request form will be\nuploaded to this folder."
+            }
+          ]
+        },
+        "url": {
+          "type": "string",
+          "description": "The generated URL for this file request. This URL can be shared\nwith users to let them upload files to the associated folder.",
+          "readOnly": true
+        },
+        "etag": {
+          "type": "string",
+          "description": "The HTTP `etag` of this file. This can be used in combination with\nthe `If-Match` header when updating a file request. By providing that\nheader, a change will only be performed on the  file request if the `etag`\non the file request still matches the `etag` provided in the `If-Match`\nheader."
+        },
+        "created_by": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/User--Mini"
+            },
+            {
+              "description": "The user who created this file request."
+            }
+          ]
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The date and time when the file request was created."
+        },
+        "updated_by": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/User--Mini"
+            },
+            {
+              "description": "The user who last modified this file request."
+            },
+            {}
+          ]
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The date and time when the file request was last updated."
+        }
+      }
+    },
+    "FileRequestUpdateRequest": {
+      "title": "File Request (Update)",
+      "type": "object",
+      "description": "The request body to update a file request.",
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "An optional new title for the file request. This can be\nused to change the title of the file request.\n\nThis will default to the value on the existing file request."
+        },
+        "description": {
+          "type": "string",
+          "description": "An optional new description for the file request. This can be\nused to change the description of the file request.\n\nThis will default to the value on the existing file request."
+        },
+        "status": {
+          "type": "string",
+          "description": "An optional new status of the file request.\n\nWhen the status is set to `inactive`, the file request\nwill no longer accept new submissions, and any visitor\nto the file request URL will receive a `HTTP 404` status\ncode.\n\nThis will default to the value on the existing file request.",
+          "enum": [
+            "active",
+            "inactive"
+          ]
+        },
+        "is_email_required": {
+          "type": "boolean",
+          "description": "Whether a file request submitter is required to provide\ntheir email address.\n\nWhen this setting is set to true, the Box UI will show\nan email field on the file request form.\n\nThis will default to the value on the existing file request."
+        },
+        "is_description_required": {
+          "type": "boolean",
+          "description": "Whether a file request submitter is required to provide\na description of the files they are submitting.\n\nWhen this setting is set to true, the Box UI will show\na description field on the file request form.\n\nThis will default to the value on the existing file request."
+        },
+        "expires_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The date after which a file request will no longer accept new\nsubmissions.\n\nAfter this date, the `status` will automatically be set to\n`inactive`.\n\nThis will default to the value on the existing file request."
+        }
+      }
+    },
+    "FileRequestCopyRequest": {
+      "title": "File Request (Copy)",
+      "type": "object",
+      "description": "The request body to copy a file request.",
+      "required": [
+        "folder"
+      ],
+      "allOf": [
+        {
+          "$ref": "#/definitions/FileRequestUpdateRequest"
+        },
+        {
+          "properties": {
+            "folder": {
+              "type": "object",
+              "description": "The folder to associate the new file request to.",
+              "required": [
+                "id"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "The ID of the folder to associate the new\nfile request to."
+                }
+              }
+            }
+          }
+        }
+      ]
     },
     "Folder": {
       "title": "Folder",
