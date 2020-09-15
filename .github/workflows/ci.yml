@@ -4,7 +4,13 @@ name: CI
 # Defines when this action should be run
 on:
   # Run on any Push
-  push: {}
+  push: 
+    branches-ignore:
+      - en
+      - en-staging
+      - en-snapshot
+      - jp
+      - jp-partial
   # Run for PRs on main and staging
   pull_request:
     branches: [ main, staging ]
@@ -193,27 +199,3 @@ jobs:
           SLACK_AVATAR: "https://avatars3.githubusercontent.com/u/8659759?s=200&v=4"
         with:
           args: "Error running `deploy-staging` job in OpenAPI CI"
-
-  # The deploy task actually deploys any changes to the jp branch
-  notify-from-jp:
-    # We run this on the latest ubuntu
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/jp'
-    timeout-minutes: 3
-
-    steps:
-      - name: 'Trigger Netlify deployment'
-        uses: joelwmale/webhook-action@master
-        env:
-          WEBHOOK_URL: ${{ secrets.NETLIFY_BOXDEV_JP_WEBHOOK }}
-          data: '{}'
-
-      - name: Send Slack notification
-        uses: Ilshidur/action-slack@2.0.2
-        if: ${{ failure() }}
-        env:
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-          SLACK_USERNAME: GitHub Actions
-          SLACK_AVATAR: "https://avatars3.githubusercontent.com/u/8659759?s=200&v=4"
-        with:
-          args: "Error running `deploy-jp` job in OpenAPI CI"
