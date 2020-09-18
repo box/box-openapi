@@ -2285,7 +2285,7 @@
       "get": {
         "operationId": "get_files_id_collaborations", 
         "summary": "ファイルのコラボレーションのリストを取得", 
-        "description": "ファイルでのコラボレーションのリストを取得します。そのファイルに対するアクセス権限を持つすべてのユーザーを返します。", 
+        "description": "ファイルでの保留中のコラボレーションとアクティブなコラボレーションのリストを取得します。そのファイルに対するアクセス権限を持つか、そのファイルに招待されているすべてのユーザーを返します。", 
         "tags": [
           "Collaborations (List)"
         ], 
@@ -2344,7 +2344,7 @@
         ], 
         "responses": {
           "200": {
-            "description": "コラボレーションオブジェクトのコレクションを返します。このファイルを関連するコラボレーションが存在しない場合は、空のコレクションが返されます。", 
+            "description": "コラボレーションオブジェクトのコレクションを返します。このファイルでのコラボレーションが存在しない場合は、空のコレクションが返されます。\n\nこのリストには、`status`が`pending`に設定されている保留中のコラボレーションが含まれます。これは、招待が送信されたもののまだ承認されていないことを示します。", 
             "content": {
               "application/json": {
                 "schema": {
@@ -2997,6 +2997,340 @@
           }, 
           "404": {
             "description": "ユーザーがファイルにアクセスできない場合に返されます。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }, 
+          "default": {
+            "description": "予期しないクライアントエラー。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }, 
+    "/files/{file_id}/metadata/enterprise/securityClassification-6VMVochwUWo": {
+      "get": {
+        "operationId": "get_files_id_metadata_enterprise_securityClassification-6VMVochwUWo", 
+        "summary": "ファイルの分類を取得", 
+        "tags": [
+          "Classifications on files"
+        ], 
+        "x-box-tag": "file_classifications", 
+        "x-box-sanitized": true, 
+        "description": "ファイルに適用されている分類メタデータインスタンスを取得します。\n\nこのAPIは、`/files/:id//enterprise_12345/securityClassification-6VMVochwUWo`のように、URLにエンタープライズIDを明示的に含めることで呼び出すこともできます。", 
+        "parameters": [
+          {
+            "name": "file_id", 
+            "description": "ファイルを表す一意の識別子。\n\nファイルIDを確認するには、ウェブアプリケーションでファイルにアクセスして、URLからIDをコピーします。たとえば、URLが`https://*.app.box.com/files/123`の場合、`file_id`は`123`です。", 
+            "example": "12345", 
+            "in": "path", 
+            "required": true, 
+            "schema": {
+              "type": "string"
+            }
+          }
+        ], 
+        "responses": {
+          "201": {
+            "description": "`securityClassification`メタデータテンプレートのインスタンスを返します。これには、この会社が使用できるすべての分類のリストを取得する`Box__Security__Classification__Key`フィールドが含まれています。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Classification"
+                }
+              }
+            }
+          }, 
+          "403": {
+            "description": "リクエストパラメータが無効な場合に返されます。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }, 
+          "404": {
+            "description": "指定したメタデータテンプレートがこのファイルに適用されていない場合、またはユーザーがこのファイルにアクセスできない場合に返されます。\n\n* `instance_not_found` - メタデータテンプレートがファイルに適用されていなかった場合に返されます。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }, 
+          "405": {
+            "description": "メソッドが許可されなかった場合に返されます。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }, 
+          "default": {
+            "description": "予期しないクライアントエラー。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        }
+      }, 
+      "post": {
+        "operationId": "post_files_id_metadata_enterprise_securityClassification-6VMVochwUWo", 
+        "summary": "ファイルに分類を追加", 
+        "tags": [
+          "Classifications on files"
+        ], 
+        "x-box-tag": "file_classifications", 
+        "x-box-sanitized": true, 
+        "description": "追加する分類のラベルを指定することで、ファイルに分類を追加します。\n\nこのAPIは、`/files/:id//enterprise_12345/securityClassification-6VMVochwUWo`のように、URLにエンタープライズIDを明示的に含めることで呼び出すこともできます。", 
+        "parameters": [
+          {
+            "name": "file_id", 
+            "description": "ファイルを表す一意の識別子。\n\nファイルIDを確認するには、ウェブアプリケーションでファイルにアクセスして、URLからIDをコピーします。たとえば、URLが`https://*.app.box.com/files/123`の場合、`file_id`は`123`です。", 
+            "example": "12345", 
+            "in": "path", 
+            "required": true, 
+            "schema": {
+              "type": "string"
+            }
+          }
+        ], 
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object", 
+                "properties": {
+                  "Box__Security__Classification__Key": {
+                    "type": "string", 
+                    "description": "このファイルに適用する分類の名前。\n\n会社で使用できる分類のリストを取得するには、分類APIを使用して、使用可能なすべての分類キーが表示される[分類テンプレート][e://get_metadata_templates_enterprise_securityClassification-6VMVochwUWo_schema]を取得します。", 
+                    "example": "Sensitive"
+                  }
+                }
+              }
+            }
+          }
+        }, 
+        "responses": {
+          "201": {
+            "description": "ファイルに適用された分類テンプレートインスタンスを返します。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Classification"
+                }
+              }
+            }
+          }, 
+          "400": {
+            "description": "リクエスト本文が無効な場合にエラーを返します。\n\n* `schema_validation_failed` - リクエスト本文に、存在しないフィールドか、値またはタイプが期待されるフィールドタイプと一致しないフィールドの値が含まれています。たとえば、`enum`または`multiSelect`フィールドに不明なオプションが指定されている場合があります。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }, 
+          "404": {
+            "description": "ファイルテンプレートまたはメタデータテンプレートが見つからない場合はエラーを返します。\n\n* `not_found` - ファイルが見つからないか、ユーザーがファイルにアクセスできない場合に返されます。\n* `instance_tuple_not_found` - メタデータテンプレートが見つからない場合に返されます。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }, 
+          "409": {
+            "description": "このメタデータテンプレートのインスタンスがすでにファイルに存在する場合はエラーを返します。\n\n* `tuple_already_exists` - メタデータテンプレートのインスタンスがすでにファイルに存在する場合に返されます。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }, 
+          "default": {
+            "description": "予期しないクライアントエラー。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        }
+      }, 
+      "put": {
+        "operationId": "put_files_id_metadata_enterprise_securityClassification-6VMVochwUWo", 
+        "summary": "ファイルの分類を更新", 
+        "tags": [
+          "Classifications on files"
+        ], 
+        "x-box-tag": "file_classifications", 
+        "x-box-sanitized": true, 
+        "description": "ファイルの分類を更新します。\n\n分類を更新できるのは、分類がすでにファイルに適用されている場合のみです。分類を編集する際は、会社に対して定義されている値のみを使用できます。", 
+        "parameters": [
+          {
+            "name": "file_id", 
+            "description": "ファイルを表す一意の識別子。\n\nファイルIDを確認するには、ウェブアプリケーションでファイルにアクセスして、URLからIDをコピーします。たとえば、URLが`https://*.app.box.com/files/123`の場合、`file_id`は`123`です。", 
+            "example": "12345", 
+            "in": "path", 
+            "required": true, 
+            "schema": {
+              "type": "string"
+            }
+          }
+        ], 
+        "requestBody": {
+          "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "description": "分類ラベルを更新するために加える1つの変更を含むリスト。", 
+                "type": "array", 
+                "items": {
+                  "type": "object", 
+                  "description": "分類メタデータテンプレートのインスタンスに対して実行する操作。この場合、`Box__Security__Classification__Key`フィールドに格納された値を新しい値で置き換えるために使用されます。", 
+                  "properties": {
+                    "op": {
+                      "type": "string", 
+                      "example": "replace", 
+                      "description": "`replace`", 
+                      "enum": [
+                        "replace"
+                      ]
+                    }, 
+                    "path": {
+                      "type": "string", 
+                      "example": "/Box__Security__Classification__Key", 
+                      "description": "`/Box__Security__Classification__Key`", 
+                      "enum": [
+                        "/Box__Security__Classification__Key"
+                      ]
+                    }, 
+                    "value": {
+                      "type": "string", 
+                      "description": "このファイルに適用する分類の名前。\n\n会社で使用できる分類のリストを取得するには、分類APIを使用して、使用可能なすべての分類キーが表示される[分類テンプレート][e://get_metadata_templates_enterprise_securityClassification-6VMVochwUWo_schema]を取得します。", 
+                      "example": "Sensitive"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }, 
+        "responses": {
+          "200": {
+            "description": "更新された分類メタデータテンプレートインスタンスを返します。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Classification"
+                }
+              }
+            }
+          }, 
+          "400": {
+            "description": "リクエスト本文が無効な場合にエラーを返します。\n\n* `bad_request` - リクエスト本文の形式が有効なJSON Patch操作の配列ではありません。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }, 
+          "500": {
+            "description": "リクエスト本文が有効なJSON Patch項目の配列でない場合、一部のエッジケースでエラーを返します。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }, 
+          "default": {
+            "description": "予期しないクライアントエラー。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        }
+      }, 
+      "delete": {
+        "operationId": "delete_files_id_metadata_enterprise_securityClassification-6VMVochwUWo", 
+        "summary": "ファイルから分類を削除", 
+        "tags": [
+          "Classifications on files"
+        ], 
+        "x-box-tag": "file_classifications", 
+        "x-box-sanitized": true, 
+        "description": "ファイルからすべての分類を削除します。\n\nこのAPIは、`/files/:id//enterprise_12345/securityClassification-6VMVochwUWo`のように、URLにエンタープライズIDを明示的に含めることで呼び出すこともできます。", 
+        "parameters": [
+          {
+            "name": "file_id", 
+            "description": "ファイルを表す一意の識別子。\n\nファイルIDを確認するには、ウェブアプリケーションでファイルにアクセスして、URLからIDをコピーします。たとえば、URLが`https://*.app.box.com/files/123`の場合、`file_id`は`123`です。", 
+            "example": "12345", 
+            "in": "path", 
+            "required": true, 
+            "schema": {
+              "type": "string"
+            }
+          }
+        ], 
+        "responses": {
+          "204": {
+            "description": "分類が正常に削除された場合は空の応答を返します。"
+          }, 
+          "400": {
+            "description": "リクエストパラメータが無効な場合に返されます。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }, 
+          "404": {
+            "description": "ファイルに分類が適用されていない場合、またはユーザーがファイルにアクセスできない場合はエラーを返します。\n\n* `instance_not_found` - 分類メタデータテンプレートのインスタンスがこのファイルに見つからなかった場合に返されます。\n* `not_found` - ファイルが見つからなかったか、ユーザーがファイルにアクセスできない場合に返されます。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }, 
+          "405": {
+            "description": "メソッドが許可されなかった場合に返されます。", 
             "content": {
               "application/json": {
                 "schema": {
@@ -5104,7 +5438,7 @@
       "get": {
         "operationId": "get_folders_id_collaborations", 
         "summary": "フォルダコラボレーションのリストを取得", 
-        "description": "フォルダでのコラボレーションのリストを取得します。そのフォルダに対するアクセス権限を持つすべてのユーザーを返します。", 
+        "description": "フォルダでの保留中のコラボレーションとアクティブなコラボレーションのリストを取得します。そのフォルダに対するアクセス権限を持つか、そのフォルダに招待されているすべてのユーザーを返します。", 
         "tags": [
           "Collaborations (List)"
         ], 
@@ -5142,7 +5476,7 @@
         ], 
         "responses": {
           "200": {
-            "description": "コラボレーションオブジェクトのコレクションを返します。このフォルダでのコラボレーションが存在しない場合は、空のコレクションが返されます。", 
+            "description": "コラボレーションオブジェクトのコレクションを返します。このフォルダでのコラボレーションが存在しない場合は、空のコレクションが返されます。\n\nこのリストには、`status`が`pending`に設定されている保留中のコラボレーションが含まれます。これは、招待が送信されたもののまだ承認されていないことを示します。", 
             "content": {
               "application/json": {
                 "schema": {
@@ -5331,6 +5665,344 @@
           }, 
           "404": {
             "description": "ユーザーがフォルダにアクセスできない場合に返されます。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }, 
+          "default": {
+            "description": "予期しないクライアントエラー。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }, 
+    "/folders/{folder_id}/metadata/enterprise/securityClassification-6VMVochwUWo": {
+      "get": {
+        "operationId": "get_folders_id_metadata_enterprise_securityClassification-6VMVochwUWo", 
+        "summary": "フォルダの分類を取得", 
+        "tags": [
+          "Classifications on folders"
+        ], 
+        "x-box-tag": "folder_classifications", 
+        "x-box-sanitized": true, 
+        "description": "フォルダに適用されている分類メタデータインスタンスを取得します。\n\nこのAPIは、`/folders/:id//enterprise_12345/securityClassification-6VMVochwUWo`のように、URLにエンタープライズIDを明示的に含めることで呼び出すこともできます。", 
+        "parameters": [
+          {
+            "name": "folder_id", 
+            "description": "フォルダを表す一意の識別子。\n\nフォルダIDを確認するには、ウェブアプリケーションでこのフォルダにアクセスして、URLからIDをコピーします。たとえば、URLが`https://*.app.box.com/folder/123`の場合、`folder_id`は`123`です。\n\nBoxアカウントのルートフォルダは常にID `0`で表されます。", 
+            "example": "0", 
+            "in": "path", 
+            "required": true, 
+            "schema": {
+              "type": "string", 
+              "nullable": false
+            }
+          }
+        ], 
+        "responses": {
+          "201": {
+            "description": "`securityClassification`メタデータテンプレートのインスタンスを返します。これには、この会社が使用できるすべての分類のリストを取得する`Box__Security__Classification__Key`フィールドが含まれています。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Classification"
+                }
+              }
+            }
+          }, 
+          "403": {
+            "description": "リクエストパラメータが無効な場合に返されます。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }, 
+          "404": {
+            "description": "指定したメタデータテンプレートがこのフォルダに適用されていない場合、またはユーザーがこのフォルダにアクセスできない場合に返されます。\n\n* `instance_not_found` - メタデータテンプレートがフォルダに適用されていなかった場合に返されます。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }, 
+          "405": {
+            "description": "メソッドが許可されなかった場合に返されます。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }, 
+          "default": {
+            "description": "予期しないクライアントエラー。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        }
+      }, 
+      "post": {
+        "operationId": "post_folders_id_metadata_enterprise_securityClassification-6VMVochwUWo", 
+        "summary": "フォルダに分類を追加", 
+        "tags": [
+          "Classifications on folders"
+        ], 
+        "x-box-tag": "folder_classifications", 
+        "x-box-sanitized": true, 
+        "description": "追加する分類のラベルを指定することで、フォルダに分類を追加します。\n\nこのAPIは、`/folders/:id//enterprise_12345/securityClassification-6VMVochwUWo`のように、URLにエンタープライズIDを明示的に含めることで呼び出すこともできます。", 
+        "parameters": [
+          {
+            "name": "folder_id", 
+            "description": "フォルダを表す一意の識別子。\n\nフォルダIDを確認するには、ウェブアプリケーションでこのフォルダにアクセスして、URLからIDをコピーします。たとえば、URLが`https://*.app.box.com/folder/123`の場合、`folder_id`は`123`です。\n\nBoxアカウントのルートフォルダは常にID `0`で表されます。", 
+            "example": "0", 
+            "in": "path", 
+            "required": true, 
+            "schema": {
+              "type": "string", 
+              "nullable": false
+            }
+          }
+        ], 
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object", 
+                "properties": {
+                  "Box__Security__Classification__Key": {
+                    "type": "string", 
+                    "description": "このフォルダに適用する分類の名前。\n\n会社で使用できる分類のリストを取得するには、分類APIを使用して、使用可能なすべての分類キーが表示される[分類テンプレート][e://get_metadata_templates_enterprise_securityClassification-6VMVochwUWo_schema]を取得します。", 
+                    "example": "Sensitive"
+                  }
+                }
+              }
+            }
+          }
+        }, 
+        "responses": {
+          "201": {
+            "description": "フォルダに適用された分類テンプレートインスタンスを返します。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Classification"
+                }
+              }
+            }
+          }, 
+          "400": {
+            "description": "リクエスト本文が無効な場合にエラーを返します。\n\n* `schema_validation_failed` - リクエスト本文に、存在しないフィールドか、値またはタイプが期待されるフィールドタイプと一致しないフィールドの値が含まれています。たとえば、`enum`または`multiSelect`フィールドに不明なオプションが指定されている場合があります。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }, 
+          "404": {
+            "description": "フォルダテンプレートまたはメタデータテンプレートが見つからない場合はエラーを返します。\n\n* `not_found` - フォルダが見つからないか、ユーザーがフォルダにアクセスできない場合に返されます。\n* `instance_tuple_not_found` - メタデータテンプレートが見つからない場合に返されます。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }, 
+          "409": {
+            "description": "このメタデータテンプレートのインスタンスがすでにフォルダに存在する場合はエラーを返します。\n\n* `tuple_already_exists` - メタデータテンプレートのインスタンスがすでにフォルダに存在する場合に返されます。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }, 
+          "default": {
+            "description": "予期しないクライアントエラー。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        }
+      }, 
+      "put": {
+        "operationId": "put_folders_id_metadata_enterprise_securityClassification-6VMVochwUWo", 
+        "summary": "フォルダの分類を更新", 
+        "tags": [
+          "Classifications on folders"
+        ], 
+        "x-box-tag": "folder_classifications", 
+        "x-box-sanitized": true, 
+        "description": "フォルダの分類を更新します。\n\n分類を更新できるのは、分類がすでにフォルダに適用されている場合のみです。分類を編集する際は、会社に対して定義されている値のみを使用できます。", 
+        "parameters": [
+          {
+            "name": "folder_id", 
+            "description": "フォルダを表す一意の識別子。\n\nフォルダIDを確認するには、ウェブアプリケーションでこのフォルダにアクセスして、URLからIDをコピーします。たとえば、URLが`https://*.app.box.com/folder/123`の場合、`folder_id`は`123`です。\n\nBoxアカウントのルートフォルダは常にID `0`で表されます。", 
+            "example": "0", 
+            "in": "path", 
+            "required": true, 
+            "schema": {
+              "type": "string", 
+              "nullable": false
+            }
+          }
+        ], 
+        "requestBody": {
+          "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "description": "分類ラベルを更新するために加える1つの変更を含むリスト。", 
+                "type": "array", 
+                "items": {
+                  "type": "object", 
+                  "description": "分類メタデータテンプレートのインスタンスに対して実行する操作。この場合、`Box__Security__Classification__Key`フィールドに格納された値を新しい値で置き換えるために使用されます。", 
+                  "properties": {
+                    "op": {
+                      "type": "string", 
+                      "example": "replace", 
+                      "description": "`replace`", 
+                      "enum": [
+                        "replace"
+                      ]
+                    }, 
+                    "path": {
+                      "type": "string", 
+                      "example": "/Box__Security__Classification__Key", 
+                      "description": "`/Box__Security__Classification__Key`", 
+                      "enum": [
+                        "/Box__Security__Classification__Key"
+                      ]
+                    }, 
+                    "value": {
+                      "type": "string", 
+                      "description": "このフォルダに適用する分類の名前。\n\n会社で使用できる分類のリストを取得するには、分類APIを使用して、使用可能なすべての分類キーが表示される[分類テンプレート][e://get_metadata_templates_enterprise_securityClassification-6VMVochwUWo_schema]を取得します。", 
+                      "example": "Sensitive"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }, 
+        "responses": {
+          "200": {
+            "description": "更新された分類メタデータテンプレートインスタンスを返します。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Classification"
+                }
+              }
+            }
+          }, 
+          "400": {
+            "description": "リクエスト本文が無効な場合にエラーを返します。\n\n* `bad_request` - リクエスト本文の形式が有効なJSON Patch操作の配列ではありません。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }, 
+          "500": {
+            "description": "リクエスト本文が有効なJSON Patch項目の配列でない場合、一部のエッジケースでエラーを返します。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }, 
+          "default": {
+            "description": "予期しないクライアントエラー。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        }
+      }, 
+      "delete": {
+        "operationId": "delete_folders_id_metadata_enterprise_securityClassification-6VMVochwUWo", 
+        "summary": "フォルダから分類を削除", 
+        "tags": [
+          "Classifications on folders"
+        ], 
+        "x-box-tag": "folder_classifications", 
+        "x-box-sanitized": true, 
+        "description": "フォルダからすべての分類を削除します。\n\nこのAPIは、`/folders/:id//enterprise_12345/securityClassification-6VMVochwUWo`のように、URLにエンタープライズIDを明示的に含めることで呼び出すこともできます。", 
+        "parameters": [
+          {
+            "name": "folder_id", 
+            "description": "フォルダを表す一意の識別子。\n\nフォルダIDを確認するには、ウェブアプリケーションでこのフォルダにアクセスして、URLからIDをコピーします。たとえば、URLが`https://*.app.box.com/folder/123`の場合、`folder_id`は`123`です。\n\nBoxアカウントのルートフォルダは常にID `0`で表されます。", 
+            "example": "0", 
+            "in": "path", 
+            "required": true, 
+            "schema": {
+              "type": "string", 
+              "nullable": false
+            }
+          }
+        ], 
+        "responses": {
+          "204": {
+            "description": "分類が正常に削除された場合は空の応答を返します。"
+          }, 
+          "400": {
+            "description": "リクエストパラメータが無効な場合に返されます。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }, 
+          "404": {
+            "description": "フォルダに分類が適用されていない場合、またはユーザーがフォルダにアクセスできない場合はエラーを返します。\n\n* `instance_not_found` - 分類メタデータテンプレートのインスタンスがこのフォルダに見つからなかった場合に返されます。\n* `not_found` - フォルダが見つからなかったか、ユーザーがフォルダにアクセスできない場合に返されます。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }, 
+          "405": {
+            "description": "メソッドが許可されなかった場合に返されます。", 
             "content": {
               "application/json": {
                 "schema": {
@@ -6178,6 +6850,411 @@
         }
       }
     }, 
+    "/metadata_templates/enterprise/securityClassification-6VMVochwUWo/schema": {
+      "get": {
+        "operationId": "get_metadata_templates_enterprise_securityClassification-6VMVochwUWo_schema", 
+        "summary": "すべての分類のリストを取得", 
+        "tags": [
+          "Classifications"
+        ], 
+        "x-box-tag": "classifications", 
+        "x-box-sanitized": true, 
+        "description": "分類メタデータテンプレートを取得し、この会社が使用できるすべての分類のリストを取得します。\n\nこのAPIは、`/metadata_templates/enterprise_12345/securityClassification-6VMVochwUWo/schema`のように、URLにエンタープライズIDを明示的に含めることで呼び出すこともできます。", 
+        "responses": {
+          "200": {
+            "description": "`securityClassification`メタデータテンプレートを返します。これには、この会社が使用できるすべての分類のリストを取得する`Box__Security__Classification__Key`フィールドが含まれています。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClassificationTemplate"
+                }
+              }
+            }
+          }, 
+          "400": {
+            "description": "リクエストパラメータのいずれかが無効な場合に返されます。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }, 
+          "404": {
+            "description": "テンプレート名が正しくないときに返されます。リクエストのURLが正しいことを確認してください。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }, 
+          "default": {
+            "description": "予期しないクライアントエラー。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        }
+      }, 
+      "delete": {
+        "operationId": "delete_metadata_templates_enterprise_securityClassification-6VMVochwUWo_schema", 
+        "summary": "すべての分類を削除", 
+        "tags": [
+          "Classifications"
+        ], 
+        "x-box-tag": "classifications", 
+        "x-box-sanitized": true, 
+        "description": "分類メタデータテンプレートを削除することで、すべての分類を削除します。", 
+        "responses": {
+          "204": {
+            "description": "分類のメタデータテンプレートが正常に削除された場合は、空の応答を返します。"
+          }, 
+          "default": {
+            "description": "予期しないクライアントエラー。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }, 
+    "/metadata_templates/enterprise/securityClassification-6VMVochwUWo/schema#add": {
+      "put": {
+        "operationId": "put_metadata_templates_enterprise_securityClassification-6VMVochwUWo_schema#add", 
+        "summary": "分類を追加", 
+        "tags": [
+          "Classifications"
+        ], 
+        "x-box-tag": "classifications", 
+        "x-box-sanitized": true, 
+        "description": "会社が使用できる分類のリストに1つ以上の新しい分類を追加します。\n\nこのAPIは、`/metadata_templates/enterprise_12345/securityClassification-6VMVochwUWo/schema`のように、URLにエンタープライズIDを明示的に含めることで呼び出すこともできます。", 
+        "requestBody": {
+          "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "description": "会社の分類のリストに追加する1つ以上の分類を含む配列。", 
+                "type": "array", 
+                "items": {
+                  "type": "object", 
+                  "description": "会社に追加する1つの分類。", 
+                  "required": [
+                    "op", 
+                    "fieldKey", 
+                    "data"
+                  ], 
+                  "properties": {
+                    "op": {
+                      "type": "string", 
+                      "example": "addEnumOption", 
+                      "description": "`addEnumOption`"
+                    }, 
+                    "fieldKey": {
+                      "type": "string", 
+                      "example": "Box__Security__Classification__Key", 
+                      "description": "`Box__Security__Classification__Key`"
+                    }, 
+                    "data": {
+                      "type": "object", 
+                      "description": "追加する分類の詳細。", 
+                      "required": [
+                        "key"
+                      ], 
+                      "properties": {
+                        "key": {
+                          "type": "string", 
+                          "example": "Sensitive", 
+                          "description": "ウェブインターフェイスおよびモバイルインターフェイスに表示される分類のラベル。これは、分類を追加するために必要な唯一のフィールドです。"
+                        }, 
+                        "classification": {
+                          "type": "object", 
+                          "description": "分類の追加情報。", 
+                          "properties": {
+                            "classificationDefinition": {
+                              "type": "string", 
+                              "example": "Sensitive information that must not be shared.", 
+                              "description": "分類の詳しい説明。"
+                            }, 
+                            "colorID": {
+                              "type": "number", 
+                              "example": 4, 
+                              "description": "分類ラベルに色を割り当てる際に使用される内部のBox識別子。\n\n`colorID`と色の間のマッピングは予告なしに変更される場合があります。現在、色のマッピングは以下のとおりです。\n\n* `0`: 黄\n* `1`: オレンジ\n* `2`: 赤\n* `3`: 紫\n* `4`: ライトブルー\n* `5`: ダークブルー\n* `6`: ライトグリーン\n* `7`: グレー"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }, 
+        "responses": {
+          "200": {
+            "description": "更新された`securityClassification`メタデータテンプレートを返します。これには、この会社が使用できるすべての分類のリストを取得する`Box__Security__Classification__Key`フィールドが含まれています。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClassificationTemplate"
+                }
+              }
+            }
+          }, 
+          "400": {
+            "description": "リクエストパラメータのいずれかが無効な場合に返されます。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }, 
+          "404": {
+            "description": "テンプレート名が正しくないときに返されます。リクエストのURLが正しいことを確認してください。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }, 
+          "default": {
+            "description": "予期しないクライアントエラー。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }, 
+    "/metadata_templates/enterprise/securityClassification-6VMVochwUWo/schema#update": {
+      "put": {
+        "operationId": "put_metadata_templates_enterprise_securityClassification-6VMVochwUWo_schema#update", 
+        "summary": "分類を更新", 
+        "tags": [
+          "Classifications"
+        ], 
+        "x-box-tag": "classifications", 
+        "x-box-sanitized": true, 
+        "description": "会社が使用できる1つ以上の分類のラベルと説明を更新します。\n\nこのAPIは、`/metadata_templates/enterprise_12345/securityClassification-6VMVochwUWo/schema`のように、URLにエンタープライズIDを明示的に含めることで呼び出すこともできます。", 
+        "requestBody": {
+          "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "description": "更新する1つ以上の分類を含む配列。", 
+                "type": "array", 
+                "items": {
+                  "type": "object", 
+                  "description": "更新する1つの分類。", 
+                  "required": [
+                    "op", 
+                    "fieldKey", 
+                    "enumOptionKey", 
+                    "data"
+                  ], 
+                  "properties": {
+                    "op": {
+                      "type": "string", 
+                      "example": "editEnumOption", 
+                      "description": "`editEnumOption`"
+                    }, 
+                    "fieldKey": {
+                      "type": "string", 
+                      "example": "Box__Security__Classification__Key", 
+                      "description": "`Box__Security__Classification__Key`"
+                    }, 
+                    "enumOptionKey": {
+                      "type": "string", 
+                      "example": "Sensitive", 
+                      "description": "変更する分類の元のラベル。"
+                    }, 
+                    "data": {
+                      "type": "object", 
+                      "description": "更新された分類の詳細。", 
+                      "required": [
+                        "key"
+                      ], 
+                      "properties": {
+                        "key": {
+                          "type": "string", 
+                          "example": "Very Sensitive", 
+                          "description": "ウェブインターフェイスおよびモバイルインターフェイスに表示される、分類の新しいラベル。"
+                        }, 
+                        "classification": {
+                          "type": "object", 
+                          "description": "分類の追加情報。", 
+                          "properties": {
+                            "classificationDefinition": {
+                              "type": "string", 
+                              "example": "Sensitive information that must not be shared.", 
+                              "description": "分類の詳しい説明。"
+                            }, 
+                            "colorID": {
+                              "type": "number", 
+                              "example": 4, 
+                              "description": "分類ラベルに色を割り当てる際に使用される内部のBox識別子。\n\n`colorID`と色の間のマッピングは予告なしに変更される場合があります。現在、色のマッピングは以下のとおりです。\n\n* `0`: 黄\n* `1`: オレンジ\n* `2`: 赤\n* `3`: 紫\n* `4`: ライトブルー\n* `5`: ダークブルー\n* `6`: ライトグリーン\n* `7`: グレー"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }, 
+        "responses": {
+          "200": {
+            "description": "更新された`securityClassification`メタデータテンプレートを返します。これには、この会社が使用できるすべての分類のリストを取得する`Box__Security__Classification__Key`フィールドが含まれています。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClassificationTemplate"
+                }
+              }
+            }
+          }, 
+          "400": {
+            "description": "リクエストパラメータのいずれかが無効な場合に返されます。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }, 
+          "404": {
+            "description": "テンプレート名が正しくないときに返されます。リクエストのURLが正しいことを確認してください。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }, 
+          "default": {
+            "description": "予期しないクライアントエラー。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }, 
+    "/metadata_templates/enterprise/securityClassification-6VMVochwUWo/schema#delete": {
+      "put": {
+        "operationId": "put_metadata_templates_enterprise_securityClassification-6VMVochwUWo_schema#delete", 
+        "summary": "分類を削除", 
+        "tags": [
+          "Classifications"
+        ], 
+        "x-box-tag": "classifications", 
+        "x-box-sanitized": true, 
+        "description": "会社が使用できる分類のリストから1つの分類を削除します。\n\nこのAPIは、`/metadata_templates/enterprise_12345/securityClassification-6VMVochwUWo/schema`のように、URLにエンタープライズIDを明示的に含めることで呼び出すこともできます。", 
+        "requestBody": {
+          "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "description": "削除する1つ以上の分類を含む配列。", 
+                "type": "array", 
+                "items": {
+                  "type": "object", 
+                  "description": "削除する1つの分類。", 
+                  "required": [
+                    "op", 
+                    "fieldKey", 
+                    "enumOptionKey"
+                  ], 
+                  "properties": {
+                    "op": {
+                      "type": "string", 
+                      "example": "removeEnumOption", 
+                      "description": "`removeEnumOption`"
+                    }, 
+                    "fieldKey": {
+                      "type": "string", 
+                      "example": "Box__Security__Classification__Key", 
+                      "description": "`Box__Security__Classification__Key`"
+                    }, 
+                    "enumOptionKey": {
+                      "type": "string", 
+                      "example": "Sensitive", 
+                      "description": "削除する分類のラベル。"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }, 
+        "responses": {
+          "200": {
+            "description": "更新された`securityClassification`メタデータテンプレートを返します。これには、この会社が使用できるすべての分類のリストを取得する`Box__Security__Classification__Key`フィールドが含まれています。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClassificationTemplate"
+                }
+              }
+            }
+          }, 
+          "400": {
+            "description": "リクエストパラメータのいずれかが無効な場合に返されます。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }, 
+          "404": {
+            "description": "テンプレート名が正しくないときに返されます。リクエストのURLが正しいことを確認してください。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }, 
+          "default": {
+            "description": "予期しないクライアントエラー。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }, 
     "/metadata_templates/{scope}/{template_key}/schema": {
       "get": {
         "operationId": "get_metadata_templates_id_id_schema", 
@@ -6861,6 +7938,185 @@
           }, 
           "403": {
             "description": "ユーザーにメタデータテンプレートを作成する権限がない場合に返されます。その理由はいくつかありますが、最も一般的なのは、ユーザーが(共同)管理者権限を持っていないこと、またはアプリケーションが`global`スコープのテンプレートを作成しようとしていることです。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }, 
+          "default": {
+            "description": "予期しないクライアントエラー。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }, 
+    "/metadata_templates/schema#classifications": {
+      "post": {
+        "operationId": "post_metadata_templates_schema#classifications", 
+        "summary": "最初の分類を追加", 
+        "tags": [
+          "Classifications"
+        ], 
+        "x-box-tag": "classifications", 
+        "x-box-sanitized": true, 
+        "description": "会社にまだ分類がない場合は、このAPI呼び出しによって、分類テンプレートが最初の一連の分類で初期化されます。\n\n会社にすでに分類がある場合は、テンプレートがすでに存在するため、さらに分類を追加するためにAPI呼び出しが行われます。", 
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object", 
+                "required": [
+                  "scope", 
+                  "displayName"
+                ], 
+                "properties": {
+                  "scope": {
+                    "type": "string", 
+                    "description": "分類を作成するスコープ。これには、`enterprise`または`enterprise_{id}` (`id`は会社の一意のID) を指定する必要があります。", 
+                    "example": "enterprise", 
+                    "enum": [
+                      "enterprise"
+                    ]
+                  }, 
+                  "templateKey": {
+                    "type": "string", 
+                    "example": "securityClassification-6VMVochwUWo", 
+                    "description": "`securityClassification-6VMVochwUWo`", 
+                    "enum": [
+                      "securityClassification-6VMVochwUWo"
+                    ]
+                  }, 
+                  "displayName": {
+                    "type": "string", 
+                    "description": "`Classification`", 
+                    "example": "Classification", 
+                    "enum": [
+                      "Classification"
+                    ]
+                  }, 
+                  "hidden": {
+                    "type": "boolean", 
+                    "example": false, 
+                    "description": "`false`"
+                  }, 
+                  "copyInstanceOnItemCopy": {
+                    "type": "boolean", 
+                    "example": false, 
+                    "description": "`false`"
+                  }, 
+                  "fields": {
+                    "type": "array", 
+                    "description": "分類テンプレートは1つのフィールドを保持します。このフィールドでは、有効な分類の値がすべて保持されます。", 
+                    "items": {
+                      "type": "object", 
+                      "description": "有効な分類の値をすべて保持する`enum`フィールド。", 
+                      "properties": {
+                        "type": {
+                          "type": "string", 
+                          "example": "enum", 
+                          "description": "`enum`", 
+                          "enum": [
+                            "enum"
+                          ]
+                        }, 
+                        "key": {
+                          "type": "string", 
+                          "example": "Box__Security__Classification__Key", 
+                          "description": "`Box__Security__Classification__Key`", 
+                          "enum": [
+                            "Box__Security__Classification__Key"
+                          ]
+                        }, 
+                        "displayName": {
+                          "type": "string", 
+                          "example": "Classification", 
+                          "description": "`Classification`", 
+                          "enum": [
+                            "Classification"
+                          ]
+                        }, 
+                        "hidden": {
+                          "type": "boolean", 
+                          "example": false, 
+                          "description": "`false`"
+                        }, 
+                        "options": {
+                          "type": "array", 
+                          "description": "このテンプレートに存在する実際の分類のリスト。", 
+                          "items": {
+                            "type": "object", 
+                            "description": "個々の分類。", 
+                            "properties": {
+                              "key": {
+                                "type": "string", 
+                                "description": "この分類の表示名とキー。これはBox UIに表示されます。", 
+                                "example": "Sensitive"
+                              }, 
+                              "staticConfig": {
+                                "type": "object", 
+                                "description": "分類に関する追加情報。", 
+                                "properties": {
+                                  "classification": {
+                                    "type": "object", 
+                                    "description": "分類に関する追加情報。", 
+                                    "properties": {
+                                      "classificationDefinition": {
+                                        "type": "string", 
+                                        "example": "Sensitive information", 
+                                        "description": "分類の詳しい説明。"
+                                      }, 
+                                      "colorID": {
+                                        "type": "number", 
+                                        "example": 4, 
+                                        "description": "分類ラベルに色を割り当てる際に使用される識別子。\n\n`colorID`と色の間のマッピングは予告なしに変更される場合があります。現在、色のマッピングは以下のとおりです。\n\n* `0`: 黄\n* `1`: オレンジ\n* `2`: 赤\n* `3`: 紫\n* `4`: ライトブルー\n* `5`: ダークブルー\n* `6`: ライトグリーン\n* `7`: グレー"
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }, 
+        "responses": {
+          "200": {
+            "description": "新しい`securityClassification`メタデータテンプレートを返します。これには、この会社が使用できるすべての分類のリストを取得する`Box__Security__Classification__Key`フィールドが含まれています。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClassificationTemplate"
+                }
+              }
+            }
+          }, 
+          "400": {
+            "description": "リクエストパラメータのいずれかが無効な場合に返されます。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }, 
+          "404": {
+            "description": "テンプレート名が正しくないときに返されます。リクエストのURLが正しいことを確認してください。", 
             "content": {
               "application/json": {
                 "schema": {
@@ -9683,7 +10939,7 @@
           }, 
           {
             "name": "user_type", 
-            "description": "指定したタイプのユーザーのみに結果を絞り込みます。\n\n* `all`を指定すると、`login`または`name`が`filter_term`と\n  部分的に一致するすべての種類のユーザーが返されます。\n  ログインが`filter_term`と完全に一致した場合は、\n  外部ユーザーのみが返され、その場合に返されるユーザーは、\n  完全に一致したユーザーのみです。\n* `managed`を指定すると、`login`または`name`が`filter_term`と部分的に一致する\n  すべての管理対象ユーザー\n  およびアプリユーザーが返されます。\n* `external`を指定すると、`login`が`filter_term`と完全に一致する\n  すべての外部ユーザーが返されます。", 
+            "description": "指定したタイプのユーザーのみに結果を絞り込みます。\n\n* `all`を指定すると、`login`または`name`が`filter_term`と部分的に一致するすべての種類のユーザーが返されます。ログインが`filter_term`と完全に一致した場合は、外部ユーザーのみが返され、その場合に返されるユーザーは、完全に一致したユーザーのみです。\n* `managed`を指定すると、`login`または`name`が`filter_term`と部分的に一致するすべての管理対象ユーザーおよびアプリユーザーが返されます。\n* `external`を指定すると、`login`が`filter_term`と完全に一致するすべての外部ユーザーが返されます。", 
             "in": "query", 
             "required": false, 
             "example": "managed", 
@@ -9695,6 +10951,16 @@
                 "external"
               ]
             }
+          }, 
+          {
+            "name": "external_app_user_id", 
+            "in": "query", 
+            "required": false, 
+            "schema": {
+              "type": "string"
+            }, 
+            "example": "my-user-1234", 
+            "description": "指定した`external_app_user_id`値を持つアプリユーザーに結果を絞り込みます。\n\nアプリユーザーの作成時に、`external_app_user_id`値を設定できます。その後、この値をこのエンドポイントで使用すると、その`external_app_user_id`値に一致するすべてのユーザーが見つかります。"
           }, 
           {
             "name": "fields", 
@@ -10889,6 +12155,16 @@
         ], 
         "description": "指定した会社のすべてのグループを取得します。会社のグループを調べるには、管理者権限が必要です。", 
         "parameters": [
+          {
+            "name": "filter_term", 
+            "description": "`name`が検索用語で始まるグループのみに結果を絞り込みます。", 
+            "in": "query", 
+            "required": false, 
+            "example": "Engineering", 
+            "schema": {
+              "type": "string"
+            }
+          }, 
           {
             "name": "fields", 
             "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれず、リクエストしたフィールドのほかには、簡易版レプリゼンテーションのフィールドしか返されないことに注意してください。", 
@@ -16070,13 +17346,13 @@
                       "name_conflicts": [
                         [
                           {
-                            "id": 12345, 
+                            "id": "12345", 
                             "type": "file", 
                             "original_name": "Report.pdf", 
                             "download_name": "3aa6a7.pdf"
                           }, 
                           {
-                            "id": 34325, 
+                            "id": "34325", 
                             "type": "file", 
                             "original_name": "Report.pdf", 
                             "download_name": "5d53f2.pdf"
@@ -17119,6 +18395,201 @@
               "urn:ietf:params:oauth:token-type:access_token"
             ], 
             "description": "返されたダウンスコープ済みアクセストークンのタイプ。これは、アクセストークンがダウンスコープされている場合にのみ返されます。"
+          }
+        }
+      }, 
+      "Classification": {
+        "title": "分類", 
+        "type": "object", 
+        "x-box-resource-id": "classification", 
+        "x-box-tag": "classifications", 
+        "description": "ファイルまたはフォルダに適用される分類を含む、分類メタデータテンプレートのインスタンス。\n\n項目に適用される分類に関する詳細を取得するには、分類メタデータテンプレートをリクエストしてください。", 
+        "properties": {
+          "Box__Security__Classification__Key": {
+            "type": "string", 
+            "example": "Sensitive", 
+            "description": "項目に適用される分類の名前。"
+          }, 
+          "$parent": {
+            "type": "string", 
+            "example": "folder_59449484661,", 
+            "description": "このメタデータインスタンスが追加されている項目の識別子。これは、親の`type`と`id`を`{type}_{id}`という形式で組み合わせたものです。"
+          }, 
+          "$template": {
+            "type": "string", 
+            "example": "securityClassification-6VMVochwUWo", 
+            "description": "`securityClassification-6VMVochwUWo`", 
+            "enum": [
+              "securityClassification-6VMVochwUWo"
+            ]
+          }, 
+          "$scope": {
+            "type": "string", 
+            "example": "enterprise_27335", 
+            "description": "この分類が適用されている会社のスコープ。\n\nこれは`enterprise_{enterprise_id}`形式になります。"
+          }, 
+          "$version": {
+            "type": "integer", 
+            "example": 1, 
+            "description": "メタデータインスタンスのバージョン。このバージョンは0から始まり、分類が更新されるたびに増加します。"
+          }, 
+          "$type": {
+            "type": "string", 
+            "example": "securityClassification-6VMVochwUWo-fd31537a-0f95-4d86-9f2b-5974a29978f8", 
+            "description": "この分類インスタンスの一意のID。これには、分類テンプレートの名前と一意のIDが含まれます。"
+          }, 
+          "$typeVersion": {
+            "type": "number", 
+            "example": 5, 
+            "description": "メタデータテンプレートのバージョン。このバージョンは0から始まり、テンプレートが更新されるたびに増加します。これはほとんどの場合、内部で使用されます。"
+          }, 
+          "$canEdit": {
+            "type": "boolean", 
+            "example": true, 
+            "description": "エンドユーザーが分類を変更できるかどうか。"
+          }
+        }
+      }, 
+      "ClassificationTemplate": {
+        "title": "分類テンプレート", 
+        "type": "object", 
+        "x-box-resource-id": "classification_template", 
+        "x-box-tag": "classifications", 
+        "description": "会社が定義したセキュリティ分類を保持するメタデータテンプレート。", 
+        "properties": {
+          "id": {
+            "type": "string", 
+            "example": "58063d82-4128-7b43-bba9-92f706befcdf", 
+            "description": "分類テンプレートのID。"
+          }, 
+          "type": {
+            "type": "string", 
+            "description": "`metadata_template`", 
+            "example": "metadata_template", 
+            "enum": [
+              "metadata_template"
+            ], 
+            "nullable": false
+          }, 
+          "scope": {
+            "type": "string", 
+            "description": "分類テンプレートのスコープ。これは`enterprise_{id}`形式 (`id`はエンタープライズID) になります。", 
+            "example": "enterprise_123456"
+          }, 
+          "templateKey": {
+            "type": "string", 
+            "example": "securityClassification-6VMVochwUWo", 
+            "description": "`securityClassification-6VMVochwUWo`", 
+            "enum": [
+              "securityClassification-6VMVochwUWo"
+            ]
+          }, 
+          "displayName": {
+            "type": "string", 
+            "example": "Classification", 
+            "description": "ウェブインターフェイスおよびモバイルインターフェイスに表示されるこのテンプレートの名前。", 
+            "enum": [
+              "Classification"
+            ]
+          }, 
+          "hidden": {
+            "type": "boolean", 
+            "example": false, 
+            "description": "このテンプレートはいつでもウェブインターフェイスおよびモバイルインターフェイスで使用できます。"
+          }, 
+          "copyInstanceOnItemCopy": {
+            "type": "boolean", 
+            "example": true, 
+            "description": "ファイルまたはフォルダがコピーされると、必ず分類もコピーされます。"
+          }, 
+          "fields": {
+            "type": "array", 
+            "maxItems": 1, 
+            "minItems": 1, 
+            "description": "この分類テンプレートのフィールドのリスト。これには、`Box__Security__Classification__Key`というフィールドが1つだけ含まれています。これにより、この会社で使用できるさまざまな分類が定義されます。", 
+            "items": {
+              "type": "object", 
+              "description": "使用可能な分類を表すメタデータテンプレートフィールド。", 
+              "properties": {
+                "id": {
+                  "type": "string", 
+                  "example": "822227e0-47a5-921b-88a8-494760b2e6d2", 
+                  "description": "フィールドの一意のID。"
+                }, 
+                "type": {
+                  "type": "string", 
+                  "example": "enum", 
+                  "description": "`enum`", 
+                  "enum": [
+                    "enum"
+                  ]
+                }, 
+                "key": {
+                  "type": "string", 
+                  "example": "Box__Security__Classification__Key", 
+                  "description": "`Box__Security__Classification__Key`", 
+                  "enum": [
+                    "Box__Security__Classification__Key"
+                  ]
+                }, 
+                "displayName": {
+                  "type": "string", 
+                  "example": "Classification", 
+                  "description": "`Classification`", 
+                  "enum": [
+                    "Classification"
+                  ]
+                }, 
+                "hidden": {
+                  "type": "boolean", 
+                  "example": false, 
+                  "description": "分類は常にウェブユーザーおよびモバイルユーザーに表示されます。"
+                }, 
+                "options": {
+                  "type": "array", 
+                  "description": "この会社で使用できる分類のリスト。", 
+                  "minItems": 1, 
+                  "items": {
+                    "type": "object", 
+                    "description": "この会社で使用できる1つの分類。", 
+                    "properties": {
+                      "id": {
+                        "type": "string", 
+                        "example": "46aea176-3483-4431-856c-6b5b13d1cc50", 
+                        "description": "この分類の一意のID。"
+                      }, 
+                      "key": {
+                        "type": "string", 
+                        "example": "Sensitive", 
+                        "description": "この分類の表示名とキー。"
+                      }, 
+                      "staticConfig": {
+                        "type": "object", 
+                        "description": "分類に関する追加情報。", 
+                        "properties": {
+                          "classification": {
+                            "type": "object", 
+                            "description": "分類に関する追加情報。\n\nこれはプロパティの唯一のリストではなく、より多くのオブジェクトフィールドが返される場合があります。これらのフィールドは内部のBox ShieldおよびBox Governanceの目的で使用されるため、これらのフィールドからさらなる値が派生しないようにしてください。", 
+                            "properties": {
+                              "classificationDefinition": {
+                                "type": "string", 
+                                "example": "Sensitive information", 
+                                "description": "分類の詳しい説明。"
+                              }, 
+                              "colorID": {
+                                "type": "number", 
+                                "example": 4, 
+                                "description": "分類ラベルに色を割り当てる際に使用される内部のBox識別子。\n\n`colorID`と色の間のマッピングは予告なしに変更される場合があります。現在、色のマッピングは以下のとおりです。\n\n* `0`: 黄\n* `1`: オレンジ\n* `2`: 赤\n* `3`: 紫\n* `4`: ライトブルー\n* `5`: ダークブルー\n* `6`: ライトグリーン\n* `7`: グレー"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }, 
@@ -20490,7 +21961,7 @@
               "invitability_level": {
                 "type": "string", 
                 "example": "admins_only", 
-                "description": "フォルダでのコラボレーションにグループを招待できるユーザーを指定します(コラボレーションの作成)。\n\n`admins_only`に設定すると、会社の管理者、共同管理者、およびグループ管理者がグループを招待できるようになります。\n\n`admins_and_members`に設定すると、上記すべての管理者に加えて、グループのメンバーもグループを招待できるようになります。\n\n`all_managed_users`に設定すると、社内のすべての管理対象ユーザーがグループを招待できるようになります。", 
+                "description": "項目でのコラボレーションにグループを招待できるユーザーを指定します。\n\n`admins_only`に設定すると、会社の管理者、共同管理者、およびグループ管理者がグループを招待できるようになります。\n\n`admins_and_members`に設定すると、上記すべての管理者に加えて、グループのメンバーもグループを招待できるようになります。\n\n`all_managed_users`に設定すると、社内のすべての管理対象ユーザーがグループを招待できるようになります。", 
                 "enum": [
                   "admins_only", 
                   "admins_and_members", 
@@ -20505,6 +21976,24 @@
                   "admins_only", 
                   "admins_and_members", 
                   "all_managed_users"
+                ]
+              }, 
+              "permissions": {
+                "allOf": [
+                  {
+                    "type": "object", 
+                    "description": "グループに対して認証済みユーザーが持っている権限。", 
+                    "properties": {
+                      "can_invite_as_collaborator": {
+                        "type": "boolean", 
+                        "description": "ユーザーが項目でのコラボレーションにグループを招待できるかどうかを指定します。", 
+                        "example": true
+                      }
+                    }
+                  }, 
+                  {
+                    "description": "このグループに対して現在のユーザーが持っている権限について説明します。"
+                  }
                 ]
               }
             }
@@ -24974,6 +26463,18 @@
       "name": "承認", 
       "x-box-tag": "authorization", 
       "x-box-priority": true
+    }, 
+    {
+      "name": "Classifications", 
+      "x-box-tag": "classifications"
+    }, 
+    {
+      "name": "ファイルの分類", 
+      "x-box-tag": "file_classifications"
+    }, 
+    {
+      "name": "フォルダの分類", 
+      "x-box-tag": "folder_classifications"
     }, 
     {
       "name": "Collaborations", 
