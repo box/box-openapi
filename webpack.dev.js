@@ -33,6 +33,7 @@ module.exports = {
       warnings: true,
       errors: true
     },
+    host: `0.0.0.0`,
     watchContentBase: true,
     open: true,
     progress: true,
