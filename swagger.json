@@ -5508,71 +5508,90 @@
         "tags": [
           "Search"
         ],
-        "description": "Searches for items that are available to the user or an entire enterprise.",
+        "description": "Searches for files, folders, web links, and shared files across the\nusers content or across the entire enterprise.",
         "parameters": [
           {
             "name": "query",
-            "description": "The string to search for. This query is matched against item names,\ndescriptions, text content of files, and various other fields of\nthe different item types.\n\nRequired unless `mdfilters` parameter is defined.",
+            "description": "The string to search for. This query is matched against item names,\ndescriptions, text content of files, and various other fields of\nthe different item types.\n\nThis field is required unless the `mdfilters` parameter is defined.",
             "in": "query",
             "required": false,
             "type": "string"
           },
           {
             "name": "scope",
-            "description": "Limits search results to a user scope.\n\nDefaults to `user_content` which limits the search to content\navailable to the current user\n\nSetting this to `enterprise_content` widens the search to content\navailable to the entire enterprise. To enable this scope for an\nadministrator, please reach out to support.",
+            "description": "Limits the search results to either the files that the user has\naccess to, or to files available to the entire enterprise.\n\nThe scope defaults to `user_content`, which limits the search\nresults to content that is available to the currently authenticated\nuser.\n\nThe `enterprise_content` can be requested by an admin through our\nsupport channels. Once this scope has been enabled for a user, it\nwill allow that use to query for content across the entire\nenterprise and not only the content that they have access to.",
             "in": "query",
             "required": false,
             "type": "string",
             "enum": [
               "user_content",
               "enterprise_content"
-            ]
+            ],
+            "default": "user_content"
           },
           {
             "name": "file_extensions",
-            "description": "Limits search results to a comma-separated list of\nfile extensions.",
+            "description": "Limits the search results to any files that match any of the provided\nfile extensions. This list is a comma-separated list of file extensions\nwithout the dots.",
             "in": "query",
             "required": false,
-            "type": "string"
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           },
           {
             "name": "created_at_range",
-            "description": "Limits search results to items created within\na given date range.\n\nDate ranges are defined as comma separated RFC3339\ntimestamps.\n\nIf the the start date is omitted (`,2014-05-17T13:35:01-07:00`)\nthe earliest known date will be used as the start date instead.\n\nIf the end date is omitted (`2014-05-15T13:35:01-07:00,`) the\ncurrent date will be used as the end date instead.",
+            "description": "Limits the search results to any items created within\na given date range.\n\nDate ranges are defined as comma separated RFC3339\ntimestamps.\n\nIf the the start date is omitted (`,2014-05-17T13:35:01-07:00`)\nanything created before the end date will be returned.\n\nIf the end date is omitted (`2014-05-15T13:35:01-07:00,`) the\ncurrent date will be used as the end date instead.",
             "in": "query",
             "required": false,
-            "type": "string"
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           },
           {
             "name": "updated_at_range",
-            "description": "Limits search results to items updated within\na given date range.\n\nDate ranges are defined as comma separated RFC3339\ntimestamps.\n\nIf the start date is omitted (`,2014-05-17T13:35:01-07:00`)\nthe earliest known date will be used as the start date instead.\n\nIf the end date is omitted (`2014-05-15T13:35:01-07:00,`) the\ncurrent date will be used as the end date instead.",
+            "description": "Limits the search results to any items updated within\na given date range.\n\nDate ranges are defined as comma separated RFC3339\ntimestamps.\n\nIf the start date is omitted (`,2014-05-17T13:35:01-07:00`)\nanything updated before the end date will be returned.\n\nIf the end date is omitted (`2014-05-15T13:35:01-07:00,`) the\ncurrent date will be used as the end date instead.",
             "in": "query",
             "required": false,
-            "type": "string"
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           },
           {
             "name": "size_range",
-            "description": "Limits search results to items within a given file size\nrange.\n\nFile size ranges are defined as comma separated byte sizes.\n\nThe upper and lower bound can be omitted to create open ranges.",
+            "description": "Limits the search results to any items with a size within\na given file size range. This applied to files and folders.\n\nSize ranges are defined as comma separated list of a lower\nand upper byte size limit (inclusive).\n\nThe upper and lower bound can be omitted to create open ranges.",
             "in": "query",
             "required": false,
-            "type": "string"
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           },
           {
             "name": "owner_user_ids",
-            "description": "Limits search results to items owned\nby the given list of owners.\n\nOwners are defined as a comma separated list of user IDs.",
+            "description": "Limits the search results to any items that are owned\nby the given list of owners, defined as a list of comma separated\nuser IDs.\n\nPlease note that the items still need to be owned or shared with\nthe currently authenticated user for them to show up in the search\nresults. If the user does not have access to any files owned by any of\nthe users an empty result set will be returned.\n\nTo search across an entire enterprise, we recommend using the\n`enterprise_content` scope parameter which can be requested with our\nsupport team.",
             "in": "query",
             "required": false,
-            "type": "string"
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           },
           {
             "name": "ancestor_folder_ids",
-            "description": "Limits search results to items within the given\nlist of folders.\n\nFolders are defined as a comma separated lists\nof folder IDs.\n\nSearch results will also include items within subfolders.",
+            "description": "Limits the search results to items within the given\nlist of folders, defined as a comma separated lists\nof folder IDs.\n\nSearch results will also include items within any subfolders\nof those ancestor folders.\n\nPlease note that the folders still need to be owned or shared with\nthe currently authenticated user. If the folder is not accessible by this\nuser, or it does not exist, a `HTTP 404` error code will be returned\ninstead.\n\nTo search across an entire enterprise, we recommend using the\n`enterprise_content` scope parameter which can be requested with our\nsupport team.",
             "in": "query",
             "required": false,
-            "type": "string"
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           },
           {
             "name": "content_types",
-            "description": "Limits search results to items with the given\ncontent types.\n\nContent types are defined as a comma separated lists\nof Box recognized content types.",
+            "description": "Limits the search results to any items that match the search query\nfor a specific part of the file, for example the file description.\n\nContent types are defined as a comma separated lists\nof Box recognized content types. The allowed content types are as follows.\n\n* `name` - The name of the item, as defined by its `name` field.\n* `description` - The description of the item, as defined by its\n  `description` field.\n* `file_content` - The actual content of the file.\n* `comments` - The content of any of the comments on a file or\n   folder.\n* `tag` - Any tags that are applied to an item, as defined by its\n   `tag` field.",
             "in": "query",
             "required": false,
             "type": "array",
@@ -5582,7 +5601,7 @@
           },
           {
             "name": "type",
-            "description": "Limits search results to items of this type.",
+            "description": "Limits the search results to any items of this type. This\nparameter only takes one value. By default the API returns\nitems that match any of these types.\n\n* `file` - Limits the search results to files\n* `folder` - Limits the search results to folders\n* `web_link` - Limits the search results to web links, also known\n   as bookmarks",
             "in": "query",
             "required": false,
             "type": "string",
@@ -5594,10 +5613,11 @@
           },
           {
             "name": "trash_content",
-            "description": "Controls if search results include the trash.\n\nDefaults to `non_trashed_only`",
+            "description": "Determines if the search should look in the trash for items.\n\nBy default, this API only returns search results for items\nnot currently in the trash (`non_trashed_only`).\n\n* `trashed_only` - Only searches for items currently in the trash\n* `non_trashed_only` - Only searches for items currently not in\n  the trash",
             "in": "query",
             "required": false,
             "type": "string",
+            "default": "non_trashed_only",
             "enum": [
               "non_trashed_only",
               "trashed_only"
@@ -5627,7 +5647,7 @@
           },
           {
             "name": "sort",
-            "description": "Defines the order in which results are returned. Defaults to `relevance`.\n\n* `relevance` (default) returns the results sorted by relevance to the\nquery search term.\n* `modified_at` returns the results ordered in descending order by date\nat which the item was last modified.",
+            "description": "Defines the order in which search results are returned. This API\ndefaults to returning items by relevance unless this parameter is\nexplicitly specified.\n\n* `relevance` (default) returns the results sorted by relevance to the\nquery search term. The relevance is based on the occurrence of the search\nterm in the items name, description, content, and additional properties.\n* `modified_at` returns the results ordered in descending order by date\nat which the item was last modified.",
             "in": "query",
             "required": false,
             "type": "string",
@@ -5639,7 +5659,7 @@
           },
           {
             "name": "direction",
-            "description": "Defines the direction in which search results are ordered. Default value\nis `DESC`.\n\nWhen results are sorted by `relevance` the ordering is forced to `DESC`,\nignoring the value of this parameter.",
+            "description": "Defines the direction in which search results are ordered. This API\ndefaults to returning items in descending (`DESC`) order unless this\nparameter is explicitly specified.\n\nWhen results are sorted by `relevance` the ordering is locked to returning\nitems in descending order of relevance, and this parameter is ignored.",
             "in": "query",
             "required": false,
             "type": "string",
@@ -5651,7 +5671,7 @@
           },
           {
             "name": "limit",
-            "description": "The maximum number of items to return.",
+            "description": "Defines the maximum number of items to return as part of a page of\nresults.",
             "in": "query",
             "required": false,
             "type": "integer",
@@ -5684,6 +5704,24 @@
             "description": "Returns a collection of search results. If there are no matching\nsearch results, the `entries` array will be empty.",
             "schema": {
               "$ref": "#/definitions/SearchResults"
+            }
+          },
+          "400": {
+            "description": "Returns an error when the request was not valid. This can have multiple\nreasons and the `context_info` object will provide you with more details.\n\n* `missing_parameter` - Please provide at least the `query` or `mdfilters`\n  query parameter in a search.\n* `invalid_parameter` - Any of the fields might not be in the right\n  format. This could for example mean that one of the RFC3339 dates is\n  incorrect, or a string is provided where an integer is expected.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "403": {
+            "description": "Returns an error when the user does not have the permission to make\nthis API call.\n\n* The developer provided a `scope` of `enterprise_content` but did\n  not request this scope to be enabled for the user through our\n  support channels.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "404": {
+            "description": "Returns an error when the user does not have access to an item\nmentioned in the request.\n\n* The developer provided a folder ID in `ancestor_folder_ids`\n  that either does not exist or the user does not have access to.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
             }
           },
           "default": {
@@ -12614,6 +12652,10 @@
                       "format": "url",
                       "description": "The \"Custom URL\" that can also be used to preview the item on Box.  Custom\nURLs can only be created or modified in the Box Web application."
                     },
+                    "vanity_name": {
+                      "type": "string",
+                      "description": "The custom name of a shared link, as used in the `vanity_url` field."
+                    },
                     "access": {
                       "type": "string",
                       "description": "The access level for this shared link.\n\n* `open` - provides access to this item to anyone with this link\n* `company` - only provides access to this item to people the same company\n* `collaborators` - only provides access to this item to people who are\n   collaborators on this item\n\nIf this field is omitted when creating the shared link, the access level\nwill be set to the default access level specified by the enterprise admin.",
@@ -14014,6 +14056,10 @@
                       "format": "url",
                       "description": "The \"Custom URL\" that can also be used to preview the item on Box.  Custom\nURLs can only be created or modified in the Box Web application."
                     },
+                    "vanity_name": {
+                      "type": "string",
+                      "description": "The custom name of a shared link, as used in the `vanity_url` field."
+                    },
                     "access": {
                       "type": "string",
                       "description": "The access level for this shared link.\n\n* `open` - provides access to this item to anyone with this link\n* `company` - only provides access to this item to people the same company\n* `collaborators` - only provides access to this item to people who are\n   collaborators on this item\n\nIf this field is omitted when creating the shared link, the access level\nwill be set to the default access level specified by the enterprise admin.",
@@ -15230,6 +15276,10 @@
                       "type": "string",
                       "format": "url",
                       "description": "The \"Custom URL\" that can also be used to preview the item on Box.  Custom\nURLs can only be created or modified in the Box Web application."
+                    },
+                    "vanity_name": {
+                      "type": "string",
+                      "description": "The custom name of a shared link, as used in the `vanity_url` field."
                     },
                     "access": {
                       "type": "string",
