@@ -10,7 +10,8 @@ x-box-tag: search
 x-box-enable-explorer: true
 
 description: |-
-  Searches for items that are available to the user or an entire enterprise.
+  Searches for files, folders, web links, and shared files across the
+  users content or across the entire enterprise.
 
 parameters:
   - name: query
@@ -19,7 +20,7 @@ parameters:
       descriptions, text content of files, and various other fields of
       the different item types.
 
-      Required unless `mdfilters` parameter is defined.
+      This field is required unless the `mdfilters` parameter is defined.
     in: query
     required: false
     example: sales
@@ -28,14 +29,17 @@ parameters:
 
   - name: scope
     description: |-
-      Limits search results to a user scope.
+      Limits the search results to either the files that the user has
+      access to, or to files available to the entire enterprise.
 
-      Defaults to `user_content` which limits the search to content
-      available to the current user
+      The scope defaults to `user_content`, which limits the search
+      results to content that is available to the currently authenticated
+      user.
 
-      Setting this to `enterprise_content` widens the search to content
-      available to the entire enterprise. To enable this scope for an
-      administrator, please reach out to support.
+      The `enterprise_content` can be requested by an admin through our
+      support channels. Once this scope has been enabled for a user, it
+      will allow that use to query for content across the entire
+      enterprise and not only the content that they have access to.
     in: query
     required: false
     schema:
@@ -43,108 +47,170 @@ parameters:
       enum:
         - user_content
         - enterprise_content
+      default: user_content
     example: user_content
 
   - name: file_extensions
     description: |-
-      Limits search results to a comma-separated list of
-      file extensions.
-    example: pdf,png,gif
+      Limits the search results to any files that match any of the provided
+      file extensions. This list is a comma-separated list of file extensions
+      without the dots.
+    example:
+      - pdf
+      - png
+      - gif
     in: query
     required: false
+    explode: false
     schema:
-      type: string
+      type: array
+      items:
+        type: string
 
   - name: created_at_range
     description: |-
-      Limits search results to items created within
+      Limits the search results to any items created within
       a given date range.
 
       Date ranges are defined as comma separated RFC3339
       timestamps.
 
       If the the start date is omitted (`,2014-05-17T13:35:01-07:00`)
-      the earliest known date will be used as the start date instead.
+      anything created before the end date will be returned.
 
       If the end date is omitted (`2014-05-15T13:35:01-07:00,`) the
       current date will be used as the end date instead.
-    example: "2014-05-15T13:35:01-07:00,2014-05-17T13:35:01-07:00"
+    example:
+      - "2014-05-15T13:35:01-07:00"
+      - "2014-05-17T13:35:01-07:00"
     in: query
     required: false
+    explode: false
     schema:
-      type: string
+      type: array
+      items:
+        type: string
 
   - name: updated_at_range
     description: |-
-      Limits search results to items updated within
+      Limits the search results to any items updated within
       a given date range.
 
       Date ranges are defined as comma separated RFC3339
       timestamps.
 
       If the start date is omitted (`,2014-05-17T13:35:01-07:00`)
-      the earliest known date will be used as the start date instead.
+      anything updated before the end date will be returned.
 
       If the end date is omitted (`2014-05-15T13:35:01-07:00,`) the
       current date will be used as the end date instead.
-    example: "2014-05-15T13:35:01-07:00,2014-05-17T13:35:01-07:00"
+    example:
+      - "2014-05-15T13:35:01-07:00"
+      - "2014-05-17T13:35:01-07:00"
     in: query
     required: false
+    explode: false
     schema:
-      type: string
+      type: array
+      items:
+        type: string
 
   - name: size_range
     description: |-
-      Limits search results to items within a given file size
-      range.
+      Limits the search results to any items with a size within
+      a given file size range. This applied to files and folders.
 
-      File size ranges are defined as comma separated byte sizes.
+      Size ranges are defined as comma separated list of a lower
+      and upper byte size limit (inclusive).
 
       The upper and lower bound can be omitted to create open ranges.
-    example: "1000000,5000000"
+    example:
+      - 1000000
+      - 5000000
     in: query
     required: false
+    explode: false
     schema:
-      type: string
+      type: array
+      items:
+        type: integer
 
   - name: owner_user_ids
     description: |-
-      Limits search results to items owned
-      by the given list of owners.
+      Limits the search results to any items that are owned
+      by the given list of owners, defined as a list of comma separated
+      user IDs.
 
-      Owners are defined as a comma separated list of user IDs.
-    example: "123422,23532,3241212"
+      Please note that the items still need to be owned or shared with
+      the currently authenticated user for them to show up in the search
+      results. If the user does not have access to any files owned by any of
+      the users an empty result set will be returned.
+
+      To search across an entire enterprise, we recommend using the
+      `enterprise_content` scope parameter which can be requested with our
+      support team.
+    example:
+      - "123422"
+      - "23532"
+      - "3241212"
     in: query
     required: false
+    explode: false
     schema:
-      type: string
+      type: array
+      items:
+        type: string
 
   - name: ancestor_folder_ids
     description: |-
-      Limits search results to items within the given
-      list of folders.
-
-      Folders are defined as a comma separated lists
+      Limits the search results to items within the given
+      list of folders, defined as a comma separated lists
       of folder IDs.
 
-      Search results will also include items within subfolders.
-    example: "4535234,234123235,2654345"
+      Search results will also include items within any subfolders
+      of those ancestor folders.
+
+      Please note that the folders still need to be owned or shared with
+      the currently authenticated user. If the folder is not accessible by this
+      user, or it does not exist, a `HTTP 404` error code will be returned
+      instead.
+
+      To search across an entire enterprise, we recommend using the
+      `enterprise_content` scope parameter which can be requested with our
+      support team.
+    explode: false
+    example:
+      - "4535234"
+      - "234123235"
+      - "2654345"
     in: query
     required: false
     schema:
-      type: string
+      type: array
+      items:
+        type: string
 
   - name: content_types
     description: |-
-      Limits search results to items with the given
-      content types.
+      Limits the search results to any items that match the search query
+      for a specific part of the file, for example the file description.
 
       Content types are defined as a comma separated lists
-      of Box recognized content types.
+      of Box recognized content types. The allowed content types are as follows.
+
+      * `name` - The name of the item, as defined by its `name` field.
+      * `description` - The description of the item, as defined by its
+        `description` field.
+      * `file_content` - The actual content of the file.
+      * `comments` - The content of any of the comments on a file or
+         folder.
+      * `tag` - Any tags that are applied to an item, as defined by its
+         `tag` field.
     in: query
     example:
       - name
       - description
+    explode: false
     required: false
     schema:
       type: array
@@ -159,7 +225,14 @@ parameters:
 
   - name: type
     description: |-
-      Limits search results to items of this type.
+      Limits the search results to any items of this type. This
+      parameter only takes one value. By default the API returns
+      items that match any of these types.
+
+      * `file` - Limits the search results to files
+      * `folder` - Limits the search results to folders
+      * `web_link` - Limits the search results to web links, also known
+         as bookmarks
     example: file
     in: query
     required: false
@@ -172,25 +245,34 @@ parameters:
 
   - name: trash_content
     description: |-
-      Controls if search results include the trash.
+      Determines if the search should look in the trash for items.
 
-      Defaults to `non_trashed_only`
+      By default, this API only returns search results for items
+      not currently in the trash (`non_trashed_only`).
+
+      * `trashed_only` - Only searches for items currently in the trash
+      * `non_trashed_only` - Only searches for items currently not in
+        the trash
     in: query
     required: false
     example: non_trashed_only
     schema:
       type: string
+      default: non_trashed_only
       enum:
         - non_trashed_only
         - trashed_only
 
   - name: mdfilters
     description: |-
-      A list containing 1 metadata template to filter
-      search results by. This list can currently only
-      contain one entry.
+      Limits the search results to any items for which the metadata matches
+      the provided filter.
 
-      Required unless `query` is defined.
+      This parameter contains a list of 1 metadata template to filter
+      the search results by. This list can currently only
+      contain one entry, though this might be expanded in the future.
+
+      This parameter is required unless the `query` parameter is provided.
     in: query
 
     example:
@@ -218,10 +300,13 @@ parameters:
 
   - name: sort
     description: |-
-      Defines the order in which results are returned. Defaults to `relevance`.
+      Defines the order in which search results are returned. This API
+      defaults to returning items by relevance unless this parameter is
+      explicitly specified.
 
       * `relevance` (default) returns the results sorted by relevance to the
-      query search term.
+      query search term. The relevance is based on the occurrence of the search
+      term in the items name, description, content, and additional properties.
       * `modified_at` returns the results ordered in descending order by date
       at which the item was last modified.
     in: query
@@ -236,11 +321,12 @@ parameters:
 
   - name: direction
     description: |-
-      Defines the direction in which search results are ordered. Default value
-      is `DESC`.
+      Defines the direction in which search results are ordered. This API
+      defaults to returning items in descending (`DESC`) order unless this
+      parameter is explicitly specified.
 
-      When results are sorted by `relevance` the ordering is forced to `DESC`,
-      ignoring the value of this parameter.
+      When results are sorted by `relevance` the ordering is locked to returning
+      items in descending order of relevance, and this parameter is ignored.
     in: query
     required: false
     schema:
@@ -253,7 +339,8 @@ parameters:
 
   - name: limit
     description: |-
-      The maximum number of items to return.
+      Defines the maximum number of items to return as part of a page of
+      results.
     in: query
     required: false
     example: 100
@@ -275,6 +362,46 @@ responses:
       application/json:
         schema:
           $ref: '#/components/schemas/SearchResults'
+
+  400:
+    description: |-
+      Returns an error when the request was not valid. This can have multiple
+      reasons and the `context_info` object will provide you with more details.
+
+      * `missing_parameter` - Please provide at least the `query` or `mdfilters`
+        query parameter in a search.
+      * `invalid_parameter` - Any of the fields might not be in the right
+        format. This could for example mean that one of the RFC3339 dates is
+        incorrect, or a string is provided where an integer is expected.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
+
+  403:
+    description: |-
+      Returns an error when the user does not have the permission to make
+      this API call.
+
+      * The developer provided a `scope` of `enterprise_content` but did
+        not request this scope to be enabled for the user through our
+        support channels.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
+
+  404:
+    description: |-
+      Returns an error when the user does not have access to an item
+      mentioned in the request.
+
+      * The developer provided a folder ID in `ancestor_folder_ids`
+        that either does not exist or the user does not have access to.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
 
   default:
     description: |-
