@@ -350,8 +350,24 @@ parameters:
       default: 30
       maximum: 200
 
-  - $ref: '../attributes/fields.yml'
-  - $ref: '../attributes/offset.yml'
+  - name: include_recent_shared_links
+    description: |-
+      Defines whether the search results should include any items
+      that the user recently accessed through a shared link.
+
+      Please note that when this parameter has been set to true,
+      the format of the response of this API changes to return
+      a list of [Search Results with
+      Shared Links](r://search_results_with_shared_links)
+    in: query
+    required: false
+    example: true
+    schema:
+      type: boolean
+      default: false
+
+  - $ref: "../attributes/fields.yml"
+  - $ref: "../attributes/offset.yml"
 
 responses:
   200:
@@ -361,7 +377,9 @@ responses:
     content:
       application/json:
         schema:
-          $ref: '#/components/schemas/SearchResults'
+          oneOf:
+            - $ref: "#/components/schemas/SearchResults"
+            - $ref: "#/components/schemas/SearchResultsWithSharedLinks"
 
   400:
     description: |-
@@ -376,7 +394,7 @@ responses:
     content:
       application/json:
         schema:
-          $ref: '#/components/schemas/ClientError'
+          $ref: "#/components/schemas/ClientError"
 
   403:
     description: |-
@@ -389,7 +407,7 @@ responses:
     content:
       application/json:
         schema:
-          $ref: '#/components/schemas/ClientError'
+          $ref: "#/components/schemas/ClientError"
 
   404:
     description: |-
@@ -401,7 +419,7 @@ responses:
     content:
       application/json:
         schema:
-          $ref: '#/components/schemas/ClientError'
+          $ref: "#/components/schemas/ClientError"
 
   default:
     description: |-
@@ -409,4 +427,4 @@ responses:
     content:
       application/json:
         schema:
-          $ref: '#/components/schemas/ClientError'
+          $ref: "#/components/schemas/ClientError"
