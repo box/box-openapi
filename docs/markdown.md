@@ -1,6 +1,7 @@
 # Markdown styleguide
 
-[**Previous:** Contributing a pull request](./pull-request.md) 
+[**Previous:** Contributing a pull request](./pull-request.md) |
+[**Next:** Updating dependencies](./depdendencies.md)
 
 ---
 
