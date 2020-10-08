@@ -1,0 +1,158 @@
+---
+title: File Request
+
+type: object
+
+x-box-resource-id: file_request
+x-box-tag: file_requests
+
+description: |-
+  A standard representation of a file request, as returned
+  from any file request API endpoints by default.
+
+properties:
+  id:
+    type: string
+    description: The unique identifier for this file request.
+    readOnly: true
+    example: "42037322"
+
+  type:
+    type: string
+    description: "`file-request`"
+    example: "file-request"
+    enum:
+      - file-request
+    readOnly: true
+
+  title:
+    type: string
+    description: |-
+      The title of file request. This is shown
+      in the Box UI to users uploading files.
+
+      This defaults to title of the file request that was
+      copied to create this file request.
+    example: "Please upload documents"
+
+  description:
+    type: string
+    nullable: true
+    description: |-
+      The optional description of this file request. This is
+      shown in the Box UI to users uploading files.
+
+      This defaults to description of the file request that was
+      copied to create this file request.
+    example: "Following documents are requested for your process"
+
+  status:
+    type: string
+    example: active
+    description: |-
+      The status of the file request. This defaults
+      to `active`.
+
+      When the status is set to `inactive`, the file request
+      will no longer accept new submissions, and any visitor
+      to the file request URL will receive a `HTTP 404` status
+      code.
+
+      This defaults to status of file request that was
+      copied to create this file request.
+    enum:
+      - active
+      - inactive
+
+  is_email_required:
+    type: boolean
+    example: true
+    description: |-
+      Whether a file request submitter is required to provide
+      their email address.
+
+      When this setting is set to true, the Box UI will show
+      an email field on the file request form.
+
+      This defaults to setting of file request that was
+      copied to create this file request.
+
+  is_description_required:
+    type: boolean
+    example: true
+    description: |-
+      Whether a file request submitter is required to provide
+      a description of the files they are submitting.
+
+      When this setting is set to true, the Box UI will show
+      a description field on the file request form.
+
+      This defaults to setting of file request that was
+      copied to create this file request.
+
+  expires_at:
+    type: string
+    format: date-time
+    description: |-
+      The date after which a file request will no longer accept new
+      submissions.
+
+      After this date, the `status` will automatically be set to
+      `inactive`.
+    example: "2020-09-28T10:53:43-08:00"
+
+  folder:
+    allOf:
+      - $ref: '#/components/schemas/Folder--Mini'
+      - description: |-
+          The folder that this file request is associated with.
+
+          Files submitted through the file request form will be
+          uploaded to this folder.
+    nullable: false
+
+  url:
+    type: string
+    description: |-
+      The generated URL for this file request. This URL can be shared
+      with users to let them upload files to the associated folder.
+    example: https://cloud.app.box.com/f/19e57f40ace247278a8e3d336678c64a
+    readOnly: true
+
+  etag:
+    type: string
+    example: "1"
+    nullable: true
+    description: |-
+      The HTTP `etag` of this file. This can be used in combination with
+      the `If-Match` header when updating a file request. By providing that
+      header, a change will only be performed on the  file request if the `etag`
+      on the file request still matches the `etag` provided in the `If-Match`
+      header.
+
+  created_by:
+    allOf:
+      - $ref: "#/components/schemas/User--Mini"
+      - description: The user who created this file request.
+
+  created_at:
+    type: string
+    format: date-time
+    nullable: false
+    description: |-
+      The date and time when the file request was created.
+    example: "2020-09-28T10:53:43-08:00"
+
+  updated_by:
+    allOf:
+      - $ref: "#/components/schemas/User--Mini"
+      - description: The user who last modified this file request.
+      - nullable: false
+
+  updated_at:
+    type: string
+    format: date-time
+    nullable: false
+    description: |-
+      The date and time when the file request was last updated.
+    example: "2020-09-28T10:53:43-08:00"
