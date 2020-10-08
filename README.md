@@ -36,6 +36,7 @@ to the source of this project.
 1. [Adding a new API endpoint](./docs/add-endpoint.md)
 1. [Contributing a pull request](./docs/pull-request.md)
 1. [Markdown styleguide](./docs/markdown.md)
+1. [Updating dependencies](./docs/dependencies.md)
 
 ## Usage & License
 
