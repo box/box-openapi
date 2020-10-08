@@ -5924,6 +5924,14 @@
             "maximum": 200
           },
           {
+            "name": "include_recent_shared_links",
+            "description": "Defines whether the search results should include any items\nthat the user recently accessed through a shared link.\n\nPlease note that when this parameter has been set to true,\nthe format of the response of this API changes to return\na list of [Search Results with\nShared Links](r://search_results_with_shared_links)",
+            "in": "query",
+            "required": false,
+            "type": "boolean",
+            "default": false
+          },
+          {
             "name": "fields",
             "description": "A comma-separated list of attributes to include in the\nresponse. This can be used to request fields that are\nnot normally returned in a standard response.\n\nBe aware that specifying this parameter will have the\neffect that none of the standard fields are returned in\nthe response unless explicitly specified, instead only\nfields for the mini representation are returned, additional\nto the fields requested.",
             "in": "query",
@@ -15394,30 +15402,77 @@
       "title": "Search Results",
       "type": "object",
       "description": "A list of files, folders and web links that matched the search query.",
-      "properties": {
-        "total_count": {
-          "description": "One greater than the offset of the last entry in the search results.\nThe total number of entries in the collection may be less than\n`total_count`.",
-          "type": "integer",
-          "format": "int64"
+      "allOf": [
+        {
+          "type": "object",
+          "properties": {
+            "total_count": {
+              "description": "One greater than the offset of the last entry in the search results.\nThe total number of entries in the collection may be less than\n`total_count`.",
+              "type": "integer",
+              "format": "int64"
+            },
+            "limit": {
+              "description": "The limit that was used for this search. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed.",
+              "type": "integer",
+              "format": "int64"
+            },
+            "offset": {
+              "description": "The 0-based offset of the first entry in this set. This will be the same\nas the `offset` query parameter used.",
+              "type": "integer",
+              "format": "int64"
+            }
+          }
         },
-        "limit": {
-          "description": "The limit that was used for this search. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed.",
-          "type": "integer",
-          "format": "int64"
-        },
-        "offset": {
-          "description": "The 0-based offset of the first entry in this set. This will be the same\nas the `offset` query parameter used.",
-          "type": "integer",
-          "format": "int64"
-        },
-        "entries": {
-          "description": "The search results for the query provided.",
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/File"
+        {
+          "properties": {
+            "entries": {
+              "description": "The search results for the query provided.",
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/File"
+              }
+            }
           }
         }
-      }
+      ]
+    },
+    "SearchResultsWithSharedLinks": {
+      "title": "Search Results (including Shared Links)",
+      "type": "object",
+      "description": "A list of files, folders and web links that matched the search query,\nincluding the additional information about any shared links through\nwhich the item has been shared with the user.\n\nThis response format is only returned when the `include_recent_shared_links`\nquery parameter has been set to `true`.",
+      "allOf": [
+        {
+          "type": "object",
+          "properties": {
+            "total_count": {
+              "description": "One greater than the offset of the last entry in the search results.\nThe total number of entries in the collection may be less than\n`total_count`.",
+              "type": "integer",
+              "format": "int64"
+            },
+            "limit": {
+              "description": "The limit that was used for this search. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed.",
+              "type": "integer",
+              "format": "int64"
+            },
+            "offset": {
+              "description": "The 0-based offset of the first entry in this set. This will be the same\nas the `offset` query parameter used.",
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        },
+        {
+          "properties": {
+            "entries": {
+              "description": "The search results for the query provided, including the\nadditional information about any shared links through\nwhich the item has been shared with the user.",
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/SearchResultWithSharedLink"
+              }
+            }
+          }
+        }
+      ]
     },
     "Task": {
       "title": "Task",
@@ -18090,6 +18145,26 @@
           "description": "`terms_of_service`",
           "enum": [
             "terms_of_service"
+          ]
+        }
+      }
+    },
+    "SearchResultWithSharedLink": {
+      "title": "Search Result (including Shared Link)",
+      "type": "object",
+      "description": "A single of files, folder or web link that matched the search query,\nincluding the additional information about the shared link through\nwhich the item has been shared with the user.\n\nThis response format is only returned when the\n`include_recent_shared_links` query parameter has been set to `true`.",
+      "properties": {
+        "accessible_via_shared_link": {
+          "description": "The optional shared link through which the user has access to this\nitem. This value is only returned for items for which the user has\nrecently accessed the file through a shared link. For all other\nitems this value will return `null`."
+        },
+        "item": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/File"
+            },
+            {
+              "description": "The file, folder or web link that matched the\nsearch query."
+            }
           ]
         }
       }
