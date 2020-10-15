@@ -1,7 +1,7 @@
 # Markdown styleguide
 
 [**Previous:** Contributing a pull request](./pull-request.md) |
-[**Next:** Updating dependencies](./depdendencies.md)
+[**Next:** Updating dependencies](./dependencies.md)
 
 ---
 
@@ -17,7 +17,7 @@ As descriptions get longer then will be easier to read on multiple lines.
 
 ```yaml
 description: |-
-  This is a long description. It spans 
+  This is a long description. It spans
   multiple lines.
 
   Additionally by adding a blank line
@@ -60,7 +60,7 @@ For example:
 
 * Product names like `NodeJS`
 * References to function names like `getFileById()`, `BoxConfig.doThatThing()`,
-  etc 
+  etc
 * References to variable names like `file_id`, `allow_access`, etc
 * Version numbers, like `v1.0.0`, or `V2.0`
 * Or alternatively capitalize acronyms, like TLS, SSH, etc, as these will be
@@ -80,7 +80,7 @@ file at the root of the project.
 ## Endpoint titles start with verbs
 
 Ideally the title of an endpoint should start with
-a verb. 
+a verb.
 
 | Endpoint                                  | Verb     | Example         |
 |-------------------------------------------|----------|-----------------|
@@ -92,7 +92,7 @@ a verb.
 | `DELETE` to delete a resource permanently | Remove   | Remove comment  |
 | `DELETE` to delete a relationship         | Unassign | Unassign policy |
 
-## Add syntax highlighting 
+## Add syntax highlighting
 
 When writing longer code-blocks, add the language of the sample in the
 definition of the code block. This will enable syntax highlighting for the
@@ -129,3 +129,5 @@ names.
 | Add `owner` Field to Files | Add `owner` field to files |
 | Allow File API To Use JWT  | Allow file API to use JWT  |
 | Box CLI `3.0.0` Release    | Box CLI `3.0.0` release    |
+
+[**Next:** Updating dependencies](./dependencies.md)
