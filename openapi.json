@@ -660,6 +660,11 @@
                             "description": "The password required to access the shared link. Set the\npassword to `null` to remove it.\n\nA password can only be set when `access` is set to `open`.",
                             "example": "do-not-use-this-password"
                           },
+                          "vanity_name": {
+                            "type": "string",
+                            "description": "Defines a custom vanity name to use in the shared link URL,\nfor example `https://app.box.com/v/my-shared-link`.\n\nCustom URLs should not be used when sharing sensitive content\nas vanity URLs are a lot easier to guess than regular shared links.",
+                            "example": "my-shared-link"
+                          },
                           "unshared_at": {
                             "type": "string",
                             "format": "date-time",
@@ -5011,6 +5016,11 @@
                             "description": "The password required to access the shared link. Set the\npassword to `null` to remove it.\n\nA password can only be set when `access` is set to `open`.",
                             "example": "do-not-use-this-password"
                           },
+                          "vanity_name": {
+                            "type": "string",
+                            "description": "Defines a custom vanity name to use in the shared link URL,\nfor example `https://app.box.com/v/my-shared-link`.\n\nCustom URLs should not be used when sharing sensitive content\nas vanity URLs are a lot easier to guess than regular shared links.",
+                            "example": "my-shared-link"
+                          },
                           "unshared_at": {
                             "type": "string",
                             "format": "date-time",
@@ -7156,10 +7166,10 @@
         }
       }
     },
-    "/folder_lock": {
+    "/folder_locks": {
       "get": {
-        "operationId": "get_folder_lock",
-        "summary": "Get folder lock information",
+        "operationId": "get_folder_locks",
+        "summary": "List folder lock information",
         "tags": [
           "Folder Locks"
         ],
@@ -7234,7 +7244,7 @@
         }
       },
       "post": {
-        "operationId": "post_folder_lock",
+        "operationId": "post_folder_locks",
         "summary": "Create folder lock on folder",
         "tags": [
           "Folder Locks"
@@ -7252,6 +7262,26 @@
                   "folder"
                 ],
                 "properties": {
+                  "locked_operations": {
+                    "type": "object",
+                    "description": "The operations to lock for the folder. If `locked_operations` is\nincluded in the request, both `move` and `delete` must also be\nincluded.",
+                    "required": [
+                      "move",
+                      "delete"
+                    ],
+                    "properties": {
+                      "move": {
+                        "type": "boolean",
+                        "description": "Whether moving the folder should be locked.",
+                        "example": true
+                      },
+                      "delete": {
+                        "type": "boolean",
+                        "description": "Whether deleting the folder should be locked.",
+                        "example": false
+                      }
+                    }
+                  },
                   "folder": {
                     "type": "object",
                     "description": "The folder to apply the lock to.",
@@ -7269,26 +7299,6 @@
                         "type": "string",
                         "description": "The ID of the folder.",
                         "example": "1234567890"
-                      }
-                    }
-                  },
-                  "locked_operations": {
-                    "type": "object",
-                    "description": "The operations to lock on the folder. If `locked_operations` is\nincluded in the request, both `move` and `delete` must also be\nincluded.",
-                    "required": [
-                      "move",
-                      "delete"
-                    ],
-                    "properties": {
-                      "move": {
-                        "type": "boolean",
-                        "description": "Whether moving the folder should be locked.",
-                        "example": true
-                      },
-                      "delete": {
-                        "type": "boolean",
-                        "description": "Whether deleting the folder should be locked.",
-                        "example": false
                       }
                     }
                   }
@@ -11283,6 +11293,11 @@
                         "description": "The password required to access the shared link. Set the\npassword to `null` to remove it.\n\nA password can only be set when `access` is set to `open`.",
                         "example": "do-not-use-this-password"
                       },
+                      "vanity_name": {
+                        "type": "string",
+                        "description": "Defines a custom vanity name to use in the shared link URL,\nfor example `https://app.box.com/v/my-shared-link`.\n\nCustom URLs should not be used when sharing sensitive content\nas vanity URLs are a lot easier to guess than regular shared\nlinks.",
+                        "example": "my-shared-link"
+                      },
                       "unshared_at": {
                         "type": "string",
                         "format": "date-time",
@@ -11463,6 +11478,11 @@
                         "type": "string",
                         "description": "The password required to access the shared link. Set the\npassword to `null` to remove it.\n\nA password can only be set when `access` is set to `open`.",
                         "example": "do-not-use-this-password"
+                      },
+                      "vanity_name": {
+                        "type": "string",
+                        "description": "Defines a custom vanity name to use in the shared link URL,\nfor example `https://app.box.com/v/my-shared-link`.\n\nCustom URLs should not be used when sharing sensitive content\nas vanity URLs are a lot easier to guess than regular shared\nlinks.",
+                        "example": "my-shared-link"
                       },
                       "unshared_at": {
                         "type": "string",
@@ -24035,7 +24055,7 @@
           "type": {
             "type": "string",
             "description": "The object type, always `folder_lock`.",
-            "example": "12345678"
+            "example": "folder_lock"
           },
           "created_by": {
             "allOf": [
@@ -24052,11 +24072,6 @@
             "format": "date-time",
             "example": "2020-09-14T23:12:53Z",
             "description": "When the folder lock object was created."
-          },
-          "lock_type": {
-            "type": "string",
-            "description": "The lock type, always `freeze`.",
-            "example": "freeze"
           },
           "locked_operations": {
             "type": "object",
@@ -24075,6 +24090,11 @@
                 "example": true
               }
             }
+          },
+          "lock_type": {
+            "type": "string",
+            "description": "The lock type, always `freeze`.",
+            "example": "freeze"
           }
         }
       },
