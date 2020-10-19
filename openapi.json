@@ -660,6 +660,11 @@
                             "description": "共有リンクへのアクセスに必要なパスワード。\nパスワードを`null`に設定するとパスワードが削除されます。\n\nパスワードは`access`が`open`に設定されている場合にのみ設定できます。", 
                             "example": "do-not-use-this-password"
                           }, 
+                          "vanity_name": {
+                            "type": "string", 
+                            "description": "共有リンクのURLで使用するカスタムバニティ名を定義します (例: `https://app.box.com/v/my-shared-link`)。\n\nバニティURLは通常の共有リンクよりもかなり推測しやすいため、機密性の高いコンテンツを共有する場合は、カスタムURLを使用しないでください。", 
+                            "example": "my-shared-link"
+                          }, 
                           "unshared_at": {
                             "type": "string", 
                             "format": "date-time", 
@@ -4297,6 +4302,359 @@
         }
       }
     }, 
+    "/file_requests/{file_request_id}": {
+      "get": {
+        "operationId": "get_file_requests_id", 
+        "summary": "ファイルリクエストを取得", 
+        "tags": [
+          "File requests"
+        ], 
+        "x-box-tag": "file_requests", 
+        "x-box-enable-explorer": true, 
+        "description": "ファイルリクエストに関する情報を取得します。", 
+        "parameters": [
+          {
+            "name": "file_request_id", 
+            "description": "ファイルリクエストを表す一意の識別子。\n\nファイルリクエストのIDを確認するには、ウェブアプリケーションでファイルリクエストビルダーにアクセスして、そのURLからIDをコピーします。たとえば、URLが`https://*.app.box.com/filerequest/123`の場合、`file_request_id`は`123`です。", 
+            "example": "123", 
+            "in": "path", 
+            "required": true, 
+            "schema": {
+              "type": "string"
+            }
+          }
+        ], 
+        "responses": {
+          "200": {
+            "description": "ファイルリクエストオブジェクトを返します。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FileRequest"
+                }
+              }
+            }
+          }, 
+          "401": {
+            "description": "`Authorization`ヘッダーで指定されているアクセストークンが認識されないか、指定されていない場合に返されます。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }, 
+          "404": {
+            "description": "ファイルリクエストが見つからない場合、または関連付けられたフォルダへのアクセス権限がユーザーに与えられていない場合に返されます。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }, 
+          "405": {
+            "description": "`file_request_id`が認識されていない形式で指定されている場合に返されます。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }, 
+          "default": {
+            "description": "予期しないクライアントエラー。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        }
+      }, 
+      "put": {
+        "operationId": "put_file_requests_id", 
+        "summary": "ファイルリクエストを更新", 
+        "tags": [
+          "File requests"
+        ], 
+        "x-box-tag": "file_requests", 
+        "x-box-enable-explorer": true, 
+        "x-box-sanitized": true, 
+        "description": "ファイルリクエストを更新します。これは使用すると、ファイルリクエストを有効化または無効化できます。", 
+        "parameters": [
+          {
+            "name": "file_request_id", 
+            "description": "ファイルリクエストを表す一意の識別子。\n\nファイルリクエストのIDを確認するには、ウェブアプリケーションでファイルリクエストビルダーにアクセスして、そのURLからIDをコピーします。たとえば、URLが`https://*.app.box.com/filerequest/123`の場合、`file_request_id`は`123`です。", 
+            "example": "123", 
+            "in": "path", 
+            "required": true, 
+            "schema": {
+              "type": "string"
+            }
+          }, 
+          {
+            "name": "if-match", 
+            "description": "変更を加える前にこの項目が最近変更されていないことを確認します。\n\nその項目の最後に認識された`etag`値をこのヘッダーに渡すと、それ以降に項目が変更されている場合、エンドポイントは`412 Precondition Failed`を返して失敗します。", 
+            "in": "header", 
+            "required": false, 
+            "example": "1", 
+            "schema": {
+              "type": "string"
+            }
+          }
+        ], 
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FileRequestUpdateRequest"
+              }
+            }
+          }
+        }, 
+        "responses": {
+          "200": {
+            "description": "更新されたファイルリクエストオブジェクトを返します。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FileRequest"
+                }
+              }
+            }
+          }, 
+          "401": {
+            "description": "`Authorization`ヘッダーで指定されているアクセストークンが認識されないか、指定されていない場合に返されます。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }, 
+          "403": {
+            "description": "更新を完了するための権限がユーザーに不足している場合に返されます。\n\n* `access_denied_insufficient_permissions` - 認証済みユーザーにファイルリクエストを更新するためのアクセス権限がない場合に返されます。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }, 
+          "404": {
+            "description": "ファイルリクエストが見つからない場合、または関連付けられたフォルダへのアクセス権限がユーザーに与えられていない場合に返されます。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }, 
+          "405": {
+            "description": "`file_request_id`が認識されていない形式で指定されている場合に返されます。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }, 
+          "412": {
+            "description": "`If-Match`ヘッダーがファイルリクエストの現在の`etag`値と一致しない場合にエラーを返します。これは、ファイルリクエストが前回リクエストされたときから変更されていることを示します。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }, 
+          "default": {
+            "description": "予期しないクライアントエラー。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        }
+      }, 
+      "delete": {
+        "operationId": "delete_file_requests_id", 
+        "summary": "ファイルリクエストを削除", 
+        "tags": [
+          "File requests"
+        ], 
+        "x-box-tag": "file_requests", 
+        "x-box-sanitized": true, 
+        "description": "ファイルリクエストを完全に削除します。", 
+        "parameters": [
+          {
+            "name": "file_request_id", 
+            "description": "ファイルリクエストを表す一意の識別子。\n\nファイルリクエストのIDを確認するには、ウェブアプリケーションでファイルリクエストビルダーにアクセスして、そのURLからIDをコピーします。たとえば、URLが`https://*.app.box.com/filerequest/123`の場合、`file_request_id`は`123`です。", 
+            "example": "123", 
+            "in": "path", 
+            "required": true, 
+            "schema": {
+              "type": "string"
+            }
+          }
+        ], 
+        "responses": {
+          "204": {
+            "description": "ファイルリクエストが正常に削除された場合は、空の応答を返します。"
+          }, 
+          "401": {
+            "description": "`Authorization`ヘッダーで指定されているアクセストークンが認識されないか、指定されていない場合に返されます。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }, 
+          "404": {
+            "description": "ファイルリクエストが見つからないかすでに削除されている場合、またはユーザーに関連付けられたフォルダへのアクセス権限が与えられていない場合に返されます。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }, 
+          "405": {
+            "description": "`file_request_id`が認識されていない形式で指定されている場合に返されます。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }, 
+          "default": {
+            "description": "予期しないクライアントエラー。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }, 
+    "/file_requests/{file_request_id}/copy": {
+      "post": {
+        "operationId": "post_file_requests_id_copy", 
+        "summary": "ファイルリクエストをコピー", 
+        "tags": [
+          "File requests"
+        ], 
+        "x-box-tag": "file_requests", 
+        "x-box-enable-explorer": true, 
+        "x-box-sanitized": true, 
+        "description": "あるフォルダにすでに存在する既存のファイルリクエストをコピーし、別のフォルダに適用します。", 
+        "parameters": [
+          {
+            "name": "file_request_id", 
+            "description": "ファイルリクエストを表す一意の識別子。\n\nファイルリクエストのIDを確認するには、ウェブアプリケーションでファイルリクエストビルダーにアクセスして、そのURLからIDをコピーします。たとえば、URLが`https://*.app.box.com/filerequest/123`の場合、`file_request_id`は`123`です。", 
+            "example": "123", 
+            "in": "path", 
+            "required": true, 
+            "schema": {
+              "type": "string"
+            }
+          }
+        ], 
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FileRequestCopyRequest"
+              }
+            }
+          }
+        }, 
+        "responses": {
+          "200": {
+            "description": "更新されたファイルリクエストオブジェクトを返します。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FileRequest"
+                }
+              }
+            }
+          }, 
+          "401": {
+            "description": "`Authorization`ヘッダーで指定されているアクセストークンが認識されないか、指定されていない場合に返されます。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }, 
+          "403": {
+            "description": "更新を完了するための権限がユーザーに不足している場合に返されます。\n\n* `access_denied_insufficient_permissions` - 認証済みユーザーにファイルリクエストを更新するためのアクセス権限がない場合に返されます。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }, 
+          "404": {
+            "description": "ファイルリクエストが見つからない場合、または関連付けられたフォルダへのアクセス権限がユーザーに与えられていない場合に返されます。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }, 
+          "405": {
+            "description": "`file_request_id`が認識されていない形式で指定されている場合に返されます。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }, 
+          "default": {
+            "description": "予期しないクライアントエラー。", 
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }, 
     "/folders/{folder_id}": {
       "get": {
         "operationId": "get_folders_id", 
@@ -4657,6 +5015,11 @@
                             "type": "string", 
                             "description": "共有リンクへのアクセスに必要なパスワード。\nパスワードを`null`に設定するとパスワードが削除されます。\n\nパスワードは`access`が`open`に設定されている場合にのみ設定できます。", 
                             "example": "do-not-use-this-password"
+                          }, 
+                          "vanity_name": {
+                            "type": "string", 
+                            "description": "共有リンクのURLで使用するカスタムバニティ名を定義します (例: `https://app.box.com/v/my-shared-link`)。\n\nバニティURLは通常の共有リンクよりもかなり推測しやすいため、機密性の高いコンテンツを共有する場合は、カスタムURLを使用しないでください。", 
+                            "example": "my-shared-link"
                           }, 
                           "unshared_at": {
                             "type": "string", 
@@ -9597,6 +9960,17 @@
             }
           }, 
           {
+            "name": "include_recent_shared_links", 
+            "description": "ユーザーが最近共有リンクを介してアクセスした項目を検索結果に含めるかどうかを定義します。\n\nこのパラメータがtrueに設定されている場合は、[共有リンクを含む検索結果](r://search_results_with_shared_links)のリストを返すよう、このAPIの応答形式が変更されることに注意してください。", 
+            "in": "query", 
+            "required": false, 
+            "example": true, 
+            "schema": {
+              "type": "boolean", 
+              "default": false
+            }
+          }, 
+          {
             "name": "fields", 
             "description": "応答に含める属性のカンマ区切りリスト。このパラメータを使用すると、標準の応答には通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドは応答に含まれず、リクエストしたフィールドのほかには、簡易版レプリゼンテーションのフィールドしか返されないことに注意してください。", 
             "in": "query", 
@@ -9633,7 +10007,14 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/SearchResults"
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/SearchResults"
+                    }, 
+                    {
+                      "$ref": "#/components/schemas/SearchResultsWithSharedLinks"
+                    }
+                  ]
                 }
               }
             }
@@ -10657,6 +11038,11 @@
                         "description": "共有リンクへのアクセスに必要なパスワード。\nパスワードを`null`に設定するとパスワードが削除されます。\n\nパスワードは`access`が`open`に設定されている場合にのみ設定できます。", 
                         "example": "do-not-use-this-password"
                       }, 
+                      "vanity_name": {
+                        "type": "string", 
+                        "description": "共有リンクのURLで使用するカスタムバニティ名を定義します (例: `https://app.box.com/v/my-shared-link`)。\n\nバニティURLは通常の共有リンクよりもかなり推測しやすいため、機密性の高いコンテンツを共有する場合は、カスタムURLを使用しないでください。", 
+                        "example": "my-shared-link"
+                      }, 
                       "unshared_at": {
                         "type": "string", 
                         "format": "date-time", 
@@ -10837,6 +11223,11 @@
                         "type": "string", 
                         "description": "共有リンクへのアクセスに必要なパスワード。\nパスワードを`null`に設定するとパスワードが削除されます。\n\nパスワードは`access`が`open`に設定されている場合にのみ設定できます。", 
                         "example": "do-not-use-this-password"
+                      }, 
+                      "vanity_name": {
+                        "type": "string", 
+                        "description": "共有リンクのURLで使用するカスタムバニティ名を定義します (例: `https://app.box.com/v/my-shared-link`)。\n\nバニティURLは通常の共有リンクよりもかなり推測しやすいため、機密性の高いコンテンツを共有する場合は、カスタムURLを使用しないでください。", 
+                        "example": "my-shared-link"
                       }, 
                       "unshared_at": {
                         "type": "string", 
@@ -19255,6 +19646,87 @@
           }
         }
       }, 
+      "FileRequestUpdateRequest": {
+        "title": "ファイルリクエスト (更新)", 
+        "type": "object", 
+        "description": "ファイルリクエストを更新するためのリクエスト本文。", 
+        "properties": {
+          "title": {
+            "type": "string", 
+            "description": "ファイルリクエストの新しいタイトル (省略可)。これを使用して、ファイルリクエストのタイトルを変更できます。\n\nデフォルトでは、既存のファイルリクエストの値になります。", 
+            "example": "Please upload required documents"
+          }, 
+          "description": {
+            "type": "string", 
+            "description": "ファイルリクエストの新しい説明 (省略可)。これを使用して、ファイルリクエストの説明を変更できます。\n\nデフォルトでは、既存のファイルリクエストの値になります。", 
+            "example": "Please upload required documents"
+          }, 
+          "status": {
+            "type": "string", 
+            "description": "ファイルリクエストの新しいステータス (省略可)。\n\nこのステータスを`inactive`に設定すると、ファイルリクエストでは新しい送信を受け付けなくなり、ファイルリクエストのURLにアクセスした場合は`HTTP 404`ステータスコードが返されます。\n\nデフォルトでは、既存のファイルリクエストの値になります。", 
+            "example": "active", 
+            "enum": [
+              "active", 
+              "inactive"
+            ]
+          }, 
+          "is_email_required": {
+            "type": "boolean", 
+            "example": true, 
+            "description": "ファイルリクエストの送信者に、メールアドレスの指定を義務付けるかどうか。\n\nこれをtrueに設定すると、Box UIのファイルリクエストフォームにメールフィールドが表示されます。\n\nデフォルトでは、既存のファイルリクエストの値になります。"
+          }, 
+          "is_description_required": {
+            "type": "boolean", 
+            "example": true, 
+            "description": "ファイルリクエストの送信者に、送信するファイルの説明の指定を義務付けるかどうか。\n\nこれをtrueに設定すると、Box UIのファイルリクエストフォームに説明フィールドが表示されます。\n\nデフォルトでは、既存のファイルリクエストの値になります。"
+          }, 
+          "expires_at": {
+            "type": "string", 
+            "format": "date-time", 
+            "description": "ファイルリクエストが新しい送信を受け付けなくなる日付。\n\nこの日付を過ぎると、`status`は自動的に`inactive`に設定されます。\n\nデフォルトでは、既存のファイルリクエストの値になります。", 
+            "example": "2020-09-28T10:53:43-08:00"
+          }
+        }
+      }, 
+      "FileRequestCopyRequest": {
+        "title": "ファイルリクエスト (コピー)", 
+        "type": "object", 
+        "description": "ファイルリクエストをコピーするためのリクエスト本文。", 
+        "required": [
+          "folder"
+        ], 
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/FileRequestUpdateRequest"
+          }, 
+          {
+            "properties": {
+              "folder": {
+                "type": "object", 
+                "description": "新しいファイルリクエストを関連付けるフォルダ。", 
+                "required": [
+                  "id"
+                ], 
+                "properties": {
+                  "type": {
+                    "type": "string", 
+                    "example": "folder", 
+                    "description": "`folder`", 
+                    "enum": [
+                      "folder"
+                    ]
+                  }, 
+                  "id": {
+                    "type": "string", 
+                    "example": "42037322", 
+                    "description": "新しいファイルリクエストを関連付けるフォルダのID。"
+                  }
+                }
+              }
+            }
+          }
+        ]
+      }, 
       "ClientError": {
         "title": "クライアントエラー", 
         "type": "object", 
@@ -22057,6 +22529,126 @@
               "file"
             ], 
             "nullable": false
+          }
+        }
+      }, 
+      "FileRequest": {
+        "title": "ファイルリクエスト", 
+        "type": "object", 
+        "x-box-resource-id": "file_request", 
+        "x-box-tag": "file_requests", 
+        "description": "任意のファイルリクエストAPIエンドポイントからデフォルトで返される、ファイルリクエストの標準レプリゼンテーション。", 
+        "properties": {
+          "id": {
+            "type": "string", 
+            "description": "このファイルリクエストの一意の識別子。", 
+            "readOnly": true, 
+            "example": "42037322"
+          }, 
+          "type": {
+            "type": "string", 
+            "description": "`file-request`", 
+            "example": "file-request", 
+            "enum": [
+              "file-request"
+            ], 
+            "readOnly": true
+          }, 
+          "title": {
+            "type": "string", 
+            "description": "ファイルリクエストのタイトル。これは、Box UIで、ファイルをアップロードしているユーザーに表示されます。\n\nデフォルトでは、このファイルリクエストを作成するためにコピーされたファイルリクエストのタイトルになります。", 
+            "example": "Please upload documents"
+          }, 
+          "description": {
+            "type": "string", 
+            "nullable": true, 
+            "description": "このファイルリクエストの説明 (省略可)。これは、Box UIで、ファイルをアップロードしているユーザーに表示されます。\n\nデフォルトでは、このファイルリクエストを作成するためにコピーされたファイルリクエストの説明になります。", 
+            "example": "Following documents are requested for your process"
+          }, 
+          "status": {
+            "type": "string", 
+            "example": "active", 
+            "description": "ファイルリクエストのステータス。デフォルトでは`active`になります。\n\nこのステータスを`inactive`に設定すると、ファイルリクエストでは新しい送信を受け付けなくなり、ファイルリクエストのURLにアクセスした場合は`HTTP 404`ステータスコードが返されます。\n\nデフォルトでは、このファイルリクエストを作成するためにコピーされたファイルリクエストのステータスになります。", 
+            "enum": [
+              "active", 
+              "inactive"
+            ]
+          }, 
+          "is_email_required": {
+            "type": "boolean", 
+            "example": true, 
+            "description": "ファイルリクエストの送信者に、メールアドレスの指定を義務付けるかどうか。\n\nこれをtrueに設定すると、Box UIのファイルリクエストフォームにメールフィールドが表示されます。\n\nデフォルトでは、このファイルリクエストを作成するためにコピーされたファイルリクエストの設定になります。"
+          }, 
+          "is_description_required": {
+            "type": "boolean", 
+            "example": true, 
+            "description": "ファイルリクエストの送信者に、送信するファイルの説明の指定を義務付けるかどうか。\n\nこれをtrueに設定すると、Box UIのファイルリクエストフォームに説明フィールドが表示されます。\n\nデフォルトでは、このファイルリクエストを作成するためにコピーされたファイルリクエストの設定になります。"
+          }, 
+          "expires_at": {
+            "type": "string", 
+            "format": "date-time", 
+            "description": "ファイルリクエストが新しい送信を受け付けなくなる日付。\n\nこの日付を過ぎると、`status`は自動的に`inactive`に設定されます。", 
+            "example": "2020-09-28T10:53:43-08:00"
+          }, 
+          "folder": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Folder--Mini"
+              }, 
+              {
+                "description": "このファイルリクエストが関連付けられているフォルダ。\n\nファイルリクエストフォームを使用して送信されたファイルは、このフォルダにアップロードされます。"
+              }
+            ], 
+            "nullable": false
+          }, 
+          "url": {
+            "type": "string", 
+            "description": "このファイルリクエストに対して生成されたURL。このURLをユーザーと共有すると、ユーザーが関連付けられたフォルダにファイルをアップロードできるようになります。", 
+            "example": "https://cloud.app.box.com/f/19e57f40ace247278a8e3d336678c64a", 
+            "readOnly": true
+          }, 
+          "etag": {
+            "type": "string", 
+            "example": "1", 
+            "nullable": true, 
+            "description": "このファイルのHTTP `etag`。これは、ファイルリクエストの更新時に`If-Match`ヘッダーと組み合わせて使用できます。そのヘッダーを指定すると、`If-Match`ヘッダーで指定された`etag`とファイルリクエストの`etag`がまだ一致している場合のみ、ファイルリクエストが変更されます。"
+          }, 
+          "created_by": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/User--Mini"
+              }, 
+              {
+                "description": "このファイルリクエストを作成したユーザー。"
+              }
+            ]
+          }, 
+          "created_at": {
+            "type": "string", 
+            "format": "date-time", 
+            "nullable": false, 
+            "description": "ファイルリクエストが作成された日時。", 
+            "example": "2020-09-28T10:53:43-08:00"
+          }, 
+          "updated_by": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/User--Mini"
+              }, 
+              {
+                "description": "このファイルリクエストを最後に変更したユーザー。"
+              }, 
+              {
+                "nullable": false
+              }
+            ]
+          }, 
+          "updated_at": {
+            "type": "string", 
+            "format": "date-time", 
+            "nullable": false, 
+            "description": "ファイルリクエストが最後に更新された日時。", 
+            "example": "2020-09-28T10:53:43-08:00"
           }
         }
       }, 
@@ -24910,41 +25502,126 @@
         "x-box-resource-id": "search_results", 
         "x-box-tag": "search", 
         "description": "検索クエリに一致するファイル、フォルダ、およびウェブリンクのリスト。", 
-        "properties": {
-          "total_count": {
-            "description": "検索結果の最後のエントリのオフセットに1を加算をした値。\nコレクション内のエントリの合計数は、`total_count`よりも少ない場合があります。", 
-            "example": 5000, 
-            "type": "integer", 
-            "format": "int64"
-          }, 
-          "limit": {
-            "description": "この検索で使用された制限値。許容される最大値を超えていない限り、クエリパラメータの`limit`と等しくなります。", 
-            "example": 1000, 
-            "type": "integer", 
-            "format": "int64"
-          }, 
-          "offset": {
-            "description": "このセットに含まれる最初のエントリのゼロから始まるオフセット。これは、`offset`クエリパラメータを使用した場合と同じになります。", 
-            "example": 2000, 
-            "type": "integer", 
-            "format": "int64"
-          }, 
-          "entries": {
-            "description": "指定されたクエリの検索結果。", 
-            "type": "array", 
-            "items": {
-              "oneOf": [
-                {
-                  "$ref": "#/components/schemas/File"
-                }, 
-                {
-                  "$ref": "#/components/schemas/Folder"
-                }, 
-                {
-                  "$ref": "#/components/schemas/WebLink"
-                }
-              ]
+        "allOf": [
+          {
+            "type": "object", 
+            "properties": {
+              "total_count": {
+                "description": "検索結果の最後のエントリのオフセットに1を加算をした値。\nコレクション内のエントリの合計数は、`total_count`よりも少ない場合があります。", 
+                "example": 5000, 
+                "type": "integer", 
+                "format": "int64"
+              }, 
+              "limit": {
+                "description": "この検索で使用された制限値。許容される最大値を超えていない限り、クエリパラメータの`limit`と等しくなります。", 
+                "example": 1000, 
+                "type": "integer", 
+                "format": "int64"
+              }, 
+              "offset": {
+                "description": "このセットに含まれる最初のエントリのゼロから始まるオフセット。これは、`offset`クエリパラメータを使用した場合と同じになります。", 
+                "example": 2000, 
+                "type": "integer", 
+                "format": "int64"
+              }
             }
+          }, 
+          {
+            "properties": {
+              "entries": {
+                "description": "指定されたクエリの検索結果。", 
+                "type": "array", 
+                "items": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/File"
+                    }, 
+                    {
+                      "$ref": "#/components/schemas/Folder"
+                    }, 
+                    {
+                      "$ref": "#/components/schemas/WebLink"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }, 
+      "SearchResultsWithSharedLinks": {
+        "title": "検索結果 (複数の共有リンクを含む)", 
+        "type": "object", 
+        "x-box-resource-id": "search_results_with_shared_links", 
+        "x-box-tag": "search", 
+        "description": "検索クエリと一致したファイル、フォルダ、ウェブリンクのリスト (項目がユーザーと共有されたときに使用されたすべての共有リンクに関する追加情報を含む)。\n\nこの応答形式は、`include_recent_shared_links`クエリパラメータが`true`に設定されている場合にのみ返されます。", 
+        "allOf": [
+          {
+            "type": "object", 
+            "properties": {
+              "total_count": {
+                "description": "検索結果の最後のエントリのオフセットに1を加算をした値。\nコレクション内のエントリの合計数は、`total_count`よりも少ない場合があります。", 
+                "example": 5000, 
+                "type": "integer", 
+                "format": "int64"
+              }, 
+              "limit": {
+                "description": "この検索で使用された制限値。許容される最大値を超えていない限り、クエリパラメータの`limit`と等しくなります。", 
+                "example": 1000, 
+                "type": "integer", 
+                "format": "int64"
+              }, 
+              "offset": {
+                "description": "このセットに含まれる最初のエントリのゼロから始まるオフセット。これは、`offset`クエリパラメータを使用した場合と同じになります。", 
+                "example": 2000, 
+                "type": "integer", 
+                "format": "int64"
+              }
+            }
+          }, 
+          {
+            "properties": {
+              "entries": {
+                "description": "指定されたクエリの検索結果 (項目がユーザーと共有されたときに使用されたすべての共有リンクに関する追加情報を含む)。", 
+                "type": "array", 
+                "items": {
+                  "$ref": "#/components/schemas/SearchResultWithSharedLink"
+                }
+              }
+            }
+          }
+        ]
+      }, 
+      "SearchResultWithSharedLink": {
+        "title": "検索結果 (共有リンクを含む)", 
+        "type": "object", 
+        "x-box-resource-id": "search_result_with_shared_link", 
+        "x-box-tag": "search", 
+        "description": "検索クエリと一致したファイル、フォルダ、ウェブリンクの単一リスト (項目がユーザーと共有されたときに使用された共有リンクに関する追加情報を含む)。\n\nこの応答形式は、`include_recent_shared_links`クエリパラメータが`true`に設定されている場合にのみ返されます。", 
+        "properties": {
+          "accessible_via_shared_link": {
+            "description": "ユーザーがこの項目にアクセスする際に使用する共有リンク (省略可)。この値は、ユーザーが最近共有リンクを介してファイルにアクセスした項目のみに返されます。その他すべての項目には、`null`が返されます。", 
+            "example": "https://www.box.com/s/vspke7y05sb214wjokpk"
+          }, 
+          "item": {
+            "allOf": [
+              {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/File"
+                  }, 
+                  {
+                    "$ref": "#/components/schemas/Folder"
+                  }, 
+                  {
+                    "$ref": "#/components/schemas/WebLink"
+                  }
+                ]
+              }, 
+              {
+                "description": "検索クエリと一致したファイル、フォルダ、またはウェブリンク。"
+              }
+            ]
           }
         }
       }, 
@@ -27900,6 +28577,10 @@
     {
       "name": "Events", 
       "x-box-tag": "events"
+    }, 
+    {
+      "name": "ファイルリクエスト", 
+      "x-box-tag": "file_requests"
     }, 
     {
       "name": "ファイルバージョンのリーガルホールド", 
