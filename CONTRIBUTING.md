@@ -21,6 +21,7 @@ making contributions.
 1. [Adding a new API endpoint](./docs/add-endpoint.md)
 1. [Contributing a pull request](./docs/pull-request.md)
 1. [Markdown styleguide](./docs/markdown.md)
+1. [Updating dependencies](./docs/dependencies.md)
 
 ## Deployment
 
@@ -33,8 +34,8 @@ sites, as well as the Postman collections.
 
 ## Translation
 
-Once every few weeks a snapshot of the `en` branch is created on the
-`en-snapshot` branch and imported into out our in-house translation system
+On a regular schedule a snapshot of the `en` branch is created on the
+`en-snapshot` branch and imported into our in-house translation system
 (`Moji`) and sent off for translation.
 
 Once the translation is completed, the translated content is pushed to the `jp`
