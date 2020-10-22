@@ -10,20 +10,13 @@
 This project has a few prerequisites.
 
 * [`Git`](https://git-scm.com/) to download the source code
-* When using Docker
-  * A local installation of Docker. I'd recommend the
-    [Docker Desktop](https://www.docker.com/products/docker-desktop)
-    on Mac.
-  * [Docker Compose](https://docs.docker.com/compose/) which can be
-    installed with `Homebrew` using `brew install docker-compose`.
-* When not using Docker
-  * [`Node.js`](https://nodejs.org/) for compilation and linting of the API
-    specification. Ideally Node 12 or above.
-  * [`Yarn`](https://yarnpkg.com/) is the Node package manager for this project.
-    It can be installed with `npm i -g yarn` if Node is installed.
-  * [`YamlLint`](https://github.com/adrienverge/yamllint) is the linter to validate
-    `Yaml` files. It can be installed with `brew install yamllint` if your machine
-    has [`Homebrew`](https://brew.sh) installed.
+* [`Node.js`](https://nodejs.org/) for compilation and linting of the API
+  specification. Ideally Node 12 or above.
+* [`Yarn`](https://yarnpkg.com/) is the Node package manager for this project.
+  It can be installed with `npm i -g yarn` if Node is installed.
+* [`YamlLint`](https://github.com/adrienverge/yamllint) is the linter to validate
+  `Yaml` files. It can be installed with `brew install yamllint` if your machine
+  has [`Homebrew`](https://brew.sh) installed.
 
 ## Download the code
 
@@ -33,14 +26,6 @@ dependencies.
 ```sh
 git clone git@github.com:box/box-openapi.git box-openapi
 cd box-openapi
-```
-
-## Run with Docker
-
-To run with Docker
-
-```sh
-docker-compose up --build
 ```
 
 ## Run with Node
