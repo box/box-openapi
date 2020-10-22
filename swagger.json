@@ -2726,13 +2726,13 @@
             }
           },
           "400": {
-            "description": "Returns an error if some of the parameters are missing or\nnot valid.\n\n* `bad_request` when a parameter is missing or incorrect. This error also\n  happens when a password is set for a shared link with an access type\n  of `open`.\n* `item_name_too_long` when the folder name is too long.\n* `item_name_invalid` when the folder name contains\n  non-valid characters.",
+            "description": "Returns an error if some of the parameters are missing or\nnot valid, or if a folder lock is preventing a move operation.\n\n* `bad_request` when a parameter is missing or incorrect. This error also\n  happens when a password is set for a shared link with an access type\n  of `open`.\n* `item_name_too_long` when the folder name is too long.\n* `item_name_invalid` when the folder name contains\n  non-valid characters.",
             "schema": {
               "$ref": "#/definitions/ClientError"
             }
           },
           "403": {
-            "description": "Returns an error if the user does not have the required\naccess to perform the action.\n\n* `access_denied_insufficient_permissions`: Returned when the\n  user does not have access to the folder or parent folder.\n\n* `insufficient_scope`: Returned an error if the application\n  does not have the right scope to update folders. Make sure\n  your application has been configured to read and write all files\n  and folders stored in Box.\n\n* `forbidden`: Returned when the user is not allowed to perform this\n  action for other users. This can include trying to create a\n  Shared Link with a `company` access level on a free account.",
+            "description": "Returns an error if the user does not have the required\naccess to perform the action.\n\n* `access_denied_insufficient_permissions`: Returned when the\n  user does not have access to the folder or parent folder, or if the\n  folder is being moved and a folder lock has been applied to prevent\n  such operations.\n\n* `insufficient_scope`: Returned an error if the application\n  does not have the right scope to update folders. Make sure\n  your application has been configured to read and write all files\n  and folders stored in Box.\n\n* `forbidden`: Returned when the user is not allowed to perform this\n  action for other users. This can include trying to create a\n  Shared Link with a `company` access level on a free account.",
             "schema": {
               "$ref": "#/definitions/ClientError"
             }
@@ -2804,7 +2804,7 @@
             "description": "Returns an empty response when the folder is successfully deleted\nor moved to the trash."
           },
           "403": {
-            "description": "Returns an error if the user does not have the required\naccess to perform the action.\n\n* `access_denied_insufficient_permissions`: Returned when the\n  user does not have access to the folder.\n\n* `insufficient_scope`: Returned an error if the application\n  does not have the right scope to delete folders. Make sure\n  your application has been configured to read and write all files\n  and folders stored in Box.",
+            "description": "Returns an error if the user does not have the required\naccess to perform the action.\n\n* `access_denied_insufficient_permissions`: Returned when the\n  user does not have access to the folder, or when a folder lock has been\n  applied to the folder to prevent deletion.\n\n* `insufficient_scope`: Returned an error if the application\n  does not have the right scope to delete folders. Make sure\n  your application has been configured to read and write all files\n  and folders stored in Box.",
             "schema": {
               "$ref": "#/definitions/ClientError"
             }
@@ -4059,6 +4059,183 @@
           },
           "404": {
             "description": "Returns an error if the folder did not have\na watermark applied to it",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          }
+        }
+      }
+    },
+    "/folder_locks": {
+      "get": {
+        "operationId": "get_folder_locks",
+        "summary": "List folder locks on folder",
+        "tags": [
+          "Folder Locks"
+        ],
+        "description": "Retrieves folder lock details for a given folder.",
+        "parameters": [
+          {
+            "name": "folder_id",
+            "description": "The unique identifier that represent a folder.\n\nThe ID for any folder can be determined\nby visiting this folder in the web application\nand copying the ID from the URL. For example,\nfor the URL `https://*.app.box.com/folder/123`\nthe `folder_id` is `123`.\n\nThe root folder of a Box account is\nalways represented by the ID `0`.",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns details for all folder locks applied to the folder, including the\nlock type and user that applied the lock.",
+            "schema": {
+              "$ref": "#/definitions/FolderLocks"
+            }
+          },
+          "403": {
+            "description": "Returned when the access token provided in the `Authorization` header\nis not recognized or not provided.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "404": {
+            "description": "Returned if the folder is not found, or the user does not\nhave access to the folder.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "405": {
+            "description": "Returned if the `folder_id` is not in a recognized format.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "post_folder_locks",
+        "summary": "Create folder lock on folder",
+        "tags": [
+          "Folder Locks"
+        ],
+        "description": "Creates a folder lock on a folder, preventing it from being moved and/or\ndeleted.",
+        "responses": {
+          "200": {
+            "description": "Returns the instance of the folder lock that was applied to the folder,\nincluding the user that applied the lock and the operations set.",
+            "schema": {
+              "$ref": "#/definitions/FolderLock"
+            }
+          },
+          "400": {
+            "description": "Returns an error when the request body is not valid.\n\n* `schema_validation_failed` - The request body contains a value for\na field that either does not exist, or for which the value or type does\nnot match the expected field type. An example might be an unknown option\nfor an `enum` or `multiSelect` field.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "404": {
+            "description": "Returns an error when the folder could not be found.\n\n* `not_found` - The folder could not be found, or the user does not have\naccess to the folder.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "required": [
+                "folder"
+              ],
+              "properties": {
+                "locked_operations": {
+                  "type": "object",
+                  "description": "The operations to lock on the folder. If `locked_operations` is\nincluded in the request, both `move` and `delete` must also be\nincluded and both set to `true`.",
+                  "required": [
+                    "move",
+                    "delete"
+                  ],
+                  "properties": {
+                    "move": {
+                      "type": "boolean",
+                      "description": "Whether moving the folder should be locked."
+                    },
+                    "delete": {
+                      "type": "boolean",
+                      "description": "Whether deleting the folder should be locked."
+                    }
+                  }
+                },
+                "folder": {
+                  "type": "object",
+                  "description": "The folder to apply the lock to.",
+                  "required": [
+                    "type",
+                    "id"
+                  ],
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "description": "The content type the lock is being applied to. Only `folder`\nis supported."
+                    },
+                    "id": {
+                      "type": "string",
+                      "description": "The ID of the folder."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "/folder_locks/{folder_lock_id}": {
+      "delete": {
+        "operationId": "delete_folder_locks_id",
+        "summary": "Delete folder lock",
+        "description": "Deletes a folder lock on a given folder.",
+        "tags": [
+          "Folder Locks"
+        ],
+        "parameters": [
+          {
+            "name": "folder_lock_id",
+            "description": "The ID of the folder lock.",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Returns an empty response when the folder lock is successfully deleted."
+          },
+          "403": {
+            "description": "Returns an error if the user does not have the required\naccess to perform the action.\n\n* `access_denied_insufficient_permissions`: Returned when the\n  user does not have access to the folder.\n\n* `insufficient_scope`: Returned an error if the application\n  does not have the right scope to delete folders. Make sure\n  your application has been configured to read and write all files\n  and folders stored in Box.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "404": {
+            "description": "Returns an error if the folder could not be found,\nor the authenticated user does not have access to the folder.\n\n* `not_found` when the authenticated user does not have access\n  to the folder.",
             "schema": {
               "$ref": "#/definitions/ClientError"
             }
@@ -14671,6 +14848,102 @@
         }
       ]
     },
+    "FolderLocks": {
+      "title": "Folder Locks",
+      "type": "object",
+      "description": "A list of folder locks",
+      "allOf": [
+        {
+          "type": "object",
+          "description": "The part of an API response that describes marker\nbased pagination",
+          "properties": {
+            "limit": {
+              "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
+              "type": "integer",
+              "format": "int64"
+            },
+            "next_marker": {
+              "description": "The marker for the start of the next page of results.",
+              "type": "integer",
+              "format": "int64"
+            },
+            "prev_marker": {
+              "description": "The marker for the start of the previous page of results.",
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        },
+        {
+          "properties": {
+            "entries": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/FolderLock"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "FolderLock": {
+      "title": "Folder Lock",
+      "type": "object",
+      "description": "Folder locks define access restrictions placed by folder owners\nto prevent specific folders from being moved or deleted.",
+      "properties": {
+        "folder": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/Folder--Mini"
+            },
+            {
+              "description": "The folder that the lock applies to."
+            }
+          ]
+        },
+        "id": {
+          "type": "string",
+          "description": "The unique identifier for this folder lock."
+        },
+        "type": {
+          "type": "string",
+          "description": "The object type, always `folder_lock`."
+        },
+        "created_by": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/User--Base"
+            },
+            {
+              "description": "The user or group that created the lock."
+            }
+          ]
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the folder lock object was created."
+        },
+        "locked_operations": {
+          "type": "object",
+          "description": "The operations that have been locked. Currently the `move`\nand `delete` operations cannot be locked separately, and both need to be\nset to `true`.\n",
+          "properties": {
+            "move": {
+              "type": "boolean",
+              "description": "Whether moving the folder is restricted."
+            },
+            "delete": {
+              "type": "boolean",
+              "description": "Whether deleting the folder is restricted."
+            }
+          }
+        },
+        "lock_type": {
+          "type": "string",
+          "description": "The lock type, always `freeze`."
+        }
+      }
+    },
     "MetadataTemplates": {
       "title": "Metadata templates",
       "type": "object",
@@ -18107,6 +18380,31 @@
         }
       ]
     },
+    "User--Base": {
+      "title": "User (Base)",
+      "type": "object",
+      "x-box-variants": [
+        "base",
+        "mini",
+        "standard",
+        "full"
+      ],
+      "x-box-variant": "base",
+      "description": "A mini representation of a user, used when\nnested within another resource.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The unique identifier for this user"
+        },
+        "type": {
+          "type": "string",
+          "description": "`user`",
+          "enum": [
+            "user"
+          ]
+        }
+      }
+    },
     "Comment--Base": {
       "title": "Comment (Base)",
       "type": "object",
@@ -18628,31 +18926,6 @@
           "description": "`folder`",
           "enum": [
             "folder"
-          ]
-        }
-      }
-    },
-    "User--Base": {
-      "title": "User (Base)",
-      "type": "object",
-      "x-box-variants": [
-        "base",
-        "mini",
-        "standard",
-        "full"
-      ],
-      "x-box-variant": "base",
-      "description": "A mini representation of a user, used when\nnested within another resource.",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "The unique identifier for this user"
-        },
-        "type": {
-          "type": "string",
-          "description": "`user`",
-          "enum": [
-            "user"
           ]
         }
       }
