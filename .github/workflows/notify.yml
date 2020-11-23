@@ -4,10 +4,10 @@ name: Notify
 # Defines when this action should be run
 on:
   # Run on any Push
-  push: 
+  push:
     branches:
       - jp
-    
+
 jobs:
   # A task that notifies Netlify of changes to the jp branch
   notify-from-jp:
@@ -20,20 +20,20 @@ jobs:
         node-version: [14.x]
 
     steps:
-      - name: 'Trigger Netlify deployment'
-        uses: joelwmale/webhook-action@master
+      - name: "Trigger Netlify deployment"
+        uses: joelwmale/webhook-action@2.0.2
         env:
           WEBHOOK_URL: ${{ secrets.NETLIFY_BOXDEV_JP_WEBHOOK }}
-          data: '{}'
-          
+          data: "{}"
+
       - name: Notify other repositories of update
         uses: peter-evans/repository-dispatch@v1
         with:
           token: ${{ secrets.REPO_ACCESS_TOKEN }}
           repository: box/box-postman
           event-type: openapi-update
-          client-payload: '{}'
-          
+          client-payload: "{}"
+
       - name: Send Slack notification
         uses: Ilshidur/action-slack@2.0.2
         env:

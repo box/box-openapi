@@ -4,7 +4,7 @@ name: CI
 # Defines when this action should be run
 on:
   # Run on any Push
-  push: 
+  push:
     branches-ignore:
       - en
       - en-staging
@@ -13,7 +13,7 @@ on:
       - jp-partial
   # Run for PRs on main and staging
   pull_request:
-    branches: [ main, staging ]
+    branches: [main, staging]
 
 jobs:
   # The lint job checks that all content is sanitized,
@@ -31,31 +31,31 @@ jobs:
 
     # The following steps are performed for each lint job
     steps:
-    - name: Check out the repository
-      uses: actions/checkout@v2
+      - name: Check out the repository
+        uses: actions/checkout@v2
 
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
-      with:
-        python-version: ${{ matrix.python-version }}
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
 
-    - name: Install Python dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install yamllint
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install yamllint
 
-    - name: Set up Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v1
-      with:
-        node-version: ${{ matrix.node-version }}
+      - name: Set up Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
 
-    - name: Install Node dependencies
-      run: |
-        yarn install
+      - name: Install Node dependencies
+        run: |
+          yarn install
 
-    - name: Lint the content
-      run: |
-        yarn lint
+      - name: Lint the content
+        run: |
+          yarn lint
 
   # The deploy task actually deploys any changes to the en branch
   push-to-en:
@@ -85,7 +85,7 @@ jobs:
           yarn build:swagger
 
       - name: Push compiled content
-        uses: s0/git-publish-subdir-action@develop
+        uses: s0/git-publish-subdir-action@v2.4.0
         env:
           REPO: self
           BRANCH: en
@@ -93,7 +93,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Push GH pages for redundancy
-        uses: s0/git-publish-subdir-action@develop
+        uses: s0/git-publish-subdir-action@v2.4.0
         env:
           REPO: self
           BRANCH: gh-pages
@@ -101,7 +101,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Push Swagger 2.0 backport
-        uses: s0/git-publish-subdir-action@develop
+        uses: s0/git-publish-subdir-action@v2.4.0
         env:
           REPO: self
           BRANCH: swagger-2.0
@@ -114,19 +114,19 @@ jobs:
           token: ${{ secrets.REPO_ACCESS_TOKEN }}
           repository: box/box-postman
           event-type: openapi-update
-          client-payload: '{}'
+          client-payload: "{}"
 
-      - name: 'Trigger Netlify deployment'
-        uses: joelwmale/webhook-action@master
+      - name: "Trigger Netlify deployment"
+        uses: joelwmale/webhook-action@2.0.2
         env:
           WEBHOOK_URL: ${{ secrets.NETLIFY_BOXDEV_WEBHOOK }}
-          data: '{}'
+          data: "{}"
 
-      - name: 'Trigger Netlify deployment (Box.dev mirror)'
-        uses: joelwmale/webhook-action@master
+      - name: "Trigger Netlify deployment (Box.dev mirror)"
+        uses: joelwmale/webhook-action@2.0.2
         env:
           WEBHOOK_URL: ${{ secrets.NETLIFY_BOXDEV_MIRROR_WEBHOOK }}
-          data: '{}'
+          data: "{}"
 
       - name: Send Slack notification
         uses: Ilshidur/action-slack@2.0.2
@@ -174,18 +174,18 @@ jobs:
           yarn build
 
       - name: Push compiled content
-        uses: s0/git-publish-subdir-action@develop
+        uses: s0/git-publish-subdir-action@v2.4.0
         env:
           REPO: self
           BRANCH: en-staging
           FOLDER: compiled/openapi
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: 'Trigger Netlify deployment'
-        uses: joelwmale/webhook-action@master
+      - name: "Trigger Netlify deployment"
+        uses: joelwmale/webhook-action@2.0.2
         env:
           WEBHOOK_URL: ${{ secrets.NETLIFY_BOXDEV_STAGING_WEBHOOK }}
-          data: '{}'
+          data: "{}"
 
       - name: Send Slack notification
         uses: Ilshidur/action-slack@2.0.2
