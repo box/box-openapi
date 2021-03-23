@@ -7160,7 +7160,7 @@
     "/folder_locks": {
       "get": {
         "operationId": "get_folder_locks",
-        "summary": "List folder locks on folder",
+        "summary": "List folder locks",
         "tags": [
           "Folder Locks"
         ],
@@ -7236,7 +7236,7 @@
       },
       "post": {
         "operationId": "post_folder_locks",
-        "summary": "Create folder lock on folder",
+        "summary": "Create folder lock",
         "tags": [
           "Folder Locks"
         ],
@@ -13756,7 +13756,7 @@
         "tags": [
           "Transfer folders"
         ],
-        "description": "Move all of the items (files, folders and workflows) owned by a user into\nanother user's account\n\nOnly the root folder (`0`) can be transferred.\n\nFolders can only be moved across users by users with administrative\npermissions.\n\nAll existing shared links, collaborations at the folder-level, and\ncollaborations at the individual file-level are currently not transferred\nduring the operation.\n\nThis call will be performed synchronously which might lead to a slow response\nwhen the source user has a large number of items in all of its folders.\n\nIf the destination path has a metadata cascade policy attached to any of\nthe parent folders, a metadata cascade operation will be kicked off\nasynchronously.\n\nThere is currently no way to check for when this operation is finished.\n\nThe destination folder's name will be in the format `{User}'s Files and\nFolders`, where `{User}` is the display name of the user.\n\nTo make this API call your application will need to have the \"Read and write\nall files and folders stored in Box\" scope enabled.\n\nPlease make sure the destination user has access to `Relay` or `Relay Lite`,\nand has access to the files and folders involved in the workflows being\ntransferred.\n\nAdmins will receive an email when the operation is completed.",
+        "description": "Move all of the items (files, folders and workflows) owned by a user into\nanother user's account\n\nOnly the root folder (`0`) can be transferred.\n\nFolders can only be moved across users by users with administrative\npermissions.\n\nAll existing shared links and folder-level collaborations are transferred\nduring the operation. Please note that while collaborations at the individual\nfile-level are transferred during the operation, the collaborations are\ndeleted when the original user is deleted.\n\nThis call will be performed synchronously which might lead to a slow response\nwhen the source user has a large number of items in all of its folders.\n\nIf the destination path has a metadata cascade policy attached to any of\nthe parent folders, a metadata cascade operation will be kicked off\nasynchronously.\n\nThere is currently no way to check for when this operation is finished.\n\nThe destination folder's name will be in the format `{User}'s Files and\nFolders`, where `{User}` is the display name of the user.\n\nTo make this API call your application will need to have the \"Read and write\nall files and folders stored in Box\" scope enabled.\n\nPlease make sure the destination user has access to `Relay` or `Relay Lite`,\nand has access to the files and folders involved in the workflows being\ntransferred.\n\nAdmins will receive an email when the operation is completed.",
         "parameters": [
           {
             "name": "user_id",
@@ -14731,7 +14731,7 @@
     "/groups/{group_id}/collaborations": {
       "get": {
         "operationId": "get_groups_id_collaborations",
-        "summary": "List collaborations for group",
+        "summary": "List group collaborations",
         "x-box-tag": "list_collaborations",
         "tags": [
           "Collaborations (List)"
@@ -24356,7 +24356,7 @@
         }
       },
       "Group--Full": {
-        "title": "Group",
+        "title": "Group (Full)",
         "type": "object",
         "x-box-resource-id": "group--full",
         "x-box-variant": "full",
@@ -27675,11 +27675,36 @@
                 "description": "The description accompanying the web link. This is\nvisible within the Box web application."
               },
               "path_collection": {
-                "type": "array",
-                "description": "The path of folders to this link, starting at the root",
-                "items": {
-                  "$ref": "#/components/schemas/Folder--Mini"
-                }
+                "allOf": [
+                  {
+                    "title": "Path collection",
+                    "description": "A list of parent folders for an item.",
+                    "type": "object",
+                    "properties": {
+                      "total_count": {
+                        "description": "The number of folders in this list.",
+                        "example": 1,
+                        "type": "integer",
+                        "format": "int64",
+                        "nullable": false
+                      },
+                      "entries": {
+                        "type": "array",
+                        "description": "The parent folders for this item",
+                        "nullable": false,
+                        "items": {
+                          "$ref": "#/components/schemas/Folder--Mini"
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "description": "The tree of folders that this web link is contained in,\nstarting at the root."
+                  },
+                  {
+                    "nullable": false
+                  }
+                ]
               },
               "created_at": {
                 "type": "string",
