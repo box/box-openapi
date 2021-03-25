@@ -5373,6 +5373,62 @@
         ]
       }
     },
+    "/metadata_query_indices": {
+      "get": {
+        "operationId": "get_metadata_query_indices",
+        "summary": "List metadata query indices",
+        "tags": [
+          "Search"
+        ],
+        "description": "Retrieves the metadata query indices for a given scope and template key.",
+        "parameters": [
+          {
+            "name": "scope",
+            "description": "The scope of the metadata template",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "enum": [
+              "global",
+              "enterprise"
+            ]
+          },
+          {
+            "name": "template_key",
+            "description": "The name of the metadata template",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns a collection of metadata query indices for scope and template key.",
+            "schema": {
+              "$ref": "#/definitions/MetadataQueryIndices"
+            }
+          },
+          "400": {
+            "description": "Returns an error when any of the parameters are not in a valid format.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "404": {
+            "description": "Returns an error when the scope and template combination cannot be found.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          }
+        }
+      }
+    },
     "/comments/{comment_id}": {
       "get": {
         "operationId": "get_comments_id",
@@ -15458,6 +15514,30 @@
         }
       }
     },
+    "MetadataQueryIndices": {
+      "title": "Metadata query indices",
+      "type": "object",
+      "description": "A collection of metadata query indices.",
+      "properties": {
+        "entries": {
+          "description": "A collection of metadata query indices.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/MetadataQueryIndex"
+          }
+        },
+        "limit": {
+          "description": "The limit that was used for this request.",
+          "default": 100,
+          "type": "integer",
+          "format": "int64"
+        },
+        "next_marker": {
+          "description": "The marker for the start of the next page of results.",
+          "type": "string"
+        }
+      }
+    },
     "Comment": {
       "title": "Comment",
       "type": "object",
@@ -18418,6 +18498,56 @@
           "enum": [
             "user"
           ]
+        }
+      }
+    },
+    "MetadataQueryIndex": {
+      "title": "Metadata query index",
+      "type": "object",
+      "description": "A metadata query index",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The ID of the metadata query index."
+        },
+        "type": {
+          "type": "string",
+          "description": "Value is always `metadata_query_index`"
+        },
+        "status": {
+          "type": "string",
+          "description": "The status of the metadata query index",
+          "enum": [
+            "building",
+            "active",
+            "disabled"
+          ]
+        },
+        "fields": {
+          "type": "array",
+          "description": "A list of template fields which make up the index.",
+          "items": {
+            "type": "object",
+            "description": "The field which makes up the index.",
+            "allOf": [
+              {
+                "properties": {
+                  "key": {
+                    "type": "string",
+                    "description": "The metadata template field key."
+                  },
+                  "sort_direction": {
+                    "type": "string",
+                    "description": "The sort direction of the field.",
+                    "enum": [
+                      "asc",
+                      "desc"
+                    ]
+                  }
+                }
+              }
+            ]
+          }
         }
       }
     },
