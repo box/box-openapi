@@ -130,4 +130,18 @@ names.
 | Allow File API To Use JWT  | Allow file API to use JWT  |
 | Box CLI `3.0.0` Release    | Box CLI `3.0.0` release    |
 
+## Standards for Box terminology
+
+* Custom App refers to the type of app selected in the create new app flow
+whereas custom application refers to the custom solution build by the customer
+* Access Token
+* Box Admin
+* App Users and Managed Users
+* Developer Console
+* Service Account
+* support article or support resource
+* bold button names
+* capitalize setting names
+* use application vs app when possible
+
 [**Next:** Updating dependencies](./dependencies.md)
