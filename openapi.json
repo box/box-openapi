@@ -7320,7 +7320,7 @@
             }
           },
           "404": {
-            "description": "Returns an error when the folder could not be found.\n\n* `not_found` - The folder could not be found, or the user does not have\naccess to the folder.",
+            "description": "Returns an error when the folder could not be found.\n\n* `not_found` - The folder could not be found, the user does not have\naccess to the folder, or the user making call is not an owner or co-owner\nof folder.",
             "content": {
               "application/json": {
                 "schema": {
@@ -16886,6 +16886,188 @@
         }
       }
     },
+    "/retention_policy_assignments/{retention_policy_assignment_id}/files_under_retention": {
+      "get": {
+        "operationId": "get_retention_policy_assignments_id_files_under_retention",
+        "summary": "Get files under retention",
+        "tags": [
+          "Retention policy assignments"
+        ],
+        "x-box-tag": "retention_policy_assignments",
+        "description": "Returns a list of files under retention for a retention policy assignment.",
+        "parameters": [
+          {
+            "name": "retention_policy_assignment_id",
+            "description": "The ID of the retention policy assignment.",
+            "example": "1233123",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "fields",
+            "description": "Comma separated list of additional fields to be included in the response.",
+            "in": "query",
+            "required": false,
+            "example": "winning_retention_policy",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "disposition_at",
+                "winning_retention_policy"
+              ]
+            }
+          },
+          {
+            "name": "marker",
+            "description": "Defines the position marker at which to begin returning results. This is\nused when paginating using marker-based pagination.\n\nThis requires `usemarker` to be set to `true`.",
+            "in": "query",
+            "required": false,
+            "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "description": "The maximum number of items to return per page.",
+            "in": "query",
+            "required": false,
+            "example": 1000,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "maximum": 1000
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns a list of files under retention that are associated with the\nspecified retention policy assignment.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FileVersionRetentions"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Returns an error if `retention_policy_assignment_id` is not specified.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/retention_policy_assignments/{retention_policy_assignment_id}/files_versions_under_retention": {
+      "get": {
+        "operationId": "get_retention_policy_assignments_id_files_versions_under_retention",
+        "summary": "Get file versions under retention",
+        "tags": [
+          "Retention policy assignments"
+        ],
+        "x-box-tag": "retention_policy_assignments",
+        "description": "Returns a list of file versions under retention for a retention policy\nassignment.",
+        "parameters": [
+          {
+            "name": "retention_policy_assignment_id",
+            "description": "The ID of the retention policy assignment.",
+            "example": "1233123",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "fields",
+            "description": "Comma separated list of additional fields to be included in the response.",
+            "in": "query",
+            "required": false,
+            "example": "disposition_at",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "disposition_at",
+                "winning_retention_policy"
+              ]
+            }
+          },
+          {
+            "name": "marker",
+            "description": "Defines the position marker at which to begin returning results. This is\nused when paginating using marker-based pagination.\n\nThis requires `usemarker` to be set to `true`.",
+            "in": "query",
+            "required": false,
+            "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "description": "The maximum number of items to return per page.",
+            "in": "query",
+            "required": false,
+            "example": 1000,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "maximum": 1000
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns a list of file versions under retention that are associated with\nthe specified retention policy assignment.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FileVersionRetentions"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Returns an error if `retention_policy_assignment_id` is not specified.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/legal_hold_policies": {
       "get": {
         "operationId": "get_legal_hold_policies",
@@ -17695,127 +17877,6 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/FileVersionRetention"
-                }
-              }
-            }
-          },
-          "default": {
-            "description": "An unexpected client error.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ClientError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/file_version_retentions": {
-      "get": {
-        "operationId": "get_file_version_retentions",
-        "tags": [
-          "File version retentions"
-        ],
-        "x-box-tag": "file_version_retentions",
-        "summary": "List file version retentions",
-        "description": "Retrieves all file version retentions for the given enterprise.",
-        "parameters": [
-          {
-            "name": "file_id",
-            "description": "Filters results by files with this ID.",
-            "in": "query",
-            "example": "43123123",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "file_version_id",
-            "description": "Filters results by file versions with this ID.",
-            "in": "query",
-            "example": "1",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "policy_id",
-            "description": "Filters results by the retention policy with this ID.",
-            "in": "query",
-            "required": false,
-            "example": "982312",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "disposition_action",
-            "description": "Filters results by the retention policy with this disposition\naction.",
-            "in": "query",
-            "required": false,
-            "example": "permanently_delete",
-            "schema": {
-              "type": "string",
-              "enum": [
-                "permanently_delete",
-                "remove_retention"
-              ]
-            }
-          },
-          {
-            "name": "disposition_before",
-            "description": "Filters results by files that will have their disposition\ncome into effect before this date.",
-            "in": "query",
-            "required": false,
-            "example": "2012-12-12T10:53:43-08:00",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "disposition_after",
-            "description": "Filters results by files that will have their disposition\ncome into effect after this date.",
-            "in": "query",
-            "required": false,
-            "example": "2012-12-19T10:34:23-08:00",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "limit",
-            "description": "The maximum number of items to return per page.",
-            "in": "query",
-            "required": false,
-            "example": 1000,
-            "schema": {
-              "type": "integer",
-              "format": "int64",
-              "maximum": 1000
-            }
-          },
-          {
-            "name": "marker",
-            "description": "Defines the position marker at which to begin returning results. This is\nused when paginating using marker-based pagination.\n\nThis requires `usemarker` to be set to `true`.",
-            "in": "query",
-            "required": false,
-            "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Returns a list of all file version retentions for the enterprise.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FileVersionRetentions"
                 }
               }
             }
@@ -22786,7 +22847,7 @@
                     "type": "string",
                     "example": "Ellis Wiggins",
                     "nullable": false,
-                    "description": "The display name of the user that uploaded the file. In most cases\nthis is the name of the logged in user at the time of upload.\n\nIf this file was uploaded by a logged out user and an email address\nwas provided on upload, then this field will return that email address.\n\nIf this file was uploaded using a **File Request form** then this field\nwill be set to return a value of `File Request`. No email address will\nbe added.\n\nIn all other anonymous cases where no email was provided this field\nwill default to a value of \"Someone\"."
+                    "description": "The display name of the user that uploaded the file. In most cases this is the\nname of the user logged in at the time of the upload.\n\nIf the file was uploaded using a File Request form that requires the user to\nprovide an email address, this field is populated with that email address. If\nan email address was not required in the File Request form, this field is set\nto return a value of `File Request`.\n\nIn all other anonymous cases where no email was provided this field\nwill default to a value of `Someone`."
                   }
                 ]
               }
@@ -23096,7 +23157,7 @@
                     "type": "string",
                     "example": "Ellis Wiggins",
                     "nullable": false,
-                    "description": "The display name of the user that uploaded the file. In most cases\nthis is the name of the logged in user at the time of upload.\n\nIf this file was uploaded by a logged out user and an email address\nwas provided on upload, then this field will return that email address.\n\nIf this file was uploaded using a **File Request form** then this field\nwill be set to return a value of `File Request`. No email address will\nbe added.\n\nIn all other anonymous cases where no email was provided this field\nwill default to a value of \"Someone\"."
+                    "description": "The display name of the user that uploaded the file. In most cases this is the\nname of the user logged in at the time of the upload.\n\nIf the file was uploaded using a File Request form that requires the user to\nprovide an email address, this field is populated with that email address. If\nan email address was not required in the File Request form, this field is set\nto return a value of `File Request`.\n\nIn all other anonymous cases where no email was provided this field\nwill default to a value of `Someone`."
                   }
                 ]
               }
