@@ -1,0 +1,75 @@
+---
+title: Sign Request
+
+type: object
+
+x-box-resource-id: sign_requests
+x-box-tag: sign_requests
+
+description: |-
+  A Sign Request Object
+
+allOf: 
+  - $ref: '#/components/schemas/SignRequestCreateRequest'
+  - properties:
+      'type':
+        type: string
+        example: sign-request
+        enum: [sign-request]
+        description: object type
+
+      signers:
+        type: array
+        items:
+          $ref: '#/components/schemas/SignRequestSigner'
+        description: Array of signers for the sign request
+
+      id:
+        type: string
+        example: '12345'
+        description: Sign Request id
+
+      prepare_url:
+        type: string
+        example: 'https://prepareurl.com'
+        description: URL that can be used by the Sign Request sender to prepare the document through the UI
+
+      signing_log:
+        $ref: '#/components/schemas/File--Mini'
+
+      status:
+        type: string
+        enum: ["co","cr","se","vi","si","ca","de","ec","es","xp"]
+        example: co
+        description: 'co: converting file, cr: created, se: sent, vi: viewed, si: signed, ca: cancelled, de: declined, ec: error converting, es: error sending, xp: expired'
+
+      sign_files:
+        type: object
+        properties:
+          files:
+            type: array
+            items:
+              $ref: '#/components/schemas/File--Mini'
+          is_ready_for_download:
+            type: boolean
+            example: true
+            description: Indicates whether a change to the document is processing and the PDF may be out of date. It is recommended to wait until processing has finished before downloading the PDF. Webhooks are not sent until processing has been completed.
+        description: List of files that signing events will occur on - these are copies of the original source files.
+
+      auto_expire_at:
+        type: string
+        format: date*time
+        example: '2021-04-26T08:12:13.982Z'
+        description: Date and time calculated using auto_expire_days after which a non finished document will be automatically expired
+      
+      created_at:
+        type: string
+        format: date*time
+        example: '2021-04-26T08:12:13.982Z'
+        description: Date/Time that the sign request was created
+
+      updated_at:
+        type: string
+        format: date*time
+        example: '2021-04-26T08:12:13.982Z'
+        description: Date/Time that the sign request was last updated
