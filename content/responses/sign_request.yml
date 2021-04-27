@@ -9,7 +9,7 @@ x-box-tag: sign_requests
 description: |-
   A Sign Request Object
 
-allOf: 
+allOf:
   - $ref: '#/components/schemas/SignRequestCreateRequest'
   - properties:
       'type':
@@ -32,16 +32,33 @@ allOf:
       prepare_url:
         type: string
         example: 'https://prepareurl.com'
-        description: URL that can be used by the Sign Request sender to prepare the document through the UI
+        description: URL that can be used by the Sign Request sender to prepare
+        the document through the UI
 
       signing_log:
-        $ref: '#/components/schemas/File--Mini'
+        allOf:
+          - $ref: '#/components/schemas/File--Mini'
+          - description: Reference to a file that will hold a log
+            of all signer activity for this request
 
       status:
         type: string
-        enum: ["converting","created","sent","viewed","signed","cancelled","declined","error_converting","error_sending","expired"]
-        example: co
-        description: 'co: converting file, cr: created, se: sent, vi: viewed, si: signed, ca: cancelled, de: declined, ec: error converting, es: error sending, xp: expired'
+        enum: [
+          "converting",
+          "created",
+          "sent",
+          "viewed",
+          "signed",
+          "cancelled",
+          "declined",
+          "error_converting",
+          "error_sending",
+          "expired"
+        ]
+        example: converting
+        description: 'co: converting file, cr: created, se: sent,
+        vi: viewed, si: signed, ca: cancelled, de: declined,
+        ec: error converting, es: error sending, xp: expired'
 
       sign_files:
         type: object
@@ -53,15 +70,24 @@ allOf:
           is_ready_for_download:
             type: boolean
             example: true
-            description: Indicates whether a change to the document is processing and the PDF may be out of date. It is recommended to wait until processing has finished before downloading the PDF. Webhooks are not sent until processing has been completed.
-        description: List of files that signing events will occur on - these are copies of the original source files. These files will be updated as signers add inputs to the file and can be downloaded at any point in the signing process.
+            description: Indicates whether a change to the document
+            is processing and the PDF may be out of date. It is
+            recommended to wait until processing has finished
+            before downloading the PDF. Webhooks are not sent
+            until processing has been completed.
+        description: List of files that signing events will occur
+          on - these are copies of the original source files.
+          These files will be updated as signers add inputs to the file
+          and can be downloaded at any point in the signing process.
 
       auto_expire_at:
         type: string
         format: date*time
         example: '2021-04-26T08:12:13.982Z'
-        description: Date and time calculated using auto_expire_days after which a non finished document will be automatically expired
-      
+        description: Date and time calculated using auto_expire_days
+          after which a non finished document will be automatically
+          expired
+
       created_at:
         type: string
         format: date*time
