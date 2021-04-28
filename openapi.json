@@ -26,7 +26,7 @@
       "get": {
         "operationId": "get_authorize",
         "summary": "ユーザーを承認",
-        "description": "ユーザーを[Box](https://box.com)ウェブサイトにリダイレクトして承認し、ユーザーに代わって操作を実行する権限をリクエストします。\n\nこれは、OAuth 2.0を使用してユーザーを承認する際の最初の手順です。Box APIをユーザーに代わって使用することについて、ユーザーに承認してもらうよう依頼するには、この形式を使用してユーザーを所定のURLにリダイレクトする必要があります。",
+        "description": "ユーザーを[Box](https://box.com)ウェブサイトにリダイレクトして承認し、ユーザーに代わって操作を実行する権限をリクエストします。\n\nこれは、OAuth 2.0を使用してユーザーを承認する際の最初の手順です。Box APIをユーザーに代わって使用することについて、ユーザーに承認してもらうようリクエストするには、この形式を使用してユーザーを所定のURLにリダイレクトする必要があります。",
         "tags": [
           "Authorization"
         ],
@@ -7160,7 +7160,7 @@
     "/folder_locks": {
       "get": {
         "operationId": "get_folder_locks",
-        "summary": "フォルダに適用されているフォルダロックのリストを取得",
+        "summary": "フォルダロックのリストを取得",
         "tags": [
           "Folder Locks"
         ],
@@ -7236,7 +7236,7 @@
       },
       "post": {
         "operationId": "post_folder_locks",
-        "summary": "フォルダにフォルダロックを作成",
+        "summary": "フォルダロックを作成",
         "tags": [
           "Folder Locks"
         ],
@@ -9179,6 +9179,87 @@
           },
           "404": {
             "description": "指定された`scope`と`templateKey`のメタデータテンプレートが見つからない場合にエラーを返します。エラー応答には追加の詳細が含まれます。\n\n* `instance_not_found` - テンプレートが見つからない場合に返されます。会社のID (`enterprise_12345`など)を含むテンプレートの完全なスコープを必ず使用してください。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "予期しないクライアントエラー。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/metadata_query_indices": {
+      "get": {
+        "operationId": "get_metadata_query_indices",
+        "summary": "メタデータクエリインデックスのリストを取得",
+        "tags": [
+          "Search"
+        ],
+        "x-box-tag": "search",
+        "x-box-sanitized": true,
+        "x-box-enable-explorer": true,
+        "description": "指定されたスコープとテンプレートキーのメタデータクエリインデックスを取得します。",
+        "parameters": [
+          {
+            "name": "scope",
+            "description": "メタデータテンプレートのスコープ",
+            "example": "global",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "global",
+                "enterprise"
+              ]
+            }
+          },
+          {
+            "name": "template_key",
+            "description": "メタデータテンプレートの名前",
+            "example": "properties",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "スコープとテンプレートキーのメタデータクエリインデックスのコレクションを返します。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MetadataQueryIndices"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "パラメータのいずれかが有効な形式でない場合はエラーを返します。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "スコープとテンプレートの組み合わせが見つからない場合は、エラーを返します。",
             "content": {
               "application/json": {
                 "schema": {
@@ -14651,7 +14732,7 @@
     "/groups/{group_id}/collaborations": {
       "get": {
         "operationId": "get_groups_id_collaborations",
-        "summary": "グループのコラボレーションのリストを取得",
+        "summary": "グループコラボレーションのリストを取得",
         "x-box-tag": "list_collaborations",
         "tags": [
           "Collaborations (List)"
@@ -19703,6 +19784,12 @@
             "type": "string",
             "example": "123456789",
             "description": "`grant_type`に`client_credentials`が指定されている場合に組み合わせて使用されます。値は`box_subject_type`によって決まります。`user`の場合はユーザーIDを使用し、`enterprise`の場合はEnterprise IDを使用します。"
+          },
+          "box_shared_link": {
+            "type": "string",
+            "format": "url",
+            "description": "トークンが生成されるファイルまたはフォルダの共有リンクの完全なURL。",
+            "example": "https://cloud.box.com/s/123456"
           }
         }
       },
@@ -24276,7 +24363,7 @@
         }
       },
       "Group--Full": {
-        "title": "Group",
+        "title": "グループ (詳細)",
         "type": "object",
         "x-box-resource-id": "group--full",
         "x-box-variant": "full",
@@ -25208,6 +25295,93 @@
             }
           }
         ]
+      },
+      "MetadataQueryIndex": {
+        "title": "Metadata query index",
+        "type": "object",
+        "x-box-resource-id": "metadata_query_index",
+        "x-box-tag": "search",
+        "description": "メタデータクエリインデックス",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "-9876",
+            "description": "メタデータクエリインデックスのID。"
+          },
+          "type": {
+            "type": "string",
+            "description": "値は常に`metadata_query_index`です",
+            "example": "metadata_query_index",
+            "nullable": false
+          },
+          "status": {
+            "type": "string",
+            "description": "メタデータクエリインデックスのステータス",
+            "example": "active",
+            "enum": [
+              "building",
+              "active",
+              "disabled"
+            ],
+            "nullable": false
+          },
+          "fields": {
+            "type": "array",
+            "description": "インデックスを構成するテンプレートフィールドのリスト。",
+            "items": {
+              "type": "object",
+              "description": "インデックスを構成するフィールド。",
+              "allOf": [
+                {
+                  "properties": {
+                    "key": {
+                      "type": "string",
+                      "example": "vendor name",
+                      "description": "メタデータテンプレートのフィールドキー。"
+                    },
+                    "sort_direction": {
+                      "type": "string",
+                      "example": "asc",
+                      "description": "フィールドの並べ替え方向。",
+                      "enum": [
+                        "asc",
+                        "desc"
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      "MetadataQueryIndices": {
+        "title": "Metadata query indices",
+        "type": "object",
+        "x-box-tag": "search",
+        "x-box-resource-id": "metadata_query_indices",
+        "description": "メタデータクエリインデックスのコレクション。",
+        "properties": {
+          "entries": {
+            "description": "メタデータクエリインデックスのコレクション。",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MetadataQueryIndex"
+            }
+          },
+          "limit": {
+            "description": "このリクエストに使用された制限。",
+            "default": 100,
+            "example": 100,
+            "type": "integer",
+            "format": "int64"
+          },
+          "next_marker": {
+            "description": "次の検索結果ページの開始場所のマーカー。",
+            "example": "0!-M7487OpVfBTNBV-XsQjU50gQFlbFFu5nArMWD7Ck61GH_Qo40M1S2xN5zWZPBzEjaQS1SOjJiQoo5BsXEl1bCVLRZ2pTqo4SKp9tyqzWQK2L51KR_nC1EgF5I_TJSFw7uO2Bx4HweGETOjh5_2oPSWw5iMkM-OvGApeR0lGFO48FDKoyzJyLgz5aogxoKd8VE09CesOOnTnmZvrW0puylDc-hFjY5YLmWFBKox3SOWiSDwKFkmZGNHyjEzza1nSwbZg6CYsAdGsDwGJhuCeTNsFzP5Mo5qx9wMloS0lSPuf2CcBInbIJzl2CKlXF3FvqhANttpm2nzdBTQRSoJyJnjVBpf4Q_HjV2eb4KIZBBlLy067UCVdv2AAWQFd5E2i6s1YiGRTtgMEZntOSUYD4IYLMWWm5Ra7ke_SP32SL3GSjbBQYIyCVQ..",
+            "type": "string"
+          }
+        }
       },
       "MetadataQueryResults": {
         "title": "メタデータクエリの検索結果",
@@ -27508,11 +27682,36 @@
                 "description": "ウェブリンクに付加される説明。この説明は、Boxウェブアプリケーション内に表示されます。"
               },
               "path_collection": {
-                "type": "array",
-                "description": "ルートを起点にした、このリンクまでのフォルダのパス",
-                "items": {
-                  "$ref": "#/components/schemas/Folder--Mini"
-                }
+                "allOf": [
+                  {
+                    "title": "パスのコレクション",
+                    "description": "項目の親フォルダのリスト。",
+                    "type": "object",
+                    "properties": {
+                      "total_count": {
+                        "description": "このリスト内のフォルダの数。",
+                        "example": 1,
+                        "type": "integer",
+                        "format": "int64",
+                        "nullable": false
+                      },
+                      "entries": {
+                        "type": "array",
+                        "description": "この項目の親フォルダ",
+                        "nullable": false,
+                        "items": {
+                          "$ref": "#/components/schemas/Folder--Mini"
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "description": "ルートフォルダを起点にした、このウェブリンクを含むフォルダツリー。"
+                  },
+                  {
+                    "nullable": false
+                  }
+                ]
               },
               "created_at": {
                 "type": "string",
