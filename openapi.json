@@ -19688,6 +19688,182 @@
           }
         }
       }
+    },
+    "/workflows": {
+      "get": {
+        "operationId": "get_workflows",
+        "summary": "Returns workflow based on parameters",
+        "tags": [
+          "Workflows"
+        ],
+        "x-box-tag": "workflows",
+        "description": "Returns all defined workflows for the requesting application.",
+        "parameters": [
+          {
+            "name": "folder_id",
+            "description": "The unique identifier that represent a folder.\n\nThe ID for any folder can be determined\nby visiting this folder in the web application\nand copying the ID from the URL. For example,\nfor the URL `https://*.app.box.com/folder/123`\nthe `folder_id` is `123`.\n\nThe root folder of a Box account is\nalways represented by the ID `0`.",
+            "example": "12345",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "nullable": false
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns the workflow.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Workflow"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/workflows/{workflow_id}/start": {
+      "post": {
+        "operationId": "post_workflows_id_start",
+        "summary": "Starts workflow based on request body",
+        "tags": [
+          "Workflows"
+        ],
+        "x-box-tag": "workflows",
+        "description": "Starts a workflow based on request body",
+        "parameters": [
+          {
+            "name": "workflow_id",
+            "description": "The ID of the workflow.",
+            "example": "12345",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "target",
+                  "triggers",
+                  "address"
+                ],
+                "properties": {
+                  "target": {
+                    "type": "object",
+                    "description": "The item that will trigger the webhook",
+                    "properties": {
+                      "id": {
+                        "description": "The ID of the item to trigger a webhook",
+                        "type": "string",
+                        "example": "1231232"
+                      },
+                      "type": {
+                        "description": "The type of item to trigger a webhook",
+                        "type": "string",
+                        "example": "file",
+                        "enum": [
+                          "file",
+                          "folder"
+                        ]
+                      }
+                    }
+                  },
+                  "address": {
+                    "type": "string",
+                    "example": "https://example.com/webhooks",
+                    "description": "The URL that is notified by this webhook"
+                  },
+                  "triggers": {
+                    "type": "array",
+                    "example": [
+                      "FILE.UPLOADED"
+                    ],
+                    "description": "An array of event names that this webhook is\nto be triggered for",
+                    "items": {
+                      "title": "Webhook Trigger",
+                      "example": "FILE.UPLOADED",
+                      "type": "string",
+                      "description": "The event name that triggered this webhook",
+                      "enum": [
+                        "FILE.UPLOADED",
+                        "FILE.PREVIEWED",
+                        "FILE.DOWNLOADED",
+                        "FILE.TRASHED",
+                        "FILE.DELETED",
+                        "FILE.RESTORED",
+                        "FILE.COPIED",
+                        "FILE.MOVED",
+                        "FILE.LOCKED",
+                        "FILE.UNLOCKED",
+                        "FILE.RENAMED",
+                        "COMMENT.CREATED",
+                        "COMMENT.UPDATED",
+                        "COMMENT.DELETED",
+                        "TASK_ASSIGNMENT.CREATED",
+                        "TASK_ASSIGNMENT.UPDATED",
+                        "METADATA_INSTANCE.CREATED",
+                        "METADATA_INSTANCE.UPDATED",
+                        "METADATA_INSTANCE.DELETED",
+                        "FOLDER.CREATED",
+                        "FOLDER.RENAMED",
+                        "FOLDER.DOWNLOADED",
+                        "FOLDER.RESTORED",
+                        "FOLDER.DELETED",
+                        "FOLDER.COPIED",
+                        "FOLDER.MOVED",
+                        "FOLDER.TRASHED",
+                        "WEBHOOK.DELETED",
+                        "COLLABORATION.CREATED",
+                        "COLLABORATION.ACCEPTED",
+                        "COLLABORATION.REJECTED",
+                        "COLLABORATION.REMOVED",
+                        "COLLABORATION.UPDATED",
+                        "SHARED_LINK.DELETED",
+                        "SHARED_LINK.CREATED",
+                        "SHARED_LINK.UPDATED"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Starts the workflow."
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
