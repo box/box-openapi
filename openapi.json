@@ -19697,7 +19697,7 @@
           "Workflows"
         ],
         "x-box-tag": "workflows",
-        "description": "Returns list of workflows that act on a given `folder ID`, and\nhave a flow with a trigger type of `MANUAL_START`.",
+        "description": "Returns list of workflows that act on a given `folder ID`, and\nhave a flow with a trigger type of `WORKFLOW_MANUAL_START`.",
         "parameters": [
           {
             "name": "folder_id",
@@ -19709,6 +19709,39 @@
               "type": "string",
               "nullable": false
             }
+          },
+          {
+            "name": "trigger_type",
+            "description": "Type of trigger to search for",
+            "example": "WORKFLOW_MANUAL_START",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "nullable": false
+            }
+          },
+          {
+            "name": "limit",
+            "description": "The maximum number of items to return per page.",
+            "in": "query",
+            "required": false,
+            "example": 1000,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "maximum": 1000
+            }
+          },
+          {
+            "name": "marker",
+            "description": "Defines the position marker at which to begin returning results. This is\nused when paginating using marker-based pagination.\n\nThis requires `usemarker` to be set to `true`.",
+            "in": "query",
+            "required": false,
+            "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -19717,7 +19750,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Workflow"
+                  "$ref": "#/components/schemas/Workflows"
                 }
               }
             }
@@ -28194,7 +28227,7 @@
         "type": "object",
         "x-box-resource-id": "workflow",
         "x-box-variant": "standard",
-        "description": "Box Relay Workflows are objects that represent a named collection of flows.",
+        "description": "Box Relay Workflows are objects that represent a named collection of flows",
         "allOf": [
           {
             "$ref": "#/components/schemas/Workflow--Mini"
@@ -28206,7 +28239,7 @@
                 "description": "A list of flows assigned to a workflow.",
                 "items": {
                   "type": "object",
-                  "description": "A step in a Box Relay Workflow. Each flow contains a `Trigger` and\na collection of Outcomes to perform once the conditions of a\n`Trigger` are met.",
+                  "description": "A step in a Box Relay Workflow. Each flow contains a `Trigger` and\na collection of Outcomes to perform once the conditions of a\n`Trigger` are met",
                   "properties": {
                     "id": {
                       "type": "string",
@@ -28470,17 +28503,44 @@
         "type": "object",
         "x-box-resource-id": "workflow--full",
         "x-box-variant": "full",
-        "description": "Box Relay Workflows are objects that represent a named collection of flows.",
+        "description": "Box Relay Workflows are objects that represent a named collection of flows",
         "allOf": [
           {
             "$ref": "#/components/schemas/Workflow"
           },
           {
             "properties": {
-              "id": {
+              "created_at": {
                 "type": "string",
-                "description": "The unique identifier for the workflow",
-                "example": "11446498"
+                "format": "date-time",
+                "description": "The date and time when the workflow was created on Box",
+                "example": "2012-12-12T10:53:43-08:00"
+              },
+              "modified_at": {
+                "type": "string",
+                "format": "date-time",
+                "description": "The date and time when the workflow was last updated on Box",
+                "example": "2012-12-12T10:53:43-08:00"
+              },
+              "created_by": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/User--Base"
+                  },
+                  {
+                    "description": "The user who created this workflow"
+                  }
+                ]
+              },
+              "modified_by": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/User--Base"
+                  },
+                  {
+                    "description": "The user who last modified this workflow"
+                  }
+                ]
               }
             }
           }
@@ -28497,7 +28557,7 @@
           "full"
         ],
         "x-box-variant": "mini",
-        "description": "Box Relay Workflows are objects that represent a named collection of flows.",
+        "description": "Box Relay Workflows are objects that represent a named collection of flows",
         "properties": {
           "id": {
             "type": "string",
@@ -28528,6 +28588,49 @@
             "description": "Specifies if this workflow is enabled"
           }
         }
+      },
+      "Workflows": {
+        "title": "Workflows",
+        "type": "object",
+        "x-box-resource-id": "workflows",
+        "x-box-tag": "workflows",
+        "description": "A list of workflows",
+        "allOf": [
+          {
+            "type": "object",
+            "description": "The part of an API response that describes marker\nbased pagination",
+            "properties": {
+              "limit": {
+                "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
+                "example": 1000,
+                "type": "integer",
+                "format": "int64"
+              },
+              "next_marker": {
+                "description": "The marker for the start of the next page of results.",
+                "example": 3000,
+                "type": "integer",
+                "format": "int64"
+              },
+              "prev_marker": {
+                "description": "The marker for the start of the previous page of results.",
+                "example": 1000,
+                "type": "integer",
+                "format": "int64"
+              }
+            }
+          },
+          {
+            "properties": {
+              "entries": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Workflow"
+                }
+              }
+            }
+          }
+        ]
       },
       "ZipDownload": {
         "title": "Zip download",
