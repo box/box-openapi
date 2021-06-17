@@ -1,11 +1,43 @@
 ---
 type: array
 items:
-  $ref: '../attributes/outcome.yml'
-  if_rejected:
-    type: array
-    description: |-
-      If `action_type` is `assign_task` and the task is rejected, returns a
-      list of outcomes to complete
-    items:
-      $ref: '../attributes/outcome.yml'
+  type: object
+  description: |-
+    List of outcomes to perform once the conditions of trigger are met.
+  properties:
+    id:
+      type: string
+      description: The identifier of the outcome
+      example: '12345'
+    type:
+      type: string
+      description: The outcomes resource type
+      example: outcome
+      enum:
+        - outcome
+    name:
+      type: string
+      description: The name of the outcome
+      example: ' '
+    action_type:
+      allOf:
+        - $ref: '../attributes/action_type.yml'
+        - description: |-
+            The type of outcome
+    outcome_parameters:
+      type: object
+      example:
+        folder: {type: 'folder', id: {value: '1234567'}}
+        collaborators: {type: 'variable', variable_type: 'user_list'}
+        role: {type: 'variable', variable_type: 'collaborator_role'}
+      description: |-
+        Information about how to complete the outcome which varies based on
+        `action_type` selected
+    if_rejected:
+      type: array
+      description: |-
+        If `action_type` is `assign_task` and the task is rejected, returns a
+        list of outcomes to complete
+      items:
+        type: object
+        description: Outcome that occurs if task was rejected
