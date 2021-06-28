@@ -9,7 +9,7 @@ tags:
 x-box-tag: workflows
 
 description: |-
-  Initiates a flow with a trigger type of `MANUAL_START`.
+  Initiates a flow with a trigger type of `WORKFLOW_MANUAL_START`.
 
 parameters:
   - $ref: '../attributes/workflow_id.yml'
@@ -20,51 +20,108 @@ requestBody:
       schema:
         type: object
         required:
-          - target
-          - triggers
-          - address
+          - flow
+          - folder
         properties:
-          target:
+          type:
+            type: string
+            description: |-
+              The type of the parameters object
+            example: WORKFLOW_PARAMETERS
+            enum:
+              - WORKFLOW_PARAMETERS
+
+          flow:
             type: object
             description: |-
-              The item that will trigger the webhook
+              The flow that will be triggered
             properties:
-              id:
-                description: |-
-                  The ID of the item to trigger a webhook
-                type: string
-                example: "1231232"
-
               type:
-                description: |-
-                  The type of item to trigger a webhook
                 type: string
-                example: file
-                enum:
-                  - file
-                  - folder
-
-          address:
-            type: string
-            example: "https://example.com/webhooks"
-            description: |-
-              The URL that is notified by this webhook
-
-          triggers:
+                description: The type of the flow object
+                example: "flow"
+              id:
+                type: string
+                description: The id of the flow
+                example: "123456789"
+          files:
             type: array
-            example:
-              - FILE.UPLOADED
             description: |-
-              An array of event names that this webhook is
-              to be triggered for
+              The array of files the workflow should start for
             items:
-              $ref: '../attributes/webhook_trigger.yml'
+              type: object
+              description: |-
+                A file the workflow should start for
+              properties:
+                type:
+                  type: string
+                  description: |-
+                    The type of the file object
+                  example: file
+                  enum:
+                    - file
+                id:
+                  type: string
+                  description: |-
+                    The id of the file
+                  example: "12345678"
+          folder:
+            type: object
+            description: |-
+              The folder the workflow should start for
+            properties:
+              type:
+                type: string
+                description: The type of the folder object
+                example: folder
+                enum:
+                  - folder
+              id:
+                type: string
+                description: The id of the folder
+                example: "87654321"
 
 responses:
   204:
     description: |-
       Starts the workflow.
+  400:
+    description: |-
+      Returns an error if some of the parameters are missing or
+      not valid.
 
+      * `workflow_is_not_enabled` when the workflow is not enabled
+      * `workflow_not_active_on_provided_folder` when the workflow is not
+        enabled for the specified folder id
+      * `parameters_provided_do_not_match_target_outcome` when the provided
+        parameters do not match the expected parameters
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
+  403:
+    description: |-
+      Returns an error if there are insufficient permissions.
+
+      * `insufficient_access` when the user does not have access rights to file
+        or folder
+      * `missing_relay_full_access` when the user does not have access to Relay
+        Full
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
+  404:
+    description: |-
+      Returns an error if the workflow could not be found,
+      or the authenticated user does not have access to the workflow.
+
+      * `workflow_not_found` when the workflow is not found
+      * `flow_missing_or_inaccessible` when the flow is not a manual start flow
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
   default:
     description: |-
       An unexpected client error.
