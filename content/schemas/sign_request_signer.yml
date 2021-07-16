@@ -1,0 +1,47 @@
+---
+title: Signer fields for GET Sign Request response
+
+type: object
+
+description: |-
+  The schema for a Signer in a GET Sign Request request body
+
+required:
+  - email
+
+allOf:
+  - $ref: '#/components/schemas/SignRequestCreateSigner'
+  - properties:
+      has_viewed_document:
+        type: boolean
+        readOnly: true
+        example: true
+        description: true if the signer has viewed the document
+
+      signer_decision:
+        type: object
+        properties:
+          'type':
+            type: string
+            enum: ['signed', 'declined']
+            example: signed
+            description: type of decision made by signer
+          finalized_at:
+            type: string
+            format: date-time
+            example: '2021-04-26T08:12:13.982Z'
+            description: Date/Time that the decision was made
+        description: final decision made by signer
+          (type and time the decision was made)
+
+      inputs:
+        type: array
+        items:
+          $ref: '#/components/schemas/SignRequestSignerInput'
+        readOnly: true
+
+      embed_url:
+        type: string
+        readOnly: true
+        example: https://example.com
+        description: Url to direct signer to for signing
