@@ -9,47 +9,16 @@ description: |-
 required:
   - signers
   - source_files
+  - parent_folder
 
 properties:
   is_document_preparation_needed:
     type: boolean
     description: >-
-      Indicates if the sender should be taken into the builder flow to
-      prepare the document.
+      Indicates if the sender should recieve a URL in the response to
+      complete document preparation via UI. This will be returned in 
+      the prepare_url field.
     example: true
-
-  redirect_url:
-    type: string
-    description: The uri that a signer will be redirect to after signing a
-      document. If no declined redirect url is specified, this will be
-      used for decline actions as well. The default behavior will be to
-      redirect the signer to a standard box success page.
-    example: https://redirect.com
-
-  declined_redirect_url:
-    type: string
-    description: >-
-      The uri that a signer will be redirect to after declining to sign a
-      document.
-    example: https://declined-redirect.com
-
-  required_attachments:
-    type: array
-    items:
-      type: object
-      properties:
-        name:
-          type: string
-          example: passport
-          description: >-
-            name of attachment to be uploaded by signer
-    description: Attachments that signers are required to upload
-
-  are_attachments_enabled:
-    type: boolean
-    description: Disable uploading/adding attachments for signers
-    example: true
-    default: true
 
   are_text_signatures_enabled:
     type: boolean
@@ -82,21 +51,13 @@ properties:
     enum: ['blue', 'black', 'red']
     example: blue
     description: >-
-      Force a specific color for the signature
-
-  is_phone_verification_required_to_view:
-    type: boolean
-    description: >-
-      Forces signers to verify a text message prior to viewing the
-      document. You must specify the phone number of signers to have
-      this setting apply to them.
-    example: true
+      Force a specific color for the signature for all signers
 
   email_subject:
     type: string
     example: Sign Request from Acme
     description: Subject of sign request email. This is cleaned by sign
-      request.
+      request. If this field is not passed, a default subject will be used.
 
   email_message:
     type: string
@@ -109,32 +70,39 @@ properties:
       b, blockquote, code, em, i, ul, li, ol, and strong. Be aware
       that when the text to html ratio is too high, the email may
       end up in spam filters. Custom styles on these tags are not allowed."
+      If this field is not passed, a default message will be used.
 
   are_reminders_enabled:
     type: boolean
     example: true
     description: >-
-      Remind signers to sign a document on day 3, 8, 13 and
-      18 (or less if the document has been digitally signed already).
+      Remind signers to sign a document on day 3, 8, 13 and 18.
+      Reminders will not be sent to signers that have already
+      completed the necessary actions on the request.
 
   signers:
     type: array
     items:
       $ref: '#/components/schemas/SignRequestCreateSigner'
-    description: Array of signers for the sign request
+    description: Array of signers for the sign request. 35 is the
+    max number of signers permitted.
 
   source_files:
     type: array
     items:
       $ref: '#/components/schemas/File--Mini'
-    description: List of files to create a signing document from
+    description: List of files to create a signing document from.
+    This is currently limited to 1 file. Only id and type fields 
+    are required per file.
 
   parent_folder:
     allOf:
         - $ref: "#/components/schemas/Folder--Mini"
         - description: |-
             The destination folder to place sign request
-            specific data in (copy of source files, signing log etc.)
+            specific data in (copy of source files, signing log etc).
+            Only id and type fields are required. Folder id 0 (root 
+            folder) cannot be used.
 
   name:
     type: string
