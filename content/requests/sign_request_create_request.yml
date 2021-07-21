@@ -9,6 +9,7 @@ description: |-
 required:
   - signers
   - source_files
+  - parent_folder
 
 properties:
   is_document_preparation_needed:
@@ -43,13 +44,6 @@ properties:
       request
     example: false
     default: false
-
-  signature_color:
-    type: string
-    enum: ['blue', 'black', 'red']
-    example: blue
-    description: >-
-      Enforces a specific signature color for all signers
 
   email_subject:
     type: string
@@ -96,6 +90,15 @@ properties:
       currently limited to one file. Only the ID and type fields are required
       for each file.
 
+  parent_folder:
+    allOf:
+      - $ref: "#/components/schemas/Folder--Mini"
+      - description: |-
+            The destination folder to place sign request
+            specific data in (copy of source files, signing log etc).
+            Only id and type fields are required. Folder id 0 (root
+            folder) cannot be used.
+
   name:
     type: string
     example: name
@@ -104,10 +107,10 @@ properties:
   prefill_tags:
     type: array
     items:
-      $ref: '#/components/schemas/SignRequestPrefillTag'
-    description: >-
-      When a document contains tags in the content, the placeholders can be
-      prefilled.
+      - $ref: '#/components/schemas/SignRequestPrefillTag'
+      - description: >-
+          When a document contains tags in the content, the placeholders can be
+          prefilled.
 
   days_valid:
     type: integer
