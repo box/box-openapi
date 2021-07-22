@@ -9,6 +9,7 @@ description: |-
 required:
   - signers
   - source_files
+  - parent_folder
 
 properties:
   is_document_preparation_needed:
@@ -24,32 +25,11 @@ properties:
     example: true
     default: true
 
-  is_text_enabled:
-    type: boolean
-    description: Disables the ability for signers to add text
-    example: true
-    default: true
-
   are_dates_enabled:
     type: boolean
     description: Disables the ability for signers to add dates
     example: true
     default: true
-
-  are_emails_disabled:
-    type: boolean
-    description: >-
-      Disables all status emails, as well as the first email containing the sign
-      request
-    example: false
-    default: false
-
-  signature_color:
-    type: string
-    enum: ['blue', 'black', 'red']
-    example: blue
-    description: >-
-      Enforces a specific signature color for all signers
 
   email_subject:
     type: string
@@ -96,6 +76,15 @@ properties:
       currently limited to one file. Only the ID and type fields are required
       for each file.
 
+  parent_folder:
+    allOf:
+      - $ref: "#/components/schemas/Folder--Mini"
+      - description: |-
+            The destination folder to place sign request
+            specific data in (copy of source files, signing log etc).
+            Only id and type fields are required. Folder id 0 (root
+            folder) cannot be used.
+
   name:
     type: string
     example: name
@@ -106,8 +95,9 @@ properties:
     items:
       $ref: '#/components/schemas/SignRequestPrefillTag'
     description: >-
-      When a document contains tags in the content, the placeholders can be
-      prefilled.
+        When a document contains sign related tags in the content,
+        you can prefill them using this `prefill_tags` by referencing the 'id'
+        of the tag as the `external_id` field of the prefill tag.
 
   days_valid:
     type: integer
