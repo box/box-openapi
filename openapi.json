@@ -20624,7 +20624,8 @@
         "description": "A request to create a sign request object",
         "required": [
           "signers",
-          "source_files"
+          "source_files",
+          "parent_folder"
         ],
         "properties": {
           "is_document_preparation_needed": {
@@ -20638,33 +20639,11 @@
             "example": true,
             "default": true
           },
-          "is_text_enabled": {
-            "type": "boolean",
-            "description": "Disables the ability for signers to add text",
-            "example": true,
-            "default": true
-          },
           "are_dates_enabled": {
             "type": "boolean",
             "description": "Disables the ability for signers to add dates",
             "example": true,
             "default": true
-          },
-          "are_emails_disabled": {
-            "type": "boolean",
-            "description": "Disables all status emails, as well as the first email containing the sign request",
-            "example": false,
-            "default": false
-          },
-          "signature_color": {
-            "type": "string",
-            "enum": [
-              "blue",
-              "black",
-              "red"
-            ],
-            "example": "blue",
-            "description": "Enforces a specific signature color for all signers"
           },
           "email_subject": {
             "type": "string",
@@ -20695,6 +20674,16 @@
             },
             "description": "List of files to create a signing document from. This is currently limited to one file. Only the ID and type fields are required for each file."
           },
+          "parent_folder": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Folder--Mini"
+              },
+              {
+                "description": "The destination folder to place sign request\nspecific data in (copy of source files, signing log etc).\nOnly id and type fields are required. Folder id 0 (root\nfolder) cannot be used."
+              }
+            ]
+          },
           "name": {
             "type": "string",
             "example": "name",
@@ -20705,7 +20694,7 @@
             "items": {
               "$ref": "#/components/schemas/SignRequestPrefillTag"
             },
-            "description": "When a document contains tags in the content, the placeholders can be prefilled."
+            "description": "When a document contains sign related tags in the content, you can prefill them using this `prefill_tags` by referencing the 'id' of the tag as the `external_id` field of the prefill tag."
           },
           "days_valid": {
             "type": "integer",
@@ -29248,19 +29237,7 @@
                 "type": "string",
                 "format": "date-time",
                 "example": "2021-04-26T08:12:13.982Z",
-                "description": "Takes `days_valid` and calculates the date and time the sign request will expire if unsigned."
-              },
-              "created_at": {
-                "type": "string",
-                "format": "date-time",
-                "example": "2021-04-26T08:12:13.982Z",
-                "description": "Date and time the sign request was created"
-              },
-              "updated_at": {
-                "type": "string",
-                "format": "date-time",
-                "example": "2021-04-26T08:12:13.982Z",
-                "description": "Date and time the sign request was last updated"
+                "description": "Uses `days_valid` to calculate the date and time, in GMT, the sign request will expire if unsigned."
               }
             }
           }
@@ -30158,30 +30135,6 @@
             "description": "Order of the signer",
             "minimum": 0,
             "example": 2
-          },
-          "language": {
-            "type": "string",
-            "enum": [
-              "en",
-              "gb",
-              "nl",
-              "fr",
-              "de",
-              "he",
-              "da",
-              "fi",
-              "hu",
-              "it",
-              "nb",
-              "pl",
-              "pt",
-              "es",
-              "sv",
-              "ru",
-              "ja"
-            ],
-            "description": "Language of email notifications sent to the signer",
-            "example": "en"
           },
           "embed_url_external_user_id": {
             "type": "string",
