@@ -13011,6 +13011,193 @@
         }
       }
     },
+    "/sign_requests/{sign_request_id}/cancel": {
+      "post": {
+        "operationId": "post_sign_requests_id_cancel",
+        "summary": "Cancel sign request",
+        "tags": [
+          "Box Sign"
+        ],
+        "description": "Cancels a sign request.",
+        "parameters": [
+          {
+            "name": "sign_request_id",
+            "description": "The ID of the sign request",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns a Sign Request object.",
+            "schema": {
+              "$ref": "#/definitions/SignRequest"
+            }
+          },
+          "404": {
+            "description": "Returns an error when the sign request cannot be found or the user does\nnot have access to the sign request.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          }
+        }
+      }
+    },
+    "/sign_requests/{sign_request_id}/resend": {
+      "post": {
+        "operationId": "post_sign_requests_id_resend",
+        "summary": "Resend sign request",
+        "tags": [
+          "Box Sign"
+        ],
+        "description": "Resends a sign request email to all outstanding signers.",
+        "parameters": [
+          {
+            "name": "sign_request_id",
+            "description": "The ID of the sign request",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Returns an empty response when the API call was successful.\nThe email notifications will be sent asynchronously."
+          },
+          "404": {
+            "description": "Returns an error when the sign request cannot be found or the user does\nnot have access to the sign request.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          }
+        }
+      }
+    },
+    "/sign_requests/{sign_request_id}": {
+      "get": {
+        "operationId": "get_sign_requests_id",
+        "summary": "Get sign request by ID",
+        "tags": [
+          "Box Sign"
+        ],
+        "description": "Gets a sign request by ID.",
+        "parameters": [
+          {
+            "name": "sign_request_id",
+            "description": "The ID of the sign request",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns a sign request",
+            "schema": {
+              "$ref": "#/definitions/SignRequest"
+            }
+          },
+          "404": {
+            "description": "Returns an error when the sign request cannot be found or the user does\nnot have access to the sign request.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          }
+        }
+      }
+    },
+    "/sign_requests": {
+      "get": {
+        "operationId": "get_sign_requests",
+        "summary": "List sign requests",
+        "tags": [
+          "Box Sign"
+        ],
+        "description": "Gets sign requests created by a user.",
+        "parameters": [
+          {
+            "name": "marker",
+            "description": "Defines the position marker at which to begin returning results. This is\nused when paginating using marker-based pagination.\n\nThis requires `usemarker` to be set to `true`.",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "limit",
+            "description": "The maximum number of items to return per page.",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int64",
+            "maximum": 1000
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns a collection of sign requests",
+            "schema": {
+              "$ref": "#/definitions/SignRequests"
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "post_sign_requests",
+        "summary": "Create sign request",
+        "tags": [
+          "Box Sign"
+        ],
+        "description": "Creates a sign request. This involves preparing a document for signing and\nsending the sign request to signers.",
+        "responses": {
+          "201": {
+            "description": "Returns a Sign Request object.",
+            "schema": {
+              "$ref": "#/definitions/SignRequest"
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/SignRequestCreateRequest"
+            }
+          }
+        ]
+      }
+    },
     "/workflows": {
       "get": {
         "operationId": "get_workflows",
@@ -13494,7 +13681,8 @@
             "too_many_requests",
             "internal_server_error",
             "unavailable",
-            "item_name_invalid"
+            "item_name_invalid",
+            "insufficient_scope"
           ]
         },
         "message": {
@@ -18502,6 +18690,205 @@
         }
       }
     },
+    "SignRequest": {
+      "title": "Sign Request",
+      "type": "object",
+      "description": "A Sign Request Object",
+      "allOf": [
+        {
+          "$ref": "#/definitions/SignRequestCreateRequest"
+        },
+        {
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": [
+                "sign-request"
+              ],
+              "description": "object type"
+            },
+            "signers": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/SignRequestSigner"
+              },
+              "description": "Array of signers for the sign request"
+            },
+            "id": {
+              "type": "string",
+              "description": "Sign request ID"
+            },
+            "prepare_url": {
+              "type": "string",
+              "description": "This URL is returned if `is_document_preparation_needed` is\nset to `true` in the request. It is used to prepare the sign request\nvia UI. The sign request is not sent until preparation is complete."
+            },
+            "signing_log": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/File--Mini"
+                },
+                {
+                  "description": "Reference to a file that holds a log of all signer activity for\nthe request"
+                }
+              ]
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "converting",
+                "created",
+                "sent",
+                "viewed",
+                "signed",
+                "cancelled",
+                "declined",
+                "error_converting",
+                "error_sending",
+                "expired"
+              ],
+              "description": "Describes the status of the sign request"
+            },
+            "sign_files": {
+              "type": "object",
+              "properties": {
+                "files": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/File--Mini"
+                  }
+                },
+                "is_ready_for_download": {
+                  "type": "boolean",
+                  "description": "Indicates whether the `sign_files` documents are processing\nand the PDFs may be out of date. A change to any document\nrequires processing on all `sign_files`. We\nrecommended waiting until processing is finished\n(and this value is true) before downloading the PDFs."
+                }
+              },
+              "description": "List of files that will be signed, which are copies of the original\nsource files. A new version of these files are created as signers sign\nand can be downloaded at any point in the signing process."
+            },
+            "auto_expire_at": {
+              "type": "string",
+              "format": "date-time",
+              "description": "Uses `days_valid` to calculate the date and time, in GMT, the sign request will expire if unsigned."
+            }
+          }
+        }
+      ]
+    },
+    "SignRequests": {
+      "title": "Box Sign",
+      "type": "object",
+      "description": "A standard representation of a sign request, as returned from any Box Sign\nAPI endpoints by default.",
+      "allOf": [
+        {
+          "type": "object",
+          "description": "The part of an API response that describes marker\nbased pagination",
+          "properties": {
+            "limit": {
+              "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
+              "type": "integer",
+              "format": "int64"
+            },
+            "next_marker": {
+              "description": "The marker for the start of the next page of results.",
+              "type": "integer",
+              "format": "int64"
+            },
+            "prev_marker": {
+              "description": "The marker for the start of the previous page of results.",
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        },
+        {
+          "properties": {
+            "entries": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/SignRequest"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "SignRequestCreateRequest": {
+      "title": "Create a sign request",
+      "type": "object",
+      "description": "A request to create a sign request object",
+      "required": [
+        "signers",
+        "source_files",
+        "parent_folder"
+      ],
+      "properties": {
+        "is_document_preparation_needed": {
+          "type": "boolean",
+          "description": "Indicates if the sender should receive a `prepare_url` in the response to complete document preparation via UI."
+        },
+        "are_text_signatures_enabled": {
+          "type": "boolean",
+          "description": "Disables the usage of signatures generated by typing (text)",
+          "default": true
+        },
+        "email_subject": {
+          "type": "string",
+          "description": "Subject of sign request email. This is cleaned by sign request. If this field is not passed, a default subject will be used."
+        },
+        "email_message": {
+          "type": "string",
+          "description": "Message to include in sign request email. The field is cleaned through sanitization of specific characters. However, some html tags are allowed. Links included in the message are also converted to hyperlinks in the email. The message may contain the following html tags including `a`, `abbr`, `acronym`, `b`, `blockquote`, `code`, `em`, `i`, `ul`, `li`, `ol`, and `strong`. Be aware that when the text to html ratio is too high, the email may end up in spam filters. Custom styles on these tags are not allowed. If this field is not passed, a default message will be used."
+        },
+        "are_reminders_enabled": {
+          "type": "boolean",
+          "description": "Reminds signers to sign a document on day 3, 8, 13 and 18. Reminders are only sent to outstanding signers."
+        },
+        "signers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SignRequestCreateSigner"
+          },
+          "description": "Array of signers for the sign request. 35 is the max number of signers permitted."
+        },
+        "source_files": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/File--Mini"
+          },
+          "description": "List of files to create a signing document from. This is currently limited to one file. Only the ID and type fields are required for each file."
+        },
+        "parent_folder": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/Folder--Mini"
+            },
+            {
+              "description": "The destination folder to place final, signed document and signing\nlog. Only `ID` and `type` fields are required. The root folder,\nfolder ID `0`, cannot be used."
+            }
+          ]
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the sign request"
+        },
+        "prefill_tags": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SignRequestPrefillTag"
+          },
+          "description": "When a document contains sign related tags in the content, you can prefill them using this `prefill_tags` by referencing the 'id' of the tag as the `external_id` field of the prefill tag."
+        },
+        "days_valid": {
+          "type": "integer",
+          "description": "Number of days after which this request will automatically expire if not completed",
+          "minimum": 1,
+          "maximum": 730
+        },
+        "external_id": {
+          "type": "string",
+          "description": "This can be used to reference an ID in an external system that the sign request is related to."
+        }
+      }
+    },
     "Workflows": {
       "title": "Workflows",
       "type": "object",
@@ -19287,6 +19674,124 @@
         }
       }
     },
+    "SignRequestSigner": {
+      "title": "Signer fields for GET Sign Request response",
+      "type": "object",
+      "description": "The schema for a Signer in a GET Sign Request request body",
+      "required": [
+        "email"
+      ],
+      "allOf": [
+        {
+          "$ref": "#/definitions/SignRequestCreateSigner"
+        },
+        {
+          "properties": {
+            "has_viewed_document": {
+              "type": "boolean",
+              "readOnly": true,
+              "description": "Set to `true` if the signer views the document"
+            },
+            "signer_decision": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "signed",
+                    "declined"
+                  ],
+                  "description": "Type of decision made by the signer"
+                },
+                "finalized_at": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "Date and Time that the decision was made"
+                }
+              },
+              "description": "Final decision made by the signer"
+            },
+            "inputs": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/SignRequestSignerInput"
+              },
+              "readOnly": true
+            },
+            "embed_url": {
+              "type": "string",
+              "readOnly": true,
+              "description": "URL to direct a signer to for signing"
+            }
+          }
+        }
+      ]
+    },
+    "SignRequestCreateSigner": {
+      "title": "Signer fields for Create Sign Request",
+      "type": "object",
+      "description": "The schema for a Signer in a POST Sign Request request body",
+      "required": [
+        "email"
+      ],
+      "properties": {
+        "email": {
+          "type": "string",
+          "description": "Email address of the signer"
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the signer"
+        },
+        "role": {
+          "type": "string",
+          "enum": [
+            "signer",
+            "approver",
+            "final_copy_reader"
+          ],
+          "description": "Defines the role of the signer in the sign request. Signers\nneed to sign the document and Approvers approve the document. A\n`final_copy_reader` only receives the final signed document and signing\nlog.",
+          "default": "signer"
+        },
+        "is_in_person": {
+          "type": "boolean",
+          "description": "Used in combination with an embed URL for a sender. After the\nsender signs, they will be redirected to the next `in_person` signer."
+        },
+        "order": {
+          "type": "integer",
+          "description": "Order of the signer",
+          "minimum": 0
+        },
+        "embed_url_external_user_id": {
+          "type": "string",
+          "description": "User ID for the signer in an external application responsible\nfor authentication when accessing the embed URL."
+        }
+      }
+    },
+    "SignRequestPrefillTag": {
+      "title": "Sign Request Prefill Tag",
+      "type": "object",
+      "description": "Prefill tags are used to prefill placeholders with signer input data. Only\none value field can be included.",
+      "properties": {
+        "document_tag_id": {
+          "type": "string",
+          "description": "This references the ID of a specific tag contained in a file of the sign request."
+        },
+        "text_value": {
+          "type": "string",
+          "description": "Text prefill value"
+        },
+        "checkbox_value": {
+          "type": "boolean",
+          "description": "Checkbox prefill value"
+        },
+        "date_value": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Date prefill value"
+        }
+      }
+    },
     "Workflow": {
       "title": "Workflow",
       "type": "object",
@@ -19741,6 +20246,37 @@
           ]
         }
       }
+    },
+    "SignRequestSignerInput": {
+      "title": "Sign Request Signer Input",
+      "type": "object",
+      "description": "Input created by a Signer on a Sign Request",
+      "required": [
+        "page_index"
+      ],
+      "allOf": [
+        {
+          "$ref": "#/definitions/SignRequestPrefillTag"
+        },
+        {
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": [
+                "signature",
+                "date",
+                "text",
+                "checkbox"
+              ],
+              "description": "Type of input"
+            },
+            "page_index": {
+              "type": "integer",
+              "description": "Index of page that the input is on"
+            }
+          }
+        }
+      ]
     },
     "Workflow--Mini": {
       "title": "Workflow (Mini)",
