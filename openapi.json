@@ -19440,7 +19440,7 @@
         ],
         "x-box-tag": "zip_downloads",
         "x-box-reference-category": "zip_downloads",
-        "description": "Creates a request to download multiple files and folders as a single `zip`\narchive file. This API does not return the archive but instead performs all\nthe checks to ensure that the user has access to all the items, and then\nreturns a `download_url` and a `status_url` that can be used to download the\narchive.\n\nThe limit for an archive is either 32GB or 10,000 files, whichever\nlimitation is met first.",
+        "description": "Creates a request to download multiple files and folders as a single `zip`\narchive file. This API does not return the archive but instead performs all\nthe checks to ensure that the user has access to all the items, and then\nreturns a `download_url` and a `status_url` that can be used to download the\narchive.\n\nThe limit for an archive is either the Account's upload limit or\n10,000 files, whichever is met first",
         "requestBody": {
           "content": {
             "application/json": {
@@ -19487,7 +19487,7 @@
             }
           },
           "400": {
-            "description": "Returns an error if some of the parameters are missing or\nnot valid.\n\nIn most cases, this error might happen because the JSON request body is\nnot valid JSON, any of the items has an incorrect or missing ID, any of\nthe items is not a file or folder, or the root folder with ID `0` has been\nadded to the list of folders to add to the archive.\n\nThe following is a list of common error codes for this response.\n\n* `bad_request` - the request body is missing, invalid, or both the list\nof files and folders are empty. Additionally, it this error might be\nreturned when attempting to add the root folder with ID `0` to an archive.\n* `zip_download_file_count_exceeded_limit` - the requested files and\nfolders would result in an archive with more than 10,000 files. The\nrequest will have to be split into multiple requests to reduce the number\nof files per archive.\n* `zip_download_pre_compressed_bytes_exceeded_limit` - the requested files\nand folders would result in an archive with more than 32GB of content. The\nrequest will have to be split into multiple requests to reduce the size of\nthe archive.",
+            "description": "Returns an error if some of the parameters are missing or\nnot valid.\n\nIn most cases, this error might happen because the JSON request body is\nnot valid JSON, any of the items has an incorrect or missing ID, any of\nthe items is not a file or folder, or the root folder with ID `0` has been\nadded to the list of folders to add to the archive.\n\nThe following is a list of common error codes for this response.\n\n* `bad_request` - the request body is missing, invalid, or both the list\nof files and folders are empty. Additionally, it this error might be\nreturned when attempting to add the root folder with ID `0` to an archive.\n* `zip_download_file_count_exceeded_limit` - the requested files and\nfolders would result in an archive with more than 10,000 files. The\nrequest will have to be split into multiple requests to reduce the number\nof files per archive.\n* `zip_download_pre_compressed_bytes_exceeded_limit` - the requested files\nand folders would result in an archive with more than the allowed download\nlimit. The request will have to be split into multiple requests to reduce\nthe size of the archive.",
             "content": {
               "application/json": {
                 "schema": {
@@ -19668,263 +19668,6 @@
           },
           "404": {
             "description": "Returns an error if the ID of this download request is not valid, or if\nthe status of a download is requested before the download has been\nstarted.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ClientError"
-                }
-              }
-            }
-          },
-          "default": {
-            "description": "An unexpected client error.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ClientError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/workflows": {
-      "get": {
-        "operationId": "get_workflows",
-        "summary": "List workflows",
-        "tags": [
-          "Workflows"
-        ],
-        "x-box-tag": "workflows",
-        "description": "Returns list of workflows that act on a given `folder ID`, and\nhave a flow with a trigger type of `WORKFLOW_MANUAL_START`.",
-        "parameters": [
-          {
-            "name": "folder_id",
-            "description": "The unique identifier that represent a folder.\n\nThe ID for any folder can be determined\nby visiting this folder in the web application\nand copying the ID from the URL. For example,\nfor the URL `https://*.app.box.com/folder/123`\nthe `folder_id` is `123`.\n\nThe root folder of a Box account is\nalways represented by the ID `0`.",
-            "example": "12345",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "nullable": false
-            }
-          },
-          {
-            "name": "trigger_type",
-            "description": "Type of trigger to search for.",
-            "example": "WORKFLOW_MANUAL_START",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "nullable": false
-            }
-          },
-          {
-            "name": "limit",
-            "description": "The maximum number of items to return per page.",
-            "in": "query",
-            "required": false,
-            "example": 1000,
-            "schema": {
-              "type": "integer",
-              "format": "int64",
-              "maximum": 1000
-            }
-          },
-          {
-            "name": "marker",
-            "description": "Defines the position marker at which to begin returning results. This is\nused when paginating using marker-based pagination.\n\nThis requires `usemarker` to be set to `true`.",
-            "in": "query",
-            "required": false,
-            "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Returns the workflow.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Workflows"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Returned if the trigger type is not `WORKFLOW_MANUAL_START`.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ClientError"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Returned if the folder is not found, or the user does not\nhave access to the folder.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ClientError"
-                }
-              }
-            }
-          },
-          "default": {
-            "description": "An unexpected client error.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ClientError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/workflows/{workflow_id}/start": {
-      "post": {
-        "operationId": "post_workflows_id_start",
-        "summary": "Starts workflow based on request body",
-        "tags": [
-          "Workflows"
-        ],
-        "x-box-tag": "workflows",
-        "description": "Initiates a flow with a trigger type of `WORKFLOW_MANUAL_START`.",
-        "parameters": [
-          {
-            "name": "workflow_id",
-            "description": "The ID of the workflow.",
-            "example": "12345",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "required": [
-                  "flow",
-                  "files",
-                  "folder"
-                ],
-                "properties": {
-                  "type": {
-                    "type": "string",
-                    "description": "The type of the parameters object",
-                    "example": "WORKFLOW_PARAMETERS",
-                    "enum": [
-                      "WORKFLOW_PARAMETERS"
-                    ]
-                  },
-                  "flow": {
-                    "type": "object",
-                    "description": "The flow that will be triggered",
-                    "properties": {
-                      "type": {
-                        "type": "string",
-                        "description": "The type of the flow object",
-                        "example": "flow"
-                      },
-                      "id": {
-                        "type": "string",
-                        "description": "The id of the flow",
-                        "example": "123456789"
-                      }
-                    }
-                  },
-                  "files": {
-                    "type": "array",
-                    "description": "The array of files for which the workflow should start. All files\nmust be in the workflow's configured folder.",
-                    "items": {
-                      "type": "object",
-                      "description": "A file the workflow should start for",
-                      "properties": {
-                        "type": {
-                          "type": "string",
-                          "description": "The type of the file object",
-                          "example": "file",
-                          "enum": [
-                            "file"
-                          ]
-                        },
-                        "id": {
-                          "type": "string",
-                          "description": "The id of the file",
-                          "example": "12345678"
-                        }
-                      }
-                    }
-                  },
-                  "folder": {
-                    "type": "object",
-                    "description": "The folder object for which the workflow is configured.",
-                    "properties": {
-                      "type": {
-                        "type": "string",
-                        "description": "The type of the folder object",
-                        "example": "folder",
-                        "enum": [
-                          "folder"
-                        ]
-                      },
-                      "id": {
-                        "type": "string",
-                        "description": "The id of the folder",
-                        "example": "87654321"
-                      }
-                    }
-                  },
-                  "outcomes": {
-                    "type": "array",
-                    "description": "A list of outcomes required to be configured at start time.",
-                    "items": {
-                      "type": "object",
-                      "description": "A configurable outcome the workflow should complete. If you\nhave a `task_completion_rule`, you may input `all_assignees` or\n`any_assignee` in the `variable_value` field. Similarly, if you\nhave a `collaborator_role`, you may input `editor`, `viewer`,\n`previewer`, `uploader`, `previewer uploader`, `viewer uploader`\n, `co-owner` in the `variable_value` field."
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "204": {
-            "description": "Starts the workflow."
-          },
-          "400": {
-            "description": "Returns an error if some of the parameters are missing or\nnot valid.\n\n* `workflow_is_not_enabled` when the workflow is not enabled\n* `workflow_not_active_on_provided_folder` when the workflow is not\n  enabled for the specified folder id\n* `parameters_provided_do_not_match_target_outcome` when the provided\n  parameters do not match the expected parameters",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ClientError"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Returns an error if there are insufficient permissions.\n\n* `insufficient_access` when the user does not have access rights to file\n  or folder\n* `missing_relay_full_access` when the user does not have access to Relay\n  Full",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ClientError"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Returns an error if the workflow could not be found,\nor the authenticated user does not have access to the workflow.\n\n* `workflow_not_found` when the workflow is not found\n* `flow_missing_or_inaccessible` when the flow is not a manual start flow",
             "content": {
               "application/json": {
                 "schema": {
@@ -20184,6 +19927,263 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/SignRequest"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/workflows": {
+      "get": {
+        "operationId": "get_workflows",
+        "summary": "List workflows",
+        "tags": [
+          "Workflows"
+        ],
+        "x-box-tag": "workflows",
+        "description": "Returns list of workflows that act on a given `folder ID`, and\nhave a flow with a trigger type of `WORKFLOW_MANUAL_START`.\n\nYou application must be authorized to use the `Manage Box Relay` application\nscope within the developer console in to use this endpoint.",
+        "parameters": [
+          {
+            "name": "folder_id",
+            "description": "The unique identifier that represent a folder.\n\nThe ID for any folder can be determined\nby visiting this folder in the web application\nand copying the ID from the URL. For example,\nfor the URL `https://*.app.box.com/folder/123`\nthe `folder_id` is `123`.\n\nThe root folder of a Box account is\nalways represented by the ID `0`.",
+            "example": "12345",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "nullable": false
+            }
+          },
+          {
+            "name": "trigger_type",
+            "description": "Type of trigger to search for.",
+            "example": "WORKFLOW_MANUAL_START",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "nullable": false
+            }
+          },
+          {
+            "name": "limit",
+            "description": "The maximum number of items to return per page.",
+            "in": "query",
+            "required": false,
+            "example": 1000,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "maximum": 1000
+            }
+          },
+          {
+            "name": "marker",
+            "description": "Defines the position marker at which to begin returning results. This is\nused when paginating using marker-based pagination.\n\nThis requires `usemarker` to be set to `true`.",
+            "in": "query",
+            "required": false,
+            "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns the workflow.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Workflows"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Returned if the trigger type is not `WORKFLOW_MANUAL_START`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Returned if the folder is not found, or the user does not\nhave access to the folder.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/workflows/{workflow_id}/start": {
+      "post": {
+        "operationId": "post_workflows_id_start",
+        "summary": "Starts workflow based on request body",
+        "tags": [
+          "Workflows"
+        ],
+        "x-box-tag": "workflows",
+        "description": "Initiates a flow with a trigger type of `WORKFLOW_MANUAL_START`.\n\nYou application must be authorized to use the `Manage Box Relay` application\nscope within the developer console.",
+        "parameters": [
+          {
+            "name": "workflow_id",
+            "description": "The ID of the workflow.",
+            "example": "12345",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "flow",
+                  "files",
+                  "folder"
+                ],
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "description": "The type of the parameters object",
+                    "example": "workflow_parameters",
+                    "enum": [
+                      "workflow_parameters"
+                    ]
+                  },
+                  "flow": {
+                    "type": "object",
+                    "description": "The flow that will be triggered",
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "description": "The type of the flow object",
+                        "example": "flow"
+                      },
+                      "id": {
+                        "type": "string",
+                        "description": "The id of the flow",
+                        "example": "123456789"
+                      }
+                    }
+                  },
+                  "files": {
+                    "type": "array",
+                    "description": "The array of files for which the workflow should start. All files\nmust be in the workflow's configured folder.",
+                    "items": {
+                      "type": "object",
+                      "description": "A file the workflow should start for",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "description": "The type of the file object",
+                          "example": "file",
+                          "enum": [
+                            "file"
+                          ]
+                        },
+                        "id": {
+                          "type": "string",
+                          "description": "The id of the file",
+                          "example": "12345678"
+                        }
+                      }
+                    }
+                  },
+                  "folder": {
+                    "type": "object",
+                    "description": "The folder object for which the workflow is configured.",
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "description": "The type of the folder object",
+                        "example": "folder",
+                        "enum": [
+                          "folder"
+                        ]
+                      },
+                      "id": {
+                        "type": "string",
+                        "description": "The id of the folder",
+                        "example": "87654321"
+                      }
+                    }
+                  },
+                  "outcomes": {
+                    "type": "array",
+                    "description": "A list of outcomes required to be configured at start time.",
+                    "items": {
+                      "type": "object",
+                      "description": "A configurable outcome the workflow should complete. If you\nhave a `task_completion_rule`, you may input `all_assignees` or\n`any_assignee` in the `variable_value` field. Similarly, if you\nhave a `collaborator_role`, you may input `editor`, `viewer`,\n`previewer`, `uploader`, `previewer uploader`, `viewer uploader`\n, `co-owner` in the `variable_value` field."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Starts the workflow."
+          },
+          "400": {
+            "description": "Returns an error if some of the parameters are missing or\nnot valid.\n\n* `workflow_is_not_enabled` when the workflow is not enabled\n* `workflow_not_active_on_provided_folder` when the workflow is not\n  enabled for the specified folder id\n* `parameters_provided_do_not_match_target_outcome` when the provided\n  parameters do not match the expected parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Returns an error if there are insufficient permissions.\n\n* `insufficient_access` when the user does not have access rights to file\n  or folder\n* `missing_relay_full_access` when the user does not have access to Relay\n  Full",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Returns an error if the workflow could not be found,\nor the authenticated user does not have access to the workflow.\n\n* `workflow_not_found` when the workflow is not found\n* `flow_missing_or_inaccessible` when the flow is not a manual start flow",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
                 }
               }
             }
@@ -28617,7 +28617,7 @@
         "type": "object",
         "x-box-resource-id": "workflow",
         "x-box-variant": "standard",
-        "description": "Box Relay Workflows are objects that represent a named collection of flows",
+        "description": "Box Relay Workflows are objects that represent a named collection of flows.\n\nYou application must be authorized to use the `Manage Box Relay` application\nscope within the developer console in order to use this resource.",
         "allOf": [
           {
             "$ref": "#/components/schemas/Workflow--Mini"
@@ -28887,7 +28887,7 @@
         "type": "object",
         "x-box-resource-id": "workflow--full",
         "x-box-variant": "full",
-        "description": "Box Relay Workflows are objects that represent a named collection of flows",
+        "description": "Box Relay Workflows are objects that represent a named collection of flows.\n\nYou application must be authorized to use the `Manage Box Relay` application\nscope within the developer console in order to use this resource.",
         "allOf": [
           {
             "$ref": "#/components/schemas/Workflow"
@@ -28941,7 +28941,7 @@
           "full"
         ],
         "x-box-variant": "mini",
-        "description": "Box Relay Workflows are objects that represent a named collection of flows",
+        "description": "Box Relay Workflows are objects that represent a named collection of flows.\n\nYou application must be authorized to use the `Manage Box Relay` application\nscope within the developer console in order to use this resource.",
         "properties": {
           "id": {
             "type": "string",
@@ -28978,7 +28978,7 @@
         "type": "object",
         "x-box-resource-id": "workflows",
         "x-box-tag": "workflows",
-        "description": "A list of workflows",
+        "description": "A list of workflows.\n\nYou application must be authorized to use the `Manage Box Relay` application\nscope within the developer console in order to use this resource.",
         "allOf": [
           {
             "type": "object",
