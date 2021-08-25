@@ -16935,7 +16935,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/FileVersionRetentions"
+                  "$ref": "#/components/schemas/FilesUnderRetention"
                 }
               }
             }
@@ -17012,7 +17012,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/FileVersionRetentions"
+                  "$ref": "#/components/schemas/FileVersionsUnderRetention"
                 }
               }
             }
@@ -24180,6 +24180,152 @@
           }
         ]
       },
+      "FileVersionUnderRetention": {
+        "title": "File version under retention",
+        "type": "object",
+        "x-box-resource-id": "file_version_under_retention",
+        "x-box-tag": "file_versions_under_retention",
+        "description": "A retention policy blocks permanent deletion of content\nfor a specified amount of time. Admins can apply policies to\nspecified folders, or an entire enterprise. A file version retention\nis a  record for a retained file version. To use this feature,\nyou must  have the manage retention policies scope enabled for your\nAPI key via  your application management console. For more information\nabout retention policies, please visit our help documentation",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The unique identifier for this file version retention.",
+            "example": "11446498"
+          },
+          "type": {
+            "type": "string",
+            "description": "`file_version`",
+            "example": "file_version",
+            "enum": [
+              "file_version"
+            ]
+          },
+          "file_version": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FileVersion--Mini"
+              },
+              {
+                "description": "The file version this file version retention was\napplied to"
+              }
+            ]
+          },
+          "sequence_id": {
+            "allOf": [
+              {
+                "type": "string",
+                "example": "3",
+                "nullable": false,
+                "description": "A numeric identifier that represents the most recent user event\nthat has been applied to this item.\n\nThis can be used in combination with the `GET /events`-endpoint\nto filter out user events that would have occurred before this\nidentifier was read.\n\nAn example would be where a Box Drive-like application\nwould fetch an item via the API, and then listen to incoming\nuser events for changes to the item. The application would\nignore any user events where the `sequence_id` in the event\nis smaller than or equal to the `sequence_id` in the originally\nfetched resource."
+              },
+              {
+                "nullable": false
+              }
+            ]
+          },
+          "etag": {
+            "type": "string",
+            "description": "The HTTP `etag` of this file. This can be used within some API\nendpoints in the `If-Match` and `If-None-Match` headers to only\nperform changes on the file if (no) changes have happened.",
+            "example": "1"
+          },
+          "sha1": {
+            "type": "string",
+            "description": "The SHA1 hash of the file. This can be used to compare the contents\nof a file on Box with a local file.",
+            "example": "565b3ee8bb2bea16b430b0f173c36f6458f24fbd"
+          },
+          "name": {
+            "type": "string",
+            "description": "The name of the file.",
+            "example": "example.pdf"
+          }
+        }
+      },
+      "FileVersionsUnderRetention": {
+        "title": "File versions under retention",
+        "type": "object",
+        "x-box-resource-id": "file_versions_under_retention",
+        "x-box-tag": "file_versions_under_retention",
+        "description": "A list of file versions under retention.",
+        "allOf": [
+          {
+            "type": "object",
+            "description": "The part of an API response that describes marker\nbased pagination",
+            "properties": {
+              "limit": {
+                "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
+                "example": 1000,
+                "type": "integer",
+                "format": "int64"
+              },
+              "next_marker": {
+                "description": "The marker for the start of the next page of results.",
+                "example": 3000,
+                "type": "integer",
+                "format": "int64"
+              },
+              "prev_marker": {
+                "description": "The marker for the start of the previous page of results.",
+                "example": 1000,
+                "type": "integer",
+                "format": "int64"
+              }
+            }
+          },
+          {
+            "properties": {
+              "entries": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/FileVersionUnderRetention"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "FilesUnderRetention": {
+        "title": "Files under retention",
+        "type": "object",
+        "x-box-resource-id": "files_under_retention",
+        "x-box-tag": "files_under_retention",
+        "description": "A list of files under retention.",
+        "allOf": [
+          {
+            "type": "object",
+            "description": "The part of an API response that describes marker\nbased pagination",
+            "properties": {
+              "limit": {
+                "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
+                "example": 1000,
+                "type": "integer",
+                "format": "int64"
+              },
+              "next_marker": {
+                "description": "The marker for the start of the next page of results.",
+                "example": 3000,
+                "type": "integer",
+                "format": "int64"
+              },
+              "prev_marker": {
+                "description": "The marker for the start of the previous page of results.",
+                "example": 1000,
+                "type": "integer",
+                "format": "int64"
+              }
+            }
+          },
+          {
+            "properties": {
+              "entries": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/File--Mini"
+                }
+              }
+            }
+          }
+        ]
+      },
       "Folder": {
         "title": "Folder",
         "type": "object",
@@ -30642,8 +30788,16 @@
       "x-box-tag": "file_versions"
     },
     {
+      "name": "File versions under retention",
+      "x-box-tag": "file_versions_under_retention"
+    },
+    {
       "name": "Files",
       "x-box-tag": "files"
+    },
+    {
+      "name": "Files under retention",
+      "x-box-tag": "files_under_retention"
     },
     {
       "name": "Folder Locks",
