@@ -13231,13 +13231,10 @@
                   },
                   "tracking_codes": {
                     "type": "array",
-                    "description": "Tracking codes allow an admin to generate reports from the\nadmin console and assign an attribute to a specific group\nof users. This setting must be enabled for an enterprise before it\ncan be used.",
-                    "example": [
-                      "code1: 12345"
-                    ],
                     "items": {
-                      "type": "string"
-                    }
+                      "$ref": "#/components/schemas/TrackingCode"
+                    },
+                    "description": "Tracking codes allow an admin to generate reports from the\nadmin console and assign an attribute to a specific group\nof users. This setting must be enabled for an enterprise before it\ncan be used."
                   },
                   "can_see_managed_users": {
                     "type": "boolean",
@@ -13531,13 +13528,10 @@
                   },
                   "tracking_codes": {
                     "type": "array",
-                    "description": "Tracking codes allow an admin to generate reports from the\nadmin console and assign an attribute to a specific group\nof users. This setting must be enabled for an enterprise before it\ncan be used.",
-                    "example": [
-                      "code1: 12345"
-                    ],
                     "items": {
-                      "type": "string"
-                    }
+                      "$ref": "#/components/schemas/TrackingCode"
+                    },
+                    "description": "Tracking codes allow an admin to generate reports from the\nadmin console and assign an attribute to a specific group\nof users. This setting must be enabled for an enterprise before it\ncan be used."
                   },
                   "can_see_managed_users": {
                     "type": "boolean",
@@ -16682,7 +16676,8 @@
               "type": "string",
               "enum": [
                 "folder",
-                "enterprise"
+                "enterprise",
+                "metadata_template"
               ]
             }
           },
@@ -16791,6 +16786,30 @@
                         "example": "6564564"
                       }
                     }
+                  },
+                  "filter_fields": {
+                    "type": "array",
+                    "description": "If the `assign_to` type is `metadata_template`,\nthen optionally add the `filter_fields` parameter which will\nrequire an array of objects with a field entry and a value entry.\nCurrently only one object of `field` and `value` is supported.",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "field": {
+                          "type": "string",
+                          "description": "The metadata attribute key id.",
+                          "example": "a0f4ee4e-1dc1-4h90-a8a9-aef55fc681d4"
+                        },
+                        "value": {
+                          "type": "string",
+                          "description": "The metadata attribute field id. For value, only\nenum and multiselect types are supported.",
+                          "example": "0c27b756-0p87-4fe0-a43a-59fb661ccc4e"
+                        }
+                      }
+                    }
+                  },
+                  "start_date_field": {
+                    "description": "The date the retention policy assignment begins.\n\nIf the `assigned_to` type is `metadata_template`,\nthis field can be a date field's metadata attribute key id.",
+                    "type": "string",
+                    "example": "upload_date"
                   }
                 }
               }
@@ -26772,28 +26791,34 @@
             ]
           },
           "assigned_to": {
-            "allOf": [
-              {
-                "title": "Reference",
-                "description": "The bare basic reference for an object",
-                "type": "object",
-                "properties": {
-                  "id": {
-                    "type": "string",
-                    "description": "The unique identifier for this object",
-                    "example": "11446498"
-                  },
-                  "type": {
-                    "type": "string",
-                    "description": "The type for this object",
-                    "example": "file"
-                  }
-                }
+            "type": "object",
+            "description": "The `type` and `id` of the content that is under\nretention. The `type` can either be `folder`\n`enterprise`, or `metadata_template`.",
+            "properties": {
+              "id": {
+                "type": "string",
+                "example": "324494",
+                "description": "The ID of the folder, enterprise, or metadata template\nthe policy is assigned to."
               },
-              {
-                "description": "The `type` and `id` of the content that is under\nretention. The `type` can either be `folder` or `\nenterprise`."
+              "type": {
+                "type": "string",
+                "example": "folder",
+                "description": "The type of resource the policy is assigned to.",
+                "enum": [
+                  "folder",
+                  "enterprise",
+                  "metadata_template"
+                ]
               }
-            ]
+            }
+          },
+          "filter_fields": {
+            "type": "array",
+            "nullable": true,
+            "description": "An array of field objects. Values are only returned if the `assigned_to`\ntype is `metadata_template`. Otherwise, the array is blank.",
+            "items": {
+              "type": "object",
+              "nullable": true
+            }
           },
           "assigned_by": {
             "allOf": [
@@ -26810,6 +26835,11 @@
             "format": "date-time",
             "description": "When the retention policy assignment object was\ncreated",
             "example": "2012-12-12T10:53:43-08:00"
+          },
+          "start_date_field": {
+            "type": "string",
+            "description": "The date the retention policy assignment begins",
+            "example": "upload_date"
           }
         }
       },
@@ -28110,31 +28140,10 @@
               },
               "tracking_codes": {
                 "type": "array",
-                "description": "Tracking codes allow an admin to generate reports from the\nadmin console and assign an attribute to a specific group\nof users. This setting must be enabled for an enterprise\nbefore it can be used.",
                 "items": {
-                  "type": "object",
-                  "description": "Custom tracking code for a user.",
-                  "properties": {
-                    "type": {
-                      "type": "string",
-                      "description": "`tracking_code`",
-                      "example": "tracking_code",
-                      "enum": [
-                        "tracking_code"
-                      ]
-                    },
-                    "name": {
-                      "type": "string",
-                      "description": "The name of the tracking code, which must be preconfigured in\nthe Admin Console",
-                      "example": "department"
-                    },
-                    "value": {
-                      "type": "string",
-                      "description": "The value of the tracking code",
-                      "example": "Sales"
-                    }
-                  }
-                }
+                  "$ref": "#/components/schemas/TrackingCode"
+                },
+                "description": "Tracking codes allow an admin to generate reports from the\nadmin console and assign an attribute to a specific group\nof users. This setting must be enabled for an enterprise\nbefore it can be used."
               },
               "can_see_managed_users": {
                 "type": "boolean",
@@ -28954,7 +28963,8 @@
                               },
                               "outcome_parameters": {
                                 "type": "object",
-                                "description": "Information about how to complete the outcome which varies based on\n`action_type` selected"
+                                "description": "Information about how to complete the outcome which varies based on\n`action_type` selected",
+                                "nullable": true
                               },
                               "if_rejected": {
                                 "type": "array",
@@ -29020,7 +29030,8 @@
                                     },
                                     "outcome_parameters": {
                                       "type": "object",
-                                      "description": "Information about how to complete the outcome which varies based on\n`action_type` selected"
+                                      "description": "Information about how to complete the outcome which varies based on\n`action_type` selected",
+                                      "nullable": true
                                     }
                                   }
                                 }
@@ -30435,6 +30446,31 @@
             }
           }
         ]
+      },
+      "TrackingCode": {
+        "title": "Tracking code",
+        "type": "object",
+        "description": "Tracking codes allow an admin to generate reports from the admin console\nand assign an attribute to a specific group of users.\nThis setting must be enabled for an enterprise before it can be used.",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "`tracking_code`",
+            "example": "tracking_code",
+            "enum": [
+              "tracking_code"
+            ]
+          },
+          "name": {
+            "type": "string",
+            "description": "The name of the tracking code, which must be preconfigured in\nthe Admin Console",
+            "example": "department"
+          },
+          "value": {
+            "type": "string",
+            "description": "The value of the tracking code",
+            "example": "Sales"
+          }
+        }
       },
       "MetadataFilter": {
         "title": "Metadata filter",
