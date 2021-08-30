@@ -16671,7 +16671,7 @@
             "description": "The type of the retention policy assignment to retrieve.",
             "in": "query",
             "required": false,
-            "example": "folder",
+            "example": "metadata_template",
             "schema": {
               "type": "string",
               "enum": [
@@ -16773,7 +16773,7 @@
                       "type": {
                         "type": "string",
                         "description": "The type of item to assign the policy to.",
-                        "example": "folder",
+                        "example": "metadata_template",
                         "enum": [
                           "enterprise",
                           "folder",
@@ -16828,7 +16828,7 @@
             }
           },
           "400": {
-            "description": "Returns an error if an `id` is specified while assigning a the\nretention policy to an enterprise.",
+            "description": "Returns an error if an `id` is specified while assigning the\nretention policy to an enterprise.\n\nReturns an error if `start_date_field` is present but `assign_to.type`\nis not `metadata_template`\n\nReturns an error if `start_date_field` is present, but belongs to a\ndifferent metadata template than the one specified in `assign_to.id`\n\nReturns an error if `start_date_field` is present, but the\n`retention_policy` has a `retention_length` of \"indefinite\"\n\nReturns an error if `start_date_field` is present, but cannot be resolved\nto a valid metadata date field.",
             "content": {
               "application/json": {
                 "schema": {
@@ -23785,6 +23785,49 @@
           }
         }
       },
+      "FilesUnderRetention": {
+        "title": "Files under retention",
+        "type": "object",
+        "x-box-resource-id": "files_under_retention",
+        "x-box-tag": "retention_policy_assignments",
+        "description": "A list of files under retention.",
+        "allOf": [
+          {
+            "type": "object",
+            "description": "The part of an API response that describes marker\nbased pagination",
+            "properties": {
+              "limit": {
+                "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
+                "example": 1000,
+                "type": "integer",
+                "format": "int64"
+              },
+              "next_marker": {
+                "description": "The marker for the start of the next page of results.",
+                "example": 3000,
+                "type": "integer",
+                "format": "int64"
+              },
+              "prev_marker": {
+                "description": "The marker for the start of the previous page of results.",
+                "example": 1000,
+                "type": "integer",
+                "format": "int64"
+              }
+            }
+          },
+          {
+            "properties": {
+              "entries": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/File--Mini"
+                }
+              }
+            }
+          }
+        ]
+      },
       "FileVersion": {
         "title": "File version",
         "type": "object",
@@ -24203,49 +24246,6 @@
                 "type": "array",
                 "items": {
                   "$ref": "#/components/schemas/FileVersionRetention"
-                }
-              }
-            }
-          }
-        ]
-      },
-      "FilesUnderRetention": {
-        "title": "Files under retention",
-        "type": "object",
-        "x-box-resource-id": "files_under_retention",
-        "x-box-tag": "retention_policy_assignments",
-        "description": "A list of files under retention.",
-        "allOf": [
-          {
-            "type": "object",
-            "description": "The part of an API response that describes marker\nbased pagination",
-            "properties": {
-              "limit": {
-                "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
-                "example": 1000,
-                "type": "integer",
-                "format": "int64"
-              },
-              "next_marker": {
-                "description": "The marker for the start of the next page of results.",
-                "example": 3000,
-                "type": "integer",
-                "format": "int64"
-              },
-              "prev_marker": {
-                "description": "The marker for the start of the previous page of results.",
-                "example": 1000,
-                "type": "integer",
-                "format": "int64"
-              }
-            }
-          },
-          {
-            "properties": {
-              "entries": {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/File--Mini"
                 }
               }
             }
@@ -26796,12 +26796,12 @@
             "properties": {
               "id": {
                 "type": "string",
-                "example": "324494",
+                "example": "a983f69f-e85f-4ph4-9f46-4afdf9c1af65",
                 "description": "The ID of the folder, enterprise, or metadata template\nthe policy is assigned to."
               },
               "type": {
                 "type": "string",
-                "example": "folder",
+                "example": "metadata_template",
                 "description": "The type of resource the policy is assigned to.",
                 "enum": [
                   "folder",
@@ -28975,11 +28975,6 @@
                                   }
                                 ]
                               },
-                              "outcome_parameters": {
-                                "type": "object",
-                                "description": "Information about how to complete the outcome which varies based on\n`action_type` selected",
-                                "nullable": true
-                              },
                               "if_rejected": {
                                 "type": "array",
                                 "description": "If `action_type` is `assign_task` and the task is rejected, returns a\nlist of outcomes to complete",
@@ -29041,11 +29036,6 @@
                                           "description": "The type of outcome"
                                         }
                                       ]
-                                    },
-                                    "outcome_parameters": {
-                                      "type": "object",
-                                      "description": "Information about how to complete the outcome which varies based on\n`action_type` selected",
-                                      "nullable": true
                                     }
                                   }
                                 }
