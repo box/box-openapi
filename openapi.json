@@ -16379,6 +16379,11 @@
                     "description": "The name for the retention policy",
                     "example": "Some Policy Name"
                   },
+                  "description": {
+                    "type": "string",
+                    "description": "The additional text description of the retention policy.",
+                    "example": "Policy to retain all reports for at least one month"
+                  },
                   "policy_type": {
                     "type": "string",
                     "example": "finite",
@@ -16463,7 +16468,7 @@
             }
           },
           "400": {
-            "description": "Returns a `bad_request` error with the `retention_length` was\nspecified for a `infinite` retention policy, or an incorrect\n`disposition_action` was set.",
+            "description": "Returns a `bad_request` error with the `retention_length` was\nspecified for a `infinite` retention policy, an incorrect\n`disposition_action` was set, or description exceeds maximum length of\n500 characters.",
             "content": {
               "application/json": {
                 "schema": {
@@ -16570,6 +16575,11 @@
                     "description": "The name for the retention policy",
                     "example": "Some Policy Name"
                   },
+                  "description": {
+                    "type": "string",
+                    "description": "The additional text description of the retention policy.",
+                    "example": "Policy to retain all reports for at least one month"
+                  },
                   "disposition_action": {
                     "type": "string",
                     "example": "permanently_delete",
@@ -16604,7 +16614,7 @@
             }
           },
           "400": {
-            "description": "Returns a `bad_request` if an incorrect\n`disposition_action` was set.",
+            "description": "Returns a `bad_request` if an incorrect\n`disposition_action` was set or description exceeds maximum length of\n500 characters.",
             "content": {
               "application/json": {
                 "schema": {
@@ -16661,12 +16671,13 @@
             "description": "The type of the retention policy assignment to retrieve.",
             "in": "query",
             "required": false,
-            "example": "folder",
+            "example": "metadata_template",
             "schema": {
               "type": "string",
               "enum": [
                 "folder",
-                "enterprise"
+                "enterprise",
+                "metadata_template"
               ]
             }
           },
@@ -16762,7 +16773,7 @@
                       "type": {
                         "type": "string",
                         "description": "The type of item to assign the policy to.",
-                        "example": "folder",
+                        "example": "metadata_template",
                         "enum": [
                           "enterprise",
                           "folder",
@@ -16775,6 +16786,30 @@
                         "example": "6564564"
                       }
                     }
+                  },
+                  "filter_fields": {
+                    "type": "array",
+                    "description": "If the `assign_to` type is `metadata_template`,\nthen optionally add the `filter_fields` parameter which will\nrequire an array of objects with a field entry and a value entry.\nCurrently only one object of `field` and `value` is supported.",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "field": {
+                          "type": "string",
+                          "description": "The metadata attribute key id.",
+                          "example": "a0f4ee4e-1dc1-4h90-a8a9-aef55fc681d4"
+                        },
+                        "value": {
+                          "type": "string",
+                          "description": "The metadata attribute field id. For value, only\nenum and multiselect types are supported.",
+                          "example": "0c27b756-0p87-4fe0-a43a-59fb661ccc4e"
+                        }
+                      }
+                    }
+                  },
+                  "start_date_field": {
+                    "description": "The date the retention policy assignment begins.\n\nIf the `assigned_to` type is `metadata_template`,\nthis field can be a date field's metadata attribute key id.",
+                    "type": "string",
+                    "example": "upload_date"
                   }
                 }
               }
@@ -16793,7 +16828,7 @@
             }
           },
           "400": {
-            "description": "Returns an error if an `id` is specified while assigning a the\nretention policy to an enterprise.",
+            "description": "Returns an error if an `id` is specified while assigning the\nretention policy to an enterprise.\n\nReturns an error if `start_date_field` is present but `assign_to.type`\nis not `metadata_template`\n\nReturns an error if `start_date_field` is present, but belongs to a\ndifferent metadata template than the one specified in `assign_to.id`\n\nReturns an error if `start_date_field` is present, but the\n`retention_policy` has a `retention_length` of \"indefinite\"\n\nReturns an error if `start_date_field` is present, but cannot be resolved\nto a valid metadata date field.",
             "content": {
               "application/json": {
                 "schema": {
@@ -20713,9 +20748,15 @@
             "nullable": false
           },
           "context_info": {
-            "description": "A free-form object that contains additional context\nabout the error. The possible fields are defined on\na per-endpoint basis.",
+            "description": "A free-form object that contains additional context\nabout the error. The possible fields are defined on\na per-endpoint basis. `message` is only one example.",
             "type": "object",
-            "nullable": true
+            "properties": {
+              "message": {
+                "type": "string",
+                "description": "More details on the error.",
+                "example": "Something went wrong."
+              }
+            }
           },
           "help_url": {
             "description": "A URL that links to more information about why this error occurred.",
@@ -23596,6 +23637,49 @@
           }
         }
       },
+      "FilesUnderRetention": {
+        "title": "Files under retention",
+        "type": "object",
+        "x-box-resource-id": "files_under_retention",
+        "x-box-tag": "retention_policy_assignments",
+        "description": "A list of files under retention.",
+        "allOf": [
+          {
+            "type": "object",
+            "description": "The part of an API response that describes marker\nbased pagination",
+            "properties": {
+              "limit": {
+                "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
+                "example": 1000,
+                "type": "integer",
+                "format": "int64"
+              },
+              "next_marker": {
+                "description": "The marker for the start of the next page of results.",
+                "example": 3000,
+                "type": "integer",
+                "format": "int64"
+              },
+              "prev_marker": {
+                "description": "The marker for the start of the previous page of results.",
+                "example": 1000,
+                "type": "integer",
+                "format": "int64"
+              }
+            }
+          },
+          {
+            "properties": {
+              "entries": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/File--Mini"
+                }
+              }
+            }
+          }
+        ]
+      },
       "FileVersion": {
         "title": "File version",
         "type": "object",
@@ -26412,6 +26496,11 @@
           },
           {
             "properties": {
+              "description": {
+                "type": "string",
+                "example": "Policy to retain all reports for at least one month",
+                "description": "The additional text description of the retention policy."
+              },
               "policy_type": {
                 "type": "string",
                 "example": "finite",
@@ -26554,28 +26643,48 @@
             ]
           },
           "assigned_to": {
-            "allOf": [
-              {
-                "title": "Reference",
-                "description": "The bare basic reference for an object",
-                "type": "object",
-                "properties": {
-                  "id": {
-                    "type": "string",
-                    "description": "The unique identifier for this object",
-                    "example": "11446498"
-                  },
-                  "type": {
-                    "type": "string",
-                    "description": "The type for this object",
-                    "example": "file"
-                  }
-                }
+            "type": "object",
+            "description": "The `type` and `id` of the content that is under\nretention. The `type` can either be `folder`\n`enterprise`, or `metadata_template`.",
+            "properties": {
+              "id": {
+                "type": "string",
+                "example": "a983f69f-e85f-4ph4-9f46-4afdf9c1af65",
+                "description": "The ID of the folder, enterprise, or metadata template\nthe policy is assigned to."
               },
-              {
-                "description": "The `type` and `id` of the content that is under\nretention. The `type` can either be `folder` or `\nenterprise`."
+              "type": {
+                "type": "string",
+                "example": "metadata_template",
+                "description": "The type of resource the policy is assigned to.",
+                "enum": [
+                  "folder",
+                  "enterprise",
+                  "metadata_template"
+                ]
               }
-            ]
+            }
+          },
+          "filter_fields": {
+            "type": "array",
+            "nullable": true,
+            "description": "An array of field objects. Values are only returned if the `assigned_to`\ntype is `metadata_template`. Otherwise, the array is blank.",
+            "items": {
+              "type": "object",
+              "nullable": true,
+              "properties": {
+                "field": {
+                  "type": "string",
+                  "nullable": true,
+                  "description": "The metadata attribute key id.",
+                  "example": "a0f4ee4e-1dc1-4h90-a8a9-aef55fc681d4"
+                },
+                "value": {
+                  "type": "string",
+                  "nullable": true,
+                  "description": "The metadata attribute field id. For value, only\nenum and multiselect types are supported.",
+                  "example": "0c27b756-0p87-4fe0-a43a-59fb661ccc4e"
+                }
+              }
+            }
           },
           "assigned_by": {
             "allOf": [
@@ -26592,6 +26701,11 @@
             "format": "date-time",
             "description": "When the retention policy assignment object was\ncreated",
             "example": "2012-12-12T10:53:43-08:00"
+          },
+          "start_date_field": {
+            "type": "string",
+            "description": "The date the retention policy assignment begins",
+            "example": "upload_date"
           }
         }
       },
@@ -28713,10 +28827,6 @@
                                   }
                                 ]
                               },
-                              "outcome_parameters": {
-                                "type": "object",
-                                "description": "Information about how to complete the outcome which varies based on\n`action_type` selected"
-                              },
                               "if_rejected": {
                                 "type": "array",
                                 "description": "If `action_type` is `assign_task` and the task is rejected, returns a\nlist of outcomes to complete",
@@ -28778,10 +28888,6 @@
                                           "description": "The type of outcome"
                                         }
                                       ]
-                                    },
-                                    "outcome_parameters": {
-                                      "type": "object",
-                                      "description": "Information about how to complete the outcome which varies based on\n`action_type` selected"
                                     }
                                   }
                                 }
