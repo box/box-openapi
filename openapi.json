@@ -7167,7 +7167,7 @@
                 "x-box-tag": "folder_locks",
                 "x-box-sanitized": true,
                 "x-box-enable-explorer": true,
-                "description": "指定したフォルダのフォルダロックの詳細を取得します。",
+                "description": "指定したフォルダのフォルダロックの詳細を取得します。\n\nYou must be authenticated as the owner or co-owner of the folder to use this endpoint.",
                 "parameters": [
                     {
                         "name": "folder_id",
@@ -7243,7 +7243,7 @@
                 "x-box-tag": "folder_locks",
                 "x-box-sanitized": true,
                 "x-box-enable-explorer": false,
-                "description": "フォルダにフォルダロックを作成し、フォルダが移動または削除されないようにします。",
+                "description": "フォルダにフォルダロックを作成し、フォルダが移動または削除されないようにします。\n\nYou must be authenticated as the owner or co-owner of the folder to use this endpoint.",
                 "requestBody": {
                     "content": {
                         "application/json": {
@@ -7346,7 +7346,7 @@
             "delete": {
                 "operationId": "delete_folder_locks_id",
                 "summary": "フォルダロックを削除",
-                "description": "指定したフォルダに適用されているフォルダロックを削除します。",
+                "description": "指定したフォルダに適用されているフォルダロックを削除します。\n\nYou must be authenticated as the owner or co-owner of the folder to use this endpoint.",
                 "tags": [
                     "フォルダロック"
                 ],
@@ -16379,6 +16379,11 @@
                                         "description": "リテンションポリシーの名前",
                                         "example": "Some Policy Name"
                                     },
+                                    "description": {
+                                        "type": "string",
+                                        "description": "The additional text description of the retention policy.",
+                                        "example": "Policy to retain all reports for at least one month"
+                                    },
                                     "policy_type": {
                                         "type": "string",
                                         "example": "finite",
@@ -16463,7 +16468,7 @@
                         }
                     },
                     "400": {
-                        "description": "`infinite`リテンションポリシーに対して`retention_length`が指定された場合、または誤った`disposition_action`が設定された場合は、`bad_request`エラーを返します。",
+                        "description": "Returns a `bad_request` error with the `retention_length` was specified for a `infinite` retention policy, an incorrect `disposition_action` was set, or description exceeds maximum length of 500 characters.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -16570,6 +16575,11 @@
                                         "description": "リテンションポリシーの名前",
                                         "example": "Some Policy Name"
                                     },
+                                    "description": {
+                                        "type": "string",
+                                        "description": "The additional text description of the retention policy.",
+                                        "example": "Policy to retain all reports for at least one month"
+                                    },
                                     "disposition_action": {
                                         "type": "string",
                                         "example": "permanently_delete",
@@ -16604,7 +16614,7 @@
                         }
                     },
                     "400": {
-                        "description": "誤った`disposition_action`が設定された場合は、`bad_request`を返します。",
+                        "description": "Returns a `bad_request` if an incorrect `disposition_action` was set or description exceeds maximum length of 500 characters.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -16661,12 +16671,13 @@
                         "description": "取得するリテンションポリシー割り当てのタイプ。",
                         "in": "query",
                         "required": false,
-                        "example": "folder",
+                        "example": "metadata_template",
                         "schema": {
                             "type": "string",
                             "enum": [
                                 "folder",
-                                "enterprise"
+                                "enterprise",
+                                "metadata_template"
                             ]
                         }
                     },
@@ -16762,7 +16773,7 @@
                                             "type": {
                                                 "type": "string",
                                                 "description": "ポリシーを割り当てる項目のタイプ。",
-                                                "example": "folder",
+                                                "example": "metadata_template",
                                                 "enum": [
                                                     "enterprise",
                                                     "folder",
@@ -16775,6 +16786,30 @@
                                                 "example": "6564564"
                                             }
                                         }
+                                    },
+                                    "filter_fields": {
+                                        "type": "array",
+                                        "description": "If the `assign_to` type is `metadata_template`, then optionally add the `filter_fields` parameter which will require an array of objects with a field entry and a value entry. Currently only one object of `field` and `value` is supported.",
+                                        "items": {
+                                            "type": "object",
+                                            "properties": {
+                                                "field": {
+                                                    "type": "string",
+                                                    "description": "The metadata attribute key id.",
+                                                    "example": "a0f4ee4e-1dc1-4h90-a8a9-aef55fc681d4"
+                                                },
+                                                "value": {
+                                                    "type": "string",
+                                                    "description": "The metadata attribute field id. For value, only enum and multiselect types are supported.",
+                                                    "example": "0c27b756-0p87-4fe0-a43a-59fb661ccc4e"
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "start_date_field": {
+                                        "description": "The date the retention policy assignment begins.\n\nIf the `assigned_to` type is `metadata_template`, this field can be a date field's metadata attribute key id.",
+                                        "type": "string",
+                                        "example": "upload_date"
                                     }
                                 }
                             }
@@ -16793,7 +16828,7 @@
                         }
                     },
                     "400": {
-                        "description": "会社にリテンションポリシーを割り当てている最中に`id`が指定された場合は、エラーを返します。",
+                        "description": "Returns an error if an `id` is specified while assigning the retention policy to an enterprise.\n\nReturns an error if `start_date_field` is present but `assign_to.type` is not `metadata_template`\n\nReturns an error if `start_date_field` is present, but belongs to a different metadata template than the one specified in `assign_to.id`\n\nReturns an error if `start_date_field` is present, but the `retention_policy` has a `retention_length` of \"indefinite\"\n\nReturns an error if `start_date_field` is present, but cannot be resolved to a valid metadata date field.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -16863,6 +16898,160 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/RetentionPolicyAssignment"
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "予期しないクライアントエラー。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/retention_policy_assignments/{retention_policy_assignment_id}/files_under_retention": {
+            "get": {
+                "operationId": "get_retention_policy_assignments_id_files_under_retention",
+                "summary": "リテンションの対象となるファイルを取得",
+                "tags": [
+                    "リテンションポリシー割り当て"
+                ],
+                "x-box-tag": "retention_policy_assignments",
+                "description": "リテンションポリシー割り当てのために、リテンションの対象となるファイルのリストを返します。",
+                "parameters": [
+                    {
+                        "name": "retention_policy_assignment_id",
+                        "description": "リテンションポリシー割り当てのID。",
+                        "example": "1233123",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "marker",
+                        "description": "結果が返される開始位置のマーカー。マーカーベースのページ割りを使用している場合に使用されます。\n\nこれを使用するには、`usemarker`を`true`に設定する必要があります。",
+                        "in": "query",
+                        "required": false,
+                        "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "description": "返す項目の1ページあたりの最大数。",
+                        "in": "query",
+                        "required": false,
+                        "example": 1000,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64",
+                            "maximum": 1000
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "指定したリテンションポリシー割り当てに関連付けられている、リテンションの対象となるファイルのリストを返します。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/FilesUnderRetention"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "`retention_policy_assignment_id`が指定されていない場合は、エラーを返します。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "予期しないクライアントエラー。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/retention_policy_assignments/{retention_policy_assignment_id}/file_versions_under_retention": {
+            "get": {
+                "operationId": "get_retention_policy_assignments_id_file_versions_under_retention",
+                "summary": "リテンションの対象となるファイルバージョンを取得",
+                "tags": [
+                    "リテンションポリシー割り当て"
+                ],
+                "x-box-tag": "retention_policy_assignments",
+                "description": "リテンションポリシー割り当てのために、リテンションの対象となるファイルバージョンのリストを返します。",
+                "parameters": [
+                    {
+                        "name": "retention_policy_assignment_id",
+                        "description": "リテンションポリシー割り当てのID。",
+                        "example": "1233123",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "marker",
+                        "description": "結果が返される開始位置のマーカー。マーカーベースのページ割りを使用している場合に使用されます。\n\nこれを使用するには、`usemarker`を`true`に設定する必要があります。",
+                        "in": "query",
+                        "required": false,
+                        "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "description": "返す項目の1ページあたりの最大数。",
+                        "in": "query",
+                        "required": false,
+                        "example": 1000,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64",
+                            "maximum": 1000
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "指定したリテンションポリシー割り当てに関連付けられている、リテンションの対象となるファイルバージョンのリストを返します。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/FilesUnderRetention"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "`retention_policy_assignment_id`が指定されていない場合は、エラーを返します。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
                                 }
                             }
                         }
@@ -17576,6 +17765,127 @@
                 }
             }
         },
+        "/file_version_retentions": {
+            "get": {
+                "operationId": "get_file_version_retentions",
+                "tags": [
+                    "ファイルバージョンリテンション"
+                ],
+                "x-box-tag": "file_version_retentions",
+                "summary": "ファイルバージョンリテンションのリストを取得",
+                "description": "指定した会社のすべてのファイルバージョンリテンションを取得します。",
+                "parameters": [
+                    {
+                        "name": "file_id",
+                        "description": "このIDを持つファイルのみに結果を絞り込みます。",
+                        "in": "query",
+                        "example": "43123123",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "file_version_id",
+                        "description": "このIDを持つファイルバージョンのみに結果を絞り込みます。",
+                        "in": "query",
+                        "example": "1",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "policy_id",
+                        "description": "このIDを持つリテンションポリシーのみに結果を絞り込みます。",
+                        "in": "query",
+                        "required": false,
+                        "example": "982312",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "disposition_action",
+                        "description": "この廃棄アクションを使用するリテンションポリシーのみに結果を絞り込みます。",
+                        "in": "query",
+                        "required": false,
+                        "example": "permanently_delete",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "permanently_delete",
+                                "remove_retention"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "disposition_before",
+                        "description": "この日付の前に廃棄が有効になるファイルのみに結果を絞り込みます。",
+                        "in": "query",
+                        "required": false,
+                        "example": "2012-12-12T10:53:43-08:00",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "disposition_after",
+                        "description": "この日付の後で廃棄が有効になるファイルのみに結果を絞り込みます。",
+                        "in": "query",
+                        "required": false,
+                        "example": "2012-12-19T10:34:23-08:00",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "description": "返す項目の1ページあたりの最大数。",
+                        "in": "query",
+                        "required": false,
+                        "example": 1000,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64",
+                            "maximum": 1000
+                        }
+                    },
+                    {
+                        "name": "marker",
+                        "description": "結果が返される開始位置のマーカー。マーカーベースのページ割りを使用している場合に使用されます。\n\nこれを使用するには、`usemarker`を`true`に設定する必要があります。",
+                        "in": "query",
+                        "required": false,
+                        "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "会社のすべてのファイルバージョンリテンションのリストを返します。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/FileVersionRetentions"
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "予期しないクライアントエラー。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/legal_hold_policy_assignments/{legal_hold_policy_assignment_id}/file_versions_on_hold": {
             "get": {
                 "operationId": "get_legal_hold_policy_assignments_id_file_versions_on_hold",
@@ -17689,127 +17999,6 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/FileVersionRetention"
-                                }
-                            }
-                        }
-                    },
-                    "default": {
-                        "description": "予期しないクライアントエラー。",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ClientError"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/file_version_retentions": {
-            "get": {
-                "operationId": "get_file_version_retentions",
-                "tags": [
-                    "ファイルバージョンリテンション"
-                ],
-                "x-box-tag": "file_version_retentions",
-                "summary": "ファイルバージョンリテンションのリストを取得",
-                "description": "指定した会社のすべてのファイルバージョンリテンションを取得します。",
-                "parameters": [
-                    {
-                        "name": "file_id",
-                        "description": "このIDを持つファイルのみに結果を絞り込みます。",
-                        "in": "query",
-                        "example": "43123123",
-                        "required": false,
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "name": "file_version_id",
-                        "description": "このIDを持つファイルバージョンのみに結果を絞り込みます。",
-                        "in": "query",
-                        "example": "1",
-                        "required": false,
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "name": "policy_id",
-                        "description": "このIDを持つリテンションポリシーのみに結果を絞り込みます。",
-                        "in": "query",
-                        "required": false,
-                        "example": "982312",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "name": "disposition_action",
-                        "description": "この廃棄アクションを使用するリテンションポリシーのみに結果を絞り込みます。",
-                        "in": "query",
-                        "required": false,
-                        "example": "permanently_delete",
-                        "schema": {
-                            "type": "string",
-                            "enum": [
-                                "permanently_delete",
-                                "remove_retention"
-                            ]
-                        }
-                    },
-                    {
-                        "name": "disposition_before",
-                        "description": "この日付の前に廃棄が有効になるファイルのみに結果を絞り込みます。",
-                        "in": "query",
-                        "required": false,
-                        "example": "2012-12-12T10:53:43-08:00",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "name": "disposition_after",
-                        "description": "この日付の後で廃棄が有効になるファイルのみに結果を絞り込みます。",
-                        "in": "query",
-                        "required": false,
-                        "example": "2012-12-19T10:34:23-08:00",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "name": "limit",
-                        "description": "返す項目の1ページあたりの最大数。",
-                        "in": "query",
-                        "required": false,
-                        "example": 1000,
-                        "schema": {
-                            "type": "integer",
-                            "format": "int64",
-                            "maximum": 1000
-                        }
-                    },
-                    {
-                        "name": "marker",
-                        "description": "結果が返される開始位置のマーカー。マーカーベースのページ割りを使用している場合に使用されます。\n\nこれを使用するには、`usemarker`を`true`に設定する必要があります。",
-                        "in": "query",
-                        "required": false,
-                        "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "会社のすべてのファイルバージョンリテンションのリストを返します。",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/FileVersionRetentions"
                                 }
                             }
                         }
@@ -20107,7 +20296,27 @@
                                         "description": "開始時に設定する必要がある結果のリスト。",
                                         "items": {
                                             "type": "object",
-                                            "description": "ワークフローで完了する必要がある設定可能な結果。`task_completion_rule`がある場合は、`all_assignees`または`any_assignee`を`variable_value`フィールドに入力できます。同様に、`collaborator_role`がある場合は、`editor`、`viewer`、`previewer`、`uploader`、`previewer uploader`、`viewer uploader`、`co-owner`を`variable_value`フィールドに入力できます。"
+                                            "description": "ワークフローで完了する必要がある設定可能な結果。`task_completion_rule`がある場合は、`all_assignees`または`any_assignee`を`variable_value`フィールドに入力できます。同様に、`collaborator_role`がある場合は、`editor`、`viewer`、`previewer`、`uploader`、`previewer uploader`、`viewer uploader`、`co-owner`を`variable_value`フィールドに入力できます。",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "string",
+                                                    "description": "The id of the outcome",
+                                                    "example": "890375782"
+                                                },
+                                                "type": {
+                                                    "type": "string",
+                                                    "description": "The type of the outcome object",
+                                                    "example": "outcome",
+                                                    "enum": [
+                                                        "outcome"
+                                                    ]
+                                                },
+                                                "parameter": {
+                                                    "type": "string",
+                                                    "description": "This is a placeholder example for various objects that can be passed in - refer to the guides section to find out more information.",
+                                                    "example": "placeholder"
+                                                }
+                                            }
                                         }
                                     }
                                 }
@@ -20713,9 +20922,15 @@
                         "nullable": false
                     },
                     "context_info": {
-                        "description": "このエラーに関する追加コンテキストを含む自由形式のオブジェクト。使用できるフィールドは、エンドポイントごとに定義されています。",
+                        "description": "A free-form object that contains additional context about the error. The possible fields are defined on a per-endpoint basis. `message` is only one example.",
                         "type": "object",
-                        "nullable": true
+                        "properties": {
+                            "message": {
+                                "type": "string",
+                                "description": "More details on the error.",
+                                "example": "Something went wrong."
+                            }
+                        }
                     },
                     "help_url": {
                         "description": "このエラーの原因に関する詳細情報にリンクされたURL。",
@@ -23596,6 +23811,49 @@
                     }
                 }
             },
+            "FilesUnderRetention": {
+                "title": "Files under retention",
+                "type": "object",
+                "x-box-resource-id": "files_under_retention",
+                "x-box-tag": "retention_policy_assignments",
+                "description": "A list of files under retention.",
+                "allOf": [
+                    {
+                        "type": "object",
+                        "description": "マーカーベースのページ割りについて説明しているAPIレスポンスの部分",
+                        "properties": {
+                            "limit": {
+                                "description": "これらのエントリで使用された制限値。許容される最大値を超えていない限り、クエリパラメータの`limit`と等しくなります。最大値はAPIによって異なります。",
+                                "example": 1000,
+                                "type": "integer",
+                                "format": "int64"
+                            },
+                            "next_marker": {
+                                "description": "次の検索結果ページの開始場所のマーカー。",
+                                "example": 3000,
+                                "type": "integer",
+                                "format": "int64"
+                            },
+                            "prev_marker": {
+                                "description": "前の検索結果ページの開始場所のマーカー。",
+                                "example": 1000,
+                                "type": "integer",
+                                "format": "int64"
+                            }
+                        }
+                    },
+                    {
+                        "properties": {
+                            "entries": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/File--Mini"
+                                }
+                            }
+                        }
+                    }
+                ]
+            },
             "FileVersion": {
                 "title": "ファイルバージョン",
                 "type": "object",
@@ -26412,6 +26670,11 @@
                     },
                     {
                         "properties": {
+                            "description": {
+                                "type": "string",
+                                "example": "Policy to retain all reports for at least one month",
+                                "description": "The additional text description of the retention policy."
+                            },
                             "policy_type": {
                                 "type": "string",
                                 "example": "finite",
@@ -26554,28 +26817,48 @@
                         ]
                     },
                     "assigned_to": {
-                        "allOf": [
-                            {
-                                "title": "Reference",
-                                "description": "オブジェクトの最も基本的な参照",
-                                "type": "object",
-                                "properties": {
-                                    "id": {
-                                        "type": "string",
-                                        "description": "このオブジェクトの一意の識別子",
-                                        "example": "11446498"
-                                    },
-                                    "type": {
-                                        "type": "string",
-                                        "description": "このオブジェクトのタイプ",
-                                        "example": "file"
-                                    }
-                                }
+                        "type": "object",
+                        "description": "The `type` and `id` of the content that is under retention. The `type` can either be `folder` `enterprise`, or `metadata_template`.",
+                        "properties": {
+                            "id": {
+                                "type": "string",
+                                "example": "a983f69f-e85f-4ph4-9f46-4afdf9c1af65",
+                                "description": "The ID of the folder, enterprise, or metadata template the policy is assigned to."
                             },
-                            {
-                                "description": "リテンションの対象となるコンテンツの`type`と`id`。`type`は、`folder`または`enterprise`のいずれかになります。"
+                            "type": {
+                                "type": "string",
+                                "example": "metadata_template",
+                                "description": "The type of resource the policy is assigned to.",
+                                "enum": [
+                                    "folder",
+                                    "enterprise",
+                                    "metadata_template"
+                                ]
                             }
-                        ]
+                        }
+                    },
+                    "filter_fields": {
+                        "type": "array",
+                        "nullable": true,
+                        "description": "An array of field objects. Values are only returned if the `assigned_to` type is `metadata_template`. Otherwise, the array is blank.",
+                        "items": {
+                            "type": "object",
+                            "nullable": true,
+                            "properties": {
+                                "field": {
+                                    "type": "string",
+                                    "nullable": true,
+                                    "description": "The metadata attribute key id.",
+                                    "example": "a0f4ee4e-1dc1-4h90-a8a9-aef55fc681d4"
+                                },
+                                "value": {
+                                    "type": "string",
+                                    "nullable": true,
+                                    "description": "The metadata attribute field id. For value, only enum and multiselect types are supported.",
+                                    "example": "0c27b756-0p87-4fe0-a43a-59fb661ccc4e"
+                                }
+                            }
+                        }
                     },
                     "assigned_by": {
                         "allOf": [
@@ -26592,6 +26875,11 @@
                         "format": "date-time",
                         "description": "リテンションポリシー割り当てオブジェクトが作成された日時",
                         "example": "2012-12-12T10:53:43-08:00"
+                    },
+                    "start_date_field": {
+                        "type": "string",
+                        "description": "The date the retention policy assignment begins",
+                        "example": "upload_date"
                     }
                 }
             },
@@ -28713,10 +29001,6 @@
                                                                     }
                                                                 ]
                                                             },
-                                                            "outcome_parameters": {
-                                                                "type": "object",
-                                                                "description": "選択された`action_type`によって異なる結果を完了する方法に関する情報"
-                                                            },
                                                             "if_rejected": {
                                                                 "type": "array",
                                                                 "description": "`action_type`が`assign_task`の場合にタスクが拒否されると、完了すべき結果のリストが返されます",
@@ -28778,10 +29062,6 @@
                                                                                     "description": "結果の種類"
                                                                                 }
                                                                             ]
-                                                                        },
-                                                                        "outcome_parameters": {
-                                                                            "type": "object",
-                                                                            "description": "選択された`action_type`によって異なる結果を完了する方法に関する情報"
                                                                         }
                                                                     }
                                                                 }
