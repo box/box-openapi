@@ -37,7 +37,7 @@ requestBody:
                 type: string
                 description: |-
                   The type of item to assign the policy to.
-                example: folder
+                example: metadata_template
                 enum:
                   - enterprise
                   - folder
@@ -51,25 +51,36 @@ requestBody:
                   `enterprise`.
                 example: "6564564"
 
-                # filter_fields:
-                #   description: |-
-                #     If the `assign_to` type is `metadata_template,
-                #     then optionally
-                #     add the `filter_fields` paramter which will require an
-                #     array
-                #     of objects with a field entry and a value entry.
+          filter_fields:
+            type: array
+            description: |-
+              If the `assign_to` type is `metadata_template`,
+              then optionally add the `filter_fields` parameter which will
+              require an array of objects with a field entry and a value entry.
+              Currently only one object of `field` and `value` is supported.
+            items:
+              type: object
+              properties:
+                field:
+                  type: string
+                  description: |-
+                    The metadata attribute key id.
+                  example: "a0f4ee4e-1dc1-4h90-a8a9-aef55fc681d4"
+                value:
+                  type: string
+                  description: |-
+                    The metadata attribute field id. For value, only
+                    enum and multiselect types are supported.
+                  example: "0c27b756-0p87-4fe0-a43a-59fb661ccc4e"
 
-                #     `field` is the metadata attribute key id and `value`
-                #     is the
-                #     metadata attribute field id.
+          start_date_field:
+            description: |-
+              The date the retention policy assignment begins.
 
-                #     For value, only enum and multi-select types are supported.
-                #     Currently only one object of `field` and `value` is
-                #     supported.
-                #   x-box-todo: true
-                #   type: array
-                #   items:
-                #     type: string
+              If the `assigned_to` type is `metadata_template`,
+              this field can be a date field's metadata attribute key id.
+            type: string
+            example: "upload_date"
 
 responses:
   201:
@@ -82,8 +93,20 @@ responses:
 
   400:
     description: |-
-      Returns an error if an `id` is specified while assigning a the
+      Returns an error if an `id` is specified while assigning the
       retention policy to an enterprise.
+
+      Returns an error if `start_date_field` is present but `assign_to.type`
+      is not `metadata_template`
+
+      Returns an error if `start_date_field` is present, but belongs to a
+      different metadata template than the one specified in `assign_to.id`
+
+      Returns an error if `start_date_field` is present, but the
+      `retention_policy` has a `retention_length` of "indefinite"
+
+      Returns an error if `start_date_field` is present, but cannot be resolved
+      to a valid metadata date field.
     content:
       application/json:
         schema:
