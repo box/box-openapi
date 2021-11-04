@@ -339,6 +339,11 @@
                     }
                   }
                 },
+                "disposition_at": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "The retention expiration timestamp for the given file. This\ndate cannot be shortened once set on a file."
+                },
                 "permissions": {
                   "description": "Defines who can download a file.",
                   "type": "object",
@@ -373,6 +378,12 @@
               "$ref": "#/definitions/File"
             }
           },
+          "400": {
+            "description": "Returned when the new retention time > maximum retention length.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
           "401": {
             "description": "Returned when the access token provided in the `Authorization` header\nis not recognized or not provided.",
             "schema": {
@@ -380,7 +391,7 @@
             }
           },
           "403": {
-            "description": "Returned if the user does not have all the permissions to complete the\nupdate.\n\n* `access_denied_insufficient_permissions` when the authenticated user\ndoes not have access the destination folder to move the file to.",
+            "description": "Returned if the user does not have all the permissions to complete the\nupdate.\n\nReturns `access_denied_insufficient_permissions` when the authenticated\nuser does not have access the destination folder to move the file to.\n\nReturned when retention time is shorter or equal to current retention\ntimestamp.\n\nReturned when a `file_id` that is not under retention is entered.\n\nReturned when a file that is retained but the disposition action is set\nto `remove_retention`",
             "schema": {
               "$ref": "#/definitions/ClientError"
             }
