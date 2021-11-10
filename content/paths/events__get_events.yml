@@ -12,11 +12,12 @@ description: |-
   Returns up to a year of past events for a given user
   or for the entire enterprise.
 
-  By default this returns events for the authenticated user. To retrieve
-  events for the entire enterprise, set the `stream_type` to `admin_logs`.
-  The user making the API call will need to have admin privileges, and
-  the application will need to have the permission to access the event feed
-  to get the enterprise event feed.
+  By default this returns events for the authenticated user. To retrieve events
+  for the entire enterprise, set the `stream_type` to `admin_logs_streaming`
+  for live monitoring of new events, or `admin_logs` for querying across
+  historical events. The user making the API call will
+  need to have admin privileges, and the application will need to have the
+  scope `manage enterprise properties` checked.
 
 parameters:
   - name: stream_type
@@ -28,11 +29,18 @@ parameters:
         such as file updates or collaborations.
       * `sync` is similar to `changes` but only applies to synced folders
       * `admin_logs` returns all events for an entire enterprise and
-        requires the user making the API call to have admin permissions.
+        requires the user making the API call to have admin permissions. This
+        stream type is for programmatically pulling from a 1 year history of
+        events across all users within the enterprise and within a
+        `created_after` and `created_before` time frame. The complete history
+        of events will be returned in chronological order based on the event
+        time, but latency will be much higher than `admin_logs_streaming`.
       * `admin_logs_streaming` returns all events for an entire enterprise and
-        requires the user making the API call to have admin permissions. It
-        guarantees delivery but may deliver duplicates or out of order messages.
-    in: query
+        requires the user making the API call to have admin permissions. This
+        stream type is for polling for recent events across all users within
+        the enterprise. Latency will be much lower than `admin_logs`, but
+        events will not be returned in chronological order and may
+        contain duplicates.
     example: all
     schema:
       type: string
