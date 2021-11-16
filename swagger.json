@@ -10612,6 +10612,32 @@
             "in": "query",
             "required": false,
             "type": "string"
+          },
+          {
+            "name": "fields",
+            "description": "A comma-separated list of attributes to include in the\nresponse. This can be used to request fields that are\nnot normally returned in a standard response.\n\nBe aware that specifying this parameter will have the\neffect that none of the standard fields are returned in\nthe response unless explicitly specified, instead only\nfields for the mini representation are returned, additional\nto the fields requested.",
+            "in": "query",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "description": "The maximum number of items to return per page.",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int64",
+            "maximum": 1000
+          },
+          {
+            "name": "marker",
+            "description": "Defines the position marker at which to begin returning results. This is\nused when paginating using marker-based pagination.",
+            "in": "query",
+            "required": false,
+            "type": "string"
           }
         ],
         "responses": {
@@ -10895,8 +10921,18 @@
             ]
           },
           {
+            "name": "fields",
+            "description": "A comma-separated list of attributes to include in the\nresponse. This can be used to request fields that are\nnot normally returned in a standard response.\n\nBe aware that specifying this parameter will have the\neffect that none of the standard fields are returned in\nthe response unless explicitly specified, instead only\nfields for the mini representation are returned, additional\nto the fields requested.",
+            "in": "query",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          {
             "name": "marker",
-            "description": "Defines the position marker at which to begin returning results. This is\nused when paginating using marker-based pagination.\n\nThis requires `usemarker` to be set to `true`.",
+            "description": "Defines the position marker at which to begin returning results. This is\nused when paginating using marker-based pagination.",
             "in": "query",
             "required": false,
             "type": "string"
@@ -17582,19 +17618,33 @@
       "title": "Retention policies",
       "type": "object",
       "description": "A list of retention policies",
-      "properties": {
-        "total_count": {
-          "description": "The number of retention policies.",
-          "type": "integer",
-          "format": "int64"
+      "allOf": [
+        {
+          "properties": {
+            "entries": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/RetentionPolicy"
+              }
+            }
+          }
         },
-        "entries": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/RetentionPolicy"
+        {
+          "type": "object",
+          "description": "The part of an API response that describes marker\nbased pagination",
+          "properties": {
+            "limit": {
+              "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
+              "type": "integer",
+              "format": "int64"
+            },
+            "next_marker": {
+              "description": "The marker for the start of the next page of results.",
+              "type": "string"
+            }
           }
         }
-      }
+      ]
     },
     "RetentionPolicy": {
       "title": "Retention policy",
@@ -17657,6 +17707,16 @@
       "description": "A list of retention policy assignments",
       "allOf": [
         {
+          "properties": {
+            "entries": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/RetentionPolicyAssignment"
+              }
+            }
+          }
+        },
+        {
           "type": "object",
           "description": "The part of an API response that describes marker\nbased pagination",
           "properties": {
@@ -17667,23 +17727,7 @@
             },
             "next_marker": {
               "description": "The marker for the start of the next page of results.",
-              "type": "integer",
-              "format": "int64"
-            },
-            "prev_marker": {
-              "description": "The marker for the start of the previous page of results.",
-              "type": "integer",
-              "format": "int64"
-            }
-          }
-        },
-        {
-          "properties": {
-            "entries": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/RetentionPolicyAssignment"
-              }
+              "type": "string"
             }
           }
         }
