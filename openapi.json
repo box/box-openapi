@@ -15928,11 +15928,11 @@
                     "Events"
                 ],
                 "x-box-tag": "events",
-                "description": "指定したユーザーまたは会社全体の過去のイベントを最大1年間遡って返します。\n\nデフォルトでは、認証済みユーザーのイベントを返します。会社全体のイベントを取得するには、`stream_type`を`admin_logs`に設定します。会社のイベントフィードを取得するには、API呼び出しを行うユーザーが管理者権限を所有していて、アプリケーションがイベントフィードに対するアクセス権限を所有している必要があります。",
+                "description": "指定したユーザーまたは会社全体の過去のイベントを最大1年間遡って返します。\n\nBy default this returns events for the authenticated user. To retrieve events for the entire enterprise, set the `stream_type` to `admin_logs_streaming` for live monitoring of new events, or `admin_logs` for querying across historical events. The user making the API call will need to have admin privileges, and the application will need to have the scope `manage enterprise properties` checked.",
                 "parameters": [
                     {
                         "name": "stream_type",
-                        "description": "返されるイベントのタイプを定義します\n\n* `all`を指定すると、ユーザーに関するすべてのイベントが返されます (デフォルト)。\n* `changes`を指定すると、ファイルの更新やコラボレーションなど、ファイルツリーを変更する可能性があるイベントが返されます。\n* `sync`は`changes`に似ていますが、同期対象フォルダのみに適用されます\n* `admin_logs`を指定すると、企業全体のすべてのイベントが返されます。API呼び出しを行うユーザーは、管理者権限が必要です。",
+                        "description": "返されるイベントのタイプを定義します\n\n* `all`を指定すると、ユーザーに関するすべてのイベントが返されます (デフォルト)。\n* `changes`を指定すると、ファイルの更新やコラボレーションなど、ファイルツリーを変更する可能性があるイベントが返されます。\n* `sync`は`changes`に似ていますが、同期対象フォルダのみに適用されます\n* `admin_logs` returns all events for an entire enterprise and requires the user making the API call to have admin permissions. This stream type is for programmatically pulling from a 1 year history of events across all users within the enterprise and within a `created_after` and `created_before` time frame. The complete history of events will be returned in chronological order based on the event time, but latency will be much higher than `admin_logs_streaming`.\n* `admin_logs_streaming` returns all events for an entire enterprise and requires the user making the API call to have admin permissions. This stream type is for polling for recent events across all users within the enterprise. Latency will be much lower than `admin_logs`, but events will not be returned in chronological order and may contain duplicates.",
                         "in": "query",
                         "example": "all",
                         "schema": {
@@ -15942,7 +15942,8 @@
                                 "all",
                                 "changes",
                                 "sync",
-                                "admin_logs"
+                                "admin_logs",
+                                "admin_logs_streaming"
                             ]
                         }
                     },
@@ -15969,7 +15970,7 @@
                     },
                     {
                         "name": "event_type",
-                        "description": "フィルタとして使用するイベントのカンマ区切りリスト。`stream_type`が`admin_logs`のイベントをリクエストする場合にのみ使用できます。`stream_type`がこれ以外の場合、この値は無視されます。",
+                        "description": "A comma-separated list of events to filter by. This can only be used when requesting the events with a `stream_type` of `admin_logs` or `adming_logs_streaming`. For any other `stream_type` this value will be ignored.",
                         "in": "query",
                         "explode": false,
                         "example": [
@@ -16422,6 +16423,46 @@
                         "schema": {
                             "type": "string"
                         }
+                    },
+                    {
+                        "name": "fields",
+                        "description": "レスポンスに含める属性のカンマ区切りリスト。このパラメータを使用すると、標準のレスポンスには通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドはレスポンスに含まれず、リクエストしたフィールドのほかには、簡易版レプリゼンテーションのフィールドしか返されないことに注意してください。",
+                        "in": "query",
+                        "example": [
+                            "id",
+                            "type",
+                            "name"
+                        ],
+                        "required": false,
+                        "explode": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "description": "返す項目の1ページあたりの最大数。",
+                        "in": "query",
+                        "required": false,
+                        "example": 1000,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64",
+                            "maximum": 1000
+                        }
+                    },
+                    {
+                        "name": "marker",
+                        "description": "結果が返される開始位置のマーカー。マーカーベースのページ割りを使用している場合に使用されます。",
+                        "in": "query",
+                        "required": false,
+                        "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                        "schema": {
+                            "type": "string"
+                        }
                     }
                 ],
                 "responses": {
@@ -16794,8 +16835,26 @@
                         }
                     },
                     {
+                        "name": "fields",
+                        "description": "レスポンスに含める属性のカンマ区切りリスト。このパラメータを使用すると、標準のレスポンスには通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドはレスポンスに含まれず、リクエストしたフィールドのほかには、簡易版レプリゼンテーションのフィールドしか返されないことに注意してください。",
+                        "in": "query",
+                        "example": [
+                            "id",
+                            "type",
+                            "name"
+                        ],
+                        "required": false,
+                        "explode": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    {
                         "name": "marker",
-                        "description": "結果が返される開始位置のマーカー。マーカーベースのページ割りを使用している場合に使用されます。\n\nこれを使用するには、`usemarker`を`true`に設定する必要があります。",
+                        "description": "結果が返される開始位置のマーカー。マーカーベースのページ割りを使用している場合に使用されます。",
                         "in": "query",
                         "required": false,
                         "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
@@ -26778,20 +26837,35 @@
                 "x-box-resource-id": "retention_policies",
                 "x-box-tag": "retention_policies",
                 "description": "リテンションポリシーのリスト",
-                "properties": {
-                    "total_count": {
-                        "description": "リテンションポリシーの数。",
-                        "example": 156,
-                        "type": "integer",
-                        "format": "int64"
+                "allOf": [
+                    {
+                        "properties": {
+                            "entries": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/RetentionPolicy"
+                                }
+                            }
+                        }
                     },
-                    "entries": {
-                        "type": "array",
-                        "items": {
-                            "$ref": "#/components/schemas/RetentionPolicy"
+                    {
+                        "type": "object",
+                        "description": "マーカーベースのページ割りについて説明しているAPIレスポンスの部分",
+                        "properties": {
+                            "limit": {
+                                "description": "これらのエントリで使用された制限値。許容される最大値を超えていない限り、クエリパラメータの`limit`と等しくなります。最大値はAPIによって異なります。",
+                                "example": 1000,
+                                "type": "integer",
+                                "format": "int64"
+                            },
+                            "next_marker": {
+                                "description": "次の検索結果ページの開始場所のマーカー。",
+                                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                                "type": "string"
+                            }
                         }
                     }
-                }
+                ]
             },
             "RetentionPolicy": {
                 "title": "リテンションポリシー",
@@ -27027,6 +27101,16 @@
                 "description": "リテンションポリシー割り当てのリスト",
                 "allOf": [
                     {
+                        "properties": {
+                            "entries": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/RetentionPolicyAssignment"
+                                }
+                            }
+                        }
+                    },
+                    {
                         "type": "object",
                         "description": "マーカーベースのページ割りについて説明しているAPIレスポンスの部分",
                         "properties": {
@@ -27038,25 +27122,8 @@
                             },
                             "next_marker": {
                                 "description": "次の検索結果ページの開始場所のマーカー。",
-                                "example": 3000,
-                                "type": "integer",
-                                "format": "int64"
-                            },
-                            "prev_marker": {
-                                "description": "前の検索結果ページの開始場所のマーカー。",
-                                "example": 1000,
-                                "type": "integer",
-                                "format": "int64"
-                            }
-                        }
-                    },
-                    {
-                        "properties": {
-                            "entries": {
-                                "type": "array",
-                                "items": {
-                                    "$ref": "#/components/schemas/RetentionPolicyAssignment"
-                                }
+                                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                                "type": "string"
                             }
                         }
                     }
