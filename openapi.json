@@ -6580,7 +6580,7 @@
             }
           },
           "400": {
-            "description": "Returns an error when the request body is not valid.\n\n* `schema_validation_failed` - The request body contains a value for a for\na field that either does not exist, or for which the value or type does\nnot match the expected field type. An example might be an unknown option\nfor an `enum` or `multiSelect` field.",
+            "description": "Returns an error when the request body is not valid.\n\n* `schema_validation_failed` - The request body contains a value for\na field that either does not exist, or for which the value or type does\nnot match the expected field type. An example might be an unknown option\nfor an `enum` or `multiSelect` field.",
             "content": {
               "application/json": {
                 "schema": {
@@ -9698,7 +9698,7 @@
                   },
                   "can_view_path": {
                     "type": "boolean",
-                    "description": "Determines if the invited users can see the entire parent path to\nthe associated folder. The user will not gain privileges in any\nparent folder and therefore can not see content the user is not\ncollaborated on.\n\nBe aware that this meaningfully increases the time required to load the\ninvitee's **All Files** page. We recommend you limit the number of\ncollaborations with `can_view_path` enabled to 1,000 per user.",
+                    "description": "Determines if the invited users can see the entire parent path to\nthe associated folder. The user will not gain privileges in any\nparent folder and therefore can not see content the user is not\ncollaborated on.\n\nBe aware that this meaningfully increases the time required to load the\ninvitee's **All Files** page. We recommend you limit the number of\ncollaborations with `can_view_path` enabled to 1,000 per user.\n\nOnly owner or co-owners can invite collaborators with a `can_view_path` of\n`true`.\n\n`can_view_path` can only be used for folder collaborations.",
                     "example": true
                   }
                 }
@@ -9992,7 +9992,7 @@
                   },
                   "can_view_path": {
                     "type": "boolean",
-                    "description": "Determines if the invited users can see the entire parent path to\nthe associated folder. The user will not gain privileges in any\nparent folder and therefore can not see content the user is not\ncollaborated on.\n\nBe aware that this meaningfully increases the time required to load the\ninvitee's **All Files** page. We recommend you limit the number of\ncollaborations with `can_view_path` enabled to 1,000 per user.",
+                    "description": "Determines if the invited users can see the entire parent path to\nthe associated folder. The user will not gain privileges in any\nparent folder and therefore can not see content the user is not\ncollaborated on.\n\nBe aware that this meaningfully increases the time required to load the\ninvitee's **All Files** page. We recommend you limit the number of\ncollaborations with `can_view_path` enabled to 1,000 per user.\n\nOnly owner or co-owners can invite collaborators with a `can_view_path` of\n`true`.\n\n`can_view_path` can only be used for folder collaborations.",
                     "example": true
                   },
                   "expires_at": {
@@ -23502,6 +23502,18 @@
                         "type": "boolean",
                         "example": true,
                         "description": "Whether or not the file can be downloaded while locked."
+                      },
+                      "app_type": {
+                        "type": "string",
+                        "description": "If the lock is managed by an application rather than a user, this\nfield identifies the type of the application that holds the lock.\nThis is an open enum and may be extended with additional values in\nthe future.",
+                        "enum": [
+                          "gsuite",
+                          "office_wopi",
+                          "office_wopiplus",
+                          "other"
+                        ],
+                        "example": "office_wopiplus",
+                        "nullable": true
                       }
                     }
                   },
@@ -27970,6 +27982,89 @@
             }
           }
         }
+      },
+      "TrashFile": {
+        "title": "Trashed File",
+        "type": "object",
+        "x-box-resource-id": "trash_file",
+        "x-box-tag": "trashed_files",
+        "description": "Represents a trashed file.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/File--Mini"
+          },
+          {
+            "properties": {
+              "description": {
+                "type": "string",
+                "nullable": false,
+                "description": "The optional description of this file",
+                "maxLength": 256,
+                "example": "Contract for Q1 renewal"
+              },
+              "size": {
+                "type": "integer",
+                "nullable": false,
+                "description": "The file size in bytes. Be careful parsing this integer as it can\nget very large and cause an integer overflow.",
+                "example": 629644
+              }
+            }
+          }
+        ]
+      },
+      "TrashFolder": {
+        "title": "Trashed Folder",
+        "type": "object",
+        "x-box-resource-id": "trash_folder",
+        "x-box-tag": "trashed_folders",
+        "description": "Represents a trashed folder.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Folder--Mini"
+          },
+          {
+            "properties": {
+              "created_at": {
+                "type": "string",
+                "format": "date-time",
+                "nullable": true,
+                "description": "The date and time when the folder was created. This value may\nbe `null` for some folders such as the root folder or the trash\nfolder.",
+                "example": "2012-12-12T10:53:43-08:00"
+              }
+            }
+          }
+        ]
+      },
+      "TrashWebLink": {
+        "title": "Trashed Web Link",
+        "type": "object",
+        "x-box-resource-id": "trash_web_link",
+        "x-box-tag": "trashed_web_links",
+        "description": "Represents a trashed web link.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/WebLink--Mini"
+          },
+          {
+            "properties": {
+              "parent": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/Folder--Mini"
+                  },
+                  {
+                    "description": "The parent object the web link belongs to"
+                  }
+                ]
+              },
+              "description": {
+                "type": "string",
+                "example": "Example page",
+                "description": "The description accompanying the web link. This is\nvisible within the Box web application."
+              }
+            }
+          }
+        ]
       },
       "UploadPart": {
         "title": "Upload part",
