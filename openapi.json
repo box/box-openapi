@@ -27994,28 +27994,64 @@
         "x-box-resource-id": "trash_file",
         "x-box-tag": "trashed_files",
         "description": "Represents a trashed file.",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/File--Mini"
+        "properties": {
+          "id": {
+            "type": "string",
+            "nullable": false,
+            "description": "The unique identifier that represent a file.\n\nThe ID for any file can be determined\nby visiting a file in the web application\nand copying the ID from the URL. For example,\nfor the URL `https://*.app.box.com/files/123`\nthe `file_id` is `123`.",
+            "example": "12345"
           },
-          {
-            "properties": {
-              "description": {
+          "etag": {
+            "type": "string",
+            "example": "1",
+            "nullable": true,
+            "description": "The HTTP `etag` of this file. This can be used within some API\nendpoints in the `If-Match` and `If-None-Match` headers to only\nperform changes on the file if (no) changes have happened."
+          },
+          "type": {
+            "type": "string",
+            "description": "`file`",
+            "example": "file",
+            "enum": [
+              "file"
+            ],
+            "nullable": false
+          },
+          "sequence_id": {
+            "allOf": [
+              {
                 "type": "string",
+                "example": "3",
                 "nullable": false,
-                "description": "The optional description of this file",
-                "maxLength": 256,
-                "example": "Contract for Q1 renewal"
+                "description": "A numeric identifier that represents the most recent user event\nthat has been applied to this item.\n\nThis can be used in combination with the `GET /events`-endpoint\nto filter out user events that would have occurred before this\nidentifier was read.\n\nAn example would be where a Box Drive-like application\nwould fetch an item via the API, and then listen to incoming\nuser events for changes to the item. The application would\nignore any user events where the `sequence_id` in the event\nis smaller than or equal to the `sequence_id` in the originally\nfetched resource."
               },
-              "size": {
-                "type": "integer",
-                "nullable": false,
-                "description": "The file size in bytes. Be careful parsing this integer as it can\nget very large and cause an integer overflow.",
-                "example": 629644
+              {
+                "nullable": false
               }
-            }
+            ]
+          },
+          "name": {
+            "type": "string",
+            "description": "The name of the file",
+            "example": "Contract.pdf"
+          },
+          "sha1": {
+            "type": "string",
+            "format": "digest",
+            "nullable": false,
+            "example": "85136C79CBF9FE36BB9D05D0639C70C265C18D37",
+            "description": "The SHA1 hash of the file. This can be used to compare the contents\nof a file on Box with a local file."
+          },
+          "file_version": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FileVersion--Mini"
+              },
+              {
+                "description": "The information about the current version of the file."
+              }
+            ]
           }
-        ]
+        }
       },
       "TrashFolder": {
         "title": "Trashed Folder",
@@ -28023,22 +28059,48 @@
         "x-box-resource-id": "trash_folder",
         "x-box-tag": "trashed_folders",
         "description": "Represents a trashed folder.",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/Folder--Mini"
+        "properties": {
+          "id": {
+            "type": "string",
+            "nullable": false,
+            "description": "The unique identifier that represent a folder.\n\nThe ID for any folder can be determined\nby visiting a folder in the web application\nand copying the ID from the URL. For example,\nfor the URL `https://*.app.box.com/folders/123`\nthe `folder_id` is `123`.",
+            "example": "12345"
           },
-          {
-            "properties": {
-              "created_at": {
+          "etag": {
+            "type": "string",
+            "nullable": true,
+            "example": "1",
+            "description": "The HTTP `etag` of this folder. This can be used within some API\nendpoints in the `If-Match` and `If-None-Match` headers to only\nperform changes on the folder if (no) changes have happened."
+          },
+          "type": {
+            "type": "string",
+            "description": "`folder`",
+            "example": "folder",
+            "enum": [
+              "folder"
+            ],
+            "nullable": false
+          },
+          "sequence_id": {
+            "allOf": [
+              {
                 "type": "string",
-                "format": "date-time",
-                "nullable": true,
-                "description": "The date and time when the folder was created. This value may\nbe `null` for some folders such as the root folder or the trash\nfolder.",
-                "example": "2012-12-12T10:53:43-08:00"
+                "example": "3",
+                "nullable": false,
+                "description": "A numeric identifier that represents the most recent user event\nthat has been applied to this item.\n\nThis can be used in combination with the `GET /events`-endpoint\nto filter out user events that would have occurred before this\nidentifier was read.\n\nAn example would be where a Box Drive-like application\nwould fetch an item via the API, and then listen to incoming\nuser events for changes to the item. The application would\nignore any user events where the `sequence_id` in the event\nis smaller than or equal to the `sequence_id` in the originally\nfetched resource."
+              },
+              {
+                "nullable": false
               }
-            }
+            ]
+          },
+          "name": {
+            "type": "string",
+            "description": "The name of the folder.",
+            "example": "Contracts",
+            "nullable": false
           }
-        ]
+        }
       },
       "TrashWebLink": {
         "title": "Trashed Web Link",
@@ -28046,30 +28108,49 @@
         "x-box-resource-id": "trash_web_link",
         "x-box-tag": "trashed_web_links",
         "description": "Represents a trashed web link.",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/WebLink--Mini"
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The unique identifier for this web link",
+            "example": "11446498"
           },
-          {
-            "properties": {
-              "parent": {
-                "allOf": [
-                  {
-                    "$ref": "#/components/schemas/Folder--Mini"
-                  },
-                  {
-                    "description": "The parent object the web link belongs to"
-                  }
-                ]
-              },
-              "description": {
+          "type": {
+            "type": "string",
+            "description": "`web_link`",
+            "example": "web_link",
+            "enum": [
+              "web_link"
+            ]
+          },
+          "etag": {
+            "type": "string",
+            "example": "1",
+            "description": "The entity tag of this web link. Used with `If-Match`\nheaders."
+          },
+          "url": {
+            "type": "string",
+            "example": "https://www.example.com/example/1234",
+            "description": "The URL this web link points to"
+          },
+          "sequence_id": {
+            "allOf": [
+              {
                 "type": "string",
-                "example": "Example page",
-                "description": "The description accompanying the web link. This is\nvisible within the Box web application."
+                "example": "3",
+                "nullable": false,
+                "description": "A numeric identifier that represents the most recent user event\nthat has been applied to this item.\n\nThis can be used in combination with the `GET /events`-endpoint\nto filter out user events that would have occurred before this\nidentifier was read.\n\nAn example would be where a Box Drive-like application\nwould fetch an item via the API, and then listen to incoming\nuser events for changes to the item. The application would\nignore any user events where the `sequence_id` in the event\nis smaller than or equal to the `sequence_id` in the originally\nfetched resource."
+              },
+              {
+                "nullable": false
               }
-            }
+            ]
+          },
+          "name": {
+            "type": "string",
+            "description": "The name of the web link",
+            "example": "My Bookmark"
           }
-        ]
+        }
       },
       "UploadPart": {
         "title": "Upload part",
