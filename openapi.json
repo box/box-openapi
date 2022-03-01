@@ -23070,14 +23070,14 @@
                 "format": "date-time",
                 "nullable": true,
                 "description": "The time at which this file was put in the trash.",
-                "example": "2012-12-12T10:53:43-08:00"
+                "example": null
               },
               "purged_at": {
                 "type": "string",
                 "format": "date-time",
                 "nullable": true,
                 "description": "The time at which this file is expected to be purged\nfrom the trash.",
-                "example": "2012-12-12T10:53:43-08:00"
+                "example": null
               },
               "content_created_at": {
                 "type": "string",
@@ -28050,6 +28050,190 @@
                 "description": "The information about the current version of the file."
               }
             ]
+          },
+          "description": {
+            "type": "string",
+            "nullable": false,
+            "description": "The optional description of this file",
+            "maxLength": 256,
+            "example": "Contract for Q1 renewal"
+          },
+          "size": {
+            "type": "integer",
+            "nullable": false,
+            "description": "The file size in bytes. Be careful parsing this integer as it can\nget very large and cause an integer overflow.",
+            "example": 629644
+          },
+          "path_collection": {
+            "allOf": [
+              {
+                "title": "Path collection (Trash)",
+                "description": "A list of parent folders for an item in the trash.",
+                "type": "object",
+                "properties": {
+                  "total_count": {
+                    "description": "The number of folders in this list.",
+                    "example": 1,
+                    "type": "integer",
+                    "format": "int64",
+                    "nullable": false
+                  },
+                  "entries": {
+                    "type": "array",
+                    "nullable": false,
+                    "items": {
+                      "type": "object",
+                      "description": "The parent folder for this item",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "description": "`folder`",
+                          "enum": [
+                            "folder"
+                          ],
+                          "example": "folder"
+                        },
+                        "id": {
+                          "type": "string",
+                          "description": "The unique identifier that represent a folder.",
+                          "example": "123456789"
+                        },
+                        "sequence_id": {
+                          "type": "string",
+                          "nullable": true,
+                          "example": null,
+                          "description": "This field is null for the Trash folder"
+                        },
+                        "etag": {
+                          "type": "string",
+                          "nullable": true,
+                          "example": null,
+                          "description": "This field is null for the Trash folder"
+                        },
+                        "name": {
+                          "type": "string",
+                          "description": "The name of the Trash folder.",
+                          "example": "Trash",
+                          "nullable": false
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "description": "The tree of folders that this file is contained in,\nstarting at the root."
+              },
+              {
+                "nullable": false
+              }
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": false,
+            "description": "The date and time when the file was created on Box.",
+            "example": "2012-12-12T10:53:43-08:00"
+          },
+          "modified_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": false,
+            "description": "The date and time when the file was last updated on Box.",
+            "example": "2012-12-12T10:53:43-08:00"
+          },
+          "trashed_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "The time at which this file was put in the trash.",
+            "example": "2012-12-12T10:53:43-08:00"
+          },
+          "purged_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "The time at which this file is expected to be purged\nfrom the trash.",
+            "example": "2012-12-12T10:53:43-08:00"
+          },
+          "content_created_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "The date and time at which this file was originally\ncreated, which might be before it was uploaded to Box.",
+            "example": "2012-12-12T10:53:43-08:00"
+          },
+          "content_modified_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "The date and time at which this file was last updated,\nwhich might be before it was uploaded to Box.",
+            "example": "2012-12-12T10:53:43-08:00"
+          },
+          "created_by": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/User--Mini"
+              },
+              {
+                "description": "The user who created this file"
+              }
+            ]
+          },
+          "modified_by": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/User--Mini"
+              },
+              {
+                "description": "The user who last modified this file"
+              },
+              {
+                "nullable": false
+              }
+            ]
+          },
+          "owned_by": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/User--Mini"
+              },
+              {
+                "description": "The user who owns this file"
+              },
+              {
+                "nullable": false
+              }
+            ]
+          },
+          "shared_link": {
+            "type": "string",
+            "description": "The shared link for this file. This will be\n`null` if a file has been trashed, since the link will no longer\nbe active.",
+            "nullable": true,
+            "example": null
+          },
+          "parent": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Folder--Mini"
+              },
+              {
+                "description": "The folder that this file is located within."
+              }
+            ],
+            "nullable": true
+          },
+          "item_status": {
+            "type": "string",
+            "description": "Defines if this item has been deleted or not.\n\n* `active` when the item has is not in the trash\n* `trashed` when the item has been moved to the trash but not deleted\n* `deleted` when the item has been permanently deleted.",
+            "enum": [
+              "active",
+              "trashed",
+              "deleted"
+            ],
+            "nullable": false,
+            "example": "trashed"
           }
         }
       },
@@ -28249,7 +28433,7 @@
         "type": "object",
         "x-box-resource-id": "trash_web_link_restored",
         "x-box-tag": "trashed_web_links",
-        "description": "Represents a trashed web link.",
+        "description": "Represents a web link restored from the trash.",
         "properties": {
           "id": {
             "type": "string",
