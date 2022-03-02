@@ -24650,13 +24650,6 @@
                 "description": "The date and time at which this folder was last updated.",
                 "example": "2012-12-12T10:53:43-08:00"
               },
-              "expires_at": {
-                "type": "string",
-                "format": "date-time",
-                "nullable": true,
-                "description": "The time and which the folder will be automatically be deleted.",
-                "example": "2012-12-12T10:53:43-08:00"
-              },
               "owned_by": {
                 "allOf": [
                   {
@@ -28101,13 +28094,13 @@
                         "sequence_id": {
                           "type": "string",
                           "nullable": true,
-                          "example": null,
+                          "example": "null",
                           "description": "This field is null for the Trash folder"
                         },
                         "etag": {
                           "type": "string",
                           "nullable": true,
-                          "example": null,
+                          "example": "null",
                           "description": "This field is null for the Trash folder"
                         },
                         "name": {
@@ -28211,7 +28204,7 @@
             "type": "string",
             "description": "The shared link for this file. This will be\n`null` if a file has been trashed, since the link will no longer\nbe active.",
             "nullable": true,
-            "example": null
+            "example": "null"
           },
           "parent": {
             "allOf": [
@@ -28283,6 +28276,207 @@
             "description": "The name of the folder.",
             "example": "Contracts",
             "nullable": false
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "The date and time when the folder was created. This value may\nbe `null` for some folders such as the root folder or the trash\nfolder.",
+            "example": "2012-12-12T10:53:43-08:00"
+          },
+          "modified_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date and time when the folder was last updated. This value may\nbe `null` for some folders such as the root folder or the trash\nfolder.",
+            "example": "2012-12-12T10:53:43-08:00",
+            "nullable": true
+          },
+          "description": {
+            "allOf": [
+              {
+                "type": "string",
+                "description": "The optional description of this folder",
+                "maxLength": 256,
+                "example": "Legal contracts for the new ACME deal",
+                "nullable": false
+              },
+              {
+                "nullable": false
+              }
+            ]
+          },
+          "size": {
+            "type": "integer",
+            "format": "int64",
+            "description": "The folder size in bytes.\n\nBe careful parsing this integer as its\nvalue can get very large.",
+            "example": 629644,
+            "nullable": false
+          },
+          "path_collection": {
+            "allOf": [
+              {
+                "title": "Path collection (Trash)",
+                "description": "A list of parent folders for an item in the trash.",
+                "type": "object",
+                "properties": {
+                  "total_count": {
+                    "description": "The number of folders in this list.",
+                    "example": 1,
+                    "type": "integer",
+                    "format": "int64",
+                    "nullable": false
+                  },
+                  "entries": {
+                    "type": "array",
+                    "nullable": false,
+                    "items": {
+                      "type": "object",
+                      "description": "The parent folder for this item",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "description": "`folder`",
+                          "enum": [
+                            "folder"
+                          ],
+                          "example": "folder"
+                        },
+                        "id": {
+                          "type": "string",
+                          "description": "The unique identifier that represent a folder.",
+                          "example": "123456789"
+                        },
+                        "sequence_id": {
+                          "type": "string",
+                          "nullable": true,
+                          "example": "null",
+                          "description": "This field is null for the Trash folder"
+                        },
+                        "etag": {
+                          "type": "string",
+                          "nullable": true,
+                          "example": "null",
+                          "description": "This field is null for the Trash folder"
+                        },
+                        "name": {
+                          "type": "string",
+                          "description": "The name of the Trash folder.",
+                          "example": "Trash",
+                          "nullable": false
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "description": "The tree of folders that this file is contained in,\nstarting at the root."
+              },
+              {
+                "nullable": false
+              }
+            ]
+          },
+          "created_by": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/User--Mini"
+              },
+              {
+                "description": "The user who created this folder"
+              },
+              {
+                "nullable": false
+              }
+            ]
+          },
+          "modified_by": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/User--Mini"
+              },
+              {
+                "description": "The user who last modified this folder."
+              },
+              {
+                "nullable": false
+              }
+            ]
+          },
+          "trashed_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The time at which this folder was put in the trash.",
+            "example": "2012-12-12T10:53:43-08:00",
+            "nullable": true
+          },
+          "purged_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The time at which this folder is expected to be purged\nfrom the trash.",
+            "example": "2012-12-12T10:53:43-08:00",
+            "nullable": true
+          },
+          "content_created_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "The date and time at which this folder was originally\ncreated.",
+            "example": "2012-12-12T10:53:43-08:00"
+          },
+          "content_modified_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "The date and time at which this folder was last updated.",
+            "example": "2012-12-12T10:53:43-08:00"
+          },
+          "owned_by": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/User--Mini"
+              },
+              {
+                "description": "The user who owns this folder."
+              },
+              {
+                "nullable": false
+              }
+            ]
+          },
+          "shared_link": {
+            "type": "string",
+            "description": "The shared link for this folder. This will be\n`null` if a folder has been trashed, since the link will no longer\nbe active.",
+            "example": "null",
+            "nullable": true
+          },
+          "folder_upload_email": {
+            "type": "string",
+            "description": "The folder upload email for this folder. This will be\n`null` if a folder has been trashed, since the upload will no longer\nwork.",
+            "example": "null",
+            "nullable": true
+          },
+          "parent": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Folder--Mini"
+              },
+              {
+                "description": "The optional folder that this folder is located within.\n\nThis value may be `null` for some folders such as the\nroot folder or the trash folder."
+              }
+            ],
+            "nullable": true
+          },
+          "item_status": {
+            "type": "string",
+            "description": "Defines if this item has been deleted or not.\n\n* `active` when the item has is not in the trash\n* `trashed` when the item has been moved to the trash but not deleted\n* `deleted` when the item has been permanently deleted.",
+            "enum": [
+              "active",
+              "trashed",
+              "deleted"
+            ],
+            "nullable": false,
+            "example": "trashed"
           }
         }
       },
@@ -28293,11 +28487,6 @@
         "x-box-tag": "trashed_web_links",
         "description": "Represents a trashed web link.",
         "properties": {
-          "id": {
-            "type": "string",
-            "description": "The unique identifier for this web link",
-            "example": "11446498"
-          },
           "type": {
             "type": "string",
             "description": "`web_link`",
@@ -28306,15 +28495,10 @@
               "web_link"
             ]
           },
-          "etag": {
+          "id": {
             "type": "string",
-            "example": "1",
-            "description": "The entity tag of this web link. Used with `If-Match`\nheaders."
-          },
-          "url": {
-            "type": "string",
-            "example": "https://www.example.com/example/1234",
-            "description": "The URL this web link points to"
+            "description": "The unique identifier for this web link",
+            "example": "11446498"
           },
           "sequence_id": {
             "allOf": [
@@ -28329,10 +28513,172 @@
               }
             ]
           },
+          "etag": {
+            "type": "string",
+            "example": "1",
+            "description": "The entity tag of this web link. Used with `If-Match`\nheaders."
+          },
           "name": {
             "type": "string",
             "description": "The name of the web link",
             "example": "My Bookmark"
+          },
+          "url": {
+            "type": "string",
+            "example": "https://www.example.com/example/1234",
+            "description": "The URL this web link points to"
+          },
+          "parent": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Folder--Mini"
+              },
+              {
+                "description": "The parent object the web link belongs to"
+              }
+            ]
+          },
+          "description": {
+            "type": "string",
+            "example": "Example page",
+            "description": "The description accompanying the web link. This is\nvisible within the Box web application."
+          },
+          "path_collection": {
+            "allOf": [
+              {
+                "title": "Path collection (Trash)",
+                "description": "A list of parent folders for an item in the trash.",
+                "type": "object",
+                "properties": {
+                  "total_count": {
+                    "description": "The number of folders in this list.",
+                    "example": 1,
+                    "type": "integer",
+                    "format": "int64",
+                    "nullable": false
+                  },
+                  "entries": {
+                    "type": "array",
+                    "nullable": false,
+                    "items": {
+                      "type": "object",
+                      "description": "The parent folder for this item",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "description": "`folder`",
+                          "enum": [
+                            "folder"
+                          ],
+                          "example": "folder"
+                        },
+                        "id": {
+                          "type": "string",
+                          "description": "The unique identifier that represent a folder.",
+                          "example": "123456789"
+                        },
+                        "sequence_id": {
+                          "type": "string",
+                          "nullable": true,
+                          "example": "null",
+                          "description": "This field is null for the Trash folder"
+                        },
+                        "etag": {
+                          "type": "string",
+                          "nullable": true,
+                          "example": "null",
+                          "description": "This field is null for the Trash folder"
+                        },
+                        "name": {
+                          "type": "string",
+                          "description": "The name of the Trash folder.",
+                          "example": "Trash",
+                          "nullable": false
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "description": "The tree of folders that this web link is contained in,\nstarting at the root."
+              },
+              {
+                "nullable": false
+              }
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When this file was created on Box’s servers.",
+            "example": "2012-12-12T10:53:43-08:00"
+          },
+          "modified_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When this file was last updated on the Box\nservers.",
+            "example": "2012-12-12T10:53:43-08:00"
+          },
+          "trashed_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "When this file was last moved to the trash.",
+            "example": "2012-12-12T10:53:43-08:00"
+          },
+          "purged_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "When this file will be permanently deleted.",
+            "example": "2012-12-12T10:53:43-08:00"
+          },
+          "created_by": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/User--Mini"
+              },
+              {
+                "description": "The user who created this web link"
+              }
+            ]
+          },
+          "modified_by": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/User--Mini"
+              },
+              {
+                "description": "The user who last modified this web link"
+              }
+            ]
+          },
+          "owned_by": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/User--Mini"
+              },
+              {
+                "description": "The user who owns this web link"
+              }
+            ]
+          },
+          "shared_link": {
+            "type": "string",
+            "description": "The shared link for this bookmark. This will be\n`null` if a bookmark has been trashed, since the link will no longer\nbe active.",
+            "example": "null",
+            "nullable": true
+          },
+          "item_status": {
+            "type": "string",
+            "example": "trashed",
+            "enum": [
+              "active",
+              "trashed",
+              "deleted"
+            ],
+            "description": "Whether this item is deleted or not. Values include `active`,\n`trashed` if the file has been moved to the trash, and `deleted` if\nthe file has been permanently deleted"
           }
         }
       },
@@ -28460,17 +28806,15 @@
           },
           "trashed_at": {
             "type": "string",
-            "format": "date-time",
             "nullable": true,
-            "description": "The time at which this file was put in the trash.",
-            "example": null
+            "description": "The time at which this file was put in the trash - becomes `null`\nafter restore.",
+            "example": "null"
           },
           "purged_at": {
             "type": "string",
-            "format": "date-time",
             "nullable": true,
-            "description": "The time at which this file is expected to be purged\nfrom the trash.",
-            "example": null
+            "description": "The time at which this file is expected to be purged\nfrom the trash  - becomes `null`\nafter restore.",
+            "example": "null"
           },
           "content_created_at": {
             "type": "string",
@@ -28524,7 +28868,7 @@
           },
           "shared_link": {
             "type": "string",
-            "description": "The shared link for this file. This will be\n`null` if a file had been trashed.",
+            "description": "The shared link for this file. This will be\n`null` if a file had been trashed, even though the original shared\nlink does become active again.",
             "nullable": true,
             "example": null
           },
@@ -28598,6 +28942,172 @@
             "description": "The name of the folder.",
             "example": "Contracts",
             "nullable": false
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "The date and time when the folder was created. This value may\nbe `null` for some folders such as the root folder or the trash\nfolder.",
+            "example": "2012-12-12T10:53:43-08:00"
+          },
+          "modified_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date and time when the folder was last updated. This value may\nbe `null` for some folders such as the root folder or the trash\nfolder.",
+            "example": "2012-12-12T10:53:43-08:00",
+            "nullable": true
+          },
+          "description": {
+            "allOf": [
+              {
+                "type": "string",
+                "description": "The optional description of this folder",
+                "maxLength": 256,
+                "example": "Legal contracts for the new ACME deal",
+                "nullable": false
+              },
+              {
+                "nullable": false
+              }
+            ]
+          },
+          "size": {
+            "type": "integer",
+            "format": "int64",
+            "description": "The folder size in bytes.\n\nBe careful parsing this integer as its\nvalue can get very large.",
+            "example": 629644,
+            "nullable": false
+          },
+          "path_collection": {
+            "allOf": [
+              {
+                "title": "Path collection",
+                "description": "A list of parent folders for an item.",
+                "type": "object",
+                "properties": {
+                  "total_count": {
+                    "description": "The number of folders in this list.",
+                    "example": 1,
+                    "type": "integer",
+                    "format": "int64",
+                    "nullable": false
+                  },
+                  "entries": {
+                    "type": "array",
+                    "description": "The parent folders for this item",
+                    "nullable": false,
+                    "items": {
+                      "$ref": "#/components/schemas/Folder--Mini"
+                    }
+                  }
+                }
+              },
+              {
+                "description": "The tree of folders that this file is contained in,\nstarting at the root."
+              },
+              {
+                "nullable": false
+              }
+            ]
+          },
+          "created_by": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/User--Mini"
+              },
+              {
+                "description": "The user who created this folder"
+              },
+              {
+                "nullable": false
+              }
+            ]
+          },
+          "modified_by": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/User--Mini"
+              },
+              {
+                "description": "The user who last modified this folder."
+              },
+              {
+                "nullable": false
+              }
+            ]
+          },
+          "trashed_at": {
+            "type": "string",
+            "description": "The time at which this folder was put in the trash - becomes `null`\nafter restore",
+            "example": "null",
+            "nullable": true
+          },
+          "purged_at": {
+            "type": "string",
+            "description": "The time at which this folder is expected to be purged\nfrom the trash  - becomes `null`\nafter restore",
+            "example": "null",
+            "nullable": true
+          },
+          "content_created_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "The date and time at which this folder was originally\ncreated.",
+            "example": "2012-12-12T10:53:43-08:00"
+          },
+          "content_modified_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "The date and time at which this folder was last updated.",
+            "example": "2012-12-12T10:53:43-08:00"
+          },
+          "owned_by": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/User--Mini"
+              },
+              {
+                "description": "The user who owns this folder."
+              },
+              {
+                "nullable": false
+              }
+            ]
+          },
+          "shared_link": {
+            "type": "string",
+            "description": "The shared link for this file. This will be\n`null` if a folder had been trashed, even though the original shared\nlink does become active again.",
+            "example": "null",
+            "nullable": true
+          },
+          "folder_upload_email": {
+            "type": "string",
+            "description": "The folder upload email for this folder. This will be\n`null` if a folder has been trashed, even though the original upload\nemail does become active again.",
+            "example": "null",
+            "nullable": true
+          },
+          "parent": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Folder--Mini"
+              },
+              {
+                "description": "The optional folder that this folder is located within.\n\nThis value may be `null` for some folders such as the\nroot folder or the trash folder."
+              }
+            ],
+            "nullable": true
+          },
+          "item_status": {
+            "type": "string",
+            "description": "Defines if this item has been deleted or not.\n\n* `active` when the item has is not in the trash\n* `trashed` when the item has been moved to the trash but not deleted\n* `deleted` when the item has been permanently deleted.",
+            "enum": [
+              "active",
+              "trashed",
+              "deleted"
+            ],
+            "nullable": false,
+            "example": "active"
           }
         }
       },
@@ -28608,11 +29118,6 @@
         "x-box-tag": "trashed_web_links",
         "description": "Represents a web link restored from the trash.",
         "properties": {
-          "id": {
-            "type": "string",
-            "description": "The unique identifier for this web link",
-            "example": "11446498"
-          },
           "type": {
             "type": "string",
             "description": "`web_link`",
@@ -28621,15 +29126,10 @@
               "web_link"
             ]
           },
-          "etag": {
+          "id": {
             "type": "string",
-            "example": "1",
-            "description": "The entity tag of this web link. Used with `If-Match`\nheaders."
-          },
-          "url": {
-            "type": "string",
-            "example": "https://www.example.com/example/1234",
-            "description": "The URL this web link points to"
+            "description": "The unique identifier for this web link",
+            "example": "11446498"
           },
           "sequence_id": {
             "allOf": [
@@ -28644,10 +29144,137 @@
               }
             ]
           },
+          "etag": {
+            "type": "string",
+            "example": "1",
+            "description": "The entity tag of this web link. Used with `If-Match`\nheaders."
+          },
           "name": {
             "type": "string",
             "description": "The name of the web link",
             "example": "My Bookmark"
+          },
+          "url": {
+            "type": "string",
+            "example": "https://www.example.com/example/1234",
+            "description": "The URL this web link points to"
+          },
+          "parent": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Folder--Mini"
+              },
+              {
+                "description": "The parent object the web link belongs to"
+              }
+            ]
+          },
+          "description": {
+            "type": "string",
+            "example": "Example page",
+            "description": "The description accompanying the web link. This is\nvisible within the Box web application."
+          },
+          "path_collection": {
+            "allOf": [
+              {
+                "title": "Path collection",
+                "description": "A list of parent folders for an item.",
+                "type": "object",
+                "properties": {
+                  "total_count": {
+                    "description": "The number of folders in this list.",
+                    "example": 1,
+                    "type": "integer",
+                    "format": "int64",
+                    "nullable": false
+                  },
+                  "entries": {
+                    "type": "array",
+                    "description": "The parent folders for this item",
+                    "nullable": false,
+                    "items": {
+                      "$ref": "#/components/schemas/Folder--Mini"
+                    }
+                  }
+                }
+              },
+              {
+                "description": "The tree of folders that this web link is contained in,\nstarting at the root."
+              },
+              {
+                "nullable": false
+              }
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When this file was created on Box’s servers.",
+            "example": "2012-12-12T10:53:43-08:00"
+          },
+          "modified_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When this file was last updated on the Box\nservers.",
+            "example": "2012-12-12T10:53:43-08:00"
+          },
+          "trashed_at": {
+            "type": "string",
+            "nullable": true,
+            "description": "The time at which this bookmark was put in the trash - becomes `null`\nafter restore",
+            "example": "null"
+          },
+          "purged_at": {
+            "type": "string",
+            "nullable": true,
+            "description": "The time at which this bookmark will be permanently deleted - becomes\n`null` after restore",
+            "example": "null"
+          },
+          "created_by": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/User--Mini"
+              },
+              {
+                "description": "The user who created this web link"
+              }
+            ]
+          },
+          "modified_by": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/User--Mini"
+              },
+              {
+                "description": "The user who last modified this web link"
+              }
+            ]
+          },
+          "owned_by": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/User--Mini"
+              },
+              {
+                "description": "The user who owns this web link"
+              }
+            ]
+          },
+          "shared_link": {
+            "type": "string",
+            "description": "The shared link for this bookmark. This will be\n`null` if a bookmark had been trashed, even though the original shared\nlink does become active again.",
+            "nullable": true,
+            "example": null
+          },
+          "item_status": {
+            "type": "string",
+            "example": "trashed",
+            "enum": [
+              "active",
+              "trashed",
+              "deleted"
+            ],
+            "description": "Whether this item is deleted or not. Values include `active`,\n`trashed` if the file has been moved to the trash, and `deleted` if\nthe file has been permanently deleted"
           }
         }
       },
@@ -29521,7 +30148,7 @@
                 "type": "string",
                 "format": "date-time",
                 "nullable": true,
-                "description": "When this file was last moved to the trash.",
+                "description": "When this file was moved to the trash.",
                 "example": "2012-12-12T10:53:43-08:00"
               },
               "purged_at": {
