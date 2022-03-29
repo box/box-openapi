@@ -1358,6 +1358,16 @@
                             }
                         }
                     },
+                    "400": {
+                        "description": "パラメータが不足しているか無効の場合はエラーを返します。\n\n* `bad_request` - パラメータが指定されていないか誤っている場合に返されます。\n* `item_name_too_long` - フォルダ名が長すぎる場合に返されます。\n* `item_name_invalid` - フォルダ名に無効な文字が含まれている場合に返されます。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
                     "409": {
                         "description": "ファイルがすでに存在する場合、またはアカウントのディスク容量が不足している場合は、エラーを返します。",
                         "content": {
@@ -2131,7 +2141,7 @@
             "get": {
                 "operationId": "get_files_id_thumbnail_id",
                 "summary": "ファイルサムネイルを取得",
-                "description": "ファイルのサムネイル (小さい画像レプリゼンテーション) を取得します。\n\nSizes of `32x32`,`64x64`, `128x128`, and `256x256` can be returned in the `.png` format and sizes of `32x32`, `160x160`, and `320x320` can be returned in the `.jpg` format.\n\nサムネイルを生成できる画像および動画ファイルの形式については、[こちら][1]を参照してください。\n\n[1]: https://community.box.com/t5/Migrating-and-Previewing-Content/File-Types-and-Fonts-Supported-in-Box-Content-Preview/ta-p/327",
+                "description": "ファイルのサムネイル (小さい画像レプリゼンテーション) を取得します。\n\nサイズ`32x32`、`64x64`、`128x128`、`256x256`は`.png`形式で返すことができます。また、サイズ`32x32`、`160x160`、`320x320`は`.jpg`形式で返すことができます。\n\nサムネイルを生成できる画像および動画ファイルの形式については、[こちら][1]を参照してください。\n\n[1]: https://community.box.com/t5/Migrating-and-Previewing-Content/File-Types-and-Fonts-Supported-in-Box-Content-Preview/ta-p/327",
                 "tags": [
                     "Files"
                 ],
@@ -5261,6 +5271,16 @@
                     "204": {
                         "description": "フォルダが正常に削除された場合、またはごみ箱に移動された場合は、空のレスポンスを返します。"
                     },
+                    "400": {
+                        "description": "Returns an error if the user makes a bad request.\n\n* `folder_not_empty`: フォルダが空でない場合に返されます。フォルダとそのコンテンツを再帰的に削除するには、`recursive`クエリパラメータを使用します。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
                     "403": {
                         "description": "ユーザーにこのアクションを実行するためのアクセス権限がない場合はエラーを返します。\n\n* `access_denied_insufficient_permissions`: ユーザーにフォルダへのアクセス権限がない場合、または削除されないようにフォルダにフォルダロックが適用されている場合に返されます。\n\n* `insufficient_scope`: アプリケーションにフォルダを削除するための適切なスコープがない場合にエラーが返されます。Boxに格納されているすべてのファイルとフォルダに対して読み取りと書き込みを行えるようにアプリケーションが設定されていることを確認してください。",
                         "content": {
@@ -5282,7 +5302,7 @@
                         }
                     },
                     "409": {
-                        "description": "* `folder_not_empty`: フォルダが空でない場合に返されます。フォルダとそのコンテンツを再帰的に削除するには、`recursive`クエリパラメータを使用します。\n* `operation_blocked_temporary`: 別の移動、コピー、削除、または復元操作が進行中であることによりフォルダがロックされている場合に返されます。\n\n  操作は後で再試行することができます。",
+                        "description": "* `operation_blocked_temporary`: 別の移動、コピー、削除、または復元操作が進行中であることによりフォルダがロックされている場合に返されます。\n\n  操作は後で再試行することができます。",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -9698,7 +9718,7 @@
                                     },
                                     "can_view_path": {
                                         "type": "boolean",
-                                        "description": "招待されたユーザーが招待に関連付けられているフォルダへの親パス全体を見ることができるかどうかを示します。招待されたユーザーには親フォルダ内の権限が付与されないため、自身が参加しているコラボレーションに関係しないコンテンツを閲覧することはできません。\n\nこれにより、招待されたユーザーの \\[**すべてのファイル**] ページの読み込みに必要な時間が有意に増加することに注意してください。`can_view_path`が有効になっているコラボレーションの数を1ユーザーあたり1,000に制限することをお勧めします。\n\nOnly owner or co-owners can invite collaborators with a `can_view_path` of `true`.\n\n`can_view_path` can only be used for folder collaborations.",
+                                        "description": "招待されたユーザーが招待に関連付けられているフォルダへの親パス全体を見ることができるかどうかを示します。招待されたユーザーには親フォルダ内の権限が付与されないため、自身が参加しているコラボレーションに関係しないコンテンツを閲覧することはできません。\n\nこれにより、招待されたユーザーの \\[**すべてのファイル**] ページの読み込みに必要な時間が有意に増加することに注意してください。`can_view_path`が有効になっているコラボレーションの数を1ユーザーあたり1,000に制限することをお勧めします。\n\n`can_view_path`が`true`に設定されているコラボレータを招待できるのは、所有者と共同所有者のみです。\n\n`can_view_path`は、フォルダのコラボレーションのみに使用できます。",
                                         "example": true
                                     }
                                 }
@@ -9992,7 +10012,7 @@
                                     },
                                     "can_view_path": {
                                         "type": "boolean",
-                                        "description": "招待されたユーザーが招待に関連付けられているフォルダへの親パス全体を見ることができるかどうかを示します。招待されたユーザーには親フォルダ内の権限が付与されないため、自身が参加しているコラボレーションに関係しないコンテンツを閲覧することはできません。\n\nこれにより、招待されたユーザーの \\[**すべてのファイル**] ページの読み込みに必要な時間が有意に増加することに注意してください。`can_view_path`が有効になっているコラボレーションの数を1ユーザーあたり1,000に制限することをお勧めします。\n\nOnly owner or co-owners can invite collaborators with a `can_view_path` of `true`.\n\n`can_view_path` can only be used for folder collaborations.",
+                                        "description": "招待されたユーザーが招待に関連付けられているフォルダへの親パス全体を見ることができるかどうかを示します。招待されたユーザーには親フォルダ内の権限が付与されないため、自身が参加しているコラボレーションに関係しないコンテンツを閲覧することはできません。\n\nこれにより、招待されたユーザーの \\[**すべてのファイル**] ページの読み込みに必要な時間が有意に増加することに注意してください。`can_view_path`が有効になっているコラボレーションの数を1ユーザーあたり1,000に制限することをお勧めします。\n\n`can_view_path`が`true`に設定されているコラボレータを招待できるのは、所有者と共同所有者のみです。\n\n`can_view_path`は、フォルダのコラボレーションのみに使用できます。",
                                         "example": true
                                     },
                                     "expires_at": {
@@ -10138,6 +10158,24 @@
                     {
                         "name": "owner_user_ids",
                         "description": "指定した所有者リスト (ユーザーIDのカンマ区切りリストとして定義) によって所有される項目のみに検索結果を絞り込みます。\n\n検索結果に項目が表示されるように、項目は現在認証されているユーザーによって所有または共有されている必要もあることに注意してください。いずれかのユーザーが所有するファイルにユーザーがアクセスできない場合は、空の結果セットが返されます。\n\n会社全体で検索するには、サポートチームにリクエスト可能な`enterprise_content`スコープパラメータを使用することをお勧めします。",
+                        "example": [
+                            "123422",
+                            "23532",
+                            "3241212"
+                        ],
+                        "in": "query",
+                        "required": false,
+                        "explode": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    {
+                        "name": "recent_updater_user_ids",
+                        "description": "Limits the search results to any items that have been updated by the given list of users, defined as a list of comma separated user IDs.\n\n検索結果に項目が表示されるように、項目は現在認証されているユーザーによって所有または共有されている必要もあることに注意してください。いずれかのユーザーが所有するファイルにユーザーがアクセスできない場合は、空の結果セットが返されます。\n\nThis feature only searches back to the last 10 versions of an item.",
                         "example": [
                             "123422",
                             "23532",
@@ -13526,7 +13564,7 @@
                 ],
                 "x-box-tag": "users",
                 "x-box-enable-explorer": true,
-                "description": "Updates a managed or app user in an enterprise. This endpoint is only available to users and applications with the right admin permissions.",
+                "description": "企業内の管理対象ユーザーまたはApp Userを更新します。このエンドポイントを使用できるのは、適切な管理者権限を持つユーザーとアプリケーションのみです。",
                 "parameters": [
                     {
                         "name": "user_id",
@@ -13582,7 +13620,7 @@
                                     },
                                     "login": {
                                         "type": "string",
-                                        "description": "ユーザーがログインに使用するメールアドレス\n\nNote: If the target user's email is not confirmed, then the primary login address cannot be changed.",
+                                        "description": "ユーザーがログインに使用するメールアドレス\n\n注: ターゲットユーザーのメールアドレスが確認されていない場合は、プライマリログインアドレスを変更できません。",
                                         "example": "somename@box.com"
                                     },
                                     "role": {
@@ -13692,7 +13730,7 @@
                                     "external_app_user_id": {
                                         "type": "string",
                                         "example": "my-user-1234",
-                                        "description": "ユーザーの検索に使用できる、アプリユーザーの外部識別子。これを使用して、外部IDプロバイダのユーザーIDをBoxユーザーに結び付けることが使用できます。\n\nNote: In order to update this field, you need to request a token using the application that created the app user."
+                                        "description": "ユーザーの検索に使用できる、アプリユーザーの外部識別子。これを使用して、外部IDプロバイダのユーザーIDをBoxユーザーに結び付けることが使用できます。\n\n注: このフィールドを更新するには、App Userを作成したアプリケーションを使用してトークンをリクエストする必要があります。"
                                     }
                                 }
                             }
@@ -15963,7 +16001,7 @@
                     },
                     {
                         "name": "limit",
-                        "description": "返されるイベントの数を制限します\n\nNote: Sometimes, the events less than the limit requested can be returned even when there may be more events remaining. This is primarily done in the case where a number of events have already been retrieved and these retrieved events are returned rather than delaying for an unknown amount of time to see if there are any more results.",
+                        "description": "返されるイベントの数を制限します\n\n注: まだイベントが残っているときでも、返されるイベントの数がリクエストされた制限を下回る場合があります。これは主に、多数のイベントがすでに取得されていて、他に結果があるかどうかを確認するためにこの取得したイベントが先延ばしせずに返される場合に発生します。",
                         "in": "query",
                         "example": 50,
                         "schema": {
@@ -27960,11 +27998,11 @@
                 }
             },
             "TrashFile": {
-                "title": "Trashed File",
+                "title": "ごみ箱内のファイル",
                 "type": "object",
                 "x-box-resource-id": "trash_file",
                 "x-box-tag": "trashed_files",
-                "description": "Represents a trashed file.",
+                "description": "ごみ箱内のファイルを表します。",
                 "properties": {
                     "id": {
                         "type": "string",
@@ -28038,8 +28076,8 @@
                     "path_collection": {
                         "allOf": [
                             {
-                                "title": "Path collection (Trash)",
-                                "description": "A list of parent folders for an item in the trash.",
+                                "title": "パスのコレクション (ごみ箱)",
+                                "description": "ごみ箱内の項目の親フォルダのリスト。",
                                 "type": "object",
                                 "properties": {
                                     "total_count": {
@@ -28050,11 +28088,11 @@
                                         "nullable": false
                                     },
                                     "entries": {
-                                        "description": "Array of folders for this item's path collection",
+                                        "description": "この項目のパスのコレクションのフォルダの配列",
                                         "type": "array",
                                         "items": {
                                             "type": "object",
-                                            "description": "The parent folder for this item",
+                                            "description": "この項目の親フォルダ",
                                             "properties": {
                                                 "type": {
                                                     "type": "string",
@@ -28073,17 +28111,17 @@
                                                     "type": "string",
                                                     "nullable": true,
                                                     "example": null,
-                                                    "description": "This field is null for the Trash folder"
+                                                    "description": "ごみ箱フォルダの場合、このフィールドはnullです"
                                                 },
                                                 "etag": {
                                                     "type": "string",
                                                     "nullable": true,
                                                     "example": null,
-                                                    "description": "This field is null for the Trash folder"
+                                                    "description": "ごみ箱フォルダの場合、このフィールドはnullです"
                                                 },
                                                 "name": {
                                                     "type": "string",
-                                                    "description": "The name of the Trash folder.",
+                                                    "description": "ごみ箱フォルダの名前。",
                                                     "example": "Trash",
                                                     "nullable": false
                                                 }
@@ -28180,7 +28218,7 @@
                     },
                     "shared_link": {
                         "type": "string",
-                        "description": "The shared link for this file. This will be `null` if a file has been trashed, since the link will no longer be active.",
+                        "description": "このファイルの共有リンク。ファイルがごみ箱に移動された場合、このリンクはアクティブではなくなるため、これは`null`になります。",
                         "example": null,
                         "nullable": true
                     },
@@ -28211,11 +28249,11 @@
                 }
             },
             "TrashFolder": {
-                "title": "Trashed Folder",
+                "title": "ごみ箱内のフォルダ",
                 "type": "object",
                 "x-box-resource-id": "trash_folder",
                 "x-box-tag": "trashed_folders",
-                "description": "Represents a trashed folder.",
+                "description": "ごみ箱内のフォルダを表します。",
                 "properties": {
                     "id": {
                         "type": "string",
@@ -28295,8 +28333,8 @@
                     "path_collection": {
                         "allOf": [
                             {
-                                "title": "Path collection (Trash)",
-                                "description": "A list of parent folders for an item in the trash.",
+                                "title": "パスのコレクション (ごみ箱)",
+                                "description": "ごみ箱内の項目の親フォルダのリスト。",
                                 "type": "object",
                                 "properties": {
                                     "total_count": {
@@ -28307,11 +28345,11 @@
                                         "nullable": false
                                     },
                                     "entries": {
-                                        "description": "Array of folders for this item's path collection",
+                                        "description": "この項目のパスのコレクションのフォルダの配列",
                                         "type": "array",
                                         "items": {
                                             "type": "object",
-                                            "description": "The parent folder for this item",
+                                            "description": "この項目の親フォルダ",
                                             "properties": {
                                                 "type": {
                                                     "type": "string",
@@ -28330,17 +28368,17 @@
                                                     "type": "string",
                                                     "nullable": true,
                                                     "example": null,
-                                                    "description": "This field is null for the Trash folder"
+                                                    "description": "ごみ箱フォルダの場合、このフィールドはnullです"
                                                 },
                                                 "etag": {
                                                     "type": "string",
                                                     "nullable": true,
                                                     "example": null,
-                                                    "description": "This field is null for the Trash folder"
+                                                    "description": "ごみ箱フォルダの場合、このフィールドはnullです"
                                                 },
                                                 "name": {
                                                     "type": "string",
-                                                    "description": "The name of the Trash folder.",
+                                                    "description": "ごみ箱フォルダの名前。",
                                                     "example": "Trash",
                                                     "nullable": false
                                                 }
@@ -28426,13 +28464,13 @@
                     },
                     "shared_link": {
                         "type": "string",
-                        "description": "The shared link for this folder. This will be `null` if a folder has been trashed, since the link will no longer be active.",
+                        "description": "このフォルダの共有リンク。フォルダがごみ箱に移動された場合、このリンクはアクティブではなくなるため、これは`null`になります。",
                         "example": null,
                         "nullable": true
                     },
                     "folder_upload_email": {
                         "type": "string",
-                        "description": "The folder upload email for this folder. This will be `null` if a folder has been trashed, since the upload will no longer work.",
+                        "description": "このフォルダのフォルダアップロード用メールアドレス。フォルダがごみ箱に移動された場合、アップロードは動作しなくなるため、これは`null`になります。",
                         "example": null,
                         "nullable": true
                     },
@@ -28463,11 +28501,11 @@
                 }
             },
             "TrashWebLink": {
-                "title": "Trashed Web Link",
+                "title": "ごみ箱内のウェブリンク",
                 "type": "object",
                 "x-box-resource-id": "trash_web_link",
                 "x-box-tag": "trashed_web_links",
-                "description": "Represents a trashed web link.",
+                "description": "ごみ箱内のウェブリンクを表します。",
                 "properties": {
                     "type": {
                         "type": "string",
@@ -28528,8 +28566,8 @@
                     "path_collection": {
                         "allOf": [
                             {
-                                "title": "Path collection (Trash)",
-                                "description": "A list of parent folders for an item in the trash.",
+                                "title": "パスのコレクション (ごみ箱)",
+                                "description": "ごみ箱内の項目の親フォルダのリスト。",
                                 "type": "object",
                                 "properties": {
                                     "total_count": {
@@ -28540,11 +28578,11 @@
                                         "nullable": false
                                     },
                                     "entries": {
-                                        "description": "Array of folders for this item's path collection",
+                                        "description": "この項目のパスのコレクションのフォルダの配列",
                                         "type": "array",
                                         "items": {
                                             "type": "object",
-                                            "description": "The parent folder for this item",
+                                            "description": "この項目の親フォルダ",
                                             "properties": {
                                                 "type": {
                                                     "type": "string",
@@ -28563,17 +28601,17 @@
                                                     "type": "string",
                                                     "nullable": true,
                                                     "example": null,
-                                                    "description": "This field is null for the Trash folder"
+                                                    "description": "ごみ箱フォルダの場合、このフィールドはnullです"
                                                 },
                                                 "etag": {
                                                     "type": "string",
                                                     "nullable": true,
                                                     "example": null,
-                                                    "description": "This field is null for the Trash folder"
+                                                    "description": "ごみ箱フォルダの場合、このフィールドはnullです"
                                                 },
                                                 "name": {
                                                     "type": "string",
-                                                    "description": "The name of the Trash folder.",
+                                                    "description": "ごみ箱フォルダの名前。",
                                                     "example": "Trash",
                                                     "nullable": false
                                                 }
@@ -28648,7 +28686,7 @@
                     },
                     "shared_link": {
                         "type": "string",
-                        "description": "The shared link for this bookmark. This will be `null` if a bookmark has been trashed, since the link will no longer be active.",
+                        "description": "このブックマークの共有リンク。ブックマークがごみ箱に移動された場合、このリンクはアクティブではなくなるため、これは`null`になります。",
                         "example": null,
                         "nullable": true
                     },
@@ -28665,11 +28703,11 @@
                 }
             },
             "TrashFileRestored": {
-                "title": "Trashed File (Restored)",
+                "title": "ごみ箱内のファイル (復元済み)",
                 "type": "object",
                 "x-box-resource-id": "trash_file_restored",
                 "x-box-tag": "trashed_files",
-                "description": "Represents a file restored from the trash.",
+                "description": "ごみ箱から復元されたファイルを表します。",
                 "properties": {
                     "id": {
                         "type": "string",
@@ -28789,13 +28827,13 @@
                     "trashed_at": {
                         "type": "string",
                         "nullable": true,
-                        "description": "The time at which this file was put in the trash - becomes `null` after restore.",
+                        "description": "このファイルがごみ箱に移動された日時。復元後は`null`になります。",
                         "example": null
                     },
                     "purged_at": {
                         "type": "string",
                         "nullable": true,
-                        "description": "The time at which this file is expected to be purged from the trash - becomes `null` after restore.",
+                        "description": "このファイルがごみ箱から削除される予定日時。復元後は`null`になります。",
                         "example": null
                     },
                     "content_created_at": {
@@ -28850,7 +28888,7 @@
                     },
                     "shared_link": {
                         "type": "string",
-                        "description": "The shared link for this file. This will be `null` if a file had been trashed, even though the original shared link does become active again.",
+                        "description": "このファイルの共有リンク。ファイルがごみ箱に移動された場合、元の共有リンクが再度アクティブになっても、これは`null`になります。",
                         "nullable": true,
                         "example": null
                     },
@@ -28881,11 +28919,11 @@
                 }
             },
             "TrashFolderRestored": {
-                "title": "Trashed Folder (Restored)",
+                "title": "ごみ箱内のフォルダ (復元済み)",
                 "type": "object",
                 "x-box-resource-id": "trash_folder_restored",
                 "x-box-tag": "trashed_folders",
-                "description": "Represents a folder restored from the trash.",
+                "description": "ごみ箱から復元されたフォルダを表します。",
                 "properties": {
                     "id": {
                         "type": "string",
@@ -29022,13 +29060,13 @@
                     },
                     "trashed_at": {
                         "type": "string",
-                        "description": "The time at which this folder was put in the trash - becomes `null` after restore.",
+                        "description": "このフォルダがごみ箱に移動された日時。復元後は`null`になります。",
                         "example": null,
                         "nullable": true
                     },
                     "purged_at": {
                         "type": "string",
-                        "description": "The time at which this folder is expected to be purged from the trash - becomes `null` after restore.",
+                        "description": "このフォルダがごみ箱から削除される予定日時。復元後は`null`になります。",
                         "example": null,
                         "nullable": true
                     },
@@ -29061,13 +29099,13 @@
                     },
                     "shared_link": {
                         "type": "string",
-                        "description": "The shared link for this file. This will be `null` if a folder had been trashed, even though the original shared link does become active again.",
+                        "description": "このファイルの共有リンク。フォルダがごみ箱に移動された場合、元の共有リンクが再度アクティブになっても、これは`null`になります。",
                         "example": null,
                         "nullable": true
                     },
                     "folder_upload_email": {
                         "type": "string",
-                        "description": "The folder upload email for this folder. This will be `null` if a folder has been trashed, even though the original upload email does become active again.",
+                        "description": "このフォルダのフォルダアップロード用メールアドレス。フォルダがごみ箱に移動された場合、元のアップロード用メールアドレスが再度アクティブになっても、これは`null`になります。",
                         "example": null,
                         "nullable": true
                     },
@@ -29098,11 +29136,11 @@
                 }
             },
             "TrashWebLinkRestored": {
-                "title": "Trashed Web Link (Restored)",
+                "title": "ごみ箱内のウェブリンク (復元済み)",
                 "type": "object",
                 "x-box-resource-id": "trash_web_link_restored",
                 "x-box-tag": "trashed_web_links",
-                "description": "Represents a web link restored from the trash.",
+                "description": "ごみ箱から復元されたウェブリンクを表します。",
                 "properties": {
                     "type": {
                         "type": "string",
@@ -29207,13 +29245,13 @@
                     "trashed_at": {
                         "type": "string",
                         "nullable": true,
-                        "description": "The time at which this bookmark was put in the trash - becomes `null` after restore.",
+                        "description": "このブックマークがごみ箱に移動された日時。復元後は`null`になります。",
                         "example": null
                     },
                     "purged_at": {
                         "type": "string",
                         "nullable": true,
-                        "description": "The time at which this bookmark will be permanently deleted - becomes `null` after restore.",
+                        "description": "このブックマークが完全に削除される予定日時。復元後は`null`になります。",
                         "example": null
                     },
                     "created_by": {
@@ -29248,7 +29286,7 @@
                     },
                     "shared_link": {
                         "type": "string",
-                        "description": "The shared link for this bookmark. This will be `null` if a bookmark had been trashed, even though the original shared link does become active again.",
+                        "description": "このブックマークの共有リンク。ブックマークがごみ箱に移動された場合、元の共有リンクが再度アクティブになっても、これは`null`になります。",
                         "nullable": true,
                         "example": null
                     },
@@ -30134,7 +30172,7 @@
                                 "type": "string",
                                 "format": "date-time",
                                 "nullable": true,
-                                "description": "When this file was moved to the trash.",
+                                "description": "このファイルがごみ箱に移動された日時。",
                                 "example": "2012-12-12T10:53:43-08:00"
                             },
                             "purged_at": {
