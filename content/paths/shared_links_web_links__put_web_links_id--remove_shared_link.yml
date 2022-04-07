@@ -1,0 +1,101 @@
+---
+operationId: put_web_links_id#remove_shared_link
+
+summary: Remove shared link from web link
+
+tags:
+  - Shared links (Web Links)
+
+x-box-tag: shared_links_web_links
+x-box-enable-explorer: true
+x-box-sanitized: true
+
+description: |-
+  Removes a shared link from a web link.
+
+parameters:
+  - $ref: '../attributes/web_link_id.yml'
+  - $ref: '../attributes/shared_item_fields.yml'
+
+requestBody:
+  content:
+    application/json:
+      schema:
+        type: object
+        properties:
+          shared_link:
+            description: |-
+              By setting this value to `null`, the shared link
+              is removed from the file.
+            type: object
+            example: null
+            nullable: true
+
+responses:
+  200:
+    description: |-
+      Returns a basic representation of a file, with the shared link removed.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/File'
+        examples:
+          default:
+            value:
+              id: "12345"
+              type: "file"
+              etag: "1"
+              shared_link: null
+
+  401:
+    description: |-
+      Returned when the access token provided in the `Authorization` header
+      is not recognized or not provided.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
+
+  403:
+    description: |-
+      Returned if the user does not have all the permissions to complete the
+      update.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
+
+  404:
+    description: |-
+      Returned if the file is not found, or the user does not
+      have access to the file.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
+
+  405:
+    description: |-
+      Returned if the `file_id` is not in a recognized format.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
+
+  412:
+    description: |-
+      Returns an error when the `If-Match` header does not match
+      the current `etag` value of the file. This indicates that the file
+      has changed since it was last requested.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
+
+  default:
+    description: |-
+      An unexpected client error.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
