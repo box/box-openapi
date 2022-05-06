@@ -1,20 +1,20 @@
 ---
-operationId: put_files_id#add_shared_link
+operationId: put_web_links_id#update_shared_link
 
-summary: Add shared link to file
+summary: Update shared link on web link
 
 tags:
-  - Shared links (Files)
+  - Shared links (Web Links)
 
-x-box-tag: shared_links_files
+x-box-tag: shared_links_web_links
 x-box-enable-explorer: true
 x-box-sanitized: true
 
 description: |-
-  Adds a shared link to a file.
+  Updates a shared link on a web link.
 
 parameters:
-  - $ref: '../attributes/file_id.yml'
+  - $ref: '../attributes/web_link_id.yml'
   - $ref: '../attributes/shared_item_fields.yml'
 
 requestBody:
@@ -25,10 +25,7 @@ requestBody:
         properties:
           shared_link:
             description: |-
-              The settings for the shared link to create on the file.
-
-              Use an empty object (`{}`) to use the default settings for shared
-              links.
+              The settings for the shared link to update.
 
             type: object
             properties:
@@ -38,7 +35,7 @@ requestBody:
                   The level of access for the shared link. This can be
                   restricted to anyone with the link (`open`), only people
                   within the company (`company`) and only those who
-                  have been invited to the file (`collaborators`).
+                  have been invited to the folder (`collaborators`).
 
                   If not set, this field defaults to the access level specified
                   by the enterprise admin. To create a shared link with this
@@ -105,26 +102,21 @@ requestBody:
                     type: boolean
                     example: true
                     description: |-
-                      If the shared link allows for editing of files.
-                      This can only be set when `access` is set to
-                      `open` or `company`.
-                      This value can only be `true` is `can_download` is
-                      also `true`.
-
+                      This value can only be `true` is `type` is `file`.
 responses:
   200:
     description: |-
-      Returns the base representation of a file with a new shared
+      Returns a basic representation of the web link, with the updated shared
       link attached.
     content:
       application/json:
         schema:
-          $ref: '#/components/schemas/File'
+          $ref: '#/components/schemas/WebLink'
         examples:
           default:
             value:
               id: "12345"
-              type: "file"
+              type: "web_link"
               etag: "1"
               shared_link:
                 # yamllint disable rule:line-length
@@ -143,7 +135,7 @@ responses:
                 permissions:
                   can_preview: true
                   can_download: true
-                  can_edit: true
+                  can_edit: false
 
   400:
     description: |-
@@ -152,6 +144,7 @@ responses:
       application/json:
         schema:
           $ref: '#/components/schemas/ClientError'
+
   401:
     description: |-
       Returned when the access token provided in the `Authorization` header
