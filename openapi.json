@@ -11180,7 +11180,7 @@
                 ],
                 "x-box-tag": "shared_links_files",
                 "x-box-enable-explorer": true,
-                "description": "共有リンクで表されるファイルを返します。\n\n共有ファイルは、共有リンクで表すことが可能で、現在の会社内に存在する項目である場合も、別の会社内に存在する項目である場合もあります。\n\nアプリケーションからこのエンドポイントを呼び出すと、共有ファイルについての情報を取得できます (共有リンクが存在する場合のみ)。",
+                "description": "Returns the file represented by a shared link.\n\n共有ファイルは、共有リンクで表すことが可能で、現在の会社内に存在する項目である場合も、別の会社内に存在する項目である場合もあります。\n\nアプリケーションからこのエンドポイントを呼び出すと、共有ファイルについての情報を取得できます (共有リンクが存在する場合のみ)。\n\nThe `shared_link_permission_options` array field can be returned by requesting it in the `fields` query parameter.",
                 "parameters": [
                     {
                         "name": "if-none-match",
@@ -11309,7 +11309,8 @@
                                                 "access": "open",
                                                 "permissions": {
                                                     "can_preview": true,
-                                                    "can_download": true
+                                                    "can_download": true,
+                                                    "can_edit": true
                                                 }
                                             }
                                         }
@@ -11438,6 +11439,16 @@
                                                         "type": "boolean",
                                                         "example": true,
                                                         "description": "共有リンクからのファイルのダウンロードが許可されているかどうか。`access`が`open`または`company`に設定されている場合にのみ設定できます。"
+                                                    },
+                                                    "can_preview": {
+                                                        "type": "boolean",
+                                                        "example": true,
+                                                        "description": "If the shared link allows for previewing of files. This value is always `true`. For shared links on folders this also applies to any items in the folder."
+                                                    },
+                                                    "can_edit": {
+                                                        "type": "boolean",
+                                                        "example": true,
+                                                        "description": "If the shared link allows for editing of files. This can only be set when `access` is set to `open` or `company`. This value can only be `true` is `can_download` is also `true`."
                                                     }
                                                 }
                                             }
@@ -11476,11 +11487,22 @@
                                                 "access": "open",
                                                 "permissions": {
                                                     "can_preview": true,
-                                                    "can_download": true
+                                                    "can_download": true,
+                                                    "can_edit": true
                                                 }
                                             }
                                         }
                                     }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Returned when there is an incorrect permission combination",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
                                 }
                             }
                         }
@@ -11625,6 +11647,16 @@
                                                         "type": "boolean",
                                                         "example": true,
                                                         "description": "共有リンクからのファイルのダウンロードが許可されているかどうか。`access`が`open`または`company`に設定されている場合にのみ設定できます。"
+                                                    },
+                                                    "can_preview": {
+                                                        "type": "boolean",
+                                                        "example": true,
+                                                        "description": "If the shared link allows for previewing of files. This value is always `true`. For shared links on folders this also applies to any items in the folder."
+                                                    },
+                                                    "can_edit": {
+                                                        "type": "boolean",
+                                                        "example": true,
+                                                        "description": "If the shared link allows for editing of files. This can only be set when `access` is set to `open` or `company`. This value can only be `true` is `can_download` is also `true`."
                                                     }
                                                 }
                                             }
@@ -11663,11 +11695,22 @@
                                                 "access": "open",
                                                 "permissions": {
                                                     "can_preview": true,
-                                                    "can_download": true
+                                                    "can_download": true,
+                                                    "can_edit": true
                                                 }
                                             }
                                         }
                                     }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Returned when there is an incorrect permission combination",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
                                 }
                             }
                         }
@@ -12008,7 +12051,8 @@
                                                 "access": "open",
                                                 "permissions": {
                                                     "can_preview": true,
-                                                    "can_download": true
+                                                    "can_download": true,
+                                                    "can_edit": false
                                                 }
                                             }
                                         }
@@ -12137,7 +12181,17 @@
                                                     "can_download": {
                                                         "type": "boolean",
                                                         "example": true,
-                                                        "description": "共有リンクからのフォルダのダウンロードが許可されているかどうか。`access`が、`open`または`company`に設定されている場合にのみ設定できます。"
+                                                        "description": "共有リンクからのファイルのダウンロードが許可されているかどうか。`access`が`open`または`company`に設定されている場合にのみ設定できます。"
+                                                    },
+                                                    "can_preview": {
+                                                        "type": "boolean",
+                                                        "example": true,
+                                                        "description": "If the shared link allows for previewing of files. This value is always `true`. For shared links on folders this also applies to any items in the folder."
+                                                    },
+                                                    "can_edit": {
+                                                        "type": "boolean",
+                                                        "example": false,
+                                                        "description": "This value can only be `false` for items with a `type` of `folder`."
                                                     }
                                                 }
                                             }
@@ -12176,11 +12230,22 @@
                                                 "access": "open",
                                                 "permissions": {
                                                     "can_preview": true,
-                                                    "can_download": true
+                                                    "can_download": true,
+                                                    "can_edit": false
                                                 }
                                             }
                                         }
                                     }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Returned when there is an incorrect permission combination",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
                                 }
                             }
                         }
@@ -12325,7 +12390,17 @@
                                                     "can_download": {
                                                         "type": "boolean",
                                                         "example": true,
-                                                        "description": "共有リンクからのフォルダのダウンロードが許可されているかどうか。`access`が、`open`または`company`に設定されている場合にのみ設定できます。"
+                                                        "description": "共有リンクからのファイルのダウンロードが許可されているかどうか。`access`が`open`または`company`に設定されている場合にのみ設定できます。"
+                                                    },
+                                                    "can_preview": {
+                                                        "type": "boolean",
+                                                        "example": true,
+                                                        "description": "If the shared link allows for previewing of files. This value is always `true`. For shared links on folders this also applies to any items in the folder."
+                                                    },
+                                                    "can_edit": {
+                                                        "type": "boolean",
+                                                        "example": false,
+                                                        "description": "This value can only be `false` for items with a `type` of `folder`."
                                                     }
                                                 }
                                             }
@@ -12364,11 +12439,22 @@
                                                 "access": "open",
                                                 "permissions": {
                                                     "can_preview": true,
-                                                    "can_download": true
+                                                    "can_download": true,
+                                                    "can_edit": false
                                                 }
                                             }
                                         }
                                     }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Returned when there is an incorrect permission combination",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
                                 }
                             }
                         }
@@ -13115,6 +13201,747 @@
                     },
                     "404": {
                         "description": "ウェブリンクがごみ箱内にない場合は、エラーを返します。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "予期しないクライアントエラー。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/shared_items#web_links": {
+            "get": {
+                "operationId": "get_shared_items#web_links",
+                "summary": "Find web link for shared link",
+                "tags": [
+                    "Shared links (Web Links)"
+                ],
+                "x-box-tag": "shared_links_web_links",
+                "x-box-enable-explorer": true,
+                "description": "Returns the web link represented by a shared link.\n\nA shared web link can be represented by a shared link, which can originate within the current enterprise or within another.\n\nThis endpoint allows an application to retrieve information about a shared web link when only given a shared link.",
+                "parameters": [
+                    {
+                        "name": "if-none-match",
+                        "description": "項目が変更されている場合にのみ、その項目を返します。\n\nその項目の最後に認識された`etag`値をこのヘッダーに渡すと、それ以降に項目が変更されていない場合、エンドポイントは`304 Not Modified`を返して失敗します。",
+                        "in": "header",
+                        "required": false,
+                        "example": "1",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "fields",
+                        "description": "レスポンスに含める属性のカンマ区切りリスト。このパラメータを使用すると、標準のレスポンスには通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドはレスポンスに含まれず、リクエストしたフィールドのほかには、Mini版の表示のフィールドしか返されないことに注意してください。",
+                        "in": "query",
+                        "example": [
+                            "id",
+                            "type",
+                            "name"
+                        ],
+                        "required": false,
+                        "explode": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    {
+                        "name": "boxapi",
+                        "description": "共有リンクとその共有リンクの省略可能なパスワードを含むヘッダー。\n\nこのヘッダーの形式は次のようになります。\n\n`shared_link=[link]&shared_link_password=[password]`",
+                        "example": "shared_link=[link]&shared_link_password=[password]",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "共有リンクが有効で、ユーザーがそのリンクに対するアクセス権限を持っている場合は、Full版のファイルリソースを返します。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/WebLink"
+                                }
+                            }
+                        }
+                    },
+                    "304": {
+                        "description": "`If-None-Match`ヘッダーがフォルダの現在の`etag`値と一致する場合は、空のレスポンスを返します。これは、フォルダが前回リクエストされたときから変更されていないことを示します。"
+                    },
+                    "default": {
+                        "description": "予期しないクライアントエラー。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/web_links/{web_link_id}#get_shared_link": {
+            "get": {
+                "operationId": "get_web_links_id#get_shared_link",
+                "summary": "Get shared link for web link",
+                "tags": [
+                    "Shared links (Web Links)"
+                ],
+                "x-box-tag": "shared_links_web_links",
+                "x-box-enable-explorer": true,
+                "x-box-sanitized": true,
+                "description": "Gets the information for a shared link on a web link.",
+                "parameters": [
+                    {
+                        "name": "web_link_id",
+                        "description": "ウェブリンクのID。",
+                        "example": "12345",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "fields",
+                        "description": "この項目に返される`shared_link`フィールドを明示的にリクエストします。",
+                        "example": "shared_link",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns the base representation of a web link with the additional shared link information.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/WebLink"
+                                },
+                                "examples": {
+                                    "default": {
+                                        "value": {
+                                            "id": "12345",
+                                            "type": "web_link",
+                                            "etag": "1",
+                                            "shared_link": {
+                                                "url": "https://app.box.com/s/kwio6b4ovt1264rnfbyqo1",
+                                                "download_url": "https://app.box.com/shared/static/kwio6b4ovt1264rnfbyqo1.pdf",
+                                                "vanity_url": null,
+                                                "vanity_name": null,
+                                                "effective_access": "open",
+                                                "effective_permission": "can_download",
+                                                "is_password_enabled": false,
+                                                "unshared_at": "2020-09-21T10:34:41-07:00",
+                                                "download_count": 0,
+                                                "preview_count": 0,
+                                                "access": "open",
+                                                "permissions": {
+                                                    "can_preview": true,
+                                                    "can_download": true,
+                                                    "can_edit": false
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "`Authorization`ヘッダーで指定されているアクセストークンが認識されないか、指定されていない場合に返されます。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "ファイルが見つからない場合、またはユーザーにファイルへのアクセス権限が与えられていない場合に返されます。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "405": {
+                        "description": "`file_id`が認識されていない形式で指定されている場合に返されます。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "予期しないクライアントエラー。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/web_links/{web_link_id}#add_shared_link": {
+            "put": {
+                "operationId": "put_web_links_id#add_shared_link",
+                "summary": "Add shared link to web link",
+                "tags": [
+                    "Shared links (Web Links)"
+                ],
+                "x-box-tag": "shared_links_web_links",
+                "x-box-enable-explorer": true,
+                "x-box-sanitized": true,
+                "description": "Adds a shared link to a web link.",
+                "parameters": [
+                    {
+                        "name": "web_link_id",
+                        "description": "ウェブリンクのID。",
+                        "example": "12345",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "fields",
+                        "description": "この項目に返される`shared_link`フィールドを明示的にリクエストします。",
+                        "example": "shared_link",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "shared_link": {
+                                        "description": "The settings for the shared link to create on the web link.\n\n共有リンクにデフォルト設定を使用するには、空のオブジェクト (`{}`) を使用します。",
+                                        "type": "object",
+                                        "properties": {
+                                            "access": {
+                                                "type": "string",
+                                                "description": "共有リンクのアクセスレベル。これは、リンクを知っている全員 (`open`)、会社内のユーザーのみ (`company`)、ファイルに招待されたユーザーのみ (`collaborators`) のいずれかに制限できます。\n\n設定しなかった場合、このフィールドは、デフォルトで、企業の管理者が指定したアクセスレベルになります。このデフォルトの設定で共有リンクを作成するには、`{ \"shared_link\": {} }`のように、`access`フィールドを指定せずに`shared_link`オブジェクトを渡します。\n\n`company`アクセスレベルは、有料アカウントのみで使用できます。",
+                                                "enum": [
+                                                    "open",
+                                                    "company",
+                                                    "collaborators"
+                                                ],
+                                                "example": "open"
+                                            },
+                                            "password": {
+                                                "type": "string",
+                                                "description": "共有リンクへのアクセスに必要なパスワード。パスワードを`null`に設定するとパスワードが削除されます。\n\nパスワードは`access`が`open`に設定されている場合にのみ設定できます。",
+                                                "example": "do-not-use-this-password"
+                                            },
+                                            "vanity_name": {
+                                                "type": "string",
+                                                "description": "共有リンクのURLで使用するカスタムバニティ名を定義します (例: `https://app.box.com/v/my-shared-link`)。\n\nバニティURLは通常の共有リンクよりもかなり推測しやすいため、機密性の高いコンテンツを共有する場合は、カスタムURLを使用しないでください。",
+                                                "minLength": 12,
+                                                "example": "my-shared-link"
+                                            },
+                                            "unshared_at": {
+                                                "type": "string",
+                                                "format": "date-time",
+                                                "example": "2012-12-12T10:53:43-08:00",
+                                                "description": "この共有リンクの有効期限が切れる日時のタイムスタンプ。このフィールドを設定できるのは、有料アカウントを持つユーザーのみです。この値には、現在の日時より後の日時を指定する必要があります。"
+                                            },
+                                            "permissions": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "can_download": {
+                                                        "type": "boolean",
+                                                        "example": true,
+                                                        "description": "共有リンクからのファイルのダウンロードが許可されているかどうか。`access`が`open`または`company`に設定されている場合にのみ設定できます。"
+                                                    },
+                                                    "can_preview": {
+                                                        "type": "boolean",
+                                                        "example": true,
+                                                        "description": "If the shared link allows for previewing of files. This value is always `true`. For shared links on folders this also applies to any items in the folder."
+                                                    },
+                                                    "can_edit": {
+                                                        "type": "boolean",
+                                                        "example": false,
+                                                        "description": "This value can only be `true` is `type` is `file`."
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Returns the base representation of a web link with a new shared link attached.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/WebLink"
+                                },
+                                "examples": {
+                                    "default": {
+                                        "value": {
+                                            "id": "12345",
+                                            "type": "web_link",
+                                            "etag": "1",
+                                            "shared_link": {
+                                                "url": "https://app.box.com/s/kwio6b4ovt1264rnfbyqo1",
+                                                "download_url": "https://app.box.com/shared/static/kwio6b4ovt1264rnfbyqo1.pdf",
+                                                "vanity_url": null,
+                                                "vanity_name": null,
+                                                "effective_access": "open",
+                                                "effective_permission": "can_download",
+                                                "is_password_enabled": false,
+                                                "unshared_at": "2020-09-21T10:34:41-07:00",
+                                                "download_count": 0,
+                                                "preview_count": 0,
+                                                "access": "open",
+                                                "permissions": {
+                                                    "can_preview": true,
+                                                    "can_download": true,
+                                                    "can_edit": false
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Returned when there is an incorrect permission combination",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "`Authorization`ヘッダーで指定されているアクセストークンが認識されないか、指定されていない場合に返されます。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "更新を完了するための権限がユーザーに不足している場合に返されます。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "ファイルが見つからない場合、またはユーザーにファイルへのアクセス権限が与えられていない場合に返されます。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "405": {
+                        "description": "`file_id`が認識されていない形式で指定されている場合に返されます。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "412": {
+                        "description": "`If-Match`ヘッダーがファイルの現在の`etag`値と一致しない場合にエラーを返します。これは、ファイルが前回リクエストされたときから変更されていることを示します。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "予期しないクライアントエラー。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/web_links/{web_link_id}#update_shared_link": {
+            "put": {
+                "operationId": "put_web_links_id#update_shared_link",
+                "summary": "Update shared link on web link",
+                "tags": [
+                    "Shared links (Web Links)"
+                ],
+                "x-box-tag": "shared_links_web_links",
+                "x-box-enable-explorer": true,
+                "x-box-sanitized": true,
+                "description": "Updates a shared link on a web link.",
+                "parameters": [
+                    {
+                        "name": "web_link_id",
+                        "description": "ウェブリンクのID。",
+                        "example": "12345",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "fields",
+                        "description": "この項目に返される`shared_link`フィールドを明示的にリクエストします。",
+                        "example": "shared_link",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "shared_link": {
+                                        "description": "更新する共有リンクの設定。",
+                                        "type": "object",
+                                        "properties": {
+                                            "access": {
+                                                "type": "string",
+                                                "description": "共有リンクのアクセスレベル。これは、リンクを知っている全員 (`open`)、会社内のユーザーのみ (`company`)、フォルダに招待されたユーザーのみ (`collaborators`) のいずれかに制限できます。\n\n設定しなかった場合、このフィールドは、デフォルトで、企業の管理者が指定したアクセスレベルになります。このデフォルトの設定で共有リンクを作成するには、`{ \"shared_link\": {} }`のように、`access`フィールドを指定せずに`shared_link`オブジェクトを渡します。\n\n`company`アクセスレベルは、有料アカウントのみで使用できます。",
+                                                "enum": [
+                                                    "open",
+                                                    "company",
+                                                    "collaborators"
+                                                ],
+                                                "example": "open"
+                                            },
+                                            "password": {
+                                                "type": "string",
+                                                "description": "共有リンクへのアクセスに必要なパスワード。パスワードを`null`に設定するとパスワードが削除されます。\n\nパスワードは`access`が`open`に設定されている場合にのみ設定できます。",
+                                                "example": "do-not-use-this-password"
+                                            },
+                                            "vanity_name": {
+                                                "type": "string",
+                                                "description": "共有リンクのURLで使用するカスタムバニティ名を定義します (例: `https://app.box.com/v/my-shared-link`)。\n\nバニティURLは通常の共有リンクよりもかなり推測しやすいため、機密性の高いコンテンツを共有する場合は、カスタムURLを使用しないでください。",
+                                                "minLength": 12,
+                                                "example": "my-shared-link"
+                                            },
+                                            "unshared_at": {
+                                                "type": "string",
+                                                "format": "date-time",
+                                                "example": "2012-12-12T10:53:43-08:00",
+                                                "description": "この共有リンクの有効期限が切れる日時のタイムスタンプ。このフィールドを設定できるのは、有料アカウントを持つユーザーのみです。この値には、現在の日時より後の日時を指定する必要があります。"
+                                            },
+                                            "permissions": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "can_download": {
+                                                        "type": "boolean",
+                                                        "example": true,
+                                                        "description": "共有リンクからのファイルのダウンロードが許可されているかどうか。`access`が`open`または`company`に設定されている場合にのみ設定できます。"
+                                                    },
+                                                    "can_preview": {
+                                                        "type": "boolean",
+                                                        "example": true,
+                                                        "description": "If the shared link allows for previewing of files. This value is always `true`. For shared links on folders this also applies to any items in the folder."
+                                                    },
+                                                    "can_edit": {
+                                                        "type": "boolean",
+                                                        "example": true,
+                                                        "description": "This value can only be `true` is `type` is `file`."
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Returns a basic representation of the web link, with the updated shared link attached.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/WebLink"
+                                },
+                                "examples": {
+                                    "default": {
+                                        "value": {
+                                            "id": "12345",
+                                            "type": "web_link",
+                                            "etag": "1",
+                                            "shared_link": {
+                                                "url": "https://app.box.com/s/kwio6b4ovt1264rnfbyqo1",
+                                                "download_url": "https://app.box.com/shared/static/kwio6b4ovt1264rnfbyqo1.pdf",
+                                                "vanity_url": null,
+                                                "vanity_name": null,
+                                                "effective_access": "open",
+                                                "effective_permission": "can_download",
+                                                "is_password_enabled": false,
+                                                "unshared_at": "2020-09-21T10:34:41-07:00",
+                                                "download_count": 0,
+                                                "preview_count": 0,
+                                                "access": "open",
+                                                "permissions": {
+                                                    "can_preview": true,
+                                                    "can_download": true,
+                                                    "can_edit": false
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Returned when there is an incorrect permission combination",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "`Authorization`ヘッダーで指定されているアクセストークンが認識されないか、指定されていない場合に返されます。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "更新を完了するための権限がユーザーに不足している場合に返されます。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "ファイルが見つからない場合、またはユーザーにファイルへのアクセス権限が与えられていない場合に返されます。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "405": {
+                        "description": "`file_id`が認識されていない形式で指定されている場合に返されます。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "412": {
+                        "description": "`If-Match`ヘッダーがファイルの現在の`etag`値と一致しない場合にエラーを返します。これは、ファイルが前回リクエストされたときから変更されていることを示します。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "予期しないクライアントエラー。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/web_links/{web_link_id}#remove_shared_link": {
+            "put": {
+                "operationId": "put_web_links_id#remove_shared_link",
+                "summary": "Remove shared link from web link",
+                "tags": [
+                    "Shared links (Web Links)"
+                ],
+                "x-box-tag": "shared_links_web_links",
+                "x-box-enable-explorer": true,
+                "x-box-sanitized": true,
+                "description": "Removes a shared link from a web link.",
+                "parameters": [
+                    {
+                        "name": "web_link_id",
+                        "description": "ウェブリンクのID。",
+                        "example": "12345",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "fields",
+                        "description": "この項目に返される`shared_link`フィールドを明示的にリクエストします。",
+                        "example": "shared_link",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "shared_link": {
+                                        "description": "By setting this value to `null`, the shared link is removed from the web link.",
+                                        "type": "object",
+                                        "example": null,
+                                        "nullable": true
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Returns a basic representation of a web link, with the shared link removed.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/WebLink"
+                                },
+                                "examples": {
+                                    "default": {
+                                        "value": {
+                                            "id": "12345",
+                                            "type": "web_link",
+                                            "etag": "1",
+                                            "shared_link": null
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "`Authorization`ヘッダーで指定されているアクセストークンが認識されないか、指定されていない場合に返されます。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "更新を完了するための権限がユーザーに不足している場合に返されます。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "ファイルが見つからない場合、またはユーザーにファイルへのアクセス権限が与えられていない場合に返されます。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "405": {
+                        "description": "`file_id`が認識されていない形式で指定されている場合に返されます。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "412": {
+                        "description": "`If-Match`ヘッダーがファイルの現在の`etag`値と一致しない場合にエラーを返します。これは、ファイルが前回リクエストされたときから変更されていることを示します。",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -14059,7 +14886,7 @@
                                     "email": {
                                         "type": "string",
                                         "example": "alias@example.com",
-                                        "description": "アカウントにエイリアスとして追加するメールアドレス。"
+                                        "description": "アカウントにエイリアスとして追加するメールアドレス。\n\nNote: The domain of the email alias needs to be registered to your enterprise. See the [domain verification guide](https://support.box.com/hc/en-us/articles/4408619650579-Domain-Verification) for steps to add a new domain."
                                     }
                                 }
                             }
@@ -22783,6 +23610,18 @@
                         "type": "string",
                         "example": "event"
                     },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "When the event object was created",
+                        "example": "2022-12-12T10:53:43-08:00"
+                    },
+                    "recorded_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "When the event object was recorded in database",
+                        "example": "2022-12-12T10:54:43-08:00"
+                    },
                     "event_id": {
                         "type": "string",
                         "example": "f82c3ba03e41f7e8a7608363cc6c0390183c3f83",
@@ -23236,6 +24075,12 @@
                                                         "example": true,
                                                         "nullable": false,
                                                         "description": "共有リンクを通じて項目をプレビューすることを許可するかどうかを定義します。\n\nこの値は常に`true`です。フォルダの共有リンクの場合、この設定はフォルダ内のすべての項目にも適用されます。"
+                                                    },
+                                                    "can_edit": {
+                                                        "type": "boolean",
+                                                        "example": false,
+                                                        "nullable": false,
+                                                        "description": "Defines if the shared link allows for the item to be edited.\n\nThis value can only be `true` if `can_download` is also `true` and if the item has a type of `file.`"
                                                     }
                                                 }
                                             },
@@ -23848,6 +24693,22 @@
                                 "nullable": true,
                                 "description": "特定のファイルのリテンションの有効期限のタイムスタンプ",
                                 "example": "2012-12-12T10:53:43-08:00"
+                            },
+                            "shared_link_permission_options": {
+                                "type": "array",
+                                "example": [
+                                    "can_preview"
+                                ],
+                                "nullable": true,
+                                "description": "このファイルを共有するときに招待できるユーザーの役割タイプのリスト。",
+                                "items": {
+                                    "type": "string",
+                                    "enum": [
+                                        "can_preview",
+                                        "can_download",
+                                        "can_edit"
+                                    ]
+                                }
                             }
                         }
                     }
@@ -24235,7 +25096,8 @@
                 "x-box-variants": [
                     "base",
                     "mini",
-                    "standard"
+                    "standard",
+                    "full"
                 ],
                 "x-box-variant": "base",
                 "description": "最も基本的なファイルバージョンのBase版の表示。`fields`クエリパラメータを使用すると、最小限の数のフィールドが返されます。",
@@ -24256,6 +25118,27 @@
                         "nullable": false
                     }
                 }
+            },
+            "FileVersion--Full": {
+                "title": "File version (Full)",
+                "type": "object",
+                "x-box-resource-id": "file_version--full",
+                "x-box-variant": "full",
+                "description": "A full representation of a file version, as can be returned from any file version API endpoints by default",
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/FileVersion"
+                    },
+                    {
+                        "properties": {
+                            "version_number": {
+                                "type": "string",
+                                "example": "1",
+                                "description": "The version number of this file version"
+                            }
+                        }
+                    }
+                ]
             },
             "FileVersions": {
                 "title": "ファイルバージョン",
@@ -24770,6 +25653,12 @@
                                                         "example": true,
                                                         "nullable": false,
                                                         "description": "共有リンクを通じて項目をプレビューすることを許可するかどうかを定義します。\n\nこの値は常に`true`です。フォルダの共有リンクの場合、この設定はフォルダ内のすべての項目にも適用されます。"
+                                                    },
+                                                    "can_edit": {
+                                                        "type": "boolean",
+                                                        "example": false,
+                                                        "nullable": false,
+                                                        "description": "Defines if the shared link allows for the item to be edited.\n\nThis value can only be `true` if `can_download` is also `true` and if the item has a type of `file.`"
                                                     }
                                                 }
                                             },
@@ -30303,6 +31192,12 @@
                                                         "example": true,
                                                         "nullable": false,
                                                         "description": "共有リンクを通じて項目をプレビューすることを許可するかどうかを定義します。\n\nこの値は常に`true`です。フォルダの共有リンクの場合、この設定はフォルダ内のすべての項目にも適用されます。"
+                                                    },
+                                                    "can_edit": {
+                                                        "type": "boolean",
+                                                        "example": false,
+                                                        "nullable": false,
+                                                        "description": "Defines if the shared link allows for the item to be edited.\n\nThis value can only be `true` if `can_download` is also `true` and if the item has a type of `file.`"
                                                     }
                                                 }
                                             },
@@ -32428,6 +33323,10 @@
         {
             "name": "共有リンク (フォルダ)",
             "x-box-tag": "shared_links_folders"
+        },
+        {
+            "name": "Shared links (Web Links)",
+            "x-box-tag": "shared_links_web_links"
         },
         {
             "name": "Skills",
