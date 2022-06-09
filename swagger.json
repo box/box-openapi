@@ -5974,6 +5974,10 @@
                   "type": "string",
                   "format": "date-time",
                   "description": "Set the expiration date for the collaboration. At this date, the\ncollaboration will be automatically removed from the item.\n\nThis feature will only work if the **Automatically remove invited\ncollaborators: Allow folder owners to extend the expiry date**\nsetting has been enabled in the **Enterprise Settings**\nof the **Admin Console**. When the setting is not enabled,\ncollaborations can not have an expiry date and a value for this\nfield will be result in an error."
+                },
+                "is_access_only": {
+                  "type": "boolean",
+                  "description": "Whether or not the collaboration can be seen on the All Files\npage."
                 }
               }
             }
@@ -5984,6 +5988,12 @@
             "description": "Returns a new collaboration object.",
             "schema": {
               "$ref": "#/definitions/Collaboration"
+            }
+          },
+          "403": {
+            "description": "Returns an error if some of the parameters are missing or\nnot valid.\n\n* `is_access_only` cannot be true for any role other than `viewer`\n* `is_access_only` can only be set on the Top Level Content Folder of\n  Box Hub\n* `is_access_only` cannot be set on a `can_view_path` collaboration",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
             }
           },
           "default": {
@@ -10673,7 +10683,11 @@
                       "COLLABORATION.UPDATED",
                       "SHARED_LINK.DELETED",
                       "SHARED_LINK.CREATED",
-                      "SHARED_LINK.UPDATED"
+                      "SHARED_LINK.UPDATED",
+                      "SIGN_REQUEST.SIGNED",
+                      "SIGN_REQUEST.DECLINED",
+                      "SIGN_REQUEST.EXPIRED",
+                      "SIGN_REQUEST.SIGNER_EMAIL_BOUNCED"
                     ]
                   }
                 }
@@ -10813,7 +10827,11 @@
                       "COLLABORATION.UPDATED",
                       "SHARED_LINK.DELETED",
                       "SHARED_LINK.CREATED",
-                      "SHARED_LINK.UPDATED"
+                      "SHARED_LINK.UPDATED",
+                      "SIGN_REQUEST.SIGNED",
+                      "SIGN_REQUEST.DECLINED",
+                      "SIGN_REQUEST.EXPIRED",
+                      "SIGN_REQUEST.SIGNER_EMAIL_BOUNCED"
                     ]
                   }
                 }
@@ -17946,6 +17964,10 @@
           "format": "date-time",
           "description": "When the collaboration object was last modified"
         },
+        "is_access_only": {
+          "type": "boolean",
+          "description": "Whether or not the collaboration can be seen on the All Files\npage. This field is only returned if requested via the\n`fields` query parameter."
+        },
         "acceptance_requirements_status": {
           "type": "object",
           "properties": {
@@ -19419,7 +19441,11 @@
                   "COLLABORATION.UPDATED",
                   "SHARED_LINK.DELETED",
                   "SHARED_LINK.CREATED",
-                  "SHARED_LINK.UPDATED"
+                  "SHARED_LINK.UPDATED",
+                  "SIGN_REQUEST.SIGNED",
+                  "SIGN_REQUEST.DECLINED",
+                  "SIGN_REQUEST.EXPIRED",
+                  "SIGN_REQUEST.SIGNER_EMAIL_BOUNCED"
                 ]
               }
             }
