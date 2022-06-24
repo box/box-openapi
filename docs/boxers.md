@@ -43,7 +43,7 @@ When working on the API specification we recommend the following best practices:
 * **Draft Pull Requests:** When working on a design change that has not yet been
   approved, we high recommend creating a **draft Pull Request**, as it won't be
   accidentally merged before the change is ready.
- 
+
 ---
 
 [**Next:** The OpenAPI structure and custom attributes](./structure.md)
