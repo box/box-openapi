@@ -36,15 +36,36 @@ requestBody:
             example: permanently_delete
             description: |-
               The disposition action of the retention policy.
-              This action can be `permanently_delete`, which
-              will cause the content retained by the policy
-              to be permanently deleted, or `remove_retention`,
-              which will lift the retention policy from the content,
-              allowing it to be deleted by users,
-              once the retention policy has expired.
+              `permanently_delete` deletes the content
+              retained by the policy permanently.
+              `remove_retention` lifts retention policy
+              from the content, allowing it to be deleted
+              by users once the retention policy has expired.
             enum:
               - permanently_delete
               - remove_retention
+
+          retention_type:
+            type: string
+            description: |-
+             Specifies if a policy can or
+             cannot be modified.
+            enum:
+              - modifiable
+              - non-modifiable
+            example: modifiable
+
+          retention_length:
+            type: string
+            format: int32
+            example: "365"
+            description: |-
+              The length of the retention policy. This value
+              specifies the duration in days when the retention
+              policy will be active for after being assigned to
+              content.  If the policy has a `policy_type` of
+              `indefinite`, the `retention_length` will also be
+              `indefinite`.
 
           status:
             type: string
@@ -75,7 +96,19 @@ responses:
       application/json:
         schema:
           $ref: '#/components/schemas/ClientError'
-
+  403:
+    description: |-
+      Returns an error when a user wants to
+      shorten the duration of a
+      non-modifiable policy, or to convert
+      a non-modifiable policy to
+      a modifiable one.
+      Note: Lengthening policy duration
+      is allowed.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
   409:
     description: |-
       Returns an error if a retention policy with the given name already exists
