@@ -17589,7 +17589,7 @@
                   "disposition_action": {
                     "type": "string",
                     "example": "permanently_delete",
-                    "description": "The disposition action of the retention policy.\nThis action can be `permanently_delete`, which\nwill cause the content retained by the policy\nto be permanently deleted, or `remove_retention`,\nwhich will lift the retention policy from the content,\nallowing it to be deleted by users,\nonce the retention policy has expired.",
+                    "description": "The disposition action of the retention policy.\n`permanently_delete` deletes the content\nretained by the policy permanently.\n`remove_retention` lifts retention policy\nfrom the content, allowing it to be deleted\nby users once the retention policy has expired.",
                     "enum": [
                       "permanently_delete",
                       "remove_retention"
@@ -17600,7 +17600,16 @@
                     "format": "int32",
                     "example": "365",
                     "minimum": 1,
-                    "description": "The length of the retention policy. This length\nspecifies the duration in days that the retention\npolicy will be active for after being assigned to\ncontent.  If the policy has A `policy_type` of\n`indefinite`, the `retention_length` will also be\n`indefinite`."
+                    "description": "The length of the retention policy. This value\nspecifies the duration in days when the retention\npolicy will be active for after being assigned to\ncontent.  If the policy has a `policy_type` of\n`indefinite`, the `retention_length` will also be\n`indefinite`."
+                  },
+                  "retention_type": {
+                    "type": "string",
+                    "example": "modifiable",
+                    "description": "Specifies if a policy can or\ncannot be modified.",
+                    "enum": [
+                      "modifiable",
+                      "non-modifiable"
+                    ]
                   },
                   "can_owner_extend_retention": {
                     "type": "boolean",
@@ -17776,11 +17785,26 @@
                   "disposition_action": {
                     "type": "string",
                     "example": "permanently_delete",
-                    "description": "The disposition action of the retention policy.\nThis action can be `permanently_delete`, which\nwill cause the content retained by the policy\nto be permanently deleted, or `remove_retention`,\nwhich will lift the retention policy from the content,\nallowing it to be deleted by users,\nonce the retention policy has expired.",
+                    "description": "The disposition action of the retention policy.\n`permanently_delete` deletes the content\nretained by the policy permanently.\n`remove_retention` lifts retention policy\nfrom the content, allowing it to be deleted\nby users once the retention policy has expired.",
                     "enum": [
                       "permanently_delete",
                       "remove_retention"
                     ]
+                  },
+                  "retention_type": {
+                    "type": "string",
+                    "description": "Specifies if a policy can or\ncannot be modified.",
+                    "enum": [
+                      "modifiable",
+                      "non-modifiable"
+                    ],
+                    "example": "modifiable"
+                  },
+                  "retention_length": {
+                    "type": "string",
+                    "format": "int32",
+                    "example": "365",
+                    "description": "The length of the retention policy. This value\nspecifies the duration in days when the retention\npolicy will be active for after being assigned to\ncontent.  If the policy has a `policy_type` of\n`indefinite`, the `retention_length` will also be\n`indefinite`."
                   },
                   "status": {
                     "type": "string",
@@ -17808,6 +17832,16 @@
           },
           "400": {
             "description": "Returns a `bad_request` if an incorrect\n`disposition_action` was set or description exceeds maximum length of\n500 characters.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Returns an error when a user wants to\nshorten the duration of a\nnon-modifiable policy, or to convert\na non-modifiable policy to\na modifiable one.\nNote: Lengthening policy duration\nis allowed.",
             "content": {
               "application/json": {
                 "schema": {
@@ -18109,6 +18143,62 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RetentionPolicyAssignment"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "delete_retention_policy_assignments_id",
+        "summary": "Remove retention policy assignment",
+        "tags": [
+          "Retention policy assignments"
+        ],
+        "x-box-tag": "retention_policy_assignments",
+        "description": "Removes a retention policy assignment\napplied to content.",
+        "parameters": [
+          {
+            "name": "retention_policy_assignment_id",
+            "description": "The ID of the retention policy assignment.",
+            "example": "1233123",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Returns an empty response when the policy assignment\nis successfully deleted."
+          },
+          "403": {
+            "description": "Returns an error when the assignment relates to\na retention policy that cannot be modified.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Returns an error when the retention policy\nassignment does not exist.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
                 }
               }
             }
@@ -28162,6 +28252,15 @@
                   "indefinite"
                 ]
               },
+              "retention_type": {
+                "type": "string",
+                "example": "modifiable",
+                "description": "Specifies if a policy can or\ncannot be modified.",
+                "enum": [
+                  "modifiable",
+                  "non-modifiable"
+                ]
+              },
               "status": {
                 "type": "string",
                 "example": "active",
@@ -28219,7 +28318,7 @@
                 "format": "int32",
                 "example": "365",
                 "minimum": 1,
-                "description": "The length of the retention policy. This length\nspecifies the duration in days that the retention\npolicy will be active for after being assigned to\ncontent.  If the policy has A `policy_type` of\n`indefinite`, the `retention_length` will also be\n`indefinite`."
+                "description": "The length of the retention policy. This value\nspecifies the duration in days when the retention\npolicy will be active for after being assigned to\ncontent.  If the policy has a `policy_type` of\n`indefinite`, the `retention_length` will also be\n`indefinite`."
               },
               "disposition_action": {
                 "type": "string",
