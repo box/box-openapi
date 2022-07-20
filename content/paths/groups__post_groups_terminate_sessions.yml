@@ -1,15 +1,15 @@
 ---
-operationId: post_users_terminate_sessions
+operationId: post_groups_terminate_sessions
 
-summary: Terminate user's session
+summary: Terminate group's session
 
 tags:
-  - Users
+  - Groups
 
-x-box-tag: users
+x-box-tag: groups
 
 description: |-
-  Validates the roles and permissions of the user, and creates async jobs to terminate the user's sessions. Returns the status for the POST request. 
+  Validates the roles and permissions of the group, and creates async jobs to terminate the group's sessions. Returns the status for the POST request.
 
 requestBody:
   content:
@@ -17,22 +17,14 @@ requestBody:
       schema:
         type: object
         required:
-          - user_ids
-          - user_logins
+          - group_ids
         properties:
-          user_ids:
+          group_ids:
             type: array
             items:
               type: string
-            description: ID of the user
+            description: ID of the group
             example: 6178859178
-          
-          user_logins:
-            type: array
-            items:
-              type: string
-            description: Login of the user
-            example: user@example.com
 
 responses:
   202:
@@ -41,15 +33,15 @@ responses:
     content:
       application/json:
         schema:
-          $ref: '#/components/schemas/UsersSessionTermination'
+          $ref: '#/components/schemas/User'
 
   400:
     description: |-
-      Returns an error if some of the parameters are 
+      Returns an error if some of the parameters are
       not valid.
 
-      * `Users can not be NULL or EMPTY` when no value is provided
-      * `User id format is string` when the provided user id format 
+      * `Groups can not be NULL or EMPTY` when no value is provided
+      * `group id format is string` when the provided group id format
       is incorrect
       * `Supported payload format is JSON` when the provided payload
       format is incorrect
@@ -76,7 +68,7 @@ responses:
 
   429:
     description: |-
-      Returns an error if the rate limit is exceeded.
+      Returns an error if the request limit is exceeded.
     content:
       application/json:
         schema:
@@ -89,7 +81,7 @@ responses:
       application/json:
         schema:
           $ref: '#/components/schemas/ClientError'
-  
+
   503:
     description: |-
       Returns an error if the request timed out.
