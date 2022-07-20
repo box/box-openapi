@@ -1,0 +1,107 @@
+---
+operationId: post_users_terminate_sessions
+
+summary: Terminate user's session
+
+tags:
+  - Users
+
+x-box-tag: users
+
+description: |-
+  Validates the roles and permissions of the user, and creates async jobs to terminate the user's sessions. Returns the status for the POST request. 
+
+requestBody:
+  content:
+    application/json:
+      schema:
+        type: object
+        required:
+          - user_ids
+          - user_logins
+        properties:
+          user_ids:
+            type: array
+              items: 
+                type: string
+                description: ID of the user
+                example: 6178859178
+          
+          user_logins:
+            type: array
+              items:
+                type: string
+                description: Login of the user
+                example: user@example.com
+
+responses:
+  202:
+    description: |-
+      Returns a message about the request status.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/UsersSessionTermination'
+
+  400:
+    description: |-
+      Returns an error if some of the parameters are 
+      not valid.
+
+      * `Users can not be NULL or EMPTY` when no value is provided
+      * `User id format is string` when the provided user id format 
+      is incorrect
+      * `Supported payload format is JSON` when the provided payload
+      format is incorrect
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
+
+  403:
+    description: |-
+      Returns an error if there are insufficient permissions.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
+
+  404:
+    description: |-
+      Returns an error if the resource could not be found.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
+
+  429:
+    description: |-
+      Returns an error if the rate limit is exceeded.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
+
+  500:
+    description: |-
+      Returns an error if there is an internal server issue.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
+  
+  503:
+    description: |-
+      Returns an error if the request timed out.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
+
+  default:
+    description: |-
+      An unexpected client error.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
