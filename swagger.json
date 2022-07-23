@@ -11465,7 +11465,7 @@
                 },
                 "disposition_action": {
                   "type": "string",
-                  "description": "The disposition action of the retention policy.\nThis action can be `permanently_delete`, which\nwill cause the content retained by the policy\nto be permanently deleted, or `remove_retention`,\nwhich will lift the retention policy from the content,\nallowing it to be deleted by users,\nonce the retention policy has expired.",
+                  "description": "The disposition action of the retention policy.\n`permanently_delete` deletes the content\nretained by the policy permanently.\n`remove_retention` lifts retention policy\nfrom the content, allowing it to be deleted\nby users once the retention policy has expired.",
                   "enum": [
                     "permanently_delete",
                     "remove_retention"
@@ -11475,7 +11475,15 @@
                   "type": "string",
                   "format": "int32",
                   "minimum": 1,
-                  "description": "The length of the retention policy. This length\nspecifies the duration in days that the retention\npolicy will be active for after being assigned to\ncontent.  If the policy has A `policy_type` of\n`indefinite`, the `retention_length` will also be\n`indefinite`."
+                  "description": "The length of the retention policy. This value\nspecifies the duration in days that the retention\npolicy will be active for after being assigned to\ncontent.  If the policy has a `policy_type` of\n`indefinite`, the `retention_length` will also be\n`indefinite`."
+                },
+                "retention_type": {
+                  "type": "string",
+                  "description": "Specifies the retention type:\n\n* `modifiable`: You can modify the retention policy. For example,\nyou can add or remove folders, shorten or lengthen\nthe policy duration, or delete the assignment.\nUse this type if your retention policy\nis not related to any regulatory purposes.\n\n* `non-modifiable`: You can modify the retention policy\nonly in a limited way: add a folder, lengthen the duration,\nretire the policy, change the disposition action\nor notification settings. You cannot perform other actions,\nsuch as deleting the assignment or shortening the\npolicy duration. Use this type to ensure\ncompliance with regulatory retention policies.",
+                  "enum": [
+                    "modifiable",
+                    "non-modifiable"
+                  ]
                 },
                 "can_owner_extend_retention": {
                   "type": "boolean",
@@ -11582,18 +11590,24 @@
                 },
                 "disposition_action": {
                   "type": "string",
-                  "description": "The disposition action of the retention policy.\nThis action can be `permanently_delete`, which\nwill cause the content retained by the policy\nto be permanently deleted, or `remove_retention`,\nwhich will lift the retention policy from the content,\nallowing it to be deleted by users,\nonce the retention policy has expired.",
+                  "description": "The disposition action of the retention policy.\n`permanently_delete` deletes the content\nretained by the policy permanently.\n`remove_retention` lifts retention policy\nfrom the content, allowing it to be deleted\nby users once the retention policy has expired.",
                   "enum": [
                     "permanently_delete",
                     "remove_retention"
                   ]
                 },
+                "retention_type": {
+                  "type": "string",
+                  "description": "Specifies the retention type:\n\n* `modifiable`: You can modify the retention policy. For example,\nyou can add or remove folders, shorten or lengthen\nthe policy duration, or delete the assignment.\nUse this type if your retention policy\nis not related to any regulatory purposes.\n* `non-modifiable`: You can modify the retention policy\nonly in a limited way: add a folder, lengthen the duration,\nretire the policy, change the disposition action\nor notification settings. You cannot perform other actions,\nsuch as deleting the assignment or shortening the\npolicy duration. Use this type to ensure\ncompliance with regulatory retention policies.\n\nWhen updating a retention policy, you can use\n`non-modifiable` type only. You can convert a\n`modifiable` policy to `non-modifiable`, but\nnot the other way around."
+                },
+                "retention_length": {
+                  "type": "string",
+                  "format": "int32",
+                  "description": "The length of the retention policy. This value\nspecifies the duration in days that the retention\npolicy will be active for after being assigned to\ncontent.  If the policy has a `policy_type` of\n`indefinite`, the `retention_length` will also be\n`indefinite`."
+                },
                 "status": {
                   "type": "string",
-                  "description": "Used to retire a retention policy.\n\nIf not retiring a policy, do not include this parameter\nor set it to `null`.",
-                  "enum": [
-                    "retired"
-                  ]
+                  "description": "Used to retire a retention policy.\n\nIf not retiring a policy, do not include this parameter\nor set it to `null`."
                 }
               }
             }
@@ -11608,6 +11622,12 @@
           },
           "400": {
             "description": "Returns a `bad_request` if an incorrect\n`disposition_action` was set or description exceeds maximum length of\n500 characters.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "403": {
+            "description": "Returns an error when a user wants to\nshorten the duration of a\nnon-modifiable policy, or to convert\na non-modifiable policy to\na modifiable one.\nNote: Lengthening policy duration\nis allowed.",
             "schema": {
               "$ref": "#/definitions/ClientError"
             }
@@ -11778,7 +11798,7 @@
                     },
                     "id": {
                       "type": "string",
-                      "description": "The ID of item to assign the policy to.\n\nSet to `null` or omit when `type` is set to\n`enterprise`."
+                      "description": "The ID of item to assign the policy to.\nSet to `null` or omit when `type` is set to\n`enterprise`."
                     }
                   }
                 },
@@ -11831,6 +11851,46 @@
             "description": "Returns the retention policy assignment object.",
             "schema": {
               "$ref": "#/definitions/RetentionPolicyAssignment"
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "delete_retention_policy_assignments_id",
+        "summary": "Remove retention policy assignment",
+        "tags": [
+          "Retention policy assignments"
+        ],
+        "description": "Removes a retention policy assignment\napplied to content.",
+        "parameters": [
+          {
+            "name": "retention_policy_assignment_id",
+            "description": "The ID of the retention policy assignment.",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Returns an empty response when the policy assignment\nis successfully deleted."
+          },
+          "403": {
+            "description": "Returns an error when the assignment relates to\na retention policy that cannot be modified.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "404": {
+            "description": "Returns an error when the retention policy\nassignment does not exist.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
             }
           },
           "default": {
@@ -19643,6 +19703,14 @@
                 "indefinite"
               ]
             },
+            "retention_type": {
+              "type": "string",
+              "description": "Specifies the retention type:\n\n* `modifiable`: You can modify the retention policy. For example,\n you can add or remove folders, shorten or lengthen\n the policy duration, or delete the assignment.\n Use this type if your retention policy\n is not related to any regulatory purposes.\n\n* `non-modifiable`: You can modify the retention policy\n only in a limited way: add a folder, lengthen the duration,\n retire the policy, change the disposition action\n or notification settings. You cannot perform other actions,\n such as deleting the assignment or shortening the\n policy duration. Use this type to ensure\n compliance with regulatory retention policies.",
+              "enum": [
+                "modifiable",
+                "non-modifiable"
+              ]
+            },
             "status": {
               "type": "string",
               "description": "The status of the retention policy. The status of\na policy will be `active`, unless explicitly retired by an\nadministrator, in which case the status will be `retired`.\nOnce a policy has been retired, it cannot become\nactive again.",
@@ -21979,7 +22047,7 @@
               "type": "string",
               "format": "int32",
               "minimum": 1,
-              "description": "The length of the retention policy. This length\nspecifies the duration in days that the retention\npolicy will be active for after being assigned to\ncontent.  If the policy has A `policy_type` of\n`indefinite`, the `retention_length` will also be\n`indefinite`."
+              "description": "The length of the retention policy. This value\nspecifies the duration in days that the retention\npolicy will be active for after being assigned to\ncontent.  If the policy has a `policy_type` of\n`indefinite`, the `retention_length` will also be\n`indefinite`."
             },
             "disposition_action": {
               "type": "string",
