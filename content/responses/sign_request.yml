@@ -1,0 +1,92 @@
+---
+title: Sign Request
+
+type: object
+
+x-box-resource-id: sign_request
+x-box-tag: sign_requests
+
+description: |-
+  A Sign Request Object
+
+allOf:
+  - $ref: '#/components/schemas/SignRequestCreateRequest'
+  - properties:
+      'type':
+        type: string
+        example: sign-request
+        enum: [sign-request]
+        description: object type
+
+      signers:
+        type: array
+        items:
+          $ref: '#/components/schemas/SignRequestSigner'
+        description: Array of signers for the sign request
+
+      id:
+        type: string
+        example: '12345'
+        description: Sign request ID
+
+      prepare_url:
+        type: string
+        example: https://prepareurl.com
+        description: |-
+          This URL is returned if `is_document_preparation_needed` is
+          set to `true` in the request. It is used to prepare the sign request
+          via UI. The sign request is not sent until preparation is complete.
+
+      signing_log:
+        allOf:
+          - $ref: "#/components/schemas/File--Mini"
+          - description: |-
+              Reference to a file that holds a log of all signer activity for
+              the request. `Null` if the signing log is deleted.
+
+      status:
+        type: string
+        enum: [
+          "converting",
+          "created",
+          "sent",
+          "viewed",
+          "signed",
+          "cancelled",
+          "declined",
+          "error_converting",
+          "error_sending",
+          "expired",
+          "downloaded",
+          "signed and downloaded"
+        ]
+        example: converting
+        description: 'Describes the status of the sign request'
+
+      sign_files:
+        type: object
+        properties:
+          files:
+            type: array
+            items:
+              $ref: '#/components/schemas/File--Mini'
+          is_ready_for_download:
+            type: boolean
+            example: true
+            description: |-
+              Indicates whether the `sign_files` documents are processing
+              and the PDFs may be out of date. A change to any document
+              requires processing on all `sign_files`. We
+              recommended waiting until processing is finished
+              (and this value is true) before downloading the PDFs.
+        description: |-
+          List of files that will be signed, which are copies of the original
+          source files. A new version of these files are created as signers sign
+          and can be downloaded at any point in the signing process.
+
+      auto_expire_at:
+        type: string
+        format: date-time
+        example: '2021-04-26T08:12:13.982Z'
+        description: Uses `days_valid` to calculate the date and time, in GMT,
+          the sign request will expire if unsigned.

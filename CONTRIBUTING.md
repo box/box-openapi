@@ -29,9 +29,6 @@ When pushing to the `main` or `staging` branch, GitHub actions will run the
 linter and tests and will push the compiled OpenAPI spec to the `en` and
 `en-staging` branches respectively.
 
-The pushing of these compiled branches will kick-off a rebuild of the developer
-sites, as well as the Postman collections.
-
 ## Translation
 
 On a regular schedule a snapshot of the `en` branch is created on the

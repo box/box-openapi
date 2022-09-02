@@ -1,0 +1,203 @@
+---
+title: Trashed Folder
+
+type: object
+
+x-box-resource-id: trash_folder
+x-box-tag: trashed_folders
+
+description: |-
+  Represents a trashed folder.
+
+required:
+  - id
+  - type
+  - name
+  - description
+  - size
+  - path_collection
+  - created_by
+  - modified_by
+  - owned_by
+  - item_status
+
+properties:
+  id:
+    type: string
+    nullable: false
+    description: |-
+      The unique identifier that represent a folder.
+
+      The ID for any folder can be determined
+      by visiting a folder in the web application
+      and copying the ID from the URL. For example,
+      for the URL `https://*.app.box.com/folders/123`
+      the `folder_id` is `123`.
+    example: "123456789"
+
+  etag:
+    type: string
+    nullable: true
+    example: "1"
+    description: |-
+      The HTTP `etag` of this folder. This can be used within some API
+      endpoints in the `If-Match` and `If-None-Match` headers to only
+      perform changes on the folder if (no) changes have happened.
+
+  type:
+    type: string
+    description: "`folder`"
+    example: folder
+    enum:
+      - folder
+    nullable: false
+
+  sequence_id:
+    allOf:
+      - $ref: "../attributes/sequence_id.yml"
+      - nullable: false
+
+  name:
+    type: string
+    description: The name of the folder.
+    example: "Contracts"
+    nullable: false
+
+  created_at:
+    type: string
+    format: date-time
+    nullable: true
+    description: |-
+      The date and time when the folder was created. This value may
+      be `null` for some folders such as the root folder or the trash
+      folder.
+    example: "2012-12-12T10:53:43-08:00"
+
+  modified_at:
+    type: string
+    format: date-time
+    description: |-
+      The date and time when the folder was last updated. This value may
+      be `null` for some folders such as the root folder or the trash
+      folder.
+    example: "2012-12-12T10:53:43-08:00"
+    nullable: true
+
+  description:
+    allOf:
+      - $ref: "../attributes/folder__description.yml"
+      - nullable: false
+
+  size:
+    type: integer
+    format: int64
+    description: |-
+      The folder size in bytes.
+
+      Be careful parsing this integer as its
+      value can get very large.
+    example: 629644
+    nullable: false
+
+  path_collection:
+    allOf:
+      - $ref: '../attributes/path_collection_trash.yml'
+      - description: |-
+          The tree of folders that this file is contained in,
+          starting at the root.
+      - nullable: false
+
+  created_by:
+    allOf:
+      - $ref: '#/components/schemas/User--Mini'
+      - description: The user who created this folder
+      - nullable: false
+
+  modified_by:
+    allOf:
+      - $ref: '#/components/schemas/User--Mini'
+      - description: The user who last modified this folder.
+      - nullable: false
+
+  trashed_at:
+    type: string
+    format: date-time
+    description: |-
+      The time at which this folder was put in the trash.
+    example: "2012-12-12T10:53:43-08:00"
+    nullable: true
+
+  purged_at:
+    type: string
+    format: date-time
+    description: |-
+      The time at which this folder is expected to be purged
+      from the trash.
+    example: "2012-12-12T10:53:43-08:00"
+    nullable: true
+
+  content_created_at:
+    type: string
+    format: date-time
+    nullable: true
+    description: |-
+      The date and time at which this folder was originally
+      created.
+    example: "2012-12-12T10:53:43-08:00"
+
+  content_modified_at:
+    type: string
+    format: date-time
+    nullable: true
+    description: |-
+      The date and time at which this folder was last updated.
+    example: "2012-12-12T10:53:43-08:00"
+
+  owned_by:
+    allOf:
+      - $ref: '#/components/schemas/User--Mini'
+      - description: The user who owns this folder.
+      - nullable: false
+
+  shared_link:
+    type: string
+    description: |-
+      The shared link for this folder. This will
+      be `null` if a folder has been trashed, since the link will no longer
+      be active.
+    example: null
+    nullable: true
+
+  folder_upload_email:
+    type: string
+    description: |-
+      The folder upload email for this folder. This will
+      be `null` if a folder has been trashed, since the upload will no longer
+      work.
+    example: null
+    nullable: true
+
+  parent:
+    allOf:
+      - $ref: '#/components/schemas/Folder--Mini'
+      - description: |-
+          The optional folder that this folder is located within.
+
+          This value may be `null` for some folders such as the
+          root folder or the trash folder.
+      - nullable: true
+
+  item_status:
+    type: string
+    description: |-
+      Defines if this item has been deleted or not.
+
+      * `active` when the item has is not in the trash
+      * `trashed` when the item has been moved to the trash but not deleted
+      * `deleted` when the item has been permanently deleted.
+    enum:
+      - active
+      - trashed
+      - deleted
+    nullable: false
+    example: trashed

@@ -10,7 +10,7 @@ x-box-tag: users
 x-box-enable-explorer: true
 
 description: |-
-  Updates a managed user in an enterprise. This endpoint
+  Updates a managed or app user in an enterprise. This endpoint
   is only available to users and applications with the right
   admin permissions.
 
@@ -49,7 +49,10 @@ requestBody:
             type: string
             description: |-
               The email address the user uses to log in
-            example: boss@box.com
+
+              Note: If the target user's email is not confirmed, then the
+              primary login address cannot be changed.
+            example: somename@box.com
 
           role:
             type: string
@@ -91,15 +94,13 @@ requestBody:
 
           tracking_codes:
             type: array
+            items:
+              $ref: '#/components/schemas/TrackingCode'
             description: |-
               Tracking codes allow an admin to generate reports from the
               admin console and assign an attribute to a specific group
               of users. This setting must be enabled for an enterprise before it
               can be used.
-            example:
-              - "code1: 12345"
-            items:
-              type: string
 
           can_see_managed_users:
             type: boolean
@@ -172,6 +173,17 @@ requestBody:
                 type: string
                 example: notifications@example.com
                 description: The email address to send the notifications to.
+
+          external_app_user_id:
+            type: string
+            example: my-user-1234
+            description: |-
+              An external identifier for an app user, which can be used to look
+              up the user. This can be used to tie user IDs from external
+              identity providers to Box users.
+
+              Note: In order to update this field, you need to request a token
+              using the application that created the app user.
 
 responses:
   200:
