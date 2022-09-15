@@ -12,11 +12,12 @@ description: |-
   Returns up to a year of past events for a given user
   or for the entire enterprise.
 
-  By default this returns events for the authenticated user. To retrieve
-  events for the entire enterprise, set the `stream_type` to `admin_logs`.
-  The user making the API call will need to have admin privileges, and
-  the application will need to have the permission to access the event feed
-  to get the enterprise event feed.
+  By default this returns events for the authenticated user. To retrieve events
+  for the entire enterprise, set the `stream_type` to `admin_logs_streaming`
+  for live monitoring of new events, or `admin_logs` for querying across
+  historical events. The user making the API call will
+  need to have admin privileges, and the application will need to have the
+  scope `manage enterprise properties` checked.
 
 parameters:
   - name: stream_type
@@ -28,7 +29,18 @@ parameters:
         such as file updates or collaborations.
       * `sync` is similar to `changes` but only applies to synced folders
       * `admin_logs` returns all events for an entire enterprise and
-        requires the user making the API call to have admin permissions.
+        requires the user making the API call to have admin permissions. This
+        stream type is for programmatically pulling from a 1 year history of
+        events across all users within the enterprise and within a
+        `created_after` and `created_before` time frame. The complete history
+        of events will be returned in chronological order based on the event
+        time, but latency will be much higher than `admin_logs_streaming`.
+      * `admin_logs_streaming` returns all events for an entire enterprise and
+        requires the user making the API call to have admin permissions. This
+        stream type is for polling for recent events across all users within
+        the enterprise. Latency will be much lower than `admin_logs`, but
+        events will not be returned in chronological order and may
+        contain duplicates.
     in: query
     example: all
     schema:
@@ -39,6 +51,7 @@ parameters:
         - changes
         - sync
         - admin_logs
+        - admin_logs_streaming
 
   - name: stream_position
     description: |-
@@ -55,6 +68,12 @@ parameters:
   - name: limit
     description: |-
       Limits the number of events returned
+
+      Note: Sometimes, the events less than the limit requested can be returned
+      even when there may be more events remaining. This is primarily done in
+      the case where a number of events have already been retrieved and these
+      retrieved events are returned rather than delaying for an unknown amount
+      of time to see if there are any more results.
     in: query
     example: 50
     schema:
@@ -66,8 +85,9 @@ parameters:
   - name: event_type
     description: |-
       A comma-separated list of events to filter by. This can only be used when
-      requesting the events with a `stream_type` of `admin_logs`. For any other
-      `stream_type` this value will be ignored.
+      requesting the events with a `stream_type` of `admin_logs` or
+      `adming_logs_streaming`. For any other `stream_type` this value will be
+      ignored.
     in: query
     explode: false
     example:
@@ -154,6 +174,22 @@ parameters:
           - SHARE
           - SHARE_EXPIRATION
           - SHIELD_ALERT
+          - SHIELD_EXTERNAL_COLLAB_ACCESS_BLOCKED
+          - SHIELD_EXTERNAL_COLLAB_ACCESS_BLOCKED_MISSING_JUSTIFICATION
+          - SHIELD_EXTERNAL_COLLAB_INVITE_BLOCKED
+          - SHIELD_EXTERNAL_COLLAB_INVITE_BLOCKED_MISSING_JUSTIFICATION
+          - SHIELD_JUSTIFICATION_APPROVAL
+          - SIGN_DOCUMENT_ASSIGNED
+          - SIGN_DOCUMENT_CANCELLED
+          - SIGN_DOCUMENT_COMPLETED
+          - SIGN_DOCUMENT_CONVERTED
+          - SIGN_DOCUMENT_CREATED
+          - SIGN_DOCUMENT_DECLINED
+          - SIGN_DOCUMENT_EXPIRED
+          - SIGN_DOCUMENT_SIGNED
+          - SIGN_DOCUMENT_VIEWED_BY_SIGNED
+          - SIGNER_DOWNLOADED
+          - SIGNER_FORWARDED
           - STORAGE_EXPIRATION
           - TASK_ASSIGNMENT_CREATE
           - TASK_ASSIGNMENT_DELETE

@@ -1,0 +1,167 @@
+---
+operationId: post_workflows_id_start
+
+summary: Starts workflow based on request body
+
+tags:
+  - Workflows
+
+x-box-tag: workflows
+
+description: |-
+  Initiates a flow with a trigger type of `WORKFLOW_MANUAL_START`.
+
+  You application must be authorized to use the `Manage Box Relay` application
+  scope within the developer console.
+
+parameters:
+  - $ref: '../attributes/workflow_id.yml'
+
+requestBody:
+  content:
+    application/json:
+      schema:
+        type: object
+        required:
+          - flow
+          - files
+          - folder
+        properties:
+          type:
+            type: string
+            description: |-
+              The type of the parameters object
+            example: workflow_parameters
+            enum:
+              - workflow_parameters
+
+          flow:
+            type: object
+            description: |-
+              The flow that will be triggered
+            properties:
+              type:
+                type: string
+                description: The type of the flow object
+                example: "flow"
+              id:
+                type: string
+                description: The id of the flow
+                example: "123456789"
+          files:
+            type: array
+            description: |-
+              The array of files for which the workflow should start. All files
+              must be in the workflow's configured folder.
+            items:
+              type: object
+              description: |-
+                A file the workflow should start for
+              properties:
+                type:
+                  type: string
+                  description: |-
+                    The type of the file object
+                  example: file
+                  enum:
+                    - file
+                id:
+                  type: string
+                  description: |-
+                    The id of the file
+                  example: "12345678"
+          folder:
+            type: object
+            description: |-
+              The folder object for which the workflow is configured.
+            properties:
+              type:
+                type: string
+                description: The type of the folder object
+                example: folder
+                enum:
+                  - folder
+              id:
+                type: string
+                description: The id of the folder
+                example: "87654321"
+          outcomes:
+            type: array
+            description: |-
+              A list of outcomes required to be configured at start time.
+            items:
+              type: object
+              description: |-
+                A configurable outcome the workflow should complete. If you
+                have a `task_completion_rule`, you may input `all_assignees` or
+                `any_assignee` in the `variable_value` field. Similarly, if you
+                have a `collaborator_role`, you may input `editor`, `viewer`,
+                `previewer`, `uploader`, `previewer uploader`, `viewer uploader`
+                , `co-owner` in the `variable_value` field.
+              properties:
+                id:
+                  type: string
+                  description: The id of the outcome
+                  example: "890375782"
+                type:
+                  type: string
+                  description: The type of the outcome object
+                  example: outcome
+                  enum:
+                    - outcome
+                parameter:
+                  type: string
+                  description: |-
+                    This is a placeholder example for various objects that
+                    can be passed in - refer to the guides section to find
+                    out more information.
+                  example: "placeholder"
+
+responses:
+  204:
+    description: |-
+      Starts the workflow.
+  400:
+    description: |-
+      Returns an error if some of the parameters are missing or
+      not valid.
+
+      * `workflow_is_not_enabled` when the workflow is not enabled
+      * `workflow_not_active_on_provided_folder` when the workflow is not
+        enabled for the specified folder id
+      * `parameters_provided_do_not_match_target_outcome` when the provided
+        parameters do not match the expected parameters
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
+  403:
+    description: |-
+      Returns an error if there are insufficient permissions.
+
+      * `insufficient_access` when the user does not have access rights to file
+        or folder
+      * `missing_relay_full_access` when the user does not have access to Relay
+        Full
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
+  404:
+    description: |-
+      Returns an error if the workflow could not be found,
+      or the authenticated user does not have access to the workflow.
+
+      * `workflow_not_found` when the workflow is not found
+      * `flow_missing_or_inaccessible` when the flow is not a manual start flow
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
+  default:
+    description: |-
+      An unexpected client error.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
