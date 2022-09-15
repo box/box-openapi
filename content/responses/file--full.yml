@@ -10,6 +10,13 @@ description: |-
   A full representation of a file, as can be returned from any
   file API endpoints by default
 
+required:
+  - permissions
+  - tags
+  - allowed_invitee_roles
+  - is_externally_owned
+  - has_collaborations
+
 allOf:
   - $ref: '#/components/schemas/File'
   - properties:
@@ -142,7 +149,7 @@ allOf:
               A list of representations for a file that can be used to
               display a placeholder of the file in your application. By default
               this returns all representations and we recommend using the
-              `X-Rep-Hints` header to further customize the desired
+              `x-rep-hints` header to further customize the desired
               representations.
 
       classification:
@@ -155,3 +162,26 @@ allOf:
       uploader_display_name:
         allOf:
           - $ref: '../attributes/uploader_display_name.yml'
+
+      disposition_at:
+        type: string
+        format: date-time
+        nullable: true
+        description: |-
+          The retention expiration timestamp for the given file
+        example: "2012-12-12T10:53:43-08:00"
+
+      shared_link_permission_options:
+        type: array
+        example:
+          - can_preview
+        nullable: true
+        description: |-
+          A list of the types of roles that user can be invited at
+          when sharing this file.
+        items:
+          type: string
+          enum:
+            - can_preview
+            - can_download
+            - can_edit

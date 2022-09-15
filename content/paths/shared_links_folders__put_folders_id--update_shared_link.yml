@@ -59,6 +59,18 @@ requestBody:
                   A password can only be set when `access` is set to `open`.
                 example: "do-not-use-this-password"
 
+              vanity_name:
+                type: string
+                description: |-
+                  Defines a custom vanity name to use in the shared link URL,
+                  for example `https://app.box.com/v/my-shared-link`.
+
+                  Custom URLs should not be used when sharing sensitive content
+                  as vanity URLs are a lot easier to guess than regular shared
+                  links.
+                minLength: 12
+                example: "my-shared-link"
+
               unshared_at:
                 type: string
                 format: date-time
@@ -66,7 +78,8 @@ requestBody:
                 description: |-
                   The timestamp at which this shared link will
                   expire. This field can only be set by
-                  users with paid accounts.
+                  users with paid accounts. The value must be greater than the
+                  current date and time.
 
               permissions:
                 type: object
@@ -75,9 +88,23 @@ requestBody:
                     type: boolean
                     example: true
                     description: |-
-                      If the shared link allows for downloading of folders.
+                      If the shared link allows for downloading of files.
                       This can only be set when `access` is set to
                       `open` or `company`.
+                  can_preview:
+                    type: boolean
+                    example: true
+                    description: |-
+                      If the shared link allows for previewing of files.
+                      This value is always `true`. For shared links on folders
+                      this also applies to any items in the folder.
+                  can_edit:
+                    type: boolean
+                    example: false
+                    description: |-
+                      This value can only be `false` for items
+                      with a `type` of `folder`.
+
 
 responses:
   200:
@@ -111,6 +138,15 @@ responses:
                 permissions:
                   can_preview: true
                   can_download: true
+                  can_edit: false
+
+  400:
+    description: |-
+      Returned when there is an incorrect permission combination
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
 
   401:
     description: |-
