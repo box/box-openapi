@@ -36,15 +36,50 @@ requestBody:
             example: permanently_delete
             description: |-
               The disposition action of the retention policy.
-              This action can be `permanently_delete`, which
-              will cause the content retained by the policy
-              to be permanently deleted, or `remove_retention`,
-              which will lift the retention policy from the content,
-              allowing it to be deleted by users,
-              once the retention policy has expired.
+              `permanently_delete` deletes the content
+              retained by the policy permanently.
+              `remove_retention` lifts retention policy
+              from the content, allowing it to be deleted
+              by users once the retention policy has expired.
             enum:
               - permanently_delete
               - remove_retention
+
+          retention_type:
+            type: string
+            example: non-modifiable
+            description: |-
+              Specifies the retention type:
+
+              * `modifiable`: You can modify the retention policy. For example,
+              you can add or remove folders, shorten or lengthen
+              the policy duration, or delete the assignment.
+              Use this type if your retention policy
+              is not related to any regulatory purposes.
+              * `non-modifiable`: You can modify the retention policy
+              only in a limited way: add a folder, lengthen the duration,
+              retire the policy, change the disposition action
+              or notification settings. You cannot perform other actions,
+              such as deleting the assignment or shortening the
+              policy duration. Use this type to ensure
+              compliance with regulatory retention policies.
+
+              When updating a retention policy, you can use
+              `non-modifiable` type only. You can convert a
+              `modifiable` policy to `non-modifiable`, but
+              not the other way around.
+
+          retention_length:
+            type: string
+            format: int32
+            example: "365"
+            description: |-
+              The length of the retention policy. This value
+              specifies the duration in days that the retention
+              policy will be active for after being assigned to
+              content.  If the policy has a `policy_type` of
+              `indefinite`, the `retention_length` will also be
+              `indefinite`.
 
           status:
             type: string
@@ -54,8 +89,6 @@ requestBody:
 
               If not retiring a policy, do not include this parameter
               or set it to `null`.
-            enum:
-              - retired
 
 responses:
   200:
@@ -75,7 +108,19 @@ responses:
       application/json:
         schema:
           $ref: '#/components/schemas/ClientError'
-
+  403:
+    description: |-
+      Returns an error when a user wants to
+      shorten the duration of a
+      non-modifiable policy, or to convert
+      a non-modifiable policy to
+      a modifiable one.
+      Note: Lengthening policy duration
+      is allowed.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
   409:
     description: |-
       Returns an error if a retention policy with the given name already exists
