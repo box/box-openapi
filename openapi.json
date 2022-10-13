@@ -17855,11 +17855,19 @@
                   },
                   "can_owner_extend_retention": {
                     "type": "boolean",
+                    "enum": [
+                      true,
+                      false
+                    ],
                     "example": true,
                     "description": "Whether the owner of a file will be allowed to\nextend the retention."
                   },
                   "are_owners_notified": {
                     "type": "boolean",
+                    "enum": [
+                      true,
+                      false
+                    ],
                     "example": true,
                     "description": "Whether owner and co-owners of a file are notified\nwhen the policy nears expiration."
                   },
@@ -17901,7 +17909,7 @@
           }
         },
         "responses": {
-          "200": {
+          "201": {
             "description": "Returns a new retention policy object.",
             "content": {
               "application/json": {
@@ -17962,6 +17970,24 @@
             "required": true,
             "schema": {
               "type": "string"
+            }
+          },
+          {
+            "name": "fields",
+            "description": "A comma-separated list of attributes to include in the\nresponse. This can be used to request fields that are\nnot normally returned in a standard response.\n\nBe aware that specifying this parameter will have the\neffect that none of the standard fields are returned in\nthe response unless explicitly specified, instead only\nfields for the mini representation are returned, additional\nto the fields requested.",
+            "in": "query",
+            "example": [
+              "id",
+              "type",
+              "name"
+            ],
+            "required": false,
+            "explode": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
             }
           }
         ],
@@ -18048,6 +18074,53 @@
                     "type": "string",
                     "example": "retired",
                     "description": "Used to retire a retention policy.\n\nIf not retiring a policy, do not include this parameter\nor set it to `null`."
+                  },
+                  "can_owner_extend_retention": {
+                    "type": "boolean",
+                    "description": "Determines if the owner of items under the policy\ncan extend the retention when the original retention\nduration is about to end.",
+                    "example": false
+                  },
+                  "are_owners_notified": {
+                    "type": "boolean",
+                    "description": "Determines if owners and co-owners of items\nunder the policy are notified when\nthe retention duration is about to end.",
+                    "enum": [
+                      true,
+                      false
+                    ],
+                    "example": false
+                  },
+                  "custom_notification_recipients": {
+                    "type": "array",
+                    "description": "A list of users notified when the retention duration is about to end.",
+                    "items": {
+                      "type": "object",
+                      "description": "A user that is notified of an event.",
+                      "properties": {
+                        "type": {
+                          "description": "The type of item to notify.",
+                          "type": "string",
+                          "example": "user",
+                          "enum": [
+                            "user"
+                          ]
+                        },
+                        "id": {
+                          "description": "The id of the user to notify.",
+                          "type": "string",
+                          "example": "12312312"
+                        },
+                        "name": {
+                          "type": "string",
+                          "description": "The name of the user to notify.",
+                          "example": "Tim Apple"
+                        },
+                        "login": {
+                          "type": "string",
+                          "description": "The email address of the user to notify.",
+                          "example": "apple@example.com"
+                        }
+                      }
+                    }
                   }
                 }
               }
@@ -18428,6 +18501,24 @@
             "required": true,
             "schema": {
               "type": "string"
+            }
+          },
+          {
+            "name": "fields",
+            "description": "A comma-separated list of attributes to include in the\nresponse. This can be used to request fields that are\nnot normally returned in a standard response.\n\nBe aware that specifying this parameter will have the\neffect that none of the standard fields are returned in\nthe response unless explicitly specified, instead only\nfields for the mini representation are returned, additional\nto the fields requested.",
+            "in": "query",
+            "example": [
+              "id",
+              "type",
+              "name"
+            ],
+            "required": false,
+            "explode": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
             }
           }
         ],
@@ -28503,14 +28594,15 @@
         "type": "object",
         "x-box-resource-id": "retention_policies",
         "x-box-tag": "retention_policies",
-        "description": "A list of retention policies",
+        "description": "A list of retention policies.",
         "allOf": [
           {
             "properties": {
               "entries": {
+                "description": "A list in which each entry represents a retention policy object.",
                 "type": "array",
                 "items": {
-                  "$ref": "#/components/schemas/RetentionPolicy"
+                  "$ref": "#/components/schemas/RetentionPolicy--Mini"
                 }
               }
             }
@@ -28529,6 +28621,31 @@
                 "description": "The marker for the start of the next page of results.",
                 "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
                 "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "RetentionPolicies--Mini": {
+        "title": "Retention policies (Mini)",
+        "type": "object",
+        "x-box-resource-id": "retention_policies--mini",
+        "x-box-tag": "retention_policies",
+        "x-box-variants": [
+          "mini",
+          "standard"
+        ],
+        "x-box-variant": "mini",
+        "description": "A mini representation of\na list of retention policies.",
+        "allOf": [
+          {
+            "properties": {
+              "entries": {
+                "description": "A list in which each entry represents a retention policy object.",
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/RetentionPolicy"
+                }
               }
             }
           }
@@ -28585,27 +28702,88 @@
                     "$ref": "#/components/schemas/User--Mini"
                   },
                   {
-                    "description": "A mini user object representing the user that\ncreated the retention policy"
+                    "description": "A mini user object representing the user that\ncreated the retention policy."
                   }
                 ]
               },
               "created_at": {
                 "type": "string",
                 "format": "date-time",
-                "description": "When the retention policy object was created",
+                "description": "When the retention policy object was created.",
                 "example": "2012-12-12T10:53:43-08:00"
               },
               "modified_at": {
                 "type": "string",
                 "format": "date-time",
-                "description": "When the retention policy object was last modified",
+                "description": "When the retention policy object was last modified.",
                 "example": "2012-12-12T10:53:43-08:00"
               },
-              "deleted_at": {
-                "type": "string",
-                "format": "date-time",
-                "description": "When the retention policy object was deleted",
-                "example": "2012-12-12T10:53:43-08:00"
+              "can_owner_extend_retention": {
+                "type": "boolean",
+                "description": "Determines if the owner of items under the policy\ncan extend the retention when the original\nretention duration is about to end.",
+                "example": false
+              },
+              "are_owners_notified": {
+                "type": "boolean",
+                "description": "Determines if owners and co-owners of items\nunder the policy are notified when\nthe retention duration is about to end.",
+                "example": false
+              },
+              "custom_notification_recipients": {
+                "type": "array",
+                "description": "A list of users notified when the retention policy duration is about to end.",
+                "items": {
+                  "type": "object",
+                  "description": "A user that is notified of an event.",
+                  "properties": {
+                    "type": {
+                      "description": "The type of item to notify",
+                      "type": "string",
+                      "example": "user",
+                      "enum": [
+                        "user"
+                      ]
+                    },
+                    "id": {
+                      "description": "The id of the user to notify.",
+                      "type": "string",
+                      "example": "12312312"
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "The name of the user to notify.",
+                      "example": "Tim Apple"
+                    },
+                    "login": {
+                      "type": "string",
+                      "description": "The email address of the user to notify.",
+                      "example": "apple@example.com"
+                    }
+                  }
+                }
+              },
+              "assignment_counts": {
+                "type": "object",
+                "description": "Counts the retention policy assignments for each item type.",
+                "properties": {
+                  "enterprise": {
+                    "description": "The number of enterprises this policy applies to.",
+                    "format": "int64",
+                    "type": "integer",
+                    "example": 1
+                  },
+                  "folder": {
+                    "description": "The number of folders this policy applies to.",
+                    "format": "int64",
+                    "type": "integer",
+                    "example": 1
+                  },
+                  "metadata_template": {
+                    "description": "The number of metadata templates this policy applies to.",
+                    "format": "int64",
+                    "type": "integer",
+                    "example": 1
+                  }
+                }
               }
             }
           }
@@ -28625,7 +28803,7 @@
             "properties": {
               "policy_name": {
                 "type": "string",
-                "description": "The name given to the retention policy",
+                "description": "The name given to the retention policy.",
                 "example": "Some Policy Name"
               },
               "retention_length": {
@@ -28659,7 +28837,7 @@
           "standard"
         ],
         "x-box-variant": "base",
-        "description": "The bare basic representation of a file version, the minimal\namount of fields returned when using the `fields` query\nparameter.",
+        "description": "A base representation of a retention policy.",
         "required": [
           "id",
           "type"
@@ -28668,7 +28846,7 @@
           "id": {
             "type": "string",
             "nullable": false,
-            "description": "The unique identifier that represent a file version.",
+            "description": "The unique identifier that represents a file version.",
             "example": "12345"
           },
           "type": {
@@ -28682,16 +28860,49 @@
           }
         }
       },
+      "RetentionPolicyAssignment--Base": {
+        "title": "Retention policy assignment (Base)",
+        "type": "object",
+        "x-box-resource-id": "retention_policy_assignment--base",
+        "x-box-tag": "retention_policy_assignments",
+        "x-box-variants": [
+          "base",
+          "standard"
+        ],
+        "x-box-variant": "base",
+        "description": "A base representation of a retention policy assignment.",
+        "required": [
+          "id",
+          "type"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "nullable": false,
+            "description": "The unique identifier that represents a file version.",
+            "example": "12345"
+          },
+          "type": {
+            "type": "string",
+            "description": "`retention_policy_assignment`",
+            "example": "retention_policy_assignment",
+            "enum": [
+              "retention_policy_assignment"
+            ],
+            "nullable": false
+          }
+        }
+      },
       "RetentionPolicyAssignment": {
         "title": "Retention policy assignment",
         "type": "object",
         "x-box-resource-id": "retention_policy_assignment",
         "x-box-tag": "retention_policy_assignments",
-        "description": "The retention policy assignment endpoint provides a way\nfor admins to apply a retention policy on a per-folder\nbasis, or place a blanket policy over the entire\nenterprise.",
+        "description": "The retention policy assignment provides details of\nthe assignment between specific content and a retention\npolicy.",
         "properties": {
           "id": {
             "type": "string",
-            "description": "The unique identifier for this retention policy assignment",
+            "description": "The unique identifier for a retention policy assignment.",
             "example": "11446498"
           },
           "type": {
@@ -28708,7 +28919,7 @@
                 "$ref": "#/components/schemas/RetentionPolicy--Mini"
               },
               {
-                "description": "A mini retention policy object representing the\nretention policy that has been assigned to this content"
+                "description": "A mini representation of a retention policy object\nthat has been assigned to the content."
               }
             ]
           },
@@ -28762,25 +28973,19 @@
                 "$ref": "#/components/schemas/User--Mini"
               },
               {
-                "description": "A mini user object representing the user that\ncreated the retention policy assignment object"
+                "description": "A mini user object representing the user that\ncreated the retention policy assignment."
               }
             ]
           },
           "assigned_at": {
             "type": "string",
             "format": "date-time",
-            "description": "When the retention policy assignment object was\ncreated",
-            "example": "2012-12-12T10:53:43-08:00"
-          },
-          "deleted_at": {
-            "type": "string",
-            "format": "date-time",
-            "description": "When the retention policy assignment was deleted",
+            "description": "When the retention policy assignment object was\ncreated.",
             "example": "2012-12-12T10:53:43-08:00"
           },
           "start_date_field": {
             "type": "string",
-            "description": "The date the retention policy assignment begins",
+            "description": "The date the retention policy assignment begins.",
             "example": "upload_date"
           }
         }
@@ -28790,7 +28995,7 @@
         "type": "object",
         "x-box-resource-id": "retention_policy_assignments",
         "x-box-tag": "retention_policy_assignments",
-        "description": "A list of retention policy assignments",
+        "description": "A list of retention policy assignments.",
         "allOf": [
           {
             "properties": {
