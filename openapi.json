@@ -786,7 +786,7 @@
                         }
                     },
                     "403": {
-                        "description": "更新を完了するための権限がユーザーに不足している場合に返されます。\n\n認証済みユーザーにファイルの移動先フォルダへのアクセス権限がない場合は、`access_denied_insufficient_permissions`を返します。\n\nリテンション期間が現在のリテンションのタイムスタンプと等しいか、それより短い場合に返されます。\n\nリテンションの対象でない`file_id`が入力された場合に返されます。\n\nファイルが保持されているものの、廃棄アクションが`remove_retention`に設定されている場合に返されます。",
+                        "description": "更新を完了するための権限がユーザーに不足している場合に返されます。\n\n* `access_denied_insufficient_permissions` returned when the authenticated user does not have access to the destination folder to move the file to.\n* リテンション期間が現在のリテンションのタイムスタンプと等しいか、それより短い場合に返されます。\n* リテンションの対象でない`file_id`が入力された場合に返されます。\n* ファイルが保持されているものの、廃棄アクションが`remove_retention`に設定されている場合に返されます。\n* `forbidden_by_policy` is returned if copying a folder is forbidden due to information barrier restrictions.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -2104,6 +2104,16 @@
                             }
                         }
                     },
+                    "403": {
+                        "description": "Returns an error when the user does not have the right permissions to create the copy a file.\n\n* `forbidden_by_policy`: Returned if copying a file is forbidden due to information barrier restrictions.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
                     "404": {
                         "description": "ソースファイルまたは宛先フォルダのどちらも見つからないか、認証済みユーザーがどちらにもアクセスできない場合はエラーを返します。\n\n* `not_found` - 認証済みユーザーがソースファイルまたは宛先フォルダにアクセスできない場合に返されます",
                         "content": {
@@ -3183,7 +3193,7 @@
                         }
                     },
                     "404": {
-                        "description": "ファイルテンプレートまたはメタデータテンプレートが見つからない場合はエラーを返します。\n\n* `not_found` - ファイルが見つからないか、ユーザーがファイルにアクセスできない場合に返されます。\n* `instance_tuple_not_found` - メタデータテンプレートが見つかりませんでした。",
+                        "description": "Returns an error when the file or metadata template was not found.\n\n* `not_found` - ファイルが見つからないか、ユーザーがファイルにアクセスできない場合に返されます。\n* `instance_tuple_not_found` - The metadata template was not found.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -3567,7 +3577,7 @@
                         }
                     },
                     "404": {
-                        "description": "ファイルテンプレートまたはメタデータテンプレートが見つからない場合はエラーを返します。\n\n* `not_found` - ファイルが見つからないか、ユーザーがファイルにアクセスできない場合に返されます。\n* `instance_tuple_not_found` - メタデータテンプレートが見つかりませんでした。",
+                        "description": "Returns an error when the file or metadata template was not found.\n\n* `not_found` - ファイルが見つからないか、ユーザーがファイルにアクセスできない場合に返されます。\n* `instance_tuple_not_found` - The metadata template was not found.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -3946,7 +3956,7 @@
                         }
                     },
                     "404": {
-                        "description": "ファイルテンプレートまたはメタデータテンプレートが見つからない場合はエラーを返します。\n\n* `not_found` - ファイルが見つからないか、ユーザーがファイルにアクセスできない場合に返されます。\n* `instance_tuple_not_found` - メタデータテンプレートが見つかりませんでした。",
+                        "description": "Returns an error when the file or metadata template was not found.\n\n* `not_found` - ファイルが見つからないか、ユーザーがファイルにアクセスできない場合に返されます。\n* `instance_tuple_not_found` - The metadata template was not found.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -5164,7 +5174,7 @@
                         }
                     },
                     "403": {
-                        "description": "ユーザーにこのアクションを実行するためのアクセス権限がない場合はエラーを返します。\n\n* `access_denied_insufficient_permissions`: ユーザーにフォルダまたは親フォルダへのアクセス権限がない場合か、移動できないようにフォルダロックが適用されているのにフォルダが移動されている場合に返されます。\n\n* `insufficient_scope`: アプリケーションにフォルダを更新するための適切なスコープがない場合に返されます。Boxに格納されているすべてのファイルとフォルダに対して読み取りと書き込みを行えるようにアプリケーションが設定されていることを確認してください。\n\n* `forbidden`: ユーザーが他のユーザーに対してこのアクションを実行することが許可されていない場合に返されます。これには、アクセスレベルが`company`に設定されている共有リンクを無料アカウントで作成するアクションも含まれます。\n\nリクエスト本文に含まれる操作が多すぎる場合にエラーを返します。\n\n* `operation_limit_exceeded`: ユーザーがリクエスト本文で`parent.id`に加えてパラメータを渡したときに返されます。このエンドポイントに対する呼び出しは分割する必要があります。最初の呼び出しには`parent.id`だけを含める必要があります。次の呼び出しには他のパラメータを含めることができます。",
+                        "description": "ユーザーにこのアクションを実行するためのアクセス権限がない場合はエラーを返します。\n\n* `access_denied_insufficient_permissions`: ユーザーにフォルダまたは親フォルダへのアクセス権限がない場合か、移動できないようにフォルダロックが適用されているのにフォルダが移動されている場合に返されます。\n\n* `insufficient_scope`: アプリケーションにフォルダを更新するための適切なスコープがない場合に返されます。Boxに格納されているすべてのファイルとフォルダに対して読み取りと書き込みを行えるようにアプリケーションが設定されていることを確認してください。\n\n* `forbidden`: ユーザーが他のユーザーに対してこのアクションを実行することが許可されていない場合に返されます。これには、アクセスレベルが`company`に設定されている共有リンクを無料アカウントで作成するアクションも含まれます。\n\n* `forbidden_by_policy`: Returned if copying a folder is forbidden due to information barrier restrictions.\n\nリクエスト本文に含まれる操作が多すぎる場合にエラーを返します。\n\n* `operation_limit_exceeded`: ユーザーがリクエスト本文で`parent.id`に加えてパラメータを渡したときに返されます。このエンドポイントに対する呼び出しは分割する必要があります。最初の呼び出しには`parent.id`だけを含める必要があります。次の呼び出しには他のパラメータを含めることができます。",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -5790,6 +5800,16 @@
                             }
                         }
                     },
+                    "403": {
+                        "description": "Returns an error when the user does not have the right permissions to copy a folder.\n\n* `forbidden_by_policy`: Returned if copying a folder is forbidden due to information barrier restrictions.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
                     "404": {
                         "description": "元のフォルダまたは宛先フォルダのどちらも見つからないか、認証済みユーザーがどちらのフォルダにもアクセスできない場合はエラーを返します。\n\n* `not_found` - 認証済みユーザーが親フォルダにアクセスできない場合に返されます",
                         "content": {
@@ -6221,7 +6241,7 @@
                         }
                     },
                     "404": {
-                        "description": "フォルダテンプレートまたはメタデータテンプレートが見つからない場合はエラーを返します。\n\n* `not_found` - フォルダが見つからないか、ユーザーがフォルダにアクセスできません。\n* `instance_tuple_not_found` - メタデータテンプレートが見つかりませんでした。",
+                        "description": "Returns an error when the folder or metadata template was not found.\n\n* `not_found` - フォルダが見つからないか、ユーザーがフォルダにアクセスできません。\n* `instance_tuple_not_found` - The metadata template was not found.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -6610,7 +6630,7 @@
                         }
                     },
                     "404": {
-                        "description": "フォルダテンプレートまたはメタデータテンプレートが見つからない場合はエラーを返します。\n\n* `not_found` - フォルダが見つからないか、ユーザーがフォルダにアクセスできません。\n* `instance_tuple_not_found` - メタデータテンプレートが見つかりませんでした。",
+                        "description": "Returns an error when the folder or metadata template was not found.\n\n* `not_found` - フォルダが見つからないか、ユーザーがフォルダにアクセスできません。\n* `instance_tuple_not_found` - The metadata template was not found.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -7356,7 +7376,7 @@
                         }
                     },
                     "404": {
-                        "description": "フォルダが見つからない場合はエラーを返します。\n\n* `not_found` - フォルダが見つからないか、ユーザーがフォルダにアクセスできないか、または呼び出しを行うユーザーがフォルダの所有者または共同所有者ではない場合に返されます。",
+                        "description": "Returns an error when the folder was not found.\n\n* `not_found` - フォルダが見つからないか、ユーザーがフォルダにアクセスできないか、または呼び出しを行うユーザーがフォルダの所有者または共同所有者ではない場合に返されます。",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -9214,7 +9234,7 @@
                         }
                     },
                     "404": {
-                        "description": "指定された`scope`と`templateKey`のメタデータテンプレートが見つからない場合にエラーを返します。エラーレスポンスには追加の詳細が含まれます。\n\n* `instance_not_found` - テンプレートが見つからない場合に返されます。会社のID (`enterprise_12345`など) を含むテンプレートの完全なスコープを必ず使用してください。",
+                        "description": "指定された`scope`と`templateKey`のメタデータテンプレートが見つからない場合にエラーを返します。エラーレスポンスには追加の詳細が含まれます。\n\n* `instance_not_found` - The template was not found. Please make sure to use the full template scope including the enterprise ID, like `enterprise_12345`.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -9663,7 +9683,7 @@
                 ],
                 "x-box-tag": "user_collaborations",
                 "summary": "コラボレーションを更新",
-                "description": "コラボレーションを更新します。\n\n項目の所有者を変更したり、コラボレーションへの招待を承認したりする場合に使用します。",
+                "description": "Updates a collaboration. Can be used to change the owner of an item, or to accept collaboration invites.",
                 "parameters": [
                     {
                         "name": "collaboration_id",
@@ -10033,6 +10053,16 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/Collaboration"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Returns an error when the user does not have the right permissions to create the collaboration.\n\n* `forbidden_by_policy`: Creating a collaboration is forbidden due to information barrier restrictions.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
                                 }
                             }
                         }
@@ -11402,7 +11432,7 @@
                                 "type": "object",
                                 "properties": {
                                     "shared_link": {
-                                        "description": "ファイルに作成する共有リンクの設定。\n\n共有リンクにデフォルト設定を使用するには、空のオブジェクト (`{}`) を使用します。",
+                                        "description": "The settings for the shared link to create on the file. Use an empty object (`{}`) to use the default settings for shared links.",
                                         "type": "object",
                                         "properties": {
                                             "access": {
@@ -14586,7 +14616,7 @@
                         }
                     },
                     "403": {
-                        "description": "ユーザーに変更が許可されていない場合にエラーを返します。\n\n* `access_denied_insufficient_permissions`: ユーザーに適切な権限がない場合です。たとえば、企業の設定で通知メールのアップデートがオフになっている場合です。",
+                        "description": "ユーザーに変更が許可されていない場合にエラーを返します。\n\n* `access_denied_insufficient_permissions`: ユーザーに適切な権限がない場合です。たとえば、企業の設定で通知メールのアップデートがオフになっている場合です。\n* `denied_by_policy` when the user does not have the right permissions due to the information barrier restrictions.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -14941,6 +14971,16 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/Folder"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Returns an error when folder ownership cannot be transferred to another user.\n\n* `forbidden_by_policy`: Returned if ownership transfer is forbidden due to information barrier restrictions.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
                                 }
                             }
                         }
@@ -16007,6 +16047,16 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/GroupMembership"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Returns an error when the user cannot be added to a group.\n\n* `forbidden_by_policy`: Adding a user to a group is forbidden due to information barrier restrictions.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
                                 }
                             }
                         }
@@ -17597,44 +17647,27 @@
                                     },
                                     "can_owner_extend_retention": {
                                         "type": "boolean",
+                                        "enum": [
+                                            true,
+                                            false
+                                        ],
                                         "example": true,
                                         "description": "ファイルの所有者がリテンションを延長できるかどうか。"
                                     },
                                     "are_owners_notified": {
                                         "type": "boolean",
+                                        "enum": [
+                                            true,
+                                            false
+                                        ],
                                         "example": true,
                                         "description": "ポリシーの有効期限が近付いたときにファイルの所有者と共同所有者に通知するかどうか。"
                                     },
                                     "custom_notification_recipients": {
                                         "type": "array",
+                                        "description": "A list of users notified when the retention policy duration is about to end.",
                                         "items": {
-                                            "type": "object",
-                                            "description": "イベントが通知されるユーザー。",
-                                            "properties": {
-                                                "type": {
-                                                    "description": "通知する項目のタイプ",
-                                                    "type": "string",
-                                                    "example": "user",
-                                                    "enum": [
-                                                        "user"
-                                                    ]
-                                                },
-                                                "id": {
-                                                    "description": "通知を送るユーザーのID",
-                                                    "type": "string",
-                                                    "example": "12312312"
-                                                },
-                                                "name": {
-                                                    "type": "string",
-                                                    "description": "通知を送るユーザーの名前",
-                                                    "example": "Tim Apple"
-                                                },
-                                                "login": {
-                                                    "type": "string",
-                                                    "description": "ユーザーが通知に使用するメールアドレス",
-                                                    "example": "apple@example.com"
-                                                }
-                                            }
+                                            "$ref": "#/components/schemas/User--Mini"
                                         }
                                     }
                                 }
@@ -17643,7 +17676,7 @@
                     }
                 },
                 "responses": {
-                    "200": {
+                    "201": {
                         "description": "新しいリテンションポリシーオブジェクトを返します。",
                         "content": {
                             "application/json": {
@@ -17704,6 +17737,24 @@
                         "required": true,
                         "schema": {
                             "type": "string"
+                        }
+                    },
+                    {
+                        "name": "fields",
+                        "description": "レスポンスに含める属性のカンマ区切りリスト。このパラメータを使用すると、標準のレスポンスには通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドはレスポンスに含まれず、リクエストしたフィールドのほかには、Mini版の表示のフィールドしか返されないことに注意してください。",
+                        "in": "query",
+                        "example": [
+                            "id",
+                            "type",
+                            "name"
+                        ],
+                        "required": false,
+                        "explode": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
                         }
                     }
                 ],
@@ -17790,6 +17841,27 @@
                                         "type": "string",
                                         "example": "retired",
                                         "description": "リテンションポリシーを撤回する場合に使用します。\n\nポリシーを撤回しない場合は、このパラメータを含めないようにするか、 このパラメータを`null`に設定します。"
+                                    },
+                                    "can_owner_extend_retention": {
+                                        "type": "boolean",
+                                        "description": "Determines if the owner of items under the policy can extend the retention when the original retention duration is about to end.",
+                                        "example": false
+                                    },
+                                    "are_owners_notified": {
+                                        "type": "boolean",
+                                        "description": "Determines if owners and co-owners of items under the policy are notified when the retention duration is about to end.",
+                                        "enum": [
+                                            true,
+                                            false
+                                        ],
+                                        "example": false
+                                    },
+                                    "custom_notification_recipients": {
+                                        "type": "array",
+                                        "description": "A list of users notified when the retention duration is about to end.",
+                                        "items": {
+                                            "$ref": "#/components/schemas/User--Mini"
+                                        }
                                     }
                                 }
                             }
@@ -17829,6 +17901,66 @@
                     },
                     "409": {
                         "description": "指定した名前を持つリテンションポリシーがすでに存在する場合は、エラーを返します",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "予期しないクライアントエラー。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "delete_retention_policies_id",
+                "summary": "Delete retention policy",
+                "tags": [
+                    "リテンションポリシー"
+                ],
+                "x-box-tag": "retention_policies",
+                "x-box-scopes": [
+                    "manage_data_retention",
+                    "data_retention"
+                ],
+                "description": "Permanently deletes a retention policy.",
+                "parameters": [
+                    {
+                        "name": "retention_policy_id",
+                        "description": "リテンションポリシーのID。",
+                        "example": "982312",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Returns an empty response when the policy has been deleted."
+                    },
+                    "403": {
+                        "description": "Returns an error if the policy is non-modifiable or the user does not have the required access to perform the action.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Returns an error if the policy is not found.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -18110,6 +18242,24 @@
                         "required": true,
                         "schema": {
                             "type": "string"
+                        }
+                    },
+                    {
+                        "name": "fields",
+                        "description": "レスポンスに含める属性のカンマ区切りリスト。このパラメータを使用すると、標準のレスポンスには通常含まれないフィールドをリクエストできます。\n\nこのパラメータを指定すると、明示的に指定しない限り標準フィールドはレスポンスに含まれず、リクエストしたフィールドのほかには、Mini版の表示のフィールドしか返されないことに注意してください。",
+                        "in": "query",
+                        "example": [
+                            "id",
+                            "type",
+                            "name"
+                        ],
+                        "required": false,
+                        "explode": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
                         }
                     }
                 ],
@@ -19389,6 +19539,1490 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/FileVersionLegalHolds"
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "予期しないクライアントエラー。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/shield_information_barriers/{shield_information_barrier_id}": {
+            "get": {
+                "operationId": "get_shield_information_barriers_id",
+                "summary": "Get shield information barrier with specified ID",
+                "tags": [
+                    "Shield information barriers"
+                ],
+                "x-box-tag": "shield_information_barriers",
+                "x-box-scopes": [
+                    "manage_managed_users"
+                ],
+                "description": "Get shield information barrier based on provided ID..",
+                "parameters": [
+                    {
+                        "name": "shield_information_barrier_id",
+                        "description": "The ID of the shield information barrier.",
+                        "example": "1910967",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns the shield information barrier object.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ShieldInformationBarrier"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Returns a `not_found` error if the shield information barrier was not found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "予期しないクライアントエラー。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/shield_information_barriers/change_status": {
+            "post": {
+                "operationId": "post_shield_information_barriers_change_status",
+                "summary": "Add changed status of shield information barrier with specified ID",
+                "tags": [
+                    "Shield information barriers"
+                ],
+                "x-box-tag": "shield_information_barriers",
+                "x-box-scopes": [
+                    "manage_managed_users"
+                ],
+                "description": "Change status of shield information barrier with the specified ID.",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "id",
+                                    "status"
+                                ],
+                                "properties": {
+                                    "id": {
+                                        "type": "string",
+                                        "example": "1910967",
+                                        "description": "The ID of the shield information barrier."
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "pending",
+                                            "disabled"
+                                        ],
+                                        "example": "pending",
+                                        "description": "The desired status for the shield information barrier."
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Returns the updated shield information barrier object.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ShieldInformationBarrier"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Returns a `not_found` error if the shield information barrier was not found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Returns an error if there exists Conflicts with existing information barriers.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "予期しないクライアントエラー。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/shield_information_barriers": {
+            "get": {
+                "operationId": "get_shield_information_barriers",
+                "summary": "List shield information barriers",
+                "tags": [
+                    "Shield information barriers"
+                ],
+                "x-box-tag": "shield_information_barriers",
+                "x-box-scopes": [
+                    "manage_managed_users"
+                ],
+                "description": "Retrieves a list of shield information barrier objects for the enterprise of JWT.",
+                "parameters": [
+                    {
+                        "name": "marker",
+                        "description": "結果が返される開始位置のマーカー。マーカーベースのページ割りを使用している場合に使用されます。\n\nこれを使用するには、`usemarker`を`true`に設定する必要があります。",
+                        "in": "query",
+                        "required": false,
+                        "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "description": "返す項目の1ページあたりの最大数。",
+                        "in": "query",
+                        "required": false,
+                        "example": 1000,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64",
+                            "maximum": 1000
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns a paginated list of shield information barrier objects, empty list if currently no barrier.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "limit": {
+                                            "description": "これらのエントリで使用された制限値。許容される最大値を超えていない限り、クエリパラメータの`limit`と等しくなります。最大値はAPIによって異なります。",
+                                            "example": 1000,
+                                            "type": "integer",
+                                            "format": "int64"
+                                        },
+                                        "next_marker": {
+                                            "description": "次の検索結果ページの開始場所のマーカー。",
+                                            "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                                            "type": "string"
+                                        },
+                                        "entries": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/ShieldInformationBarrier"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Returns a `not_found` error if could not find an enterprise using JWT.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "予期しないクライアントエラー。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "operationId": "post_shield_information_barriers",
+                "summary": "Create shield information barrier",
+                "tags": [
+                    "Shield information barriers"
+                ],
+                "x-box-tag": "shield_information_barriers",
+                "x-box-scopes": [
+                    "manage_managed_users"
+                ],
+                "description": "Creates a shield information barrier to separate individuals/groups within the same firm and prevents confidential information passing between them.",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ShieldInformationBarrier"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Returns a new shield information barrier object.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ShieldInformationBarrier"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Returns an error if the enterprise was not found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "予期しないクライアントエラー。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/shield_information_barrier_reports": {
+            "get": {
+                "operationId": "get_shield_information_barrier_reports",
+                "summary": "List shield information barrier reports",
+                "tags": [
+                    "Shield information barrier reports"
+                ],
+                "x-box-tag": "shield_information_barrier_reports",
+                "x-box-scopes": [
+                    "manage_managed_users"
+                ],
+                "description": "Lists shield information barrier reports with specific IDs.",
+                "parameters": [
+                    {
+                        "name": "shield_information_barrier_id",
+                        "description": "The ID of the shield information barrier.",
+                        "example": "1910967",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "marker",
+                        "description": "結果が返される開始位置のマーカー。マーカーベースのページ割りを使用している場合に使用されます。\n\nこれを使用するには、`usemarker`を`true`に設定する必要があります。",
+                        "in": "query",
+                        "required": false,
+                        "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "description": "返す項目の1ページあたりの最大数。",
+                        "in": "query",
+                        "required": false,
+                        "example": 1000,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64",
+                            "maximum": 1000
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns a paginated list of shield information barrier report objects.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "limit": {
+                                            "description": "これらのエントリで使用された制限値。許容される最大値を超えていない限り、クエリパラメータの`limit`と等しくなります。最大値はAPIによって異なります。",
+                                            "example": 1000,
+                                            "type": "integer",
+                                            "format": "int64"
+                                        },
+                                        "next_marker": {
+                                            "description": "次の検索結果ページの開始場所のマーカー。",
+                                            "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                                            "type": "string"
+                                        },
+                                        "entries": {
+                                            "type": "array",
+                                            "description": "A list of shield barrier reports.",
+                                            "items": {
+                                                "$ref": "#/components/schemas/ShieldInformationBarrierReport"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Returns a `not_found` error if the shield information barrier was not found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "予期しないクライアントエラー。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "operationId": "post_shield_information_barrier_reports",
+                "summary": "Create shield information barrier report",
+                "tags": [
+                    "Shield information barrier reports"
+                ],
+                "x-box-tag": "shield_information_barrier_reports",
+                "x-box-scopes": [
+                    "manage_managed_users"
+                ],
+                "description": "Creates a shield information barrier report for a given barrier.",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ShieldInformationBarrierReference"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Returns the shield information barrier report information object.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ShieldInformationBarrierReport"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Returns a `not_found` error if the shield information barrier report was not found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Returns a `conflict` error if a shield information barrier report is currently being created.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "予期しないクライアントエラー。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/shield_information_barrier_reports/{shield_information_barrier_report_id}": {
+            "get": {
+                "operationId": "get_shield_information_barrier_reports_id",
+                "summary": "Get shield information barrier report by ID",
+                "tags": [
+                    "Shield information barrier reports"
+                ],
+                "x-box-tag": "shield_information_barrier_reports",
+                "x-box-scopes": [
+                    "manage_managed_users"
+                ],
+                "description": "Retrieves a shield information barrier report by its ID.",
+                "parameters": [
+                    {
+                        "name": "shield_information_barrier_report_id",
+                        "description": "The ID of the shield information barrier Report.",
+                        "example": "3423",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns the shield information barrier report object.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ShieldInformationBarrierReport"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Returns a `not_found` error if the shield information barrier Report was not found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "予期しないクライアントエラー。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/shield_information_barrier_segments/{shield_information_barrier_segment_id}": {
+            "get": {
+                "operationId": "get_shield_information_barrier_segments_id",
+                "summary": "Get shield information barrier segment with specified ID",
+                "tags": [
+                    "Shield information barrier segments"
+                ],
+                "x-box-tag": "shield_information_barrier_segments",
+                "x-box-scopes": [
+                    "manage_managed_users"
+                ],
+                "description": "Retrieves shield information barrier segment based on provided ID..",
+                "parameters": [
+                    {
+                        "name": "shield_information_barrier_segment_id",
+                        "description": "The ID of the shield information barrier segment.",
+                        "example": "3423",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns the shield information barrier segment object.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ShieldInformationBarrierSegment"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Returns a `not_found` error if the shield information barrier segment was not found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "予期しないクライアントエラー。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "delete_shield_information_barrier_segments_id",
+                "summary": "Delete shield information barrier segment",
+                "tags": [
+                    "Shield information barrier segments"
+                ],
+                "x-box-tag": "shield_information_barrier_segments",
+                "x-box-scopes": [
+                    "manage_managed_users"
+                ],
+                "description": "Deletes the shield information barrier segment based on provided ID.",
+                "parameters": [
+                    {
+                        "name": "shield_information_barrier_segment_id",
+                        "description": "The ID of the shield information barrier segment.",
+                        "example": "3423",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Empty body in response"
+                    },
+                    "404": {
+                        "description": "Returns a `not_found` error if the shield information barrier segment with specified ID was not found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "予期しないクライアントエラー。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "operationId": "put_shield_information_barrier_segments_id",
+                "summary": "Update shield information barrier segment with specified ID",
+                "tags": [
+                    "Shield information barrier segments"
+                ],
+                "x-box-tag": "shield_information_barrier_segments",
+                "x-box-scopes": [
+                    "manage_managed_users"
+                ],
+                "description": "Updates the shield information barrier segment based on provided ID..",
+                "parameters": [
+                    {
+                        "name": "shield_information_barrier_segment_id",
+                        "description": "The ID of the shield information barrier segment.",
+                        "example": "3423",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "description": "An object containing update(s) to be made on the Shield Information Barrier Segment. Possible properties include 'name' and 'description', the value in object is the update.",
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "pattern": "\\S+",
+                                        "example": "Investment Banking",
+                                        "description": "The updated name for the shield information barrier segment."
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "nullable": true,
+                                        "example": "'Corporate division that engages in advisory_based\nfinancial transactions on behalf of individuals,\ncorporations, and governments.'",
+                                        "description": "The updated description for the shield information barrier segment."
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Returns the updated shield information barrier segment object.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ShieldInformationBarrierSegment"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Returns a `not_found` error if the shield information Barrier Segment was not found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Returns an error if there exists a shield information Barrier Segment with the same name.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "予期しないクライアントエラー。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/shield_information_barrier_segments": {
+            "get": {
+                "operationId": "get_shield_information_barrier_segments",
+                "summary": "List shield information barrier segments",
+                "tags": [
+                    "Shield information barrier segments"
+                ],
+                "x-box-tag": "shield_information_barrier_segments",
+                "x-box-scopes": [
+                    "manage_managed_users"
+                ],
+                "description": "Retrieves a list of shield information barrier segment objects for the specified Information Barrier ID.",
+                "parameters": [
+                    {
+                        "name": "shield_information_barrier_id",
+                        "description": "The ID of the shield information barrier.",
+                        "example": "1910967",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "marker",
+                        "description": "結果が返される開始位置のマーカー。マーカーベースのページ割りを使用している場合に使用されます。\n\nこれを使用するには、`usemarker`を`true`に設定する必要があります。",
+                        "in": "query",
+                        "required": false,
+                        "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "description": "返す項目の1ページあたりの最大数。",
+                        "in": "query",
+                        "required": false,
+                        "example": 1000,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64",
+                            "maximum": 1000
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns a paginated list of shield information barrier segment objects.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "limit": {
+                                            "description": "これらのエントリで使用された制限値。許容される最大値を超えていない限り、クエリパラメータの`limit`と等しくなります。最大値はAPIによって異なります。",
+                                            "example": 1000,
+                                            "type": "integer",
+                                            "format": "int64"
+                                        },
+                                        "next_marker": {
+                                            "description": "次の検索結果ページの開始場所のマーカー。",
+                                            "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                                            "type": "string"
+                                        },
+                                        "entries": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/ShieldInformationBarrierSegment"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Returns a `not_found` error if the shield information Barrier of given ID was not found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "予期しないクライアントエラー。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "operationId": "post_shield_information_barrier_segments",
+                "summary": "Create shield information barrier segment",
+                "tags": [
+                    "Shield information barrier segments"
+                ],
+                "x-box-tag": "shield_information_barrier_segments",
+                "x-box-scopes": [
+                    "manage_managed_users"
+                ],
+                "description": "Creates a shield information barrier segment.",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "shield_information_barrier",
+                                    "name"
+                                ],
+                                "properties": {
+                                    "shield_information_barrier": {
+                                        "$ref": "#/components/schemas/ShieldInformationBarrier--Base"
+                                    },
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Investment Banking",
+                                        "description": "Name of the shield information barrier segment"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "'Corporate division that engages in\n advisory_based financial\ntransactions on behalf of individuals,\ncorporations, and governments.'",
+                                        "description": "Description of the shield information barrier segment"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Returns a new shield information barrier segment object.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ShieldInformationBarrierSegment"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Returns an error if the shield information barrier was not found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Returns an error if there exists an shield information barrier segment with same name.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "予期しないクライアントエラー。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/shield_information_barrier_segment_members/{shield_information_barrier_segment_member_id}": {
+            "get": {
+                "operationId": "get_shield_information_barrier_segment_members_id",
+                "summary": "Get shield information barrier segment member by ID",
+                "tags": [
+                    "Shield information barrier segment members"
+                ],
+                "x-box-tag": "shield_information_barrier_segment_members",
+                "x-box-scopes": [
+                    "manage_managed_users"
+                ],
+                "description": "Retrieves a shield information barrier segment member by its ID.",
+                "parameters": [
+                    {
+                        "name": "shield_information_barrier_segment_member_id",
+                        "description": "The ID of the shield information barrier segment Member.",
+                        "example": "7815",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns the shield information barrier segment member object.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ShieldInformationBarrierSegmentMember"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Returns a `not_found` error if the shield information barrier segment member was not found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "予期しないクライアントエラー。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "delete_shield_information_barrier_segment_members_id",
+                "summary": "Delete shield information barrier segment member by ID",
+                "tags": [
+                    "Shield information barrier segment members"
+                ],
+                "x-box-tag": "shield_information_barrier_segment_members",
+                "x-box-scopes": [
+                    "manage_managed_users"
+                ],
+                "description": "Deletes a shield information barrier segment member based on provided ID.",
+                "parameters": [
+                    {
+                        "name": "shield_information_barrier_segment_member_id",
+                        "description": "The ID of the shield information barrier segment Member.",
+                        "example": "7815",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Returns an empty response if the segment member was deleted successfully."
+                    },
+                    "404": {
+                        "description": "Returns a `not_found` error if the shield information barrier segment member was not found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "予期しないクライアントエラー。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/shield_information_barrier_segment_members": {
+            "get": {
+                "operationId": "get_shield_information_barrier_segment_members",
+                "summary": "List shield information barrier segment members",
+                "tags": [
+                    "Shield information barrier segment members"
+                ],
+                "x-box-tag": "shield_information_barrier_segment_members",
+                "x-box-scopes": [
+                    "manage_managed_users"
+                ],
+                "description": "Lists shield information barrier segment members based on provided segment IDs.",
+                "parameters": [
+                    {
+                        "name": "shield_information_barrier_segment_id",
+                        "description": "The ID of the shield information barrier segment.",
+                        "example": "3423",
+                        "required": true,
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "marker",
+                        "description": "結果が返される開始位置のマーカー。マーカーベースのページ割りを使用している場合に使用されます。\n\nこれを使用するには、`usemarker`を`true`に設定する必要があります。",
+                        "in": "query",
+                        "required": false,
+                        "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "description": "返す項目の1ページあたりの最大数。",
+                        "in": "query",
+                        "required": false,
+                        "example": 1000,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64",
+                            "maximum": 1000
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns a paginated list of shield information barrier segment member objects.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "limit": {
+                                            "description": "これらのエントリで使用された制限値。許容される最大値を超えていない限り、クエリパラメータの`limit`と等しくなります。最大値はAPIによって異なります。",
+                                            "example": 1000,
+                                            "type": "integer",
+                                            "format": "int64"
+                                        },
+                                        "next_marker": {
+                                            "description": "次の検索結果ページの開始場所のマーカー。",
+                                            "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                                            "type": "string"
+                                        },
+                                        "entries": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/ShieldInformationBarrierSegmentMember"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "予期しないクライアントエラー。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "operationId": "post_shield_information_barrier_segment_members",
+                "summary": "Create shield information barrier segment member",
+                "tags": [
+                    "Shield information barrier segment members"
+                ],
+                "x-box-tag": "shield_information_barrier_segment_members",
+                "x-box-scopes": [
+                    "manage_managed_users"
+                ],
+                "description": "Creates a new shield information barrier segment member.",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "shield_information_barrier_segment",
+                                    "user"
+                                ],
+                                "properties": {
+                                    "type": {
+                                        "description": "\\-| A type of the shield barrier segment member.",
+                                        "type": "string",
+                                        "example": "shield_information_barrier_segment_member",
+                                        "enum": [
+                                            "shield_information_barrier_segment_member"
+                                        ]
+                                    },
+                                    "shield_information_barrier": {
+                                        "$ref": "#/components/schemas/ShieldInformationBarrier--Base"
+                                    },
+                                    "shield_information_barrier_segment": {
+                                        "type": "object",
+                                        "properties": {
+                                            "id": {
+                                                "type": "string",
+                                                "example": "432554",
+                                                "description": "The ID reference of the requesting shield information barrier segment."
+                                            },
+                                            "type": {
+                                                "type": "string",
+                                                "description": "The type of the shield barrier segment for this member.",
+                                                "example": "shield_information_barrier_segment",
+                                                "enum": [
+                                                    "shield_information_barrier_segment"
+                                                ]
+                                            }
+                                        },
+                                        "description": "The `type` and `id` of the requested shield information barrier segment."
+                                    },
+                                    "user": {
+                                        "allOf": [
+                                            {
+                                                "$ref": "#/components/schemas/User--Base"
+                                            },
+                                            {
+                                                "description": "The `type` and `id` of the requested shield information barrier segment Member."
+                                            }
+                                        ]
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Returns a new shield information barrier segment Member object.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ShieldInformationBarrierSegmentMember"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Returns an error if the shield information barrier or Segment was not found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "予期しないクライアントエラー。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/shield_information_barrier_segment_restrictions/{shield_information_barrier_segment_restriction_id}": {
+            "get": {
+                "operationId": "get_shield_information_barrier_segment_restrictions_id",
+                "summary": "Get shield information barrier segment restriction by ID",
+                "tags": [
+                    "Shield information barrier segment restrictions"
+                ],
+                "x-box-tag": "shield_information_barrier_segment_restrictions",
+                "x-box-scopes": [
+                    "manage_managed_users"
+                ],
+                "description": "Retrieves a shield information barrier segment restriction based on provided ID.",
+                "parameters": [
+                    {
+                        "name": "shield_information_barrier_segment_restriction_id",
+                        "description": "The ID of the shield information barrier segment Restriction.",
+                        "example": "4563",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns the shield information barrier segment restriction object.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ShieldInformationBarrierSegmentRestriction"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Returns a `not_found` error if the shield information barrier segment restriction was not found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "予期しないクライアントエラー。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "delete_shield_information_barrier_segment_restrictions_id",
+                "summary": "Delete shield information barrier segment restriction by ID",
+                "tags": [
+                    "Shield information barrier segment restrictions"
+                ],
+                "x-box-tag": "shield_information_barrier_segment_restrictions",
+                "x-box-scopes": [
+                    "manage_managed_users"
+                ],
+                "description": "Delete shield information barrier segment restriction based on provided ID.",
+                "parameters": [
+                    {
+                        "name": "shield_information_barrier_segment_restriction_id",
+                        "description": "The ID of the shield information barrier segment Restriction.",
+                        "example": "4563",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Empty body in response"
+                    },
+                    "404": {
+                        "description": "Returns a `not_found` error if the shield information barrier segment restriction was not found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "予期しないクライアントエラー。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/shield_information_barrier_segment_restrictions": {
+            "get": {
+                "operationId": "get_shield_information_barrier_segment_restrictions",
+                "summary": "List shield information barrier segment restrictions",
+                "tags": [
+                    "Shield information barrier segment restrictions"
+                ],
+                "x-box-tag": "shield_information_barrier_segment_restrictions",
+                "x-box-scopes": [
+                    "manage_managed_users"
+                ],
+                "description": "Lists shield information barrier segment restrictions based on provided segment ID.",
+                "parameters": [
+                    {
+                        "name": "shield_information_barrier_segment_id",
+                        "description": "The ID of the shield information barrier segment.",
+                        "example": "3423",
+                        "required": true,
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "marker",
+                        "description": "結果が返される開始位置のマーカー。マーカーベースのページ割りを使用している場合に使用されます。\n\nこれを使用するには、`usemarker`を`true`に設定する必要があります。",
+                        "in": "query",
+                        "required": false,
+                        "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "description": "返す項目の1ページあたりの最大数。",
+                        "in": "query",
+                        "required": false,
+                        "example": 1000,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64",
+                            "maximum": 1000
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns a paginated list of shield information barrier segment restriction objects.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "limit": {
+                                            "description": "これらのエントリで使用された制限値。許容される最大値を超えていない限り、クエリパラメータの`limit`と等しくなります。最大値はAPIによって異なります。",
+                                            "example": 1000,
+                                            "type": "integer",
+                                            "format": "int64"
+                                        },
+                                        "next_marker": {
+                                            "description": "次の検索結果ページの開始場所のマーカー。",
+                                            "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                                            "type": "string"
+                                        },
+                                        "entries": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/ShieldInformationBarrierSegmentRestriction"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "予期しないクライアントエラー。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "operationId": "post_shield_information_barrier_segment_restrictions",
+                "summary": "Create shield information barrier segment restriction",
+                "tags": [
+                    "Shield information barrier segment restrictions"
+                ],
+                "x-box-tag": "shield_information_barrier_segment_restrictions",
+                "x-box-scopes": [
+                    "manage_managed_users"
+                ],
+                "description": "Creates a shield information barrier segment restriction object.",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "type",
+                                    "shield_information_barrier_segment",
+                                    "restricted_segment"
+                                ],
+                                "properties": {
+                                    "type": {
+                                        "type": "string",
+                                        "description": "The type of the shield barrier segment restriction for this member.",
+                                        "example": "shield_information_barrier_segment_restriction",
+                                        "enum": [
+                                            "shield_information_barrier_segment_restriction"
+                                        ]
+                                    },
+                                    "shield_information_barrier": {
+                                        "$ref": "#/components/schemas/ShieldInformationBarrier--Base"
+                                    },
+                                    "shield_information_barrier_segment": {
+                                        "type": "object",
+                                        "properties": {
+                                            "id": {
+                                                "type": "string",
+                                                "example": "1910967",
+                                                "description": "The ID reference of the requesting shield information barrier segment."
+                                            },
+                                            "type": {
+                                                "type": "string",
+                                                "description": "The type of the shield barrier segment for this member.",
+                                                "example": "shield_information_barrier_segment",
+                                                "enum": [
+                                                    "shield_information_barrier_segment"
+                                                ]
+                                            }
+                                        },
+                                        "description": "The `type` and `id` of the requested shield information barrier segment."
+                                    },
+                                    "restricted_segment": {
+                                        "type": "object",
+                                        "properties": {
+                                            "id": {
+                                                "type": "string",
+                                                "example": "1910967",
+                                                "description": "The ID reference of the restricted shield information barrier segment."
+                                            },
+                                            "type": {
+                                                "type": "string",
+                                                "example": "shield_information_barrier_segment",
+                                                "description": "The type of the restricted shield information barrier segment.",
+                                                "enum": [
+                                                    "shield_information_barrier_segment"
+                                                ]
+                                            }
+                                        },
+                                        "description": "The `type` and `id` of the restricted shield information barrier segment."
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Returns the newly created Shield Information Barrier Segment Restriction object.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ShieldInformationBarrierSegmentRestriction"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Returns a `not_found` error if the shield information barrier or Segment was not found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
                                 }
                             }
                         }
@@ -23855,6 +25489,35 @@
                     }
                 }
             },
+            "Enterprise--Base": {
+                "title": "Enterprise (Base)",
+                "type": "object",
+                "x-box-resource-id": "enterprise--base",
+                "x-box-variants": [
+                    "base",
+                    "mini",
+                    "standard",
+                    "full"
+                ],
+                "x-box-variant": "base",
+                "description": "A mini representation of a enterprise, used when nested within another resource.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "description": "The unique identifier for this enterprise",
+                        "example": "1910967"
+                    },
+                    "type": {
+                        "type": "string",
+                        "description": "`enterprise`",
+                        "example": "enterprise",
+                        "nullable": false,
+                        "enum": [
+                            "enterprise"
+                        ]
+                    }
+                }
+            },
             "Event": {
                 "title": "Event",
                 "type": "object",
@@ -28185,14 +29848,15 @@
                 "type": "object",
                 "x-box-resource-id": "retention_policies",
                 "x-box-tag": "retention_policies",
-                "description": "リテンションポリシーのリスト",
+                "description": "A list of retention policies.",
                 "allOf": [
                     {
                         "properties": {
                             "entries": {
+                                "description": "A list in which each entry represents a retention policy object.",
                                 "type": "array",
                                 "items": {
-                                    "$ref": "#/components/schemas/RetentionPolicy"
+                                    "$ref": "#/components/schemas/RetentionPolicy--Mini"
                                 }
                             }
                         }
@@ -28222,7 +29886,7 @@
                 "x-box-resource-id": "retention_policy",
                 "x-box-tag": "retention_policies",
                 "x-box-variant": "standard",
-                "description": "リテンションポリシーは、指定した期間にわたってコンテンツが完全に削除されるのを防止します。管理者はリテンションポリシーを作成して特定のフォルダや会社全体に割り当てることができます。この機能を使用するには、アプリケーション管理コンソールから、APIキーに対して \\[リテンションポリシーを管理する] スコープを有効にする必要があります。",
+                "description": "A retention policy blocks permanent deletion of content for a specified amount of time. Admins can create retention policies and then later assign them to specific folders, metadata templates, or their entire enterprise. To use this feature, you must have the manage retention policies scope enabled for your API key via your application management console.",
                 "allOf": [
                     {
                         "$ref": "#/components/schemas/RetentionPolicy--Mini"
@@ -28267,21 +29931,62 @@
                                         "$ref": "#/components/schemas/User--Mini"
                                     },
                                     {
-                                        "description": "リテンションポリシーを作成したユーザーをMini版のユーザーオブジェクトで表示。"
+                                        "description": "A mini user object representing the user that created the retention policy."
                                     }
                                 ]
                             },
                             "created_at": {
                                 "type": "string",
                                 "format": "date-time",
-                                "description": "リテンションポリシーオブジェクトが作成された日時",
+                                "description": "When the retention policy object was created.",
                                 "example": "2012-12-12T10:53:43-08:00"
                             },
                             "modified_at": {
                                 "type": "string",
                                 "format": "date-time",
-                                "description": "リテンションポリシーオブジェクトが最後に変更された日時",
+                                "description": "When the retention policy object was last modified.",
                                 "example": "2012-12-12T10:53:43-08:00"
+                            },
+                            "can_owner_extend_retention": {
+                                "type": "boolean",
+                                "description": "Determines if the owner of items under the policy can extend the retention when the original retention duration is about to end.",
+                                "example": false
+                            },
+                            "are_owners_notified": {
+                                "type": "boolean",
+                                "description": "Determines if owners and co-owners of items under the policy are notified when the retention duration is about to end.",
+                                "example": false
+                            },
+                            "custom_notification_recipients": {
+                                "type": "array",
+                                "description": "A list of users notified when the retention policy duration is about to end.",
+                                "items": {
+                                    "$ref": "#/components/schemas/User--Mini"
+                                }
+                            },
+                            "assignment_counts": {
+                                "type": "object",
+                                "description": "Counts the retention policy assignments for each item type.",
+                                "properties": {
+                                    "enterprise": {
+                                        "description": "The number of enterprise assignments this policy has. The maximum value is 1.",
+                                        "format": "int64",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "folder": {
+                                        "description": "The number of folder assignments this policy has.",
+                                        "format": "int64",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "metadata_template": {
+                                        "description": "The number of metadata template assignments this policy has.",
+                                        "format": "int64",
+                                        "type": "integer",
+                                        "example": 1
+                                    }
+                                }
                             }
                         }
                     }
@@ -28301,7 +30006,7 @@
                         "properties": {
                             "policy_name": {
                                 "type": "string",
-                                "description": "リテンションポリシーの名前",
+                                "description": "The name given to the retention policy.",
                                 "example": "Some Policy Name"
                             },
                             "retention_length": {
@@ -28335,7 +30040,7 @@
                     "standard"
                 ],
                 "x-box-variant": "base",
-                "description": "最も基本的なファイルバージョンのBase版の表示。`fields`クエリパラメータを使用すると、最小限の数のフィールドが返されます。",
+                "description": "A base representation of a retention policy.",
                 "required": [
                     "id",
                     "type"
@@ -28344,7 +30049,7 @@
                     "id": {
                         "type": "string",
                         "nullable": false,
-                        "description": "ファイルバージョンを表す一意の識別子。",
+                        "description": "The unique identifier that represents a retention policy.",
                         "example": "12345"
                     },
                     "type": {
@@ -28358,16 +30063,49 @@
                     }
                 }
             },
+            "RetentionPolicyAssignment--Base": {
+                "title": "Retention policy assignment (Base)",
+                "type": "object",
+                "x-box-resource-id": "retention_policy_assignment--base",
+                "x-box-tag": "retention_policy_assignments",
+                "x-box-variants": [
+                    "base",
+                    "standard"
+                ],
+                "x-box-variant": "base",
+                "description": "A base representation of a retention policy assignment.",
+                "required": [
+                    "id",
+                    "type"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "nullable": false,
+                        "description": "The unique identifier that represents a file version.",
+                        "example": "12345"
+                    },
+                    "type": {
+                        "type": "string",
+                        "description": "`retention_policy_assignment`",
+                        "example": "retention_policy_assignment",
+                        "enum": [
+                            "retention_policy_assignment"
+                        ],
+                        "nullable": false
+                    }
+                }
+            },
             "RetentionPolicyAssignment": {
                 "title": "リテンションポリシー割り当て",
                 "type": "object",
                 "x-box-resource-id": "retention_policy_assignment",
                 "x-box-tag": "retention_policy_assignments",
-                "description": "管理者はリテンションポリシー割り当てエンドポイントを使用して、フォルダごとにリテンションポリシーを適用したり、会社全体を対象とした包括的なポリシーを設定したりすることができます。",
+                "description": "A retention assignment represents a rule specifying the files a retention policy retains. Assignments can retain files based on their folder or metadata, or hold all files in the enterprise.",
                 "properties": {
                     "id": {
                         "type": "string",
-                        "description": "このリテンションポリシー割り当ての一意の識別子",
+                        "description": "The unique identifier for a retention policy assignment.",
                         "example": "11446498"
                     },
                     "type": {
@@ -28384,7 +30122,7 @@
                                 "$ref": "#/components/schemas/RetentionPolicy--Mini"
                             },
                             {
-                                "description": "このコンテンツに割り当てられたリテンションポリシーを表すMini版のリテンションポリシーオブジェクト"
+                                "description": "A mini representation of a retention policy object that has been assigned to the content."
                             }
                         ]
                     },
@@ -28438,14 +30176,14 @@
                                 "$ref": "#/components/schemas/User--Mini"
                             },
                             {
-                                "description": "リテンションポリシー割り当てのオブジェクトを作成したユーザーをMini版のユーザーオブジェクトで表示"
+                                "description": "A mini user object representing the user that created the retention policy assignment."
                             }
                         ]
                     },
                     "assigned_at": {
                         "type": "string",
                         "format": "date-time",
-                        "description": "リテンションポリシー割り当てオブジェクトが作成された日時",
+                        "description": "When the retention policy assignment object was created.",
                         "example": "2012-12-12T10:53:43-08:00"
                     },
                     "start_date_field": {
@@ -28460,14 +30198,14 @@
                 "type": "object",
                 "x-box-resource-id": "retention_policy_assignments",
                 "x-box-tag": "retention_policy_assignments",
-                "description": "リテンションポリシー割り当てのリスト",
+                "description": "A list of retention policy assignments.",
                 "allOf": [
                     {
                         "properties": {
                             "entries": {
                                 "type": "array",
                                 "items": {
-                                    "$ref": "#/components/schemas/RetentionPolicyAssignment"
+                                    "$ref": "#/components/schemas/RetentionPolicyAssignment--Base"
                                 }
                             }
                         }
@@ -28486,6 +30224,595 @@
                                 "description": "次の検索結果ページの開始場所のマーカー。",
                                 "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
                                 "type": "string"
+                            }
+                        }
+                    }
+                ]
+            },
+            "ShieldInformationBarrier": {
+                "title": "Shield information barrier",
+                "type": "object",
+                "x-box-resource-id": "shield_information_barrier",
+                "x-box-tag": "shield_information_barriers",
+                "x-box-variants": [
+                    "base",
+                    "standard"
+                ],
+                "x-box-variant": "standard",
+                "description": "A standard representation of a shield information barrier object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "example": "11446498",
+                        "description": "The unique identifier for the shield information barrier"
+                    },
+                    "type": {
+                        "type": "string",
+                        "description": "The type of the shield information barrier",
+                        "example": "shield_information_barrier",
+                        "enum": [
+                            "shield_information_barrier"
+                        ]
+                    },
+                    "enterprise": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/Enterprise--Base"
+                            },
+                            {
+                                "description": "The `type` and `id` of enterprise this barrier is under."
+                            }
+                        ]
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "draft",
+                            "pending",
+                            "disabled",
+                            "enabled",
+                            "invalid"
+                        ],
+                        "description": "Status of the shield information barrier",
+                        "example": "draft"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2020-06-26T18:44:45.869Z",
+                        "description": "ISO date time string when this shield information barrier object was created."
+                    },
+                    "created_by": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/User--Base"
+                            },
+                            {
+                                "description": "The user who created this shield information barrier."
+                            }
+                        ]
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2020-07-26T18:44:45.869Z",
+                        "description": "ISO date time string when this shield information barrier was updated."
+                    },
+                    "updated_by": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/User--Base"
+                            },
+                            {
+                                "description": "The user that updated this shield information barrier."
+                            }
+                        ]
+                    },
+                    "enabled_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2020-07-26T18:44:45.869Z",
+                        "description": "ISO date time string when this shield information barrier was enabled."
+                    },
+                    "enabled_by": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/User--Base"
+                            },
+                            {
+                                "description": "The user that enabled this shield information barrier."
+                            }
+                        ]
+                    }
+                }
+            },
+            "ShieldInformationBarrier--Base": {
+                "title": "Shield information barrier (Base)",
+                "type": "object",
+                "x-box-resource-id": "shield_information_barrier--base",
+                "x-box-tag": "shield_information_barriers",
+                "x-box-variants": [
+                    "base",
+                    "standard"
+                ],
+                "x-box-variant": "base",
+                "description": "A base representation of a shield information barrier object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "example": "11446498",
+                        "description": "The unique identifier for the shield information barrier"
+                    },
+                    "type": {
+                        "type": "string",
+                        "description": "The type of the shield information barrier",
+                        "example": "shield_information_barrier",
+                        "enum": [
+                            "shield_information_barrier"
+                        ]
+                    }
+                }
+            },
+            "ShieldInformationBarrierReport": {
+                "title": "Shield information barrier report",
+                "type": "object",
+                "x-box-resource-id": "shield_information_barrier_report",
+                "x-box-tag": "shield_information_barrier_reports",
+                "x-box-variants": [
+                    "base",
+                    "standard"
+                ],
+                "x-box-variant": "standard",
+                "description": "A standard representation of a shield information barrier report object",
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/ShieldInformationBarrierReport--Base"
+                    },
+                    {
+                        "properties": {
+                            "shield_information_barrier": {
+                                "allOf": [
+                                    {
+                                        "$ref": "#/components/schemas/ShieldInformationBarrierReference"
+                                    }
+                                ]
+                            },
+                            "status": {
+                                "type": "string",
+                                "enum": [
+                                    "pending",
+                                    "error",
+                                    "done",
+                                    "cancelled"
+                                ],
+                                "description": "Status of the shield information report",
+                                "example": "pending"
+                            },
+                            "details": {
+                                "allOf": [
+                                    {
+                                        "$ref": "#/components/schemas/ShieldInformationBarrierReportDetails"
+                                    }
+                                ]
+                            },
+                            "created_at": {
+                                "type": "string",
+                                "format": "date-time",
+                                "example": "2020-06-26T18:44:45.869Z",
+                                "description": "ISO date time string when this shield information barrier report object was created."
+                            },
+                            "created_by": {
+                                "allOf": [
+                                    {
+                                        "$ref": "#/components/schemas/User--Base"
+                                    },
+                                    {
+                                        "description": "The user who created this shield information barrier report."
+                                    }
+                                ]
+                            },
+                            "updated_at": {
+                                "type": "string",
+                                "format": "date-time",
+                                "example": "2020-07-26T18:44:45.869Z",
+                                "description": "ISO date time string when this shield information barrier report was updated."
+                            }
+                        }
+                    }
+                ]
+            },
+            "ShieldInformationBarrierReport--Base": {
+                "title": "Shield information barrier report (Base)",
+                "type": "object",
+                "x-box-resource-id": "shield_information_barrier_report--base",
+                "x-box-tag": "shield_information_barrier_reports",
+                "x-box-variants": [
+                    "base",
+                    "standard"
+                ],
+                "x-box-variant": "base",
+                "description": "A base representation of a shield information barrier report object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "example": "11446498",
+                        "description": "The unique identifier for the shield information barrier report"
+                    },
+                    "type": {
+                        "type": "string",
+                        "description": "The type of the shield information barrier report",
+                        "example": "shield_information_barrier_report",
+                        "enum": [
+                            "shield_information_barrier_report"
+                        ]
+                    }
+                }
+            },
+            "ShieldInformationBarrierSegment": {
+                "title": "Shield information barrier segment",
+                "type": "object",
+                "x-box-resource-id": "shield_information_barrier_segment",
+                "x-box-tag": "shield_information_barrier_segments",
+                "description": "A shield information barrier segment object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "example": "11446498",
+                        "description": "The unique identifier for the shield information barrier segment"
+                    },
+                    "type": {
+                        "type": "string",
+                        "description": "The type of the shield information barrier segment",
+                        "example": "shield_information_barrier_segment",
+                        "enum": [
+                            "shield_information_barrier_segment"
+                        ]
+                    },
+                    "shield_information_barrier": {
+                        "$ref": "#/components/schemas/ShieldInformationBarrier--Base"
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Investment Banking",
+                        "description": "Name of the shield information barrier segment"
+                    },
+                    "description": {
+                        "type": "string",
+                        "example": "'Corporate division that engages in advisory_based financial\n transactions on behalf of individuals, corporations, and governments.'",
+                        "description": "Description of the shield information barrier segment"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2020-06-26T18:44:45.869Z",
+                        "description": "ISO date time string when this shield information barrier object was created."
+                    },
+                    "created_by": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/User--Base"
+                            },
+                            {
+                                "description": "The user who created this shield information barrier segment."
+                            }
+                        ]
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2020-07-26T18:44:45.869Z",
+                        "description": "ISO date time string when this shield information barrier segment was updated."
+                    },
+                    "updated_by": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/User--Base"
+                            },
+                            {
+                                "description": "The user that updated this shield information barrier segment."
+                            }
+                        ]
+                    }
+                }
+            },
+            "ShieldInformationBarrierSegmentMember": {
+                "title": "Shield information barrier segment member",
+                "type": "object",
+                "x-box-resource-id": "shield_information_barrier_segment_member",
+                "x-box-tag": "shield_information_barrier_segment_members",
+                "x-box-variants": [
+                    "base",
+                    "mini",
+                    "standard"
+                ],
+                "x-box-variant": "standard",
+                "description": "A standard representation of a shield information barrier segment member object",
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/ShieldInformationBarrierSegmentMember--Mini"
+                    },
+                    {
+                        "properties": {
+                            "shield_information_barrier": {
+                                "$ref": "#/components/schemas/ShieldInformationBarrier--Base"
+                            },
+                            "shield_information_barrier_segment": {
+                                "type": "object",
+                                "properties": {
+                                    "id": {
+                                        "type": "string",
+                                        "example": "432554",
+                                        "description": "The ID reference of the requesting shield information barrier segment."
+                                    },
+                                    "type": {
+                                        "type": "string",
+                                        "example": "shield_information_barrier_segment",
+                                        "description": "The type of the shield information barrier segment",
+                                        "enum": [
+                                            "shield_information_barrier_segment"
+                                        ]
+                                    }
+                                },
+                                "description": "The `type` and `id` of the requested shield information barrier segment."
+                            },
+                            "user": {
+                                "allOf": [
+                                    {
+                                        "$ref": "#/components/schemas/User--Base"
+                                    },
+                                    {
+                                        "description": "The `type` and `id` of the requested shield information barrier segment member."
+                                    }
+                                ]
+                            },
+                            "created_at": {
+                                "type": "string",
+                                "format": "date-time",
+                                "example": "2020-06-26T18:44:45.869Z",
+                                "description": "ISO date time string when this shield information barrier object was created."
+                            },
+                            "created_by": {
+                                "allOf": [
+                                    {
+                                        "$ref": "#/components/schemas/User--Base"
+                                    },
+                                    {
+                                        "description": "The user who created this shield information barrier segment member."
+                                    }
+                                ]
+                            },
+                            "updated_at": {
+                                "type": "string",
+                                "format": "date-time",
+                                "example": "2020-07-26T18:44:45.869Z",
+                                "description": "ISO date time string when this shield information barrier segment Member was updated."
+                            },
+                            "updated_by": {
+                                "allOf": [
+                                    {
+                                        "$ref": "#/components/schemas/User--Base"
+                                    },
+                                    {
+                                        "description": "The user that updated this shield information barrier segment Member."
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                ]
+            },
+            "ShieldInformationBarrierSegmentMember--Base": {
+                "title": "Shield information barrier segment member (Base)",
+                "type": "object",
+                "x-box-resource-id": "shield_information_barrier_segment_member--base",
+                "x-box-tag": "shield_information_barrier_segment_members",
+                "x-box-variants": [
+                    "base",
+                    "mini",
+                    "standard"
+                ],
+                "x-box-variant": "base",
+                "description": "A base representation of a shield information barrier segment member object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "example": "11446498",
+                        "description": "The unique identifier for the shield information barrier segment member"
+                    },
+                    "type": {
+                        "type": "string",
+                        "description": "The type of the shield information barrier segment member",
+                        "example": "shield_information_barrier_segment_member",
+                        "enum": [
+                            "shield_information_barrier_segment_member"
+                        ]
+                    }
+                }
+            },
+            "ShieldInformationBarrierSegmentMember--Mini": {
+                "title": "Shield information barrier segment member (Mini)",
+                "type": "object",
+                "x-box-resource-id": "shield_information_barrier_segment_member--mini",
+                "x-box-tag": "shield_information_barrier_segment_members",
+                "x-box-variants": [
+                    "base",
+                    "mini",
+                    "standard"
+                ],
+                "x-box-variant": "mini",
+                "description": "A mini representation of a shield information barrier segment member object",
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/ShieldInformationBarrierSegmentMember--Base"
+                    },
+                    {
+                        "properties": {
+                            "user": {
+                                "allOf": [
+                                    {
+                                        "$ref": "#/components/schemas/User--Base"
+                                    },
+                                    {
+                                        "description": "The `type` and `id` of the requested shield information barrier segment member."
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                ]
+            },
+            "ShieldInformationBarrierSegmentRestriction": {
+                "title": "Shield information barrier segment restriction",
+                "type": "object",
+                "x-box-resource-id": "shield_information_barrier_segment_restriction",
+                "x-box-tag": "shield_information_barrier_segment_restrictions",
+                "x-box-variants": [
+                    "base",
+                    "mini",
+                    "standard"
+                ],
+                "x-box-variant": "standard",
+                "description": "A standard representation of a segment restriction of a shield information barrier object",
+                "required": [
+                    "shield_information_barrier_segment",
+                    "restricted_segment"
+                ],
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/ShieldInformationBarrierSegmentRestriction--Mini"
+                    },
+                    {
+                        "properties": {
+                            "shield_information_barrier": {
+                                "$ref": "#/components/schemas/ShieldInformationBarrier--Base"
+                            },
+                            "created_at": {
+                                "type": "string",
+                                "format": "date-time",
+                                "example": "2020-06-26T18:44:45.869Z",
+                                "description": "ISO date time string when this shield information barrier Segment Restriction object was created."
+                            },
+                            "created_by": {
+                                "allOf": [
+                                    {
+                                        "$ref": "#/components/schemas/User--Base"
+                                    },
+                                    {
+                                        "description": "The user who created this shield information barrier segment Restriction."
+                                    }
+                                ]
+                            },
+                            "updated_at": {
+                                "type": "string",
+                                "format": "date-time",
+                                "example": "2020-07-26T18:44:45.869Z",
+                                "description": "ISO date time string when this shield information barrier segment Restriction was updated."
+                            },
+                            "updated_by": {
+                                "allOf": [
+                                    {
+                                        "$ref": "#/components/schemas/User--Base"
+                                    },
+                                    {
+                                        "description": "The user that updated this shield information barrier segment Restriction."
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                ]
+            },
+            "ShieldInformationBarrierSegmentRestriction--Base": {
+                "title": "Shield information barrier segment restriction (Base)",
+                "type": "object",
+                "x-box-resource-id": "shield_information_barrier_segment_restriction--base",
+                "x-box-tag": "shield_information_barrier_segment_restrictions",
+                "x-box-variants": [
+                    "base",
+                    "mini",
+                    "standard"
+                ],
+                "x-box-variant": "base",
+                "description": "A base representation of a segment restriction object for the shield information barrier",
+                "required": [
+                    "shield_information_barrier_segment",
+                    "restricted_segment"
+                ],
+                "properties": {
+                    "type": {
+                        "type": "string",
+                        "description": "Shield information barrier segment restriction",
+                        "example": "shield_information_barrier_segment_restriction",
+                        "enum": [
+                            "shield_information_barrier_segment_restriction"
+                        ]
+                    },
+                    "id": {
+                        "type": "string",
+                        "example": "11446498",
+                        "description": "The unique identifier for the shield information barrier segment restriction."
+                    }
+                }
+            },
+            "ShieldInformationBarrierSegmentRestriction--Mini": {
+                "title": "Shield information barrier segment restriction (Mini)",
+                "type": "object",
+                "x-box-resource-id": "shield_information_barrier_segment_restriction--mini",
+                "x-box-tag": "shield_information_barrier_segment_restrictions",
+                "x-box-variants": [
+                    "base",
+                    "mini",
+                    "standard"
+                ],
+                "x-box-variant": "mini",
+                "description": "A mini representation of a segment restriction object for the shield information barrier",
+                "required": [
+                    "shield_information_barrier_segment",
+                    "restricted_segment"
+                ],
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/ShieldInformationBarrierSegmentRestriction--Base"
+                    },
+                    {
+                        "properties": {
+                            "shield_information_barrier_segment": {
+                                "type": "object",
+                                "properties": {
+                                    "id": {
+                                        "type": "string",
+                                        "example": "1910967",
+                                        "description": "The ID reference of the requesting shield information barrier segment."
+                                    },
+                                    "type": {
+                                        "type": "string",
+                                        "description": "The type of the shield information barrier segment",
+                                        "example": "shield_information_barrier_segment",
+                                        "enum": [
+                                            "shield_information_barrier_segment"
+                                        ]
+                                    }
+                                },
+                                "description": "The `type` and `id` of the requested shield information barrier segment."
+                            },
+                            "restricted_segment": {
+                                "type": "object",
+                                "properties": {
+                                    "id": {
+                                        "type": "string",
+                                        "example": "1910967",
+                                        "description": "The ID reference of the restricted shield information barrier segment."
+                                    },
+                                    "type": {
+                                        "type": "string",
+                                        "description": "The type of the shield information segment",
+                                        "example": "shield_information_barrier_segment",
+                                        "enum": [
+                                            "shield_information_barrier_segment"
+                                        ]
+                                    }
+                                },
+                                "description": "The `type` and `id` of the restricted shield information barrier segment."
                             }
                         }
                     }
@@ -33409,6 +35736,12 @@
                         "example": "https://declined-example.com",
                         "nullable": true
                     },
+                    "login_required": {
+                        "type": "boolean",
+                        "description": "If set to true, signer will need to login to a Box account before signing the request. If the signer does not have an existing account, they will have an option to create a free Box account.",
+                        "example": true,
+                        "nullable": true
+                    },
                     "verification_phone_number": {
                         "type": "string",
                         "description": "設定した場合は、2要素認証による署名者の認証にこの電話番号を使用しないと、署名者はドキュメントに署名できません。",
@@ -33558,6 +35891,37 @@
                         }
                     }
                 ]
+            },
+            "ShieldInformationBarrierReference": {
+                "title": "Shield information barrier reference",
+                "type": "object",
+                "x-box-resource-id": "shield_information_barrier_reference",
+                "x-box-tag": "shield_information_barrier_reports",
+                "description": "A shield information barrier reference for requests and responses",
+                "properties": {
+                    "shield_information_barrier": {
+                        "$ref": "#/components/schemas/ShieldInformationBarrier--Base"
+                    }
+                }
+            },
+            "ShieldInformationBarrierReportDetails": {
+                "title": "Shield information barrier report details",
+                "type": "object",
+                "x-box-resource-id": "shield_information_barrier_report_details",
+                "x-box-tag": "shield_information_barrier_reports",
+                "description": "Indicates which folder the report file is located and any errors when generating the report.",
+                "properties": {
+                    "details": {
+                        "type": "object",
+                        "properties": {
+                            "folder_id": {
+                                "type": "string",
+                                "example": "124235",
+                                "description": "Folder ID for locating this report"
+                            }
+                        }
+                    }
+                }
             },
             "TrackingCode": {
                 "title": "追跡コード",
@@ -33922,6 +36286,26 @@
         {
             "name": "共有リンク (ウェブリンク)",
             "x-box-tag": "shared_links_web_links"
+        },
+        {
+            "name": "Shield information barriers",
+            "x-box-tag": "shield_information_barriers"
+        },
+        {
+            "name": "Shield information barrier segments",
+            "x-box-tag": "shield_information_barrier_segments"
+        },
+        {
+            "name": "Shield information barrier segment members",
+            "x-box-tag": "shield_information_barrier_segment_members"
+        },
+        {
+            "name": "Shield information barrier reports",
+            "x-box-tag": "shield_information_barrier_reports"
+        },
+        {
+            "name": "Shield information barrier segment restrictions",
+            "x-box-tag": "shield_information_barrier_segment_restrictions"
         },
         {
             "name": "Skills",
