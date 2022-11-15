@@ -50,12 +50,11 @@ requestBody:
             example: permanently_delete
             description: |-
               The disposition action of the retention policy.
-              This action can be `permanently_delete`, which
-              will cause the content retained by the policy
-              to be permanently deleted, or `remove_retention`,
-              which will lift the retention policy from the content,
-              allowing it to be deleted by users,
-              once the retention policy has expired.
+              `permanently_delete` deletes the content
+              retained by the policy permanently.
+              `remove_retention` lifts retention policy
+              from the content, allowing it to be deleted
+              by users once the retention policy has expired.
             enum:
               - permanently_delete
               - remove_retention
@@ -66,15 +65,41 @@ requestBody:
             example: "365"
             minimum: 1
             description: |-
-              The length of the retention policy. This length
+              The length of the retention policy. This value
               specifies the duration in days that the retention
               policy will be active for after being assigned to
-              content.  If the policy has A `policy_type` of
+              content.  If the policy has a `policy_type` of
               `indefinite`, the `retention_length` will also be
               `indefinite`.
 
+          retention_type:
+            type: string
+            example: modifiable
+            description: |-
+              Specifies the retention type:
+
+              * `modifiable`: You can modify the retention policy. For example,
+              you can add or remove folders, shorten or lengthen
+              the policy duration, or delete the assignment.
+              Use this type if your retention policy
+              is not related to any regulatory purposes.
+
+              * `non-modifiable`: You can modify the retention policy
+              only in a limited way: add a folder, lengthen the duration,
+              retire the policy, change the disposition action
+              or notification settings. You cannot perform other actions,
+              such as deleting the assignment or shortening the
+              policy duration. Use this type to ensure
+              compliance with regulatory retention policies.
+            enum:
+              - modifiable
+              - non-modifiable
+
           can_owner_extend_retention:
             type: boolean
+            enum:
+              - true
+              - false
             example: true
             description: |-
               Whether the owner of a file will be allowed to
@@ -82,6 +107,9 @@ requestBody:
 
           are_owners_notified:
             type: boolean
+            enum:
+              - true
+              - false
             example: true
             description: |-
               Whether owner and co-owners of a file are notified
@@ -89,37 +117,14 @@ requestBody:
 
           custom_notification_recipients:
             type: array
+            description: |-
+              A list of users notified when
+              the retention policy duration is about to end.
             items:
-              type: object
-
-              description: |-
-                A user that is notified of an event.
-
-              properties:
-                type:
-                  description: The type of item to notify
-                  type: string
-                  example: user
-                  enum:
-                    - user
-
-                id:
-                  description: The id of the user to notify
-                  type: string
-                  example: "12312312"
-
-                name:
-                  type: string
-                  description: The name of the user to notify
-                  example: Tim Apple
-
-                login:
-                  type: string
-                  description: The email address the user uses to notify
-                  example: apple@example.com
+              $ref: "#/components/schemas/User--Mini"
 
 responses:
-  200:
+  201:
     description: |-
       Returns a new retention policy object.
     content:
