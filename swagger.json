@@ -9139,6 +9139,95 @@
         }
       }
     },
+    "/users/terminate_sessions": {
+      "post": {
+        "operationId": "post_users_terminate_sessions",
+        "summary": "Create jobs to terminate users session",
+        "tags": [
+          "Users"
+        ],
+        "description": "Validates the roles and permissions of the user,\nand creates asynchronous jobs\nto terminate the user's sessions.\nReturns the status for the POST request.",
+        "responses": {
+          "202": {
+            "description": "Returns a message about the request status.",
+            "schema": {
+              "$ref": "#/definitions/SessionTerminationMessage"
+            }
+          },
+          "400": {
+            "description": "Returns an error if some of the parameters are\n not valid.\n\n * `Users can not be NULL or EMPTY` when no value is provided\n * `User id format is string` when the provided user id format\n is incorrect\n * `Supported payload format is JSON` when the provided payload\n format is incorrect",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "403": {
+            "description": "Returns an error if there are insufficient permissions.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "404": {
+            "description": "Returns an error if the resource could not be found.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "429": {
+            "description": "Returns an error if the rate limit is exceeded.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "500": {
+            "description": "Returns an error if there is an internal server issue.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "503": {
+            "description": "Returns an error if the request timed out.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "required": [
+                "user_ids",
+                "user_logins"
+              ],
+              "properties": {
+                "user_ids": {
+                  "type": "array",
+                  "description": "A list of user IDs",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "user_logins": {
+                  "type": "array",
+                  "description": "A list of user logins",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
     "/users/{user_id}": {
       "get": {
         "operationId": "get_users_id",
@@ -9470,6 +9559,12 @@
           },
           "404": {
             "description": "* `not_found`: Returns an error if the user\ndoes not exist or cannot be found.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
             "schema": {
               "$ref": "#/definitions/ClientError"
             }
@@ -10031,6 +10126,87 @@
             }
           }
         }
+      }
+    },
+    "/groups/terminate_sessions": {
+      "post": {
+        "operationId": "post_groups_terminate_sessions",
+        "summary": "Create jobs to terminate user group session",
+        "tags": [
+          "Groups"
+        ],
+        "description": "Validates the roles and permissions of the group,\nand creates asynchronous jobs\nto terminate the group's sessions.\nReturns the status for the POST request.",
+        "responses": {
+          "202": {
+            "description": "Returns a message about the request status.",
+            "schema": {
+              "$ref": "#/definitions/SessionTerminationMessage"
+            }
+          },
+          "400": {
+            "description": "Returns an error if some of the parameters are\nnot valid.\n\n* `Groups can not be NULL or EMPTY` when no value is provided\n* `group id format is string` when the provided group id format\nis incorrect\n* `Supported payload format is JSON` when the provided payload\nformat is incorrect",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "403": {
+            "description": "Returns an error if there are insufficient permissions.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "404": {
+            "description": "Returns an error if the resource could not be found.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "429": {
+            "description": "Returns an error if the request limit is exceeded.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "500": {
+            "description": "Returns an error if there is an internal server issue.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "503": {
+            "description": "Returns an error if the request timed out.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "required": [
+                "group_ids"
+              ],
+              "properties": {
+                "group_ids": {
+                  "type": "array",
+                  "description": "A list of group IDs",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        ]
       }
     },
     "/groups/{group_id}": {
@@ -20211,6 +20387,17 @@
           }
         }
       ]
+    },
+    "SessionTerminationMessage": {
+      "title": "Session termination message",
+      "type": "object",
+      "description": "A message informing about the\ntermination job status",
+      "properties": {
+        "message": {
+          "type": "string",
+          "description": "The unique identifier for the termination job status"
+        }
+      }
     },
     "UserAvatar": {
       "title": "User avatar",
