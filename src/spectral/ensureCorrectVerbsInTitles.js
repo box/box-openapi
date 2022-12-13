@@ -42,11 +42,11 @@ module.exports = (item, _, paths) => {
       }
     ]
   }
-  // When updating items, ensure we use "Update" or "Transfer" por "Upload"
-  else if (verb === 'put' && endWithId && !(item.summary.startsWith('Update') || item.summary.startsWith('Transfer') || item.summary.startsWith('Upload'))) {
+  // When updating items, ensure we use "Update" or "Transfer" or "Upload" or "Restore"
+  else if (verb === 'put' && endWithId && !(item.summary.startsWith('Update') || item.summary.startsWith('Transfer') || item.summary.startsWith('Restore')  || item.summary.startsWith('Upload'))) {
     return [
       {
-        message: `${paths.target.join('.')} - summary should start with "Update" or "Transfer" or "Upload".`,
+        message: `${paths.target.join('.')} - summary should start with "Update" or "Transfer" or "Upload" or "Restore".`,
       }
     ]
   }
