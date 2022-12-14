@@ -14351,6 +14351,136 @@
                 }
             }
         },
+        "/users/terminate_sessions": {
+            "post": {
+                "operationId": "post_users_terminate_sessions",
+                "summary": "Create jobs to terminate users session",
+                "tags": [
+                    "Users"
+                ],
+                "x-box-tag": "session_termination",
+                "description": "Validates the roles and permissions of the user, and creates asynchronous jobs to terminate the user's sessions. Returns the status for the POST request.",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "user_ids",
+                                    "user_logins"
+                                ],
+                                "properties": {
+                                    "user_ids": {
+                                        "example": [
+                                            "123456",
+                                            "456789"
+                                        ],
+                                        "type": "array",
+                                        "description": "A list of user IDs",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "user_logins": {
+                                        "example": [
+                                            "user@sample.com",
+                                            "user2@sample.com"
+                                        ],
+                                        "type": "array",
+                                        "description": "A list of user logins",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "202": {
+                        "description": "Returns a message about the request status.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SessionTerminationMessage"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Returns an error if some of the parameters are not valid.\n\n* `Users can not be NULL or EMPTY` when no value is provided\n* `User id format is string` when the provided user id format is incorrect\n* `Supported payload format is JSON` when the provided payload format is incorrect",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "権限が不足している場合にエラーを返します。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Returns an error if the resource could not be found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Returns an error if the rate limit is exceeded.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Returns an error if there is an internal server issue.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "503": {
+                        "description": "Returns an error if the request timed out.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "予期しないクライアントエラー。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/users/{user_id}": {
             "get": {
                 "operationId": "get_users_id",
@@ -14820,6 +14950,16 @@
                     },
                     "404": {
                         "description": "* `not_found`: ユーザーが存在しないか見つからない場合にエラーを返します。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "予期しないクライアントエラー。",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -15564,6 +15704,124 @@
                     },
                     "409": {
                         "description": "競合が原因でグループを作成できないことを示すエラーを返します。\n\n* `invalid_parameter`: グループ名が企業内で一意でない場合によく返されます。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "予期しないクライアントエラー。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/groups/terminate_sessions": {
+            "post": {
+                "operationId": "post_groups_terminate_sessions",
+                "summary": "Create jobs to terminate user group session",
+                "tags": [
+                    "Groups"
+                ],
+                "x-box-tag": "session_termination",
+                "description": "Validates the roles and permissions of the group, and creates asynchronous jobs to terminate the group's sessions. Returns the status for the POST request.",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "group_ids"
+                                ],
+                                "properties": {
+                                    "group_ids": {
+                                        "example": [
+                                            "123456",
+                                            "456789"
+                                        ],
+                                        "type": "array",
+                                        "description": "A list of group IDs",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "202": {
+                        "description": "Returns a message about the request status.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SessionTerminationMessage"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Returns an error if some of the parameters are not valid.\n\n* `Groups can not be NULL or EMPTY` when no value is provided\n* `group id format is string` when the provided group id format is incorrect\n* `Supported payload format is JSON` when the provided payload format is incorrect",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "権限が不足している場合にエラーを返します。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Returns an error if the resource could not be found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Returns an error if the request limit is exceeded.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Returns an error if there is an internal server issue.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "503": {
+                        "description": "Returns an error if the request timed out.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -21567,7 +21825,7 @@
                     }
                 },
                 "responses": {
-                    "200": {
+                    "201": {
                         "description": "サービス利用規約ステータスオブジェクトを返します。",
                         "content": {
                             "application/json": {
@@ -23787,7 +24045,7 @@
                     "days_valid": {
                         "type": "integer",
                         "description": "このリクエストが完了しなかった場合に自動的に期限切れになるまでの日数",
-                        "minimum": 1,
+                        "minimum": 0,
                         "maximum": 730,
                         "example": 2
                     },
@@ -24683,7 +24941,7 @@
                                     "terms_of_service": {
                                         "allOf": [
                                             {
-                                                "$ref": "#/components/schemas/TermsOfService--Mini"
+                                                "$ref": "#/components/schemas/TermsOfService--Base"
                                             },
                                             {
                                                 "description": "コラボレーションが承認される前に同意する必要があるサービス利用規約。 利用規約への同意が必要ない場合、このフィールドは`null`です。"
@@ -30958,6 +31216,20 @@
                     }
                 }
             },
+            "SessionTerminationMessage": {
+                "title": "Session termination message",
+                "type": "object",
+                "x-box-resource-id": "session_termination",
+                "x-box-tag": "session_termination",
+                "description": "A message informing about the termination job status",
+                "properties": {
+                    "message": {
+                        "type": "string",
+                        "description": "The unique identifier for the termination job status",
+                        "example": "Request is successful, please check the admin events for the status of the job"
+                    }
+                }
+            },
             "SkillCardsMetadata": {
                 "title": "Skillsメタデータインスタンス",
                 "type": "object",
@@ -31437,7 +31709,7 @@
                 "description": "1つのサービス利用規約に該当するとみなされるルートレベルのレコード。",
                 "allOf": [
                     {
-                        "$ref": "#/components/schemas/TermsOfService--Mini"
+                        "$ref": "#/components/schemas/TermsOfService--Base"
                     },
                     {
                         "properties": {
@@ -31533,16 +31805,16 @@
                     }
                 }
             },
-            "TermsOfService--Mini": {
-                "title": "サービス利用規約 (Mini)",
+            "TermsOfService--Base": {
+                "title": "Terms of service (Base)",
                 "type": "object",
-                "x-box-resource-id": "terms_of_service--mini",
+                "x-box-resource-id": "terms_of_service--base",
                 "x-box-tag": "terms_of_services",
                 "x-box-variants": [
-                    "mini",
+                    "base",
                     "standard"
                 ],
-                "x-box-variant": "mini",
+                "x-box-variant": "base",
                 "description": "1つのサービス利用規約に該当するとみなされるルートレベルのレコード。",
                 "properties": {
                     "id": {
@@ -31583,7 +31855,7 @@
                     "tos": {
                         "allOf": [
                             {
-                                "$ref": "#/components/schemas/TermsOfService--Mini"
+                                "$ref": "#/components/schemas/TermsOfService--Base"
                             },
                             {
                                 "description": "サービス利用規約"
@@ -36290,6 +36562,10 @@
             "x-box-tag": "search"
         },
         {
+            "name": "Session termination",
+            "x-box-tag": "session_termination"
+        },
+        {
             "name": "共有リンク (ファイル)",
             "x-box-tag": "shared_links_files"
         },
@@ -36348,6 +36624,10 @@
         {
             "name": "サービス利用規約のユーザーステータス",
             "x-box-tag": "terms_of_service_user_statuses"
+        },
+        {
+            "name": "Termination message",
+            "x-box-tag": "termination_message"
         },
         {
             "name": "フォルダを移行",
