@@ -1,0 +1,67 @@
+---
+operationId: get_shield_information_barriers
+
+summary: List shield information barriers
+
+tags:
+  - Shield information barriers
+
+
+x-box-tag: shield_information_barriers
+
+x-box-scopes:
+  - manage_managed_users
+
+description: |-
+  Retrieves a list of shield information barrier objects
+  for the enterprise of JWT.
+parameters:
+  - $ref: '../attributes/marker.yml'
+  - $ref: '../attributes/limit.yml'
+
+responses:
+  200:
+    description: |-
+      Returns a paginated list of
+      shield information barrier objects,
+      empty list if currently no barrier.
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            limit:
+              description: |-
+                The limit that was used for these entries.
+                This will be the same as the
+                `limit` query parameter unless that
+                value exceeded the maximum value
+                allowed. The maximum value varies by API.
+              example: 1000
+              type: integer
+              format: int64
+            next_marker:
+              description: |-
+                The marker for the start of the next page of results.
+              example: JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii
+              type: string
+            entries:
+              type: array
+              items:
+                $ref: '#/components/schemas/ShieldInformationBarrier'
+
+  404:
+    description: |-
+      Returns a `not_found` error if could not find an enterprise using JWT.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
+
+  default:
+    description: |-
+      An unexpected client error.
+    content:
+      application/json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
