@@ -10,12 +10,13 @@ description: |-
   A Sign Request Object
 
 allOf:
-  - $ref: '#/components/schemas/SignRequestCreateRequest'
+  - $ref: '#/components/schemas/SignRequest--Base'
   - properties:
       type:
         type: string
         example: sign-request
-        enum: [sign-request]
+        enum:
+          - sign-request
         description: object type
 
       signers:
@@ -27,12 +28,9 @@ allOf:
       signature_color:
         type: string
         example: blue
-        description: |-
-         Specific signature color.
-        enum:
-          - blue
-          - black
-          - red
+        description: Force a specific color for the signature
+          (blue, black, or red).
+        nullable: true
 
       id:
         type: string
@@ -46,30 +44,27 @@ allOf:
           This URL is returned if `is_document_preparation_needed` is
           set to `true` in the request. It is used to prepare the sign request
           via UI. The sign request is not sent until preparation is complete.
+        nullable: true
 
       signing_log:
         allOf:
-          - $ref: "#/components/schemas/File--Mini"
+          - $ref: '#/components/schemas/File--Mini'
           - description: |-
               Reference to a file that holds a log of all signer activity for
-              the request. `Null` if the signing log is deleted.
-
+              the request
       status:
         type: string
-        enum: [
-          "converting",
-          "created",
-          "sent",
-          "viewed",
-          "signed",
-          "cancelled",
-          "declined",
-          "error_converting",
-          "error_sending",
-          "expired",
-          "downloaded",
-          "signed and downloaded"
-        ]
+        enum:
+          - converting
+          - created
+          - sent
+          - viewed
+          - signed
+          - cancelled
+          - declined
+          - error_converting
+          - error_sending
+          - expired
         example: converting
         description: 'Describes the status of the sign request'
 
@@ -100,3 +95,13 @@ allOf:
         example: '2021-04-26T08:12:13.982Z'
         description: Uses `days_valid` to calculate the date and time, in GMT,
           the sign request will expire if unsigned.
+        nullable: true
+
+      source_files:
+        type: array
+        items:
+          $ref: '#/components/schemas/File--Mini'
+        description: >-
+          List of files to create a signing document from. Only the ID and type
+          fields are required for each file. The array will be empty if the
+          `source_files` are deleted.
