@@ -2944,7 +2944,7 @@
                                     "trashed_at": {
                                         "type": "string",
                                         "description": "これを`null`に設定すると、日付がクリアされ、ファイルが復元されます。",
-                                        "example": null
+                                        "example": "null"
                                     }
                                 }
                             }
@@ -24033,114 +24033,44 @@
                 "type": "object",
                 "description": "署名リクエストオブジェクトを作成するリクエスト",
                 "required": [
-                    "signers",
-                    "source_files",
-                    "parent_folder"
+                    "signers"
                 ],
-                "properties": {
-                    "name": {
-                        "type": "string",
-                        "example": "document sign request",
-                        "description": "署名リクエストの名前。"
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/SignRequest--Base"
                     },
-                    "is_document_preparation_needed": {
-                        "type": "boolean",
-                        "description": "設定した場合、送信者は、UIを使用して完了したドキュメントの準備に関するレスポンスで`prepare_url`を受け取ります。",
-                        "example": true
-                    },
-                    "redirect_url": {
-                        "type": "string",
-                        "description": "署名者がドキュメントに署名した後にリダイレクトされるURL。このURLを定義すると、すべての署名者で、デフォルトのリダイレクトURLより優先されます。拒否した場合のリダイレクトURLが指定されていない場合は、このURLが拒否の操作にも使用されます。",
-                        "example": "https://example.com",
-                        "nullable": true
-                    },
-                    "declined_redirect_url": {
-                        "type": "string",
-                        "description": "署名者がドキュメントへの署名を拒否した後にリダイレクトされるURL。このURLを定義すると、すべての署名者で、デフォルトのリダイレクトURLより優先されます。",
-                        "example": "https://declined-example.com",
-                        "nullable": true
-                    },
-                    "are_text_signatures_enabled": {
-                        "type": "boolean",
-                        "description": "(テキストの) 入力で生成された署名の使用を無効にします。",
-                        "example": true,
-                        "default": true
-                    },
-                    "email_subject": {
-                        "type": "string",
-                        "example": "Sign Request from Acme",
-                        "description": "署名リクエストメールの件名。これは、署名リクエストによって消去されます。このフィールドを渡さない場合は、デフォルトの件名が使用されます。"
-                    },
-                    "email_message": {
-                        "type": "string",
-                        "example": "Hello! Please sign the document below",
-                        "description": "署名リクエストメールに含めるメッセージ。このフィールドは、特定の文字のサニタイズによって消去されます。ただし、一部のHTMLタグは使用できます。また、このメッセージに含まれているリンクはメールではハイパーリンクに変換されます。このメッセージには、HTMLタグ`a`、`abbr`、`acronym`、`b`、`blockquote`、`code`、`em`、`i`、`ul`、`li`、`ol`、`strong`を含めることができます。HTMLに対するテキストの比率が大きすぎると、メールがスパムフィルタに入る可能性があることに注意してください。これらのタグにカスタムスタイルを適用することはできません。このフィールドを渡さない場合は、デフォルトのメッセージが使用されます。"
-                    },
-                    "are_reminders_enabled": {
-                        "type": "boolean",
-                        "description": "設定した場合、署名者には、3、8、13、18日目にドキュメントに署名するようリマインダが送信されます。リマインダは未署名の全署名者のみに送信されます。",
-                        "example": true
-                    },
-                    "signers": {
-                        "type": "array",
-                        "items": {
-                            "$ref": "#/components/schemas/SignRequestCreateSigner"
-                        },
-                        "description": "署名リクエストの署名者の配列。許可されている署名者の最大数は35です。"
-                    },
-                    "source_files": {
-                        "type": "array",
-                        "items": {
-                            "$ref": "#/components/schemas/File--Base"
-                        },
-                        "description": "署名用ドキュメントの作成元ファイルのリスト。現在は、1ファイルに制限されています。ファイルごとにIDフィールドと種類フィールドのみが必要です。`source_files`が削除されると、この配列は空になります。"
-                    },
-                    "parent_folder": {
-                        "allOf": [
-                            {
-                                "$ref": "#/components/schemas/Folder--Mini"
+                    {
+                        "properties": {
+                            "source_files": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/File--Mini"
+                                },
+                                "description": "List of files to create a signing document from. This is currently limited to 10 files. Only the ID and type fields are required for each file. The array will be empty if the `source_files` are deleted.",
+                                "minimum": 1,
+                                "maximum": 10
                             },
-                            {
-                                "description": "最終的な署名済みドキュメントと署名ログの保存先フォルダ。`ID`フィールドと`type`フィールドのみが必要です。ルートフォルダ (フォルダID `0`) は使用できません。"
+                            "signature_color": {
+                                "type": "string",
+                                "example": "blue",
+                                "description": "Force a specific signature color (blue, black, or red).",
+                                "enum": [
+                                    "blue",
+                                    "black",
+                                    "red"
+                                ],
+                                "nullable": true
+                            },
+                            "signers": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/SignRequestCreateSigner"
+                                },
+                                "description": "署名リクエストの署名者の配列。許可されている署名者の最大数は35です。"
                             }
-                        ]
-                    },
-                    "prefill_tags": {
-                        "type": "array",
-                        "items": {
-                            "$ref": "#/components/schemas/SignRequestPrefillTag"
-                        },
-                        "description": "署名に関連するタグがドキュメントのコンテンツに含まれている場合、この`prefill_tags`を使用してタグを事前入力できます。その際、タグの「id」を事前入力タグの`external_id`フィールドとして参照します。"
-                    },
-                    "days_valid": {
-                        "type": "integer",
-                        "description": "このリクエストが完了しなかった場合に自動的に期限切れになるまでの日数",
-                        "minimum": 0,
-                        "maximum": 730,
-                        "example": 2
-                    },
-                    "external_id": {
-                        "type": "string",
-                        "description": "これは、署名リクエストが関連する外部システムのIDを参照する際に使用できます。",
-                        "example": "123"
-                    },
-                    "is_phone_verification_required_to_view": {
-                        "type": "boolean",
-                        "description": "設定した場合、署名者は、2要素認証のテキストメッセージを入力しないと、ドキュメントを表示できません。この設定を適用するには、署名者に`verification_phone_number`を指定する必要があります。",
-                        "example": true
-                    },
-                    "signature_color": {
-                        "type": "string",
-                        "example": "blue",
-                        "description": "特定の署名の色。",
-                        "enum": [
-                            "blue",
-                            "black",
-                            "red"
-                        ],
-                        "nullable": true
+                        }
                     }
-                }
+                ]
             },
             "ClientError": {
                 "title": "クライアントエラー",
@@ -24290,6 +24220,7 @@
                         "allOf": [
                             {
                                 "title": "スキル",
+                                "type": "object",
                                 "description": "スキルを表すオブジェクト",
                                 "properties": {
                                     "id": {
@@ -35058,7 +34989,7 @@
                     "state": {
                         "type": "string",
                         "description": "ダウンロード中のアーカイブの状態。",
-                        "default": "in_progeress",
+                        "default": "in_progress",
                         "example": "success",
                         "enum": [
                             "in_progress",
@@ -35076,7 +35007,7 @@
                 "description": "署名リクエストオブジェクト",
                 "allOf": [
                     {
-                        "$ref": "#/components/schemas/SignRequestCreateRequest"
+                        "$ref": "#/components/schemas/SignRequest--Base"
                     },
                     {
                         "properties": {
@@ -35098,12 +35029,8 @@
                             "signature_color": {
                                 "type": "string",
                                 "example": "blue",
-                                "description": "特定の署名の色。",
-                                "enum": [
-                                    "blue",
-                                    "black",
-                                    "red"
-                                ]
+                                "description": "Force a specific color for the signature (blue, black, or red).",
+                                "nullable": true
                             },
                             "id": {
                                 "type": "string",
@@ -35113,7 +35040,8 @@
                             "prepare_url": {
                                 "type": "string",
                                 "example": "https://prepareurl.com",
-                                "description": "このURLは、リクエストで`is_document_preparation_needed`が`true`に設定されている場合に返されます。これは、UIで署名リクエストを準備する際に使用されます。署名リクエストは、準備が完了するまで送信されません。"
+                                "description": "このURLは、リクエストで`is_document_preparation_needed`が`true`に設定されている場合に返されます。これは、UIで署名リクエストを準備する際に使用されます。署名リクエストは、準備が完了するまで送信されません。",
+                                "nullable": true
                             },
                             "signing_log": {
                                 "allOf": [
@@ -35121,7 +35049,7 @@
                                         "$ref": "#/components/schemas/File--Mini"
                                     },
                                     {
-                                        "description": "リクエストに対する署名者のアクティビティがすべて記録されているファイルへの参照。署名ログが削除された場合は`Null`。"
+                                        "description": "リクエストに対する署名者のアクティビティがすべて記録されているファイルへの参照"
                                     }
                                 ]
                             },
@@ -35137,9 +35065,7 @@
                                     "declined",
                                     "error_converting",
                                     "error_sending",
-                                    "expired",
-                                    "downloaded",
-                                    "signed and downloaded"
+                                    "expired"
                                 ],
                                 "example": "converting",
                                 "description": "署名リクエストのステータスを説明します"
@@ -35165,7 +35091,15 @@
                                 "type": "string",
                                 "format": "date-time",
                                 "example": "2021-04-26T08:12:13.982Z",
-                                "description": "`days_valid`を使用すると、未署名の場合に署名リクエストの有効期限となる日時 (GMT) が計算されます。"
+                                "description": "`days_valid`を使用すると、未署名の場合に署名リクエストの有効期限となる日時 (GMT) が計算されます。",
+                                "nullable": true
+                            },
+                            "source_files": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/File--Mini"
+                                },
+                                "description": "List of files to create a signing document from. Only the ID and type fields are required for each file. The array will be empty if the `source_files` are deleted."
                             }
                         }
                     }
@@ -35213,6 +35147,101 @@
                         }
                     }
                 ]
+            },
+            "SignRequest--Base": {
+                "title": "署名リクエストを作成",
+                "type": "object",
+                "x-box-resource-id": "sign_request--base",
+                "x-box-tag": "sign_requests",
+                "description": "署名リクエストオブジェクトを作成するリクエスト",
+                "required": [
+                    "source_files",
+                    "parent_folder"
+                ],
+                "properties": {
+                    "is_document_preparation_needed": {
+                        "type": "boolean",
+                        "description": "UIを使用してドキュメントの準備を完了するために送信者がレスポンスで`prepare_url`を受け取る必要があるかどうかを示します。",
+                        "example": true
+                    },
+                    "redirect_url": {
+                        "type": "string",
+                        "example": "https://www.example.com",
+                        "description": "When specified, signature request will be redirected to this url when a document is signed.",
+                        "nullable": true
+                    },
+                    "declined_redirect_url": {
+                        "type": "string",
+                        "example": "https://declined-redirect.com",
+                        "description": "The uri that a signer will be redirected to after declining to sign a document.",
+                        "nullable": true
+                    },
+                    "are_text_signatures_enabled": {
+                        "type": "boolean",
+                        "description": "(テキストの) 入力で生成された署名の使用を無効にします。",
+                        "example": true,
+                        "default": true
+                    },
+                    "email_subject": {
+                        "type": "string",
+                        "example": "Sign Request from Acme",
+                        "description": "署名リクエストメールの件名。これは、署名リクエストによって消去されます。このフィールドを渡さない場合は、デフォルトの件名が使用されます。",
+                        "nullable": true
+                    },
+                    "email_message": {
+                        "type": "string",
+                        "example": "Hello! Please sign the document below",
+                        "description": "署名リクエストメールに含めるメッセージ。このフィールドは、特定の文字のサニタイズによって消去されます。ただし、一部のHTMLタグは使用できます。また、このメッセージに含まれているリンクはメールではハイパーリンクに変換されます。このメッセージには、HTMLタグ`a`、`abbr`、`acronym`、`b`、`blockquote`、`code`、`em`、`i`、`ul`、`li`、`ol`、`strong`を含めることができます。HTMLに対するテキストの比率が大きすぎると、メールがスパムフィルタに入る可能性があることに注意してください。これらのタグにカスタムスタイルを適用することはできません。このフィールドを渡さない場合は、デフォルトのメッセージが使用されます。",
+                        "nullable": true
+                    },
+                    "are_reminders_enabled": {
+                        "type": "boolean",
+                        "description": "3、8、13、18日目にドキュメントに署名するよう署名者に促します。リマインダは未署名の署名者にのみ送信されます。",
+                        "example": true
+                    },
+                    "parent_folder": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/Folder--Mini"
+                            },
+                            {
+                                "description": "最終的な署名済みドキュメントと署名ログの保存先フォルダ。`ID`フィールドと`type`フィールドのみが必要です。ルートフォルダ (フォルダID `0`) は使用できません。"
+                            }
+                        ]
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "name",
+                        "description": "Name of the sign request."
+                    },
+                    "prefill_tags": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/SignRequestPrefillTag"
+                        },
+                        "description": "署名に関連するタグがドキュメントのコンテンツに含まれている場合、この`prefill_tags`を使用してタグを事前入力できます。その際、タグの「id」を事前入力タグの`external_id`フィールドとして参照します。"
+                    },
+                    "days_valid": {
+                        "type": "integer",
+                        "description": "Number of days after which this request will automatically expire if not completed.",
+                        "minimum": 0,
+                        "maximum": 730,
+                        "example": 2,
+                        "nullable": true
+                    },
+                    "external_id": {
+                        "type": "string",
+                        "description": "これは、署名リクエストが関連する外部システムのIDを参照する際に使用できます。",
+                        "example": "123",
+                        "nullable": true
+                    },
+                    "is_phone_verification_required_to_view": {
+                        "type": "boolean",
+                        "description": "Forces signers to verify a text message prior to viewing the document. You must specify the phone number of signers to have this setting apply to them.",
+                        "example": true,
+                        "nullable": true
+                    }
+                }
             },
             "FileScope": {
                 "title": "ファイルスコープ",
