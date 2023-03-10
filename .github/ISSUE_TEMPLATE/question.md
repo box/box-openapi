@@ -15,7 +15,7 @@ assignees: cbetta
 
 ## Your question
 <!-- Replace this text with a description of what question you have -->
-<!-- Please include as much detail as possible -->
+<!-- Include as much detail as possible -->
 
 [api-docs]: https://developer.box.com/
 [dev-forums]: https://community.box.com/t5/Platform-and-Development-Forum/bd-p/DeveloperForum
