@@ -5940,7 +5940,7 @@
           "Collaborations"
         ],
         "summary": "Create collaboration",
-        "description": "Adds a collaboration for a single user or a single group to a file\nor folder.\n\nCollaborations can be created using email address, user IDs, or a\ngroup IDs.\n\nIf a collaboration is being created with a group, access to\nthis endpoint is dependent on the group's ability to be invited.",
+        "description": "Adds a collaboration for a single user or a single group to a file\nor folder.\n\nCollaborations can be created using email address, user IDs, or a\ngroup IDs.\n\nIf a collaboration is being created with a group, access to\nthis endpoint is dependent on the group's ability to be invited.\n\nIf collaboration is in `pending` status, the following fields\nare redacted:\n- `login` and `name` are hidden if a collaboration was created\nusing `user_id`,\n-  `name` is hidden if a collaboration was created using `login`.",
         "parameters": [
           {
             "name": "fields",
@@ -19343,10 +19343,10 @@
         "accessible_by": {
           "allOf": [
             {
-              "$ref": "#/definitions/User--Mini"
+              "$ref": "#/definitions/User--Collaborations"
             },
             {
-              "description": "The user or group that is granted access"
+              "description": "The user or group that is granted access."
             }
           ]
         },
@@ -19380,20 +19380,20 @@
             "pending",
             "rejected"
           ],
-          "description": "The status of the collaboration invitation."
+          "description": "The status of the collaboration invitation. If the status\nis `pending`, `login` and `name` return an empty string."
         },
         "acknowledged_at": {
           "type": "string",
           "format": "date-time",
-          "description": "When the `status` of the collaboration object changed to\n`accepted` or `rejected`"
+          "description": "When the `status` of the collaboration object changed to\n`accepted` or `rejected`."
         },
         "created_by": {
           "allOf": [
             {
-              "$ref": "#/definitions/User--Mini"
+              "$ref": "#/definitions/User--Collaborations"
             },
             {
-              "description": "The user who created the collaboration object"
+              "description": "The user who created the collaboration object."
             },
             {}
           ]
@@ -19401,12 +19401,12 @@
         "created_at": {
           "type": "string",
           "format": "date-time",
-          "description": "When the collaboration object was created"
+          "description": "When the collaboration object was created."
         },
         "modified_at": {
           "type": "string",
           "format": "date-time",
-          "description": "When the collaboration object was last modified"
+          "description": "When the collaboration object was last modified."
         },
         "acceptance_requirements_status": {
           "type": "object",
@@ -23382,6 +23382,35 @@
           ]
         }
       }
+    },
+    "User--Collaborations": {
+      "title": "User (Collaborations)",
+      "type": "object",
+      "x-box-variant": "collaborations",
+      "description": "A mini representation of a user, can be returned only when\nthe status is `pending`.",
+      "required": [
+        "name",
+        "login"
+      ],
+      "allOf": [
+        {
+          "$ref": "#/definitions/User--Base"
+        },
+        {
+          "properties": {
+            "name": {
+              "type": "string",
+              "description": "The display name of this user. If the collaboration status is `pending`, an empty string is returned.",
+              "maxLength": 50
+            },
+            "login": {
+              "type": "string",
+              "format": "email",
+              "description": "The primary email address of this user. If the collaboration status is `pending`, an empty string is returned."
+            }
+          }
+        }
+      ]
     },
     "TermsOfService--Base": {
       "title": "Terms of service (Base)",
