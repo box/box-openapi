@@ -1,0 +1,74 @@
+---
+operationId: put_integration_mapping_id
+
+summary: Update Slack integration mapping
+
+tags:
+  - integrationMappingsSlack
+  - put_integration_mappings_slack
+
+x-box-tag: integration_mappings_slack
+
+x-box-scopes:
+  - integration_mappings.readwrite
+
+description: |-
+  Updates a Slack integration mapping. Supports updating the Box
+  folder ID and options
+parameters:
+  - $ref: '../attributes/integration_mapping_id.yml'
+
+requestBody:
+  content:
+    application/vnd.box+json:
+      schema:
+        type: object
+        properties:
+          box_item:
+            $ref: '#/components/schemas/IntegrationMappingBoxItemSlack'
+            nullable: false
+          options:
+            $ref: '#/components/schemas/IntegrationMappingSlackOptions'
+            nullable: false
+  description: |-
+    At least one of `box_item` and `options` must be provided.
+
+responses:
+  200:
+    description: |-
+      Returns the updated integration mapping object.
+    content:
+      application/vnd.box.internal+json:
+        schema:
+          $ref: '#/components/schemas/IntegrationMapping'
+
+  404:
+    description: |-
+      Returns a `not_found` if integration mapping object was not found
+      in the database
+    content:
+      application/vnd.box.internal+json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
+
+  400:
+    description: |-
+      Returns a `bad_request` if an incorrect `options` was supplied or
+      the Box folder can not be mapped to this `partner_item`
+      Error codes:
+      `SERVICE_ACCOUNT_IS_NOT_A_COOWNER_OR_OWNER` -- service account doesn't
+      have co-owner collaboration or is not an owner of the `box_item_id`,
+      `MAPPING_NOT_FOUND` -- mapping was not found,
+      `JWT_APP_NOT_AUTHORIZED` -- JWT authorization error.
+    content:
+      application/vnd.box.internal+json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
+
+  default:
+    description: |-
+      An unexpected client error.
+    content:
+      application/vnd.box.internal+json:
+        schema:
+          $ref: '#/components/schemas/ClientError'
