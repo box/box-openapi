@@ -1,0 +1,240 @@
+---
+title: Template
+
+type: object
+
+x-box-resource-id: template
+x-box-tag: templates
+
+description: |-
+  A template object
+allOf:
+  - properties:
+      id:
+        type: string
+        example: 4206996024-14944f75-c34b-478a-95a1-264b1ff80d35
+        description: Template identifier.
+
+      name:
+        type: string
+        nullable: true
+        example: Official contract
+        description: The name of the template.
+
+      email_subject:
+        type: string
+        example: Sign Request from Acme
+        description: >-
+          Subject of signature request email. This is cleaned by sign
+          request. If this field is not passed, a default subject will be used.
+        nullable: true
+
+      email_message:
+        type: string
+        example: Hello! Please sign the document below
+        description: >-
+          Message to include in signature request email. The field
+          is cleaned through sanitization of specific characters. However,
+          some html tags are allowed. Links included in the
+          message are also converted to hyperlinks in the email. The
+          message may contain the following html tags including `a`, `abbr`,
+          `acronym`, `b`, `blockquote`, `code`, `em`, `i`, `ul`, `li`, `ol`, and
+          `strong`. Be aware that when the text
+          to html ratio is too high, the email
+          may end up in spam filters. Custom styles on
+          these tags are not allowed.
+          If this field is not passed, a default message will be used.
+        nullable: true
+      days_valid:
+        type: integer
+        description: >-
+          Set the number of days after which the
+          created signature request will automatically
+          expire if not completed. By default, we do
+          not apply any expiration date on signature
+          requests, and the signature request does not expire.
+        minimum: 0
+        maximum: 730
+        example: 2
+        nullable: true
+
+      parent_folder:
+        allOf:
+          - $ref: "#/components/schemas/Folder--Mini"
+          - description: |-
+              The destination folder to place final, signed document and signing
+              log. Only `ID` and `type` fields are required. The root folder,
+              folder ID `0`, cannot be used.
+
+      source_files:
+        type: array
+        items:
+          $ref: "#/components/schemas/File--Mini"
+        description: >-
+          List of files to create a signing document from.
+          Only the ID and type fields are required
+          for each file.
+
+      are_fields_locked:
+        type: boolean
+        description: >-
+          Indicates if the template input
+          fields are editable or not.
+        example: false
+
+      are_options_locked:
+        type: boolean
+        description: >-
+          Indicates if the template document options
+          are editable or not,
+          for example renaming the document.
+        example: true
+
+      are_recipients_locked:
+        type: boolean
+        description: >-
+          Indicates if the template signers are editable or not.
+        example: false
+
+      are_email_settings_locked:
+        type: boolean
+        description: >-
+          Indicates if the template email settings are editable or not.
+        example: true
+
+      has_files_locked:
+        type: boolean
+        description: >-
+          Indicates if the template files are editable or not.
+          This includes deleting or renaming template files.
+        example: true
+
+      signers:
+        type: array
+        items:
+          $ref: '#/components/schemas/TemplateSigner'
+        description: Array of signers for the template.
+
+      additional_info:
+        description: >-
+          Additional information on which fields are
+          required and which fields are not editable.
+        type: object
+        properties:
+          non_editable:
+            type: array
+            description: Non editable fields.
+            items:
+              type: string
+              enum:
+                - email_subject
+                - email_message
+                - name
+                - days_valid
+                - signers
+                - source_files
+            example: [name, days_valid]
+          required:
+            type: object
+            description: Required fields.
+            properties:
+              signers:
+                description: Required signer fields.
+                type: array
+                items:
+                  type: array
+                  items:
+                    type: string
+                    enum:
+                      - email
+
+      ready_sign_link:
+        nullable: true
+        description: >-
+          Box's ready-sign link feature enables you to create a
+          link to a signature request that
+          you've created from a template. Use this link
+          when you want to post a signature request
+          on a public form — such as an email, social media post,
+          or web page — without knowing who the signers will be.
+          Note: The ready-sign link feature is
+          limited to Enterprise Plus customers and not
+          available to Box Verified Enterprises.
+
+        type: object
+        properties:
+          url:
+            type: string
+            description: The URL that can be sent to signers.
+            example: |-
+             "https://app.box.com/sign/
+             ready-sign-link/a1cdf2c7-fa81-4a67-8163-1e5f4dbe5178"
+
+          name:
+            type: string
+            nullable: true
+            description: Request name.
+            example: Official contract
+
+          instructions:
+            type: string
+            nullable: true
+            description: Extra instructions for all signers.
+            example: Hello! Please sign the document below
+
+          folder_id:
+            type: string
+            nullable: true
+            example: "12345"
+            description: |-
+              The destination folder to place final,
+              signed document and signing
+              log. Only `ID` and `type` fields are required.
+              The root folder,
+              folder ID `0`, cannot be used.
+          is_notification_disabled:
+            type: boolean
+            description: |-
+             Whether to disable notifications when
+             a signer has signed.
+            example: true
+          is_active:
+            type: boolean
+            description: Whether the ready sign link
+             is enabled or not.
+            example: false
+
+      custom_branding:
+        nullable: true
+        type: object
+        description: |-
+          Custom branding applied to notifications
+          and signature requests.
+        properties:
+          company_name:
+            description: Name of the company
+            type: string
+            nullable: true
+            example: Corporation inc.
+
+          logo_uri:
+            type: string
+            nullable: true
+            description: Custom branding logo URI in
+             the form of a base64 image.
+            example: |-
+             data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA
+             AAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A
+             8AAQUBAScY42YAAAAASUVORK5CYII=
+
+          branding_color:
+            type: string
+            nullable: true
+            example: 9E5E6F
+            description: Custom branding color in hex.
+
+          email_footer_text:
+            type: string
+            nullable: true
+            example: Contact email email@mail.com
+            description: Content of the email footer.
