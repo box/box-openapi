@@ -23637,6 +23637,140 @@
           }
         }
       }
+    },
+    "/templates": {
+      "get": {
+        "operationId": "get_templates",
+        "summary": "List templates",
+        "tags": [
+          "templates",
+          "get_templates"
+        ],
+        "x-box-tag": "templates",
+        "description": "Gets templates created by a user.",
+        "parameters": [
+          {
+            "name": "marker",
+            "description": "Defines the position marker at which to begin returning results. This is\nused when paginating using marker-based pagination.\n\nThis requires `usemarker` to be set to `true`.",
+            "in": "query",
+            "required": false,
+            "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "description": "The maximum number of items to return per page.",
+            "in": "query",
+            "required": false,
+            "example": 1000,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "maximum": 1000
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns a collection of templates",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Templates"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Returned when the access token provided in the `Authorization` header\nis not recognized or not provided.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/templates/{template_id}": {
+      "get": {
+        "operationId": "get_templates_id",
+        "summary": "Get template",
+        "tags": [
+          "templates",
+          "get_templates_id"
+        ],
+        "x-box-tag": "templates",
+        "description": "Get template details.",
+        "parameters": [
+          {
+            "name": "template_id",
+            "description": "The ID of the template",
+            "example": "123075213-7d117509-8f05-42e4-a5ef-5190a319d41d",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns details of a template.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Template"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Returned when the access token provided in the `Authorization` header\nis not recognized or not provided.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Returned if the template is not found or the user does not\nhave access to the associated template.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -24071,21 +24205,16 @@
               "source_files": {
                 "type": "array",
                 "items": {
-                  "$ref": "#/components/schemas/File--Mini"
+                  "$ref": "#/components/schemas/File--Base"
                 },
-                "description": "List of files to create a signing document from. This is currently\nlimited to 10 files. Only the ID and type fields are required\nfor each file. The array will be empty if the `source_files`\nare deleted.",
-                "minimum": 1,
-                "maximum": 10
+                "description": "List of files to create a signing document from. This is currently limited to ten files. Only the ID and type fields are required for each file.",
+                "maxItems": 10,
+                "nullable": true
               },
-              "signature_color": {
+              "template_id": {
                 "type": "string",
-                "example": "blue",
-                "description": "Force a specific signature color (blue, black, or red).",
-                "enum": [
-                  "blue",
-                  "black",
-                  "red"
-                ],
+                "example": "123075213-af2c8822-3ef2-4952-8557-52d69c2fe9cb",
+                "description": "\"When a signature request is created from a template this field will indicate the id of that template.\"",
                 "nullable": true
               },
               "signers": {
@@ -31922,6 +32051,374 @@
           }
         }
       },
+      "Template": {
+        "title": "Template",
+        "type": "object",
+        "x-box-resource-id": "template",
+        "x-box-tag": "templates",
+        "description": "A template object",
+        "allOf": [
+          {
+            "properties": {
+              "id": {
+                "type": "string",
+                "example": "4206996024-14944f75-c34b-478a-95a1-264b1ff80d35",
+                "description": "Template identifier."
+              },
+              "name": {
+                "type": "string",
+                "nullable": true,
+                "example": "Official contract",
+                "description": "The name of the template."
+              },
+              "email_subject": {
+                "type": "string",
+                "example": "Sign Request from Acme",
+                "description": "Subject of signature request email. This is cleaned by sign request. If this field is not passed, a default subject will be used.",
+                "nullable": true
+              },
+              "email_message": {
+                "type": "string",
+                "example": "Hello! Please sign the document below",
+                "description": "Message to include in signature request email. The field is cleaned through sanitization of specific characters. However, some html tags are allowed. Links included in the message are also converted to hyperlinks in the email. The message may contain the following html tags including `a`, `abbr`, `acronym`, `b`, `blockquote`, `code`, `em`, `i`, `ul`, `li`, `ol`, and `strong`. Be aware that when the text to html ratio is too high, the email may end up in spam filters. Custom styles on these tags are not allowed. If this field is not passed, a default message will be used.",
+                "nullable": true
+              },
+              "days_valid": {
+                "type": "integer",
+                "description": "Set the number of days after which the created signature request will automatically expire if not completed. By default, we do not apply any expiration date on signature requests, and the signature request does not expire.",
+                "minimum": 0,
+                "maximum": 730,
+                "example": 2,
+                "nullable": true
+              },
+              "parent_folder": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/Folder--Mini"
+                  },
+                  {
+                    "description": "The destination folder to place final, signed document and signing\nlog. Only `ID` and `type` fields are required. The root folder,\nfolder ID `0`, cannot be used."
+                  }
+                ]
+              },
+              "source_files": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/File--Mini"
+                },
+                "description": "List of files to create a signing document from. Only the ID and type fields are required for each file."
+              },
+              "are_fields_locked": {
+                "type": "boolean",
+                "description": "Indicates if the template input fields are editable or not.",
+                "example": false
+              },
+              "are_options_locked": {
+                "type": "boolean",
+                "description": "Indicates if the template document options are editable or not, for example renaming the document.",
+                "example": true
+              },
+              "are_recipients_locked": {
+                "type": "boolean",
+                "description": "Indicates if the template signers are editable or not.",
+                "example": false
+              },
+              "are_email_settings_locked": {
+                "type": "boolean",
+                "description": "Indicates if the template email settings are editable or not.",
+                "example": true
+              },
+              "has_files_locked": {
+                "type": "boolean",
+                "description": "Indicates if the template files are editable or not. This includes deleting or renaming template files.",
+                "example": true
+              },
+              "signers": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/TemplateSigner"
+                },
+                "description": "Array of signers for the template."
+              },
+              "additional_info": {
+                "description": "Additional information on which fields are required and which fields are not editable.",
+                "type": "object",
+                "properties": {
+                  "non_editable": {
+                    "type": "array",
+                    "description": "Non editable fields.",
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "email_subject",
+                        "email_message",
+                        "name",
+                        "days_valid",
+                        "signers",
+                        "source_files"
+                      ]
+                    },
+                    "example": [
+                      "name",
+                      "days_valid"
+                    ]
+                  },
+                  "required": {
+                    "type": "object",
+                    "description": "Required fields.",
+                    "properties": {
+                      "signers": {
+                        "description": "Required signer fields.",
+                        "type": "array",
+                        "items": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "enum": [
+                              "email"
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "ready_sign_link": {
+                "nullable": true,
+                "description": "Box's ready-sign link feature enables you to create a link to a signature request that you've created from a template. Use this link when you want to post a signature request on a public form — such as an email, social media post, or web page — without knowing who the signers will be. Note: The ready-sign link feature is limited to Enterprise Plus customers and not available to Box Verified Enterprises.",
+                "type": "object",
+                "properties": {
+                  "url": {
+                    "type": "string",
+                    "description": "The URL that can be sent to signers.",
+                    "example": "\"https://app.box.com/sign/\nready-sign-link/a1cdf2c7-fa81-4a67-8163-1e5f4dbe5178\""
+                  },
+                  "name": {
+                    "type": "string",
+                    "nullable": true,
+                    "description": "Request name.",
+                    "example": "Official contract"
+                  },
+                  "instructions": {
+                    "type": "string",
+                    "nullable": true,
+                    "description": "Extra instructions for all signers.",
+                    "example": "Hello! Please sign the document below"
+                  },
+                  "folder_id": {
+                    "type": "string",
+                    "nullable": true,
+                    "example": "12345",
+                    "description": "The destination folder to place final,\nsigned document and signing\nlog. Only `ID` and `type` fields are required.\nThe root folder,\nfolder ID `0`, cannot be used."
+                  },
+                  "is_notification_disabled": {
+                    "type": "boolean",
+                    "description": "Whether to disable notifications when\na signer has signed.",
+                    "example": true
+                  },
+                  "is_active": {
+                    "type": "boolean",
+                    "description": "Whether the ready sign link is enabled or not.",
+                    "example": false
+                  }
+                }
+              },
+              "custom_branding": {
+                "nullable": true,
+                "type": "object",
+                "description": "Custom branding applied to notifications\nand signature requests.",
+                "properties": {
+                  "company_name": {
+                    "description": "Name of the company",
+                    "type": "string",
+                    "nullable": true,
+                    "example": "Corporation inc."
+                  },
+                  "logo_uri": {
+                    "type": "string",
+                    "nullable": true,
+                    "description": "Custom branding logo URI in the form of a base64 image.",
+                    "example": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA\nAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A\n8AAQUBAScY42YAAAAASUVORK5CYII="
+                  },
+                  "branding_color": {
+                    "type": "string",
+                    "nullable": true,
+                    "example": "9E5E6F",
+                    "description": "Custom branding color in hex."
+                  },
+                  "email_footer_text": {
+                    "type": "string",
+                    "nullable": true,
+                    "example": "Contact email email@mail.com",
+                    "description": "Content of the email footer."
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "Templates": {
+        "title": "Templates",
+        "type": "object",
+        "x-box-resource-id": "templates",
+        "x-box-tag": "templates",
+        "description": "A standard representation of a template, as returned from any Box Sign\nAPI endpoints by default.",
+        "allOf": [
+          {
+            "type": "object",
+            "description": "The part of an API response that describes marker\nbased pagination",
+            "allOf": [
+              {
+                "type": "object",
+                "description": "The part of an API response that describes marker\nbased pagination",
+                "properties": {
+                  "limit": {
+                    "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
+                    "example": 1000,
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "next_marker": {
+                    "description": "The marker for the start of the next page of results.",
+                    "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                    "type": "string"
+                  }
+                }
+              },
+              {
+                "properties": {
+                  "prev_marker": {
+                    "description": "The marker for the start of the previous page of results.",
+                    "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                    "type": "string",
+                    "nullable": true
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "properties": {
+              "entries": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Template"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "TemplateSigner": {
+        "title": "Signer fields for Templates",
+        "type": "object",
+        "description": "The schema for a Signer for Templates",
+        "allOf": [
+          {
+            "properties": {
+              "inputs": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/TemplateSignerInput"
+                },
+                "readOnly": true
+              },
+              "email": {
+                "type": "string",
+                "description": "Email address of the signer",
+                "example": "example@mail.com",
+                "nullable": true
+              },
+              "role": {
+                "type": "string",
+                "enum": [
+                  "signer",
+                  "approver",
+                  "final_copy_reader"
+                ],
+                "description": "Defines the role of the signer in the signature request. A role of\n`signer` needs to sign the document, a role `approver`\napproves the document and\na `final_copy_reader` role only\nreceives the final signed document and signing log.",
+                "example": "signer",
+                "default": "signer"
+              },
+              "is_in_person": {
+                "type": "boolean",
+                "description": "Used in combination with an embed URL for a sender.\nAfter the sender signs, they will be\nredirected to the next `in_person` signer.",
+                "example": true
+              },
+              "order": {
+                "type": "integer",
+                "description": "Order of the signer",
+                "minimum": 0,
+                "example": 2
+              }
+            }
+          }
+        ]
+      },
+      "TemplateSignerInput": {
+        "title": "Template Signer Input",
+        "type": "object",
+        "description": "Input created by a Signer on a Template",
+        "required": [
+          "page_index"
+        ],
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/SignRequestPrefillTag"
+          },
+          {
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "signature",
+                  "date",
+                  "text",
+                  "checkbox",
+                  "radio",
+                  "dropdown"
+                ],
+                "description": "Type of input",
+                "example": "text"
+              },
+              "content_type": {
+                "type": "string",
+                "enum": [
+                  "signature",
+                  "initial",
+                  "stamp",
+                  "date",
+                  "checkbox",
+                  "text",
+                  "full_name",
+                  "first_name",
+                  "last_name",
+                  "company",
+                  "title",
+                  "email",
+                  "attachment",
+                  "radio",
+                  "dropdown"
+                ],
+                "description": "Content type of input",
+                "example": "text"
+              },
+              "is_required": {
+                "type": "boolean",
+                "description": "Whether or not the input is required.",
+                "example": true
+              },
+              "page_index": {
+                "type": "integer",
+                "description": "Index of page that the input is on.",
+                "example": 4
+              }
+            }
+          }
+        ]
+      },
       "TrashFile": {
         "title": "Trashed File",
         "type": "object",
@@ -35047,6 +35544,11 @@
         "type": "object",
         "x-box-resource-id": "sign_request",
         "x-box-tag": "sign_requests",
+        "x-box-variants": [
+          "standard",
+          "base"
+        ],
+        "x-box-variant": "standard",
         "description": "A Sign Request Object",
         "allOf": [
           {
@@ -35061,6 +35563,13 @@
                   "sign-request"
                 ],
                 "description": "object type"
+              },
+              "source_files": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/File--Base"
+                },
+                "description": "List of files to create a signing document from. This is currently limited to ten files. Only the ID and type fields are required for each file."
               },
               "signers": {
                 "type": "array",
@@ -35136,13 +35645,6 @@
                 "example": "2021-04-26T08:12:13.982Z",
                 "description": "Uses `days_valid` to calculate the date and time, in GMT, the sign request will expire if unsigned.",
                 "nullable": true
-              },
-              "source_files": {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/File--Mini"
-                },
-                "description": "List of files to create a signing document from. Only the ID and type fields are required for each file. The array will be empty if the `source_files` are deleted."
               }
             }
           }
@@ -35192,13 +35694,17 @@
         ]
       },
       "SignRequest--Base": {
-        "title": "Create a sign request",
+        "title": "Sign Request (Base)",
         "type": "object",
         "x-box-resource-id": "sign_request--base",
         "x-box-tag": "sign_requests",
+        "x-box-variants": [
+          "standard",
+          "base"
+        ],
+        "x-box-variant": "base",
         "description": "A request to create a sign request object",
         "required": [
-          "source_files",
           "parent_folder"
         ],
         "properties": {
@@ -35266,7 +35772,7 @@
           },
           "days_valid": {
             "type": "integer",
-            "description": "Number of days after which this request will automatically expire if not completed.",
+            "description": "Set the number of days after which the created signature request will automatically expire if not completed. By default, we do not apply any expiration date on signature requests, and the signature request does not expire.",
             "minimum": 0,
             "maximum": 730,
             "example": 2,
@@ -36651,6 +37157,10 @@
     {
       "name": "Zip Downloads",
       "x-box-tag": "zip_downloads"
+    },
+    {
+      "name": "Templates",
+      "x-box-tag": "templates"
     }
   ],
   "externalDocs": {
