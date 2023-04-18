@@ -23673,7 +23673,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Returns a collection of templates",
+            "description": "Returns a collection of templates.",
             "content": {
               "application/json": {
                 "schema": {
@@ -24207,12 +24207,6 @@
                 },
                 "description": "List of files to create a signing document from. This is currently limited to ten files. Only the ID and type fields are required for each file.",
                 "maxItems": 10,
-                "nullable": true
-              },
-              "template_id": {
-                "type": "string",
-                "example": "123075213-af2c8822-3ef2-4952-8557-52d69c2fe9cb",
-                "description": "\"When a signature request is created from a template this field will indicate the id of that template.\"",
                 "nullable": true
               },
               "signers": {
@@ -32126,7 +32120,7 @@
                 "description": "Indicates if the template email settings are editable or not.",
                 "example": true
               },
-              "has_files_locked": {
+              "are_files_locked": {
                 "type": "boolean",
                 "description": "Indicates if the template files are editable or not. This includes deleting or renaming template files.",
                 "example": true
@@ -32157,8 +32151,8 @@
                       ]
                     },
                     "example": [
-                      "name",
-                      "days_valid"
+                      "email_subject",
+                      "name"
                     ]
                   },
                   "required": {
@@ -32167,15 +32161,25 @@
                     "properties": {
                       "signers": {
                         "description": "Required signer fields.",
+                        "example": [
+                          [
+                            "email"
+                          ],
+                          [
+                            "email"
+                          ]
+                        ],
                         "type": "array",
                         "items": {
                           "type": "array",
                           "items": {
-                            "type": "string",
                             "enum": [
                               "email"
                             ]
-                          }
+                          },
+                          "example": [
+                            "email"
+                          ]
                         }
                       }
                     }
@@ -32262,7 +32266,7 @@
         "type": "object",
         "x-box-resource-id": "templates",
         "x-box-tag": "templates",
-        "description": "A standard representation of a template, as returned from any Box Sign\nAPI endpoints by default.",
+        "description": "A list of templates, as returned from any Box Sign\nAPI endpoints by default.",
         "allOf": [
           {
             "type": "object",
@@ -32290,8 +32294,7 @@
                   "prev_marker": {
                     "description": "The marker for the start of the previous page of results.",
                     "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
-                    "type": "string",
-                    "nullable": true
+                    "type": "string"
                   }
                 }
               }
@@ -32301,6 +32304,7 @@
             "properties": {
               "entries": {
                 "type": "array",
+                "description": "A list of templates.",
                 "items": {
                   "$ref": "#/components/schemas/Template"
                 }
@@ -32412,6 +32416,63 @@
                 "type": "integer",
                 "description": "Index of page that the input is on.",
                 "example": 4
+              },
+              "document_id": {
+                "type": "string",
+                "description": "Document identifier.",
+                "example": "123075213-eb54b537-8b25-445e-87c1-5a1c67d8cbd7",
+                "nullable": true
+              },
+              "dropdown_choices": {
+                "type": "array",
+                "example": [
+                  "Yes",
+                  "No",
+                  "Maybe"
+                ],
+                "description": "When the input is of the type `dropdown` this values will be filled with all the dropdown options.",
+                "nullable": true,
+                "items": {
+                  "type": "string"
+                }
+              },
+              "group_id": {
+                "type": "string",
+                "description": "When the input is of type `radio` they can be grouped to gather with this identifier.",
+                "nullable": true,
+                "example": "da317330-225a-4c72-89ad-0d6dcaaf4df6"
+              },
+              "coordinates": {
+                "type": "object",
+                "description": "Where the input is located on a page.",
+                "properties": {
+                  "x": {
+                    "type": "number",
+                    "example": 0.672258592471358,
+                    "description": "Relative x coordinate to the page the input is on, ranging from 0 to 1."
+                  },
+                  "y": {
+                    "type": "number",
+                    "example": 0.18654283173599448,
+                    "description": "Relative y coordinate to the page the input is on, ranging from 0 to 1."
+                  }
+                }
+              },
+              "dimensions": {
+                "type": "object",
+                "description": "The size of the input.",
+                "properties": {
+                  "width": {
+                    "type": "number",
+                    "example": 0.2618657937806874,
+                    "description": "Relative width to the page the input is on, ranging from 0 to 1."
+                  },
+                  "height": {
+                    "type": "number",
+                    "example": 0.05311728090109673,
+                    "description": "Relative height to the page the input is on, ranging from 0 to 1."
+                  }
+                }
               }
             }
           }
@@ -35786,6 +35847,12 @@
             "type": "boolean",
             "description": "Forces signers to verify a text message prior to viewing the document. You must specify the phone number of signers to have this setting apply to them.",
             "example": true,
+            "nullable": true
+          },
+          "template_id": {
+            "type": "string",
+            "example": "123075213-af2c8822-3ef2-4952-8557-52d69c2fe9cb",
+            "description": "When a signature request is created from a template this field will indicate the id of that template.",
             "nullable": true
           }
         }
