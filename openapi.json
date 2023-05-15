@@ -16782,7 +16782,8 @@
                                                 "SHARED_LINK.UPDATED",
                                                 "SIGN_REQUEST.COMPLETED",
                                                 "SIGN_REQUEST.DECLINED",
-                                                "SIGN_REQUEST.EXPIRED"
+                                                "SIGN_REQUEST.EXPIRED",
+                                                "SIGN_REQUEST.SIGNER_EMAIL_BOUNCED"
                                             ]
                                         }
                                     }
@@ -17020,7 +17021,8 @@
                                                 "SHARED_LINK.UPDATED",
                                                 "SIGN_REQUEST.COMPLETED",
                                                 "SIGN_REQUEST.DECLINED",
-                                                "SIGN_REQUEST.EXPIRED"
+                                                "SIGN_REQUEST.EXPIRED",
+                                                "SIGN_REQUEST.SIGNER_EMAIL_BOUNCED"
                                             ]
                                         }
                                     }
@@ -23634,6 +23636,138 @@
                     }
                 }
             }
+        },
+        "/sign_templates": {
+            "get": {
+                "operationId": "get_sign_templates",
+                "summary": "List Box Sign templates",
+                "tags": [
+                    "templates"
+                ],
+                "x-box-tag": "sign_templates",
+                "description": "Gets Box Sign templates created by a user.",
+                "parameters": [
+                    {
+                        "name": "marker",
+                        "description": "結果が返される開始位置のマーカー。マーカーベースのページ割りを使用している場合に使用されます。\n\nこれを使用するには、`usemarker`を`true`に設定する必要があります。",
+                        "in": "query",
+                        "required": false,
+                        "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "description": "返す項目の1ページあたりの最大数。",
+                        "in": "query",
+                        "required": false,
+                        "example": 1000,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64",
+                            "maximum": 1000
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns a collection of templates.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SignTemplates"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "`Authorization`ヘッダーで指定されているアクセストークンが認識されないか、指定されていない場合に返されます。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "予期しないクライアントエラー。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/sign_templates/{template_id}": {
+            "get": {
+                "operationId": "get_sign_templates_id",
+                "summary": "Get Box Sign template by ID",
+                "tags": [
+                    "templates"
+                ],
+                "x-box-tag": "sign_templates",
+                "description": "Fetches details of a specific Box Sign template.",
+                "parameters": [
+                    {
+                        "name": "template_id",
+                        "description": "The ID of a Box Sign template.",
+                        "example": "123075213-7d117509-8f05-42e4-a5ef-5190a319d41d",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns details of a template.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SignTemplate"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "`Authorization`ヘッダーで指定されているアクセストークンが認識されないか、指定されていない場合に返されます。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Returned if the template is not found or the user does not have access to the associated template.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "予期しないクライアントエラー。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
     "components": {
@@ -24068,21 +24202,10 @@
                             "source_files": {
                                 "type": "array",
                                 "items": {
-                                    "$ref": "#/components/schemas/File--Mini"
+                                    "$ref": "#/components/schemas/File--Base"
                                 },
-                                "description": "署名用ドキュメントの作成元ファイルのリスト。現在は、10ファイルに制限されています。ファイルごとにIDフィールドと種類フィールドのみが必要です。`source_files`が削除されると、この配列は空になります。",
-                                "minimum": 1,
-                                "maximum": 10
-                            },
-                            "signature_color": {
-                                "type": "string",
-                                "example": "blue",
-                                "description": "特定の署名の色 (青、黒、または赤) を強制します。",
-                                "enum": [
-                                    "blue",
-                                    "black",
-                                    "red"
-                                ],
+                                "description": "List of files to create a signing document from. This is currently limited to ten files. Only the ID and type fields are required for each file.",
+                                "maxItems": 10,
                                 "nullable": true
                             },
                             "signers": {
@@ -24542,7 +24665,8 @@
                                     "SHARED_LINK.UPDATED",
                                     "SIGN_REQUEST.COMPLETED",
                                     "SIGN_REQUEST.DECLINED",
-                                    "SIGN_REQUEST.EXPIRED"
+                                    "SIGN_REQUEST.EXPIRED",
+                                    "SIGN_REQUEST.SIGNER_EMAIL_BOUNCED"
                                 ]
                             },
                             {
@@ -31916,6 +32040,442 @@
                     }
                 }
             },
+            "SignTemplate": {
+                "title": "Box Sign template",
+                "type": "object",
+                "x-box-resource-id": "sign_template",
+                "x-box-tag": "sign_templates",
+                "description": "A Box Sign template object",
+                "allOf": [
+                    {
+                        "properties": {
+                            "id": {
+                                "type": "string",
+                                "example": "4206996024-14944f75-c34b-478a-95a1-264b1ff80d35",
+                                "description": "Template identifier."
+                            },
+                            "name": {
+                                "type": "string",
+                                "nullable": true,
+                                "example": "Official contract",
+                                "description": "The name of the template."
+                            },
+                            "email_subject": {
+                                "type": "string",
+                                "example": "Sign Request from Acme",
+                                "description": "Subject of signature request email. This is cleaned by sign request. If this field is not passed, a default subject will be used.",
+                                "nullable": true
+                            },
+                            "email_message": {
+                                "type": "string",
+                                "example": "Hello! Please sign the document below",
+                                "description": "Message to include in signature request email. The field is cleaned through sanitization of specific characters. However, some html tags are allowed. Links included in the message are also converted to hyperlinks in the email. The message may contain the following html tags including `a`, `abbr`, `acronym`, `b`, `blockquote`, `code`, `em`, `i`, `ul`, `li`, `ol`, and `strong`. Be aware that when the text to html ratio is too high, the email may end up in spam filters. Custom styles on these tags are not allowed. If this field is not passed, a default message will be used.",
+                                "nullable": true
+                            },
+                            "days_valid": {
+                                "type": "integer",
+                                "description": "Set the number of days after which the created signature request will automatically expire if not completed. By default, we do not apply any expiration date on signature requests, and the signature request does not expire.",
+                                "minimum": 0,
+                                "maximum": 730,
+                                "example": 2,
+                                "nullable": true
+                            },
+                            "parent_folder": {
+                                "allOf": [
+                                    {
+                                        "$ref": "#/components/schemas/Folder--Mini"
+                                    },
+                                    {
+                                        "description": "最終的な署名済みドキュメントと署名ログの保存先フォルダ。`ID`フィールドと`type`フィールドのみが必要です。ルートフォルダ (フォルダID `0`) は使用できません。"
+                                    }
+                                ]
+                            },
+                            "source_files": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/File--Mini"
+                                },
+                                "description": "List of files to create a signing document from. Only the ID and type fields are required for each file."
+                            },
+                            "are_fields_locked": {
+                                "type": "boolean",
+                                "description": "Indicates if the template input fields are editable or not.",
+                                "example": false
+                            },
+                            "are_options_locked": {
+                                "type": "boolean",
+                                "description": "Indicates if the template document options are editable or not, for example renaming the document.",
+                                "example": true
+                            },
+                            "are_recipients_locked": {
+                                "type": "boolean",
+                                "description": "Indicates if the template signers are editable or not.",
+                                "example": false
+                            },
+                            "are_email_settings_locked": {
+                                "type": "boolean",
+                                "description": "Indicates if the template email settings are editable or not.",
+                                "example": true
+                            },
+                            "are_files_locked": {
+                                "type": "boolean",
+                                "description": "Indicates if the template files are editable or not. This includes deleting or renaming template files.",
+                                "example": true
+                            },
+                            "signers": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/TemplateSigner"
+                                },
+                                "description": "Array of signers for the template."
+                            },
+                            "additional_info": {
+                                "description": "Additional information on which fields are required and which fields are not editable.",
+                                "type": "object",
+                                "properties": {
+                                    "non_editable": {
+                                        "type": "array",
+                                        "description": "Non editable fields.",
+                                        "items": {
+                                            "type": "string",
+                                            "enum": [
+                                                "email_subject",
+                                                "email_message",
+                                                "name",
+                                                "days_valid",
+                                                "signers",
+                                                "source_files"
+                                            ]
+                                        },
+                                        "example": [
+                                            "email_subject",
+                                            "name"
+                                        ]
+                                    },
+                                    "required": {
+                                        "type": "object",
+                                        "description": "Required fields.",
+                                        "properties": {
+                                            "signers": {
+                                                "description": "Required signer fields.",
+                                                "example": [
+                                                    [
+                                                        "email"
+                                                    ],
+                                                    [
+                                                        "email"
+                                                    ]
+                                                ],
+                                                "type": "array",
+                                                "items": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "enum": [
+                                                            "email"
+                                                        ]
+                                                    },
+                                                    "example": [
+                                                        "email"
+                                                    ]
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            "ready_sign_link": {
+                                "nullable": true,
+                                "description": "Box's ready-sign link feature enables you to create a link to a signature request that you've created from a template. Use this link when you want to post a signature request on a public form — such as an email, social media post, or web page — without knowing who the signers will be. Note: The ready-sign link feature is limited to Enterprise Plus customers and not available to Box Verified Enterprises.",
+                                "type": "object",
+                                "properties": {
+                                    "url": {
+                                        "type": "string",
+                                        "description": "The URL that can be sent to signers.",
+                                        "example": "\"https://app.box.com/sign/\nready-sign-link/a1cdf2c7-fa81-4a67-8163-1e5f4dbe5178\""
+                                    },
+                                    "name": {
+                                        "type": "string",
+                                        "nullable": true,
+                                        "description": "Request name.",
+                                        "example": "Official contract"
+                                    },
+                                    "instructions": {
+                                        "type": "string",
+                                        "nullable": true,
+                                        "description": "Extra instructions for all signers.",
+                                        "example": "Hello! Please sign the document below"
+                                    },
+                                    "folder_id": {
+                                        "type": "string",
+                                        "nullable": true,
+                                        "example": "12345",
+                                        "description": "最終的な署名済みドキュメントと署名ログの保存先フォルダ。`ID`フィールドと`type`フィールドのみが必要です。ルートフォルダ (フォルダID `0`) は使用できません。"
+                                    },
+                                    "is_notification_disabled": {
+                                        "type": "boolean",
+                                        "description": "Whether to disable notifications when a signer has signed.",
+                                        "example": true
+                                    },
+                                    "is_active": {
+                                        "type": "boolean",
+                                        "description": "Whether the ready sign link is enabled or not.",
+                                        "example": false
+                                    }
+                                }
+                            },
+                            "custom_branding": {
+                                "nullable": true,
+                                "type": "object",
+                                "description": "Custom branding applied to notifications and signature requests.",
+                                "properties": {
+                                    "company_name": {
+                                        "description": "Name of the company",
+                                        "type": "string",
+                                        "nullable": true,
+                                        "example": "Corporation inc."
+                                    },
+                                    "logo_uri": {
+                                        "type": "string",
+                                        "nullable": true,
+                                        "description": "Custom branding logo URI in the form of a base64 image.",
+                                        "example": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA\nAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A\n8AAQUBAScY42YAAAAASUVORK5CYII="
+                                    },
+                                    "branding_color": {
+                                        "type": "string",
+                                        "nullable": true,
+                                        "example": "9E5E6F",
+                                        "description": "Custom branding color in hex."
+                                    },
+                                    "email_footer_text": {
+                                        "type": "string",
+                                        "nullable": true,
+                                        "example": "Contact email email@mail.com",
+                                        "description": "Content of the email footer."
+                                    }
+                                }
+                            }
+                        }
+                    }
+                ]
+            },
+            "SignTemplates": {
+                "title": "Box Sign templates",
+                "type": "object",
+                "x-box-resource-id": "sign_templates",
+                "x-box-tag": "sign_templates",
+                "description": "A list of templates, as returned from any Box Sign API endpoints by default.",
+                "allOf": [
+                    {
+                        "type": "object",
+                        "description": "マーカーベースのページ割りについて説明しているAPIレスポンスの部分",
+                        "allOf": [
+                            {
+                                "type": "object",
+                                "description": "マーカーベースのページ割りについて説明しているAPIレスポンスの部分",
+                                "properties": {
+                                    "limit": {
+                                        "description": "これらのエントリで使用された制限値。許容される最大値を超えていない限り、クエリパラメータの`limit`と等しくなります。最大値はAPIによって異なります。",
+                                        "example": 1000,
+                                        "type": "integer",
+                                        "format": "int64"
+                                    },
+                                    "next_marker": {
+                                        "description": "次の検索結果ページの開始場所のマーカー。",
+                                        "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                                        "type": "string"
+                                    }
+                                }
+                            },
+                            {
+                                "properties": {
+                                    "prev_marker": {
+                                        "description": "前の検索結果ページの開始場所のマーカー。",
+                                        "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "properties": {
+                            "entries": {
+                                "type": "array",
+                                "description": "A list of templates.",
+                                "items": {
+                                    "$ref": "#/components/schemas/SignTemplate"
+                                }
+                            }
+                        }
+                    }
+                ]
+            },
+            "TemplateSigner": {
+                "title": "Signer fields for Templates",
+                "type": "object",
+                "description": "The schema for a Signer for Templates",
+                "allOf": [
+                    {
+                        "properties": {
+                            "inputs": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/TemplateSignerInput"
+                                },
+                                "readOnly": true
+                            },
+                            "email": {
+                                "type": "string",
+                                "description": "署名者のメールアドレス",
+                                "example": "example@mail.com",
+                                "nullable": true
+                            },
+                            "role": {
+                                "type": "string",
+                                "enum": [
+                                    "signer",
+                                    "approver",
+                                    "final_copy_reader"
+                                ],
+                                "description": "Defines the role of the signer in the signature request. A role of `signer` needs to sign the document, a role `approver` approves the document and a `final_copy_reader` role only receives the final signed document and signing log.",
+                                "example": "signer",
+                                "default": "signer"
+                            },
+                            "is_in_person": {
+                                "type": "boolean",
+                                "description": "署名者の埋め込みURLと組み合わせて使用されます。送信者が署名すると、その次の`in_person`署名者にリダイレクトされます。",
+                                "example": true
+                            },
+                            "order": {
+                                "type": "integer",
+                                "description": "署名者の順序",
+                                "minimum": 0,
+                                "example": 2
+                            }
+                        }
+                    }
+                ]
+            },
+            "TemplateSignerInput": {
+                "title": "Template Signer Input",
+                "type": "object",
+                "description": "Input created by a Signer on a Template",
+                "required": [
+                    "page_index"
+                ],
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/SignRequestPrefillTag"
+                    },
+                    {
+                        "properties": {
+                            "type": {
+                                "type": "string",
+                                "enum": [
+                                    "signature",
+                                    "date",
+                                    "text",
+                                    "checkbox",
+                                    "radio",
+                                    "dropdown"
+                                ],
+                                "description": "入力の種類",
+                                "example": "text"
+                            },
+                            "content_type": {
+                                "type": "string",
+                                "enum": [
+                                    "signature",
+                                    "initial",
+                                    "stamp",
+                                    "date",
+                                    "checkbox",
+                                    "text",
+                                    "full_name",
+                                    "first_name",
+                                    "last_name",
+                                    "company",
+                                    "title",
+                                    "email",
+                                    "attachment",
+                                    "radio",
+                                    "dropdown"
+                                ],
+                                "description": "入力のコンテンツタイプ",
+                                "example": "text"
+                            },
+                            "is_required": {
+                                "type": "boolean",
+                                "description": "Whether or not the input is required.",
+                                "example": true
+                            },
+                            "page_index": {
+                                "type": "integer",
+                                "description": "Index of page that the input is on.",
+                                "example": 4
+                            },
+                            "document_id": {
+                                "type": "string",
+                                "description": "Document identifier.",
+                                "example": "123075213-eb54b537-8b25-445e-87c1-5a1c67d8cbd7",
+                                "nullable": true
+                            },
+                            "dropdown_choices": {
+                                "type": "array",
+                                "example": [
+                                    "Yes",
+                                    "No",
+                                    "Maybe"
+                                ],
+                                "description": "When the input is of the type `dropdown` this values will be filled with all the dropdown options.",
+                                "nullable": true,
+                                "items": {
+                                    "type": "string"
+                                }
+                            },
+                            "group_id": {
+                                "type": "string",
+                                "description": "When the input is of type `radio` they can be grouped to gather with this identifier.",
+                                "nullable": true,
+                                "example": "da317330-225a-4c72-89ad-0d6dcaaf4df6"
+                            },
+                            "coordinates": {
+                                "type": "object",
+                                "description": "Where the input is located on a page.",
+                                "properties": {
+                                    "x": {
+                                        "type": "number",
+                                        "example": 0.672258592471358,
+                                        "description": "Relative x coordinate to the page the input is on, ranging from 0 to 1."
+                                    },
+                                    "y": {
+                                        "type": "number",
+                                        "example": 0.18654283173599448,
+                                        "description": "Relative y coordinate to the page the input is on, ranging from 0 to 1."
+                                    }
+                                }
+                            },
+                            "dimensions": {
+                                "type": "object",
+                                "description": "The size of the input.",
+                                "properties": {
+                                    "width": {
+                                        "type": "number",
+                                        "example": 0.2618657937806874,
+                                        "description": "Relative width to the page the input is on, ranging from 0 to 1."
+                                    },
+                                    "height": {
+                                        "type": "number",
+                                        "example": 0.05311728090109673,
+                                        "description": "Relative height to the page the input is on, ranging from 0 to 1."
+                                    }
+                                }
+                            }
+                        }
+                    }
+                ]
+            },
             "TrashFile": {
                 "title": "ごみ箱内のファイル",
                 "type": "object",
@@ -34060,7 +34620,8 @@
                                         "SHARED_LINK.UPDATED",
                                         "SIGN_REQUEST.COMPLETED",
                                         "SIGN_REQUEST.DECLINED",
-                                        "SIGN_REQUEST.EXPIRED"
+                                        "SIGN_REQUEST.EXPIRED",
+                                        "SIGN_REQUEST.SIGNER_EMAIL_BOUNCED"
                                     ]
                                 }
                             }
@@ -35041,6 +35602,11 @@
                 "type": "object",
                 "x-box-resource-id": "sign_request",
                 "x-box-tag": "sign_requests",
+                "x-box-variants": [
+                    "standard",
+                    "base"
+                ],
+                "x-box-variant": "standard",
                 "description": "署名リクエストオブジェクト",
                 "allOf": [
                     {
@@ -35055,6 +35621,13 @@
                                     "sign-request"
                                 ],
                                 "description": "オブジェクトタイプ"
+                            },
+                            "source_files": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/File--Base"
+                                },
+                                "description": "List of files to create a signing document from. This is currently limited to ten files. Only the ID and type fields are required for each file."
                             },
                             "signers": {
                                 "type": "array",
@@ -35130,13 +35703,6 @@
                                 "example": "2021-04-26T08:12:13.982Z",
                                 "description": "`days_valid`を使用すると、未署名の場合に署名リクエストの有効期限となる日時 (GMT) が計算されます。",
                                 "nullable": true
-                            },
-                            "source_files": {
-                                "type": "array",
-                                "items": {
-                                    "$ref": "#/components/schemas/File--Mini"
-                                },
-                                "description": "署名用ドキュメントの作成元ファイルのリスト。ファイルごとにIDフィールドと種類フィールドのみが必要です。`source_files`が削除されると、この配列は空になります。"
                             }
                         }
                     }
@@ -35186,13 +35752,17 @@
                 ]
             },
             "SignRequest--Base": {
-                "title": "署名リクエストを作成",
+                "title": "Sign Request (Base)",
                 "type": "object",
                 "x-box-resource-id": "sign_request--base",
                 "x-box-tag": "sign_requests",
+                "x-box-variants": [
+                    "standard",
+                    "base"
+                ],
+                "x-box-variant": "base",
                 "description": "署名リクエストオブジェクトを作成するリクエスト",
                 "required": [
-                    "source_files",
                     "parent_folder"
                 ],
                 "properties": {
@@ -35260,7 +35830,7 @@
                     },
                     "days_valid": {
                         "type": "integer",
-                        "description": "このリクエストが完了しなかった場合に自動的に期限切れになるまでの日数。",
+                        "description": "Set the number of days after which the created signature request will automatically expire if not completed. By default, we do not apply any expiration date on signature requests, and the signature request does not expire.",
                         "minimum": 0,
                         "maximum": 730,
                         "example": 2,
@@ -35276,6 +35846,12 @@
                         "type": "boolean",
                         "description": "ドキュメントを表示する前にテキストメッセージを確認するよう署名者に強制します。この設定を署名者に適用するには、署名者の電話番号を指定する必要があります。",
                         "example": true,
+                        "nullable": true
+                    },
+                    "template_id": {
+                        "type": "string",
+                        "example": "123075213-af2c8822-3ef2-4952-8557-52d69c2fe9cb",
+                        "description": "When a signature request is created from a template this field will indicate the id of that template.",
                         "nullable": true
                     }
                 }
@@ -36383,7 +36959,7 @@
             "x-box-priority": true
         },
         {
-            "name": "Box Sign",
+            "name": "Sign requests",
             "x-box-tag": "sign_requests"
         },
         {
@@ -36553,6 +37129,10 @@
         {
             "name": "Shield情報バリアのセグメント制限",
             "x-box-tag": "shield_information_barrier_segment_restrictions"
+        },
+        {
+            "name": "Sign templates",
+            "x-box-tag": "sign_templates"
         },
         {
             "name": "Skills",
