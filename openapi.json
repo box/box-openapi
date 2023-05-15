@@ -16792,7 +16792,8 @@
                         "SHARED_LINK.UPDATED",
                         "SIGN_REQUEST.COMPLETED",
                         "SIGN_REQUEST.DECLINED",
-                        "SIGN_REQUEST.EXPIRED"
+                        "SIGN_REQUEST.EXPIRED",
+                        "SIGN_REQUEST.SIGNER_EMAIL_BOUNCED"
                       ]
                     }
                   }
@@ -17030,7 +17031,8 @@
                         "SHARED_LINK.UPDATED",
                         "SIGN_REQUEST.COMPLETED",
                         "SIGN_REQUEST.DECLINED",
-                        "SIGN_REQUEST.EXPIRED"
+                        "SIGN_REQUEST.EXPIRED",
+                        "SIGN_REQUEST.SIGNER_EMAIL_BOUNCED"
                       ]
                     }
                   }
@@ -23648,15 +23650,19 @@
         }
       }
     },
-    "/sign_templates": {
+    "/integration_mappings/slack": {
       "get": {
-        "operationId": "get_sign_templates",
-        "summary": "List Box Sign templates",
+        "operationId": "get_integration_mappings_slack",
+        "summary": "List Slack integration mappings",
         "tags": [
-          "templates"
+          "IntegrationMappingsSlack",
+          "get_integration_mappings_slack"
         ],
-        "x-box-tag": "sign_templates",
-        "description": "Gets Box Sign templates created by a user.",
+        "x-box-tag": "integration_mappings",
+        "x-box-scopes": [
+          "integration_mappings.readwrite"
+        ],
+        "description": "Lists Slack integration mappings in users' enterprise",
         "parameters": [
           {
             "name": "marker",
@@ -23679,21 +23685,121 @@
               "format": "int64",
               "maximum": 1000
             }
+          },
+          {
+            "in": "query",
+            "name": "partner_item_type",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "channel"
+              ],
+              "nullable": false
+            },
+            "example": "channel",
+            "description": "Mapped item type, for which the mapping should be returned"
+          },
+          {
+            "in": "query",
+            "name": "partner_item_id",
+            "schema": {
+              "type": "string",
+              "nullable": false
+            },
+            "example": "123456",
+            "description": "ID of the mapped item, for which the mapping should be returned"
+          },
+          {
+            "in": "query",
+            "name": "box_item_id",
+            "schema": {
+              "type": "string",
+              "nullable": false
+            },
+            "example": "456789",
+            "description": "Box item ID for which the mappings should be returned"
+          },
+          {
+            "in": "query",
+            "name": "box_item_type",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "folder"
+              ],
+              "nullable": false
+            },
+            "example": "folder",
+            "description": "Box item type, for which the mappings should be returned"
+          },
+          {
+            "in": "query",
+            "name": "is_manually_created",
+            "schema": {
+              "type": "boolean",
+              "nullable": false
+            },
+            "example": true,
+            "description": "Returns information if the mapping was created manually"
           }
         ],
         "responses": {
           "200": {
-            "description": "Returns a collection of templates.",
+            "description": "Returns a collection of integration mappings",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/SignTemplates"
+                  "$ref": "#/components/schemas/IntegrationMappings"
                 }
               }
             }
           },
-          "401": {
-            "description": "Returned when the access token provided in the `Authorization` header\nis not recognized or not provided.",
+          "default": {
+            "description": "An unexpected client error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "post_integration_mappings_slack",
+        "summary": "Create Slack integration mapping",
+        "tags": [
+          "integrationMappingsSlack",
+          "post_integration_mappings_slack"
+        ],
+        "x-box-tag": "integration_mappings",
+        "x-box-scopes": [
+          "integration_mappings.readwrite"
+        ],
+        "description": "Creates a Slack integration mapping (maps a Slack channel to a Box item)",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IntegrationMappingSlackCreateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Returns the created integration mapping.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntegrationMapping"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Returns a `bad_request` if an incorrect `options` was supplied or\nthe Box folder can not be mapped to this `partner_item_id`.\nError codes:\n`SERVICE_ACCOUNT_IS_NOT_A_COOWNER_OR_OWNER` - service account doesn't\nhave co-owner collaboration or is not an owner of the `box_item_id`,\n`CHANNEL_ALREADY_MAPPED` - channel is already mapped to another\n`box_item_id`,\n`CHANNEL_NOT_FOUND` - channel was not found,\n`CHANNEL_NOT_SUITABLE_FOR_CFS` - connect channel, not suitable for CFS,\n`JWT_APP_NOT_AUTHORIZED` - JWT authorization error.",
             "content": {
               "application/json": {
                 "schema": {
@@ -23715,20 +23821,24 @@
         }
       }
     },
-    "/sign_templates/{template_id}": {
-      "get": {
-        "operationId": "get_sign_templates_id",
-        "summary": "Get Box Sign template by ID",
+    "/integration_mappings/{integration_mapping_id}/slack": {
+      "put": {
+        "operationId": "put_integration_mappings_id_slack",
+        "summary": "Update Slack integration mapping",
         "tags": [
-          "templates"
+          "integrationMappingsSlack",
+          "put_integration_mappings_slack"
         ],
-        "x-box-tag": "sign_templates",
-        "description": "Fetches details of a specific Box Sign template.",
+        "x-box-tag": "integration_mappings",
+        "x-box-scopes": [
+          "integration_mappings.readwrite"
+        ],
+        "description": "Updates a Slack integration mapping. Supports updating the Box\nfolder ID and options",
         "parameters": [
           {
-            "name": "template_id",
-            "description": "The ID of a Box Sign template.",
-            "example": "123075213-7d117509-8f05-42e4-a5ef-5190a319d41d",
+            "name": "integration_mapping_id",
+            "description": "An ID of an integration mapping",
+            "example": "11235432",
             "in": "path",
             "required": true,
             "schema": {
@@ -23736,19 +23846,47 @@
             }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/vnd.box+json": {
+              "schema": {
+                "type": "object",
+                "description": "At least one of `box_item` and `options` must be provided.",
+                "properties": {
+                  "box_item": {
+                    "nullable": false,
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/IntegrationMappingBoxItemSlack"
+                      }
+                    ]
+                  },
+                  "options": {
+                    "nullable": false,
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/IntegrationMappingSlackOptions"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
-            "description": "Returns details of a template.",
+            "description": "Returns the updated integration mapping object.",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/SignTemplate"
+                  "$ref": "#/components/schemas/IntegrationMapping"
                 }
               }
             }
           },
-          "401": {
-            "description": "Returned when the access token provided in the `Authorization` header\nis not recognized or not provided.",
+          "400": {
+            "description": "Returns a `bad_request` if an incorrect `options` was supplied or\nthe Box folder can not be mapped to this `partner_item`\nError codes:\n`SERVICE_ACCOUNT_IS_NOT_A_COOWNER_OR_OWNER` -- service account doesn't\nhave co-owner collaboration or is not an owner of the `box_item_id`,\n`MAPPING_NOT_FOUND` -- mapping was not found,\n`JWT_APP_NOT_AUTHORIZED` -- JWT authorization error.",
             "content": {
               "application/json": {
                 "schema": {
@@ -23758,7 +23896,57 @@
             }
           },
           "404": {
-            "description": "Returned if the template is not found or the user does not\nhave access to the associated template.",
+            "description": "Returns a `not_found` if integration mapping object was not found\nin the database",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "delete_integration_mappings_id_slack",
+        "summary": "Delete Slack integration mapping",
+        "tags": [
+          "integrationMappingsSlack",
+          "delete_integration_mappings_slack"
+        ],
+        "x-box-tag": "integration_mappings",
+        "x-box-scopes": [
+          "integration_mappings.readwrite"
+        ],
+        "description": "Deletes a Slack integration mapping",
+        "parameters": [
+          {
+            "name": "integration_mapping_id",
+            "description": "An ID of an integration mapping",
+            "example": "11235432",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Empty body in response"
+          },
+          "404": {
+            "description": "Returns a `not_found` error if the integration mapping could not be found.",
             "content": {
               "application/json": {
                 "schema": {
@@ -24230,6 +24418,58 @@
           }
         ]
       },
+      "IntegrationMappingSlackCreateRequest": {
+        "title": "Integration Mapping",
+        "type": "object",
+        "x-box-resource-id": "integration_mappings",
+        "x-box-tag": "integration_mappings",
+        "description": "A Slack Integration Mapping create request",
+        "properties": {
+          "partner_item": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/IntegrationMappingPartnerItemSlack"
+              },
+              {
+                "description": "Mapped item for which the mapping should be returned"
+              },
+              {
+                "nullable": false
+              }
+            ]
+          },
+          "box_item": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/IntegrationMappingBoxItemSlack"
+              },
+              {
+                "description": "Box item for which the mappings should be returned"
+              },
+              {
+                "nullable": false
+              }
+            ]
+          },
+          "options": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/IntegrationMappingSlackOptions"
+              },
+              {
+                "description": "Mapping options"
+              },
+              {
+                "nullable": false
+              }
+            ]
+          }
+        },
+        "required": [
+          "partner_item",
+          "box_item"
+        ]
+      },
       "ClientError": {
         "title": "Client error",
         "type": "object",
@@ -24676,7 +24916,8 @@
                   "SHARED_LINK.UPDATED",
                   "SIGN_REQUEST.COMPLETED",
                   "SIGN_REQUEST.DECLINED",
-                  "SIGN_REQUEST.EXPIRED"
+                  "SIGN_REQUEST.EXPIRED",
+                  "SIGN_REQUEST.SIGNER_EMAIL_BOUNCED"
                 ]
               },
               {
@@ -26195,16 +26436,6 @@
         "x-box-resource-id": "file",
         "x-box-variant": "standard",
         "description": "A standard representation of a file, as returned from any\nfile API endpoints by default",
-        "required": [
-          "description",
-          "size",
-          "path_collection",
-          "created_at",
-          "modified_at",
-          "modified_by",
-          "owned_by",
-          "item_status"
-        ],
         "allOf": [
           {
             "$ref": "#/components/schemas/File--Mini"
@@ -27119,10 +27350,6 @@
         "x-box-resource-id": "file--mini",
         "x-box-variant": "mini",
         "description": "A mini representation of a file, used when\nnested under another resource.",
-        "required": [
-          "sequence_id",
-          "sha1"
-        ],
         "allOf": [
           {
             "$ref": "#/components/schemas/File--Base"
@@ -27834,15 +28061,6 @@
         "x-box-resource-id": "folder",
         "x-box-variant": "standard",
         "description": "A standard representation of a folder, as returned from any\nfolder API endpoints by default",
-        "required": [
-          "size",
-          "path_collection",
-          "created_by",
-          "modified_by",
-          "owned_by",
-          "item_status",
-          "item_collection"
-        ],
         "allOf": [
           {
             "$ref": "#/components/schemas/Folder--Mini"
@@ -29045,6 +29263,198 @@
                 "items": {
                   "$ref": "#/components/schemas/GroupMembership"
                 }
+              }
+            }
+          }
+        ]
+      },
+      "IntegrationMapping": {
+        "title": "Integration Mapping",
+        "type": "object",
+        "x-box-resource-id": "integration_mapping",
+        "x-box-tag": "integration_mappings",
+        "description": "An Integration Mapping Object",
+        "required": [
+          "type",
+          "partner_item",
+          "box_item"
+        ],
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/IntegrationMapping--Base"
+          },
+          {
+            "properties": {
+              "type": {
+                "type": "string",
+                "example": "integration_mapping",
+                "enum": [
+                  "integration_mapping"
+                ],
+                "description": "object type",
+                "nullable": false
+              },
+              "partner_item": {
+                "description": "Partner application",
+                "nullable": false,
+                "example": "channel",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/IntegrationMappingPartnerItemSlack"
+                  }
+                ]
+              },
+              "box_item": {
+                "description": "The Box folder, to which the object from the partner app domain\n(referenced in `partner_item_id`) is mapped",
+                "example": "folder",
+                "nullable": false,
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/Folder--Mini"
+                  }
+                ]
+              },
+              "is_manually_created": {
+                "type": "boolean",
+                "example": true,
+                "description": "Identifies whether the mapping has been manually set (as opposed to\nbeing automatically created)",
+                "nullable": false
+              },
+              "options": {
+                "description": "Options of the integration mapping",
+                "nullable": false,
+                "example": "slack",
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/IntegrationMappingSlackOptions"
+                  }
+                ]
+              },
+              "created_by": {
+                "description": "An object representing the user who created the integration mapping",
+                "example": "Aaron Levie",
+                "nullable": false,
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/User--Mini"
+                  }
+                ]
+              },
+              "modified_by": {
+                "description": "An object representing the user who last modified the integration mapping",
+                "example": "user",
+                "nullable": false,
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/User--Mini"
+                  }
+                ]
+              },
+              "created_at": {
+                "type": "string",
+                "format": "date-time",
+                "description": "When the integration mapping object was created",
+                "example": "2012-12-12T10:53:43-08:00",
+                "nullable": false
+              },
+              "modified_at": {
+                "type": "string",
+                "format": "date-time",
+                "description": "When the integration mapping object was last modified",
+                "example": "2012-12-12T10:53:43-08:00",
+                "nullable": false
+              }
+            }
+          }
+        ]
+      },
+      "IntegrationMapping--Base": {
+        "title": "Integration Mapping (Base)",
+        "type": "object",
+        "x-box-resource-id": "integration_mappings",
+        "x-box-tag": "integration_mappings",
+        "description": "An Integration Mapping Object (Base)",
+        "properties": {
+          "id": {
+            "type": "string",
+            "nullable": false,
+            "example": "12345",
+            "description": "A unique identifier of a folder mapping (part of a composite key together with `integration_type`)"
+          },
+          "integration_type": {
+            "type": "string",
+            "nullable": false,
+            "example": "slack",
+            "description": "Identifies the Box partner app, with which the mapping is associated.\nCurrently only supports Slack. (part of the composite key together with\n`id`)",
+            "enum": [
+              "slack"
+            ]
+          }
+        }
+      },
+      "IntegrationMapping--Mini": {
+        "title": "Integration Mapping (Base)",
+        "type": "object",
+        "x-box-resource-id": "integration_mappings",
+        "x-box-tag": "integration_mappings",
+        "description": "An Integration Mapping Object (Base)",
+        "properties": {
+          "id": {
+            "type": "string",
+            "nullable": false,
+            "example": "12345",
+            "description": "A unique identifier of a folder mapping (part of a composite key together with `integration_type`)"
+          },
+          "integration_type": {
+            "type": "string",
+            "nullable": false,
+            "example": "slack",
+            "description": "Identifies the Box partner app, with which the mapping is associated.\nCurrently only supports Slack. (part of the composite key together with\n`id`)",
+            "enum": [
+              "slack"
+            ]
+          }
+        }
+      },
+      "IntegrationMappings": {
+        "title": "Integration Mappings",
+        "type": "object",
+        "x-box-resource-id": "integration_mappings",
+        "x-box-tag": "integration_mappings",
+        "description": "Represents a list of integration mappings",
+        "allOf": [
+          {
+            "type": "object",
+            "description": "The part of an API response that describes marker\nbased pagination",
+            "properties": {
+              "limit": {
+                "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
+                "example": 1000,
+                "type": "integer",
+                "format": "int64"
+              },
+              "next_marker": {
+                "description": "The marker for the start of the next page of results.",
+                "example": 3000,
+                "type": "integer",
+                "format": "int64"
+              },
+              "prev_marker": {
+                "description": "The marker for the start of the previous page of results.",
+                "example": 1000,
+                "type": "integer",
+                "format": "int64"
+              }
+            }
+          },
+          {
+            "properties": {
+              "entries": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/IntegrationMapping"
+                },
+                "description": "An integration mapping object"
               }
             }
           }
@@ -32183,6 +32593,7 @@
                         "items": {
                           "type": "array",
                           "items": {
+                            "type": "string",
                             "enum": [
                               "email"
                             ]
@@ -34427,10 +34838,6 @@
         "x-box-resource-id": "user--mini",
         "x-box-variant": "mini",
         "description": "A mini representation of a user, as can be returned when nested within other\nresources.",
-        "required": [
-          "name",
-          "login"
-        ],
         "allOf": [
           {
             "$ref": "#/components/schemas/User--Base"
@@ -34494,10 +34901,6 @@
         "x-box-resource-id": "user_collaborations",
         "x-box-variant": "collaborations",
         "description": "A mini representation of a user, can be returned only when\nthe status is `pending`.",
-        "required": [
-          "name",
-          "login"
-        ],
         "allOf": [
           {
             "$ref": "#/components/schemas/User--Base"
@@ -34632,7 +35035,8 @@
                     "SHARED_LINK.UPDATED",
                     "SIGN_REQUEST.COMPLETED",
                     "SIGN_REQUEST.DECLINED",
-                    "SIGN_REQUEST.EXPIRED"
+                    "SIGN_REQUEST.EXPIRED",
+                    "SIGN_REQUEST.SIGNER_EMAIL_BOUNCED"
                   ]
                 }
               }
@@ -36722,6 +37126,81 @@
           }
         ]
       },
+      "IntegrationMappingSlackOptions": {
+        "title": "Integration mapping options for type Slack",
+        "type": "object",
+        "description": "The schema for an integration mapping options object for type Slack.",
+        "properties": {
+          "is_autocollab_disabled": {
+            "type": "boolean",
+            "example": true,
+            "description": "Indicates whether channel members and Box collaborators should be automatically synced.",
+            "nullable": false
+          }
+        }
+      },
+      "IntegrationMappingPartnerItemSlack": {
+        "title": "Integration mapping mapped item schema for type Slack",
+        "type": "object",
+        "description": "The schema for an integration mapping mapped item object for type Slack.",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "channel"
+            ],
+            "example": "channel",
+            "description": "Type of the mapped item referenced in `id`",
+            "nullable": false
+          },
+          "id": {
+            "type": "string",
+            "example": "C12378991223",
+            "description": "ID of the mapped item (of type referenced in `type`).",
+            "nullable": false
+          },
+          "slack_workspace_id": {
+            "type": "string",
+            "example": "T12352314",
+            "description": "ID of the Slack workspace with which the item is associated.",
+            "nullable": true
+          },
+          "slack_org_id": {
+            "type": "string",
+            "example": "E1234567",
+            "description": "ID of the Slack organization with which the item is associated.",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "IntegrationMappingBoxItemSlack": {
+        "title": "Integration mapping schema of Box item for type Slack",
+        "type": "object",
+        "description": "The schema for an integration mapping of Box item object for type Slack.",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "folder"
+            ],
+            "example": "folder",
+            "description": "Type of the mapped item referenced in `id`.",
+            "nullable": false
+          },
+          "id": {
+            "type": "string",
+            "example": "1234567891",
+            "description": "ID of the mapped item (of type referenced in `type`).",
+            "nullable": false
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
       "ShieldInformationBarrierReference": {
         "title": "Shield information barrier reference",
         "type": "object",
@@ -37060,6 +37539,10 @@
     {
       "name": "Groups",
       "x-box-tag": "groups"
+    },
+    {
+      "name": "Integration mappings",
+      "x-box-tag": "integration_mappings"
     },
     {
       "name": "Invites",
