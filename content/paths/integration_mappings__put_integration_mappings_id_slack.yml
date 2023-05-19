@@ -4,8 +4,7 @@ operationId: put_integration_mappings_id_slack
 summary: Update Slack integration mapping
 
 tags:
-  - integrationMappingsSlack
-  - put_integration_mappings_slack
+  - Integration mappings
 
 x-box-tag: integration_mappings
 
@@ -14,13 +13,15 @@ x-box-scopes:
 
 description: |-
   Updates a Slack integration mapping. Supports updating the Box
-  folder ID and options
+  folder ID and options. This endpoint is available
+  only for users with admin or co-admin role.
+
 parameters:
   - $ref: '../attributes/integration_mapping_id.yml'
 
 requestBody:
   content:
-    application/vnd.box+json:
+    application:
       schema:
         type: object
         description: |-
@@ -46,8 +47,7 @@ responses:
 
   404:
     description: |-
-      Returns a `not_found` if integration mapping object was not found
-      in the database
+      Returns `not_found` if integration mapping object was not found.
     content:
       application/json:
         schema:
@@ -57,11 +57,14 @@ responses:
     description: |-
       Returns a `bad_request` if an incorrect `options` was supplied or
       the Box folder can not be mapped to this `partner_item`
+
       Error codes:
-      `SERVICE_ACCOUNT_IS_NOT_A_COOWNER_OR_OWNER` -- service account doesn't
+      * `SERVICE_ACCOUNT_IS_NOT_A_COOWNER_OR_OWNER` -- service account doesn't
       have co-owner collaboration or is not an owner of the `box_item_id`,
-      `MAPPING_NOT_FOUND` -- mapping was not found,
-      `JWT_APP_NOT_AUTHORIZED` -- JWT authorization error.
+      * `MAPPING_NOT_FOUND` -- mapping was not found,
+      * `BOX_FOLDER_EXTERNALLY_OWNED` -- provided Slack entity and enterprise
+      are not configured to use Custom File Storage,
+      * `JWT_APP_NOT_AUTHORIZED` -- JWT authorization error.
     content:
       application/json:
         schema:
