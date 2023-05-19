@@ -1,34 +1,29 @@
 ---
 operationId: put_integration_mappings_id_slack
 
-summary: Update Slack integration mapping.
+summary: Update Slack integration mapping
 
 tags:
-  - Integration mappings
+  - integrationMappingsSlack
+  - put_integration_mappings
 
 x-box-tag: integration_mappings
 
 x-box-scopes:
-  - integration_mappings.readwrite
+  - manage_enterprise_properties
+
 
 description: |-
-  Updates a Slack integration mapping. Supports updating the Box
-  folder ID and options. This endpoint is available
-  only for users with admin or co-admin role.
-
-  For more information, see the product documentation:
-  https://support.box.com/hc/en-us/articles/4415585987859-Box-as-the-Content-Layer-for-Slack.
-
+  Updates a Slack integration mapping.
+  Supports updating the Box folder ID and options
 parameters:
   - $ref: '../attributes/integration_mapping_id.yml'
 
 requestBody:
   content:
-    application:
+    application/vnd.box+json:
       schema:
         type: object
-        description: |-
-          At least one of `box_item` and `options` must be provided.
         properties:
           box_item:
             nullable: false
@@ -38,6 +33,8 @@ requestBody:
             nullable: false
             allOf:
               - $ref: '#/components/schemas/IntegrationMappingSlackOptions'
+  description: |-
+    At least one of `box_item` and `options` must be provided.
 
 responses:
   200:
@@ -50,7 +47,8 @@ responses:
 
   404:
     description: |-
-      Returns `not_found` if integration mapping object was not found.
+      Returns a `not_found` if integration mapping
+      object was not found in the database
     content:
       application/json:
         schema:
@@ -58,16 +56,13 @@ responses:
 
   400:
     description: |-
-      Returns a `bad_request` if an incorrect `options` was supplied or
-      the Box folder can not be mapped to this `partner_item`
-
+      Returns a `bad_request` if an incorrect `options` was
+      supplied or the Box folder can not be mapped to this `partner_item`
       Error codes:
-      * `SERVICE_ACCOUNT_IS_NOT_A_COOWNER_OR_OWNER` -- service account doesn't
-      have co-owner collaboration or is not an owner of the `box_item_id`,
-      * `MAPPING_NOT_FOUND` -- mapping was not found,
-      * `BOX_FOLDER_EXTERNALLY_OWNED` -- provided Slack entity and enterprise
-      are not configured to use Custom File Storage,
-      * `JWT_APP_NOT_AUTHORIZED` -- JWT authorization error.
+      `SERVICE_ACCOUNT_IS_NOT_A_COOWNER_OR_OWNER` -- service account
+       doesn't have co-owner collaboration or is not an owner of
+       the `box_item_id`,
+      `JWT_APP_NOT_AUTHORIZED` -- JWT authorization error.
     content:
       application/json:
         schema:
