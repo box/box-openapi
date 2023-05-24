@@ -15942,6 +15942,242 @@
           }
         }
       }
+    },
+    "/integration_mappings/slack": {
+      "get": {
+        "operationId": "get_integration_mappings_slack",
+        "summary": "List Slack integration mappings",
+        "tags": [
+          "integrationMappingsSlack"
+        ],
+        "description": "Lists [Slack integration mappings](https://support.box.com/hc/en-us/articles/4415585987859-Box-as-the-Content-Layer-for-Slack) in a users' enterprise.\n\nYou need Admin or Co-Admin role to\nuse this endpoint.",
+        "parameters": [
+          {
+            "name": "marker",
+            "description": "Defines the position marker at which to begin returning results. This is\nused when paginating using marker-based pagination.\n\nThis requires `usemarker` to be set to `true`.",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "limit",
+            "description": "The maximum number of items to return per page.",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int64",
+            "maximum": 1000
+          },
+          {
+            "in": "query",
+            "name": "partner_item_type",
+            "description": "Mapped item type, for which the mapping should be returned",
+            "type": "string",
+            "enum": [
+              "channel"
+            ]
+          },
+          {
+            "in": "query",
+            "name": "partner_item_id",
+            "description": "ID of the mapped item, for which the mapping should be returned",
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "box_item_id",
+            "description": "Box item ID, for which the mappings should be returned",
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "box_item_type",
+            "description": "Box item type, for which the mappings should be returned",
+            "type": "string",
+            "enum": [
+              "folder"
+            ]
+          },
+          {
+            "in": "query",
+            "name": "is_manually_created",
+            "description": "Whether the mapping has been manually created",
+            "type": "boolean"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns a collection of integration mappings",
+            "schema": {
+              "$ref": "#/definitions/IntegrationMappings"
+            }
+          },
+          "400": {
+            "description": "The server cannot or will not process the\nrequest due to an apparent client error.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "404": {
+            "description": "Returns a `not_found` error if the integration mapping could not be found.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "post_integration_mappings_slack",
+        "summary": "Create Slack integration mapping",
+        "tags": [
+          "integrationMappingsSlack",
+          "post_integration_mappings_slack"
+        ],
+        "description": "Creates a [Slack integration mapping](https://support.box.com/hc/en-us/articles/4415585987859-Box-as-the-Content-Layer-for-Slack)\nby mapping a Slack channel to a Box item.\n\nYou need Admin or Co-Admin role to\nuse this endpoint.",
+        "responses": {
+          "201": {
+            "description": "Returns the created integration mapping.",
+            "schema": {
+              "$ref": "#/definitions/IntegrationMapping"
+            }
+          },
+          "400": {
+            "description": "Returns a `bad_request` if an incorrect `options`\nwas supplied or the Box folder cannot be\nmapped to this `partner_item_id`.\nError codes:\n* `SERVICE_ACCOUNT_IS_NOT_A_COOWNER_OR_OWNER` - service account\ndoesn't have co-owner collaboration or is\nnot an owner of the `box_item_id`,\n* `CHANNEL_ALREADY_MAPPED` - channel is already\n  mapped to another `box_item_id`,\n* `CHANNEL_NOT_FOUND` - channel was not found,\n* `CHANNEL_NOT_SUITABLE_FOR_CFS` - connect channel, not\nsuitable for Box as Content layer for Slack,\n* `BOX_ENTERPRISE_MISMATCH` - Box folder must be\nowned by the enterprise, which is configured\nto use Box as Content layer for Slack,\n* `CFS_DISABLED` - Box as Content layer\nfor Slack must be enabled for a provided\nSlack workspace or organization\n* `BOX_FOLDER_EXTERNALLY_OWNED` - Box folder must\nbe internally owned to the admin's enterprise,\n* `JWT_APP_NOT_AUTHORIZED` - JWT authorization error.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "404": {
+            "description": "Returns a `not_found` error if the integration mapping could not be found.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/IntegrationMappingSlackCreateRequest"
+            }
+          }
+        ]
+      }
+    },
+    "/integration_mappings/slack/{integration_mapping_id}": {
+      "put": {
+        "operationId": "put_integration_mappings_slack_id",
+        "summary": "Update Slack integration mapping",
+        "tags": [
+          "integrationMappingsSlack"
+        ],
+        "description": "Updates a [Slack integration mapping](https://support.box.com/hc/en-us/articles/4415585987859-Box-as-the-Content-Layer-for-Slack).\nSupports updating the Box folder ID and options.\n\nYou need Admin or Co-Admin role to\nuse this endpoint.",
+        "parameters": [
+          {
+            "name": "integration_mapping_id",
+            "description": "An ID of an integration mapping",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "box_item": {
+                  "allOf": [
+                    {
+                      "$ref": "#/definitions/IntegrationMappingBoxItemSlack"
+                    }
+                  ]
+                },
+                "options": {
+                  "allOf": [
+                    {
+                      "$ref": "#/definitions/IntegrationMappingSlackOptions"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns the updated integration mapping object.",
+            "schema": {
+              "$ref": "#/definitions/IntegrationMapping"
+            }
+          },
+          "400": {
+            "description": "Returns a `bad_request` if an incorrect `options` was\nsupplied or the Box folder cannot be mapped to this `partner_item`.\nError codes:\n* `SERVICE_ACCOUNT_IS_NOT_A_COOWNER_OR_OWNER` - service account\n  doesn't have co-owner collaboration or is\n  not an owner of the `box_item_id`,\n* `BOX_FOLDER_EXTERNALLY_OWNED` - Box folder must be\n  internally owned to the admin's enterprise,\n* `JWT_APP_NOT_AUTHORIZED` - JWT authorization error.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "404": {
+            "description": "Returns a `not_found` if integration mapping\nobject was not found in the database",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "delete_integration_mappings_slack_id",
+        "summary": "Delete Slack integration mapping",
+        "tags": [
+          "integrationMappingsSlack"
+        ],
+        "description": "Deletes a [Slack integration mapping](https://support.box.com/hc/en-us/articles/4415585987859-Box-as-the-Content-Layer-for-Slack).\n\n\nYou need Admin or Co-Admin role to\nuse this endpoint.",
+        "parameters": [
+          {
+            "name": "integration_mapping_id",
+            "description": "An ID of an integration mapping",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Empty body in response"
+          },
+          "404": {
+            "description": "Returns a `not_found` error if the integration mapping could not be found.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          }
+        }
+      }
     }
   },
   "securityDefinitions": {
@@ -23540,6 +23776,185 @@
         }
       ]
     },
+    "IntegrationMappings": {
+      "title": "Integration mappings",
+      "type": "object",
+      "description": "A list of integration mapping\nobjects.",
+      "allOf": [
+        {
+          "type": "object",
+          "description": "The part of an API response that describes marker\nbased pagination",
+          "properties": {
+            "limit": {
+              "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
+              "type": "integer",
+              "format": "int64"
+            },
+            "next_marker": {
+              "description": "The marker for the start of the next page of results.",
+              "type": "integer",
+              "format": "int64"
+            },
+            "prev_marker": {
+              "description": "The marker for the start of the previous page of results.",
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        },
+        {
+          "properties": {
+            "entries": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/IntegrationMapping"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "IntegrationMapping": {
+      "title": "Integration mapping",
+      "type": "object",
+      "x-box-variant": "standard",
+      "description": "A standard representation of an integration\nmapping object.",
+      "allOf": [
+        {
+          "$ref": "#/definitions/IntegrationMapping--Base"
+        },
+        {
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": [
+                "integration_mapping"
+              ],
+              "description": "Mapping type"
+            },
+            "partner_item": {
+              "$ref": "#/definitions/IntegrationMappingPartnerItemSlack"
+            },
+            "box_item": {
+              "description": "The Box folder, to which the object from the\npartner app domain (referenced in `partner_item_id`) is mapped",
+              "allOf": [
+                {
+                  "$ref": "#/definitions/Folder--Mini"
+                }
+              ]
+            },
+            "is_manually_created": {
+              "type": "boolean",
+              "description": "Identifies whether the mapping has\nbeen manually set\n(as opposed to being automatically created)"
+            },
+            "options": {
+              "description": "Integration mapping options for Slack",
+              "anyOf": [
+                {
+                  "$ref": "#/definitions/IntegrationMappingSlackOptions"
+                }
+              ]
+            },
+            "created_by": {
+              "description": "An object representing the user who\ncreated the integration mapping",
+              "allOf": [
+                {
+                  "$ref": "#/definitions/UserIntegrationMappings"
+                }
+              ]
+            },
+            "modified_by": {
+              "description": "The user who\nlast modified the integration mapping",
+              "allOf": [
+                {
+                  "$ref": "#/definitions/UserIntegrationMappings"
+                }
+              ]
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time",
+              "description": "When the integration mapping object was created"
+            },
+            "modified_at": {
+              "type": "string",
+              "format": "date-time",
+              "description": "When the integration mapping object was last modified"
+            }
+          }
+        }
+      ],
+      "required": [
+        "type",
+        "partner_item",
+        "box_item"
+      ]
+    },
+    "IntegrationMappingSlackCreateRequest": {
+      "title": "Create integration mapping request",
+      "type": "object",
+      "description": "A request to create a\nSlack Integration Mapping object",
+      "properties": {
+        "partner_item": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/IntegrationMappingPartnerItemSlack"
+            }
+          ]
+        },
+        "box_item": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/IntegrationMappingBoxItemSlack"
+            }
+          ]
+        },
+        "options": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/IntegrationMappingSlackOptions"
+            }
+          ]
+        }
+      },
+      "required": [
+        "partner_item",
+        "box_item"
+      ]
+    },
+    "IntegrationMappingBoxItemSlack": {
+      "title": "Integration mapping Box item schema for type Slack",
+      "type": "object",
+      "description": "The schema for an integration mapping Box item object for type Slack",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "folder"
+          ],
+          "description": "Type of the mapped item referenced in `id`"
+        },
+        "id": {
+          "type": "string",
+          "description": "ID of the mapped item (of type referenced in `type`)"
+        }
+      },
+      "required": [
+        "id",
+        "type"
+      ]
+    },
+    "IntegrationMappingSlackOptions": {
+      "title": "Integration mapping options for type Slack",
+      "type": "object",
+      "description": "The schema for an integration mapping options object for Slack type.",
+      "properties": {
+        "is_access_management_disabled": {
+          "type": "boolean",
+          "description": "Indicates whether or not channel member\naccess to the underlying box item\nshould be automatically managed.\nDepending on type of channel, access is managed\nthrough creating collaborations or shared links."
+        }
+      }
+    },
     "File": {
       "title": "File",
       "type": "object",
@@ -25671,6 +26086,84 @@
               "type": "integer",
               "description": "Order of the signer",
               "minimum": 0
+            }
+          }
+        }
+      ]
+    },
+    "IntegrationMapping--Base": {
+      "title": "Integration mapping (Base)",
+      "type": "object",
+      "x-box-variant": "base",
+      "x-box-variants": [
+        "base",
+        "standard",
+        "mini"
+      ],
+      "description": "A base representation of an\nintegration mapping object.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "A unique identifier of a folder mapping\n(part of a composite key together\nwith `integration_type`)"
+        },
+        "integration_type": {
+          "type": "string",
+          "description": "Identifies the Box partner app,\nwith which the mapping is associated.\nCurrently only supports Slack.\n(part of the composite key together with `id`)",
+          "enum": [
+            "slack"
+          ]
+        }
+      }
+    },
+    "IntegrationMappingPartnerItemSlack": {
+      "title": "Integration mapping mapped item schema for type Slack",
+      "type": "object",
+      "description": "The schema for an integration mapping mapped item object for type Slack",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "channel"
+          ],
+          "description": "Type of the mapped item referenced in `id`"
+        },
+        "id": {
+          "type": "string",
+          "description": "ID of the mapped item (of type referenced in `type`)"
+        },
+        "slack_workspace_id": {
+          "type": "string",
+          "description": "ID of the Slack workspace with which the item is associated"
+        },
+        "slack_org_id": {
+          "type": "string",
+          "description": "ID of the Slack organization with which the item is associated"
+        }
+      },
+      "required": [
+        "id",
+        "type"
+      ]
+    },
+    "UserIntegrationMappings": {
+      "title": "User (Integration Mappings)",
+      "type": "object",
+      "description": "A user representation for integration mappings\nAPI purposes. Fields name and login are not required.",
+      "allOf": [
+        {
+          "$ref": "#/definitions/User--Base"
+        },
+        {
+          "properties": {
+            "name": {
+              "type": "string",
+              "description": "The display name of this user",
+              "maxLength": 50
+            },
+            "login": {
+              "type": "string",
+              "format": "email",
+              "description": "The primary email address of this user"
             }
           }
         }
