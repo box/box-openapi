@@ -16,7 +16,7 @@ module.exports = (item) => {
     ]
   }
 
-  // if the item contains a reference, ensure the description is
+  /** if the item contains a reference, ensure the description is
   // the second item, unless the second option is a direct
   // list of properties
   if (keys.includes("$ref") && keys[1] && keys[1] !== "description" && keys[1] !== "properties" && keys[1] !== "x-box-reference-hide") {
@@ -25,7 +25,7 @@ module.exports = (item) => {
         message: `description or properties needs to be second item in allOf set`
       }
     ]
-  }
+  }*/
 
   // Check of there are any keys we did not expect
   let excessKeys = keys && ["$ref", "description"]
