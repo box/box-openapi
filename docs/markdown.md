@@ -35,12 +35,12 @@ In the extreme case that a line can not be kept under 80 characters, for example
 when creating markdown tables, you can use the following syntax to make an
 exception.
 
-```md
-<!-- markdownlint-disable line-length -->
+```yaml
+<!-- yamllint-disable line-length -->
 
 Do something long here ...........................................
 
-<!-- markdownlint-enable line-length -->
+<!-- yamllint-enable line-length -->
 ```
 
 ## Escape any code and brand names

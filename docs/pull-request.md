@@ -75,6 +75,33 @@ yarn lint
 
 Resolve any warnings and errors before making a pull request.
 
+## Commit changes
+
+Use [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/)
+when committing the changes and adding the PR. This will allow releasing
+a new SDK version based on the changes.
+When committing your changes, follow this pattern:
+
+```sh
+<type>[optional scope]: <description>
+
+[optional body]
+```
+
+For example:
+
+```sh
+feat: Add new API for templates
+```
+
+Commit types:
+
+* `feat`: Added or updated API spec with new information. This commit
+   will bump a `MINOR` version.
+* `fix` : Fixed a bug. This commit will bump a `PATCH` version.
+* `docs`: Updated docs that are not related to the API schema, for example MD guidelines.
+* `chore`: Configuration changes - not related to API or docs.
+
 ### Step 7: Send the pull request
 
 Send the pull request from your feature branch to us. Be sure to include a
