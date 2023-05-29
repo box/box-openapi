@@ -99,7 +99,8 @@ Commit types:
 * `feat`: Added or updated API spec with new information. This commit
    will bump a `MINOR` version.
 * `fix` : Fixed a bug. This commit will bump a `PATCH` version.
-* `docs`: Updated docs, for example MD guidelines
+* `docs`: Updated docs that are not related to the API schema, for example MD guidelines.
+* `chore`: Configuration changes - not related to API or docs.
 
 ### Step 7: Send the pull request
 
