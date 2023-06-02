@@ -230,8 +230,6 @@ jobs:
     steps:
       - name: Check out the repo
         uses: actions/checkout@v3
-        with:
-          path: box-openapi
       
       - name: Set up Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v3
@@ -240,7 +238,7 @@ jobs:
 
       - name: Compile the content
         run: |
-          cd $GITHUB_WORKSPACE/box-openapi
+          cd ${{ github.workspace }}/box-openapi
           yarn install
           yarn build
       
@@ -250,11 +248,10 @@ jobs:
           repository: box/box-codegen
           ref: main
           token: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
-          path: box-codegen
 
       - name: Run Codegen spec validation
         run: |
-          cd $GITHUB_WORKSPACE/codegen/scripts
+          cd ${{ github.workspace }}/codegen/scripts
           npm install
           cp $GITHUB_WORKSPACE/box-openapi/compiled/openapi/openapi.json .
           npm run generate ./openapi.json ./dist python
