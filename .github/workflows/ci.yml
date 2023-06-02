@@ -225,6 +225,9 @@ jobs:
     strategy:
       matrix:
         node-version: [14.x]
+    
+    env:
+      HOME_DIR: ${{ github.workspace }}
 
     # The following steps are performed for each lint job
     steps:
@@ -238,7 +241,7 @@ jobs:
 
       - name: Compile the content
         run: |
-          cd ${{ github.workspace }}/box-openapi
+          cd ${{ env.HOME_DIR }}/box-openapi
           yarn install
           yarn build
       
@@ -251,9 +254,9 @@ jobs:
 
       - name: Run Codegen spec validation
         run: |
-          cd ${{ github.workspace }}/codegen/scripts
+          cd ${{ env.HOME_DIR }}/codegen/scripts
           npm install
-          cp $GITHUB_WORKSPACE/box-openapi/compiled/openapi/openapi.json .
+          cp ${{ env.HOME_DIR }}/box-openapi/compiled/openapi/openapi.json .
           npm run generate ./openapi.json ./dist python
 
       
