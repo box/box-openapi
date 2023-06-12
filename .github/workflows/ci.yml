@@ -215,3 +215,44 @@ jobs:
           SLACK_AVATAR: "https://avatars3.githubusercontent.com/u/8659759?s=200&v=4"
         with:
           args: "Error running `deploy-staging` job in OpenAPI CI"
+  
+  # Build the OpenAPI spec and validate using Codegen
+  validate-spec:
+    name: Validate OpenAPI spec using Codegen
+    # We run this on the latest ubuntu
+    runs-on: ubuntu-latest
+
+    # The following steps are performed for each lint job
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v3
+        with:
+          path: box-openapi
+      
+      - name: Set up Node.js 16.x
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16.x
+
+      - name: Compile the content
+        run: |
+          cd $GITHUB_WORKSPACE/box-openapi
+          yarn install
+          yarn build
+      
+      - name: Check out the Codegen repo
+        uses: actions/checkout@v3
+        with:
+          repository: box/box-codegen
+          ref: main
+          token: ${{ secrets.CODEGEN_REPO_ACCESS_TOKEN }}
+          path: box-codegen
+
+      - name: Run Codegen spec validation
+        run: |
+          cd $GITHUB_WORKSPACE/box-codegen
+          npm install
+          cd scripts
+          npm install
+          cp $GITHUB_WORKSPACE/box-openapi/compiled/openapi/openapi.json .
+          npm run validate ./openapi.json
