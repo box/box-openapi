@@ -20,7 +20,7 @@ module.exports = (item, _, paths) => {
   if (!item.description) {
     return [
       {
-        message: `${paths.target ? paths.target.join('.') : 'property'} is not truthy`,
+        message: `${paths.target ? paths.target.join('.') : 'property'} requires description.`,
       }
     ]
   }
