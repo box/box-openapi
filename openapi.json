@@ -4775,7 +4775,7 @@
         "x-box-tag": "folders",
         "x-box-enable-explorer": true,
         "x-box-sanitized": true,
-        "description": "Retrieves details for a folder, including the first 100 entries\nin the folder.\n\nTo fetch more items within the folder, please use the\n[Get items in a folder](#get-folders-id-items) endpoint.",
+        "description": "Retrieves details for a folder, including the first 100 entries\nin the folder.\n\nPassing `sort`, `direction`, `offset`, and `limit`\nparameters in query allows you to manage the\nlist of returned\n[folder items](r://folder--full#param-item-collection).\n\nTo fetch more items within the folder, use the\n[Get items in a folder](#get-folders-id-items) endpoint.",
         "parameters": [
           {
             "name": "folder_id",
@@ -4825,11 +4825,65 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "sort",
+            "description": "Defines the **second** attribute by which items\nare sorted.\n\nThe folder type affects the way the items\nare sorted:\n\n  * **Standard folder**:\n  Items are always sorted by\n  their `type` first, with\n  folders listed before files,\n  and files listed\n  before web links.\n\n  * **Root folder**:\n  This parameter is not supported\n  for marker-based pagination\n  on the root folder\n\n  (the folder with an `id` of `0`).\n\n  * **Shared folder with parent path\n  to the associated folder visible to\n  the collaborator**:\n  Items are always sorted by\n  their `type` first, with\n  folders listed before files,\n  and files listed\n  before web links.",
+            "in": "query",
+            "required": false,
+            "example": "id",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "id",
+                "name",
+                "date",
+                "size"
+              ]
+            }
+          },
+          {
+            "name": "direction",
+            "description": "The direction to sort results in. This can be either in alphabetical ascending\n(`ASC`) or descending (`DESC`) order.",
+            "in": "query",
+            "required": false,
+            "example": "ASC",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ASC",
+                "DESC"
+              ]
+            }
+          },
+          {
+            "name": "offset",
+            "description": "The offset of the item at which to begin the response.\n\nQueries with offset parameter value\nexceeding 10000 will be rejected\nwith a 400 response.",
+            "in": "query",
+            "required": false,
+            "example": 1000,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "default": 0
+            }
+          },
+          {
+            "name": "limit",
+            "description": "The maximum number of items to return per page.",
+            "in": "query",
+            "required": false,
+            "example": 1000,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "maximum": 1000
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "Returns a folder, including the first 100 entries in the folder.\n\nTo fetch more items within the folder, please use the\n[Get items in a folder](#get-folders-id-items) endpoint.\n\nNot all available fields are returned by default. Use the\n[fields](#param-fields) query parameter to explicitly request\nany specific fields.",
+            "description": "Returns a folder, including the first 100 entries in the folder.\nIf you used query parameters like\n`sort`, `direction`, `offset`, or `limit`\nthe *folder items list* will be affected accordingly.\n\nTo fetch more items within the folder, use the\n[Get items in a folder](#get-folders-id-items) endpoint.\n\nNot all available fields are returned by default. Use the\n[fields](#param-fields) query parameter to explicitly request\nany specific fields.",
             "content": {
               "application/json": {
                 "schema": {
@@ -5438,7 +5492,7 @@
         "x-box-tag": "folders",
         "x-box-sanitized": true,
         "x-box-enable-explorer": true,
-        "description": "Retrieves a page of items in a folder. These items can be files,\nfolders, and web links.\n\nTo request more information about the folder itself, like its size,\nplease use the [Get a folder](#get-folders-id) endpoint instead.",
+        "description": "Retrieves a page of items in a folder. These items can be files,\nfolders, and web links.\n\nTo request more information about the folder itself, like its size,\nuse the [Get a folder](#get-folders-id) endpoint instead.",
         "parameters": [
           {
             "name": "folder_id",
@@ -5525,7 +5579,7 @@
           },
           {
             "name": "sort",
-            "description": "Defines the **second** attribute by which items\nare sorted.\n\nThe folder type affects the way the items\nare sorted:\n\n* **Standard folder**:\n  Items are always sorted by their `type` first, with\n  folders listed before files, and files listed\n  before web links.\n\n* **Root folder**:\n  This parameter is not supported for marker-based pagination\n  on the root folder (the folder with an `id` of `0`).\n\n* **Shared folder with parent path to the associated folder visible to the collaborator**:\n  Items are always sorted by their `type` first, with\n  folders listed before files, and files listed\n  before web links.",
+            "description": "Defines the **second** attribute by which items\nare sorted.\n\nThe folder type affects the way the items\nare sorted:\n\n  * **Standard folder**:\n  Items are always sorted by\n  their `type` first, with\n  folders listed before files,\n  and files listed\n  before web links.\n\n  * **Root folder**:\n  This parameter is not supported\n  for marker-based pagination\n  on the root folder\n\n  (the folder with an `id` of `0`).\n\n  * **Shared folder with parent path\n  to the associated folder visible to\n  the collaborator**:\n  Items are always sorted by\n  their `type` first, with\n  folders listed before files,\n  and files listed\n  before web links.",
             "in": "query",
             "required": false,
             "example": "id",
