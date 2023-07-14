@@ -4775,7 +4775,7 @@
                 "x-box-tag": "folders",
                 "x-box-enable-explorer": true,
                 "x-box-sanitized": true,
-                "description": "フォルダ内の最初の100エントリを含むフォルダの詳細を取得します。\n\nフォルダ内の項目をさらに多く取得するには、[フォルダ内の項目を取得](#get-folders-id-items)エンドポイントを使用してください。",
+                "description": "フォルダ内の最初の100エントリを含むフォルダの詳細を取得します。\n\nPassing `sort`, `direction`, `offset`, and `limit` parameters in query allows you to manage the list of returned [folder items](r://folder--full#param-item-collection).\n\nTo fetch more items within the folder, use the [Get items in a folder](#get-folders-id-items) endpoint.",
                 "parameters": [
                     {
                         "name": "folder_id",
@@ -4825,11 +4825,65 @@
                         "schema": {
                             "type": "string"
                         }
+                    },
+                    {
+                        "name": "sort",
+                        "description": "項目並べ替えの**2番目**の基準として使用される属性を定義します。\n\nThe folder type affects the way the items are sorted:\n\n* **Standard folder**: Items are always sorted by their `type` first, with folders listed before files, and files listed before web links.\n\n* **Root folder**: This parameter is not supported for marker-based pagination on the root folder\n\n  (the folder with an `id` of `0`).\n\n* **Shared folder with parent path to the associated folder visible to the collaborator**: Items are always sorted by their `type` first, with folders listed before files, and files listed before web links.",
+                        "in": "query",
+                        "required": false,
+                        "example": "id",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "id",
+                                "name",
+                                "date",
+                                "size"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "direction",
+                        "description": "結果を並べ替える方向。アルファベットの昇順 (`ASC`) または降順 (`DESC`) のいずれかを指定できます。",
+                        "in": "query",
+                        "required": false,
+                        "example": "ASC",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "ASC",
+                                "DESC"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "offset",
+                        "description": "レスポンスが開始される項目のオフセット。\n\nオフセットパラメータ値が10,000を超えているクエリは拒否され、400レスポンスが返されます。",
+                        "in": "query",
+                        "required": false,
+                        "example": 1000,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64",
+                            "default": 0
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "description": "返す項目の1ページあたりの最大数。",
+                        "in": "query",
+                        "required": false,
+                        "example": 1000,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64",
+                            "maximum": 1000
+                        }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "フォルダ内の最初の100エントリを含め、フォルダを返します。\n\nフォルダ内の項目をさらに多く取得するには、[フォルダ内の項目を取得](#get-folders-id-items)エンドポイントを使用してください。\n\n使用可能なすべてのフィールドがデフォルトで返されるとは限りません。特定のフィールドを明示的にリクエストするには、[fields](#param-fields)クエリパラメータを使用します。",
+                        "description": "Returns a folder, including the first 100 entries in the folder. If you used query parameters like `sort`, `direction`, `offset`, or `limit` the _folder items list_ will be affected accordingly.\n\nTo fetch more items within the folder, use the [Get items in a folder](#get-folders-id-items) endpoint.\n\n使用可能なすべてのフィールドがデフォルトで返されるとは限りません。特定のフィールドを明示的にリクエストするには、[fields](#param-fields)クエリパラメータを使用します。",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -5438,7 +5492,7 @@
                 "x-box-tag": "folders",
                 "x-box-sanitized": true,
                 "x-box-enable-explorer": true,
-                "description": "フォルダ内の項目のページを取得します。これらの項目はファイル、 フォルダ、ウェブリンクのいずれかになります。\n\nフォルダ自体の詳細情報 (サイズなど) をリクエストするには、代わりに[フォルダを取得](#get-folders-id)エンドポイントを使用してください。",
+                "description": "フォルダ内の項目のページを取得します。これらの項目はファイル、 フォルダ、ウェブリンクのいずれかになります。\n\nTo request more information about the folder itself, like its size, use the [Get a folder](#get-folders-id) endpoint instead.",
                 "parameters": [
                     {
                         "name": "folder_id",
@@ -5525,7 +5579,7 @@
                     },
                     {
                         "name": "sort",
-                        "description": "項目並べ替えの**2番目**の基準として使用される属性を定義します。\n\n項目は必ず最初に`type`を基準にして並べ替えられ、フォルダはファイルよりも前に、ファイルはウェブリンクよりも前にリストされます。\n\nルートフォルダ (ID `0`のフォルダ) の場合、このパラメータを使用したマーカーに基づくページ割りはサポートされません。",
+                        "description": "項目並べ替えの**2番目**の基準として使用される属性を定義します。\n\nThe folder type affects the way the items are sorted:\n\n* **Standard folder**: Items are always sorted by their `type` first, with folders listed before files, and files listed before web links.\n\n* **Root folder**: This parameter is not supported for marker-based pagination on the root folder\n\n  (the folder with an `id` of `0`).\n\n* **Shared folder with parent path to the associated folder visible to the collaborator**: Items are always sorted by their `type` first, with folders listed before files, and files listed before web links.",
                         "in": "query",
                         "required": false,
                         "example": "id",
@@ -24816,7 +24870,7 @@
                                         "type": "integer",
                                         "format": "int64",
                                         "example": 3600,
-                                        "description": "このトークンが期限切れになるまでの秒数。"
+                                        "description": "The time in seconds by which this token will expire."
                                     },
                                     "token_type": {
                                         "type": "string",
@@ -24847,7 +24901,7 @@
                                         "type": "integer",
                                         "format": "int64",
                                         "example": 3600,
-                                        "description": "このトークンが期限切れになるまでの秒数。"
+                                        "description": "The time in seconds by which this token will expire."
                                     },
                                     "token_type": {
                                         "type": "string",
@@ -25108,7 +25162,7 @@
                         "type": "integer",
                         "format": "int64",
                         "example": 3600,
-                        "description": "このトークンが期限切れになるまでの秒数。"
+                        "description": "The time in seconds by which this token will expire."
                     },
                     "token_type": {
                         "type": "string",
@@ -27192,7 +27246,7 @@
                                                         "type": "integer",
                                                         "format": "int64",
                                                         "example": 3600,
-                                                        "description": "このトークンが期限切れになるまでの秒数。"
+                                                        "description": "The time in seconds by which this token will expire."
                                                     },
                                                     "token_type": {
                                                         "type": "string",
@@ -31855,6 +31909,15 @@
                     },
                     {
                         "properties": {
+                            "type": {
+                                "description": "Specifies the response as search result items without shared links",
+                                "type": "string",
+                                "example": "search_results_items",
+                                "enum": [
+                                    "search_results_items"
+                                ],
+                                "nullable": false
+                            },
                             "entries": {
                                 "description": "指定されたクエリの検索結果。",
                                 "type": "array",
@@ -31908,6 +31971,15 @@
                     },
                     {
                         "properties": {
+                            "type": {
+                                "description": "Specifies the response as search result items with shared links",
+                                "type": "string",
+                                "example": "search_results_with_shared_links",
+                                "enum": [
+                                    "search_results_with_shared_links"
+                                ],
+                                "nullable": false
+                            },
                             "entries": {
                                 "description": "指定されたクエリの検索結果 (項目がユーザーと共有されたときに使用されたすべての共有リンクに関する追加情報を含む)。",
                                 "type": "array",
@@ -36319,7 +36391,9 @@
                                     "declined",
                                     "error_converting",
                                     "error_sending",
-                                    "expired"
+                                    "expired",
+                                    "finalizing",
+                                    "error_finalizing"
                                 ],
                                 "example": "converting",
                                 "description": "署名リクエストのステータスを説明します"
