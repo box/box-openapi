@@ -737,6 +737,27 @@
                                             }
                                         }
                                     },
+                                    "collections": {
+                                        "type": "array",
+                                        "description": "An array of collections to make this file a member of. Currently we only support the `favorites` collection.\n\nコレクションのIDを取得するには、[すべてのコレクションのリストを取得][1]エンドポイントを使用します。\n\nPassing an empty array `[]` or `null` will remove the file from all collections.\n\n[1]: e://get-collections",
+                                        "items": {
+                                            "title": "Reference",
+                                            "description": "オブジェクトの最も基本的な参照",
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "string",
+                                                    "description": "このオブジェクトの一意の識別子",
+                                                    "example": "11446498"
+                                                },
+                                                "type": {
+                                                    "type": "string",
+                                                    "description": "このオブジェクトのタイプ",
+                                                    "example": "file"
+                                                }
+                                            }
+                                        }
+                                    },
                                     "tags": {
                                         "type": "array",
                                         "example": [
@@ -987,6 +1008,18 @@
                     }
                 ],
                 "responses": {
+                    "200": {
+                        "description": "Returns the requested file if the client has the **follow redirects** setting enabled to automatically follow HTTP `3xx` responses as redirects. If not, the request will return `302` instead. For details, see the [download file guide](g://downloads/file#download-url).",
+                        "content": {
+                            "application/octet-stream": {
+                                "schema": {
+                                    "type": "string",
+                                    "format": "binary",
+                                    "description": "ファイルのバイナリコンテンツ"
+                                }
+                            }
+                        }
+                    },
                     "202": {
                         "description": "ファイルをダウンロードする準備ができていない場合は、クライアントがファイルをダウンロードできるようになるまでの秒数を示す`Retry-After`ヘッダーが返されます。\n\nこのレスポンスは、ダウンロードリクエストの直前にファイルがアップロードされた場合に発生することがあります。",
                         "headers": {
@@ -999,7 +1032,7 @@
                         }
                     },
                     "302": {
-                        "description": "ファイルがダウンロード可能な場合、レスポンスには`dl.boxcloud.com`上のファイルの`Location`ヘッダーが含まれます。\n\n`dl.boxcloud.com`というURLは永続的なものではないため、クライアントで実際にファイルをダウンロードするには、リダイレクト指示に従う必要があります。",
+                        "description": "If the file is available for download the response will include a `Location` header for the file on `dl.boxcloud.com`.\n\nThe `dl.boxcloud.com` URL is not persistent and clients will need to follow the redirect to actually download the file.",
                         "headers": {
                             "Location": {
                                 "description": "ダウンロードURLへのポインタ",
@@ -5251,7 +5284,7 @@
                                     },
                                     "collections": {
                                         "type": "array",
-                                        "description": "このフォルダをメンバーとして追加するコレクションの配列。現時点では、`favorites`コレクションのみがサポートされています。\n\nコレクションのIDを取得するには、[すべてのコレクションのリストを取得][1]エンドポイントを使用します。\n\n空の配列`[]`または`null`を渡すと、すべてのコレクションからこのフォルダが削除されます。\n\n[1]: ../advanced-files-and-folders/#get-collections",
+                                        "description": "このフォルダをメンバーとして追加するコレクションの配列。現時点では、`favorites`コレクションのみがサポートされています。\n\nコレクションのIDを取得するには、[すべてのコレクションのリストを取得][1]エンドポイントを使用します。\n\n空の配列`[]`または`null`を渡すと、すべてのコレクションからこのフォルダが削除されます。\n\n[1]: e://get-collections",
                                         "items": {
                                             "title": "Reference",
                                             "description": "オブジェクトの最も基本的な参照",
@@ -12895,39 +12928,6 @@
                                         "type": "string",
                                         "example": "Cloud Content Management",
                                         "description": "ウェブリンクの説明。"
-                                    },
-                                    "shared_link": {
-                                        "description": "更新する共有リンクの設定。",
-                                        "type": "object",
-                                        "properties": {
-                                            "access": {
-                                                "type": "string",
-                                                "description": "共有リンクのアクセスレベル。これは、リンクを知っている全員 (`open`)、会社内のユーザーのみ (`company`)、フォルダに招待されたユーザーのみ (`collaborators`) のいずれかに制限できます。\n\n設定しなかった場合、このフィールドは、デフォルトで、企業の管理者が指定したアクセスレベルになります。このデフォルトの設定で共有リンクを作成するには、`{ \"shared_link\": {} }`のように、`access`フィールドを指定せずに`shared_link`オブジェクトを渡します。\n\n`company`アクセスレベルは、有料アカウントのみで使用できます。",
-                                                "enum": [
-                                                    "open",
-                                                    "company",
-                                                    "collaborators"
-                                                ],
-                                                "example": "open"
-                                            },
-                                            "password": {
-                                                "type": "string",
-                                                "description": "共有リンクへのアクセスに必要なパスワード。パスワードを`null`に設定するとパスワードが削除されます。今後、パスワードは8文字以上にし、数字、大文字、または英数字以外の文字を含める必要があります。`access`が`open`に設定されている場合にのみ、パスワードを設定できます。",
-                                                "example": "do-n8t-use-this-Password"
-                                            },
-                                            "vanity_name": {
-                                                "type": "string",
-                                                "description": "共有リンクのURLで使用するカスタムバニティ名を定義します (例: `https://app.box.com/v/my-shared-link`)。\n\nバニティURLは通常の共有リンクよりもかなり推測しやすいため、機密性の高いコンテンツを共有する場合は、カスタムURLを使用しないでください。",
-                                                "minLength": 12,
-                                                "example": "my-shared-link"
-                                            },
-                                            "unshared_at": {
-                                                "type": "string",
-                                                "format": "date-time",
-                                                "example": "2012-12-12T10:53:43-08:00",
-                                                "description": "この共有リンクの有効期限が切れる日時のタイムスタンプ。このフィールドを設定できるのは、有料アカウントを持つユーザーのみです。この値には、現在の日時より後の日時を指定する必要があります。"
-                                            }
-                                        }
                                     }
                                 }
                             }
@@ -22927,7 +22927,7 @@
                 ],
                 "x-box-tag": "zip_downloads",
                 "x-box-reference-category": "zip_downloads",
-                "description": "複数のファイルやフォルダを1つの`zip`アーカイブファイルとしてダウンロードするためのリクエストを作成します。このAPIでは、アーカイブは返されませんが、代わりにユーザーがすべての項目にアクセスできるかどうかを確認するチェックがすべて実行され、アーカイブのダウンロードに使用できる`download_url`および`status_url`が返されます。\n\nアーカイブの上限は、アカウントのアップロード上限または10,000ファイルのいずれかで、最初に達した上限が適用されます。",
+                "description": "複数のファイルやフォルダを1つの`zip`アーカイブファイルとしてダウンロードするためのリクエストを作成します。このAPIでは、アーカイブは返されませんが、代わりにユーザーがすべての項目にアクセスできるかどうかを確認するチェックがすべて実行され、アーカイブのダウンロードに使用できる`download_url`および`status_url`が返されます。\n\nThe limit for an archive is either the Account's upload limit or 10,000 files, whichever is met first.\n\n**Note**: Downloading a large file can be affected by various factors such as distance, network latency, bandwidth, and congestion, as well as packet loss ratio and current server load. For these reasons we recommend that a maximum ZIP archive total size does not exceed 25GB.",
                 "requestBody": {
                     "content": {
                         "application/json": {
