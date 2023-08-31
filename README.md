@@ -2,12 +2,9 @@
 
 ![CI](https://github.com/box/box-openapi/workflows/CI/badge.svg) [![Project Status](https://opensource.box.com/badges/active.svg)](http://opensource.box.com/badges)
 
-This repository contains the build system for the Box OpenAPI 3.0 Specification
-(OAS3) of the
-[Box Platform API](https://developers.box.com/).
+This repository contains the build system for the Box OpenAPI 3.0 Specification (OAS3) of the [Box Platform API](https://developers.box.com/).
 
-> **Note** Due to changes in API schema development process, this repository is currently frozen. This means we are not actively contributing to the repository, apart from
-necessary fixes and improvements that help us to put the new process in place even faster. 
+> **Note**: Due to changes in API schema development process, this repository is currently frozen. This means we are not actively contributing to the repository, apart from necessary fixes and improvements that help us to put the new process in place even faster. 
 You can still use the raw sources for specification available in the **Download** section.
 ## Downloads
 
@@ -29,7 +26,7 @@ The older and incomplete Swagger 2.0 specification is still available on the
 ## Contribution
 
 * If you notice that the content requires improvements or you feel that some information is missing add a new [Github issue](https://github.com/box/box-openapi/issues) and describe the issue.
-* If you are a Boxer, create a Developer Documentation ticket, or use the `#dev-docs-feedback` Slack channel for assistance.
+* If you are a Boxer, create a Developer Documentation ticket or use the `#dev-docs-feedback` Slack channel for assistance.
 
 ## Usage & License
 
