@@ -73,7 +73,7 @@ jobs:
     needs:
       - lint
 
-    # The following steps are performed for each lint job
+    # The following steps are performed for each job
     steps:
       - name: Check out the repo
         uses: actions/checkout@v3
@@ -86,7 +86,7 @@ jobs:
       - name: Compile the content
         run: |
           yarn install
-          yarn build
+          yarn build:content
           yarn build:swagger
 
       - name: Push compiled content
@@ -94,7 +94,7 @@ jobs:
         env:
           REPO: self
           BRANCH: en
-          FOLDER: compiled/openapi
+          FOLDER: compiled/content
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Push GH pages for redundancy
@@ -102,7 +102,7 @@ jobs:
         env:
           REPO: self
           BRANCH: gh-pages
-          FOLDER: compiled/openapi
+          FOLDER: compiled/content
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Push Swagger 2.0 backport
@@ -168,7 +168,7 @@ jobs:
     needs:
       - lint
 
-    # The following steps are performed for each lint job
+    # The following steps are performed for each job
     steps:
       - name: Check out the repo
         uses: actions/checkout@v3
@@ -181,14 +181,14 @@ jobs:
       - name: Compile the content
         run: |
           yarn install
-          yarn build
+          yarn build:content
 
       - name: Push compiled content
         uses: s0/git-publish-subdir-action@v2.4.0
         env:
           REPO: self
           BRANCH: en-staging
-          FOLDER: compiled/openapi
+          FOLDER: compiled/content
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: "Trigger Netlify deployment"
@@ -222,7 +222,7 @@ jobs:
     # We run this on the latest ubuntu
     runs-on: ubuntu-latest
 
-    # The following steps are performed for each lint job
+    # The following steps are performed for each job
     steps:
       - name: Check out the repo
         uses: actions/checkout@v3
@@ -238,7 +238,7 @@ jobs:
         run: |
           cd $GITHUB_WORKSPACE/box-openapi
           yarn install
-          yarn build
+          yarn build:content
       
       - name: Check out the Codegen repo
         uses: actions/checkout@v3
@@ -254,5 +254,5 @@ jobs:
           npm install
           cd scripts
           npm install
-          cp $GITHUB_WORKSPACE/box-openapi/compiled/openapi/openapi.json .
+          cp $GITHUB_WORKSPACE/box-openapi/compiled/content/openapi.json .
           npm run validate ./openapi.json
