@@ -16,6 +16,47 @@ on:
     branches: [main, staging]
 
 jobs:
+  # The lint job checks that all content is sanitized,
+  # spell checked, and without any obvious dead links
+  lint:
+    # We run this on the latest ubuntu
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    # We use node 14 and Python 3.8
+    strategy:
+      matrix:
+        node-version: [14.x]
+        python-version: [3.8]
+
+    # The following steps are performed for each lint job
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install yamllint
+
+      - name: Set up Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Install Node dependencies
+        run: |
+          yarn install
+
+      - name: Lint the content
+        run: |
+          yarn lint
+
   # The deploy task actually deploys any changes to the en branch
   push-to-en:
     # We run this on the latest ubuntu
@@ -28,7 +69,11 @@ jobs:
       matrix:
         node-version: [14.x]
 
-    # The following steps are performed for each job
+    # Requires the lint and test jobs to pass first
+    needs:
+      - lint
+
+    # The following steps are performed for each lint job
     steps:
       - name: Check out the repo
         uses: actions/checkout@v3
@@ -41,7 +86,7 @@ jobs:
       - name: Compile the content
         run: |
           yarn install
-          yarn build:content
+          yarn build
           yarn build:swagger
 
       - name: Push compiled content
@@ -119,7 +164,11 @@ jobs:
       matrix:
         node-version: [14.x]
 
-    # The following steps are performed for each job
+    # Requires the lint and test jobs to pass first
+    needs:
+      - lint
+
+    # The following steps are performed for each lint job
     steps:
       - name: Check out the repo
         uses: actions/checkout@v3
@@ -132,7 +181,7 @@ jobs:
       - name: Compile the content
         run: |
           yarn install
-          yarn build:content
+          yarn build
 
       - name: Push compiled content
         uses: s0/git-publish-subdir-action@v2.4.0
@@ -173,7 +222,7 @@ jobs:
     # We run this on the latest ubuntu
     runs-on: ubuntu-latest
 
-    # The following steps are performed for each job
+    # The following steps are performed for each lint job
     steps:
       - name: Check out the repo
         uses: actions/checkout@v3
@@ -189,7 +238,7 @@ jobs:
         run: |
           cd $GITHUB_WORKSPACE/box-openapi
           yarn install
-          yarn build:content
+          yarn build
       
       - name: Check out the Codegen repo
         uses: actions/checkout@v3

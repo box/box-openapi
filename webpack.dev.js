@@ -1,7 +1,9 @@
 const path = require('path')
 
 /**
- * Dev server configuration for running Swagger UI.
+ * Dev server configuration for running and 
+ * compiling the specification in development, 
+ * as well as running Swagger UI.
  */
 module.exports = {
   mode: 'development',
@@ -26,16 +28,15 @@ module.exports = {
 
   // start a server
   devServer: {
-    static: path.join(__dirname, 'src', 'dev'),
-    client: {
-      overlay: {
-        errors: true,
-        warnings: true,
-      },
-      progress: true,
+    contentBase: path.join(__dirname, 'src', 'dev'),
+    overlay: {
+      warnings: true,
+      errors: true
     },
     host: `0.0.0.0`,
+    watchContentBase: true,
     open: true,
-    allowedHosts: "all"
+    progress: true,
+    disableHostCheck: true
   }
 }

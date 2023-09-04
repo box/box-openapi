@@ -37,8 +37,9 @@ yarn install
 yarn start
 ```
 
-This final `yarn start` command starts up a local server. It will open up
-a browser window with a preview of the API specification.
+This final `yarn start` command starts up a local server and watches the files
+for changes. It will open up a browser window with a preview of the compiled API
+specification.
 
 ## Lint and validate the tests
 
