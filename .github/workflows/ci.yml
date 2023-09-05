@@ -57,6 +57,38 @@ jobs:
         run: |
           yarn lint
 
+  # Verify compiled schema is up to date
+  # If this action fails, it means one have to run `yarn build:schema` and commit changes in the file
+  verify-compiled-schema-up-to-date:
+    name: Verify openapi.json file is up to date
+    # We run this on the latest ubuntu
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/staging' || github.event_name == 'pull_request'
+    timeout-minutes: 10
+
+    # We use node 14.X
+    strategy:
+      matrix:
+        node-version: [14.x]
+
+    # The following steps are performed for each job
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v3
+      
+      - name: Set up Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Compile the content
+        run: |
+          yarn install
+          yarn build:schema
+
+      - name: Verify openapi.json file is up to date
+        run: git diff --quiet openapi.json
+
   # The deploy task actually deploys any changes to the en branch
   push-to-en:
     # We run this on the latest ubuntu
