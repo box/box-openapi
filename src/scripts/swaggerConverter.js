@@ -8,12 +8,12 @@ class SwaggerConverter {
    * to a Swagger 2.0 file
    */
   async writeSpecification(folder) {
-    const openapiFilename = `compiled/openapi/openapi.json`
+    const openapiFilename = `openapi.json`
     if (!fs.existsSync(openapiFilename)) { return }
 
     let openapi = JSON.parse(fs.readFileSync(openapiFilename))
 
-    if (!fs.existsSync(`${folder}`)) { fs.mkdirpSync(`${folder}`)}
+    if (!fs.existsSync(`${folder}`)) { fs.mkdirpSync(`${folder}`) }
 
     let sw1 = new Swagger(openapi).convert('https://api.box.com/2.0')
     fs.writeFileSync(`${folder}/swagger.json`, JSON.stringify(sw1, null, 2))
@@ -41,7 +41,7 @@ class Swagger {
     let swagger = {
       swagger: '2.0',
       info: this.openapi.info,
-      host:  new URL(this.serverUrl).host,
+      host: new URL(this.serverUrl).host,
       basePath: new URL(this.serverUrl).pathname,
       schemes: ['https'],
       consumes: ['application/json'],
@@ -52,7 +52,7 @@ class Swagger {
     }
 
     swagger.definitions = {}
-    while (Object.keys(swagger.definitions).length <  Object.keys(this.resolveReferences(swagger)).length) {
+    while (Object.keys(swagger.definitions).length < Object.keys(this.resolveReferences(swagger)).length) {
       swagger.definitions = this.resolveReferences(swagger)
     }
 
@@ -134,7 +134,7 @@ class Swagger {
   removeVendorAttributes(item) {
     Object.keys(item).forEach(key => {
       if (key.startsWith('x-')) { delete item[key] }
-    }) 
+    })
     return item
   }
 
@@ -185,8 +185,8 @@ class Swagger {
       delete response.content
     }
     if (response.headers) {
-      this.responseHeaders(response.headers) 
-    } 
+      this.responseHeaders(response.headers)
+    }
     return response
   }
 
@@ -212,23 +212,23 @@ class Swagger {
       })
     }
     return parameters
-  } 
+  }
 
   formDataEntry(key, property, required) {
     delete property.example
     property.name = key
     property.in = 'formData'
     property.required = required
-    return property 
+    return property
   }
 
   body(parameters, schema) {
     parameters.push({
-     name: 'body',
-     in: 'body',
-     schema: schema
+      name: 'body',
+      in: 'body',
+      schema: schema
     })
-  } 
+  }
 
   deleteAllAttributes(object, key) {
     const paths = jp.paths(object, `$..["${key}"]`)
