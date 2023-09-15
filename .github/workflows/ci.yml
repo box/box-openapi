@@ -53,41 +53,9 @@ jobs:
         run: |
           yarn install
 
-      - name: Lint the content
+      - name: Lint API specification and markdown
         run: |
           yarn lint
-
-  # Verify compiled schema is up to date
-  # If this action fails, it means one have to run `yarn build:schema` and commit changes in the file
-  verify-compiled-schema-up-to-date:
-    name: Verify openapi.json file is up to date
-    # We run this on the latest ubuntu
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/staging' || github.event_name == 'pull_request'
-    timeout-minutes: 10
-
-    # We use node 14.X
-    strategy:
-      matrix:
-        node-version: [14.x]
-
-    # The following steps are performed for each job
-    steps:
-      - name: Check out the repo
-        uses: actions/checkout@v3
-      
-      - name: Set up Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
-        with:
-          node-version: ${{ matrix.node-version }}
-
-      - name: Compile the content
-        run: |
-          yarn install
-          yarn build:schema
-
-      - name: Verify openapi.json file is up to date (run 'yarn build:schema' and commit changes in openapi.json file if this command returns error)
-        run: git diff --quiet openapi.json
 
   # The deploy task actually deploys any changes to the en branch
   push-to-en:
@@ -109,24 +77,25 @@ jobs:
     steps:
       - name: Check out the repo
         uses: actions/checkout@v3
-      
+
       - name: Set up Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
 
-      - name: Compile the content
+      - name: Build content
         run: |
           yarn install
+          yarn build:spec
           yarn build:content
           yarn build:swagger
 
-      - name: Push compiled content
+      - name: Push API specification
         uses: s0/git-publish-subdir-action@v2.4.0
         env:
           REPO: self
           BRANCH: en
-          FOLDER: compiled/content
+          FOLDER: compiled/spec
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Push GH pages for redundancy
@@ -210,17 +179,17 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
-      - name: Compile the content
+      - name: Build content
         run: |
           yarn install
-          yarn build:content
+          yarn build:spec
 
-      - name: Push compiled content
+      - name: Push API specification
         uses: s0/git-publish-subdir-action@v2.4.0
         env:
           REPO: self
           BRANCH: en-staging
-          FOLDER: compiled/content
+          FOLDER: compiled/spec
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: "Trigger Netlify deployment"
@@ -247,7 +216,7 @@ jobs:
           SLACK_AVATAR: "https://avatars3.githubusercontent.com/u/8659759?s=200&v=4"
         with:
           args: "Error running `deploy-staging` job in OpenAPI CI"
-  
+
   # Build the OpenAPI spec and validate using Codegen
   validate-spec:
     name: Validate OpenAPI spec using Codegen
@@ -260,18 +229,12 @@ jobs:
         uses: actions/checkout@v3
         with:
           path: box-openapi
-      
+
       - name: Set up Node.js 16.x
         uses: actions/setup-node@v3
         with:
           node-version: 16.x
 
-      - name: Compile the content
-        run: |
-          cd $GITHUB_WORKSPACE/box-openapi
-          yarn install
-          yarn build:content
-      
       - name: Check out the Codegen repo
         uses: actions/checkout@v3
         with:
@@ -286,5 +249,5 @@ jobs:
           npm install
           cd scripts
           npm install
-          cp $GITHUB_WORKSPACE/box-openapi/compiled/content/openapi.json .
+          cp $GITHUB_WORKSPACE/box-openapi/openapi.json .
           npm run validate ./openapi.json
