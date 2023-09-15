@@ -1,6 +1,6 @@
 # Description
 
-Please include a summary of the change and which issue is fixed. 
+Please include a summary of the change and which issue is fixed.
 
 If you are a Boxer, please also reference the related `DDOC` or `APIWG` tickets.
 If you do not have a related `Jira` ticket and this is more than a bug fix, then
@@ -16,6 +16,7 @@ Re `APIWG-#` (`Jira` ticket)
 - [ ] I have performed a self-review of my own changes
 - [ ] I have run `yarn lint` to make sure my changes pass all linters
 - [ ] I have pulled the latest changes from the upstream developer branch
+- [ ] I have run `yarn build:schema` and included changes in `openapi.json` file if any
 
 ## Contribution guidelines
 
