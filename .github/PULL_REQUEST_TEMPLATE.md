@@ -16,7 +16,7 @@ Re `APIWG-#` (`Jira` ticket)
 - [ ] I have performed a self-review of my own changes
 - [ ] I have run `yarn lint` to make sure my changes pass all linters
 - [ ] I have pulled the latest changes from the upstream developer branch
-- [ ] I have run `yarn build:schema` and included changes in `openapi.json` file if any
+- [ ] I have run `yarn build:schema` and included changes in `openapi.json`
 
 ## Contribution guidelines
 
