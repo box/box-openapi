@@ -13,7 +13,8 @@
       "name": "Apache-2.0",
       "url": "http://www.apache.org/licenses/LICENSE-2.0"
     },
-    "version": "2.0.0"
+    "version": "2.0.0",
+    "x-box-commit-hash": "007e64f567"
   },
   "servers": [
     {
@@ -16439,7 +16440,7 @@
                     "example": {
                       "can_run_reports": true
                     },
-                    "description": "Custom configuration for the permissions an admin\nif a group will receive. This option has no effect\non members with a role of `member`.\n\nSetting these permissions overwrites the default\naccess levels of an admin.\n\nSpecifying a value of \"null\" for this object will deactivate\nall configurable permissions. Specifying permissions will set\nthem accordingly, omitted permissions will be enabled by default.",
+                    "description": "Custom configuration for the permissions an admin\nif a group will receive. This option has no effect\non members with a role of `member`.\n\nSetting these permissions overwrites the default\naccess levels of an admin.\n\nSpecifying a value of \"null\" for this object will disable\nall configurable permissions. Specifying permissions will set\nthem accordingly, omitted permissions will be enabled by default.",
                     "additionalProperties": {
                       "type": "boolean",
                       "description": "A key value pair of custom permissions.",
@@ -16606,7 +16607,7 @@
                     "example": {
                       "can_run_reports": true
                     },
-                    "description": "Custom configuration for the permissions an admin\nif a group will receive. This option has no effect\non members with a role of `member`.\n\nSetting these permissions overwrites the default\naccess levels of an admin.\n\nSpecifying a value of \"null\" for this object will deactivate\nall configurable permissions. Specifying permissions will set\nthem accordingly, omitted permissions will be enabled by default.",
+                    "description": "Custom configuration for the permissions an admin\nif a group will receive. This option has no effect\non members with a role of `member`.\n\nSetting these permissions overwrites the default\naccess levels of an admin.\n\nSpecifying a value of \"null\" for this object will disable\nall configurable permissions. Specifying permissions will set\nthem accordingly, omitted permissions will be enabled by default.",
                     "additionalProperties": {
                       "type": "boolean",
                       "description": "A key value pair of custom permissions.",
@@ -18044,19 +18045,28 @@
                     ]
                   },
                   "retention_length": {
-                    "type": "string",
-                    "format": "int32",
+                    "oneOf": [
+                      {
+                        "type": "string",
+                        "format": "int32",
+                        "nullable": true
+                      },
+                      {
+                        "type": "number",
+                        "format": "int32",
+                        "nullable": false
+                      }
+                    ],
                     "example": "365",
-                    "minimum": 1,
                     "description": "The length of the retention policy. This value\nspecifies the duration in days that the retention\npolicy will be active for after being assigned to\ncontent.  If the policy has a `policy_type` of\n`indefinite`, the `retention_length` will also be\n`indefinite`."
                   },
                   "retention_type": {
                     "type": "string",
                     "example": "modifiable",
-                    "description": "Specifies the retention type:\n\n* `modifiable`: You can modify the retention policy. For example,\nyou can add or remove folders, shorten or lengthen\nthe policy duration, or delete the assignment.\nUse this type if your retention policy\nis not related to any regulatory purposes.\n\n* `non-modifiable`: You can modify the retention policy\nonly in a limited way: add a folder, lengthen the duration,\nretire the policy, change the disposition action\nor notification settings. You cannot perform other actions,\nsuch as deleting the assignment or shortening the\npolicy duration. Use this type to ensure\ncompliance with regulatory retention policies.",
+                    "description": "Specifies the retention type:\n\n* `modifiable`: You can modify the retention policy. For example,\nyou can add or remove folders, shorten or lengthen\nthe policy duration, or delete the assignment.\nUse this type if your retention policy\nis not related to any regulatory purposes.\n\n* `non_modifiable`: You can modify the retention policy\nonly in a limited way: add a folder, lengthen the duration,\nretire the policy, change the disposition action\nor notification settings. You cannot perform other actions,\nsuch as deleting the assignment or shortening the\npolicy duration. Use this type to ensure\ncompliance with regulatory retention policies.",
                     "enum": [
                       "modifiable",
-                      "non-modifiable"
+                      "non_modifiable"
                     ]
                   },
                   "can_owner_extend_retention": {
@@ -18224,57 +18234,78 @@
                   "policy_name": {
                     "type": "string",
                     "description": "The name for the retention policy",
-                    "example": "Some Policy Name"
+                    "example": "Some Policy Name",
+                    "nullable": true
                   },
                   "description": {
                     "type": "string",
                     "description": "The additional text description of the retention policy.",
-                    "example": "Policy to retain all reports for at least one month"
+                    "example": "Policy to retain all reports for at least one month",
+                    "nullable": true
                   },
                   "disposition_action": {
-                    "type": "string",
-                    "example": "permanently_delete",
-                    "description": "The disposition action of the retention policy.\n`permanently_delete` deletes the content\nretained by the policy permanently.\n`remove_retention` lifts retention policy\nfrom the content, allowing it to be deleted\nby users once the retention policy has expired.",
-                    "enum": [
-                      "permanently_delete",
-                      "remove_retention"
-                    ]
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "enum": [
+                          "permanently_delete",
+                          "remove_retention"
+                        ]
+                      },
+                      {
+                        "type": "string",
+                        "nullable": true
+                      }
+                    ],
+                    "description": "The disposition action of the retention policy.\nThis action can be `permanently_delete`, which\nwill cause the content retained by the policy\nto be permanently deleted, or `remove_retention`,\nwhich will lift the retention policy from the content,\nallowing it to be deleted by users,\nonce the retention policy has expired. \nYou can use \"null\" if you don't want to change `disposition_action`.",
+                    "example": "permanently_delete"
                   },
                   "retention_type": {
                     "type": "string",
                     "example": "non-modifiable",
+                    "nullable": true,
                     "description": "Specifies the retention type:\n\n* `modifiable`: You can modify the retention policy. For example,\nyou can add or remove folders, shorten or lengthen\nthe policy duration, or delete the assignment.\nUse this type if your retention policy\nis not related to any regulatory purposes.\n* `non-modifiable`: You can modify the retention policy\nonly in a limited way: add a folder, lengthen the duration,\nretire the policy, change the disposition action\nor notification settings. You cannot perform other actions,\nsuch as deleting the assignment or shortening the\npolicy duration. Use this type to ensure\ncompliance with regulatory retention policies.\n\nWhen updating a retention policy, you can use\n`non-modifiable` type only. You can convert a\n`modifiable` policy to `non-modifiable`, but\nnot the other way around."
                   },
                   "retention_length": {
-                    "type": "string",
-                    "format": "int32",
+                    "oneOf": [
+                      {
+                        "type": "string",
+                        "format": "int32",
+                        "nullable": true
+                      },
+                      {
+                        "type": "number",
+                        "format": "int32",
+                        "nullable": false
+                      }
+                    ],
                     "example": "365",
                     "description": "The length of the retention policy. This value\nspecifies the duration in days that the retention\npolicy will be active for after being assigned to\ncontent.  If the policy has a `policy_type` of\n`indefinite`, the `retention_length` will also be\n`indefinite`."
                   },
                   "status": {
                     "type": "string",
                     "example": "retired",
+                    "nullable": true,
                     "description": "Used to retire a retention policy.\n\nIf not retiring a policy, do not include this parameter\nor set it to `null`."
                   },
                   "can_owner_extend_retention": {
                     "type": "boolean",
+                    "nullable": true,
                     "description": "Determines if the owner of items under the policy\ncan extend the retention when the original retention\nduration is about to end.",
                     "example": false
                   },
                   "are_owners_notified": {
                     "type": "boolean",
+                    "nullable": true,
                     "description": "Determines if owners and co-owners of items\nunder the policy are notified when\nthe retention duration is about to end.",
-                    "enum": [
-                      true,
-                      false
-                    ],
                     "example": false
                   },
                   "custom_notification_recipients": {
                     "type": "array",
+                    "nullable": true,
                     "description": "A list of users notified when the retention duration is about to end.",
                     "items": {
-                      "$ref": "#/components/schemas/User--Mini"
+                      "$ref": "#/components/schemas/User--Base"
                     }
                   }
                 }
@@ -18342,10 +18373,6 @@
           "Retention policies"
         ],
         "x-box-tag": "retention_policies",
-        "x-box-scopes": [
-          "manage_data_retention",
-          "data_retention"
-        ],
         "description": "Permanently deletes a retention policy.",
         "parameters": [
           {
@@ -18534,8 +18561,7 @@
                     "type": "object",
                     "description": "The item to assign the policy to",
                     "required": [
-                      "type",
-                      "id"
+                      "type"
                     ],
                     "properties": {
                       "type": {
@@ -18550,6 +18576,7 @@
                       },
                       "id": {
                         "type": "string",
+                        "nullable": true,
                         "description": "The ID of item to assign the policy to.\nSet to `null` or omit when `type` is set to\n`enterprise`.",
                         "example": "6564564"
                       }
@@ -19978,10 +20005,7 @@
           "Shield information barriers"
         ],
         "x-box-tag": "shield_information_barriers",
-        "x-box-scopes": [
-          "manage_managed_users"
-        ],
-        "description": "Get shield information barrier based on provided ID..",
+        "description": "Get shield information barrier based on provided ID.",
         "parameters": [
           {
             "name": "shield_information_barrier_id",
@@ -20036,9 +20060,6 @@
           "Shield information barriers"
         ],
         "x-box-tag": "shield_information_barriers",
-        "x-box-scopes": [
-          "manage_managed_users"
-        ],
         "description": "Change status of shield information barrier with the specified ID.",
         "requestBody": {
           "content": {
@@ -20121,14 +20142,11 @@
           "Shield information barriers"
         ],
         "x-box-tag": "shield_information_barriers",
-        "x-box-scopes": [
-          "manage_managed_users"
-        ],
         "description": "Retrieves a list of shield information barrier objects\nfor the enterprise of JWT.",
         "parameters": [
           {
             "name": "marker",
-            "description": "Defines the position marker at which to begin returning results. This is\nused when paginating using marker-based pagination.\n\nThis requires `usemarker` to be set to `true`.",
+            "description": "Defines the position marker at which to begin returning results. This is\nused when paginating using marker-based pagination.",
             "in": "query",
             "required": false,
             "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
@@ -20155,27 +20173,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "limit": {
-                      "description": "The limit that was used for these entries.\nThis will be the same as the\n`limit` query parameter unless that\nvalue exceeded the maximum value\nallowed. The maximum value varies by API.",
-                      "example": 1000,
-                      "type": "integer",
-                      "format": "int64"
-                    },
-                    "next_marker": {
-                      "description": "The marker for the start of the next page of results.",
-                      "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
-                      "type": "string"
-                    },
-                    "entries": {
-                      "type": "array",
-                      "description": "A list of shield information barrier objects",
-                      "items": {
-                        "$ref": "#/components/schemas/ShieldInformationBarrier"
-                      }
-                    }
-                  }
+                  "$ref": "#/components/schemas/ShieldInformationBarriers"
                 }
               }
             }
@@ -20209,15 +20207,25 @@
           "Shield information barriers"
         ],
         "x-box-tag": "shield_information_barriers",
-        "x-box-scopes": [
-          "manage_managed_users"
-        ],
         "description": "Creates a shield information barrier to\nseparate individuals/groups within the same\nfirm and prevents confidential information passing between them.",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ShieldInformationBarrier"
+                "type": "object",
+                "properties": {
+                  "enterprise": {
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/Enterprise--Base"
+                      }
+                    ],
+                    "description": "The `type` and `id` of enterprise this barrier is under."
+                  }
+                },
+                "required": [
+                  "enterprise"
+                ]
               }
             }
           }
@@ -20264,10 +20272,7 @@
           "Shield information barrier reports"
         ],
         "x-box-tag": "shield_information_barrier_reports",
-        "x-box-scopes": [
-          "manage_managed_users"
-        ],
-        "description": "Lists shield information barrier reports with specific IDs.",
+        "description": "Lists shield information barrier reports.",
         "parameters": [
           {
             "name": "shield_information_barrier_id",
@@ -20308,33 +20313,13 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "limit": {
-                      "description": "The limit that was used for these entries.\nThis will be the same as the\n`limit` query parameter unless that\nvalue exceeded the maximum value\nallowed. The maximum value varies by API.",
-                      "example": 1000,
-                      "type": "integer",
-                      "format": "int64"
-                    },
-                    "next_marker": {
-                      "description": "The marker for the start of the next page of results.",
-                      "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
-                      "type": "string"
-                    },
-                    "entries": {
-                      "type": "array",
-                      "description": "A list of shield barrier reports.",
-                      "items": {
-                        "$ref": "#/components/schemas/ShieldInformationBarrierReport"
-                      }
-                    }
-                  }
+                  "$ref": "#/components/schemas/ShieldInformationBarrierReports"
                 }
               }
             }
           },
           "404": {
-            "description": "Returns a `not_found` error if the\nshield information barrier was not found.",
+            "description": "Returns a `not_found` error if the Shield Information Barrier could not be found.",
             "content": {
               "application/json": {
                 "schema": {
@@ -20362,9 +20347,6 @@
           "Shield information barrier reports"
         ],
         "x-box-tag": "shield_information_barrier_reports",
-        "x-box-scopes": [
-          "manage_managed_users"
-        ],
         "description": "Creates a shield information barrier report for a given barrier.",
         "requestBody": {
           "content": {
@@ -20427,9 +20409,6 @@
           "Shield information barrier reports"
         ],
         "x-box-tag": "shield_information_barrier_reports",
-        "x-box-scopes": [
-          "manage_managed_users"
-        ],
         "description": "Retrieves a shield information barrier report by its ID.",
         "parameters": [
           {
@@ -20485,9 +20464,6 @@
           "Shield information barrier segments"
         ],
         "x-box-tag": "shield_information_barrier_segments",
-        "x-box-scopes": [
-          "manage_managed_users"
-        ],
         "description": "Retrieves shield information barrier segment based on provided ID..",
         "parameters": [
           {
@@ -20541,9 +20517,6 @@
           "Shield information barrier segments"
         ],
         "x-box-tag": "shield_information_barrier_segments",
-        "x-box-scopes": [
-          "manage_managed_users"
-        ],
         "description": "Deletes the shield information barrier segment\nbased on provided ID.",
         "parameters": [
           {
@@ -20590,9 +20563,6 @@
           "Shield information barrier segments"
         ],
         "x-box-tag": "shield_information_barrier_segments",
-        "x-box-scopes": [
-          "manage_managed_users"
-        ],
         "description": "Updates the shield information barrier segment based on provided ID..",
         "parameters": [
           {
@@ -20682,9 +20652,6 @@
           "Shield information barrier segments"
         ],
         "x-box-tag": "shield_information_barrier_segments",
-        "x-box-scopes": [
-          "manage_managed_users"
-        ],
         "description": "Retrieves a list of shield information barrier segment objects\nfor the specified Information Barrier ID.",
         "parameters": [
           {
@@ -20726,27 +20693,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "limit": {
-                      "description": "The limit that was used for these entries.\nThis will be the same as the\n`limit` query parameter unless\nthat value exceeded the maximum value\nallowed. The maximum value varies by API.",
-                      "example": 1000,
-                      "type": "integer",
-                      "format": "int64"
-                    },
-                    "next_marker": {
-                      "description": "The marker for the start of the next page of results.",
-                      "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
-                      "type": "string"
-                    },
-                    "entries": {
-                      "type": "array",
-                      "description": "A list of shield information barrier segment\nobjects",
-                      "items": {
-                        "$ref": "#/components/schemas/ShieldInformationBarrierSegment"
-                      }
-                    }
-                  }
+                  "$ref": "#/components/schemas/ShieldInformationBarrierSegments"
                 }
               }
             }
@@ -20780,9 +20727,6 @@
           "Shield information barrier segments"
         ],
         "x-box-tag": "shield_information_barrier_segments",
-        "x-box-scopes": [
-          "manage_managed_users"
-        ],
         "description": "Creates a shield information barrier segment.",
         "requestBody": {
           "content": {
@@ -20834,7 +20778,7 @@
             }
           },
           "409": {
-            "description": "Returns an error if there exists an shield information\nbarrier segment with same name.",
+            "description": "Returns an error if there exists an shield information \nbarrier segment with same name.",
             "content": {
               "application/json": {
                 "schema": {
@@ -20864,9 +20808,6 @@
           "Shield information barrier segment members"
         ],
         "x-box-tag": "shield_information_barrier_segment_members",
-        "x-box-scopes": [
-          "manage_managed_users"
-        ],
         "description": "Retrieves a shield information barrier\nsegment member by its ID.",
         "parameters": [
           {
@@ -20920,9 +20861,6 @@
           "Shield information barrier segment members"
         ],
         "x-box-tag": "shield_information_barrier_segment_members",
-        "x-box-scopes": [
-          "manage_managed_users"
-        ],
         "description": "Deletes a shield information barrier\nsegment member based on provided ID.",
         "parameters": [
           {
@@ -20971,9 +20909,6 @@
           "Shield information barrier segment members"
         ],
         "x-box-tag": "shield_information_barrier_segment_members",
-        "x-box-scopes": [
-          "manage_managed_users"
-        ],
         "description": "Lists shield information barrier segment members\nbased on provided segment IDs.",
         "parameters": [
           {
@@ -21015,27 +20950,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "limit": {
-                      "description": "The limit that was used for these entries.\nThis will be the same as the\n`limit` query parameter unless that value\nexceeded the maximum value\nallowed. The maximum value varies by API.",
-                      "example": 1000,
-                      "type": "integer",
-                      "format": "int64"
-                    },
-                    "next_marker": {
-                      "description": "The marker for the start of the next page of results.",
-                      "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
-                      "type": "string"
-                    },
-                    "entries": {
-                      "type": "array",
-                      "description": "A list of shield information\nbarrier segment members",
-                      "items": {
-                        "$ref": "#/components/schemas/ShieldInformationBarrierSegmentMember"
-                      }
-                    }
-                  }
+                  "$ref": "#/components/schemas/ShieldInformationBarrierSegmentMembers"
                 }
               }
             }
@@ -21059,9 +20974,6 @@
           "Shield information barrier segment members"
         ],
         "x-box-tag": "shield_information_barrier_segment_members",
-        "x-box-scopes": [
-          "manage_managed_users"
-        ],
         "description": "Creates a new shield information barrier segment member.",
         "requestBody": {
           "content": {
@@ -21107,11 +21019,9 @@
                     "allOf": [
                       {
                         "$ref": "#/components/schemas/User--Base"
-                      },
-                      {
-                        "description": "The `type` and `id` of the requested shield information barrier segment Member."
                       }
-                    ]
+                    ],
+                    "description": "User to which restriction will be applied."
                   }
                 }
               }
@@ -21120,7 +21030,7 @@
         },
         "responses": {
           "201": {
-            "description": "Returns a new shield information barrier segment Member object.",
+            "description": "Returns a new shield information barrier segment member object.",
             "content": {
               "application/json": {
                 "schema": {
@@ -21130,7 +21040,7 @@
             }
           },
           "404": {
-            "description": "Returns an error if the\nshield information barrier or Segment was not found.",
+            "description": "Returns an error if the\nshield information barrier or segment was not found.",
             "content": {
               "application/json": {
                 "schema": {
@@ -21160,9 +21070,6 @@
           "Shield information barrier segment restrictions"
         ],
         "x-box-tag": "shield_information_barrier_segment_restrictions",
-        "x-box-scopes": [
-          "manage_managed_users"
-        ],
         "description": "Retrieves a shield information barrier segment\nrestriction based on provided ID.",
         "parameters": [
           {
@@ -21216,9 +21123,6 @@
           "Shield information barrier segment restrictions"
         ],
         "x-box-tag": "shield_information_barrier_segment_restrictions",
-        "x-box-scopes": [
-          "manage_managed_users"
-        ],
         "description": "Delete shield information barrier segment restriction\nbased on provided ID.",
         "parameters": [
           {
@@ -21267,9 +21171,6 @@
           "Shield information barrier segment restrictions"
         ],
         "x-box-tag": "shield_information_barrier_segment_restrictions",
-        "x-box-scopes": [
-          "manage_managed_users"
-        ],
         "description": "Lists shield information barrier segment restrictions\nbased on provided segment ID.",
         "parameters": [
           {
@@ -21311,27 +21212,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "limit": {
-                      "description": "The limit that was used for these entries.\nThis will be the same as the\n`limit` query parameter unless\nthat value exceeded the maximum value\nallowed. The maximum value varies by API.",
-                      "example": 1000,
-                      "type": "integer",
-                      "format": "int64"
-                    },
-                    "next_marker": {
-                      "description": "The marker for the start of the next page of results.",
-                      "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
-                      "type": "string"
-                    },
-                    "entries": {
-                      "type": "array",
-                      "description": "A list of shield information barrier\nsegment restriction objects",
-                      "items": {
-                        "$ref": "#/components/schemas/ShieldInformationBarrierSegmentRestriction"
-                      }
-                    }
-                  }
+                  "$ref": "#/components/schemas/ShieldInformationBarrierSegmentRestrictions"
                 }
               }
             }
@@ -21355,9 +21236,6 @@
           "Shield information barrier segment restrictions"
         ],
         "x-box-tag": "shield_information_barrier_segment_restrictions",
-        "x-box-scopes": [
-          "manage_managed_users"
-        ],
         "description": "Creates a shield information barrier\nsegment restriction object.",
         "requestBody": {
           "content": {
@@ -21436,7 +21314,7 @@
             }
           },
           "404": {
-            "description": "Returns a `not_found` error if the\nshield information barrier or Segment was not found.",
+            "description": "Returns a `not_found` error if the\nshield information barrier or segment was not found.",
             "content": {
               "application/json": {
                 "schema": {
@@ -22476,7 +22354,7 @@
           "Storage policies"
         ],
         "x-box-tag": "storage_policies",
-        "description": "Fetches all the storage policies in the enterprise.\nOnly a Primary Admin can access this endpoint. The user\nneeds to generate a token for an account to authenticate this request.",
+        "description": "Fetches all the storage policies in the enterprise.",
         "parameters": [
           {
             "name": "fields",
@@ -22551,7 +22429,7 @@
           "Storage policies"
         ],
         "x-box-tag": "storage_policies",
-        "description": "Fetches a specific storage policy. Only a Primary Admin can access this endpoint. The user needs to generate a token for an account to authenticate this request.",
+        "description": "Fetches a specific storage policy.",
         "parameters": [
           {
             "name": "storage_policy_id",
@@ -22596,7 +22474,7 @@
           "Storage policy assignments"
         ],
         "x-box-tag": "storage_policy_assignments",
-        "description": "Fetches all the storage policy assignment for an enterprise or user.\nOnly a Primary Admin can access this endpoint. The user\nneeds to generate a token for an account to authenticate this request.",
+        "description": "Fetches all the storage policy assignment for an enterprise or user.",
         "parameters": [
           {
             "name": "marker",
@@ -22663,7 +22541,7 @@
           "Storage policy assignments"
         ],
         "x-box-tag": "storage_policy_assignments",
-        "description": "Creates a storage policy assignment for an enterprise or user.\nOnly a Primary Admin can access this endpoint. The user\nneeds to generate a token for an account to authenticate this request.",
+        "description": "Creates a storage policy assignment for an enterprise or user.",
         "requestBody": {
           "content": {
             "application/json": {
@@ -22758,7 +22636,7 @@
           "Storage policy assignments"
         ],
         "x-box-tag": "storage_policy_assignments",
-        "description": "Fetches a specific storage policy assignment. Only a Primary Admin can access this endpoint. The user needs to generate a token for an account to authenticate this request.",
+        "description": "Fetches a specific storage policy assignment.",
         "parameters": [
           {
             "name": "storage_policy_assignment_id",
@@ -22801,7 +22679,7 @@
           "Storage policy assignments"
         ],
         "x-box-tag": "storage_policy_assignments",
-        "description": "Updates a specific storage policy assignment. Only a Primary Admin can access this endpoint. The user needs to generate a token for an account to authenticate this request.",
+        "description": "Updates a specific storage policy assignment.",
         "parameters": [
           {
             "name": "storage_policy_assignment_id",
@@ -22881,7 +22759,7 @@
           "Storage policy assignments"
         ],
         "x-box-tag": "storage_policy_assignments",
-        "description": "Delete a storage policy assignment.\n\nDeleting a storage policy assignment on a user\nwill have the user inherit the enterprise's default\nstorage policy.\n\nThere is a rate limit for calling this endpoint of only\ntwice per user in a 24 hour time frame.\n\nOnly a Primary Admin can access this endpoint. The user\nneeds to generate a token for an account to authenticate this request.",
+        "description": "Delete a storage policy assignment.\n\nDeleting a storage policy assignment on a user\nwill have the user inherit the enterprise's default\nstorage policy.\n\nThere is a rate limit for calling this endpoint of only\ntwice per user in a 24 hour time frame.",
         "parameters": [
           {
             "name": "storage_policy_assignment_id",
@@ -23841,9 +23719,6 @@
           "integrationMappingsSlack"
         ],
         "x-box-tag": "integration_mappings",
-        "x-box-scopes": [
-          "manage_enterprise_properties"
-        ],
         "description": "Lists [Slack integration mappings](https://support.box.com/hc/en-us/articles/4415585987859-Box-as-the-Content-Layer-for-Slack) in a users' enterprise.\n\nYou need Admin or Co-Admin role to\nuse this endpoint.",
         "parameters": [
           {
@@ -23976,9 +23851,6 @@
           "post_integration_mappings_slack"
         ],
         "x-box-tag": "integration_mappings",
-        "x-box-scopes": [
-          "manage_enterprise_properties"
-        ],
         "description": "Creates a [Slack integration mapping](https://support.box.com/hc/en-us/articles/4415585987859-Box-as-the-Content-Layer-for-Slack)\nby mapping a Slack channel to a Box item.\n\nYou need Admin or Co-Admin role to\nuse this endpoint.",
         "requestBody": {
           "content": {
@@ -24041,9 +23913,6 @@
           "integrationMappingsSlack"
         ],
         "x-box-tag": "integration_mappings",
-        "x-box-scopes": [
-          "manage_enterprise_properties"
-        ],
         "description": "Updates a [Slack integration mapping](https://support.box.com/hc/en-us/articles/4415585987859-Box-as-the-Content-Layer-for-Slack).\nSupports updating the Box folder ID and options.\n\nYou need Admin or Co-Admin role to\nuse this endpoint.",
         "parameters": [
           {
@@ -24107,7 +23976,7 @@
             }
           },
           "404": {
-            "description": "Returns a `not_found` if integration mapping\nobject was not found in the database",
+            "description": "Returns `not_found` if integration mapping object was not found.",
             "content": {
               "application/json": {
                 "schema": {
@@ -24135,9 +24004,6 @@
           "integrationMappingsSlack"
         ],
         "x-box-tag": "integration_mappings",
-        "x-box-scopes": [
-          "manage_enterprise_properties"
-        ],
         "description": "Deletes a [Slack integration mapping](https://support.box.com/hc/en-us/articles/4415585987859-Box-as-the-Content-Layer-for-Slack).\n\n\nYou need Admin or Co-Admin role to\nuse this endpoint.",
         "parameters": [
           {
@@ -24617,12 +24483,23 @@
                 "maxItems": 10,
                 "nullable": true
               },
+              "signature_color": {
+                "type": "string",
+                "example": "blue",
+                "description": "Force a specific color for the signature (blue, black, or red)",
+                "enum": [
+                  "blue",
+                  "black",
+                  "red"
+                ],
+                "nullable": true
+              },
               "signers": {
                 "type": "array",
                 "items": {
                   "$ref": "#/components/schemas/SignRequestCreateSigner"
                 },
-                "description": "Array of signers for the sign request. 35 is the\nmax number of signers permitted."
+                "description": "Array of signers for the sign request. 35 is the max number of signers permitted."
               }
             }
           }
@@ -24635,28 +24512,28 @@
         "description": "A request to create a\nSlack Integration Mapping object",
         "properties": {
           "partner_item": {
-            "nullable": false,
             "allOf": [
               {
                 "$ref": "#/components/schemas/IntegrationMappingPartnerItemSlack"
               }
-            ]
+            ],
+            "nullable": false
           },
           "box_item": {
-            "nullable": false,
             "allOf": [
               {
                 "$ref": "#/components/schemas/IntegrationMappingBoxItemSlack"
               }
-            ]
+            ],
+            "nullable": false
           },
           "options": {
-            "nullable": false,
             "allOf": [
               {
                 "$ref": "#/components/schemas/IntegrationMappingSlackOptions"
               }
-            ]
+            ],
+            "nullable": false
           }
         },
         "required": [
@@ -24671,7 +24548,7 @@
         "description": "A generic error",
         "properties": {
           "type": {
-            "description": "`error`",
+            "description": "error",
             "example": "error",
             "type": "string",
             "enum": [
@@ -24719,6 +24596,7 @@
           "context_info": {
             "description": "A free-form object that contains additional context\nabout the error. The possible fields are defined on\na per-endpoint basis. `message` is only one example.",
             "type": "object",
+            "nullable": true,
             "properties": {
               "message": {
                 "type": "string",
@@ -25751,13 +25629,15 @@
                 "description": "The marker for the start of the next page of results.",
                 "example": 3000,
                 "type": "integer",
-                "format": "int64"
+                "format": "int64",
+                "nullable": true
               },
               "prev_marker": {
                 "description": "The marker for the start of the previous page of results.",
                 "example": 1000,
                 "type": "integer",
-                "format": "int64"
+                "format": "int64",
+                "nullable": true
               }
             }
           },
@@ -25871,13 +25751,15 @@
                 "description": "The marker for the start of the next page of results.",
                 "example": 3000,
                 "type": "integer",
-                "format": "int64"
+                "format": "int64",
+                "nullable": true
               },
               "prev_marker": {
                 "description": "The marker for the start of the previous page of results.",
                 "example": 1000,
                 "type": "integer",
-                "format": "int64"
+                "format": "int64",
+                "nullable": true
               }
             }
           },
@@ -27537,6 +27419,7 @@
         "x-box-resource-id": "file--mini",
         "x-box-variant": "mini",
         "description": "A mini representation of a file, used when\nnested under another resource.",
+        "nullable": true,
         "allOf": [
           {
             "$ref": "#/components/schemas/File--Base"
@@ -27595,6 +27478,7 @@
           "full"
         ],
         "x-box-variant": "base",
+        "nullable": true,
         "description": "The bare basic representation of a file, the minimal\namount of fields returned when using the `fields` query\nparameter.",
         "required": [
           "id",
@@ -27770,13 +27654,15 @@
                 "description": "The marker for the start of the next page of results.",
                 "example": 3000,
                 "type": "integer",
-                "format": "int64"
+                "format": "int64",
+                "nullable": true
               },
               "prev_marker": {
                 "description": "The marker for the start of the previous page of results.",
                 "example": 1000,
                 "type": "integer",
-                "format": "int64"
+                "format": "int64",
+                "nullable": true
               }
             }
           },
@@ -28115,13 +28001,15 @@
                 "description": "The marker for the start of the next page of results.",
                 "example": 3000,
                 "type": "integer",
-                "format": "int64"
+                "format": "int64",
+                "nullable": true
               },
               "prev_marker": {
                 "description": "The marker for the start of the previous page of results.",
                 "example": 1000,
                 "type": "integer",
-                "format": "int64"
+                "format": "int64",
+                "nullable": true
               }
             }
           },
@@ -28223,13 +28111,15 @@
                 "description": "The marker for the start of the next page of results.",
                 "example": 3000,
                 "type": "integer",
-                "format": "int64"
+                "format": "int64",
+                "nullable": true
               },
               "prev_marker": {
                 "description": "The marker for the start of the previous page of results.",
                 "example": 1000,
                 "type": "integer",
-                "format": "int64"
+                "format": "int64",
+                "nullable": true
               }
             }
           },
@@ -28923,17 +28813,24 @@
           },
           {
             "properties": {
+              "sequence_id": {
+                "allOf": [
+                  {
+                    "type": "string",
+                    "example": "3",
+                    "nullable": true,
+                    "description": "A numeric identifier that represents the most recent user event\nthat has been applied to this item.\n\nThis can be used in combination with the `GET /events`-endpoint\nto filter out user events that would have occurred before this\nidentifier was read.\n\nAn example would be where a Box Drive-like application\nwould fetch an item via the API, and then listen to incoming\nuser events for changes to the item. The application would\nignore any user events where the `sequence_id` in the event\nis smaller than or equal to the `sequence_id` in the originally\nfetched resource."
+                  },
+                  {
+                    "nullable": false
+                  }
+                ]
+              },
               "name": {
                 "type": "string",
                 "description": "The name of the folder.",
                 "example": "Contracts",
                 "nullable": false
-              },
-              "sequence_id": {
-                "type": "string",
-                "example": "3",
-                "nullable": true,
-                "description": "A numeric identifier that represents the most recent user event\nthat has been applied to this item.\n\nThis can be used in combination with the `GET /events`-endpoint\nto filter out user events that would have occurred before this\nidentifier was read.\n\nAn example would be where a Box Drive-like application\nwould fetch an item via the API, and then listen to incoming\nuser events for changes to the item. The application would\nignore any user events where the `sequence_id` in the event\nis smaller than or equal to the `sequence_id` in the originally\nfetched resource."
               }
             }
           }
@@ -29074,13 +28971,15 @@
                 "description": "The marker for the start of the next page of results.",
                 "example": 3000,
                 "type": "integer",
-                "format": "int64"
+                "format": "int64",
+                "nullable": true
               },
               "prev_marker": {
                 "description": "The marker for the start of the previous page of results.",
                 "example": 1000,
                 "type": "integer",
-                "format": "int64"
+                "format": "int64",
+                "nullable": true
               }
             }
           },
@@ -29129,13 +29028,13 @@
                 "description": "Mapped item object for Slack"
               },
               "box_item": {
-                "description": "The Box folder, to which the object from the\npartner app domain (referenced in `partner_item_id`) is mapped",
-                "nullable": false,
                 "allOf": [
                   {
                     "$ref": "#/components/schemas/Folder--Mini"
                   }
-                ]
+                ],
+                "description": "The Box folder, to which the object from the\npartner app domain (referenced in `partner_item_id`) is mapped",
+                "nullable": false
               },
               "is_manually_created": {
                 "type": "boolean",
@@ -29155,22 +29054,22 @@
                 ]
               },
               "created_by": {
-                "description": "An object representing the user who\ncreated the integration mapping",
-                "nullable": false,
                 "allOf": [
                   {
                     "$ref": "#/components/schemas/UserIntegrationMappings"
                   }
-                ]
+                ],
+                "description": "An object representing the user who\ncreated the integration mapping",
+                "nullable": false
               },
               "modified_by": {
-                "description": "The user who\nlast modified the integration mapping",
-                "nullable": false,
                 "allOf": [
                   {
                     "$ref": "#/components/schemas/UserIntegrationMappings"
                   }
-                ]
+                ],
+                "description": "The user who\nlast modified the integration mapping",
+                "nullable": false
               },
               "created_at": {
                 "type": "string",
@@ -29291,15 +29190,9 @@
               },
               "next_marker": {
                 "description": "The marker for the start of the next page of results.",
-                "example": 3000,
-                "type": "integer",
-                "format": "int64"
-              },
-              "prev_marker": {
-                "description": "The marker for the start of the previous page of results.",
-                "example": 1000,
-                "type": "integer",
-                "format": "int64"
+                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                "type": "string",
+                "nullable": true
               }
             }
           },
@@ -29962,13 +29855,15 @@
                 "description": "The marker for the start of the next page of results.",
                 "example": 3000,
                 "type": "integer",
-                "format": "int64"
+                "format": "int64",
+                "nullable": true
               },
               "prev_marker": {
                 "description": "The marker for the start of the previous page of results.",
                 "example": 1000,
                 "type": "integer",
-                "format": "int64"
+                "format": "int64",
+                "nullable": true
               }
             }
           },
@@ -30129,13 +30024,15 @@
                 "description": "The marker for the start of the next page of results.",
                 "example": 3000,
                 "type": "integer",
-                "format": "int64"
+                "format": "int64",
+                "nullable": true
               },
               "prev_marker": {
                 "description": "The marker for the start of the previous page of results.",
                 "example": 1000,
                 "type": "integer",
-                "format": "int64"
+                "format": "int64",
+                "nullable": true
               }
             }
           },
@@ -30362,13 +30259,15 @@
                 "description": "The marker for the start of the next page of results.",
                 "example": 3000,
                 "type": "integer",
-                "format": "int64"
+                "format": "int64",
+                "nullable": true
               },
               "prev_marker": {
                 "description": "The marker for the start of the previous page of results.",
                 "example": 1000,
                 "type": "integer",
-                "format": "int64"
+                "format": "int64",
+                "nullable": true
               }
             }
           },
@@ -30707,13 +30606,15 @@
                 "description": "The marker for the start of the next page of results.",
                 "example": 3000,
                 "type": "integer",
-                "format": "int64"
+                "format": "int64",
+                "nullable": true
               },
               "prev_marker": {
                 "description": "The marker for the start of the previous page of results.",
                 "example": 1000,
                 "type": "integer",
-                "format": "int64"
+                "format": "int64",
+                "nullable": true
               }
             }
           },
@@ -30861,12 +30762,14 @@
               "next_marker": {
                 "description": "The marker for the start of the next page of results.",
                 "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
-                "type": "string"
+                "type": "string",
+                "nullable": true
               },
               "prev_marker": {
                 "description": "The marker for the start of the previous page of results.",
                 "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVih",
-                "type": "string"
+                "type": "string",
+                "nullable": true
               }
             }
           },
@@ -30914,7 +30817,8 @@
               "next_marker": {
                 "description": "The marker for the start of the next page of results.",
                 "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
-                "type": "string"
+                "type": "string",
+                "nullable": true
               }
             }
           }
@@ -30949,11 +30853,11 @@
               },
               "retention_type": {
                 "type": "string",
-                "example": "non-modifiable",
+                "example": "non_modifiable",
                 "description": "Specifies the retention type:\n\n* `modifiable`: You can modify the retention policy. For example,\n you can add or remove folders, shorten or lengthen\n the policy duration, or delete the assignment.\n Use this type if your retention policy\n is not related to any regulatory purposes.\n\n* `non-modifiable`: You can modify the retention policy\n only in a limited way: add a folder, lengthen the duration,\n retire the policy, change the disposition action\n or notification settings. You cannot perform other actions,\n such as deleting the assignment or shortening the\n policy duration. Use this type to ensure\n compliance with regulatory retention policies.",
                 "enum": [
                   "modifiable",
-                  "non-modifiable"
+                  "non_modifiable"
                 ]
               },
               "status": {
@@ -31172,8 +31076,9 @@
             "properties": {
               "id": {
                 "type": "string",
+                "nullable": true,
                 "example": "a983f69f-e85f-4ph4-9f46-4afdf9c1af65",
-                "description": "The ID of the folder, enterprise, or metadata template\nthe policy is assigned to."
+                "description": "The ID of the folder, enterprise, or metadata template\nthe policy is assigned to.\nSet to null or omit when type is set to enterprise."
               },
               "type": {
                 "type": "string",
@@ -31246,7 +31151,7 @@
                 "type": "array",
                 "description": "A list of retention policy assignments",
                 "items": {
-                  "$ref": "#/components/schemas/RetentionPolicyAssignment--Base"
+                  "$ref": "#/components/schemas/RetentionPolicyAssignment"
                 }
               }
             }
@@ -31264,7 +31169,8 @@
               "next_marker": {
                 "description": "The marker for the start of the next page of results.",
                 "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
-                "type": "string"
+                "type": "string",
+                "nullable": true
               }
             }
           }
@@ -31299,11 +31205,9 @@
             "allOf": [
               {
                 "$ref": "#/components/schemas/Enterprise--Base"
-              },
-              {
-                "description": "The `type` and `id` of enterprise this barrier is under."
               }
-            ]
+            ],
+            "description": "The `type` and `id` of enterprise this barrier is under."
           },
           "status": {
             "type": "string",
@@ -31327,11 +31231,9 @@
             "allOf": [
               {
                 "$ref": "#/components/schemas/User--Base"
-              },
-              {
-                "description": "The user who created this shield information barrier."
               }
-            ]
+            ],
+            "description": "The user who created this shield information barrier."
           },
           "updated_at": {
             "type": "string",
@@ -31343,11 +31245,9 @@
             "allOf": [
               {
                 "$ref": "#/components/schemas/User--Base"
-              },
-              {
-                "description": "The user that updated this shield information barrier."
               }
-            ]
+            ],
+            "description": "The user that updated this shield information barrier."
           },
           "enabled_at": {
             "type": "string",
@@ -31393,6 +31293,44 @@
             ]
           }
         }
+      },
+      "ShieldInformationBarriers": {
+        "title": "List of Shield Information Barriers",
+        "type": "object",
+        "x-box-resource-id": "shield_information_barriers",
+        "x-box-tag": "shield_information_barriers",
+        "description": "List of Shield Information Barrier objects",
+        "allOf": [
+          {
+            "type": "object",
+            "description": "The part of an API response that describes marker\nbased pagination",
+            "properties": {
+              "limit": {
+                "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
+                "example": 1000,
+                "type": "integer",
+                "format": "int64"
+              },
+              "next_marker": {
+                "description": "The marker for the start of the next page of results.",
+                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                "type": "string",
+                "nullable": true
+              }
+            }
+          },
+          {
+            "properties": {
+              "entries": {
+                "type": "array",
+                "description": "A list of shield information barrier objects",
+                "items": {
+                  "$ref": "#/components/schemas/ShieldInformationBarrier"
+                }
+              }
+            }
+          }
+        ]
       },
       "ShieldInformationBarrierReport": {
         "title": "Shield information barrier report",
@@ -31489,6 +31427,44 @@
           }
         }
       },
+      "ShieldInformationBarrierReports": {
+        "title": "List of Shield Information Barrier Reports",
+        "type": "object",
+        "x-box-resource-id": "shield_information_barrier_reports",
+        "x-box-tag": "shield_information_barrier_reports",
+        "description": "A list of shield barrier reports.",
+        "allOf": [
+          {
+            "type": "object",
+            "description": "The part of an API response that describes marker\nbased pagination",
+            "properties": {
+              "limit": {
+                "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
+                "example": 1000,
+                "type": "integer",
+                "format": "int64"
+              },
+              "next_marker": {
+                "description": "The marker for the start of the next page of results.",
+                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                "type": "string",
+                "nullable": true
+              }
+            }
+          },
+          {
+            "properties": {
+              "entries": {
+                "type": "array",
+                "description": "A list of shield information\nbarrier reports.",
+                "items": {
+                  "$ref": "#/components/schemas/ShieldInformationBarrierReport"
+                }
+              }
+            }
+          }
+        ]
+      },
       "ShieldInformationBarrierSegment": {
         "title": "Shield information barrier segment",
         "type": "object",
@@ -31555,6 +31531,44 @@
             ]
           }
         }
+      },
+      "ShieldInformationBarrierSegments": {
+        "title": "List of Shield Information Barrier Segments",
+        "type": "object",
+        "x-box-resource-id": "shield_information_barrier_segments",
+        "x-box-tag": "shield_information_barrier_segments",
+        "description": "List of Shield Information Barrier Segment objects",
+        "allOf": [
+          {
+            "type": "object",
+            "description": "The part of an API response that describes marker\nbased pagination",
+            "properties": {
+              "limit": {
+                "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
+                "example": 1000,
+                "type": "integer",
+                "format": "int64"
+              },
+              "next_marker": {
+                "description": "The marker for the start of the next page of results.",
+                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                "type": "string",
+                "nullable": true
+              }
+            }
+          },
+          {
+            "properties": {
+              "entries": {
+                "type": "array",
+                "description": "A list of shield information barrier\nsegments",
+                "items": {
+                  "$ref": "#/components/schemas/ShieldInformationBarrierSegment"
+                }
+              }
+            }
+          }
+        ]
       },
       "ShieldInformationBarrierSegmentMember": {
         "title": "Shield information barrier segment member",
@@ -31697,6 +31711,44 @@
                     "description": "The `type` and `id` of the requested shield information barrier segment member."
                   }
                 ]
+              }
+            }
+          }
+        ]
+      },
+      "ShieldInformationBarrierSegmentMembers": {
+        "title": "List of Shield Information Barrier Segment Members",
+        "type": "object",
+        "x-box-resource-id": "shield_information_barrier_segment_members",
+        "x-box-tag": "shield_information_barrier_segment_members",
+        "description": "List of Shield Information Barrier Member objects",
+        "allOf": [
+          {
+            "type": "object",
+            "description": "The part of an API response that describes marker\nbased pagination",
+            "properties": {
+              "limit": {
+                "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
+                "example": 1000,
+                "type": "integer",
+                "format": "int64"
+              },
+              "next_marker": {
+                "description": "The marker for the start of the next page of results.",
+                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                "type": "string",
+                "nullable": true
+              }
+            }
+          },
+          {
+            "properties": {
+              "entries": {
+                "type": "array",
+                "description": "A list of shield information\nbarrier segment members",
+                "items": {
+                  "$ref": "#/components/schemas/ShieldInformationBarrierSegmentMember"
+                }
               }
             }
           }
@@ -31854,6 +31906,44 @@
                   }
                 },
                 "description": "The `type` and `id` of the\nrestricted shield information barrier segment."
+              }
+            }
+          }
+        ]
+      },
+      "ShieldInformationBarrierSegmentRestrictions": {
+        "title": "List of Shield Information Barrier Segment Restrictions",
+        "type": "object",
+        "x-box-resource-id": "shield_information_barrier_segment_restrictions",
+        "x-box-tag": "shield_information_barrier_segment_restrictions",
+        "description": "List of shield information barrier segment restriction objects",
+        "allOf": [
+          {
+            "type": "object",
+            "description": "The part of an API response that describes marker\nbased pagination",
+            "properties": {
+              "limit": {
+                "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
+                "example": 1000,
+                "type": "integer",
+                "format": "int64"
+              },
+              "next_marker": {
+                "description": "The marker for the start of the next page of results.",
+                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                "type": "string",
+                "nullable": true
+              }
+            }
+          },
+          {
+            "properties": {
+              "entries": {
+                "type": "array",
+                "description": "A list of shield information barrier\nsegment restriction objects",
+                "items": {
+                  "$ref": "#/components/schemas/ShieldInformationBarrierSegmentRestriction"
+                }
               }
             }
           }
@@ -32146,13 +32236,15 @@
                 "description": "The marker for the start of the next page of results.",
                 "example": 3000,
                 "type": "integer",
-                "format": "int64"
+                "format": "int64",
+                "nullable": true
               },
               "prev_marker": {
                 "description": "The marker for the start of the previous page of results.",
                 "example": 1000,
                 "type": "integer",
-                "format": "int64"
+                "format": "int64",
+                "nullable": true
               }
             }
           },
@@ -32260,13 +32352,15 @@
                 "description": "The marker for the start of the next page of results.",
                 "example": 3000,
                 "type": "integer",
-                "format": "int64"
+                "format": "int64",
+                "nullable": true
               },
               "prev_marker": {
                 "description": "The marker for the start of the previous page of results.",
                 "example": 1000,
                 "type": "integer",
-                "format": "int64"
+                "format": "int64",
+                "nullable": true
               }
             }
           },
@@ -32955,34 +33049,26 @@
           {
             "type": "object",
             "description": "The part of an API response that describes marker\nbased pagination",
-            "allOf": [
-              {
-                "type": "object",
-                "description": "The part of an API response that describes marker\nbased pagination",
-                "properties": {
-                  "limit": {
-                    "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
-                    "example": 1000,
-                    "type": "integer",
-                    "format": "int64"
-                  },
-                  "next_marker": {
-                    "description": "The marker for the start of the next page of results.",
-                    "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
-                    "type": "string"
-                  }
-                }
+            "properties": {
+              "limit": {
+                "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
+                "example": 1000,
+                "type": "integer",
+                "format": "int64"
               },
-              {
-                "properties": {
-                  "prev_marker": {
-                    "description": "The marker for the start of the previous page of results.",
-                    "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
-                    "type": "string"
-                  }
-                }
+              "next_marker": {
+                "description": "The marker for the start of the next page of results.",
+                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                "type": "string",
+                "nullable": true
+              },
+              "prev_marker": {
+                "description": "The marker for the start of the previous page of results.",
+                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVih",
+                "type": "string",
+                "nullable": true
               }
-            ]
+            }
           },
           {
             "properties": {
@@ -35148,8 +35234,8 @@
         "x-box-variant": "base",
         "description": "A mini representation of a user, used when\nnested within another resource.",
         "required": [
-          "id",
-          "type"
+          "type",
+          "id"
         ],
         "properties": {
           "id": {
@@ -35415,13 +35501,15 @@
                 "description": "The marker for the start of the next page of results.",
                 "example": 3000,
                 "type": "integer",
-                "format": "int64"
+                "format": "int64",
+                "nullable": true
               },
               "prev_marker": {
                 "description": "The marker for the start of the previous page of results.",
                 "example": 1000,
                 "type": "integer",
-                "format": "int64"
+                "format": "int64",
+                "nullable": true
               }
             }
           },
@@ -36163,13 +36251,15 @@
                 "description": "The marker for the start of the next page of results.",
                 "example": 3000,
                 "type": "integer",
-                "format": "int64"
+                "format": "int64",
+                "nullable": true
               },
               "prev_marker": {
                 "description": "The marker for the start of the previous page of results.",
                 "example": 1000,
                 "type": "integer",
-                "format": "int64"
+                "format": "int64",
+                "nullable": true
               }
             }
           },
@@ -36317,6 +36407,111 @@
           }
         }
       },
+      "SignRequest--Base": {
+        "title": "Sign Request (Base)",
+        "type": "object",
+        "x-box-resource-id": "sign_request--base",
+        "x-box-tag": "sign_requests",
+        "x-box-variants": [
+          "standard",
+          "base"
+        ],
+        "x-box-variant": "base",
+        "description": "A request to create a sign request object",
+        "required": [
+          "parent_folder"
+        ],
+        "properties": {
+          "is_document_preparation_needed": {
+            "type": "boolean",
+            "description": "Indicates if the sender should receive a `prepare_url` in the response to complete document preparation via UI.",
+            "example": true
+          },
+          "redirect_url": {
+            "type": "string",
+            "example": "https://www.example.com",
+            "description": "When specified, signature request will be redirected to this url when a document is signed.",
+            "nullable": true
+          },
+          "declined_redirect_url": {
+            "type": "string",
+            "example": "https://declined-redirect.com",
+            "description": "The uri that a signer will be redirected to after declining to sign a document.",
+            "nullable": true
+          },
+          "are_text_signatures_enabled": {
+            "type": "boolean",
+            "description": "Disables the usage of signatures generated by typing (text).",
+            "example": true,
+            "default": true
+          },
+          "email_subject": {
+            "type": "string",
+            "example": "Sign Request from Acme",
+            "description": "Subject of sign request email. This is cleaned by sign request. If this field is not passed, a default subject will be used.",
+            "nullable": true
+          },
+          "email_message": {
+            "type": "string",
+            "example": "Hello! Please sign the document below",
+            "description": "Message to include in sign request email. The field is cleaned through sanitization of specific characters. However, some html tags are allowed. Links included in the message are also converted to hyperlinks in the email. The message may contain the following html tags including `a`, `abbr`, `acronym`, `b`, `blockquote`, `code`, `em`, `i`, `ul`, `li`, `ol`, and `strong`. Be aware that when the text to html ratio is too high, the email may end up in spam filters. Custom styles on these tags are not allowed. If this field is not passed, a default message will be used.",
+            "nullable": true
+          },
+          "are_reminders_enabled": {
+            "type": "boolean",
+            "description": "Reminds signers to sign a document on day 3, 8, 13 and 18. Reminders are only sent to outstanding signers.",
+            "example": true
+          },
+          "parent_folder": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Folder--Mini"
+              },
+              {
+                "description": "The destination folder to place final, signed document and signing\nlog. Only `ID` and `type` fields are required. The root folder,\nfolder ID `0`, cannot be used."
+              }
+            ]
+          },
+          "name": {
+            "type": "string",
+            "example": "name",
+            "description": "Name of the sign request."
+          },
+          "prefill_tags": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SignRequestPrefillTag"
+            },
+            "description": "When a document contains sign related tags in the content, you can prefill them using this `prefill_tags` by referencing the 'id' of the tag as the `external_id` field of the prefill tag."
+          },
+          "days_valid": {
+            "type": "integer",
+            "description": "Set the number of days after which the created signature request will automatically expire if not completed. By default, we do not apply any expiration date on signature requests, and the signature request does not expire.",
+            "minimum": 0,
+            "maximum": 730,
+            "example": 2,
+            "nullable": true
+          },
+          "external_id": {
+            "type": "string",
+            "description": "This can be used to reference an ID in an external system that the sign request is related to.",
+            "example": "123",
+            "nullable": true
+          },
+          "is_phone_verification_required_to_view": {
+            "type": "boolean",
+            "description": "Forces signers to verify a text message prior to viewing the document. You must specify the phone number of signers to have this setting apply to them.",
+            "example": true,
+            "nullable": true
+          },
+          "template_id": {
+            "type": "string",
+            "example": "123075213-af2c8822-3ef2-4952-8557-52d69c2fe9cb",
+            "description": "When a signature request is created from a template this field will indicate the id of that template.",
+            "nullable": true
+          }
+        }
+      },
       "SignRequest": {
         "title": "Sign Request",
         "type": "object",
@@ -36431,7 +36626,7 @@
         ]
       },
       "SignRequests": {
-        "title": "Sign Requests",
+        "title": "Box Sign",
         "type": "object",
         "x-box-resource-id": "sign_requests",
         "x-box-tag": "sign_requests",
@@ -36449,15 +36644,9 @@
               },
               "next_marker": {
                 "description": "The marker for the start of the next page of results.",
-                "example": 3000,
-                "type": "integer",
-                "format": "int64"
-              },
-              "prev_marker": {
-                "description": "The marker for the start of the previous page of results.",
-                "example": 1000,
-                "type": "integer",
-                "format": "int64"
+                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                "type": "string",
+                "nullable": true
               }
             }
           },
@@ -36473,111 +36662,6 @@
             }
           }
         ]
-      },
-      "SignRequest--Base": {
-        "title": "Sign Request (Base)",
-        "type": "object",
-        "x-box-resource-id": "sign_request--base",
-        "x-box-tag": "sign_requests",
-        "x-box-variants": [
-          "standard",
-          "base"
-        ],
-        "x-box-variant": "base",
-        "description": "A request to create a sign request object",
-        "required": [
-          "parent_folder"
-        ],
-        "properties": {
-          "is_document_preparation_needed": {
-            "type": "boolean",
-            "description": "Indicates if the sender should receive a `prepare_url` in the response to complete document preparation via UI.",
-            "example": true
-          },
-          "redirect_url": {
-            "type": "string",
-            "example": "https://www.example.com",
-            "description": "When specified, signature request will be redirected to this url when a document is signed.",
-            "nullable": true
-          },
-          "declined_redirect_url": {
-            "type": "string",
-            "example": "https://declined-redirect.com",
-            "description": "The uri that a signer will be redirected to after declining to sign a document.",
-            "nullable": true
-          },
-          "are_text_signatures_enabled": {
-            "type": "boolean",
-            "description": "Disables the usage of signatures generated by typing (text).",
-            "example": true,
-            "default": true
-          },
-          "email_subject": {
-            "type": "string",
-            "example": "Sign Request from Acme",
-            "description": "Subject of sign request email. This is cleaned by sign request. If this field is not passed, a default subject will be used.",
-            "nullable": true
-          },
-          "email_message": {
-            "type": "string",
-            "example": "Hello! Please sign the document below",
-            "description": "Message to include in sign request email. The field is cleaned through sanitization of specific characters. However, some html tags are allowed. Links included in the message are also converted to hyperlinks in the email. The message may contain the following html tags including `a`, `abbr`, `acronym`, `b`, `blockquote`, `code`, `em`, `i`, `ul`, `li`, `ol`, and `strong`. Be aware that when the text to html ratio is too high, the email may end up in spam filters. Custom styles on these tags are not allowed. If this field is not passed, a default message will be used.",
-            "nullable": true
-          },
-          "are_reminders_enabled": {
-            "type": "boolean",
-            "description": "Reminds signers to sign a document on day 3, 8, 13 and 18. Reminders are only sent to outstanding signers.",
-            "example": true
-          },
-          "parent_folder": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/Folder--Mini"
-              },
-              {
-                "description": "The destination folder to place final, signed document and signing\nlog. Only `ID` and `type` fields are required. The root folder,\nfolder ID `0`, cannot be used."
-              }
-            ]
-          },
-          "name": {
-            "type": "string",
-            "example": "name",
-            "description": "Name of the sign request."
-          },
-          "prefill_tags": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/SignRequestPrefillTag"
-            },
-            "description": "When a document contains sign related tags in the content, you can prefill them using this `prefill_tags` by referencing the 'id' of the tag as the `external_id` field of the prefill tag."
-          },
-          "days_valid": {
-            "type": "integer",
-            "description": "Set the number of days after which the created signature request will automatically expire if not completed. By default, we do not apply any expiration date on signature requests, and the signature request does not expire.",
-            "minimum": 0,
-            "maximum": 730,
-            "example": 2,
-            "nullable": true
-          },
-          "external_id": {
-            "type": "string",
-            "description": "This can be used to reference an ID in an external system that the sign request is related to.",
-            "example": "123",
-            "nullable": true
-          },
-          "is_phone_verification_required_to_view": {
-            "type": "boolean",
-            "description": "Forces signers to verify a text message prior to viewing the document. You must specify the phone number of signers to have this setting apply to them.",
-            "example": true,
-            "nullable": true
-          },
-          "template_id": {
-            "type": "string",
-            "example": "123075213-af2c8822-3ef2-4952-8557-52d69c2fe9cb",
-            "description": "When a signature request is created from a template this field will indicate the id of that template.",
-            "nullable": true
-          }
-        }
       },
       "FileScope": {
         "title": "File scope",
@@ -37306,14 +37390,12 @@
         "title": "Signer fields for Create Sign Request",
         "type": "object",
         "description": "The schema for a Signer in a POST Sign Request request body",
-        "required": [
-          "email"
-        ],
         "properties": {
           "email": {
             "type": "string",
-            "description": "Email address of the signer",
-            "example": "example@gmail.com"
+            "description": "Email address of the signer.\nThe email address of the signer is required when making signature requests, except when using templates that are configured to include emails.",
+            "example": "example@gmail.com",
+            "nullable": true
           },
           "role": {
             "type": "string",
@@ -37340,7 +37422,8 @@
           "embed_url_external_user_id": {
             "type": "string",
             "description": "User ID for the signer in an external application responsible\nfor authentication when accessing the embed URL.",
-            "example": "1234"
+            "example": "1234",
+            "nullable": true
           },
           "redirect_url": {
             "type": "string",
@@ -37363,13 +37446,15 @@
           "verification_phone_number": {
             "type": "string",
             "description": "If set, this phone number is be used to verify the signer\nvia two factor authentication before they are able to sign the document.",
-            "example": "6314578901"
+            "example": "6314578901",
+            "nullable": true
           },
           "password": {
             "type": "string",
             "writeOnly": true,
             "description": "If set, the signer is required to enter the password before they are able\nto sign a document. This field is write only.",
-            "example": "SecretPassword123"
+            "example": "SecretPassword123",
+            "nullable": true
           }
         }
       },
@@ -37381,23 +37466,27 @@
           "document_tag_id": {
             "type": "string",
             "example": "1234",
-            "description": "This references the ID of a specific tag contained in a file of the sign request."
+            "description": "This references the ID of a specific tag contained in a file of the sign request.",
+            "nullable": true
           },
           "text_value": {
             "type": "string",
             "example": "text",
-            "description": "Text prefill value"
+            "description": "Text prefill value",
+            "nullable": true
           },
           "checkbox_value": {
             "type": "boolean",
             "example": true,
-            "description": "Checkbox prefill value"
+            "description": "Checkbox prefill value",
+            "nullable": true
           },
           "date_value": {
             "type": "string",
-            "format": "date-time",
-            "example": "2021-04-26T08:12:13.982Z",
-            "description": "Date prefill value"
+            "format": "date",
+            "example": "2021-04-26",
+            "description": "Date prefill value",
+            "nullable": true
           }
         }
       },
@@ -37420,7 +37509,9 @@
                   "signature",
                   "date",
                   "text",
-                  "checkbox"
+                  "checkbox",
+                  "radio",
+                  "dropdown"
                 ],
                 "description": "Type of input",
                 "example": "text"
@@ -37428,19 +37519,21 @@
               "content_type": {
                 "type": "string",
                 "enum": [
+                  "signature",
                   "initial",
                   "stamp",
-                  "signature",
-                  "company",
-                  "title",
-                  "email",
+                  "date",
+                  "checkbox",
+                  "text",
                   "full_name",
                   "first_name",
                   "last_name",
-                  "text",
-                  "date",
-                  "checkbox",
-                  "attachment"
+                  "company",
+                  "title",
+                  "email",
+                  "attachment",
+                  "radio",
+                  "dropdown"
                 ],
                 "description": "Content type of input",
                 "example": "signature"
@@ -37490,9 +37583,16 @@
                     "format": "date-time",
                     "example": "2021-04-26T08:12:13.982Z",
                     "description": "Date and Time that the decision was made"
+                  },
+                  "additional_info": {
+                    "type": "string",
+                    "example": "Requesting changes before signing.",
+                    "description": "Additional info about the decision, such as the decline reason from the signer",
+                    "nullable": true
                   }
                 },
-                "description": "Final decision made by the signer"
+                "description": "Final decision made by the signer",
+                "nullable": true
               },
               "inputs": {
                 "type": "array",
@@ -37505,7 +37605,8 @@
                 "type": "string",
                 "readOnly": true,
                 "example": "https://example.com",
-                "description": "URL to direct a signer to for signing"
+                "description": "URL to direct a signer to for signing",
+                "nullable": true
               },
               "iframeable_embed_url": {
                 "type": "string",
@@ -37802,7 +37903,7 @@
     },
     {
       "name": "Comments",
-      "description": "Comments are messages generated by users on files,\nallowing users to collaborate on a file,\ndiscussing any feedback they might\nhave on the content.",
+      "description": "Comments are messages generated users on files,\nallowing users to collaborate on a file,\ndiscussing any feedback they might\nhave on the content.",
       "x-box-tag": "comments"
     },
     {
@@ -37897,7 +37998,7 @@
     },
     {
       "name": "Legal hold policy assignments",
-      "description": "A Legal Hold Policy Assignment\nis a relation between a policy and custodian.\nIn this case, a custodian can be a user, folder,\nfile, or file version.",
+      "description": "A Legal Hold Policy Assignment\nis a relation between a policy and custodian.\nIn this case, as custodian can be a user, folder,\nfile, or file version.",
       "x-box-tag": "legal_hold_policy_assignments"
     },
     {
@@ -38032,22 +38133,22 @@
     },
     {
       "name": "Trashed files",
-      "description": "Files that were deleted and\nmoved to trash.",
+      "description": "Files that were deleted and\nare in trash.",
       "x-box-tag": "trashed_files"
     },
     {
       "name": "Trashed folders",
-      "description": "Folders that were deleted and\nmoved to trash.",
+      "description": "Folders that were deleted and\nare in trash.",
       "x-box-tag": "trashed_folders"
     },
     {
       "name": "Trashed items",
-      "description": "Items that were deleted and\nmoved to trash.",
+      "description": "Items that were deleted and\nare in trash.",
       "x-box-tag": "trashed_items"
     },
     {
       "name": "Trashed web links",
-      "description": "Web links that were deleted and\nmoved to trash.",
+      "description": "Web links that were deleted and\nare in trash.",
       "x-box-tag": "trashed_web_links"
     },
     {
