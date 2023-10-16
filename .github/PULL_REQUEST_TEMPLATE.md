@@ -1,6 +1,6 @@
 # Description
 
-Please include a summary of the change and which issue is fixed. 
+Please include a summary of the change and which issue is fixed.
 
 If you are a Boxer, please also reference the related `DDOC` or `APIWG` tickets.
 If you do not have a related `Jira` ticket and this is more than a bug fix, then
