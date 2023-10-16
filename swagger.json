@@ -13,7 +13,8 @@
       "name": "Apache-2.0",
       "url": "http://www.apache.org/licenses/LICENSE-2.0"
     },
-    "version": "2.0.0"
+    "version": "2.0.0",
+    "x-box-commit-hash": ""
   },
   "host": "api.box.com",
   "basePath": "/2.0",
@@ -10648,7 +10649,7 @@
                 },
                 "configurable_permissions": {
                   "type": "object",
-                  "description": "Custom configuration for the permissions an admin\nif a group will receive. This option has no effect\non members with a role of `member`.\n\nSetting these permissions overwrites the default\naccess levels of an admin.\n\nSpecifying a value of \"null\" for this object will deactivate\nall configurable permissions. Specifying permissions will set\nthem accordingly, omitted permissions will be enabled by default.",
+                  "description": "Custom configuration for the permissions an admin\nif a group will receive. This option has no effect\non members with a role of `member`.\n\nSetting these permissions overwrites the default\naccess levels of an admin.\n\nSpecifying a value of \"null\" for this object will disable\nall configurable permissions. Specifying permissions will set\nthem accordingly, omitted permissions will be enabled by default.",
                   "additionalProperties": {
                     "type": "boolean",
                     "description": "A key value pair of custom permissions.",
@@ -10764,7 +10765,7 @@
                 },
                 "configurable_permissions": {
                   "type": "object",
-                  "description": "Custom configuration for the permissions an admin\nif a group will receive. This option has no effect\non members with a role of `member`.\n\nSetting these permissions overwrites the default\naccess levels of an admin.\n\nSpecifying a value of \"null\" for this object will deactivate\nall configurable permissions. Specifying permissions will set\nthem accordingly, omitted permissions will be enabled by default.",
+                  "description": "Custom configuration for the permissions an admin\nif a group will receive. This option has no effect\non members with a role of `member`.\n\nSetting these permissions overwrites the default\naccess levels of an admin.\n\nSpecifying a value of \"null\" for this object will disable\nall configurable permissions. Specifying permissions will set\nthem accordingly, omitted permissions will be enabled by default.",
                   "additionalProperties": {
                     "type": "boolean",
                     "description": "A key value pair of custom permissions.",
@@ -11786,10 +11787,10 @@
                 },
                 "retention_type": {
                   "type": "string",
-                  "description": "Specifies the retention type:\n\n* `modifiable`: You can modify the retention policy. For example,\nyou can add or remove folders, shorten or lengthen\nthe policy duration, or delete the assignment.\nUse this type if your retention policy\nis not related to any regulatory purposes.\n\n* `non-modifiable`: You can modify the retention policy\nonly in a limited way: add a folder, lengthen the duration,\nretire the policy, change the disposition action\nor notification settings. You cannot perform other actions,\nsuch as deleting the assignment or shortening the\npolicy duration. Use this type to ensure\ncompliance with regulatory retention policies.",
+                  "description": "Specifies the retention type:\n\n* `modifiable`: You can modify the retention policy. For example,\nyou can add or remove folders, shorten or lengthen\nthe policy duration, or delete the assignment.\nUse this type if your retention policy\nis not related to any regulatory purposes.\n\n* `non_modifiable`: You can modify the retention policy\nonly in a limited way: add a folder, lengthen the duration,\nretire the policy, change the disposition action\nor notification settings. You cannot perform other actions,\nsuch as deleting the assignment or shortening the\npolicy duration. Use this type to ensure\ncompliance with regulatory retention policies.",
                   "enum": [
                     "modifiable",
-                    "non-modifiable"
+                    "non_modifiable"
                   ]
                 },
                 "can_owner_extend_retention": {
@@ -11893,12 +11894,20 @@
                   "description": "The additional text description of the retention policy."
                 },
                 "disposition_action": {
-                  "type": "string",
-                  "description": "The disposition action of the retention policy.\n`permanently_delete` deletes the content\nretained by the policy permanently.\n`remove_retention` lifts retention policy\nfrom the content, allowing it to be deleted\nby users once the retention policy has expired.",
-                  "enum": [
-                    "permanently_delete",
-                    "remove_retention"
-                  ]
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "permanently_delete",
+                        "remove_retention"
+                      ]
+                    },
+                    {
+                      "type": "string",
+                      "pattern": ".^"
+                    }
+                  ],
+                  "description": "The disposition action of the retention policy.\nThis action can be `permanently_delete`, which\nwill cause the content retained by the policy\nto be permanently deleted, or `remove_retention`,\nwhich will lift the retention policy from the content,\nallowing it to be deleted by users,\nonce the retention policy has expired.\nYou can use \"null\" if you don't want to change `disposition_action`."
                 },
                 "retention_type": {
                   "type": "string",
@@ -11919,17 +11928,13 @@
                 },
                 "are_owners_notified": {
                   "type": "boolean",
-                  "description": "Determines if owners and co-owners of items\nunder the policy are notified when\nthe retention duration is about to end.",
-                  "enum": [
-                    true,
-                    false
-                  ]
+                  "description": "Determines if owners and co-owners of items\nunder the policy are notified when\nthe retention duration is about to end."
                 },
                 "custom_notification_recipients": {
                   "type": "array",
                   "description": "A list of users notified when the retention duration is about to end.",
                   "items": {
-                    "$ref": "#/definitions/User--Mini"
+                    "$ref": "#/definitions/User--Base"
                   }
                 }
               }
@@ -12146,8 +12151,7 @@
                   "type": "object",
                   "description": "The item to assign the policy to",
                   "required": [
-                    "type",
-                    "id"
+                    "type"
                   ],
                   "properties": {
                     "type": {
@@ -13171,7 +13175,7 @@
         "tags": [
           "Shield information barriers"
         ],
-        "description": "Get shield information barrier based on provided ID..",
+        "description": "Get shield information barrier based on provided ID.",
         "parameters": [
           {
             "name": "shield_information_barrier_id",
@@ -13277,7 +13281,7 @@
         "parameters": [
           {
             "name": "marker",
-            "description": "Defines the position marker at which to begin returning results. This is\nused when paginating using marker-based pagination.\n\nThis requires `usemarker` to be set to `true`.",
+            "description": "Defines the position marker at which to begin returning results. This is\nused when paginating using marker-based pagination.",
             "in": "query",
             "required": false,
             "type": "string"
@@ -13296,25 +13300,7 @@
           "200": {
             "description": "Returns a paginated list of\nshield information barrier objects,\nempty list if currently no barrier.",
             "schema": {
-              "type": "object",
-              "properties": {
-                "limit": {
-                  "description": "The limit that was used for these entries.\nThis will be the same as the\n`limit` query parameter unless that\nvalue exceeded the maximum value\nallowed. The maximum value varies by API.",
-                  "type": "integer",
-                  "format": "int64"
-                },
-                "next_marker": {
-                  "description": "The marker for the start of the next page of results.",
-                  "type": "string"
-                },
-                "entries": {
-                  "type": "array",
-                  "description": "A list of shield information barrier objects",
-                  "items": {
-                    "$ref": "#/definitions/ShieldInformationBarrier"
-                  }
-                }
-              }
+              "$ref": "#/definitions/ShieldInformationBarriers"
             }
           },
           "404": {
@@ -13363,7 +13349,20 @@
             "name": "body",
             "in": "body",
             "schema": {
-              "$ref": "#/definitions/ShieldInformationBarrier"
+              "type": "object",
+              "properties": {
+                "enterprise": {
+                  "allOf": [
+                    {
+                      "$ref": "#/definitions/Enterprise--Base"
+                    }
+                  ],
+                  "description": "The `type` and `id` of enterprise this barrier is under."
+                }
+              },
+              "required": [
+                "enterprise"
+              ]
             }
           }
         ]
@@ -13376,7 +13375,7 @@
         "tags": [
           "Shield information barrier reports"
         ],
-        "description": "Lists shield information barrier reports with specific IDs.",
+        "description": "Lists shield information barrier reports.",
         "parameters": [
           {
             "name": "shield_information_barrier_id",
@@ -13406,29 +13405,11 @@
           "200": {
             "description": "Returns a paginated list of shield information barrier report objects.",
             "schema": {
-              "type": "object",
-              "properties": {
-                "limit": {
-                  "description": "The limit that was used for these entries.\nThis will be the same as the\n`limit` query parameter unless that\nvalue exceeded the maximum value\nallowed. The maximum value varies by API.",
-                  "type": "integer",
-                  "format": "int64"
-                },
-                "next_marker": {
-                  "description": "The marker for the start of the next page of results.",
-                  "type": "string"
-                },
-                "entries": {
-                  "type": "array",
-                  "description": "A list of shield barrier reports.",
-                  "items": {
-                    "$ref": "#/definitions/ShieldInformationBarrierReport"
-                  }
-                }
-              }
+              "$ref": "#/definitions/ShieldInformationBarrierReports"
             }
           },
           "404": {
-            "description": "Returns a `not_found` error if the\nshield information barrier was not found.",
+            "description": "Returns a `not_found` error if the Shield Information Barrier could not be found.",
             "schema": {
               "$ref": "#/definitions/ClientError"
             }
@@ -13696,25 +13677,7 @@
           "200": {
             "description": "Returns a paginated list of shield information barrier segment objects.",
             "schema": {
-              "type": "object",
-              "properties": {
-                "limit": {
-                  "description": "The limit that was used for these entries.\nThis will be the same as the\n`limit` query parameter unless\nthat value exceeded the maximum value\nallowed. The maximum value varies by API.",
-                  "type": "integer",
-                  "format": "int64"
-                },
-                "next_marker": {
-                  "description": "The marker for the start of the next page of results.",
-                  "type": "string"
-                },
-                "entries": {
-                  "type": "array",
-                  "description": "A list of shield information barrier segment\nobjects",
-                  "items": {
-                    "$ref": "#/definitions/ShieldInformationBarrierSegment"
-                  }
-                }
-              }
+              "$ref": "#/definitions/ShieldInformationBarrierSegments"
             }
           },
           "404": {
@@ -13752,7 +13715,7 @@
             }
           },
           "409": {
-            "description": "Returns an error if there exists an shield information\nbarrier segment with same name.",
+            "description": "Returns an error if there exists an shield information \nbarrier segment with same name.",
             "schema": {
               "$ref": "#/definitions/ClientError"
             }
@@ -13902,25 +13865,7 @@
           "200": {
             "description": "Returns a paginated list of\nshield information barrier segment member objects.",
             "schema": {
-              "type": "object",
-              "properties": {
-                "limit": {
-                  "description": "The limit that was used for these entries.\nThis will be the same as the\n`limit` query parameter unless that value\nexceeded the maximum value\nallowed. The maximum value varies by API.",
-                  "type": "integer",
-                  "format": "int64"
-                },
-                "next_marker": {
-                  "description": "The marker for the start of the next page of results.",
-                  "type": "string"
-                },
-                "entries": {
-                  "type": "array",
-                  "description": "A list of shield information\nbarrier segment members",
-                  "items": {
-                    "$ref": "#/definitions/ShieldInformationBarrierSegmentMember"
-                  }
-                }
-              }
+              "$ref": "#/definitions/ShieldInformationBarrierSegmentMembers"
             }
           },
           "default": {
@@ -13940,13 +13885,13 @@
         "description": "Creates a new shield information barrier segment member.",
         "responses": {
           "201": {
-            "description": "Returns a new shield information barrier segment Member object.",
+            "description": "Returns a new shield information barrier segment member object.",
             "schema": {
               "$ref": "#/definitions/ShieldInformationBarrierSegmentMember"
             }
           },
           "404": {
-            "description": "Returns an error if the\nshield information barrier or Segment was not found.",
+            "description": "Returns an error if the\nshield information barrier or segment was not found.",
             "schema": {
               "$ref": "#/definitions/ClientError"
             }
@@ -14000,11 +13945,9 @@
                   "allOf": [
                     {
                       "$ref": "#/definitions/User--Base"
-                    },
-                    {
-                      "description": "The `type` and `id` of the requested shield information barrier segment Member."
                     }
-                  ]
+                  ],
+                  "description": "User to which restriction will be applied."
                 }
               }
             }
@@ -14122,25 +14065,7 @@
           "200": {
             "description": "Returns a paginated list of\nshield information barrier segment restriction objects.",
             "schema": {
-              "type": "object",
-              "properties": {
-                "limit": {
-                  "description": "The limit that was used for these entries.\nThis will be the same as the\n`limit` query parameter unless\nthat value exceeded the maximum value\nallowed. The maximum value varies by API.",
-                  "type": "integer",
-                  "format": "int64"
-                },
-                "next_marker": {
-                  "description": "The marker for the start of the next page of results.",
-                  "type": "string"
-                },
-                "entries": {
-                  "type": "array",
-                  "description": "A list of shield information barrier\nsegment restriction objects",
-                  "items": {
-                    "$ref": "#/definitions/ShieldInformationBarrierSegmentRestriction"
-                  }
-                }
-              }
+              "$ref": "#/definitions/ShieldInformationBarrierSegmentRestrictions"
             }
           },
           "default": {
@@ -14166,7 +14091,7 @@
             }
           },
           "404": {
-            "description": "Returns a `not_found` error if the\nshield information barrier or Segment was not found.",
+            "description": "Returns a `not_found` error if the\nshield information barrier or segment was not found.",
             "schema": {
               "$ref": "#/definitions/ClientError"
             }
@@ -15029,7 +14954,7 @@
         "tags": [
           "Storage policies"
         ],
-        "description": "Fetches all the storage policies in the enterprise.\nOnly a Primary Admin can access this endpoint. The user\nneeds to generate a token for an account to authenticate this request.",
+        "description": "Fetches all the storage policies in the enterprise.",
         "parameters": [
           {
             "name": "fields",
@@ -15081,7 +15006,7 @@
         "tags": [
           "Storage policies"
         ],
-        "description": "Fetches a specific storage policy. Only a Primary Admin can access this endpoint. The user needs to generate a token for an account to authenticate this request.",
+        "description": "Fetches a specific storage policy.",
         "parameters": [
           {
             "name": "storage_policy_id",
@@ -15114,7 +15039,7 @@
         "tags": [
           "Storage policy assignments"
         ],
-        "description": "Fetches all the storage policy assignment for an enterprise or user.\nOnly a Primary Admin can access this endpoint. The user\nneeds to generate a token for an account to authenticate this request.",
+        "description": "Fetches all the storage policy assignment for an enterprise or user.",
         "parameters": [
           {
             "name": "marker",
@@ -15163,7 +15088,7 @@
         "tags": [
           "Storage policy assignments"
         ],
-        "description": "Creates a storage policy assignment for an enterprise or user.\nOnly a Primary Admin can access this endpoint. The user\nneeds to generate a token for an account to authenticate this request.",
+        "description": "Creates a storage policy assignment for an enterprise or user.",
         "responses": {
           "200": {
             "description": "Returns the new storage policy assignment created.",
@@ -15245,7 +15170,7 @@
         "tags": [
           "Storage policy assignments"
         ],
-        "description": "Fetches a specific storage policy assignment. Only a Primary Admin can access this endpoint. The user needs to generate a token for an account to authenticate this request.",
+        "description": "Fetches a specific storage policy assignment.",
         "parameters": [
           {
             "name": "storage_policy_assignment_id",
@@ -15276,7 +15201,7 @@
         "tags": [
           "Storage policy assignments"
         ],
-        "description": "Updates a specific storage policy assignment. Only a Primary Admin can access this endpoint. The user needs to generate a token for an account to authenticate this request.",
+        "description": "Updates a specific storage policy assignment.",
         "parameters": [
           {
             "name": "storage_policy_assignment_id",
@@ -15340,7 +15265,7 @@
         "tags": [
           "Storage policy assignments"
         ],
-        "description": "Delete a storage policy assignment.\n\nDeleting a storage policy assignment on a user\nwill have the user inherit the enterprise's default\nstorage policy.\n\nThere is a rate limit for calling this endpoint of only\ntwice per user in a 24 hour time frame.\n\nOnly a Primary Admin can access this endpoint. The user\nneeds to generate a token for an account to authenticate this request.",
+        "description": "Delete a storage policy assignment.\n\nDeleting a storage policy assignment on a user\nwill have the user inherit the enterprise's default\nstorage policy.\n\nThere is a rate limit for calling this endpoint of only\ntwice per user in a 24 hour time frame.",
         "parameters": [
           {
             "name": "storage_policy_assignment_id",
@@ -16172,7 +16097,7 @@
             }
           },
           "404": {
-            "description": "Returns a `not_found` if integration mapping\nobject was not found in the database",
+            "description": "Returns `not_found` if integration mapping object was not found.",
             "schema": {
               "$ref": "#/definitions/ClientError"
             }
@@ -16705,7 +16630,7 @@
       "description": "A generic error",
       "properties": {
         "type": {
-          "description": "`error`",
+          "description": "error",
           "type": "string",
           "enum": [
             "error"
@@ -19737,6 +19662,10 @@
           "format": "date-time",
           "description": "When the collaboration will expire, or `null` if no expiration\ndate is set."
         },
+        "is_access_only": {
+          "type": "boolean",
+          "description": "If set to `true`, collaborators have access to\nshared items, but such items won't be visible in the\nAll Files list. Additionally, collaborators won't\nsee the the path to the root folder for the\nshared item."
+        },
         "status": {
           "type": "string",
           "enum": [
@@ -19771,10 +19700,6 @@
           "type": "string",
           "format": "date-time",
           "description": "When the collaboration object was last modified."
-        },
-        "is_access_only": {
-          "type": "boolean",
-          "description": "If set to `true`, collaborators have access to\nshared items, but such items won't be visible in the\nAll Files list. Additionally, collaborators won't\nsee the the path to the root folder for the\nshared item."
         },
         "acceptance_requirements_status": {
           "type": "object",
@@ -21662,7 +21587,7 @@
               "description": "Specifies the retention type:\n\n* `modifiable`: You can modify the retention policy. For example,\n you can add or remove folders, shorten or lengthen\n the policy duration, or delete the assignment.\n Use this type if your retention policy\n is not related to any regulatory purposes.\n\n* `non-modifiable`: You can modify the retention policy\n only in a limited way: add a folder, lengthen the duration,\n retire the policy, change the disposition action\n or notification settings. You cannot perform other actions,\n such as deleting the assignment or shortening the\n policy duration. Use this type to ensure\n compliance with regulatory retention policies.",
               "enum": [
                 "modifiable",
-                "non-modifiable"
+                "non_modifiable"
               ]
             },
             "status": {
@@ -21758,6 +21683,35 @@
         }
       ]
     },
+    "User--Base": {
+      "title": "User (Base)",
+      "type": "object",
+      "x-box-variants": [
+        "base",
+        "mini",
+        "standard",
+        "full"
+      ],
+      "x-box-variant": "base",
+      "description": "A mini representation of a user, used when\nnested within another resource.",
+      "required": [
+        "type",
+        "id"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The unique identifier for this user"
+        },
+        "type": {
+          "type": "string",
+          "description": "`user`",
+          "enum": [
+            "user"
+          ]
+        }
+      }
+    },
     "RetentionPolicyAssignments": {
       "title": "Retention policy assignments",
       "type": "object",
@@ -21769,7 +21723,7 @@
               "type": "array",
               "description": "A list of retention policy assignments",
               "items": {
-                "$ref": "#/definitions/RetentionPolicyAssignment--Base"
+                "$ref": "#/definitions/RetentionPolicyAssignment"
               }
             }
           }
@@ -21823,7 +21777,7 @@
           "properties": {
             "id": {
               "type": "string",
-              "description": "The ID of the folder, enterprise, or metadata template\nthe policy is assigned to."
+              "description": "The ID of the folder, enterprise, or metadata template\nthe policy is assigned to.\nSet to null or omit when type is set to enterprise."
             },
             "type": {
               "type": "string",
@@ -22357,11 +22311,9 @@
           "allOf": [
             {
               "$ref": "#/definitions/Enterprise--Base"
-            },
-            {
-              "description": "The `type` and `id` of enterprise this barrier is under."
             }
-          ]
+          ],
+          "description": "The `type` and `id` of enterprise this barrier is under."
         },
         "status": {
           "type": "string",
@@ -22383,11 +22335,9 @@
           "allOf": [
             {
               "$ref": "#/definitions/User--Base"
-            },
-            {
-              "description": "The user who created this shield information barrier."
             }
-          ]
+          ],
+          "description": "The user who created this shield information barrier."
         },
         "updated_at": {
           "type": "string",
@@ -22398,11 +22348,9 @@
           "allOf": [
             {
               "$ref": "#/definitions/User--Base"
-            },
-            {
-              "description": "The user that updated this shield information barrier."
             }
-          ]
+          ],
+          "description": "The user that updated this shield information barrier."
         },
         "enabled_at": {
           "type": "string",
@@ -22420,6 +22368,97 @@
           ]
         }
       }
+    },
+    "ShieldInformationBarriers": {
+      "title": "List of Shield Information Barriers",
+      "type": "object",
+      "description": "List of Shield Information Barrier objects",
+      "allOf": [
+        {
+          "type": "object",
+          "description": "The part of an API response that describes marker\nbased pagination",
+          "properties": {
+            "limit": {
+              "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
+              "type": "integer",
+              "format": "int64"
+            },
+            "next_marker": {
+              "description": "The marker for the start of the next page of results.",
+              "type": "string"
+            }
+          }
+        },
+        {
+          "properties": {
+            "entries": {
+              "type": "array",
+              "description": "A list of shield information barrier objects",
+              "items": {
+                "$ref": "#/definitions/ShieldInformationBarrier"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "Enterprise--Base": {
+      "title": "Enterprise (Base)",
+      "type": "object",
+      "x-box-variants": [
+        "base",
+        "mini",
+        "standard",
+        "full"
+      ],
+      "x-box-variant": "base",
+      "description": "A mini representation of a enterprise, used when\nnested within another resource.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The unique identifier for this enterprise"
+        },
+        "type": {
+          "type": "string",
+          "description": "`enterprise`",
+          "enum": [
+            "enterprise"
+          ]
+        }
+      }
+    },
+    "ShieldInformationBarrierReports": {
+      "title": "List of Shield Information Barrier Reports",
+      "type": "object",
+      "description": "A list of shield barrier reports.",
+      "allOf": [
+        {
+          "type": "object",
+          "description": "The part of an API response that describes marker\nbased pagination",
+          "properties": {
+            "limit": {
+              "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
+              "type": "integer",
+              "format": "int64"
+            },
+            "next_marker": {
+              "description": "The marker for the start of the next page of results.",
+              "type": "string"
+            }
+          }
+        },
+        {
+          "properties": {
+            "entries": {
+              "type": "array",
+              "description": "A list of shield information\nbarrier reports.",
+              "items": {
+                "$ref": "#/definitions/ShieldInformationBarrierReport"
+              }
+            }
+          }
+        }
+      ]
     },
     "ShieldInformationBarrierReport": {
       "title": "Shield information barrier report",
@@ -22553,6 +22592,39 @@
         }
       }
     },
+    "ShieldInformationBarrierSegments": {
+      "title": "List of Shield Information Barrier Segments",
+      "type": "object",
+      "description": "List of Shield Information Barrier Segment objects",
+      "allOf": [
+        {
+          "type": "object",
+          "description": "The part of an API response that describes marker\nbased pagination",
+          "properties": {
+            "limit": {
+              "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
+              "type": "integer",
+              "format": "int64"
+            },
+            "next_marker": {
+              "description": "The marker for the start of the next page of results.",
+              "type": "string"
+            }
+          }
+        },
+        {
+          "properties": {
+            "entries": {
+              "type": "array",
+              "description": "A list of shield information barrier\nsegments",
+              "items": {
+                "$ref": "#/definitions/ShieldInformationBarrierSegment"
+              }
+            }
+          }
+        }
+      ]
+    },
     "ShieldInformationBarrier--Base": {
       "title": "Shield information barrier (Base)",
       "type": "object",
@@ -22656,34 +22728,38 @@
         }
       ]
     },
-    "User--Base": {
-      "title": "User (Base)",
+    "ShieldInformationBarrierSegmentMembers": {
+      "title": "List of Shield Information Barrier Segment Members",
       "type": "object",
-      "x-box-variants": [
-        "base",
-        "mini",
-        "standard",
-        "full"
-      ],
-      "x-box-variant": "base",
-      "description": "A mini representation of a user, used when\nnested within another resource.",
-      "required": [
-        "id",
-        "type"
-      ],
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "The unique identifier for this user"
+      "description": "List of Shield Information Barrier Member objects",
+      "allOf": [
+        {
+          "type": "object",
+          "description": "The part of an API response that describes marker\nbased pagination",
+          "properties": {
+            "limit": {
+              "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
+              "type": "integer",
+              "format": "int64"
+            },
+            "next_marker": {
+              "description": "The marker for the start of the next page of results.",
+              "type": "string"
+            }
+          }
         },
-        "type": {
-          "type": "string",
-          "description": "`user`",
-          "enum": [
-            "user"
-          ]
+        {
+          "properties": {
+            "entries": {
+              "type": "array",
+              "description": "A list of shield information\nbarrier segment members",
+              "items": {
+                "$ref": "#/definitions/ShieldInformationBarrierSegmentMember"
+              }
+            }
+          }
         }
-      }
+      ]
     },
     "ShieldInformationBarrierSegmentRestriction": {
       "title": "Shield information barrier segment restriction",
@@ -22737,6 +22813,39 @@
                   "description": "The user that updated this shield information barrier segment Restriction."
                 }
               ]
+            }
+          }
+        }
+      ]
+    },
+    "ShieldInformationBarrierSegmentRestrictions": {
+      "title": "List of Shield Information Barrier Segment Restrictions",
+      "type": "object",
+      "description": "List of shield information barrier segment restriction objects",
+      "allOf": [
+        {
+          "type": "object",
+          "description": "The part of an API response that describes marker\nbased pagination",
+          "properties": {
+            "limit": {
+              "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
+              "type": "integer",
+              "format": "int64"
+            },
+            "next_marker": {
+              "description": "The marker for the start of the next page of results.",
+              "type": "string"
+            }
+          }
+        },
+        {
+          "properties": {
+            "entries": {
+              "type": "array",
+              "description": "A list of shield information barrier\nsegment restriction objects",
+              "items": {
+                "$ref": "#/definitions/ShieldInformationBarrierSegmentRestriction"
+              }
             }
           }
         }
@@ -23570,7 +23679,7 @@
       ]
     },
     "SignRequests": {
-      "title": "Sign Requests",
+      "title": "Box Sign",
       "type": "object",
       "description": "A standard representation of a sign request, as returned from any Box Sign\nAPI endpoints by default.",
       "allOf": [
@@ -23585,13 +23694,7 @@
             },
             "next_marker": {
               "description": "The marker for the start of the next page of results.",
-              "type": "integer",
-              "format": "int64"
-            },
-            "prev_marker": {
-              "description": "The marker for the start of the previous page of results.",
-              "type": "integer",
-              "format": "int64"
+              "type": "string"
             }
           }
         },
@@ -23629,12 +23732,21 @@
               "description": "List of files to create a signing document from. This is currently limited to ten files. Only the ID and type fields are required for each file.",
               "maxItems": 10
             },
+            "signature_color": {
+              "type": "string",
+              "description": "Force a specific color for the signature (blue, black, or red)",
+              "enum": [
+                "blue",
+                "black",
+                "red"
+              ]
+            },
             "signers": {
               "type": "array",
               "items": {
                 "$ref": "#/definitions/SignRequestCreateSigner"
               },
-              "description": "Array of signers for the sign request. 35 is the\nmax number of signers permitted."
+              "description": "Array of signers for the sign request. 35 is the max number of signers permitted."
             }
           }
         }
@@ -23687,31 +23799,21 @@
         {
           "type": "object",
           "description": "The part of an API response that describes marker\nbased pagination",
-          "allOf": [
-            {
-              "type": "object",
-              "description": "The part of an API response that describes marker\nbased pagination",
-              "properties": {
-                "limit": {
-                  "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
-                  "type": "integer",
-                  "format": "int64"
-                },
-                "next_marker": {
-                  "description": "The marker for the start of the next page of results.",
-                  "type": "string"
-                }
-              }
+          "properties": {
+            "limit": {
+              "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
+              "type": "integer",
+              "format": "int64"
             },
-            {
-              "properties": {
-                "prev_marker": {
-                  "description": "The marker for the start of the previous page of results.",
-                  "type": "string"
-                }
-              }
+            "next_marker": {
+              "description": "The marker for the start of the next page of results.",
+              "type": "string"
+            },
+            "prev_marker": {
+              "description": "The marker for the start of the previous page of results.",
+              "type": "string"
             }
-          ]
+          }
         },
         {
           "properties": {
@@ -23918,13 +24020,7 @@
             },
             "next_marker": {
               "description": "The marker for the start of the next page of results.",
-              "type": "integer",
-              "format": "int64"
-            },
-            "prev_marker": {
-              "description": "The marker for the start of the previous page of results.",
-              "type": "integer",
-              "format": "int64"
+              "type": "string"
             }
           }
         },
@@ -23963,12 +24059,12 @@
               "$ref": "#/definitions/IntegrationMappingPartnerItemSlack"
             },
             "box_item": {
-              "description": "The Box folder, to which the object from the\npartner app domain (referenced in `partner_item_id`) is mapped",
               "allOf": [
                 {
                   "$ref": "#/definitions/Folder--Mini"
                 }
-              ]
+              ],
+              "description": "The Box folder, to which the object from the\npartner app domain (referenced in `partner_item_id`) is mapped"
             },
             "is_manually_created": {
               "type": "boolean",
@@ -23984,20 +24080,20 @@
               ]
             },
             "created_by": {
-              "description": "An object representing the user who\ncreated the integration mapping",
               "allOf": [
                 {
                   "$ref": "#/definitions/UserIntegrationMappings"
                 }
-              ]
+              ],
+              "description": "An object representing the user who\ncreated the integration mapping"
             },
             "modified_by": {
-              "description": "The user who\nlast modified the integration mapping",
               "allOf": [
                 {
                   "$ref": "#/definitions/UserIntegrationMappings"
                 }
-              ]
+              ],
+              "description": "The user who\nlast modified the integration mapping"
             },
             "created_at": {
               "type": "string",
@@ -24396,13 +24492,18 @@
         },
         {
           "properties": {
+            "sequence_id": {
+              "allOf": [
+                {
+                  "type": "string",
+                  "description": "A numeric identifier that represents the most recent user event\nthat has been applied to this item.\n\nThis can be used in combination with the `GET /events`-endpoint\nto filter out user events that would have occurred before this\nidentifier was read.\n\nAn example would be where a Box Drive-like application\nwould fetch an item via the API, and then listen to incoming\nuser events for changes to the item. The application would\nignore any user events where the `sequence_id` in the event\nis smaller than or equal to the `sequence_id` in the originally\nfetched resource."
+                },
+                {}
+              ]
+            },
             "name": {
               "type": "string",
               "description": "The name of the folder."
-            },
-            "sequence_id": {
-              "type": "string",
-              "description": "A numeric identifier that represents the most recent user event\nthat has been applied to this item.\n\nThis can be used in combination with the `GET /events`-endpoint\nto filter out user events that would have occurred before this\nidentifier was read.\n\nAn example would be where a Box Drive-like application\nwould fetch an item via the API, and then listen to incoming\nuser events for changes to the item. The application would\nignore any user events where the `sequence_id` in the event\nis smaller than or equal to the `sequence_id` in the originally\nfetched resource."
             }
           }
         }
@@ -25457,33 +25558,6 @@
         }
       ]
     },
-    "RetentionPolicyAssignment--Base": {
-      "title": "Retention policy assignment (Base)",
-      "type": "object",
-      "x-box-variants": [
-        "base",
-        "standard"
-      ],
-      "x-box-variant": "base",
-      "description": "A base representation of a retention policy assignment.",
-      "required": [
-        "id",
-        "type"
-      ],
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "The unique identifier that represents a file version."
-        },
-        "type": {
-          "type": "string",
-          "description": "`retention_policy_assignment`",
-          "enum": [
-            "retention_policy_assignment"
-          ]
-        }
-      }
-    },
     "LegalHoldPolicy--Mini": {
       "title": "Legal hold policy (Mini)",
       "type": "object",
@@ -25526,31 +25600,6 @@
           "description": "`legal_hold_policy_assignment`",
           "enum": [
             "legal_hold_policy_assignment"
-          ]
-        }
-      }
-    },
-    "Enterprise--Base": {
-      "title": "Enterprise (Base)",
-      "type": "object",
-      "x-box-variants": [
-        "base",
-        "mini",
-        "standard",
-        "full"
-      ],
-      "x-box-variant": "base",
-      "description": "A mini representation of a enterprise, used when\nnested within another resource.",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "The unique identifier for this enterprise"
-        },
-        "type": {
-          "type": "string",
-          "description": "`enterprise`",
-          "enum": [
-            "enterprise"
           ]
         }
       }
@@ -25886,13 +25935,10 @@
       "title": "Signer fields for Create Sign Request",
       "type": "object",
       "description": "The schema for a Signer in a POST Sign Request request body",
-      "required": [
-        "email"
-      ],
       "properties": {
         "email": {
           "type": "string",
-          "description": "Email address of the signer"
+          "description": "Email address of the signer.\nThe email address of the signer is required when making signature requests, except when using templates that are configured to include emails."
         },
         "role": {
           "type": "string",
@@ -26584,7 +26630,7 @@
         },
         "date_value": {
           "type": "string",
-          "format": "date-time",
+          "format": "date",
           "description": "Date prefill value"
         }
       }
@@ -26608,26 +26654,30 @@
                 "signature",
                 "date",
                 "text",
-                "checkbox"
+                "checkbox",
+                "radio",
+                "dropdown"
               ],
               "description": "Type of input"
             },
             "content_type": {
               "type": "string",
               "enum": [
+                "signature",
                 "initial",
                 "stamp",
-                "signature",
-                "company",
-                "title",
-                "email",
+                "date",
+                "checkbox",
+                "text",
                 "full_name",
                 "first_name",
                 "last_name",
-                "text",
-                "date",
-                "checkbox",
-                "attachment"
+                "company",
+                "title",
+                "email",
+                "attachment",
+                "radio",
+                "dropdown"
               ],
               "description": "Content type of input"
             },
