@@ -13,7 +13,8 @@
             "name": "Apache-2.0",
             "url": "http://www.apache.org/licenses/LICENSE-2.0"
         },
-        "version": "2.0.0"
+        "version": "2.0.0",
+        "x-box-commit-hash": "021960106e"
     },
     "servers": [
         {
@@ -18049,19 +18050,28 @@
                                         ]
                                     },
                                     "retention_length": {
-                                        "type": "string",
-                                        "format": "int32",
+                                        "oneOf": [
+                                            {
+                                                "type": "string",
+                                                "format": "int32",
+                                                "nullable": true
+                                            },
+                                            {
+                                                "type": "number",
+                                                "format": "int32",
+                                                "nullable": false
+                                            }
+                                        ],
                                         "example": "365",
-                                        "minimum": 1,
                                         "description": "リテンションポリシーの期間。この値はリテンションポリシーがコンテンツに割り当てられた後、有効である日数を示します。ポリシーの`policy_type`が`indefinite`である場合は、`retention_length`も`indefinite`になります。"
                                     },
                                     "retention_type": {
                                         "type": "string",
                                         "example": "modifiable",
-                                        "description": "以下のリテンションの種類を指定します。\n\n* `modifiable`: リテンションポリシーを変更できます。たとえば、フォルダの追加と削除、ポリシー期間の短縮と延長、または割り当ての削除を行うことができます。リテンションポリシーが規制目的に関連していない場合はこの種類を使用してください。\n\n* `non-modifiable`: フォルダの追加、期間の延長、ポリシーの撤回、廃棄アクションまたは通知設定の変更という限られた方法でしかリテンションポリシーを変更できません。割り当ての削除やポリシー期間の短縮など、その他の操作は実行できません。規制に関するリテンションポリシーを確実に遵守する場合はこの種類を使用してください。",
+                                        "description": "以下のリテンションの種類を指定します。\n\n* `modifiable`: リテンションポリシーを変更できます。たとえば、フォルダの追加と削除、ポリシー期間の短縮と延長、または割り当ての削除を行うことができます。リテンションポリシーが規制目的に関連していない場合はこの種類を使用してください。\n\n* `non_modifiable`: フォルダの追加、期間の延長、ポリシーの撤回、廃棄アクションまたは通知設定の変更という限られた方法でしかリテンションポリシーを変更できません。割り当ての削除やポリシー期間の短縮など、その他の操作は実行できません。規制に関するリテンションポリシーを確実に遵守する場合はこの種類を使用してください。",
                                         "enum": [
                                             "modifiable",
-                                            "non-modifiable"
+                                            "non_modifiable"
                                         ]
                                     },
                                     "can_owner_extend_retention": {
@@ -18229,57 +18239,79 @@
                                     "policy_name": {
                                         "type": "string",
                                         "description": "リテンションポリシーの名前",
-                                        "example": "Some Policy Name"
+                                        "example": "Some Policy Name",
+                                        "nullable": true
                                     },
                                     "description": {
                                         "type": "string",
                                         "description": "リテンションポリシーのテキストによる追加の説明。",
-                                        "example": "Policy to retain all reports for at least one month"
+                                        "example": "Policy to retain all reports for at least one month",
+                                        "nullable": true
                                     },
                                     "disposition_action": {
-                                        "type": "string",
-                                        "example": "permanently_delete",
-                                        "description": "リテンションポリシーの廃棄アクション。`permanently_delete`に設定すると、ポリシーによって保持されているコンテンツが完全に削除されます。`remove_retention`に設定すると、コンテンツへのリテンションポリシーの適用が解除され、リテンションポリシーの有効期限が切れた後は、ユーザーがコンテンツを削除できるようになります。",
-                                        "enum": [
-                                            "permanently_delete",
-                                            "remove_retention"
-                                        ]
+                                        "anyOf": [
+                                            {
+                                                "type": "string",
+                                                "enum": [
+                                                    "permanently_delete",
+                                                    "remove_retention"
+                                                ]
+                                            },
+                                            {
+                                                "type": "string",
+                                                "pattern": ".^",
+                                                "nullable": true
+                                            }
+                                        ],
+                                        "description": "The disposition action of the retention policy. This action can be `permanently_delete`, which will cause the content retained by the policy to be permanently deleted, or `remove_retention`, which will lift the retention policy from the content, allowing it to be deleted by users, once the retention policy has expired. You can use \"null\" if you don't want to change `disposition_action`.",
+                                        "example": "permanently_delete"
                                     },
                                     "retention_type": {
                                         "type": "string",
                                         "example": "non-modifiable",
+                                        "nullable": true,
                                         "description": "以下のリテンションの種類を指定します。\n\n* `modifiable`: リテンションポリシーを変更できます。たとえば、フォルダの追加と削除、ポリシー期間の短縮と延長、または割り当ての削除を行うことができます。リテンションポリシーが規制目的に関連していない場合はこの種類を使用してください。\n* `non-modifiable`: フォルダの追加、期間の延長、ポリシーの撤回、廃棄アクションまたは通知設定の変更という限られた方法でしかリテンションポリシーを変更できません。割り当ての削除やポリシー期間の短縮など、その他の操作は実行できません。規制に関するリテンションポリシーを確実に遵守する場合はこの種類を使用してください。\n\nリテンションポリシーを更新する際は、`non-modifiable`の種類のみを使用できます。`modifiable`ポリシーを`non-modifiable`に変換することはできますが、その逆はできません。"
                                     },
                                     "retention_length": {
-                                        "type": "string",
-                                        "format": "int32",
+                                        "oneOf": [
+                                            {
+                                                "type": "string",
+                                                "format": "int32",
+                                                "nullable": true
+                                            },
+                                            {
+                                                "type": "number",
+                                                "format": "int32",
+                                                "nullable": false
+                                            }
+                                        ],
                                         "example": "365",
                                         "description": "リテンションポリシーの期間。この値はリテンションポリシーがコンテンツに割り当てられた後、有効である日数を示します。ポリシーの`policy_type`が`indefinite`である場合は、`retention_length`も`indefinite`になります。"
                                     },
                                     "status": {
                                         "type": "string",
                                         "example": "retired",
+                                        "nullable": true,
                                         "description": "リテンションポリシーを撤回する場合に使用します。\n\nポリシーを撤回しない場合は、このパラメータを含めないようにするか、 このパラメータを`null`に設定します。"
                                     },
                                     "can_owner_extend_retention": {
                                         "type": "boolean",
+                                        "nullable": true,
                                         "description": "元のリテンション期間が終了に近づいたときに、ポリシーが適用されている項目の所有者がリテンションを延長できるかどうかを決定します。",
                                         "example": false
                                     },
                                     "are_owners_notified": {
                                         "type": "boolean",
+                                        "nullable": true,
                                         "description": "リテンション期間が終了に近づいたときに、ポリシーが適用されている項目の所有者と共同所有者に通知するかどうかを決定します。",
-                                        "enum": [
-                                            true,
-                                            false
-                                        ],
                                         "example": false
                                     },
                                     "custom_notification_recipients": {
                                         "type": "array",
+                                        "nullable": true,
                                         "description": "リテンション期間が終了に近づいたときに通知されるユーザーのリスト。",
                                         "items": {
-                                            "$ref": "#/components/schemas/User--Mini"
+                                            "$ref": "#/components/schemas/User--Base"
                                         }
                                     }
                                 }
@@ -18347,10 +18379,6 @@
                     "リテンションポリシー"
                 ],
                 "x-box-tag": "retention_policies",
-                "x-box-scopes": [
-                    "manage_data_retention",
-                    "data_retention"
-                ],
                 "description": "リテンションポリシーを完全に削除します。",
                 "parameters": [
                     {
@@ -18539,8 +18567,7 @@
                                         "type": "object",
                                         "description": "ポリシーを割り当てる項目",
                                         "required": [
-                                            "type",
-                                            "id"
+                                            "type"
                                         ],
                                         "properties": {
                                             "type": {
@@ -18555,6 +18582,7 @@
                                             },
                                             "id": {
                                                 "type": "string",
+                                                "nullable": true,
                                                 "description": "ポリシーを割り当てる項目のID。`type`が`enterprise`に設定されている場合は、`null`に設定するか省略します。",
                                                 "example": "6564564"
                                             }
@@ -19983,10 +20011,7 @@
                     "Shield情報バリア"
                 ],
                 "x-box-tag": "shield_information_barriers",
-                "x-box-scopes": [
-                    "manage_managed_users"
-                ],
-                "description": "指定されたIDに基づいてShield情報バリアを取得します。",
+                "description": "Get shield information barrier based on provided ID.",
                 "parameters": [
                     {
                         "name": "shield_information_barrier_id",
@@ -20041,9 +20066,6 @@
                     "Shield情報バリア"
                 ],
                 "x-box-tag": "shield_information_barriers",
-                "x-box-scopes": [
-                    "manage_managed_users"
-                ],
                 "description": "指定されたIDのShield情報バリアのステータスを変更します。",
                 "requestBody": {
                     "content": {
@@ -20126,14 +20148,11 @@
                     "Shield情報バリア"
                 ],
                 "x-box-tag": "shield_information_barriers",
-                "x-box-scopes": [
-                    "manage_managed_users"
-                ],
                 "description": "JWTを使用している企業のShield情報バリアオブジェクトのリストを取得します。",
                 "parameters": [
                     {
                         "name": "marker",
-                        "description": "結果が返される開始位置のマーカー。マーカーベースのページ割りを使用している場合に使用されます。\n\nこれを使用するには、`usemarker`を`true`に設定する必要があります。",
+                        "description": "結果が返される開始位置のマーカー。マーカーベースのページ割りを使用している場合に使用されます。",
                         "in": "query",
                         "required": false,
                         "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
@@ -20160,27 +20179,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "limit": {
-                                            "description": "これらのエントリで使用された制限値。許容される最大値を超えていない限り、クエリパラメータの`limit`と等しくなります。最大値はAPIによって異なります。",
-                                            "example": 1000,
-                                            "type": "integer",
-                                            "format": "int64"
-                                        },
-                                        "next_marker": {
-                                            "description": "次の検索結果ページの開始場所のマーカー。",
-                                            "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
-                                            "type": "string"
-                                        },
-                                        "entries": {
-                                            "type": "array",
-                                            "description": "Shield情報バリアオブジェクトのリスト",
-                                            "items": {
-                                                "$ref": "#/components/schemas/ShieldInformationBarrier"
-                                            }
-                                        }
-                                    }
+                                    "$ref": "#/components/schemas/ShieldInformationBarriers"
                                 }
                             }
                         }
@@ -20214,15 +20213,25 @@
                     "Shield情報バリア"
                 ],
                 "x-box-tag": "shield_information_barriers",
-                "x-box-scopes": [
-                    "manage_managed_users"
-                ],
                 "description": "Shield情報バリアを作成して、同じ会社内で個人/グループを分離し、機密情報が互いにやり取りされるのを防ぎます。",
                 "requestBody": {
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/ShieldInformationBarrier"
+                                "type": "object",
+                                "properties": {
+                                    "enterprise": {
+                                        "allOf": [
+                                            {
+                                                "$ref": "#/components/schemas/Enterprise--Base"
+                                            }
+                                        ],
+                                        "description": "このバリアが配置されている企業の`type`と`id`。"
+                                    }
+                                },
+                                "required": [
+                                    "enterprise"
+                                ]
                             }
                         }
                     }
@@ -20269,10 +20278,7 @@
                     "Shield情報バリアレポート"
                 ],
                 "x-box-tag": "shield_information_barrier_reports",
-                "x-box-scopes": [
-                    "manage_managed_users"
-                ],
-                "description": "特定のIDでShield情報バリアレポートのリストを取得します。",
+                "description": "Lists shield information barrier reports.",
                 "parameters": [
                     {
                         "name": "shield_information_barrier_id",
@@ -20313,33 +20319,13 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "limit": {
-                                            "description": "これらのエントリで使用された制限値。許容される最大値を超えていない限り、クエリパラメータの`limit`と等しくなります。最大値はAPIによって異なります。",
-                                            "example": 1000,
-                                            "type": "integer",
-                                            "format": "int64"
-                                        },
-                                        "next_marker": {
-                                            "description": "次の検索結果ページの開始場所のマーカー。",
-                                            "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
-                                            "type": "string"
-                                        },
-                                        "entries": {
-                                            "type": "array",
-                                            "description": "Shieldバリアレポートのリスト。",
-                                            "items": {
-                                                "$ref": "#/components/schemas/ShieldInformationBarrierReport"
-                                            }
-                                        }
-                                    }
+                                    "$ref": "#/components/schemas/ShieldInformationBarrierReports"
                                 }
                             }
                         }
                     },
                     "404": {
-                        "description": "Shield情報バリアが見つからなかった場合は`not_found`エラーを返します。",
+                        "description": "Returns a `not_found` error if the Shield Information Barrier could not be found.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -20367,9 +20353,6 @@
                     "Shield情報バリアレポート"
                 ],
                 "x-box-tag": "shield_information_barrier_reports",
-                "x-box-scopes": [
-                    "manage_managed_users"
-                ],
                 "description": "指定されたバリアのShield情報バリアレポートを作成します。",
                 "requestBody": {
                     "content": {
@@ -20432,9 +20415,6 @@
                     "Shield情報バリアレポート"
                 ],
                 "x-box-tag": "shield_information_barrier_reports",
-                "x-box-scopes": [
-                    "manage_managed_users"
-                ],
                 "description": "IDを指定してShield情報バリアレポートを取得します。",
                 "parameters": [
                     {
@@ -20490,9 +20470,6 @@
                     "Shield情報バリアのセグメント"
                 ],
                 "x-box-tag": "shield_information_barrier_segments",
-                "x-box-scopes": [
-                    "manage_managed_users"
-                ],
                 "description": "指定されたIDに基づいてShield情報バリアのセグメントを取得します。",
                 "parameters": [
                     {
@@ -20546,9 +20523,6 @@
                     "Shield情報バリアのセグメント"
                 ],
                 "x-box-tag": "shield_information_barrier_segments",
-                "x-box-scopes": [
-                    "manage_managed_users"
-                ],
                 "description": "指定されたIDに基づいてShield情報バリアのセグメントを削除します。",
                 "parameters": [
                     {
@@ -20595,9 +20569,6 @@
                     "Shield情報バリアのセグメント"
                 ],
                 "x-box-tag": "shield_information_barrier_segments",
-                "x-box-scopes": [
-                    "manage_managed_users"
-                ],
                 "description": "指定されたIDに基づいてShield情報バリアのセグメントを更新します。",
                 "parameters": [
                     {
@@ -20687,9 +20658,6 @@
                     "Shield情報バリアのセグメント"
                 ],
                 "x-box-tag": "shield_information_barrier_segments",
-                "x-box-scopes": [
-                    "manage_managed_users"
-                ],
                 "description": "指定した情報バリアIDのShield情報バリアのセグメントオブジェクトのリストを取得します。",
                 "parameters": [
                     {
@@ -20731,27 +20699,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "limit": {
-                                            "description": "これらのエントリで使用された制限値。許容される最大値を超えていない限り、クエリパラメータの`limit`と等しくなります。最大値はAPIによって異なります。",
-                                            "example": 1000,
-                                            "type": "integer",
-                                            "format": "int64"
-                                        },
-                                        "next_marker": {
-                                            "description": "次の検索結果ページの開始場所のマーカー。",
-                                            "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
-                                            "type": "string"
-                                        },
-                                        "entries": {
-                                            "type": "array",
-                                            "description": "Shield情報バリアのセグメントオブジェクトのリスト",
-                                            "items": {
-                                                "$ref": "#/components/schemas/ShieldInformationBarrierSegment"
-                                            }
-                                        }
-                                    }
+                                    "$ref": "#/components/schemas/ShieldInformationBarrierSegments"
                                 }
                             }
                         }
@@ -20785,9 +20733,6 @@
                     "Shield情報バリアのセグメント"
                 ],
                 "x-box-tag": "shield_information_barrier_segments",
-                "x-box-scopes": [
-                    "manage_managed_users"
-                ],
                 "description": "Shield情報バリアのセグメントを作成します。",
                 "requestBody": {
                     "content": {
@@ -20869,9 +20814,6 @@
                     "Shield情報バリアのセグメントメンバー"
                 ],
                 "x-box-tag": "shield_information_barrier_segment_members",
-                "x-box-scopes": [
-                    "manage_managed_users"
-                ],
                 "description": "IDを指定してShield情報バリアのセグメントメンバーを取得します。",
                 "parameters": [
                     {
@@ -20925,9 +20867,6 @@
                     "Shield情報バリアのセグメントメンバー"
                 ],
                 "x-box-tag": "shield_information_barrier_segment_members",
-                "x-box-scopes": [
-                    "manage_managed_users"
-                ],
                 "description": "指定されたIDに基づいてShield情報バリアのセグメントメンバーを削除します。",
                 "parameters": [
                     {
@@ -20976,9 +20915,6 @@
                     "Shield情報バリアのセグメントメンバー"
                 ],
                 "x-box-tag": "shield_information_barrier_segment_members",
-                "x-box-scopes": [
-                    "manage_managed_users"
-                ],
                 "description": "指定されたセグメントIDに基づいてShield情報バリアのセグメントメンバーのリストを取得します。",
                 "parameters": [
                     {
@@ -21020,27 +20956,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "limit": {
-                                            "description": "これらのエントリで使用された制限値。許容される最大値を超えていない限り、クエリパラメータの`limit`と等しくなります。最大値はAPIによって異なります。",
-                                            "example": 1000,
-                                            "type": "integer",
-                                            "format": "int64"
-                                        },
-                                        "next_marker": {
-                                            "description": "次の検索結果ページの開始場所のマーカー。",
-                                            "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
-                                            "type": "string"
-                                        },
-                                        "entries": {
-                                            "type": "array",
-                                            "description": "Shield情報バリアのセグメントメンバーのリスト",
-                                            "items": {
-                                                "$ref": "#/components/schemas/ShieldInformationBarrierSegmentMember"
-                                            }
-                                        }
-                                    }
+                                    "$ref": "#/components/schemas/ShieldInformationBarrierSegmentMembers"
                                 }
                             }
                         }
@@ -21064,9 +20980,6 @@
                     "Shield情報バリアのセグメントメンバー"
                 ],
                 "x-box-tag": "shield_information_barrier_segment_members",
-                "x-box-scopes": [
-                    "manage_managed_users"
-                ],
                 "description": "新しいShield情報バリアのセグメントメンバーを作成します。",
                 "requestBody": {
                     "content": {
@@ -21112,11 +21025,9 @@
                                         "allOf": [
                                             {
                                                 "$ref": "#/components/schemas/User--Base"
-                                            },
-                                            {
-                                                "description": "リクエストされたShield情報バリアのセグメントメンバーの`type`と`id`。"
                                             }
-                                        ]
+                                        ],
+                                        "description": "User to which restriction will be applied."
                                     }
                                 }
                             }
@@ -21125,7 +21036,7 @@
                 },
                 "responses": {
                     "201": {
-                        "description": "新しいShield情報バリアのセグメントメンバーオブジェクトを返します。",
+                        "description": "Returns a new shield information barrier segment member object.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -21135,7 +21046,7 @@
                         }
                     },
                     "404": {
-                        "description": "Shield情報バリアまたはセグメントが見つからなかった場合はエラーを返します。",
+                        "description": "Returns an error if the shield information barrier or segment was not found.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -21165,9 +21076,6 @@
                     "Shield情報バリアのセグメント制限"
                 ],
                 "x-box-tag": "shield_information_barrier_segment_restrictions",
-                "x-box-scopes": [
-                    "manage_managed_users"
-                ],
                 "description": "指定されたIDに基づいてShield情報バリアのセグメント制限を取得します。",
                 "parameters": [
                     {
@@ -21221,9 +21129,6 @@
                     "Shield情報バリアのセグメント制限"
                 ],
                 "x-box-tag": "shield_information_barrier_segment_restrictions",
-                "x-box-scopes": [
-                    "manage_managed_users"
-                ],
                 "description": "指定されたIDに基づいてShield情報バリアのセグメント制限を削除します。",
                 "parameters": [
                     {
@@ -21272,9 +21177,6 @@
                     "Shield情報バリアのセグメント制限"
                 ],
                 "x-box-tag": "shield_information_barrier_segment_restrictions",
-                "x-box-scopes": [
-                    "manage_managed_users"
-                ],
                 "description": "指定されたセグメントIDに基づいてShield情報バリアのセグメント制限のリストを取得します。",
                 "parameters": [
                     {
@@ -21316,27 +21218,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "limit": {
-                                            "description": "これらのエントリで使用された制限値。許容される最大値を超えていない限り、クエリパラメータの`limit`と等しくなります。最大値はAPIによって異なります。",
-                                            "example": 1000,
-                                            "type": "integer",
-                                            "format": "int64"
-                                        },
-                                        "next_marker": {
-                                            "description": "次の検索結果ページの開始場所のマーカー。",
-                                            "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
-                                            "type": "string"
-                                        },
-                                        "entries": {
-                                            "type": "array",
-                                            "description": "Shield情報バリアのセグメント制限オブジェクトのリスト",
-                                            "items": {
-                                                "$ref": "#/components/schemas/ShieldInformationBarrierSegmentRestriction"
-                                            }
-                                        }
-                                    }
+                                    "$ref": "#/components/schemas/ShieldInformationBarrierSegmentRestrictions"
                                 }
                             }
                         }
@@ -21360,9 +21242,6 @@
                     "Shield情報バリアのセグメント制限"
                 ],
                 "x-box-tag": "shield_information_barrier_segment_restrictions",
-                "x-box-scopes": [
-                    "manage_managed_users"
-                ],
                 "description": "Shield情報バリアのセグメント制限オブジェクトを作成します。",
                 "requestBody": {
                     "content": {
@@ -21441,7 +21320,7 @@
                         }
                     },
                     "404": {
-                        "description": "Shield情報バリアまたはセグメントが見つからなかった場合は`not_found`エラーを返します。",
+                        "description": "Returns a `not_found` error if the shield information barrier or segment was not found.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -22481,7 +22360,7 @@
                     "ストレージポリシー"
                 ],
                 "x-box-tag": "storage_policies",
-                "description": "企業のすべてのストレージポリシーを取得します。このエンドポイントにアクセスできるのは、プライマリ管理者のみです。ユーザーは、このリクエストを認証するためにアカウントのトークンを生成する必要があります。",
+                "description": "企業のすべてのストレージポリシーを取得します。",
                 "parameters": [
                     {
                         "name": "fields",
@@ -22556,7 +22435,7 @@
                     "ストレージポリシー"
                 ],
                 "x-box-tag": "storage_policies",
-                "description": "特定のストレージポリシーを取得します。このエンドポイントにアクセスできるのは、プライマリ管理者のみです。ユーザーは、このリクエストを認証するためにアカウントのトークンを生成する必要があります。",
+                "description": "特定のストレージポリシーを取得します。",
                 "parameters": [
                     {
                         "name": "storage_policy_id",
@@ -22601,7 +22480,7 @@
                     "ストレージポリシー割り当て"
                 ],
                 "x-box-tag": "storage_policy_assignments",
-                "description": "企業またはユーザーのすべてのストレージポリシー割り当てを取得します。このエンドポイントにアクセスできるのは、プライマリ管理者のみです。ユーザーは、このリクエストを認証するためにアカウントのトークンを生成する必要があります。",
+                "description": "会社またはユーザーのすべてのストレージポリシー割り当てを取得します。",
                 "parameters": [
                     {
                         "name": "marker",
@@ -22668,7 +22547,7 @@
                     "ストレージポリシー割り当て"
                 ],
                 "x-box-tag": "storage_policy_assignments",
-                "description": "企業またはユーザーに対するストレージポリシー割り当てを作成します。このエンドポイントにアクセスできるのは、プライマリ管理者のみです。ユーザーは、このリクエストを認証するためにアカウントのトークンを生成する必要があります。",
+                "description": "会社またはユーザーに対するストレージポリシー割り当てを作成します。",
                 "requestBody": {
                     "content": {
                         "application/json": {
@@ -22763,7 +22642,7 @@
                     "ストレージポリシー割り当て"
                 ],
                 "x-box-tag": "storage_policy_assignments",
-                "description": "特定のストレージポリシー割り当てを取得します。このエンドポイントにアクセスできるのは、プライマリ管理者のみです。ユーザーは、このリクエストを認証するためにアカウントのトークンを生成する必要があります。",
+                "description": "特定のストレージポリシー割り当てを取得します。",
                 "parameters": [
                     {
                         "name": "storage_policy_assignment_id",
@@ -22806,7 +22685,7 @@
                     "ストレージポリシー割り当て"
                 ],
                 "x-box-tag": "storage_policy_assignments",
-                "description": "特定のストレージポリシー割り当てを更新します。このエンドポイントにアクセスできるのは、プライマリ管理者のみです。ユーザーは、このリクエストを認証するためにアカウントのトークンを生成する必要があります。",
+                "description": "特定のストレージポリシー割り当てを更新します。",
                 "parameters": [
                     {
                         "name": "storage_policy_assignment_id",
@@ -22886,7 +22765,7 @@
                     "ストレージポリシー割り当て"
                 ],
                 "x-box-tag": "storage_policy_assignments",
-                "description": "ストレージポリシーの割り当てを削除します。\n\nユーザーに対するストレージポリシーの割り当てを削除すると、そのユーザーは会社のデフォルトのストレージポリシーを継承します。\n\nこのエンドポイントの呼び出しには、24時間につき1ユーザーあたり2回までというレート制限が適用されます。\n\nこのエンドポイントにアクセスできるのは、プライマリ管理者のみです。ユーザーは、このリクエストを認証するためにアカウントのトークンを生成する必要があります。",
+                "description": "ストレージポリシーの割り当てを削除します。\n\nユーザーに対するストレージポリシーの割り当てを削除すると、そのユーザーは会社のデフォルトのストレージポリシーを継承します。\n\nこのエンドポイントの呼び出しには、24時間につき1ユーザーあたり2回までというレート制限が適用されます。",
                 "parameters": [
                     {
                         "name": "storage_policy_assignment_id",
@@ -23846,9 +23725,6 @@
                     "integrationMappingsSlack"
                 ],
                 "x-box-tag": "integration_mappings",
-                "x-box-scopes": [
-                    "manage_enterprise_properties"
-                ],
                 "description": "ユーザーの企業内の[Slack統合マッピング](https://support.box.com/hc/en-us/articles/4415585987859-Box-as-the-Content-Layer-for-Slack)のリストを取得します。\n\nこのエンドポイントを使用するには、管理者または共同管理者の役割が必要です。",
                 "parameters": [
                     {
@@ -23981,9 +23857,6 @@
                     "post_integration_mappings_slack"
                 ],
                 "x-box-tag": "integration_mappings",
-                "x-box-scopes": [
-                    "manage_enterprise_properties"
-                ],
                 "description": "SlackチャンネルをBox項目にマッピングすることで、[Slack統合マッピング](https://support.box.com/hc/en-us/articles/4415585987859-Box-as-the-Content-Layer-for-Slack)を作成します。\n\nこのエンドポイントを使用するには、管理者または共同管理者の役割が必要です。",
                 "requestBody": {
                     "content": {
@@ -24046,9 +23919,6 @@
                     "integrationMappingsSlack"
                 ],
                 "x-box-tag": "integration_mappings",
-                "x-box-scopes": [
-                    "manage_enterprise_properties"
-                ],
                 "description": "[Slack統合マッピング](https://support.box.com/hc/en-us/articles/4415585987859-Box-as-the-Content-Layer-for-Slack)を更新します。BoxフォルダIDおよびオプションの更新をサポートします。\n\nこのエンドポイントを使用するには、管理者または共同管理者の役割が必要です。",
                 "parameters": [
                     {
@@ -24112,7 +23982,7 @@
                         }
                     },
                     "404": {
-                        "description": "統合マッピングオブジェクトがデータベースに見つからなかった場合に`not_found`を返します。",
+                        "description": "Returns `not_found` if integration mapping object was not found.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -24140,9 +24010,6 @@
                     "integrationMappingsSlack"
                 ],
                 "x-box-tag": "integration_mappings",
-                "x-box-scopes": [
-                    "manage_enterprise_properties"
-                ],
                 "description": "[Slack統合マッピング](https://support.box.com/hc/en-us/articles/4415585987859-Box-as-the-Content-Layer-for-Slack)を削除します。\n\nこのエンドポイントを使用するには、管理者または共同管理者の役割が必要です。",
                 "parameters": [
                     {
@@ -24409,7 +24276,7 @@
                                     "example": "file",
                                     "enum": [
                                         "file",
-                                        "folder."
+                                        "folder"
                                     ]
                                 },
                                 "id": {
@@ -24622,6 +24489,17 @@
                                 "maxItems": 10,
                                 "nullable": true
                             },
+                            "signature_color": {
+                                "type": "string",
+                                "example": "blue",
+                                "description": "Force a specific color for the signature (blue, black, or red)",
+                                "enum": [
+                                    "blue",
+                                    "black",
+                                    "red"
+                                ],
+                                "nullable": true
+                            },
                             "signers": {
                                 "type": "array",
                                 "items": {
@@ -24640,28 +24518,28 @@
                 "description": "Slack統合マッピングオブジェクトを作成するリクエスト",
                 "properties": {
                     "partner_item": {
-                        "nullable": false,
                         "allOf": [
                             {
                                 "$ref": "#/components/schemas/IntegrationMappingPartnerItemSlack"
                             }
-                        ]
+                        ],
+                        "nullable": false
                     },
                     "box_item": {
-                        "nullable": false,
                         "allOf": [
                             {
                                 "$ref": "#/components/schemas/IntegrationMappingBoxItemSlack"
                             }
-                        ]
+                        ],
+                        "nullable": false
                     },
                     "options": {
-                        "nullable": false,
                         "allOf": [
                             {
                                 "$ref": "#/components/schemas/IntegrationMappingSlackOptions"
                             }
-                        ]
+                        ],
+                        "nullable": false
                     }
                 },
                 "required": [
@@ -24676,7 +24554,7 @@
                 "description": "一般的なエラー",
                 "properties": {
                     "type": {
-                        "description": "`error`",
+                        "description": "error",
                         "example": "error",
                         "type": "string",
                         "enum": [
@@ -24724,6 +24602,7 @@
                     "context_info": {
                         "description": "このエラーに関する追加コンテキストを含む自由形式のオブジェクト。使用できるフィールドは、エンドポイントごとに定義されています。`message`は唯一の例です。",
                         "type": "object",
+                        "nullable": true,
                         "properties": {
                             "message": {
                                 "type": "string",
@@ -25478,6 +25357,11 @@
                         "example": "2012-12-26T10:53:43-08:00",
                         "description": "コラボレーションの有効期限。有効期限が設定されていない場合は`null`。"
                     },
+                    "is_access_only": {
+                        "type": "boolean",
+                        "example": true,
+                        "description": "`true`に設定した場合、コラボレータは共有項目にアクセスできますが、これらの項目は \\[すべてのファイル] リストに表示されません。また、コラボレータには共有項目のルートフォルダのパスも表示されません。"
+                    },
                     "status": {
                         "type": "string",
                         "example": "accepted",
@@ -25531,11 +25415,6 @@
                         "format": "date-time",
                         "example": "2012-12-12T10:53:43-08:00",
                         "description": "コラボレーションオブジェクトが最後に変更された日時。"
-                    },
-                    "is_access_only": {
-                        "type": "boolean",
-                        "example": true,
-                        "description": "`true`に設定した場合、コラボレータは共有項目にアクセスできますが、これらの項目は \\[すべてのファイル] リストに表示されません。また、コラボレータには共有項目のルートフォルダのパスも表示されません。"
                     },
                     "acceptance_requirements_status": {
                         "type": "object",
@@ -25761,13 +25640,15 @@
                                 "description": "次の検索結果ページの開始場所のマーカー。",
                                 "example": 3000,
                                 "type": "integer",
-                                "format": "int64"
+                                "format": "int64",
+                                "nullable": true
                             },
                             "prev_marker": {
                                 "description": "前の検索結果ページの開始場所のマーカー。",
                                 "example": 1000,
                                 "type": "integer",
-                                "format": "int64"
+                                "format": "int64",
+                                "nullable": true
                             }
                         }
                     },
@@ -25881,13 +25762,15 @@
                                 "description": "次の検索結果ページの開始場所のマーカー。",
                                 "example": 3000,
                                 "type": "integer",
-                                "format": "int64"
+                                "format": "int64",
+                                "nullable": true
                             },
                             "prev_marker": {
                                 "description": "前の検索結果ページの開始場所のマーカー。",
                                 "example": 1000,
                                 "type": "integer",
-                                "format": "int64"
+                                "format": "int64",
+                                "nullable": true
                             }
                         }
                     },
@@ -27547,6 +27430,7 @@
                 "x-box-resource-id": "file--mini",
                 "x-box-variant": "mini",
                 "description": "他のリソースの下にネストされたときに使用されるファイルのMini版の表示。",
+                "nullable": true,
                 "allOf": [
                     {
                         "$ref": "#/components/schemas/File--Base"
@@ -27605,6 +27489,7 @@
                     "full"
                 ],
                 "x-box-variant": "base",
+                "nullable": true,
                 "description": "最も基本的なファイルのBase版の表示。`fields`クエリパラメータを使用すると、最小限の数のフィールドが返されます。",
                 "required": [
                     "id",
@@ -27780,13 +27665,15 @@
                                 "description": "次の検索結果ページの開始場所のマーカー。",
                                 "example": 3000,
                                 "type": "integer",
-                                "format": "int64"
+                                "format": "int64",
+                                "nullable": true
                             },
                             "prev_marker": {
                                 "description": "前の検索結果ページの開始場所のマーカー。",
                                 "example": 1000,
                                 "type": "integer",
-                                "format": "int64"
+                                "format": "int64",
+                                "nullable": true
                             }
                         }
                     },
@@ -28125,13 +28012,15 @@
                                 "description": "次の検索結果ページの開始場所のマーカー。",
                                 "example": 3000,
                                 "type": "integer",
-                                "format": "int64"
+                                "format": "int64",
+                                "nullable": true
                             },
                             "prev_marker": {
                                 "description": "前の検索結果ページの開始場所のマーカー。",
                                 "example": 1000,
                                 "type": "integer",
-                                "format": "int64"
+                                "format": "int64",
+                                "nullable": true
                             }
                         }
                     },
@@ -28233,13 +28122,15 @@
                                 "description": "次の検索結果ページの開始場所のマーカー。",
                                 "example": 3000,
                                 "type": "integer",
-                                "format": "int64"
+                                "format": "int64",
+                                "nullable": true
                             },
                             "prev_marker": {
                                 "description": "前の検索結果ページの開始場所のマーカー。",
                                 "example": 1000,
                                 "type": "integer",
-                                "format": "int64"
+                                "format": "int64",
+                                "nullable": true
                             }
                         }
                     },
@@ -28933,17 +28824,24 @@
                     },
                     {
                         "properties": {
+                            "sequence_id": {
+                                "allOf": [
+                                    {
+                                        "type": "string",
+                                        "example": "3",
+                                        "nullable": true,
+                                        "description": "この項目に適用された最新のUser Eventを表す数値の識別子。\n\nこれを`GET /events`エンドポイントと組み合わせて使用すると、この識別子が読み取られる前に発生した可能性があるUser Eventを除外できます。\n\nたとえば、Box DriveなどのアプリケーションがAPIを介して項目を取得し、その項目の変更に関連するUser Eventの発生を監視する場合などがこれに該当します。User Eventの`sequence_id`が最初に取得されたリソースの`sequence_id`よりも小さいか同じである場合、アプリケーションはそのようなUser Eventをすべて無視します。"
+                                    },
+                                    {
+                                        "nullable": false
+                                    }
+                                ]
+                            },
                             "name": {
                                 "type": "string",
                                 "description": "フォルダの名前。",
                                 "example": "Contracts",
                                 "nullable": false
-                            },
-                            "sequence_id": {
-                                "type": "string",
-                                "example": "3",
-                                "nullable": true,
-                                "description": "この項目に適用された最新のUser Eventを表す数値の識別子。\n\nこれを`GET /events`エンドポイントと組み合わせて使用すると、この識別子が読み取られる前に発生した可能性があるUser Eventを除外できます。\n\nたとえば、Box DriveなどのアプリケーションがAPIを介して項目を取得し、その項目の変更に関連するUser Eventの発生を監視する場合などがこれに該当します。User Eventの`sequence_id`が最初に取得されたリソースの`sequence_id`よりも小さいか同じである場合、アプリケーションはそのようなUser Eventをすべて無視します。"
                             }
                         }
                     }
@@ -29084,13 +28982,15 @@
                                 "description": "次の検索結果ページの開始場所のマーカー。",
                                 "example": 3000,
                                 "type": "integer",
-                                "format": "int64"
+                                "format": "int64",
+                                "nullable": true
                             },
                             "prev_marker": {
                                 "description": "前の検索結果ページの開始場所のマーカー。",
                                 "example": 1000,
                                 "type": "integer",
-                                "format": "int64"
+                                "format": "int64",
+                                "nullable": true
                             }
                         }
                     },
@@ -29139,13 +29039,13 @@
                                 "description": "Slack用にマッピングされた項目オブジェクト"
                             },
                             "box_item": {
-                                "description": "パートナーアプリのドメインのオブジェクト (`partner_item_id`で参照) のマッピング先であるBoxフォルダ",
-                                "nullable": false,
                                 "allOf": [
                                     {
                                         "$ref": "#/components/schemas/Folder--Mini"
                                     }
-                                ]
+                                ],
+                                "description": "パートナーアプリのドメインのオブジェクト (`partner_item_id`で参照) のマッピング先であるBoxフォルダ",
+                                "nullable": false
                             },
                             "is_manually_created": {
                                 "type": "boolean",
@@ -29165,22 +29065,22 @@
                                 ]
                             },
                             "created_by": {
-                                "description": "統合マッピングを作成したユーザーを表すオブジェクト",
-                                "nullable": false,
                                 "allOf": [
                                     {
                                         "$ref": "#/components/schemas/UserIntegrationMappings"
                                     }
-                                ]
+                                ],
+                                "description": "統合マッピングを作成したユーザーを表すオブジェクト",
+                                "nullable": false
                             },
                             "modified_by": {
-                                "description": "統合マッピングを最後に変更したユーザー",
-                                "nullable": false,
                                 "allOf": [
                                     {
                                         "$ref": "#/components/schemas/UserIntegrationMappings"
                                     }
-                                ]
+                                ],
+                                "description": "統合マッピングを最後に変更したユーザー",
+                                "nullable": false
                             },
                             "created_at": {
                                 "type": "string",
@@ -29301,15 +29201,9 @@
                             },
                             "next_marker": {
                                 "description": "次の検索結果ページの開始場所のマーカー。",
-                                "example": 3000,
-                                "type": "integer",
-                                "format": "int64"
-                            },
-                            "prev_marker": {
-                                "description": "前の検索結果ページの開始場所のマーカー。",
-                                "example": 1000,
-                                "type": "integer",
-                                "format": "int64"
+                                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                                "type": "string",
+                                "nullable": true
                             }
                         }
                     },
@@ -29972,13 +29866,15 @@
                                 "description": "次の検索結果ページの開始場所のマーカー。",
                                 "example": 3000,
                                 "type": "integer",
-                                "format": "int64"
+                                "format": "int64",
+                                "nullable": true
                             },
                             "prev_marker": {
                                 "description": "前の検索結果ページの開始場所のマーカー。",
                                 "example": 1000,
                                 "type": "integer",
-                                "format": "int64"
+                                "format": "int64",
+                                "nullable": true
                             }
                         }
                     },
@@ -30139,13 +30035,15 @@
                                 "description": "次の検索結果ページの開始場所のマーカー。",
                                 "example": 3000,
                                 "type": "integer",
-                                "format": "int64"
+                                "format": "int64",
+                                "nullable": true
                             },
                             "prev_marker": {
                                 "description": "前の検索結果ページの開始場所のマーカー。",
                                 "example": 1000,
                                 "type": "integer",
-                                "format": "int64"
+                                "format": "int64",
+                                "nullable": true
                             }
                         }
                     },
@@ -30372,13 +30270,15 @@
                                 "description": "次の検索結果ページの開始場所のマーカー。",
                                 "example": 3000,
                                 "type": "integer",
-                                "format": "int64"
+                                "format": "int64",
+                                "nullable": true
                             },
                             "prev_marker": {
                                 "description": "前の検索結果ページの開始場所のマーカー。",
                                 "example": 1000,
                                 "type": "integer",
-                                "format": "int64"
+                                "format": "int64",
+                                "nullable": true
                             }
                         }
                     },
@@ -30717,13 +30617,15 @@
                                 "description": "次の検索結果ページの開始場所のマーカー。",
                                 "example": 3000,
                                 "type": "integer",
-                                "format": "int64"
+                                "format": "int64",
+                                "nullable": true
                             },
                             "prev_marker": {
                                 "description": "前の検索結果ページの開始場所のマーカー。",
                                 "example": 1000,
                                 "type": "integer",
-                                "format": "int64"
+                                "format": "int64",
+                                "nullable": true
                             }
                         }
                     },
@@ -30871,12 +30773,14 @@
                             "next_marker": {
                                 "description": "次の検索結果ページの開始場所のマーカー。",
                                 "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
-                                "type": "string"
+                                "type": "string",
+                                "nullable": true
                             },
                             "prev_marker": {
                                 "description": "前の検索結果ページの開始場所のマーカー。",
                                 "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVih",
-                                "type": "string"
+                                "type": "string",
+                                "nullable": true
                             }
                         }
                     },
@@ -30924,7 +30828,8 @@
                             "next_marker": {
                                 "description": "次の検索結果ページの開始場所のマーカー。",
                                 "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
-                                "type": "string"
+                                "type": "string",
+                                "nullable": true
                             }
                         }
                     }
@@ -30959,11 +30864,11 @@
                             },
                             "retention_type": {
                                 "type": "string",
-                                "example": "non-modifiable",
+                                "example": "non_modifiable",
                                 "description": "以下のリテンションの種類を指定します。\n\n* `modifiable`: リテンションポリシーを変更できます。たとえば、フォルダの追加と削除、ポリシー期間の短縮と延長、または割り当ての削除を行うことができます。リテンションポリシーが規制目的に関連していない場合はこの種類を使用してください。\n\n* `non-modifiable`: フォルダの追加、期間の延長、ポリシーの撤回、廃棄アクションまたは通知設定の変更という限られた方法でしかリテンションポリシーを変更できません。割り当ての削除やポリシー期間の短縮など、その他の操作は実行できません。規制に関するリテンションポリシーを確実に遵守する場合はこの種類を使用してください。",
                                 "enum": [
                                     "modifiable",
-                                    "non-modifiable"
+                                    "non_modifiable"
                                 ]
                             },
                             "status": {
@@ -31182,8 +31087,9 @@
                         "properties": {
                             "id": {
                                 "type": "string",
+                                "nullable": true,
                                 "example": "a983f69f-e85f-4ph4-9f46-4afdf9c1af65",
-                                "description": "ポリシーが割り当てられるフォルダ、企業、またはメタデータテンプレートのID。"
+                                "description": "The ID of the folder, enterprise, or metadata template the policy is assigned to. Set to null or omit when type is set to enterprise."
                             },
                             "type": {
                                 "type": "string",
@@ -31256,7 +31162,7 @@
                                 "type": "array",
                                 "description": "リテンションポリシー割り当てのリスト",
                                 "items": {
-                                    "$ref": "#/components/schemas/RetentionPolicyAssignment--Base"
+                                    "$ref": "#/components/schemas/RetentionPolicyAssignment"
                                 }
                             }
                         }
@@ -31274,7 +31180,8 @@
                             "next_marker": {
                                 "description": "次の検索結果ページの開始場所のマーカー。",
                                 "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
-                                "type": "string"
+                                "type": "string",
+                                "nullable": true
                             }
                         }
                     }
@@ -31309,11 +31216,9 @@
                         "allOf": [
                             {
                                 "$ref": "#/components/schemas/Enterprise--Base"
-                            },
-                            {
-                                "description": "このバリアが配置されている企業の`type`と`id`。"
                             }
-                        ]
+                        ],
+                        "description": "このバリアが配置されている企業の`type`と`id`。"
                     },
                     "status": {
                         "type": "string",
@@ -31337,11 +31242,9 @@
                         "allOf": [
                             {
                                 "$ref": "#/components/schemas/User--Base"
-                            },
-                            {
-                                "description": "このShield情報バリアを作成したユーザー。"
                             }
-                        ]
+                        ],
+                        "description": "このShield情報バリアを作成したユーザー。"
                     },
                     "updated_at": {
                         "type": "string",
@@ -31353,11 +31256,9 @@
                         "allOf": [
                             {
                                 "$ref": "#/components/schemas/User--Base"
-                            },
-                            {
-                                "description": "このShield情報バリアを更新したユーザー。"
                             }
-                        ]
+                        ],
+                        "description": "このShield情報バリアを更新したユーザー。"
                     },
                     "enabled_at": {
                         "type": "string",
@@ -31403,6 +31304,44 @@
                         ]
                     }
                 }
+            },
+            "ShieldInformationBarriers": {
+                "title": "List of Shield Information Barriers",
+                "type": "object",
+                "x-box-resource-id": "shield_information_barriers",
+                "x-box-tag": "shield_information_barriers",
+                "description": "List of Shield Information Barrier objects",
+                "allOf": [
+                    {
+                        "type": "object",
+                        "description": "マーカーベースのページ割りについて説明しているAPIレスポンスの部分",
+                        "properties": {
+                            "limit": {
+                                "description": "これらのエントリで使用された制限値。許容される最大値を超えていない限り、クエリパラメータの`limit`と等しくなります。最大値はAPIによって異なります。",
+                                "example": 1000,
+                                "type": "integer",
+                                "format": "int64"
+                            },
+                            "next_marker": {
+                                "description": "次の検索結果ページの開始場所のマーカー。",
+                                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                                "type": "string",
+                                "nullable": true
+                            }
+                        }
+                    },
+                    {
+                        "properties": {
+                            "entries": {
+                                "type": "array",
+                                "description": "Shield情報バリアオブジェクトのリスト",
+                                "items": {
+                                    "$ref": "#/components/schemas/ShieldInformationBarrier"
+                                }
+                            }
+                        }
+                    }
+                ]
             },
             "ShieldInformationBarrierReport": {
                 "title": "Shield情報バリアレポート",
@@ -31499,6 +31438,44 @@
                     }
                 }
             },
+            "ShieldInformationBarrierReports": {
+                "title": "List of Shield Information Barrier Reports",
+                "type": "object",
+                "x-box-resource-id": "shield_information_barrier_reports",
+                "x-box-tag": "shield_information_barrier_reports",
+                "description": "Shieldバリアレポートのリスト。",
+                "allOf": [
+                    {
+                        "type": "object",
+                        "description": "マーカーベースのページ割りについて説明しているAPIレスポンスの部分",
+                        "properties": {
+                            "limit": {
+                                "description": "これらのエントリで使用された制限値。許容される最大値を超えていない限り、クエリパラメータの`limit`と等しくなります。最大値はAPIによって異なります。",
+                                "example": 1000,
+                                "type": "integer",
+                                "format": "int64"
+                            },
+                            "next_marker": {
+                                "description": "次の検索結果ページの開始場所のマーカー。",
+                                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                                "type": "string",
+                                "nullable": true
+                            }
+                        }
+                    },
+                    {
+                        "properties": {
+                            "entries": {
+                                "type": "array",
+                                "description": "A list of shield information barrier reports.",
+                                "items": {
+                                    "$ref": "#/components/schemas/ShieldInformationBarrierReport"
+                                }
+                            }
+                        }
+                    }
+                ]
+            },
             "ShieldInformationBarrierSegment": {
                 "title": "Shield情報バリアのセグメント",
                 "type": "object",
@@ -31565,6 +31542,44 @@
                         ]
                     }
                 }
+            },
+            "ShieldInformationBarrierSegments": {
+                "title": "List of Shield Information Barrier Segments",
+                "type": "object",
+                "x-box-resource-id": "shield_information_barrier_segments",
+                "x-box-tag": "shield_information_barrier_segments",
+                "description": "List of Shield Information Barrier Segment objects",
+                "allOf": [
+                    {
+                        "type": "object",
+                        "description": "マーカーベースのページ割りについて説明しているAPIレスポンスの部分",
+                        "properties": {
+                            "limit": {
+                                "description": "これらのエントリで使用された制限値。許容される最大値を超えていない限り、クエリパラメータの`limit`と等しくなります。最大値はAPIによって異なります。",
+                                "example": 1000,
+                                "type": "integer",
+                                "format": "int64"
+                            },
+                            "next_marker": {
+                                "description": "次の検索結果ページの開始場所のマーカー。",
+                                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                                "type": "string",
+                                "nullable": true
+                            }
+                        }
+                    },
+                    {
+                        "properties": {
+                            "entries": {
+                                "type": "array",
+                                "description": "A list of shield information barrier segments",
+                                "items": {
+                                    "$ref": "#/components/schemas/ShieldInformationBarrierSegment"
+                                }
+                            }
+                        }
+                    }
+                ]
             },
             "ShieldInformationBarrierSegmentMember": {
                 "title": "Shield情報バリアのセグメントメンバー",
@@ -31707,6 +31722,44 @@
                                         "description": "リクエストされたShield情報バリアのセグメントメンバーの`type`と`id`。"
                                     }
                                 ]
+                            }
+                        }
+                    }
+                ]
+            },
+            "ShieldInformationBarrierSegmentMembers": {
+                "title": "List of Shield Information Barrier Segment Members",
+                "type": "object",
+                "x-box-resource-id": "shield_information_barrier_segment_members",
+                "x-box-tag": "shield_information_barrier_segment_members",
+                "description": "List of Shield Information Barrier Member objects",
+                "allOf": [
+                    {
+                        "type": "object",
+                        "description": "マーカーベースのページ割りについて説明しているAPIレスポンスの部分",
+                        "properties": {
+                            "limit": {
+                                "description": "これらのエントリで使用された制限値。許容される最大値を超えていない限り、クエリパラメータの`limit`と等しくなります。最大値はAPIによって異なります。",
+                                "example": 1000,
+                                "type": "integer",
+                                "format": "int64"
+                            },
+                            "next_marker": {
+                                "description": "次の検索結果ページの開始場所のマーカー。",
+                                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                                "type": "string",
+                                "nullable": true
+                            }
+                        }
+                    },
+                    {
+                        "properties": {
+                            "entries": {
+                                "type": "array",
+                                "description": "Shield情報バリアのセグメントメンバーのリスト",
+                                "items": {
+                                    "$ref": "#/components/schemas/ShieldInformationBarrierSegmentMember"
+                                }
                             }
                         }
                     }
@@ -31864,6 +31917,44 @@
                                     }
                                 },
                                 "description": "制限されたShield情報バリアのセグメントの`type`と`id`。"
+                            }
+                        }
+                    }
+                ]
+            },
+            "ShieldInformationBarrierSegmentRestrictions": {
+                "title": "List of Shield Information Barrier Segment Restrictions",
+                "type": "object",
+                "x-box-resource-id": "shield_information_barrier_segment_restrictions",
+                "x-box-tag": "shield_information_barrier_segment_restrictions",
+                "description": "List of shield information barrier segment restriction objects",
+                "allOf": [
+                    {
+                        "type": "object",
+                        "description": "マーカーベースのページ割りについて説明しているAPIレスポンスの部分",
+                        "properties": {
+                            "limit": {
+                                "description": "これらのエントリで使用された制限値。許容される最大値を超えていない限り、クエリパラメータの`limit`と等しくなります。最大値はAPIによって異なります。",
+                                "example": 1000,
+                                "type": "integer",
+                                "format": "int64"
+                            },
+                            "next_marker": {
+                                "description": "次の検索結果ページの開始場所のマーカー。",
+                                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                                "type": "string",
+                                "nullable": true
+                            }
+                        }
+                    },
+                    {
+                        "properties": {
+                            "entries": {
+                                "type": "array",
+                                "description": "Shield情報バリアのセグメント制限オブジェクトのリスト",
+                                "items": {
+                                    "$ref": "#/components/schemas/ShieldInformationBarrierSegmentRestriction"
+                                }
                             }
                         }
                     }
@@ -32156,13 +32247,15 @@
                                 "description": "次の検索結果ページの開始場所のマーカー。",
                                 "example": 3000,
                                 "type": "integer",
-                                "format": "int64"
+                                "format": "int64",
+                                "nullable": true
                             },
                             "prev_marker": {
                                 "description": "前の検索結果ページの開始場所のマーカー。",
                                 "example": 1000,
                                 "type": "integer",
-                                "format": "int64"
+                                "format": "int64",
+                                "nullable": true
                             }
                         }
                     },
@@ -32270,13 +32363,15 @@
                                 "description": "次の検索結果ページの開始場所のマーカー。",
                                 "example": 3000,
                                 "type": "integer",
-                                "format": "int64"
+                                "format": "int64",
+                                "nullable": true
                             },
                             "prev_marker": {
                                 "description": "前の検索結果ページの開始場所のマーカー。",
                                 "example": 1000,
                                 "type": "integer",
-                                "format": "int64"
+                                "format": "int64",
+                                "nullable": true
                             }
                         }
                     },
@@ -32965,34 +33060,26 @@
                     {
                         "type": "object",
                         "description": "マーカーベースのページ割りについて説明しているAPIレスポンスの部分",
-                        "allOf": [
-                            {
-                                "type": "object",
-                                "description": "マーカーベースのページ割りについて説明しているAPIレスポンスの部分",
-                                "properties": {
-                                    "limit": {
-                                        "description": "これらのエントリで使用された制限値。許容される最大値を超えていない限り、クエリパラメータの`limit`と等しくなります。最大値はAPIによって異なります。",
-                                        "example": 1000,
-                                        "type": "integer",
-                                        "format": "int64"
-                                    },
-                                    "next_marker": {
-                                        "description": "次の検索結果ページの開始場所のマーカー。",
-                                        "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
-                                        "type": "string"
-                                    }
-                                }
+                        "properties": {
+                            "limit": {
+                                "description": "これらのエントリで使用された制限値。許容される最大値を超えていない限り、クエリパラメータの`limit`と等しくなります。最大値はAPIによって異なります。",
+                                "example": 1000,
+                                "type": "integer",
+                                "format": "int64"
                             },
-                            {
-                                "properties": {
-                                    "prev_marker": {
-                                        "description": "前の検索結果ページの開始場所のマーカー。",
-                                        "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
-                                        "type": "string"
-                                    }
-                                }
+                            "next_marker": {
+                                "description": "次の検索結果ページの開始場所のマーカー。",
+                                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                                "type": "string",
+                                "nullable": true
+                            },
+                            "prev_marker": {
+                                "description": "前の検索結果ページの開始場所のマーカー。",
+                                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVih",
+                                "type": "string",
+                                "nullable": true
                             }
-                        ]
+                        }
                     },
                     {
                         "properties": {
@@ -35158,8 +35245,8 @@
                 "x-box-variant": "base",
                 "description": "他のリソース内にネストされたときに使用されるユーザーのMini版の表示。",
                 "required": [
-                    "id",
-                    "type"
+                    "type",
+                    "id"
                 ],
                 "properties": {
                     "id": {
@@ -35425,13 +35512,15 @@
                                 "description": "次の検索結果ページの開始場所のマーカー。",
                                 "example": 3000,
                                 "type": "integer",
-                                "format": "int64"
+                                "format": "int64",
+                                "nullable": true
                             },
                             "prev_marker": {
                                 "description": "前の検索結果ページの開始場所のマーカー。",
                                 "example": 1000,
                                 "type": "integer",
-                                "format": "int64"
+                                "format": "int64",
+                                "nullable": true
                             }
                         }
                     },
@@ -36173,13 +36262,15 @@
                                 "description": "次の検索結果ページの開始場所のマーカー。",
                                 "example": 3000,
                                 "type": "integer",
-                                "format": "int64"
+                                "format": "int64",
+                                "nullable": true
                             },
                             "prev_marker": {
                                 "description": "前の検索結果ページの開始場所のマーカー。",
                                 "example": 1000,
                                 "type": "integer",
-                                "format": "int64"
+                                "format": "int64",
+                                "nullable": true
                             }
                         }
                     },
@@ -36318,12 +36409,117 @@
                         "type": "string",
                         "description": "ダウンロード中のアーカイブの状態。",
                         "default": "in_progress",
-                        "example": "success",
+                        "example": "succeeded",
                         "enum": [
                             "in_progress",
                             "failed",
-                            "success"
+                            "succeeded"
                         ]
+                    }
+                }
+            },
+            "SignRequest--Base": {
+                "title": "署名リクエスト (Base)",
+                "type": "object",
+                "x-box-resource-id": "sign_request--base",
+                "x-box-tag": "sign_requests",
+                "x-box-variants": [
+                    "standard",
+                    "base"
+                ],
+                "x-box-variant": "base",
+                "description": "署名リクエストオブジェクトを作成するリクエスト",
+                "required": [
+                    "parent_folder"
+                ],
+                "properties": {
+                    "is_document_preparation_needed": {
+                        "type": "boolean",
+                        "description": "UIを使用してドキュメントの準備を完了するために送信者がレスポンスで`prepare_url`を受け取る必要があるかどうかを示します。",
+                        "example": true
+                    },
+                    "redirect_url": {
+                        "type": "string",
+                        "example": "https://www.example.com",
+                        "description": "指定した場合、ドキュメントに署名された時点で、署名リクエストがこのURLにリダイレクトされます。",
+                        "nullable": true
+                    },
+                    "declined_redirect_url": {
+                        "type": "string",
+                        "example": "https://declined-redirect.com",
+                        "description": "署名者がドキュメントへの署名を拒否した後にリダイレクトされるURI。",
+                        "nullable": true
+                    },
+                    "are_text_signatures_enabled": {
+                        "type": "boolean",
+                        "description": "(テキストの) 入力で生成された署名の使用を無効にします。",
+                        "example": true,
+                        "default": true
+                    },
+                    "email_subject": {
+                        "type": "string",
+                        "example": "Sign Request from Acme",
+                        "description": "署名リクエストメールの件名。これは、署名リクエストによって消去されます。このフィールドを渡さない場合は、デフォルトの件名が使用されます。",
+                        "nullable": true
+                    },
+                    "email_message": {
+                        "type": "string",
+                        "example": "Hello! Please sign the document below",
+                        "description": "署名リクエストメールに含めるメッセージ。このフィールドは、特定の文字のサニタイズによって消去されます。ただし、一部のHTMLタグは使用できます。また、このメッセージに含まれているリンクはメールではハイパーリンクに変換されます。このメッセージには、HTMLタグ`a`、`abbr`、`acronym`、`b`、`blockquote`、`code`、`em`、`i`、`ul`、`li`、`ol`、`strong`を含めることができます。HTMLに対するテキストの比率が大きすぎると、メールがスパムフィルタに入る可能性があることに注意してください。これらのタグにカスタムスタイルを適用することはできません。このフィールドを渡さない場合は、デフォルトのメッセージが使用されます。",
+                        "nullable": true
+                    },
+                    "are_reminders_enabled": {
+                        "type": "boolean",
+                        "description": "3、8、13、18日目にドキュメントに署名するよう署名者に促します。リマインダは未署名の署名者にのみ送信されます。",
+                        "example": true
+                    },
+                    "parent_folder": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/Folder--Mini"
+                            },
+                            {
+                                "description": "最終的な署名済みドキュメントと署名ログの保存先フォルダ。`ID`フィールドと`type`フィールドのみが必要です。ルートフォルダ (フォルダID `0`) は使用できません。"
+                            }
+                        ]
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "name",
+                        "description": "署名リクエストの名前。"
+                    },
+                    "prefill_tags": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/SignRequestPrefillTag"
+                        },
+                        "description": "署名に関連するタグがドキュメントのコンテンツに含まれている場合、この`prefill_tags`を使用してタグを事前入力できます。その際、タグの「id」を事前入力タグの`external_id`フィールドとして参照します。"
+                    },
+                    "days_valid": {
+                        "type": "integer",
+                        "description": "作成した署名リクエストが完了しなかった場合に自動的に期限切れになるまでの日数を設定します。デフォルトでは、署名リクエストに有効期限を適用しないため、署名リクエストは期限切れになりません。",
+                        "minimum": 0,
+                        "maximum": 730,
+                        "example": 2,
+                        "nullable": true
+                    },
+                    "external_id": {
+                        "type": "string",
+                        "description": "これは、署名リクエストが関連する外部システムのIDを参照する際に使用できます。",
+                        "example": "123",
+                        "nullable": true
+                    },
+                    "is_phone_verification_required_to_view": {
+                        "type": "boolean",
+                        "description": "ドキュメントを表示する前にテキストメッセージを確認するよう署名者に強制します。この設定を署名者に適用するには、署名者の電話番号を指定する必要があります。",
+                        "example": true,
+                        "nullable": true
+                    },
+                    "template_id": {
+                        "type": "string",
+                        "example": "123075213-af2c8822-3ef2-4952-8557-52d69c2fe9cb",
+                        "description": "署名リクエストがテンプレートから作成された場合、このフィールドはそのテンプレートのIDを示します。",
+                        "nullable": true
                     }
                 }
             },
@@ -36441,7 +36637,7 @@
                 ]
             },
             "SignRequests": {
-                "title": "署名リクエスト",
+                "title": "Box Sign",
                 "type": "object",
                 "x-box-resource-id": "sign_requests",
                 "x-box-tag": "sign_requests",
@@ -36459,15 +36655,9 @@
                             },
                             "next_marker": {
                                 "description": "次の検索結果ページの開始場所のマーカー。",
-                                "example": 3000,
-                                "type": "integer",
-                                "format": "int64"
-                            },
-                            "prev_marker": {
-                                "description": "前の検索結果ページの開始場所のマーカー。",
-                                "example": 1000,
-                                "type": "integer",
-                                "format": "int64"
+                                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                                "type": "string",
+                                "nullable": true
                             }
                         }
                     },
@@ -36483,111 +36673,6 @@
                         }
                     }
                 ]
-            },
-            "SignRequest--Base": {
-                "title": "署名リクエスト (Base)",
-                "type": "object",
-                "x-box-resource-id": "sign_request--base",
-                "x-box-tag": "sign_requests",
-                "x-box-variants": [
-                    "standard",
-                    "base"
-                ],
-                "x-box-variant": "base",
-                "description": "署名リクエストオブジェクトを作成するリクエスト",
-                "required": [
-                    "parent_folder"
-                ],
-                "properties": {
-                    "is_document_preparation_needed": {
-                        "type": "boolean",
-                        "description": "UIを使用してドキュメントの準備を完了するために送信者がレスポンスで`prepare_url`を受け取る必要があるかどうかを示します。",
-                        "example": true
-                    },
-                    "redirect_url": {
-                        "type": "string",
-                        "example": "https://www.example.com",
-                        "description": "指定した場合、ドキュメントに署名された時点で、署名リクエストがこのURLにリダイレクトされます。",
-                        "nullable": true
-                    },
-                    "declined_redirect_url": {
-                        "type": "string",
-                        "example": "https://declined-redirect.com",
-                        "description": "署名者がドキュメントへの署名を拒否した後にリダイレクトされるURI。",
-                        "nullable": true
-                    },
-                    "are_text_signatures_enabled": {
-                        "type": "boolean",
-                        "description": "(テキストの) 入力で生成された署名の使用を無効にします。",
-                        "example": true,
-                        "default": true
-                    },
-                    "email_subject": {
-                        "type": "string",
-                        "example": "Sign Request from Acme",
-                        "description": "署名リクエストメールの件名。これは、署名リクエストによって消去されます。このフィールドを渡さない場合は、デフォルトの件名が使用されます。",
-                        "nullable": true
-                    },
-                    "email_message": {
-                        "type": "string",
-                        "example": "Hello! Please sign the document below",
-                        "description": "署名リクエストメールに含めるメッセージ。このフィールドは、特定の文字のサニタイズによって消去されます。ただし、一部のHTMLタグは使用できます。また、このメッセージに含まれているリンクはメールではハイパーリンクに変換されます。このメッセージには、HTMLタグ`a`、`abbr`、`acronym`、`b`、`blockquote`、`code`、`em`、`i`、`ul`、`li`、`ol`、`strong`を含めることができます。HTMLに対するテキストの比率が大きすぎると、メールがスパムフィルタに入る可能性があることに注意してください。これらのタグにカスタムスタイルを適用することはできません。このフィールドを渡さない場合は、デフォルトのメッセージが使用されます。",
-                        "nullable": true
-                    },
-                    "are_reminders_enabled": {
-                        "type": "boolean",
-                        "description": "3、8、13、18日目にドキュメントに署名するよう署名者に促します。リマインダは未署名の署名者にのみ送信されます。",
-                        "example": true
-                    },
-                    "parent_folder": {
-                        "allOf": [
-                            {
-                                "$ref": "#/components/schemas/Folder--Mini"
-                            },
-                            {
-                                "description": "最終的な署名済みドキュメントと署名ログの保存先フォルダ。`ID`フィールドと`type`フィールドのみが必要です。ルートフォルダ (フォルダID `0`) は使用できません。"
-                            }
-                        ]
-                    },
-                    "name": {
-                        "type": "string",
-                        "example": "name",
-                        "description": "署名リクエストの名前。"
-                    },
-                    "prefill_tags": {
-                        "type": "array",
-                        "items": {
-                            "$ref": "#/components/schemas/SignRequestPrefillTag"
-                        },
-                        "description": "署名に関連するタグがドキュメントのコンテンツに含まれている場合、この`prefill_tags`を使用してタグを事前入力できます。その際、タグの「id」を事前入力タグの`external_id`フィールドとして参照します。"
-                    },
-                    "days_valid": {
-                        "type": "integer",
-                        "description": "作成した署名リクエストが完了しなかった場合に自動的に期限切れになるまでの日数を設定します。デフォルトでは、署名リクエストに有効期限を適用しないため、署名リクエストは期限切れになりません。",
-                        "minimum": 0,
-                        "maximum": 730,
-                        "example": 2,
-                        "nullable": true
-                    },
-                    "external_id": {
-                        "type": "string",
-                        "description": "これは、署名リクエストが関連する外部システムのIDを参照する際に使用できます。",
-                        "example": "123",
-                        "nullable": true
-                    },
-                    "is_phone_verification_required_to_view": {
-                        "type": "boolean",
-                        "description": "ドキュメントを表示する前にテキストメッセージを確認するよう署名者に強制します。この設定を署名者に適用するには、署名者の電話番号を指定する必要があります。",
-                        "example": true,
-                        "nullable": true
-                    },
-                    "template_id": {
-                        "type": "string",
-                        "example": "123075213-af2c8822-3ef2-4952-8557-52d69c2fe9cb",
-                        "description": "署名リクエストがテンプレートから作成された場合、このフィールドはそのテンプレートのIDを示します。",
-                        "nullable": true
-                    }
-                }
             },
             "FileScope": {
                 "title": "ファイルスコープ",
@@ -37316,14 +37401,12 @@
                 "title": "署名リクエストを作成の署名者フィールド",
                 "type": "object",
                 "description": "署名リクエストを投稿のリクエスト本文内の署名者のスキーマ",
-                "required": [
-                    "email"
-                ],
                 "properties": {
                     "email": {
                         "type": "string",
-                        "description": "署名者のメールアドレス",
-                        "example": "example@gmail.com"
+                        "description": "Email address of the signer. The email address of the signer is required when making signature requests, except when using templates that are configured to include emails.",
+                        "example": "example@gmail.com",
+                        "nullable": true
                     },
                     "role": {
                         "type": "string",
@@ -37350,7 +37433,8 @@
                     "embed_url_external_user_id": {
                         "type": "string",
                         "description": "埋め込みURLへのアクセス時に認証を担当する、外部アプリケーションの署名者のユーザーID。",
-                        "example": "1234"
+                        "example": "1234",
+                        "nullable": true
                     },
                     "redirect_url": {
                         "type": "string",
@@ -37373,13 +37457,15 @@
                     "verification_phone_number": {
                         "type": "string",
                         "description": "設定した場合は、2要素認証による署名者の認証にこの電話番号を使用しないと、署名者はドキュメントに署名できません。",
-                        "example": "6314578901"
+                        "example": "6314578901",
+                        "nullable": true
                     },
                     "password": {
                         "type": "string",
                         "writeOnly": true,
                         "description": "設定した場合、署名者は、このパスワードを入力しないと、ドキュメントに署名できません。このフィールドは書き込み専用です。",
-                        "example": "SecretPassword123"
+                        "example": "SecretPassword123",
+                        "nullable": true
                     }
                 }
             },
@@ -37391,23 +37477,27 @@
                     "document_tag_id": {
                         "type": "string",
                         "example": "1234",
-                        "description": "これは、署名リクエストのファイルに含まれている特定のタグのIDを参照します。"
+                        "description": "これは、署名リクエストのファイルに含まれている特定のタグのIDを参照します。",
+                        "nullable": true
                     },
                     "text_value": {
                         "type": "string",
                         "example": "text",
-                        "description": "テキストの事前入力値"
+                        "description": "テキストの事前入力値",
+                        "nullable": true
                     },
                     "checkbox_value": {
                         "type": "boolean",
                         "example": true,
-                        "description": "チェックボックスの事前入力値"
+                        "description": "チェックボックスの事前入力値",
+                        "nullable": true
                     },
                     "date_value": {
                         "type": "string",
-                        "format": "date-time",
-                        "example": "2021-04-26T08:12:13.982Z",
-                        "description": "日付の事前入力値"
+                        "format": "date",
+                        "example": "2021-04-26",
+                        "description": "日付の事前入力値",
+                        "nullable": true
                     }
                 }
             },
@@ -37430,7 +37520,9 @@
                                     "signature",
                                     "date",
                                     "text",
-                                    "checkbox"
+                                    "checkbox",
+                                    "radio",
+                                    "dropdown"
                                 ],
                                 "description": "入力の種類",
                                 "example": "text"
@@ -37438,19 +37530,21 @@
                             "content_type": {
                                 "type": "string",
                                 "enum": [
+                                    "signature",
                                     "initial",
                                     "stamp",
-                                    "signature",
-                                    "company",
-                                    "title",
-                                    "email",
+                                    "date",
+                                    "checkbox",
+                                    "text",
                                     "full_name",
                                     "first_name",
                                     "last_name",
-                                    "text",
-                                    "date",
-                                    "checkbox",
-                                    "attachment"
+                                    "company",
+                                    "title",
+                                    "email",
+                                    "attachment",
+                                    "radio",
+                                    "dropdown"
                                 ],
                                 "description": "入力のコンテンツタイプ",
                                 "example": "signature"
@@ -37508,7 +37602,8 @@
                                         "nullable": true
                                     }
                                 },
-                                "description": "署名者による最終的な決定"
+                                "description": "署名者による最終的な決定",
+                                "nullable": true
                             },
                             "inputs": {
                                 "type": "array",
@@ -37521,7 +37616,8 @@
                                 "type": "string",
                                 "readOnly": true,
                                 "example": "https://example.com",
-                                "description": "署名のために署名者に案内するURL"
+                                "description": "署名のために署名者に案内するURL",
+                                "nullable": true
                             },
                             "iframeable_embed_url": {
                                 "type": "string",
@@ -37818,7 +37914,7 @@
         },
         {
             "name": "Comments",
-            "description": "Comments are messages generated by users on files,\nallowing users to collaborate on a file,\ndiscussing any feedback they might\nhave on the content.",
+            "description": "Comments are messages generated users on files,\nallowing users to collaborate on a file,\ndiscussing any feedback they might\nhave on the content.",
             "x-box-tag": "comments"
         },
         {
@@ -37913,7 +38009,7 @@
         },
         {
             "name": "リーガルホールドポリシー割り当て",
-            "description": "A Legal Hold Policy Assignment\nis a relation between a policy and custodian.\nIn this case, a custodian can be a user, folder,\nfile, or file version.",
+            "description": "A Legal Hold Policy Assignment\nis a relation between a policy and custodian.\nIn this case, as custodian can be a user, folder,\nfile, or file version.",
             "x-box-tag": "legal_hold_policy_assignments"
         },
         {
@@ -38048,22 +38144,22 @@
         },
         {
             "name": "ごみ箱内のファイル",
-            "description": "Files that were deleted and\nmoved to trash.",
+            "description": "Files that were deleted and\nare in trash.",
             "x-box-tag": "trashed_files"
         },
         {
             "name": "ごみ箱内のフォルダ",
-            "description": "Folders that were deleted and\nmoved to trash.",
+            "description": "Folders that were deleted and\nare in trash.",
             "x-box-tag": "trashed_folders"
         },
         {
             "name": "ごみ箱内の項目",
-            "description": "Items that were deleted and\nmoved to trash.",
+            "description": "Items that were deleted and\nare in trash.",
             "x-box-tag": "trashed_items"
         },
         {
             "name": "ごみ箱内のウェブリンク",
-            "description": "Web links that were deleted and\nmoved to trash.",
+            "description": "Web links that were deleted and\nare in trash.",
             "x-box-tag": "trashed_web_links"
         },
         {
