@@ -14,7 +14,7 @@
       "url": "http://www.apache.org/licenses/LICENSE-2.0"
     },
     "version": "2.0.0",
-    "x-box-commit-hash": "2850ba7b2e"
+    "x-box-commit-hash": "e1aabe6a73"
   },
   "servers": [
     {
@@ -3379,10 +3379,10 @@
                     },
                     "path": {
                       "type": "string",
-                      "example": "/Box__Security__Classification__Key",
-                      "description": "`/Box__Security__Classification__Key`",
+                      "example": "Box__Security__Classification__Key",
+                      "description": "Defines classifications \navailable in the enterprise.",
                       "enum": [
-                        "/Box__Security__Classification__Key"
+                        "Box__Security__Classification__Key"
                       ]
                     },
                     "value": {
@@ -6476,10 +6476,10 @@
                     },
                     "path": {
                       "type": "string",
-                      "example": "/Box__Security__Classification__Key",
-                      "description": "`/Box__Security__Classification__Key`",
+                      "example": "Box__Security__Classification__Key",
+                      "description": "Defines classifications \navailable in the enterprise.",
                       "enum": [
-                        "/Box__Security__Classification__Key"
+                        "Box__Security__Classification__Key"
                       ]
                     },
                     "value": {
@@ -7763,12 +7763,14 @@
           "Classifications"
         ],
         "x-box-tag": "classifications",
-        "x-box-sanitized": true,
         "description": "Adds one or more new classifications to the list of classifications\navailable to the enterprise.\n\nThis API can also be called by including the enterprise ID in the\nURL explicitly, for example\n`/metadata_templates/enterprise_12345/securityClassification-6VMVochwUWo/schema`.",
         "requestBody": {
           "content": {
-            "application/json-patch+json": {
+            "application/json": {
               "schema": {
+                "required": [
+                  "items"
+                ],
                 "description": "An array that contains one or more classifications to add to\nthe enterprise's list of classifications.",
                 "type": "array",
                 "items": {
@@ -7783,38 +7785,51 @@
                     "op": {
                       "type": "string",
                       "example": "addEnumOption",
-                      "description": "`addEnumOption`"
+                      "description": "The type of change to perform on the classification\nobject.",
+                      "enum": [
+                        "addEnumOption"
+                      ]
                     },
                     "fieldKey": {
                       "type": "string",
                       "example": "Box__Security__Classification__Key",
-                      "description": "`Box__Security__Classification__Key`"
+                      "description": "Defines classifications \navailable in the enterprise.",
+                      "enum": [
+                        "Box__Security__Classification__Key"
+                      ]
                     },
                     "data": {
                       "type": "object",
-                      "description": "The details of the classification to add.",
                       "required": [
                         "key"
                       ],
+                      "description": "The details of the classification to add.",
                       "properties": {
                         "key": {
                           "type": "string",
                           "example": "Sensitive",
                           "description": "The label of the classification as shown in the web and\nmobile interfaces. This is the only field required to\nadd a classification."
                         },
-                        "classification": {
+                        "staticConfig": {
                           "type": "object",
-                          "description": "Additional details for the classification.",
+                          "description": "A static configuration for the classification.",
                           "properties": {
-                            "classificationDefinition": {
-                              "type": "string",
-                              "example": "Sensitive information that must not be shared.",
-                              "description": "A longer description of the classification."
-                            },
-                            "colorID": {
-                              "type": "number",
-                              "example": 4,
-                              "description": "An internal Box identifier used to assign a color to\na classification label.\n\nMapping between a `colorID` and a color may change\nwithout notice. Currently, the color mappings are as\nfollows.\n\n* `0`: Yellow\n* `1`: Orange\n* `2`: Watermelon red\n* `3`: Purple rain\n* `4`: Light blue\n* `5`: Dark blue\n* `6`: Light green\n* `7`: Gray"
+                            "classification": {
+                              "type": "object",
+                              "description": "Additional details for the classification.",
+                              "properties": {
+                                "classificationDefinition": {
+                                  "type": "string",
+                                  "example": "Sensitive information that must not be shared.",
+                                  "description": "A longer description of the classification."
+                                },
+                                "colorID": {
+                                  "type": "integer",
+                                  "format": "int64",
+                                  "example": 4,
+                                  "description": "An internal Box identifier used to assign a color to\na classification label.\n\nMapping between a `colorID` and a color may change\nwithout notice. Currently, the color mappings are as\nfollows.\n\n* `0`: Yellow\n* `1`: Orange\n* `2`: Watermelon red\n* `3`: Purple rain\n* `4`: Light blue\n* `5`: Dark blue\n* `6`: Light green\n* `7`: Gray"
+                                }
+                              }
                             }
                           }
                         }
@@ -7886,6 +7901,9 @@
               "schema": {
                 "description": "An array that contains one or more classifications to update.",
                 "type": "array",
+                "required": [
+                  "items"
+                ],
                 "items": {
                   "type": "object",
                   "description": "A single classification to update.",
@@ -7899,12 +7917,18 @@
                     "op": {
                       "type": "string",
                       "example": "editEnumOption",
-                      "description": "`editEnumOption`"
+                      "description": "The type of change to perform on the classification\nobject.",
+                      "enum": [
+                        "editEnumOption"
+                      ]
                     },
                     "fieldKey": {
                       "type": "string",
                       "example": "Box__Security__Classification__Key",
-                      "description": "`Box__Security__Classification__Key`"
+                      "description": "Defines classifications \navailable in the enterprise.",
+                      "enum": [
+                        "Box__Security__Classification__Key"
+                      ]
                     },
                     "enumOptionKey": {
                       "type": "string",
@@ -7913,29 +7937,36 @@
                     },
                     "data": {
                       "type": "object",
-                      "description": "The details of the updated classification.",
                       "required": [
                         "key"
                       ],
+                      "description": "The details of the updated classification.",
                       "properties": {
                         "key": {
                           "type": "string",
                           "example": "Very Sensitive",
                           "description": "A new label for the classification, as it will be\nshown in the web and mobile interfaces."
                         },
-                        "classification": {
+                        "staticConfig": {
                           "type": "object",
-                          "description": "Additional details for the classification.",
+                          "description": "A static configuration for the classification.",
                           "properties": {
-                            "classificationDefinition": {
-                              "type": "string",
-                              "example": "Sensitive information that must not be shared.",
-                              "description": "A longer description of the classification."
-                            },
-                            "colorID": {
-                              "type": "number",
-                              "example": 4,
-                              "description": "An internal Box identifier used to assign a color to\na classification label.\n\nMapping between a `colorID` and a color may change\nwithout notice. Currently, the color mappings are as\nfollows.\n\n* `0`: Yellow\n* `1`: Orange\n* `2`: Watermelon red\n* `3`: Purple rain\n* `4`: Light blue\n* `5`: Dark blue\n* `6`: Light green\n* `7`: Gray"
+                            "classification": {
+                              "type": "object",
+                              "description": "Additional details for the classification.",
+                              "properties": {
+                                "classificationDefinition": {
+                                  "type": "string",
+                                  "example": "Sensitive information that must not be shared.",
+                                  "description": "A longer description of the classification."
+                                },
+                                "colorID": {
+                                  "type": "integer",
+                                  "format": "int64",
+                                  "example": 4,
+                                  "description": "An internal Box identifier used to assign a color to\na classification label.\n\nMapping between a `colorID` and a color may change\nwithout notice. Currently, the color mappings are as\nfollows.\n\n* `0`: Yellow\n* `1`: Orange\n* `2`: Watermelon red\n* `3`: Purple rain\n* `4`: Light blue\n* `5`: Dark blue\n* `6`: Light green\n* `7`: Gray"
+                                }
+                              }
                             }
                           }
                         }
@@ -8019,12 +8050,18 @@
                     "op": {
                       "type": "string",
                       "example": "removeEnumOption",
-                      "description": "`removeEnumOption`"
+                      "description": "The type of change to perform on the classification\nobject.",
+                      "enum": [
+                        "removeEnumOption"
+                      ]
                     },
                     "fieldKey": {
                       "type": "string",
                       "example": "Box__Security__Classification__Key",
-                      "description": "`Box__Security__Classification__Key`"
+                      "description": "Defines classifications \navailable in the enterprise.",
+                      "enum": [
+                        "Box__Security__Classification__Key"
+                      ]
                     },
                     "enumOptionKey": {
                       "type": "string",
@@ -8802,7 +8839,9 @@
                 "type": "object",
                 "required": [
                   "scope",
-                  "displayName"
+                  "displayName",
+                  "fields",
+                  "templateKey"
                 ],
                 "properties": {
                   "scope": {
@@ -8816,14 +8855,14 @@
                   "templateKey": {
                     "type": "string",
                     "example": "securityClassification-6VMVochwUWo",
-                    "description": "`securityClassification-6VMVochwUWo`",
+                    "description": "Defines the list of metadata templates.",
                     "enum": [
                       "securityClassification-6VMVochwUWo"
                     ]
                   },
                   "displayName": {
                     "type": "string",
-                    "description": "`Classification`",
+                    "description": "The name of the\ntemplate as shown in web and mobile interfaces.",
                     "example": "Classification",
                     "enum": [
                       "Classification"
@@ -8832,24 +8871,30 @@
                   "hidden": {
                     "type": "boolean",
                     "example": false,
-                    "description": "`false`"
+                    "description": "Determines if the classification template is\nhidden or available on web and mobile\ndevices."
                   },
                   "copyInstanceOnItemCopy": {
                     "type": "boolean",
                     "example": false,
-                    "description": "`false`"
+                    "description": "Determines if classifications are\ncopied along when the file or folder is\ncopied."
                   },
                   "fields": {
                     "type": "array",
-                    "description": "The classification template holds one field, which holds\nall the valid classification values.",
+                    "description": "The classification template requires exactly\none field, which holds\nall the valid classification values.",
                     "items": {
+                      "required": [
+                        "type",
+                        "key",
+                        "displayName",
+                        "options"
+                      ],
                       "type": "object",
                       "description": "The `enum` field which holds all the valid classification\nvalues.",
                       "properties": {
                         "type": {
                           "type": "string",
                           "example": "enum",
-                          "description": "`enum`",
+                          "description": "The type of the field\nthat is always enum.",
                           "enum": [
                             "enum"
                           ]
@@ -8857,7 +8902,7 @@
                         "key": {
                           "type": "string",
                           "example": "Box__Security__Classification__Key",
-                          "description": "`Box__Security__Classification__Key`",
+                          "description": "Defines classifications \navailable in the enterprise.",
                           "enum": [
                             "Box__Security__Classification__Key"
                           ]
@@ -8865,7 +8910,7 @@
                         "displayName": {
                           "type": "string",
                           "example": "Classification",
-                          "description": "`Classification`",
+                          "description": "A display name for the classification.",
                           "enum": [
                             "Classification"
                           ]
@@ -8873,12 +8918,15 @@
                         "hidden": {
                           "type": "boolean",
                           "example": false,
-                          "description": "`false`"
+                          "description": "Determines if the classification\ntemplate is\nhidden or available on\nweb and mobile\ndevices."
                         },
                         "options": {
                           "type": "array",
                           "description": "The actual list of classifications that are present on\nthis template.",
                           "items": {
+                            "required": [
+                              "key"
+                            ],
                             "type": "object",
                             "description": "An individual classification.",
                             "properties": {
@@ -8901,7 +8949,8 @@
                                         "description": "A longer description of the classification."
                                       },
                                       "colorID": {
-                                        "type": "number",
+                                        "type": "integer",
+                                        "format": "int64",
                                         "example": 4,
                                         "description": "An identifier used to assign a color to\na classification label.\n\nMapping between a `colorID` and a color may\nchange without notice. Currently, the color\nmappings are as follows.\n\n* `0`: Yellow\n* `1`: Orange\n* `2`: Watermelon red\n* `3`: Purple rain\n* `4`: Light blue\n* `5`: Dark blue\n* `6`: Light green\n* `7`: Gray"
                                       }
@@ -9758,7 +9807,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Comment"
+                  "$ref": "#/components/schemas/Comment--Full"
                 }
               }
             }
@@ -14440,7 +14489,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/User"
+                  "$ref": "#/components/schemas/User--Full"
                 }
               }
             }
@@ -14516,7 +14565,7 @@
         "operationId": "post_users_terminate_sessions",
         "summary": "Create jobs to terminate users session",
         "tags": [
-          "Users"
+          "Session termination"
         ],
         "x-box-tag": "session_termination",
         "description": "Validates the roles and permissions of the user,\nand creates asynchronous jobs\nto terminate the user's sessions.\nReturns the status for the POST request.",
@@ -15857,7 +15906,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Group"
+                  "$ref": "#/components/schemas/Group--Full"
                 }
               }
             }
@@ -15890,7 +15939,7 @@
         "operationId": "post_groups_terminate_sessions",
         "summary": "Create jobs to terminate user group session",
         "tags": [
-          "Groups"
+          "Session termination"
         ],
         "x-box-tag": "session_termination",
         "description": "Validates the roles and permissions of the group,\nand creates asynchronous jobs\nto terminate the group's sessions.\nReturns the status for the POST request.",
@@ -22357,7 +22406,7 @@
         "operationId": "get_storage_policies",
         "summary": "List storage policies",
         "tags": [
-          "Storage policies"
+          "Standard and Zones Storage Policies"
         ],
         "x-box-tag": "storage_policies",
         "description": "Fetches all the storage policies in the enterprise.",
@@ -22432,7 +22481,7 @@
         "operationId": "get_storage_policies_id",
         "summary": "Get storage policy",
         "tags": [
-          "Storage policies"
+          "Standard and Zones Storage Policies"
         ],
         "x-box-tag": "storage_policies",
         "description": "Fetches a specific storage policy.",
@@ -22477,7 +22526,7 @@
         "operationId": "get_storage_policy_assignments",
         "summary": "List storage policy assignments",
         "tags": [
-          "Storage policy assignments"
+          "Standard and Zones Storage Policy Assignments"
         ],
         "x-box-tag": "storage_policy_assignments",
         "description": "Fetches all the storage policy assignment for an enterprise or user.",
@@ -22544,7 +22593,7 @@
         "operationId": "post_storage_policy_assignments",
         "summary": "Assign storage policy",
         "tags": [
-          "Storage policy assignments"
+          "Standard and Zones Storage Policy Assignments"
         ],
         "x-box-tag": "storage_policy_assignments",
         "description": "Creates a storage policy assignment for an enterprise or user.",
@@ -22639,7 +22688,7 @@
         "operationId": "get_storage_policy_assignments_id",
         "summary": "Get storage policy assignment",
         "tags": [
-          "Storage policy assignments"
+          "Standard and Zones Storage Policy Assignments"
         ],
         "x-box-tag": "storage_policy_assignments",
         "description": "Fetches a specific storage policy assignment.",
@@ -22682,7 +22731,7 @@
         "operationId": "put_storage_policy_assignments_id",
         "summary": "Update storage policy assignment",
         "tags": [
-          "Storage policy assignments"
+          "Standard and Zones Storage Policy Assignments"
         ],
         "x-box-tag": "storage_policy_assignments",
         "description": "Updates a specific storage policy assignment.",
@@ -22762,7 +22811,7 @@
         "operationId": "delete_storage_policy_assignments_id",
         "summary": "Unassign storage policy",
         "tags": [
-          "Storage policy assignments"
+          "Standard and Zones Storage Policy Assignments"
         ],
         "x-box-tag": "storage_policy_assignments",
         "description": "Delete a storage policy assignment.\n\nDeleting a storage policy assignment on a user\nwill have the user inherit the enterprise's default\nstorage policy.\n\nThere is a rate limit for calling this endpoint of only\ntwice per user in a 24 hour time frame.",
@@ -23058,7 +23107,7 @@
         "operationId": "post_sign_requests_id_cancel",
         "summary": "Cancel sign request",
         "tags": [
-          "Box Sign"
+          "Sign requests"
         ],
         "x-box-tag": "sign_requests",
         "description": "Cancels a sign request.",
@@ -23113,7 +23162,7 @@
         "operationId": "post_sign_requests_id_resend",
         "summary": "Resend sign request",
         "tags": [
-          "Box Sign"
+          "Sign requests"
         ],
         "x-box-tag": "sign_requests",
         "description": "Resends a sign request email to all outstanding signers.",
@@ -23161,7 +23210,7 @@
         "operationId": "get_sign_requests_id",
         "summary": "Get sign request by ID",
         "tags": [
-          "Box Sign"
+          "Sign requests"
         ],
         "x-box-tag": "sign_requests",
         "description": "Gets a sign request by ID.",
@@ -23216,7 +23265,7 @@
         "operationId": "get_sign_requests",
         "summary": "List sign requests",
         "tags": [
-          "Box Sign"
+          "Sign requests"
         ],
         "x-box-tag": "sign_requests",
         "description": "Gets sign requests created by a user. If the `sign_files` and/or\n`parent_folder` are deleted, the sign request will not return in the list.",
@@ -23271,7 +23320,7 @@
         "operationId": "post_sign_requests",
         "summary": "Create sign request",
         "tags": [
-          "Box Sign"
+          "Sign requests"
         ],
         "x-box-tag": "sign_requests",
         "description": "Creates a sign request. This involves preparing a document for signing and\nsending the sign request to signers.",
@@ -23590,7 +23639,7 @@
         "operationId": "get_sign_templates",
         "summary": "List Box Sign templates",
         "tags": [
-          "templates"
+          "Sign templates"
         ],
         "x-box-tag": "sign_templates",
         "description": "Gets Box Sign templates created by a user.",
@@ -23657,7 +23706,7 @@
         "operationId": "get_sign_templates_id",
         "summary": "Get Box Sign template by ID",
         "tags": [
-          "templates"
+          "Sign templates"
         ],
         "x-box-tag": "sign_templates",
         "description": "Fetches details of a specific Box Sign template.",
@@ -23722,7 +23771,7 @@
         "operationId": "get_integration_mappings_slack",
         "summary": "List Slack integration mappings",
         "tags": [
-          "integrationMappingsSlack"
+          "Integration mappings"
         ],
         "x-box-tag": "integration_mappings",
         "description": "Lists [Slack integration mappings](https://support.box.com/hc/en-us/articles/4415585987859-Box-as-the-Content-Layer-for-Slack) in a users' enterprise.\n\nYou need Admin or Co-Admin role to\nuse this endpoint.",
@@ -23853,8 +23902,7 @@
         "operationId": "post_integration_mappings_slack",
         "summary": "Create Slack integration mapping",
         "tags": [
-          "integrationMappingsSlack",
-          "post_integration_mappings_slack"
+          "Integration mappings"
         ],
         "x-box-tag": "integration_mappings",
         "description": "Creates a [Slack integration mapping](https://support.box.com/hc/en-us/articles/4415585987859-Box-as-the-Content-Layer-for-Slack)\nby mapping a Slack channel to a Box item.\n\nYou need Admin or Co-Admin role to\nuse this endpoint.",
@@ -23916,7 +23964,7 @@
         "operationId": "put_integration_mappings_slack_id",
         "summary": "Update Slack integration mapping",
         "tags": [
-          "integrationMappingsSlack"
+          "Integration mappings"
         ],
         "x-box-tag": "integration_mappings",
         "description": "Updates a [Slack integration mapping](https://support.box.com/hc/en-us/articles/4415585987859-Box-as-the-Content-Layer-for-Slack).\nSupports updating the Box folder ID and options.\n\nYou need Admin or Co-Admin role to\nuse this endpoint.",
@@ -24007,7 +24055,7 @@
         "operationId": "delete_integration_mappings_slack_id",
         "summary": "Delete Slack integration mapping",
         "tags": [
-          "integrationMappingsSlack"
+          "Integration mappings"
         ],
         "x-box-tag": "integration_mappings",
         "description": "Deletes a [Slack integration mapping](https://support.box.com/hc/en-us/articles/4415585987859-Box-as-the-Content-Layer-for-Slack).\n\n\nYou need Admin or Co-Admin role to\nuse this endpoint.",
@@ -25132,7 +25180,12 @@
         "x-box-tag": "classifications",
         "description": "A metadata template that holds the security classifications\ndefined by an enterprise.",
         "required": [
-          "type"
+          "id",
+          "type",
+          "scope",
+          "displayName",
+          "fields",
+          "templateKey"
         ],
         "properties": {
           "id": {
@@ -25173,12 +25226,12 @@
           "hidden": {
             "type": "boolean",
             "example": false,
-            "description": "This template is always available in web and mobile interfaces."
+            "description": "Determines if the\ntemplate is always available in web and mobile interfaces."
           },
           "copyInstanceOnItemCopy": {
             "type": "boolean",
             "example": true,
-            "description": "Classifications are always copied along when the file or folder is\ncopied."
+            "description": "Determines if \nclassifications are\ncopied along when the file or folder is\ncopied."
           },
           "fields": {
             "type": "array",
@@ -25187,6 +25240,13 @@
             "description": "A list of fields for this classification template. This includes\nonly one field, the `Box__Security__Classification__Key`, which defines\nthe different classifications available in this enterprise.",
             "items": {
               "type": "object",
+              "required": [
+                "id",
+                "type",
+                "key",
+                "displayName",
+                "options"
+              ],
               "description": "The metadata template field that represents the available\nclassifications.",
               "properties": {
                 "id": {
@@ -25197,7 +25257,7 @@
                 "type": {
                   "type": "string",
                   "example": "enum",
-                  "description": "`enum`",
+                  "description": "The array item type.",
                   "enum": [
                     "enum"
                   ]
@@ -25205,7 +25265,7 @@
                 "key": {
                   "type": "string",
                   "example": "Box__Security__Classification__Key",
-                  "description": "`Box__Security__Classification__Key`",
+                  "description": "Defines classifications \navailable in the enterprise.",
                   "enum": [
                     "Box__Security__Classification__Key"
                   ]
@@ -25228,6 +25288,10 @@
                   "description": "A list of classifications available in this enterprise.",
                   "minItems": 1,
                   "items": {
+                    "required": [
+                      "key",
+                      "id"
+                    ],
                     "type": "object",
                     "description": "A single classification available in this enterprise.",
                     "properties": {
@@ -25255,7 +25319,8 @@
                                 "description": "A longer description of the classification."
                               },
                               "colorID": {
-                                "type": "number",
+                                "type": "integer",
+                                "format": "int64",
                                 "example": 4,
                                 "description": "An internal Box identifier used to assign a color to\na classification label.\n\nMapping between a `colorID` and a color may change\nwithout notice. Currently, the color mappings are as\nfollows.\n\n* `0`: Yellow\n* `1`: Orange\n* `2`: Watermelon red\n* `3`: Purple rain\n* `4`: Light blue\n* `5`: Dark blue\n* `6`: Light green\n* `7`: Gray"
                               }
@@ -26026,7 +26091,7 @@
                 "type": "array",
                 "description": "A list of comments",
                 "items": {
-                  "$ref": "#/components/schemas/Comment"
+                  "$ref": "#/components/schemas/Comment--Full"
                 }
               }
             }
@@ -26859,7 +26924,7 @@
             "type": "array",
             "description": "A list of files",
             "items": {
-              "$ref": "#/components/schemas/File"
+              "$ref": "#/components/schemas/File--Full"
             }
           }
         }
@@ -27931,7 +27996,7 @@
                 "type": "array",
                 "description": "A list of file versions",
                 "items": {
-                  "$ref": "#/components/schemas/FileVersion"
+                  "$ref": "#/components/schemas/FileVersion--Full"
                 }
               }
             }
@@ -29311,7 +29376,7 @@
                 "type": "array",
                 "description": "A list of groups",
                 "items": {
-                  "$ref": "#/components/schemas/Group--Mini"
+                  "$ref": "#/components/schemas/Group--Full"
                 }
               }
             }
@@ -29723,7 +29788,7 @@
                       "$ref": "#/components/schemas/Folder--Mini"
                     },
                     {
-                      "$ref": "#/components/schemas/WebLink--Mini"
+                      "$ref": "#/components/schemas/WebLink"
                     }
                   ]
                 }
@@ -29904,6 +29969,10 @@
         ],
         "x-box-variant": "mini",
         "description": "A mini legal hold policy",
+        "required": [
+          "id",
+          "type"
+        ],
         "properties": {
           "id": {
             "type": "string",
@@ -30055,7 +30124,7 @@
                 "type": "array",
                 "description": "A list of legal hold\npolicy assignments",
                 "items": {
-                  "$ref": "#/components/schemas/LegalHoldPolicyAssignment--Base"
+                  "$ref": "#/components/schemas/LegalHoldPolicyAssignment"
                 }
               }
             }
@@ -30812,7 +30881,7 @@
                 "description": "A list in which each entry represents a retention policy object.",
                 "type": "array",
                 "items": {
-                  "$ref": "#/components/schemas/RetentionPolicy--Mini"
+                  "$ref": "#/components/schemas/RetentionPolicy"
                 }
               }
             }
@@ -35081,7 +35150,7 @@
                 "type": "array",
                 "description": "A list of users",
                 "items": {
-                  "$ref": "#/components/schemas/User"
+                  "$ref": "#/components/schemas/User--Full"
                 }
               }
             }
