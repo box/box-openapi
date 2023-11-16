@@ -14,7 +14,7 @@
       "url": "http://www.apache.org/licenses/LICENSE-2.0"
     },
     "version": "2.0.0",
-    "x-box-commit-hash": "2850ba7b2e"
+    "x-box-commit-hash": "e1aabe6a73"
   },
   "host": "api.box.com",
   "basePath": "/2.0",
@@ -4530,7 +4530,78 @@
             }
           }
         },
-        "parameters": []
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "required": [
+                "items"
+              ],
+              "description": "An array that contains one or more classifications to add to\nthe enterprise's list of classifications.",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "description": "A single classification to add to the enterprise.",
+                "required": [
+                  "op",
+                  "fieldKey",
+                  "data"
+                ],
+                "properties": {
+                  "op": {
+                    "type": "string",
+                    "description": "The type of change to perform on the classification\nobject.",
+                    "enum": [
+                      "addEnumOption"
+                    ]
+                  },
+                  "fieldKey": {
+                    "type": "string",
+                    "description": "Defines classifications \navailable in the enterprise.",
+                    "enum": [
+                      "Box__Security__Classification__Key"
+                    ]
+                  },
+                  "data": {
+                    "type": "object",
+                    "required": [
+                      "key"
+                    ],
+                    "description": "The details of the classification to add.",
+                    "properties": {
+                      "key": {
+                        "type": "string",
+                        "description": "The label of the classification as shown in the web and\nmobile interfaces. This is the only field required to\nadd a classification."
+                      },
+                      "staticConfig": {
+                        "type": "object",
+                        "description": "A static configuration for the classification.",
+                        "properties": {
+                          "classification": {
+                            "type": "object",
+                            "description": "Additional details for the classification.",
+                            "properties": {
+                              "classificationDefinition": {
+                                "type": "string",
+                                "description": "A longer description of the classification."
+                              },
+                              "colorID": {
+                                "type": "integer",
+                                "format": "int64",
+                                "description": "An internal Box identifier used to assign a color to\na classification label.\n\nMapping between a `colorID` and a color may change\nwithout notice. Currently, the color mappings are as\nfollows.\n\n* `0`: Yellow\n* `1`: Orange\n* `2`: Watermelon red\n* `3`: Purple rain\n* `4`: Light blue\n* `5`: Dark blue\n* `6`: Light green\n* `7`: Gray"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ]
       }
     },
     "/metadata_templates/enterprise/securityClassification-6VMVochwUWo/schema#update": {
@@ -5091,7 +5162,9 @@
               "type": "object",
               "required": [
                 "scope",
-                "displayName"
+                "displayName",
+                "fields",
+                "templateKey"
               ],
               "properties": {
                 "scope": {
@@ -5103,62 +5176,71 @@
                 },
                 "templateKey": {
                   "type": "string",
-                  "description": "`securityClassification-6VMVochwUWo`",
+                  "description": "Defines the list of metadata templates.",
                   "enum": [
                     "securityClassification-6VMVochwUWo"
                   ]
                 },
                 "displayName": {
                   "type": "string",
-                  "description": "`Classification`",
+                  "description": "The name of the\ntemplate as shown in web and mobile interfaces.",
                   "enum": [
                     "Classification"
                   ]
                 },
                 "hidden": {
                   "type": "boolean",
-                  "description": "`false`"
+                  "description": "Determines if the classification template is\nhidden or available on web and mobile\ndevices."
                 },
                 "copyInstanceOnItemCopy": {
                   "type": "boolean",
-                  "description": "`false`"
+                  "description": "Determines if classifications are\ncopied along when the file or folder is\ncopied."
                 },
                 "fields": {
                   "type": "array",
-                  "description": "The classification template holds one field, which holds\nall the valid classification values.",
+                  "description": "The classification template requires exactly\none field, which holds\nall the valid classification values.",
                   "items": {
+                    "required": [
+                      "type",
+                      "key",
+                      "displayName",
+                      "options"
+                    ],
                     "type": "object",
                     "description": "The `enum` field which holds all the valid classification\nvalues.",
                     "properties": {
                       "type": {
                         "type": "string",
-                        "description": "`enum`",
+                        "description": "The type of the field\nthat is always enum.",
                         "enum": [
                           "enum"
                         ]
                       },
                       "key": {
                         "type": "string",
-                        "description": "`Box__Security__Classification__Key`",
+                        "description": "Defines classifications \navailable in the enterprise.",
                         "enum": [
                           "Box__Security__Classification__Key"
                         ]
                       },
                       "displayName": {
                         "type": "string",
-                        "description": "`Classification`",
+                        "description": "A display name for the classification.",
                         "enum": [
                           "Classification"
                         ]
                       },
                       "hidden": {
                         "type": "boolean",
-                        "description": "`false`"
+                        "description": "Determines if the classification\ntemplate is\nhidden or available on\nweb and mobile\ndevices."
                       },
                       "options": {
                         "type": "array",
                         "description": "The actual list of classifications that are present on\nthis template.",
                         "items": {
+                          "required": [
+                            "key"
+                          ],
                           "type": "object",
                           "description": "An individual classification.",
                           "properties": {
@@ -5179,7 +5261,8 @@
                                       "description": "A longer description of the classification."
                                     },
                                     "colorID": {
-                                      "type": "number",
+                                      "type": "integer",
+                                      "format": "int64",
                                       "description": "An identifier used to assign a color to\na classification label.\n\nMapping between a `colorID` and a color may\nchange without notice. Currently, the color\nmappings are as follows.\n\n* `0`: Yellow\n* `1`: Orange\n* `2`: Watermelon red\n* `3`: Purple rain\n* `4`: Light blue\n* `5`: Dark blue\n* `6`: Light green\n* `7`: Gray"
                                     }
                                   }
@@ -5771,7 +5854,7 @@
           "201": {
             "description": "Returns the newly created comment object.\n\nNot all available fields are returned by default. Use the\n[fields](#param-fields) query parameter to explicitly request\nany specific fields.",
             "schema": {
-              "$ref": "#/definitions/Comment"
+              "$ref": "#/definitions/Comment--Full"
             }
           },
           "default": {
@@ -9201,7 +9284,7 @@
           "201": {
             "description": "Returns a user object for the newly created user.",
             "schema": {
-              "$ref": "#/definitions/User"
+              "$ref": "#/definitions/User--Full"
             }
           },
           "default": {
@@ -9254,7 +9337,7 @@
         "operationId": "post_users_terminate_sessions",
         "summary": "Create jobs to terminate users session",
         "tags": [
-          "Users"
+          "Session termination"
         ],
         "description": "Validates the roles and permissions of the user,\nand creates asynchronous jobs\nto terminate the user's sessions.\nReturns the status for the POST request.",
         "responses": {
@@ -10220,7 +10303,7 @@
           "201": {
             "description": "Returns the new group object.",
             "schema": {
-              "$ref": "#/definitions/Group"
+              "$ref": "#/definitions/Group--Full"
             }
           },
           "409": {
@@ -10243,7 +10326,7 @@
         "operationId": "post_groups_terminate_sessions",
         "summary": "Create jobs to terminate user group session",
         "tags": [
-          "Groups"
+          "Session termination"
         ],
         "description": "Validates the roles and permissions of the group,\nand creates asynchronous jobs\nto terminate the group's sessions.\nReturns the status for the POST request.",
         "responses": {
@@ -14949,7 +15032,7 @@
         "operationId": "get_storage_policies",
         "summary": "List storage policies",
         "tags": [
-          "Storage policies"
+          "Standard and Zones Storage Policies"
         ],
         "description": "Fetches all the storage policies in the enterprise.",
         "parameters": [
@@ -15001,7 +15084,7 @@
         "operationId": "get_storage_policies_id",
         "summary": "Get storage policy",
         "tags": [
-          "Storage policies"
+          "Standard and Zones Storage Policies"
         ],
         "description": "Fetches a specific storage policy.",
         "parameters": [
@@ -15034,7 +15117,7 @@
         "operationId": "get_storage_policy_assignments",
         "summary": "List storage policy assignments",
         "tags": [
-          "Storage policy assignments"
+          "Standard and Zones Storage Policy Assignments"
         ],
         "description": "Fetches all the storage policy assignment for an enterprise or user.",
         "parameters": [
@@ -15083,7 +15166,7 @@
         "operationId": "post_storage_policy_assignments",
         "summary": "Assign storage policy",
         "tags": [
-          "Storage policy assignments"
+          "Standard and Zones Storage Policy Assignments"
         ],
         "description": "Creates a storage policy assignment for an enterprise or user.",
         "responses": {
@@ -15165,7 +15248,7 @@
         "operationId": "get_storage_policy_assignments_id",
         "summary": "Get storage policy assignment",
         "tags": [
-          "Storage policy assignments"
+          "Standard and Zones Storage Policy Assignments"
         ],
         "description": "Fetches a specific storage policy assignment.",
         "parameters": [
@@ -15196,7 +15279,7 @@
         "operationId": "put_storage_policy_assignments_id",
         "summary": "Update storage policy assignment",
         "tags": [
-          "Storage policy assignments"
+          "Standard and Zones Storage Policy Assignments"
         ],
         "description": "Updates a specific storage policy assignment.",
         "parameters": [
@@ -15260,7 +15343,7 @@
         "operationId": "delete_storage_policy_assignments_id",
         "summary": "Unassign storage policy",
         "tags": [
-          "Storage policy assignments"
+          "Standard and Zones Storage Policy Assignments"
         ],
         "description": "Delete a storage policy assignment.\n\nDeleting a storage policy assignment on a user\nwill have the user inherit the enterprise's default\nstorage policy.\n\nThere is a rate limit for calling this endpoint of only\ntwice per user in a 24 hour time frame.",
         "parameters": [
@@ -15417,7 +15500,7 @@
         "operationId": "post_sign_requests_id_cancel",
         "summary": "Cancel sign request",
         "tags": [
-          "Box Sign"
+          "Sign requests"
         ],
         "description": "Cancels a sign request.",
         "parameters": [
@@ -15456,7 +15539,7 @@
         "operationId": "post_sign_requests_id_resend",
         "summary": "Resend sign request",
         "tags": [
-          "Box Sign"
+          "Sign requests"
         ],
         "description": "Resends a sign request email to all outstanding signers.",
         "parameters": [
@@ -15492,7 +15575,7 @@
         "operationId": "get_sign_requests_id",
         "summary": "Get sign request by ID",
         "tags": [
-          "Box Sign"
+          "Sign requests"
         ],
         "description": "Gets a sign request by ID.",
         "parameters": [
@@ -15531,7 +15614,7 @@
         "operationId": "get_sign_requests",
         "summary": "List sign requests",
         "tags": [
-          "Box Sign"
+          "Sign requests"
         ],
         "description": "Gets sign requests created by a user. If the `sign_files` and/or\n`parent_folder` are deleted, the sign request will not return in the list.",
         "parameters": [
@@ -15571,7 +15654,7 @@
         "operationId": "post_sign_requests",
         "summary": "Create sign request",
         "tags": [
-          "Box Sign"
+          "Sign requests"
         ],
         "description": "Creates a sign request. This involves preparing a document for signing and\nsending the sign request to signers.",
         "responses": {
@@ -15818,7 +15901,7 @@
         "operationId": "get_sign_templates",
         "summary": "List Box Sign templates",
         "tags": [
-          "templates"
+          "Sign templates"
         ],
         "description": "Gets Box Sign templates created by a user.",
         "parameters": [
@@ -15866,7 +15949,7 @@
         "operationId": "get_sign_templates_id",
         "summary": "Get Box Sign template by ID",
         "tags": [
-          "templates"
+          "Sign templates"
         ],
         "description": "Fetches details of a specific Box Sign template.",
         "parameters": [
@@ -15911,7 +15994,7 @@
         "operationId": "get_integration_mappings_slack",
         "summary": "List Slack integration mappings",
         "tags": [
-          "integrationMappingsSlack"
+          "Integration mappings"
         ],
         "description": "Lists [Slack integration mappings](https://support.box.com/hc/en-us/articles/4415585987859-Box-as-the-Content-Layer-for-Slack) in a users' enterprise.\n\nYou need Admin or Co-Admin role to\nuse this endpoint.",
         "parameters": [
@@ -15999,8 +16082,7 @@
         "operationId": "post_integration_mappings_slack",
         "summary": "Create Slack integration mapping",
         "tags": [
-          "integrationMappingsSlack",
-          "post_integration_mappings_slack"
+          "Integration mappings"
         ],
         "description": "Creates a [Slack integration mapping](https://support.box.com/hc/en-us/articles/4415585987859-Box-as-the-Content-Layer-for-Slack)\nby mapping a Slack channel to a Box item.\n\nYou need Admin or Co-Admin role to\nuse this endpoint.",
         "responses": {
@@ -16045,7 +16127,7 @@
         "operationId": "put_integration_mappings_slack_id",
         "summary": "Update Slack integration mapping",
         "tags": [
-          "integrationMappingsSlack"
+          "Integration mappings"
         ],
         "description": "Updates a [Slack integration mapping](https://support.box.com/hc/en-us/articles/4415585987859-Box-as-the-Content-Layer-for-Slack).\nSupports updating the Box folder ID and options.\n\nYou need Admin or Co-Admin role to\nuse this endpoint.",
         "parameters": [
@@ -16111,7 +16193,7 @@
         "operationId": "delete_integration_mappings_slack_id",
         "summary": "Delete Slack integration mapping",
         "tags": [
-          "integrationMappingsSlack"
+          "Integration mappings"
         ],
         "description": "Deletes a [Slack integration mapping](https://support.box.com/hc/en-us/articles/4415585987859-Box-as-the-Content-Layer-for-Slack).\n\n\nYou need Admin or Co-Admin role to\nuse this endpoint.",
         "parameters": [
@@ -17029,7 +17111,7 @@
               "type": "array",
               "description": "A list of comments",
               "items": {
-                "$ref": "#/definitions/Comment"
+                "$ref": "#/definitions/Comment--Full"
               }
             }
           }
@@ -17325,7 +17407,7 @@
               "type": "array",
               "description": "A list of file versions",
               "items": {
-                "$ref": "#/definitions/FileVersion"
+                "$ref": "#/definitions/FileVersion--Full"
               }
             }
           }
@@ -19015,7 +19097,12 @@
       "type": "object",
       "description": "A metadata template that holds the security classifications\ndefined by an enterprise.",
       "required": [
-        "type"
+        "id",
+        "type",
+        "scope",
+        "displayName",
+        "fields",
+        "templateKey"
       ],
       "properties": {
         "id": {
@@ -19049,11 +19136,11 @@
         },
         "hidden": {
           "type": "boolean",
-          "description": "This template is always available in web and mobile interfaces."
+          "description": "Determines if the\ntemplate is always available in web and mobile interfaces."
         },
         "copyInstanceOnItemCopy": {
           "type": "boolean",
-          "description": "Classifications are always copied along when the file or folder is\ncopied."
+          "description": "Determines if \nclassifications are\ncopied along when the file or folder is\ncopied."
         },
         "fields": {
           "type": "array",
@@ -19062,6 +19149,13 @@
           "description": "A list of fields for this classification template. This includes\nonly one field, the `Box__Security__Classification__Key`, which defines\nthe different classifications available in this enterprise.",
           "items": {
             "type": "object",
+            "required": [
+              "id",
+              "type",
+              "key",
+              "displayName",
+              "options"
+            ],
             "description": "The metadata template field that represents the available\nclassifications.",
             "properties": {
               "id": {
@@ -19070,14 +19164,14 @@
               },
               "type": {
                 "type": "string",
-                "description": "`enum`",
+                "description": "The array item type.",
                 "enum": [
                   "enum"
                 ]
               },
               "key": {
                 "type": "string",
-                "description": "`Box__Security__Classification__Key`",
+                "description": "Defines classifications \navailable in the enterprise.",
                 "enum": [
                   "Box__Security__Classification__Key"
                 ]
@@ -19098,6 +19192,10 @@
                 "description": "A list of classifications available in this enterprise.",
                 "minItems": 1,
                 "items": {
+                  "required": [
+                    "key",
+                    "id"
+                  ],
                   "type": "object",
                   "description": "A single classification available in this enterprise.",
                   "properties": {
@@ -19122,7 +19220,8 @@
                               "description": "A longer description of the classification."
                             },
                             "colorID": {
-                              "type": "number",
+                              "type": "integer",
+                              "format": "int64",
                               "description": "An internal Box identifier used to assign a color to\na classification label.\n\nMapping between a `colorID` and a color may change\nwithout notice. Currently, the color mappings are as\nfollows.\n\n* `0`: Yellow\n* `1`: Orange\n* `2`: Watermelon red\n* `3`: Purple rain\n* `4`: Light blue\n* `5`: Dark blue\n* `6`: Light green\n* `7`: Gray"
                             }
                           }
@@ -19532,71 +19631,6 @@
             "tagged_message": {
               "type": "string",
               "description": "The string representing the comment text with\n@mentions included. @mention format is @[id:username]\nwhere `id` is user's Box ID and `username` is\ntheir display name."
-            }
-          }
-        }
-      ]
-    },
-    "Comment": {
-      "title": "Comment",
-      "type": "object",
-      "description": "Standard representation of a comment.",
-      "x-box-variant": "standard",
-      "allOf": [
-        {
-          "$ref": "#/definitions/Comment--Base"
-        },
-        {
-          "properties": {
-            "is_reply_comment": {
-              "type": "boolean",
-              "description": "Whether or not this comment is a reply to another\ncomment"
-            },
-            "message": {
-              "type": "string",
-              "description": "The text of the comment, as provided by the user"
-            },
-            "created_by": {
-              "allOf": [
-                {
-                  "$ref": "#/definitions/User--Mini"
-                },
-                {
-                  "description": "A mini user object representing the author of the\ncomment"
-                }
-              ]
-            },
-            "created_at": {
-              "type": "string",
-              "format": "date-time",
-              "description": "The time this comment was created"
-            },
-            "modified_at": {
-              "type": "string",
-              "format": "date-time",
-              "description": "The time this comment was last modified"
-            },
-            "item": {
-              "allOf": [
-                {
-                  "title": "Reference",
-                  "description": "The bare basic reference for an object",
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "type": "string",
-                      "description": "The unique identifier for this object"
-                    },
-                    "type": {
-                      "type": "string",
-                      "description": "The type for this object"
-                    }
-                  }
-                },
-                {
-                  "description": "The file this comment was placed on"
-                }
-              ]
             }
           }
         }
@@ -20633,7 +20667,7 @@
               "type": "array",
               "description": "A list of users",
               "items": {
-                "$ref": "#/definitions/User"
+                "$ref": "#/definitions/User--Full"
               }
             }
           }
@@ -20661,98 +20695,6 @@
           "description": "The value of the tracking code"
         }
       }
-    },
-    "User": {
-      "title": "User",
-      "type": "object",
-      "x-box-variant": "standard",
-      "description": "A standard representation of a user, as returned from any\nuser API endpoints by default",
-      "allOf": [
-        {
-          "$ref": "#/definitions/User--Mini"
-        },
-        {
-          "properties": {
-            "created_at": {
-              "type": "string",
-              "format": "date-time",
-              "description": "When the user object was created"
-            },
-            "modified_at": {
-              "type": "string",
-              "format": "date-time",
-              "description": "When the user object was last modified"
-            },
-            "language": {
-              "type": "string",
-              "description": "The language of the user, formatted in modified version of the\n[ISO 639-1](/guides/api-calls/language-codes) format."
-            },
-            "timezone": {
-              "type": "string",
-              "format": "timezone",
-              "description": "The user's timezone"
-            },
-            "space_amount": {
-              "type": "integer",
-              "format": "int64",
-              "description": "The user’s total available space amount in bytes"
-            },
-            "space_used": {
-              "type": "integer",
-              "format": "int64",
-              "description": "The amount of space in use by the user"
-            },
-            "max_upload_size": {
-              "type": "integer",
-              "format": "int64",
-              "description": "The maximum individual file size in bytes the user can have"
-            },
-            "status": {
-              "type": "string",
-              "enum": [
-                "active",
-                "inactive",
-                "cannot_delete_edit",
-                "cannot_delete_edit_upload"
-              ],
-              "description": "The user's account status"
-            },
-            "job_title": {
-              "type": "string",
-              "description": "The user’s job title",
-              "maxLength": 100
-            },
-            "phone": {
-              "type": "string",
-              "description": "The user’s phone number",
-              "maxLength": 100
-            },
-            "address": {
-              "type": "string",
-              "description": "The user’s address",
-              "maxLength": 255
-            },
-            "avatar_url": {
-              "type": "string",
-              "description": "URL of the user’s avatar image"
-            },
-            "notification_email": {
-              "type": "object",
-              "description": "An alternate notification email address to which email\nnotifications are sent. When it's confirmed, this will be\nthe email address to which notifications are sent instead of\nto the primary email address.",
-              "properties": {
-                "email": {
-                  "type": "string",
-                  "description": "The email address to send the notifications to."
-                },
-                "is_confirmed": {
-                  "type": "boolean",
-                  "description": "Specifies if this email address has been confirmed."
-                }
-              }
-            }
-          }
-        }
-      ]
     },
     "User--Full": {
       "title": "User (Full)",
@@ -21109,33 +21051,8 @@
               "type": "array",
               "description": "A list of groups",
               "items": {
-                "$ref": "#/definitions/Group--Mini"
+                "$ref": "#/definitions/Group--Full"
               }
-            }
-          }
-        }
-      ]
-    },
-    "Group": {
-      "title": "Group",
-      "type": "object",
-      "x-box-variant": "standard",
-      "description": "A standard representation of a group, as returned from any\ngroup API endpoints by default",
-      "allOf": [
-        {
-          "$ref": "#/definitions/Group--Mini"
-        },
-        {
-          "properties": {
-            "created_at": {
-              "type": "string",
-              "format": "date-time",
-              "description": "When the group object was created"
-            },
-            "modified_at": {
-              "type": "string",
-              "format": "date-time",
-              "description": "When the group object was last modified"
             }
           }
         }
@@ -21536,7 +21453,7 @@
               "description": "A list in which each entry represents a retention policy object.",
               "type": "array",
               "items": {
-                "$ref": "#/definitions/RetentionPolicy--Mini"
+                "$ref": "#/definitions/RetentionPolicy"
               }
             }
           }
@@ -22038,7 +21955,7 @@
               "type": "array",
               "description": "A list of legal hold\npolicy assignments",
               "items": {
-                "$ref": "#/definitions/LegalHoldPolicyAssignment--Base"
+                "$ref": "#/definitions/LegalHoldPolicyAssignment"
               }
             }
           }
@@ -24972,38 +24889,6 @@
         }
       ]
     },
-    "WebLink--Mini": {
-      "title": "Web link (Mini)",
-      "type": "object",
-      "x-box-variant": "mini",
-      "description": "Web links are objects that point to URLs. These objects\nare also known as bookmarks within the Box web application.\n\nWeb link objects are treated similarly to file objects,\nthey will also support most actions that apply to regular files.",
-      "allOf": [
-        {
-          "$ref": "#/definitions/WebLink--Base"
-        },
-        {
-          "properties": {
-            "url": {
-              "type": "string",
-              "description": "The URL this web link points to"
-            },
-            "sequence_id": {
-              "allOf": [
-                {
-                  "type": "string",
-                  "description": "A numeric identifier that represents the most recent user event\nthat has been applied to this item.\n\nThis can be used in combination with the `GET /events`-endpoint\nto filter out user events that would have occurred before this\nidentifier was read.\n\nAn example would be where a Box Drive-like application\nwould fetch an item via the API, and then listen to incoming\nuser events for changes to the item. The application would\nignore any user events where the `sequence_id` in the event\nis smaller than or equal to the `sequence_id` in the originally\nfetched resource."
-                },
-                {}
-              ]
-            },
-            "name": {
-              "type": "string",
-              "description": "The name of the web link"
-            }
-          }
-        }
-      ]
-    },
     "MetadataQueryIndex": {
       "title": "Metadata query index",
       "type": "object",
@@ -25058,29 +24943,70 @@
         }
       }
     },
-    "Comment--Base": {
-      "title": "Comment (Base)",
+    "Comment": {
+      "title": "Comment",
       "type": "object",
-      "x-box-variants": [
-        "base",
-        "standard",
-        "full"
-      ],
-      "x-box-variant": "base",
-      "description": "Base representation of a comment.",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "The unique identifier for this comment."
+      "description": "Standard representation of a comment.",
+      "x-box-variant": "standard",
+      "allOf": [
+        {
+          "$ref": "#/definitions/Comment--Base"
         },
-        "type": {
-          "type": "string",
-          "description": "`comment`",
-          "enum": [
-            "comment"
-          ]
+        {
+          "properties": {
+            "is_reply_comment": {
+              "type": "boolean",
+              "description": "Whether or not this comment is a reply to another\ncomment"
+            },
+            "message": {
+              "type": "string",
+              "description": "The text of the comment, as provided by the user"
+            },
+            "created_by": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/User--Mini"
+                },
+                {
+                  "description": "A mini user object representing the author of the\ncomment"
+                }
+              ]
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time",
+              "description": "The time this comment was created"
+            },
+            "modified_at": {
+              "type": "string",
+              "format": "date-time",
+              "description": "The time this comment was last modified"
+            },
+            "item": {
+              "allOf": [
+                {
+                  "title": "Reference",
+                  "description": "The bare basic reference for an object",
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "The unique identifier for this object"
+                    },
+                    "type": {
+                      "type": "string",
+                      "description": "The type for this object"
+                    }
+                  }
+                },
+                {
+                  "description": "The file this comment was placed on"
+                }
+              ]
+            }
+          }
         }
-      }
+      ]
     },
     "User--Collaborations": {
       "title": "User (Collaborations)",
@@ -25182,6 +25108,155 @@
           "type": "string"
         }
       }
+    },
+    "WebLink--Mini": {
+      "title": "Web link (Mini)",
+      "type": "object",
+      "x-box-variant": "mini",
+      "description": "Web links are objects that point to URLs. These objects\nare also known as bookmarks within the Box web application.\n\nWeb link objects are treated similarly to file objects,\nthey will also support most actions that apply to regular files.",
+      "allOf": [
+        {
+          "$ref": "#/definitions/WebLink--Base"
+        },
+        {
+          "properties": {
+            "url": {
+              "type": "string",
+              "description": "The URL this web link points to"
+            },
+            "sequence_id": {
+              "allOf": [
+                {
+                  "type": "string",
+                  "description": "A numeric identifier that represents the most recent user event\nthat has been applied to this item.\n\nThis can be used in combination with the `GET /events`-endpoint\nto filter out user events that would have occurred before this\nidentifier was read.\n\nAn example would be where a Box Drive-like application\nwould fetch an item via the API, and then listen to incoming\nuser events for changes to the item. The application would\nignore any user events where the `sequence_id` in the event\nis smaller than or equal to the `sequence_id` in the originally\nfetched resource."
+                },
+                {}
+              ]
+            },
+            "name": {
+              "type": "string",
+              "description": "The name of the web link"
+            }
+          }
+        }
+      ]
+    },
+    "User": {
+      "title": "User",
+      "type": "object",
+      "x-box-variant": "standard",
+      "description": "A standard representation of a user, as returned from any\nuser API endpoints by default",
+      "allOf": [
+        {
+          "$ref": "#/definitions/User--Mini"
+        },
+        {
+          "properties": {
+            "created_at": {
+              "type": "string",
+              "format": "date-time",
+              "description": "When the user object was created"
+            },
+            "modified_at": {
+              "type": "string",
+              "format": "date-time",
+              "description": "When the user object was last modified"
+            },
+            "language": {
+              "type": "string",
+              "description": "The language of the user, formatted in modified version of the\n[ISO 639-1](/guides/api-calls/language-codes) format."
+            },
+            "timezone": {
+              "type": "string",
+              "format": "timezone",
+              "description": "The user's timezone"
+            },
+            "space_amount": {
+              "type": "integer",
+              "format": "int64",
+              "description": "The user’s total available space amount in bytes"
+            },
+            "space_used": {
+              "type": "integer",
+              "format": "int64",
+              "description": "The amount of space in use by the user"
+            },
+            "max_upload_size": {
+              "type": "integer",
+              "format": "int64",
+              "description": "The maximum individual file size in bytes the user can have"
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "active",
+                "inactive",
+                "cannot_delete_edit",
+                "cannot_delete_edit_upload"
+              ],
+              "description": "The user's account status"
+            },
+            "job_title": {
+              "type": "string",
+              "description": "The user’s job title",
+              "maxLength": 100
+            },
+            "phone": {
+              "type": "string",
+              "description": "The user’s phone number",
+              "maxLength": 100
+            },
+            "address": {
+              "type": "string",
+              "description": "The user’s address",
+              "maxLength": 255
+            },
+            "avatar_url": {
+              "type": "string",
+              "description": "URL of the user’s avatar image"
+            },
+            "notification_email": {
+              "type": "object",
+              "description": "An alternate notification email address to which email\nnotifications are sent. When it's confirmed, this will be\nthe email address to which notifications are sent instead of\nto the primary email address.",
+              "properties": {
+                "email": {
+                  "type": "string",
+                  "description": "The email address to send the notifications to."
+                },
+                "is_confirmed": {
+                  "type": "boolean",
+                  "description": "Specifies if this email address has been confirmed."
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "Group": {
+      "title": "Group",
+      "type": "object",
+      "x-box-variant": "standard",
+      "description": "A standard representation of a group, as returned from any\ngroup API endpoints by default",
+      "allOf": [
+        {
+          "$ref": "#/definitions/Group--Mini"
+        },
+        {
+          "properties": {
+            "created_at": {
+              "type": "string",
+              "format": "date-time",
+              "description": "When the group object was created"
+            },
+            "modified_at": {
+              "type": "string",
+              "format": "date-time",
+              "description": "When the group object was last modified"
+            }
+          }
+        }
+      ]
     },
     "Webhook--Mini": {
       "title": "Webhook (Mini)",
@@ -25566,6 +25641,10 @@
       ],
       "x-box-variant": "mini",
       "description": "A mini legal hold policy",
+      "required": [
+        "id",
+        "type"
+      ],
       "properties": {
         "id": {
           "type": "string",
@@ -26410,35 +26489,27 @@
         }
       }
     },
-    "WebLink--Base": {
-      "title": "Web link (Base)",
+    "Comment--Base": {
+      "title": "Comment (Base)",
       "type": "object",
       "x-box-variants": [
         "base",
-        "mini",
-        "standard"
+        "standard",
+        "full"
       ],
       "x-box-variant": "base",
-      "description": "Web links are objects that point to URLs. These objects\nare also known as bookmarks within the Box web application.\n\nWeb link objects are treated similarly to file objects,\nthey will also support most actions that apply to regular files.",
-      "required": [
-        "id",
-        "type"
-      ],
+      "description": "Base representation of a comment.",
       "properties": {
         "id": {
           "type": "string",
-          "description": "The unique identifier for this web link"
+          "description": "The unique identifier for this comment."
         },
         "type": {
           "type": "string",
-          "description": "`web_link`",
+          "description": "`comment`",
           "enum": [
-            "web_link"
+            "comment"
           ]
-        },
-        "etag": {
-          "type": "string",
-          "description": "The entity tag of this web link. Used with `If-Match`\nheaders."
         }
       }
     },
@@ -26468,6 +26539,38 @@
           "enum": [
             "group"
           ]
+        }
+      }
+    },
+    "WebLink--Base": {
+      "title": "Web link (Base)",
+      "type": "object",
+      "x-box-variants": [
+        "base",
+        "mini",
+        "standard"
+      ],
+      "x-box-variant": "base",
+      "description": "Web links are objects that point to URLs. These objects\nare also known as bookmarks within the Box web application.\n\nWeb link objects are treated similarly to file objects,\nthey will also support most actions that apply to regular files.",
+      "required": [
+        "id",
+        "type"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The unique identifier for this web link"
+        },
+        "type": {
+          "type": "string",
+          "description": "`web_link`",
+          "enum": [
+            "web_link"
+          ]
+        },
+        "etag": {
+          "type": "string",
+          "description": "The entity tag of this web link. Used with `If-Match`\nheaders."
         }
       }
     },

@@ -14,7 +14,7 @@
       "url": "http://www.apache.org/licenses/LICENSE-2.0"
     },
     "version": "2.0.0",
-    "x-box-commit-hash": "2850ba7b2e"
+    "x-box-commit-hash": "e1aabe6a73"
   },
   "host": "upload.box.com",
   "basePath": "/api/2.0",
@@ -598,7 +598,7 @@
           "type": "array",
           "description": "A list of files",
           "items": {
-            "$ref": "#/definitions/File"
+            "$ref": "#/definitions/File--Full"
           }
         }
       }
@@ -832,6 +832,485 @@
           }
         }
       ]
+    },
+    "File--Full": {
+      "title": "File (Full)",
+      "type": "object",
+      "x-box-variant": "full",
+      "description": "A full representation of a file, as can be returned from any\nfile API endpoints by default",
+      "allOf": [
+        {
+          "$ref": "#/definitions/File"
+        },
+        {
+          "properties": {
+            "version_number": {
+              "type": "string",
+              "description": "The version number of this file"
+            },
+            "comment_count": {
+              "type": "integer",
+              "description": "The number of comments on this file"
+            },
+            "permissions": {
+              "allOf": [
+                {
+                  "type": "object",
+                  "description": "The permissions that the authenticated user has for a file.",
+                  "required": [
+                    "can_annotate",
+                    "can_comment",
+                    "can_preview",
+                    "can_upload",
+                    "can_view_annotations_all",
+                    "can_view_annotations_self"
+                  ],
+                  "allOf": [
+                    {
+                      "type": "object",
+                      "description": "The permissions that the authenticated user has for an item.",
+                      "required": [
+                        "can_delete",
+                        "can_download",
+                        "can_invite_collaborator",
+                        "can_rename",
+                        "can_set_share_access",
+                        "can_share"
+                      ],
+                      "properties": {
+                        "can_delete": {
+                          "type": "boolean",
+                          "description": "Specifies if the current user can delete this item."
+                        },
+                        "can_download": {
+                          "type": "boolean",
+                          "description": "Specifies if the current user can download this item."
+                        },
+                        "can_invite_collaborator": {
+                          "type": "boolean",
+                          "description": "Specifies if the current user can invite new\nusers to collaborate on this item, and if the user can\nupdate the role of a user already collaborated on this\nitem."
+                        },
+                        "can_rename": {
+                          "type": "boolean",
+                          "description": "Specifies if the user can rename this item."
+                        },
+                        "can_set_share_access": {
+                          "type": "boolean",
+                          "description": "Specifies if the user can change the access level of an\nexisting shared link on this item."
+                        },
+                        "can_share": {
+                          "type": "boolean",
+                          "description": "Specifies if the user can create a shared link for this item."
+                        }
+                      }
+                    },
+                    {
+                      "properties": {
+                        "can_annotate": {
+                          "type": "boolean",
+                          "description": "Specifies if the user can place annotations on this file."
+                        },
+                        "can_comment": {
+                          "type": "boolean",
+                          "description": "Specifies if the user can place comments on this file."
+                        },
+                        "can_preview": {
+                          "type": "boolean",
+                          "description": "Specifies if the user can preview this file."
+                        },
+                        "can_upload": {
+                          "type": "boolean",
+                          "description": "Specifies if the user can upload a new version of this file."
+                        },
+                        "can_view_annotations_all": {
+                          "type": "boolean",
+                          "description": "Specifies if the user view all annotations placed on this file"
+                        },
+                        "can_view_annotations_self": {
+                          "type": "boolean",
+                          "description": "Specifies if the user view annotations placed by themselves\non this file"
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "description": "Describes the permissions that the current user has\nfor this file."
+                },
+                {}
+              ]
+            },
+            "tags": {
+              "allOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "minItems": 1,
+                  "maxItems": 100,
+                  "description": "The tags for this item. These tags are shown in\nthe Box web app and mobile apps next to an item.\n\nTo add or remove a tag, retrieve the item's current tags,\nmodify them, and then update this field.\n\nThere is a limit of 100 tags per item, and 10,000\nunique tags per enterprise."
+                },
+                {}
+              ]
+            },
+            "lock": {
+              "allOf": [
+                {
+                  "title": "Lock",
+                  "type": "object",
+                  "description": "The lock held on a file. A lock prevents a file from being moved,\nrenamed, or otherwise changed by anyone else than the user who created the\nlock.",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "The unique identifier for this lock"
+                    },
+                    "type": {
+                      "type": "string",
+                      "description": "`lock`",
+                      "enum": [
+                        "lock"
+                      ]
+                    },
+                    "created_by": {
+                      "allOf": [
+                        {
+                          "$ref": "#/definitions/User--Mini"
+                        },
+                        {
+                          "description": "The user who created the lock."
+                        }
+                      ]
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "The time this lock was created at."
+                    },
+                    "expired_at": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "The time this lock is to expire at, which might be in the past."
+                    },
+                    "is_download_prevented": {
+                      "type": "boolean",
+                      "description": "Whether or not the file can be downloaded while locked."
+                    },
+                    "app_type": {
+                      "type": "string",
+                      "description": "If the lock is managed by an application rather than a user, this\nfield identifies the type of the application that holds the lock.\nThis is an open enum and may be extended with additional values in\nthe future.",
+                      "enum": [
+                        "gsuite",
+                        "office_wopi",
+                        "office_wopiplus",
+                        "other"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "description": "The lock held on this file. If there is no lock, this can either\nbe `null` or have a timestamp in the past."
+                }
+              ]
+            },
+            "extension": {
+              "type": "string",
+              "description": "Indicates the (optional) file extension for this file. By default,\nthis is set to an empty string."
+            },
+            "is_package": {
+              "type": "boolean",
+              "description": "Indicates if the file is a package. Packages are commonly used\nby Mac Applications and can include iWork files."
+            },
+            "expiring_embed_link": {
+              "allOf": [
+                {
+                  "title": "Expiring embed link",
+                  "type": "object",
+                  "description": "An expiring Box Embed Link.",
+                  "allOf": [
+                    {
+                      "type": "object",
+                      "description": "The basics of an access token",
+                      "properties": {
+                        "access_token": {
+                          "type": "string",
+                          "format": "token",
+                          "description": "The requested access token."
+                        },
+                        "expires_in": {
+                          "type": "integer",
+                          "format": "int64",
+                          "description": "The time in seconds by which this token will expire."
+                        },
+                        "token_type": {
+                          "type": "string",
+                          "enum": [
+                            "bearer"
+                          ],
+                          "description": "The type of access token returned."
+                        },
+                        "restricted_to": {
+                          "type": "array",
+                          "description": "The permissions that this access token permits,\nproviding a list of resources (files, folders, etc)\nand the scopes permitted for each of those resources.",
+                          "items": {
+                            "$ref": "#/definitions/FileScope"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "properties": {
+                        "url": {
+                          "type": "string",
+                          "format": "url",
+                          "description": "The actual expiring embed URL for this file, constructed\nfrom the file ID and access tokens specified in this object."
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "description": "Requesting this field creates an expiring Box Embed URL for an\nembedded preview session in an `iframe`.\n\nThis URL will expire after 60 seconds and the session will\nexpire after 60 minutes.\n\nNot all file types are supported for these embed URLs. Box Embed\nis not optimized for mobile browsers and should not be used in web\nexperiences designed for mobile devices. Many UI elements, like\nthe **download** and **print** options might not show in mobile\nbrowsers."
+                }
+              ]
+            },
+            "watermark_info": {
+              "allOf": [
+                {
+                  "type": "object",
+                  "description": "Details about the watermark applied to this item",
+                  "properties": {
+                    "is_watermarked": {
+                      "type": "boolean",
+                      "description": "Specifies if this item has a watermark applied."
+                    }
+                  }
+                },
+                {
+                  "description": "Details about the watermark applied to this file"
+                }
+              ]
+            },
+            "is_accessible_via_shared_link": {
+              "type": "boolean",
+              "description": "Specifies if the file can be accessed\nvia the direct shared link or a shared link\nto a parent folder.",
+              "enum": [
+                true,
+                false
+              ]
+            },
+            "allowed_invitee_roles": {
+              "type": "array",
+              "description": "A list of the types of roles that user can be invited at\nwhen sharing this file.",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "editor",
+                  "viewer",
+                  "previewer",
+                  "uploader",
+                  "previewer uploader",
+                  "viewer uploader",
+                  "co-owner"
+                ]
+              }
+            },
+            "is_externally_owned": {
+              "type": "boolean",
+              "description": "Specifies if this file is owned by a user outside of the\nauthenticated enterprise."
+            },
+            "has_collaborations": {
+              "type": "boolean",
+              "description": "Specifies if this file has any other collaborators."
+            },
+            "metadata": {
+              "allOf": [
+                {
+                  "title": "Item metadata instances",
+                  "type": "object",
+                  "description": "A list of metadata instances, nested within key-value pairs of their `scope`\nand `templateKey`.\n\nTo access the metadata for a file or folder, first use the\nmetadata endpoints to determine the metadata templates available to your\nenterprise.\n\nThen use the `GET /files/:id` or `GET /folder/:id`\nendpoint with the `fields` query parameter to get\nthe metadata by ID.\n\nTo request a metadata instance for a particular `scope` and `templateKey`\nuse the following format for the `fields` parameter:\n`metadata.<scope>.<templateKey>`\n\nFor example, `?fields=metadata.enterprise_27335.marketingCollateral`.",
+                  "additionalProperties": {
+                    "type": "object",
+                    "description": "A list of metadata instances, nested within key-value pairs of their `scope`\nand `templateKey`.",
+                    "additionalProperties": {
+                      "$ref": "#/definitions/Metadata"
+                    }
+                  }
+                },
+                {
+                  "description": "An object containing the metadata instances that have been\nattached to this file.\n\nEach metadata instance is uniquely identified by its `scope` and\n`templateKey`. There can only be one instance of any metadata\ntemplate attached to each file. Each metadata instance is nested\nwithin an object with the `templateKey` as the key, which again\nitself is nested in an object with the `scope` as the key."
+                }
+              ]
+            },
+            "expires_at": {
+              "type": "string",
+              "format": "date-time",
+              "description": "When the file will automatically be deleted"
+            },
+            "representations": {
+              "allOf": [
+                {
+                  "title": "Representations",
+                  "description": "A list of file representations",
+                  "type": "object",
+                  "properties": {
+                    "entries": {
+                      "type": "array",
+                      "description": "A list of files",
+                      "items": {
+                        "type": "object",
+                        "description": "A file representation",
+                        "properties": {
+                          "content": {
+                            "type": "object",
+                            "description": "An object containing the URL that can be used to actually fetch\nthe representation.",
+                            "properties": {
+                              "url_template": {
+                                "type": "string",
+                                "description": "The download URL that can be used to fetch the representation.\nMake sure to make an authenticated API call to this endpoint.\n\nThis URL is a template and will require the `{+asset_path}` to\nbe replaced by a path. In general, for unpaged representations\nit can be replaced by an empty string.\n\nFor paged representations, replace the `{+asset_path}` with the\npage to request plus the extension for the file, for example\n`1.pdf`.\n\nWhen requesting the download URL the following additional\nquery params can be passed along.\n\n* `set_content_disposition_type` - Sets the\n`Content-Disposition` header in the API response with the\nspecified disposition type of either `inline` or `attachment`.\nIf not supplied, the `Content-Disposition` header is not\nincluded in the response.\n\n* `set_content_disposition_filename` - Allows the application to\n  define the representation's file name used in the\n  `Content-Disposition` header.  If not defined, the filename\n  is derived from the source file name in Box combined with the\n  extension of the representation."
+                              }
+                            }
+                          },
+                          "info": {
+                            "type": "object",
+                            "description": "An object containing the URL that can be used to fetch more info\non this representation.",
+                            "properties": {
+                              "url": {
+                                "type": "string",
+                                "description": "The API URL that can be used to get more info on this file\nrepresentation. Make sure to make an authenticated API call\nto this endpoint."
+                              }
+                            }
+                          },
+                          "properties": {
+                            "type": "object",
+                            "description": "An object containing the size and type of this presentation.",
+                            "properties": {
+                              "dimensions": {
+                                "type": "string",
+                                "format": "<width>x<height>",
+                                "description": "The width by height size of this representation in pixels."
+                              },
+                              "paged": {
+                                "type": "boolean",
+                                "description": "Indicates if the representation is build up out of multiple\npages."
+                              },
+                              "thumb": {
+                                "type": "boolean",
+                                "description": "Indicates if the representation can be used as a thumbnail of\nthe file."
+                              }
+                            }
+                          },
+                          "representation": {
+                            "type": "string",
+                            "description": "Indicates the file type of the returned representation."
+                          },
+                          "status": {
+                            "type": "object",
+                            "description": "An object containing the status of this representation.",
+                            "properties": {
+                              "state": {
+                                "type": "string",
+                                "enum": [
+                                  "success",
+                                  "viewable",
+                                  "pending",
+                                  "none"
+                                ],
+                                "description": "The status of the representation.\n\n* `success` defines the representation as ready to be viewed.\n* `viewable` defines a video to be ready for viewing.\n* `pending` defines the representation as to be generated. Retry\n  this endpoint to re-check the status.\n* `none` defines that the representation will be created when\n  requested. Request the URL defined in the `info` object to\n  trigger this generation."
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                {
+                  "description": "A list of representations for a file that can be used to\ndisplay a placeholder of the file in your application. By default\nthis returns all representations and we recommend using the\n`x-rep-hints` header to further customize the desired\nrepresentations."
+                }
+              ]
+            },
+            "classification": {
+              "allOf": [
+                {
+                  "type": "object",
+                  "description": "The classification applied to an item",
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "description": "The name of the classification"
+                    },
+                    "definition": {
+                      "type": "string",
+                      "description": "An explanation of the meaning of this classification."
+                    },
+                    "color": {
+                      "type": "string",
+                      "description": "The color that is used to display the\nclassification label in a user-interface. Colors are defined by the admin\nor co-admin who created the classification in the Box web app."
+                    }
+                  }
+                },
+                {
+                  "description": "Details about the classification applied to this file."
+                },
+                {}
+              ]
+            },
+            "uploader_display_name": {
+              "allOf": [
+                {
+                  "title": "Uploader display name",
+                  "type": "string",
+                  "description": "The display name of the user that uploaded the file. In most cases this is the\nname of the user logged in at the time of the upload.\n\nIf the file was uploaded using a File Request form that requires the user to\nprovide an email address, this field is populated with that email address. If\nan email address was not required in the File Request form, this field is set\nto return a value of `File Request`.\n\nIn all other anonymous cases where no email was provided this field\nwill default to a value of `Someone`."
+                }
+              ]
+            },
+            "disposition_at": {
+              "type": "string",
+              "format": "date-time",
+              "description": "The retention expiration timestamp for the given file"
+            },
+            "shared_link_permission_options": {
+              "type": "array",
+              "description": "A list of the types of roles that user can be invited at\nwhen sharing this file.",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "can_preview",
+                  "can_download",
+                  "can_edit"
+                ]
+              }
+            }
+          }
+        }
+      ]
+    },
+    "UploadPart--Mini": {
+      "title": "Upload part (Mini)",
+      "type": "object",
+      "x-box-variants": [
+        "mini",
+        "standard"
+      ],
+      "x-box-variant": "mini",
+      "description": "The basic representation of an upload\nsession chunk.",
+      "properties": {
+        "part_id": {
+          "description": "The unique ID of the chunk.",
+          "type": "string"
+        },
+        "offset": {
+          "description": "The offset of the chunk within the file\nin bytes. The lower bound of the position\nof the chunk within the file.",
+          "type": "integer",
+          "format": "int64"
+        },
+        "size": {
+          "description": "The size of the chunk in bytes.",
+          "type": "integer",
+          "format": "int64"
+        }
+      }
     },
     "File": {
       "title": "File",
@@ -1081,31 +1560,76 @@
         }
       ]
     },
-    "UploadPart--Mini": {
-      "title": "Upload part (Mini)",
+    "User--Mini": {
+      "title": "User (Mini)",
       "type": "object",
-      "x-box-variants": [
-        "mini",
-        "standard"
-      ],
       "x-box-variant": "mini",
-      "description": "The basic representation of an upload\nsession chunk.",
+      "description": "A mini representation of a user, as can be returned when nested within other\nresources.",
+      "allOf": [
+        {
+          "$ref": "#/definitions/User--Base"
+        },
+        {
+          "properties": {
+            "name": {
+              "type": "string",
+              "description": "The display name of this user",
+              "maxLength": 50
+            },
+            "login": {
+              "type": "string",
+              "format": "email",
+              "description": "The primary email address of this user"
+            }
+          }
+        }
+      ]
+    },
+    "FileScope": {
+      "title": "File scope",
+      "type": "object",
+      "description": "A relation between a file and the scopes for which the file can be accessed",
       "properties": {
-        "part_id": {
-          "description": "The unique ID of the chunk.",
-          "type": "string"
+        "scope": {
+          "type": "string",
+          "description": "The file scopes for the file access",
+          "enum": [
+            "annotation_edit",
+            "annotation_view_all",
+            "annotation_view_self",
+            "base_explorer",
+            "base_picker",
+            "base_preview",
+            "base_upload",
+            "item_delete",
+            "item_download",
+            "item_preview",
+            "item_rename",
+            "item_share"
+          ]
         },
-        "offset": {
-          "description": "The offset of the chunk within the file\nin bytes. The lower bound of the position\nof the chunk within the file.",
-          "type": "integer",
-          "format": "int64"
-        },
-        "size": {
-          "description": "The size of the chunk in bytes.",
-          "type": "integer",
-          "format": "int64"
+        "object": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/File--Mini"
+            },
+            {
+              "description": "The file for which the file can be accessed"
+            }
+          ]
         }
       }
+    },
+    "Metadata": {
+      "title": "Metadata instance",
+      "type": "object",
+      "x-box-variant": "standard",
+      "description": "An instance of a metadata template, which has been applied to a file or\nfolder.",
+      "allOf": [
+        {
+          "$ref": "#/definitions/Metadata--Base"
+        }
+      ]
     },
     "File--Mini": {
       "title": "File (Mini)",
@@ -1178,30 +1702,63 @@
         }
       ]
     },
-    "User--Mini": {
-      "title": "User (Mini)",
+    "User--Base": {
+      "title": "User (Base)",
       "type": "object",
-      "x-box-variant": "mini",
-      "description": "A mini representation of a user, as can be returned when nested within other\nresources.",
-      "allOf": [
-        {
-          "$ref": "#/definitions/User--Base"
+      "x-box-variants": [
+        "base",
+        "mini",
+        "standard",
+        "full"
+      ],
+      "x-box-variant": "base",
+      "description": "A mini representation of a user, used when\nnested within another resource.",
+      "required": [
+        "type",
+        "id"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The unique identifier for this user"
         },
-        {
-          "properties": {
-            "name": {
-              "type": "string",
-              "description": "The display name of this user",
-              "maxLength": 50
-            },
-            "login": {
-              "type": "string",
-              "format": "email",
-              "description": "The primary email address of this user"
-            }
-          }
+        "type": {
+          "type": "string",
+          "description": "`user`",
+          "enum": [
+            "user"
+          ]
         }
-      ]
+      }
+    },
+    "Metadata--Base": {
+      "title": "Metadata instance (Base)",
+      "type": "object",
+      "x-box-variants": [
+        "base",
+        "standard",
+        "full"
+      ],
+      "x-box-variant": "base",
+      "description": "The base representation of a metadata instance.",
+      "properties": {
+        "$parent": {
+          "type": "string",
+          "description": "The identifier of the item that this metadata instance\nhas been attached to. This combines the `type` and the `id`\nof the parent in the form `{type}_{id}`."
+        },
+        "$template": {
+          "type": "string",
+          "description": "The name of the template"
+        },
+        "$scope": {
+          "type": "string",
+          "description": "An ID for the scope in which this template\nhas been applied. This will be `enterprise_{enterprise_id}` for templates\ndefined for use in this enterprise, and `global` for general templates\nthat are available to all enterprises using Box."
+        },
+        "$version": {
+          "type": "integer",
+          "description": "The version of the metadata instance. This version starts at 0 and\nincreases every time a user-defined property is modified."
+        }
+      }
     },
     "File--Base": {
       "title": "File (Base)",
@@ -1284,35 +1841,6 @@
           "description": "`folder`",
           "enum": [
             "folder"
-          ]
-        }
-      }
-    },
-    "User--Base": {
-      "title": "User (Base)",
-      "type": "object",
-      "x-box-variants": [
-        "base",
-        "mini",
-        "standard",
-        "full"
-      ],
-      "x-box-variant": "base",
-      "description": "A mini representation of a user, used when\nnested within another resource.",
-      "required": [
-        "type",
-        "id"
-      ],
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "The unique identifier for this user"
-        },
-        "type": {
-          "type": "string",
-          "description": "`user`",
-          "enum": [
-            "user"
           ]
         }
       }
