@@ -14,7 +14,7 @@
             "url": "http://www.apache.org/licenses/LICENSE-2.0"
         },
         "version": "2.0.0",
-        "x-box-commit-hash": "2850ba7b2e"
+        "x-box-commit-hash": "9cf2ebee56"
     },
     "servers": [
         {
@@ -3379,10 +3379,10 @@
                                         },
                                         "path": {
                                             "type": "string",
-                                            "example": "/Box__Security__Classification__Key",
-                                            "description": "`/Box__Security__Classification__Key`",
+                                            "example": "Box__Security__Classification__Key",
+                                            "description": "Defines classifications available in the enterprise.",
                                             "enum": [
-                                                "/Box__Security__Classification__Key"
+                                                "Box__Security__Classification__Key"
                                             ]
                                         },
                                         "value": {
@@ -3660,11 +3660,17 @@
                                     "name": "Aaron Levie"
                                 },
                                 "additionalProperties": {
-                                    "type": "string",
-                                    "description": "メタデータテンプレートに存在する各フィールドの値。\n\n`global.properties`テンプレートの場合、汎用的なキー/値ペアをテンプレートに保存できるため、0個以上のフィールドのリストにすることができます。",
-                                    "example": "Aaron Levie",
-                                    "x-box-example-key": "name"
-                                }
+                                    "allOf": [
+                                        null,
+                                        {
+                                            "example": "Aaron Levie"
+                                        },
+                                        {
+                                            "description": "A value for each of the fields that are present on the metadata template. For the `global.properties` template this can be a list of zero or more fields, as this template allows for any generic key-value pairs to be stored stored in the template."
+                                        }
+                                    ]
+                                },
+                                "x-box-example-key": "name"
                             }
                         }
                     }
@@ -3675,7 +3681,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Metadata"
+                                    "$ref": "#/components/schemas/Metadata--Full"
                                 }
                             }
                         }
@@ -3818,7 +3824,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Metadata"
+                                    "$ref": "#/components/schemas/Metadata--Full"
                                 }
                             }
                         }
@@ -6476,10 +6482,10 @@
                                         },
                                         "path": {
                                             "type": "string",
-                                            "example": "/Box__Security__Classification__Key",
-                                            "description": "`/Box__Security__Classification__Key`",
+                                            "example": "Box__Security__Classification__Key",
+                                            "description": "Defines classifications available in the enterprise.",
                                             "enum": [
-                                                "/Box__Security__Classification__Key"
+                                                "Box__Security__Classification__Key"
                                             ]
                                         },
                                         "value": {
@@ -6761,11 +6767,17 @@
                                     "name": "Aaron Levie"
                                 },
                                 "additionalProperties": {
-                                    "type": "string",
-                                    "description": "メタデータテンプレートに存在する各フィールドの値。\n\n`global.properties`テンプレートの場合、汎用的なキー/値ペアをテンプレートに保存できるため、0個以上のフィールドのリストにすることができます。",
-                                    "example": "Aaron Levie",
-                                    "x-box-example-key": "name"
-                                }
+                                    "allOf": [
+                                        null,
+                                        {
+                                            "example": "Aaron Levie"
+                                        },
+                                        {
+                                            "description": "A value for each of the fields that are present on the metadata template. For the `global.properties` template this can be a list of zero or more fields, as this template allows for any generic key-value pairs to be stored in the template."
+                                        }
+                                    ]
+                                },
+                                "x-box-example-key": "name"
                             }
                         }
                     }
@@ -6776,7 +6788,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Metadata"
+                                    "$ref": "#/components/schemas/Metadata--Full"
                                 }
                             }
                         }
@@ -6920,7 +6932,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Metadata"
+                                    "$ref": "#/components/schemas/Metadata--Full"
                                 }
                             }
                         }
@@ -7728,31 +7740,6 @@
                         }
                     }
                 }
-            },
-            "delete": {
-                "operationId": "delete_metadata_templates_enterprise_securityClassification-6VMVochwUWo_schema",
-                "summary": "すべての分類を削除",
-                "tags": [
-                    "Classifications"
-                ],
-                "x-box-tag": "classifications",
-                "x-box-sanitized": true,
-                "description": "分類メタデータテンプレートを削除することで、すべての分類を削除します。",
-                "responses": {
-                    "204": {
-                        "description": "分類のメタデータテンプレートが正常に削除された場合は、空のレスポンスを返します。"
-                    },
-                    "default": {
-                        "description": "予期しないクライアントエラー。",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ClientError"
-                                }
-                            }
-                        }
-                    }
-                }
             }
         },
         "/metadata_templates/enterprise/securityClassification-6VMVochwUWo/schema#add": {
@@ -7763,12 +7750,14 @@
                     "Classifications"
                 ],
                 "x-box-tag": "classifications",
-                "x-box-sanitized": true,
                 "description": "会社が使用できる分類のリストに1つ以上の新しい分類を追加します。\n\nこのAPIは、`/metadata_templates/enterprise_12345/securityClassification-6VMVochwUWo/schema`のように、URLにEnterprise IDを明示的に含めることで呼び出すこともできます。",
                 "requestBody": {
                     "content": {
-                        "application/json-patch+json": {
+                        "application/json": {
                             "schema": {
+                                "required": [
+                                    "items"
+                                ],
                                 "description": "会社の分類のリストに追加する1つ以上の分類を含む配列。",
                                 "type": "array",
                                 "items": {
@@ -7783,38 +7772,51 @@
                                         "op": {
                                             "type": "string",
                                             "example": "addEnumOption",
-                                            "description": "`addEnumOption`"
+                                            "description": "The type of change to perform on the classification object.",
+                                            "enum": [
+                                                "addEnumOption"
+                                            ]
                                         },
                                         "fieldKey": {
                                             "type": "string",
                                             "example": "Box__Security__Classification__Key",
-                                            "description": "`Box__Security__Classification__Key`"
+                                            "description": "Defines classifications available in the enterprise.",
+                                            "enum": [
+                                                "Box__Security__Classification__Key"
+                                            ]
                                         },
                                         "data": {
                                             "type": "object",
-                                            "description": "追加する分類の詳細。",
                                             "required": [
                                                 "key"
                                             ],
+                                            "description": "追加する分類の詳細。",
                                             "properties": {
                                                 "key": {
                                                     "type": "string",
                                                     "example": "Sensitive",
                                                     "description": "ウェブインターフェースおよびモバイルインターフェースに表示される分類のラベル。これは、分類を追加するために必要な唯一のフィールドです。"
                                                 },
-                                                "classification": {
+                                                "staticConfig": {
                                                     "type": "object",
-                                                    "description": "分類の追加情報。",
+                                                    "description": "A static configuration for the classification.",
                                                     "properties": {
-                                                        "classificationDefinition": {
-                                                            "type": "string",
-                                                            "example": "Sensitive information that must not be shared.",
-                                                            "description": "分類の詳しい説明。"
-                                                        },
-                                                        "colorID": {
-                                                            "type": "number",
-                                                            "example": 4,
-                                                            "description": "分類ラベルに色を割り当てる際に使用される内部のBox識別子。\n\n`colorID`と色の間のマッピングは予告なしに変更される場合があります。現在、色のマッピングは以下のとおりです。\n\n* `0`: 黄\n* `1`: オレンジ\n* `2`: 赤\n* `3`: 紫\n* `4`: ライトブルー\n* `5`: ダークブルー\n* `6`: ライトグリーン\n* `7`: グレー"
+                                                        "classification": {
+                                                            "type": "object",
+                                                            "description": "分類の追加情報。",
+                                                            "properties": {
+                                                                "classificationDefinition": {
+                                                                    "type": "string",
+                                                                    "example": "Sensitive information that must not be shared.",
+                                                                    "description": "分類の詳しい説明。"
+                                                                },
+                                                                "colorID": {
+                                                                    "type": "integer",
+                                                                    "format": "int64",
+                                                                    "example": 4,
+                                                                    "description": "分類ラベルに色を割り当てる際に使用される内部のBox識別子。\n\n`colorID`と色の間のマッピングは予告なしに変更される場合があります。現在、色のマッピングは以下のとおりです。\n\n* `0`: 黄\n* `1`: オレンジ\n* `2`: 赤\n* `3`: 紫\n* `4`: ライトブルー\n* `5`: ダークブルー\n* `6`: ライトグリーン\n* `7`: グレー"
+                                                                }
+                                                            }
                                                         }
                                                     }
                                                 }
@@ -7886,6 +7888,9 @@
                             "schema": {
                                 "description": "更新する1つ以上の分類を含む配列。",
                                 "type": "array",
+                                "required": [
+                                    "items"
+                                ],
                                 "items": {
                                     "type": "object",
                                     "description": "更新する1つの分類。",
@@ -7899,12 +7904,18 @@
                                         "op": {
                                             "type": "string",
                                             "example": "editEnumOption",
-                                            "description": "`editEnumOption`"
+                                            "description": "The type of change to perform on the classification object.",
+                                            "enum": [
+                                                "editEnumOption"
+                                            ]
                                         },
                                         "fieldKey": {
                                             "type": "string",
                                             "example": "Box__Security__Classification__Key",
-                                            "description": "`Box__Security__Classification__Key`"
+                                            "description": "Defines classifications available in the enterprise.",
+                                            "enum": [
+                                                "Box__Security__Classification__Key"
+                                            ]
                                         },
                                         "enumOptionKey": {
                                             "type": "string",
@@ -7913,123 +7924,40 @@
                                         },
                                         "data": {
                                             "type": "object",
-                                            "description": "更新された分類の詳細。",
                                             "required": [
                                                 "key"
                                             ],
+                                            "description": "更新された分類の詳細。",
                                             "properties": {
                                                 "key": {
                                                     "type": "string",
                                                     "example": "Very Sensitive",
                                                     "description": "ウェブインターフェースおよびモバイルインターフェースに表示される、分類の新しいラベル。"
                                                 },
-                                                "classification": {
+                                                "staticConfig": {
                                                     "type": "object",
-                                                    "description": "分類の追加情報。",
+                                                    "description": "A static configuration for the classification.",
                                                     "properties": {
-                                                        "classificationDefinition": {
-                                                            "type": "string",
-                                                            "example": "Sensitive information that must not be shared.",
-                                                            "description": "分類の詳しい説明。"
-                                                        },
-                                                        "colorID": {
-                                                            "type": "number",
-                                                            "example": 4,
-                                                            "description": "分類ラベルに色を割り当てる際に使用される内部のBox識別子。\n\n`colorID`と色の間のマッピングは予告なしに変更される場合があります。現在、色のマッピングは以下のとおりです。\n\n* `0`: 黄\n* `1`: オレンジ\n* `2`: 赤\n* `3`: 紫\n* `4`: ライトブルー\n* `5`: ダークブルー\n* `6`: ライトグリーン\n* `7`: グレー"
+                                                        "classification": {
+                                                            "type": "object",
+                                                            "description": "分類の追加情報。",
+                                                            "properties": {
+                                                                "classificationDefinition": {
+                                                                    "type": "string",
+                                                                    "example": "Sensitive information that must not be shared.",
+                                                                    "description": "分類の詳しい説明。"
+                                                                },
+                                                                "colorID": {
+                                                                    "type": "integer",
+                                                                    "format": "int64",
+                                                                    "example": 4,
+                                                                    "description": "分類ラベルに色を割り当てる際に使用される内部のBox識別子。\n\n`colorID`と色の間のマッピングは予告なしに変更される場合があります。現在、色のマッピングは以下のとおりです。\n\n* `0`: 黄\n* `1`: オレンジ\n* `2`: 赤\n* `3`: 紫\n* `4`: ライトブルー\n* `5`: ダークブルー\n* `6`: ライトグリーン\n* `7`: グレー"
+                                                                }
+                                                            }
                                                         }
                                                     }
                                                 }
                                             }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "更新された`securityClassification`メタデータテンプレートを返します。これには、この会社が使用できるすべての分類のリストを取得する`Box__Security__Classification__Key`フィールドが含まれています。",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ClassificationTemplate"
-                                }
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "リクエストパラメータのいずれかが無効な場合に返されます。",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ClientError"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "テンプレート名が正しくないときに返されます。リクエストのURLが正しいことを確認してください。",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ClientError"
-                                }
-                            }
-                        }
-                    },
-                    "default": {
-                        "description": "予期しないクライアントエラー。",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ClientError"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/metadata_templates/enterprise/securityClassification-6VMVochwUWo/schema#delete": {
-            "put": {
-                "operationId": "put_metadata_templates_enterprise_securityClassification-6VMVochwUWo_schema#delete",
-                "summary": "分類を削除",
-                "tags": [
-                    "Classifications"
-                ],
-                "x-box-tag": "classifications",
-                "x-box-sanitized": true,
-                "description": "会社が使用できる分類のリストから1つの分類を削除します。\n\nこのAPIは、`/metadata_templates/enterprise_12345/securityClassification-6VMVochwUWo/schema`のように、URLにEnterprise IDを明示的に含めることで呼び出すこともできます。",
-                "requestBody": {
-                    "content": {
-                        "application/json-patch+json": {
-                            "schema": {
-                                "description": "削除する1つ以上の分類を含む配列。",
-                                "type": "array",
-                                "items": {
-                                    "type": "object",
-                                    "description": "削除する1つの分類。",
-                                    "required": [
-                                        "op",
-                                        "fieldKey",
-                                        "enumOptionKey"
-                                    ],
-                                    "properties": {
-                                        "op": {
-                                            "type": "string",
-                                            "example": "removeEnumOption",
-                                            "description": "`removeEnumOption`"
-                                        },
-                                        "fieldKey": {
-                                            "type": "string",
-                                            "example": "Box__Security__Classification__Key",
-                                            "description": "`Box__Security__Classification__Key`"
-                                        },
-                                        "enumOptionKey": {
-                                            "type": "string",
-                                            "example": "Sensitive",
-                                            "description": "削除する分類のラベル。"
                                         }
                                     }
                                 }
@@ -8236,9 +8164,15 @@
                                                 "name": "Aaron Levie"
                                             },
                                             "additionalProperties": {
-                                                "type": "string",
-                                                "description": "カスタムデータエントリの値。",
-                                                "example": "Aaron Levie",
+                                                "allOf": [
+                                                    null,
+                                                    {
+                                                        "example": "Aaron Levie"
+                                                    },
+                                                    {
+                                                        "description": "A value for each of the fields that are present on the metadata template. For the `global.properties` template this can be a list of zero or more fields, as this template allows for any generic key-value pairs to be stored stored in the template."
+                                                    }
+                                                ],
                                                 "x-box-example-key": "name"
                                             }
                                         },
@@ -8802,7 +8736,9 @@
                                 "type": "object",
                                 "required": [
                                     "scope",
-                                    "displayName"
+                                    "displayName",
+                                    "fields",
+                                    "templateKey"
                                 ],
                                 "properties": {
                                     "scope": {
@@ -8816,14 +8752,14 @@
                                     "templateKey": {
                                         "type": "string",
                                         "example": "securityClassification-6VMVochwUWo",
-                                        "description": "`securityClassification-6VMVochwUWo`",
+                                        "description": "Defines the list of metadata templates.",
                                         "enum": [
                                             "securityClassification-6VMVochwUWo"
                                         ]
                                     },
                                     "displayName": {
                                         "type": "string",
-                                        "description": "`Classification`",
+                                        "description": "The name of the template as shown in web and mobile interfaces.",
                                         "example": "Classification",
                                         "enum": [
                                             "Classification"
@@ -8832,24 +8768,30 @@
                                     "hidden": {
                                         "type": "boolean",
                                         "example": false,
-                                        "description": "`false`"
+                                        "description": "Determines if the classification template is hidden or available on web and mobile devices."
                                     },
                                     "copyInstanceOnItemCopy": {
                                         "type": "boolean",
                                         "example": false,
-                                        "description": "`false`"
+                                        "description": "Determines if classifications are copied along when the file or folder is copied."
                                     },
                                     "fields": {
                                         "type": "array",
-                                        "description": "分類テンプレートは1つのフィールドを保持します。このフィールドでは、有効な分類の値がすべて保持されます。",
+                                        "description": "The classification template requires exactly one field, which holds all the valid classification values.",
                                         "items": {
+                                            "required": [
+                                                "type",
+                                                "key",
+                                                "displayName",
+                                                "options"
+                                            ],
                                             "type": "object",
                                             "description": "有効な分類の値をすべて保持する`enum`フィールド。",
                                             "properties": {
                                                 "type": {
                                                     "type": "string",
                                                     "example": "enum",
-                                                    "description": "`enum`",
+                                                    "description": "The type of the field that is always enum.",
                                                     "enum": [
                                                         "enum"
                                                     ]
@@ -8857,7 +8799,7 @@
                                                 "key": {
                                                     "type": "string",
                                                     "example": "Box__Security__Classification__Key",
-                                                    "description": "`Box__Security__Classification__Key`",
+                                                    "description": "Defines classifications available in the enterprise.",
                                                     "enum": [
                                                         "Box__Security__Classification__Key"
                                                     ]
@@ -8865,7 +8807,7 @@
                                                 "displayName": {
                                                     "type": "string",
                                                     "example": "Classification",
-                                                    "description": "`Classification`",
+                                                    "description": "A display name for the classification.",
                                                     "enum": [
                                                         "Classification"
                                                     ]
@@ -8873,12 +8815,15 @@
                                                 "hidden": {
                                                     "type": "boolean",
                                                     "example": false,
-                                                    "description": "`false`"
+                                                    "description": "Determines if the classification template is hidden or available on web and mobile devices."
                                                 },
                                                 "options": {
                                                     "type": "array",
                                                     "description": "このテンプレートに存在する実際の分類のリスト。",
                                                     "items": {
+                                                        "required": [
+                                                            "key"
+                                                        ],
                                                         "type": "object",
                                                         "description": "個々の分類。",
                                                         "properties": {
@@ -8901,7 +8846,8 @@
                                                                                 "description": "分類の詳しい説明。"
                                                                             },
                                                                             "colorID": {
-                                                                                "type": "number",
+                                                                                "type": "integer",
+                                                                                "format": "int64",
                                                                                 "example": 4,
                                                                                 "description": "分類ラベルに色を割り当てる際に使用される識別子。\n\n`colorID`と色の間のマッピングは予告なしに変更される場合があります。現在、色のマッピングは以下のとおりです。\n\n* `0`: 黄\n* `1`: オレンジ\n* `2`: 赤\n* `3`: 紫\n* `4`: ライトブルー\n* `5`: ダークブルー\n* `6`: ライトグリーン\n* `7`: グレー"
                                                                             }
@@ -9758,7 +9704,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Comment"
+                                    "$ref": "#/components/schemas/Comment--Full"
                                 }
                             }
                         }
@@ -14440,7 +14386,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/User"
+                                    "$ref": "#/components/schemas/User--Full"
                                 }
                             }
                         }
@@ -15857,7 +15803,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Group"
+                                    "$ref": "#/components/schemas/Group--Full"
                                 }
                             }
                         }
@@ -23853,8 +23799,7 @@
                 "operationId": "post_integration_mappings_slack",
                 "summary": "Slack統合マッピングを作成",
                 "tags": [
-                    "integrationMappingsSlack",
-                    "post_integration_mappings_slack"
+                    "integrationMappingsSlack"
                 ],
                 "x-box-tag": "integration_mappings",
                 "description": "SlackチャンネルをBox項目にマッピングすることで、[Slack統合マッピング](https://support.box.com/hc/en-us/articles/4415585987859-Box-as-the-Content-Layer-for-Slack)を作成します。\n\nこのエンドポイントを使用するには、管理者または共同管理者の役割が必要です。",
@@ -25132,7 +25077,12 @@
                 "x-box-tag": "classifications",
                 "description": "会社が定義したセキュリティ分類を保持するメタデータテンプレート。",
                 "required": [
-                    "type"
+                    "id",
+                    "type",
+                    "scope",
+                    "displayName",
+                    "fields",
+                    "templateKey"
                 ],
                 "properties": {
                     "id": {
@@ -25173,12 +25123,12 @@
                     "hidden": {
                         "type": "boolean",
                         "example": false,
-                        "description": "このテンプレートはいつでもウェブインターフェースおよびモバイルインターフェースで使用できます。"
+                        "description": "Determines if the template is always available in web and mobile interfaces."
                     },
                     "copyInstanceOnItemCopy": {
                         "type": "boolean",
                         "example": true,
-                        "description": "ファイルまたはフォルダがコピーされると、必ず分類もコピーされます。"
+                        "description": "Determines if classifications are copied along when the file or folder is copied."
                     },
                     "fields": {
                         "type": "array",
@@ -25187,6 +25137,13 @@
                         "description": "この分類テンプレートのフィールドのリスト。これには、`Box__Security__Classification__Key`というフィールドが1つだけ含まれています。これにより、この会社で使用できるさまざまな分類が定義されます。",
                         "items": {
                             "type": "object",
+                            "required": [
+                                "id",
+                                "type",
+                                "key",
+                                "displayName",
+                                "options"
+                            ],
                             "description": "使用可能な分類を表すメタデータテンプレートフィールド。",
                             "properties": {
                                 "id": {
@@ -25197,7 +25154,7 @@
                                 "type": {
                                     "type": "string",
                                     "example": "enum",
-                                    "description": "`enum`",
+                                    "description": "The array item type.",
                                     "enum": [
                                         "enum"
                                     ]
@@ -25205,7 +25162,7 @@
                                 "key": {
                                     "type": "string",
                                     "example": "Box__Security__Classification__Key",
-                                    "description": "`Box__Security__Classification__Key`",
+                                    "description": "Defines classifications available in the enterprise.",
                                     "enum": [
                                         "Box__Security__Classification__Key"
                                     ]
@@ -25228,6 +25185,10 @@
                                     "description": "この会社で使用できる分類のリスト。",
                                     "minItems": 1,
                                     "items": {
+                                        "required": [
+                                            "key",
+                                            "id"
+                                        ],
                                         "type": "object",
                                         "description": "この会社で使用できる1つの分類。",
                                         "properties": {
@@ -25255,7 +25216,8 @@
                                                                 "description": "分類の詳しい説明。"
                                                             },
                                                             "colorID": {
-                                                                "type": "number",
+                                                                "type": "integer",
+                                                                "format": "int64",
                                                                 "example": 4,
                                                                 "description": "分類ラベルに色を割り当てる際に使用される内部のBox識別子。\n\n`colorID`と色の間のマッピングは予告なしに変更される場合があります。現在、色のマッピングは以下のとおりです。\n\n* `0`: 黄\n* `1`: オレンジ\n* `2`: 赤\n* `3`: 紫\n* `4`: ライトブルー\n* `5`: ダークブルー\n* `6`: ライトグリーン\n* `7`: グレー"
                                                             }
@@ -25277,6 +25239,10 @@
                 "x-box-resource-id": "collaboration",
                 "x-box-tag": "user_collaborations",
                 "description": "アクセス制御リストと同様に、コラボレーションではファイルとフォルダに 対するユーザーおよびグループのアクセス権限が定義されます。コラボレーションオブジェクトは、特定のロールによって定義される権限を含んだファイルまたはフォルダへのアクセス権限をユーザーまたはグループに付与します。",
+                "required": [
+                    "id",
+                    "type"
+                ],
                 "properties": {
                     "id": {
                         "type": "string",
@@ -25638,16 +25604,14 @@
                             },
                             "next_marker": {
                                 "description": "次の検索結果ページの開始場所のマーカー。",
-                                "example": 3000,
-                                "type": "integer",
-                                "format": "int64",
+                                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                                "type": "string",
                                 "nullable": true
                             },
                             "prev_marker": {
                                 "description": "前の検索結果ページの開始場所のマーカー。",
-                                "example": 1000,
-                                "type": "integer",
-                                "format": "int64",
+                                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVih",
+                                "type": "string",
                                 "nullable": true
                             }
                         }
@@ -25760,16 +25724,14 @@
                             },
                             "next_marker": {
                                 "description": "次の検索結果ページの開始場所のマーカー。",
-                                "example": 3000,
-                                "type": "integer",
-                                "format": "int64",
+                                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                                "type": "string",
                                 "nullable": true
                             },
                             "prev_marker": {
                                 "description": "前の検索結果ページの開始場所のマーカー。",
-                                "example": 1000,
-                                "type": "integer",
-                                "format": "int64",
+                                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVih",
+                                "type": "string",
                                 "nullable": true
                             }
                         }
@@ -26026,7 +25988,7 @@
                                 "type": "array",
                                 "description": "コメントのリスト",
                                 "items": {
-                                    "$ref": "#/components/schemas/Comment"
+                                    "$ref": "#/components/schemas/Comment--Full"
                                 }
                             }
                         }
@@ -26859,7 +26821,7 @@
                         "type": "array",
                         "description": "ファイルのリスト",
                         "items": {
-                            "$ref": "#/components/schemas/File"
+                            "$ref": "#/components/schemas/File--Full"
                         }
                     }
                 }
@@ -27665,16 +27627,14 @@
                             },
                             "next_marker": {
                                 "description": "次の検索結果ページの開始場所のマーカー。",
-                                "example": 3000,
-                                "type": "integer",
-                                "format": "int64",
+                                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                                "type": "string",
                                 "nullable": true
                             },
                             "prev_marker": {
                                 "description": "前の検索結果ページの開始場所のマーカー。",
-                                "example": 1000,
-                                "type": "integer",
-                                "format": "int64",
+                                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVih",
+                                "type": "string",
                                 "nullable": true
                             }
                         }
@@ -27931,7 +27891,7 @@
                                 "type": "array",
                                 "description": "ファイルバージョンのリスト",
                                 "items": {
-                                    "$ref": "#/components/schemas/FileVersion"
+                                    "$ref": "#/components/schemas/FileVersion--Full"
                                 }
                             }
                         }
@@ -28012,16 +27972,14 @@
                             },
                             "next_marker": {
                                 "description": "次の検索結果ページの開始場所のマーカー。",
-                                "example": 3000,
-                                "type": "integer",
-                                "format": "int64",
+                                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                                "type": "string",
                                 "nullable": true
                             },
                             "prev_marker": {
                                 "description": "前の検索結果ページの開始場所のマーカー。",
-                                "example": 1000,
-                                "type": "integer",
-                                "format": "int64",
+                                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVih",
+                                "type": "string",
                                 "nullable": true
                             }
                         }
@@ -28122,16 +28080,14 @@
                             },
                             "next_marker": {
                                 "description": "次の検索結果ページの開始場所のマーカー。",
-                                "example": 3000,
-                                "type": "integer",
-                                "format": "int64",
+                                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                                "type": "string",
                                 "nullable": true
                             },
                             "prev_marker": {
                                 "description": "前の検索結果ページの開始場所のマーカー。",
-                                "example": 1000,
-                                "type": "integer",
-                                "format": "int64",
+                                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVih",
+                                "type": "string",
                                 "nullable": true
                             }
                         }
@@ -28969,45 +28925,26 @@
                 "x-box-resource-id": "folder_locks",
                 "x-box-tag": "folder_locks",
                 "description": "フォルダロックのリスト",
-                "allOf": [
-                    {
-                        "type": "object",
-                        "description": "マーカーベースのページ割りについて説明しているAPIレスポンスの部分",
-                        "properties": {
-                            "limit": {
-                                "description": "これらのエントリで使用された制限値。許容される最大値を超えていない限り、クエリパラメータの`limit`と等しくなります。最大値はAPIによって異なります。",
-                                "example": 1000,
-                                "type": "integer",
-                                "format": "int64"
-                            },
-                            "next_marker": {
-                                "description": "次の検索結果ページの開始場所のマーカー。",
-                                "example": 3000,
-                                "type": "integer",
-                                "format": "int64",
-                                "nullable": true
-                            },
-                            "prev_marker": {
-                                "description": "前の検索結果ページの開始場所のマーカー。",
-                                "example": 1000,
-                                "type": "integer",
-                                "format": "int64",
-                                "nullable": true
-                            }
+                "properties": {
+                    "entries": {
+                        "type": "array",
+                        "description": "フォルダロックのリスト",
+                        "items": {
+                            "$ref": "#/components/schemas/FolderLock"
                         }
                     },
-                    {
-                        "properties": {
-                            "entries": {
-                                "type": "array",
-                                "description": "フォルダロックのリスト",
-                                "items": {
-                                    "$ref": "#/components/schemas/FolderLock"
-                                }
-                            }
-                        }
+                    "limit": {
+                        "description": "これらのエントリで使用された制限値。許容される最大値を超えていない限り、クエリパラメータの`limit`と等しくなります。最大値はAPIによって異なります。",
+                        "example": "1000",
+                        "type": "string"
+                    },
+                    "next_marker": {
+                        "description": "次の検索結果ページの開始場所のマーカー。",
+                        "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                        "type": "string",
+                        "nullable": true
                     }
-                ]
+                }
             },
             "IntegrationMapping": {
                 "title": "統合マッピング",
@@ -29311,7 +29248,7 @@
                                 "type": "array",
                                 "description": "グループのリスト",
                                 "items": {
-                                    "$ref": "#/components/schemas/Group--Mini"
+                                    "$ref": "#/components/schemas/Group--Full"
                                 }
                             }
                         }
@@ -29590,6 +29527,10 @@
                 "x-box-resource-id": "invite",
                 "x-box-tag": "invites",
                 "description": "会社へのユーザーの招待。",
+                "required": [
+                    "id",
+                    "type"
+                ],
                 "properties": {
                     "id": {
                         "type": "string",
@@ -29717,13 +29658,13 @@
                                 "items": {
                                     "oneOf": [
                                         {
-                                            "$ref": "#/components/schemas/File--Mini"
+                                            "$ref": "#/components/schemas/File--Full"
                                         },
                                         {
                                             "$ref": "#/components/schemas/Folder--Mini"
                                         },
                                         {
-                                            "$ref": "#/components/schemas/WebLink--Mini"
+                                            "$ref": "#/components/schemas/WebLink"
                                         }
                                     ]
                                 }
@@ -29866,16 +29807,14 @@
                             },
                             "next_marker": {
                                 "description": "次の検索結果ページの開始場所のマーカー。",
-                                "example": 3000,
-                                "type": "integer",
-                                "format": "int64",
+                                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                                "type": "string",
                                 "nullable": true
                             },
                             "prev_marker": {
                                 "description": "前の検索結果ページの開始場所のマーカー。",
-                                "example": 1000,
-                                "type": "integer",
-                                "format": "int64",
+                                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVih",
+                                "type": "string",
                                 "nullable": true
                             }
                         }
@@ -29904,6 +29843,10 @@
                 ],
                 "x-box-variant": "mini",
                 "description": "Mini版のリーガルホールドポリシー",
+                "required": [
+                    "id",
+                    "type"
+                ],
                 "properties": {
                     "id": {
                         "type": "string",
@@ -30035,16 +29978,14 @@
                             },
                             "next_marker": {
                                 "description": "次の検索結果ページの開始場所のマーカー。",
-                                "example": 3000,
-                                "type": "integer",
-                                "format": "int64",
+                                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                                "type": "string",
                                 "nullable": true
                             },
                             "prev_marker": {
                                 "description": "前の検索結果ページの開始場所のマーカー。",
-                                "example": 1000,
-                                "type": "integer",
-                                "format": "int64",
+                                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVih",
+                                "type": "string",
                                 "nullable": true
                             }
                         }
@@ -30055,7 +29996,7 @@
                                 "type": "array",
                                 "description": "リーガルホールドポリシー割り当てのリスト",
                                 "items": {
-                                    "$ref": "#/components/schemas/LegalHoldPolicyAssignment--Base"
+                                    "$ref": "#/components/schemas/LegalHoldPolicyAssignment"
                                 }
                             }
                         }
@@ -30113,8 +30054,15 @@
                     },
                     {
                         "additionalProperties": {
-                            "type": "string",
-                            "example": "Aaron Levie",
+                            "allOf": [
+                                null,
+                                {
+                                    "example": "Aaron Levie"
+                                },
+                                {
+                                    "description": "A value for each of the fields that are present on the metadata template. For the `global.properties` template this can be a list of zero or more fields, as this template allows for any generic key-value pairs to be stored stored in the template."
+                                }
+                            ],
                             "x-box-example-key": "name"
                         }
                     }
@@ -30183,6 +30131,10 @@
                 "x-box-resource-id": "metadata_cascade_policy",
                 "x-box-tag": "metadata_cascade_policies",
                 "description": "メタデータカスケードポリシーにより、メタデータテンプレートインスタンスが自動的にターゲットフォルダ内のすべてのファイルとフォルダに適用されます。",
+                "required": [
+                    "id",
+                    "type"
+                ],
                 "properties": {
                     "id": {
                         "type": "string",
@@ -30237,12 +30189,8 @@
                     },
                     "scope": {
                         "type": "string",
-                        "example": "global",
-                        "description": "フォルダの子にカスケードされるテンプレートのスコープ。",
-                        "enum": [
-                            "global",
-                            "enterprise_*"
-                        ]
+                        "description": "The scope of the metadata cascade policy can either be `global` or `enterprise_*`. The `global` scope is used for policies that are available to any Box enterprise. The `enterprise_*` scope represents policies that have been created within a specific enterprise, where `*` will be the ID of that enterprise.",
+                        "example": "enterprise_123456"
                     },
                     "templateKey": {
                         "type": "string",
@@ -30270,16 +30218,14 @@
                             },
                             "next_marker": {
                                 "description": "次の検索結果ページの開始場所のマーカー。",
-                                "example": 3000,
-                                "type": "integer",
-                                "format": "int64",
+                                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                                "type": "string",
                                 "nullable": true
                             },
                             "prev_marker": {
                                 "description": "前の検索結果ページの開始場所のマーカー。",
-                                "example": 1000,
-                                "type": "integer",
-                                "format": "int64",
+                                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVih",
+                                "type": "string",
                                 "nullable": true
                             }
                         }
@@ -30431,7 +30377,8 @@
                 "x-box-tag": "metadata_templates",
                 "description": "ファイルやフォルダに適用可能なメタデータのテンプレート",
                 "required": [
-                    "type"
+                    "type",
+                    "id"
                 ],
                 "properties": {
                     "id": {
@@ -30617,16 +30564,14 @@
                             },
                             "next_marker": {
                                 "description": "次の検索結果ページの開始場所のマーカー。",
-                                "example": 3000,
-                                "type": "integer",
-                                "format": "int64",
+                                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                                "type": "string",
                                 "nullable": true
                             },
                             "prev_marker": {
                                 "description": "前の検索結果ページの開始場所のマーカー。",
-                                "example": 1000,
-                                "type": "integer",
-                                "format": "int64",
+                                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVih",
+                                "type": "string",
                                 "nullable": true
                             }
                         }
@@ -30716,10 +30661,10 @@
                             {
                                 "oneOf": [
                                     {
-                                        "$ref": "#/components/schemas/File"
+                                        "$ref": "#/components/schemas/File--Full"
                                     },
                                     {
-                                        "$ref": "#/components/schemas/Folder"
+                                        "$ref": "#/components/schemas/Folder--Full"
                                     },
                                     {
                                         "$ref": "#/components/schemas/WebLink"
@@ -30812,7 +30757,7 @@
                                 "description": "各エントリがリテンションポリシーオブジェクトを表しているリスト。",
                                 "type": "array",
                                 "items": {
-                                    "$ref": "#/components/schemas/RetentionPolicy--Mini"
+                                    "$ref": "#/components/schemas/RetentionPolicy"
                                 }
                             }
                         }
@@ -32012,10 +31957,10 @@
                                 "items": {
                                     "oneOf": [
                                         {
-                                            "$ref": "#/components/schemas/File"
+                                            "$ref": "#/components/schemas/File--Full"
                                         },
                                         {
-                                            "$ref": "#/components/schemas/Folder"
+                                            "$ref": "#/components/schemas/Folder--Full"
                                         },
                                         {
                                             "$ref": "#/components/schemas/WebLink"
@@ -32100,10 +32045,10 @@
                             {
                                 "oneOf": [
                                     {
-                                        "$ref": "#/components/schemas/File"
+                                        "$ref": "#/components/schemas/File--Full"
                                     },
                                     {
-                                        "$ref": "#/components/schemas/Folder"
+                                        "$ref": "#/components/schemas/Folder--Full"
                                     },
                                     {
                                         "$ref": "#/components/schemas/WebLink"
@@ -32247,16 +32192,14 @@
                             },
                             "next_marker": {
                                 "description": "次の検索結果ページの開始場所のマーカー。",
-                                "example": 3000,
-                                "type": "integer",
-                                "format": "int64",
+                                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                                "type": "string",
                                 "nullable": true
                             },
                             "prev_marker": {
                                 "description": "前の検索結果ページの開始場所のマーカー。",
-                                "example": 1000,
-                                "type": "integer",
-                                "format": "int64",
+                                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVih",
+                                "type": "string",
                                 "nullable": true
                             }
                         }
@@ -32363,16 +32306,14 @@
                             },
                             "next_marker": {
                                 "description": "次の検索結果ページの開始場所のマーカー。",
-                                "example": 3000,
-                                "type": "integer",
-                                "format": "int64",
+                                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                                "type": "string",
                                 "nullable": true
                             },
                             "prev_marker": {
                                 "description": "前の検索結果ページの開始場所のマーカー。",
-                                "example": 1000,
-                                "type": "integer",
-                                "format": "int64",
+                                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVih",
+                                "type": "string",
                                 "nullable": true
                             }
                         }
@@ -35081,7 +35022,7 @@
                                 "type": "array",
                                 "description": "ユーザーのリスト",
                                 "items": {
-                                    "$ref": "#/components/schemas/User"
+                                    "$ref": "#/components/schemas/User--Full"
                                 }
                             }
                         }
@@ -35512,16 +35453,14 @@
                             },
                             "next_marker": {
                                 "description": "次の検索結果ページの開始場所のマーカー。",
-                                "example": 3000,
-                                "type": "integer",
-                                "format": "int64",
+                                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                                "type": "string",
                                 "nullable": true
                             },
                             "prev_marker": {
                                 "description": "前の検索結果ページの開始場所のマーカー。",
-                                "example": 1000,
-                                "type": "integer",
-                                "format": "int64",
+                                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVih",
+                                "type": "string",
                                 "nullable": true
                             }
                         }
@@ -36262,16 +36201,14 @@
                             },
                             "next_marker": {
                                 "description": "次の検索結果ページの開始場所のマーカー。",
-                                "example": 3000,
-                                "type": "integer",
-                                "format": "int64",
+                                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                                "type": "string",
                                 "nullable": true
                             },
                             "prev_marker": {
                                 "description": "前の検索結果ページの開始場所のマーカー。",
-                                "example": 1000,
-                                "type": "integer",
-                                "format": "int64",
+                                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVih",
+                                "type": "string",
                                 "nullable": true
                             }
                         }
