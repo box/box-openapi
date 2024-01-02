@@ -14,7 +14,7 @@
       "url": "http://www.apache.org/licenses/LICENSE-2.0"
     },
     "version": "2.0.0",
-    "x-box-commit-hash": "f871f1e4d1"
+    "x-box-commit-hash": "d6b3a4d2fb"
   },
   "servers": [
     {
@@ -21566,7 +21566,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Task"
+                  "$ref": "#/components/schemas/TermsOfService"
                 }
               }
             }
@@ -25014,7 +25014,7 @@
             "type": "array",
             "description": "The permissions that this access token permits,\nproviding a list of resources (files, folders, etc)\nand the scopes permitted for each of those resources.",
             "items": {
-              "$ref": "#/components/schemas/FileScope"
+              "$ref": "#/components/schemas/FileOrFolderScope"
             }
           },
           "refresh_token": {
@@ -27109,7 +27109,7 @@
                             "type": "array",
                             "description": "The permissions that this access token permits,\nproviding a list of resources (files, folders, etc)\nand the scopes permitted for each of those resources.",
                             "items": {
-                              "$ref": "#/components/schemas/FileScope"
+                              "$ref": "#/components/schemas/FileOrFolderScope"
                             }
                           }
                         }
@@ -32689,6 +32689,10 @@
         ],
         "x-box-variant": "base",
         "description": "The root-level record that is supposed to represent a\nsingle Terms of Service.",
+        "required": [
+          "id",
+          "type"
+        ],
         "properties": {
           "id": {
             "type": "string",
@@ -33098,6 +33102,12 @@
                 "description": "Order of the signer",
                 "minimum": 0,
                 "example": 2
+              },
+              "signer_group_id": {
+                "type": "string",
+                "description": "If set, signers who have the same group ID will be assigned to the same input.\nA signer group is expected to have more than one signer. When a group contains fewer than two signers, \nit will be converted to a single signer and the group will be removed. ",
+                "example": "cd4ff89-8fc1-42cf-8b29-1890dedd26d7",
+                "nullable": true
               }
             }
           }
@@ -36633,14 +36643,14 @@
           }
         ]
       },
-      "FileScope": {
-        "title": "File scope",
+      "FileOrFolderScope": {
+        "title": "File or folder scope",
         "type": "object",
-        "description": "A relation between a file and the scopes for which the file can be accessed",
+        "description": "A relation between a resource (file or folder) and the scopes for which the resource can be accessed",
         "properties": {
           "scope": {
             "type": "string",
-            "description": "The file scopes for the file access",
+            "description": "The scopes for the resource access",
             "example": "item_download",
             "enum": [
               "annotation_edit",
@@ -36660,10 +36670,17 @@
           "object": {
             "allOf": [
               {
-                "$ref": "#/components/schemas/File--Mini"
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/Folder--Mini"
+                  },
+                  {
+                    "$ref": "#/components/schemas/File--Mini"
+                  }
+                ]
               },
               {
-                "description": "The file for which the file can be accessed"
+                "description": "The file or folder resource"
               }
             ]
           }
@@ -37424,6 +37441,12 @@
             "writeOnly": true,
             "description": "If set, the signer is required to enter the password before they are able\nto sign a document. This field is write only.",
             "example": "SecretPassword123",
+            "nullable": true
+          },
+          "signer_group_id": {
+            "type": "string",
+            "description": "If set, signers who have the same group ID will be assigned to the same input.\nA signer group is expected to have more than one signer. When a group contains fewer than two signers, \nit will be converted to a single signer and the group will be removed. ",
+            "example": "cd4ff89-8fc1-42cf-8b29-1890dedd26d7",
             "nullable": true
           }
         }
