@@ -14,7 +14,7 @@
       "url": "http://www.apache.org/licenses/LICENSE-2.0"
     },
     "version": "2.0.0",
-    "x-box-commit-hash": "d81cf2f982"
+    "x-box-commit-hash": "d6b3a4d2fb"
   },
   "host": "api.box.com",
   "basePath": "/",
@@ -182,7 +182,7 @@
           "type": "array",
           "description": "The permissions that this access token permits,\nproviding a list of resources (files, folders, etc)\nand the scopes permitted for each of those resources.",
           "items": {
-            "$ref": "#/definitions/FileScope"
+            "$ref": "#/definitions/FileOrFolderScope"
           }
         },
         "refresh_token": {
@@ -215,14 +215,14 @@
         }
       }
     },
-    "FileScope": {
-      "title": "File scope",
+    "FileOrFolderScope": {
+      "title": "File or folder scope",
       "type": "object",
-      "description": "A relation between a file and the scopes for which the file can be accessed",
+      "description": "A relation between a resource (file or folder) and the scopes for which the resource can be accessed",
       "properties": {
         "scope": {
           "type": "string",
-          "description": "The file scopes for the file access",
+          "description": "The scopes for the resource access",
           "enum": [
             "annotation_edit",
             "annotation_view_all",
@@ -241,14 +241,42 @@
         "object": {
           "allOf": [
             {
-              "$ref": "#/definitions/File--Mini"
+              "$ref": "#/definitions/Folder--Mini"
             },
             {
-              "description": "The file for which the file can be accessed"
+              "description": "The file or folder resource"
             }
           ]
         }
       }
+    },
+    "Folder--Mini": {
+      "title": "Folder (Mini)",
+      "type": "object",
+      "x-box-variant": "mini",
+      "description": "A mini representation of a file version, used when\nnested under another resource.",
+      "allOf": [
+        {
+          "$ref": "#/definitions/Folder--Base"
+        },
+        {
+          "properties": {
+            "sequence_id": {
+              "allOf": [
+                {
+                  "type": "string",
+                  "description": "A numeric identifier that represents the most recent user event\nthat has been applied to this item.\n\nThis can be used in combination with the `GET /events`-endpoint\nto filter out user events that would have occurred before this\nidentifier was read.\n\nAn example would be where a Box Drive-like application\nwould fetch an item via the API, and then listen to incoming\nuser events for changes to the item. The application would\nignore any user events where the `sequence_id` in the event\nis smaller than or equal to the `sequence_id` in the originally\nfetched resource."
+                },
+                {}
+              ]
+            },
+            "name": {
+              "type": "string",
+              "description": "The name of the folder."
+            }
+          }
+        }
+      ]
     },
     "File--Mini": {
       "title": "File (Mini)",
@@ -292,6 +320,39 @@
           }
         }
       ]
+    },
+    "Folder--Base": {
+      "title": "Folder (Base)",
+      "type": "object",
+      "x-box-variants": [
+        "base",
+        "mini",
+        "standard",
+        "full"
+      ],
+      "x-box-variant": "base",
+      "description": "The bare basic representation of a folder, the minimal\namount of fields returned when using the `fields` query\nparameter.",
+      "required": [
+        "id",
+        "type"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The unique identifier that represent a folder.\n\nThe ID for any folder can be determined\nby visiting a folder in the web application\nand copying the ID from the URL. For example,\nfor the URL `https://*.app.box.com/folders/123`\nthe `folder_id` is `123`."
+        },
+        "etag": {
+          "type": "string",
+          "description": "The HTTP `etag` of this folder. This can be used within some API\nendpoints in the `If-Match` and `If-None-Match` headers to only\nperform changes on the folder if (no) changes have happened."
+        },
+        "type": {
+          "type": "string",
+          "description": "`folder`",
+          "enum": [
+            "folder"
+          ]
+        }
+      }
     },
     "File--Base": {
       "title": "File (Base)",
