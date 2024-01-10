@@ -14,7 +14,7 @@
             "url": "http://www.apache.org/licenses/LICENSE-2.0"
         },
         "version": "2.0.0",
-        "x-box-commit-hash": "f871f1e4d1"
+        "x-box-commit-hash": "d6b3a4d2fb"
     },
     "servers": [
         {
@@ -21566,7 +21566,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Task"
+                                    "$ref": "#/components/schemas/TermsOfService"
                                 }
                             }
                         }
@@ -25014,7 +25014,7 @@
                         "type": "array",
                         "description": "このアクセストークンで許可される権限を返します。これにより、リソース (ファイルやフォルダなど) のリストと、各リソースで許可されるスコープが提供されます。",
                         "items": {
-                            "$ref": "#/components/schemas/FileScope"
+                            "$ref": "#/components/schemas/FileOrFolderScope"
                         }
                     },
                     "refresh_token": {
@@ -27109,7 +27109,7 @@
                                                         "type": "array",
                                                         "description": "このアクセストークンで許可される権限を返します。これにより、リソース (ファイルやフォルダなど) のリストと、各リソースで許可されるスコープが提供されます。",
                                                         "items": {
-                                                            "$ref": "#/components/schemas/FileScope"
+                                                            "$ref": "#/components/schemas/FileOrFolderScope"
                                                         }
                                                     }
                                                 }
@@ -32689,6 +32689,10 @@
                 ],
                 "x-box-variant": "base",
                 "description": "1つのサービス利用規約に該当するとみなされるルートレベルのレコード。",
+                "required": [
+                    "id",
+                    "type"
+                ],
                 "properties": {
                     "id": {
                         "type": "string",
@@ -33098,6 +33102,12 @@
                                 "description": "署名者の順序",
                                 "minimum": 0,
                                 "example": 2
+                            },
+                            "signer_group_id": {
+                                "type": "string",
+                                "description": "If set, signers who have the same group ID will be assigned to the same input. A signer group is expected to have more than one signer. When a group contains fewer than two signers, it will be converted to a single signer and the group will be removed. ",
+                                "example": "cd4ff89-8fc1-42cf-8b29-1890dedd26d7",
+                                "nullable": true
                             }
                         }
                     }
@@ -36633,14 +36643,14 @@
                     }
                 ]
             },
-            "FileScope": {
-                "title": "ファイルスコープ",
+            "FileOrFolderScope": {
+                "title": "File or folder scope",
                 "type": "object",
-                "description": "ファイルとそのファイルにアクセスできるスコープの関係",
+                "description": "A relation between a resource (file or folder) and the scopes for which the resource can be accessed",
                 "properties": {
                     "scope": {
                         "type": "string",
-                        "description": "ファイルアクセスのファイルスコープ",
+                        "description": "The scopes for the resource access",
                         "example": "item_download",
                         "enum": [
                             "annotation_edit",
@@ -36660,10 +36670,17 @@
                     "object": {
                         "allOf": [
                             {
-                                "$ref": "#/components/schemas/File--Mini"
+                                "oneOf": [
+                                    {
+                                        "$ref": "#/components/schemas/Folder--Mini"
+                                    },
+                                    {
+                                        "$ref": "#/components/schemas/File--Mini"
+                                    }
+                                ]
                             },
                             {
-                                "description": "そのファイルの代わりにアクセスできるファイル"
+                                "description": "The file or folder resource"
                             }
                         ]
                     }
@@ -37424,6 +37441,12 @@
                         "writeOnly": true,
                         "description": "設定した場合、署名者は、このパスワードを入力しないと、ドキュメントに署名できません。このフィールドは書き込み専用です。",
                         "example": "SecretPassword123",
+                        "nullable": true
+                    },
+                    "signer_group_id": {
+                        "type": "string",
+                        "description": "If set, signers who have the same group ID will be assigned to the same input. A signer group is expected to have more than one signer. When a group contains fewer than two signers, it will be converted to a single signer and the group will be removed. ",
+                        "example": "cd4ff89-8fc1-42cf-8b29-1890dedd26d7",
                         "nullable": true
                     }
                 }
