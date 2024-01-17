@@ -14,7 +14,7 @@
       "url": "http://www.apache.org/licenses/LICENSE-2.0"
     },
     "version": "2.0.0",
-    "x-box-commit-hash": "d6b3a4d2fb"
+    "x-box-commit-hash": "1eb7bcd21e"
   },
   "host": "api.box.com",
   "basePath": "/2.0",
@@ -23244,7 +23244,22 @@
       "title": "Storage policy assignment",
       "type": "object",
       "description": "The assignment of a storage policy to a user or enterprise",
+      "required": [
+        "id",
+        "type"
+      ],
       "properties": {
+        "id": {
+          "type": "string",
+          "description": "The unique identifier for a storage policy assignment."
+        },
+        "type": {
+          "type": "string",
+          "description": "`storage_policy_assignment`",
+          "enum": [
+            "storage_policy_assignment"
+          ]
+        },
         "storage_policy": {
           "allOf": [
             {
@@ -23509,6 +23524,16 @@
               "type": "string",
               "format": "date-time",
               "description": "Uses `days_valid` to calculate the date and time, in GMT, the sign request will expire if unsigned."
+            },
+            "parent_folder": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/Folder--Mini"
+                },
+                {
+                  "description": "The destination folder to place final, signed document and signing\nlog.\n\nWhen this value was not passed in when the signature request was \ncreated, then we will use a default folder which is either the parent\nfolder of the first source file in the payload if we have the permission\nto upload to that folder or a folder called \"My Sign Requests\"."
+                }
+              ]
             }
           }
         }
@@ -23583,6 +23608,16 @@
                 "$ref": "#/definitions/SignRequestCreateSigner"
               },
               "description": "Array of signers for the sign request. 35 is the max number of signers permitted."
+            },
+            "parent_folder": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/Folder--Mini"
+                },
+                {
+                  "description": "The destination folder to place final, signed document and signing\nlog. Only `ID` and `type` fields are required. The root folder,\nfolder ID `0`, cannot be used and can also not be null.\n\nWhen this value is not passed in when the signature request, then\nwe will use a default folder which is either the parent folder of\nthe first source file in the payload if we have the permission to\nupload to that folder or a folder called \"My Sign Requests\"."
+                }
+              ]
             }
           }
         }
@@ -25722,6 +25757,10 @@
       ],
       "x-box-variant": "mini",
       "description": "A mini description of a Storage Policy object",
+      "required": [
+        "id",
+        "type"
+      ],
       "properties": {
         "id": {
           "type": "string",
@@ -25745,9 +25784,6 @@
       ],
       "x-box-variant": "base",
       "description": "A request to create a sign request object",
-      "required": [
-        "parent_folder"
-      ],
       "properties": {
         "is_document_preparation_needed": {
           "type": "boolean",
@@ -25777,16 +25813,6 @@
         "are_reminders_enabled": {
           "type": "boolean",
           "description": "Reminds signers to sign a document on day 3, 8, 13 and 18. Reminders are only sent to outstanding signers."
-        },
-        "parent_folder": {
-          "allOf": [
-            {
-              "$ref": "#/definitions/Folder--Mini"
-            },
-            {
-              "description": "The destination folder to place final, signed document and signing\nlog. Only `ID` and `type` fields are required. The root folder,\nfolder ID `0`, cannot be used."
-            }
-          ]
         },
         "name": {
           "type": "string",
