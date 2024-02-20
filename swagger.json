@@ -14,7 +14,7 @@
       "url": "http://www.apache.org/licenses/LICENSE-2.0"
     },
     "version": "2.0.0",
-    "x-box-commit-hash": "183d9af824"
+    "x-box-commit-hash": "d3a7365495"
   },
   "host": "api.box.com",
   "basePath": "/2.0",
@@ -5557,62 +5557,6 @@
             }
           }
         ]
-      }
-    },
-    "/metadata_query_indices": {
-      "get": {
-        "operationId": "get_metadata_query_indices",
-        "summary": "List metadata query indices",
-        "tags": [
-          "Search"
-        ],
-        "description": "Retrieves the metadata query indices for a given scope and template key.",
-        "parameters": [
-          {
-            "name": "scope",
-            "description": "The scope of the metadata template",
-            "in": "query",
-            "required": true,
-            "type": "string",
-            "enum": [
-              "global",
-              "enterprise"
-            ]
-          },
-          {
-            "name": "template_key",
-            "description": "The name of the metadata template",
-            "in": "query",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Returns a collection of metadata query indices for scope and template key.",
-            "schema": {
-              "$ref": "#/definitions/MetadataQueryIndices"
-            }
-          },
-          "400": {
-            "description": "Returns an error when any of the parameters are not in a valid format.",
-            "schema": {
-              "$ref": "#/definitions/ClientError"
-            }
-          },
-          "404": {
-            "description": "Returns an error when the scope and template combination cannot be found.",
-            "schema": {
-              "$ref": "#/definitions/ClientError"
-            }
-          },
-          "default": {
-            "description": "An unexpected client error.",
-            "schema": {
-              "$ref": "#/definitions/ClientError"
-            }
-          }
-        }
       }
     },
     "/comments/{comment_id}": {
@@ -19521,30 +19465,6 @@
         }
       }
     },
-    "MetadataQueryIndices": {
-      "title": "Metadata query indices",
-      "type": "object",
-      "description": "A collection of metadata query indices.",
-      "properties": {
-        "entries": {
-          "description": "A collection of metadata query indices.",
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/MetadataQueryIndex"
-          }
-        },
-        "limit": {
-          "description": "The limit that was used for this request.",
-          "default": 100,
-          "type": "integer",
-          "format": "int64"
-        },
-        "next_marker": {
-          "description": "The marker for the start of the next page of results.",
-          "type": "string"
-        }
-      }
-    },
     "Comment--Full": {
       "title": "Comment (Full)",
       "type": "object",
@@ -23528,6 +23448,16 @@
               "type": "string",
               "format": "date-time",
               "description": "Uses `days_valid` to calculate the date and time, in GMT, the sign request will expire if unsigned."
+            },
+            "parent_folder": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/Folder--Mini"
+                },
+                {
+                  "description": "The destination folder to place final, signed document and signing\nlog.\n\nWhen this value was not passed in when the signature request was \ncreated, then we will use a default folder which is either the parent\nfolder of the first source file in the payload if we have the permission\nto upload to that folder or a folder called \"My Sign Requests\"."
+                }
+              ]
             }
           }
         }
@@ -23602,6 +23532,16 @@
                 "$ref": "#/definitions/SignRequestCreateSigner"
               },
               "description": "Array of signers for the sign request. 35 is the max number of signers permitted."
+            },
+            "parent_folder": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/Folder--Mini"
+                },
+                {
+                  "description": "The destination folder to place final, signed document and signing\nlog. Only `ID` and `type` fields are required. The root folder,\nfolder ID `0`, cannot be used and can also not be null.\n\nWhen this value is not passed in when the signature request, then\nwe will use a default folder which is either the parent folder of\nthe first source file in the payload if we have the permission to\nupload to that folder or a folder called \"My Sign Requests\"."
+                }
+              ]
             }
           }
         }
@@ -24765,60 +24705,6 @@
         }
       ]
     },
-    "MetadataQueryIndex": {
-      "title": "Metadata query index",
-      "type": "object",
-      "description": "A metadata query index",
-      "required": [
-        "type",
-        "status"
-      ],
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "The ID of the metadata query index."
-        },
-        "type": {
-          "type": "string",
-          "description": "Value is always `metadata_query_index`"
-        },
-        "status": {
-          "type": "string",
-          "description": "The status of the metadata query index",
-          "enum": [
-            "building",
-            "active",
-            "disabled"
-          ]
-        },
-        "fields": {
-          "type": "array",
-          "description": "A list of template fields which make up the index.",
-          "items": {
-            "type": "object",
-            "description": "The field which makes up the index.",
-            "allOf": [
-              {
-                "properties": {
-                  "key": {
-                    "type": "string",
-                    "description": "The metadata template field key."
-                  },
-                  "sort_direction": {
-                    "type": "string",
-                    "description": "The sort direction of the field.",
-                    "enum": [
-                      "asc",
-                      "desc"
-                    ]
-                  }
-                }
-              }
-            ]
-          }
-        }
-      }
-    },
     "Comment": {
       "title": "Comment",
       "type": "object",
@@ -25768,9 +25654,6 @@
       ],
       "x-box-variant": "base",
       "description": "A request to create a sign request object",
-      "required": [
-        "parent_folder"
-      ],
       "properties": {
         "is_document_preparation_needed": {
           "type": "boolean",
@@ -25800,16 +25683,6 @@
         "are_reminders_enabled": {
           "type": "boolean",
           "description": "Reminds signers to sign a document on day 3, 8, 13 and 18. Reminders are only sent to outstanding signers."
-        },
-        "parent_folder": {
-          "allOf": [
-            {
-              "$ref": "#/definitions/Folder--Mini"
-            },
-            {
-              "description": "The destination folder to place final, signed document and signing\nlog. Only `ID` and `type` fields are required. The root folder,\nfolder ID `0`, cannot be used."
-            }
-          ]
         },
         "name": {
           "type": "string",
