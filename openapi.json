@@ -14,7 +14,7 @@
       "url": "http://www.apache.org/licenses/LICENSE-2.0"
     },
     "version": "2.0.0",
-    "x-box-commit-hash": "183d9af824"
+    "x-box-commit-hash": "d3a7365495"
   },
   "servers": [
     {
@@ -9358,87 +9358,6 @@
           },
           "404": {
             "description": "Returns an error when a metadata template with the given `scope` and\n`templateKey` can not be found. The error response will include extra\ndetails.\n\n* `instance_not_found` - The template was not found. Please make sure\nto use the full template scope including the enterprise ID, like\n`enterprise_12345`.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ClientError"
-                }
-              }
-            }
-          },
-          "default": {
-            "description": "An unexpected client error.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ClientError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/metadata_query_indices": {
-      "get": {
-        "operationId": "get_metadata_query_indices",
-        "summary": "List metadata query indices",
-        "tags": [
-          "Search"
-        ],
-        "x-box-tag": "search",
-        "x-box-sanitized": true,
-        "x-box-enable-explorer": true,
-        "description": "Retrieves the metadata query indices for a given scope and template key.",
-        "parameters": [
-          {
-            "name": "scope",
-            "description": "The scope of the metadata template",
-            "example": "global",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "enum": [
-                "global",
-                "enterprise"
-              ]
-            }
-          },
-          {
-            "name": "template_key",
-            "description": "The name of the metadata template",
-            "example": "properties",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Returns a collection of metadata query indices for scope and template key.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/MetadataQueryIndices"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Returns an error when any of the parameters are not in a valid format.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ClientError"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Returns an error when the scope and template combination cannot be found.",
             "content": {
               "application/json": {
                 "schema": {
@@ -24467,6 +24386,16 @@
                   "$ref": "#/components/schemas/SignRequestCreateSigner"
                 },
                 "description": "Array of signers for the sign request. 35 is the max number of signers permitted."
+              },
+              "parent_folder": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/Folder--Mini"
+                  },
+                  {
+                    "description": "The destination folder to place final, signed document and signing\nlog. Only `ID` and `type` fields are required. The root folder,\nfolder ID `0`, cannot be used and can also not be null.\n\nWhen this value is not passed in when the signature request, then\nwe will use a default folder which is either the parent folder of\nthe first source file in the payload if we have the permission to\nupload to that folder or a folder called \"My Sign Requests\"."
+                  }
+                ]
               }
             }
           }
@@ -30319,34 +30248,6 @@
                 }
               ]
             }
-          }
-        }
-      },
-      "MetadataQueryIndices": {
-        "title": "Metadata query indices",
-        "type": "object",
-        "x-box-tag": "search",
-        "x-box-resource-id": "metadata_query_indices",
-        "description": "A collection of metadata query indices.",
-        "properties": {
-          "entries": {
-            "description": "A collection of metadata query indices.",
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/MetadataQueryIndex"
-            }
-          },
-          "limit": {
-            "description": "The limit that was used for this request.",
-            "default": 100,
-            "example": 100,
-            "type": "integer",
-            "format": "int64"
-          },
-          "next_marker": {
-            "description": "The marker for the start of the next page of results.",
-            "example": "0!-M7487OpVfBTNBV-XsQjU50gQFlbFFu5nArMWD7Ck61GH_Qo40M1S2xN5zWZPBzEjaQS1SOjJiQoo5BsXEl1bCVLRZ2pTqo4SKp9tyqzWQK2L51KR_nC1EgF5I_TJSFw7uO2Bx4HweGETOjh5_2oPSWw5iMkM-OvGApeR0lGFO48FDKoyzJyLgz5aogxoKd8VE09CesOOnTnmZvrW0puylDc-hFjY5YLmWFBKox3SOWiSDwKFkmZGNHyjEzza1nSwbZg6CYsAdGsDwGJhuCeTNsFzP5Mo5qx9wMloS0lSPuf2CcBInbIJzl2CKlXF3FvqhANttpm2nzdBTQRSoJyJnjVBpf4Q_HjV2eb4KIZBBlLy067UCVdv2AAWQFd5E2i6s1YiGRTtgMEZntOSUYD4IYLMWWm5Ra7ke_SP32SL3GSjbBQYIyCVQ..",
-            "type": "string"
           }
         }
       },
@@ -36423,9 +36324,6 @@
         ],
         "x-box-variant": "base",
         "description": "A request to create a sign request object",
-        "required": [
-          "parent_folder"
-        ],
         "properties": {
           "is_document_preparation_needed": {
             "type": "boolean",
@@ -36466,16 +36364,6 @@
             "type": "boolean",
             "description": "Reminds signers to sign a document on day 3, 8, 13 and 18. Reminders are only sent to outstanding signers.",
             "example": true
-          },
-          "parent_folder": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/Folder--Mini"
-              },
-              {
-                "description": "The destination folder to place final, signed document and signing\nlog. Only `ID` and `type` fields are required. The root folder,\nfolder ID `0`, cannot be used."
-              }
-            ]
           },
           "name": {
             "type": "string",
@@ -36625,6 +36513,17 @@
                 "example": "2021-04-26T08:12:13.982Z",
                 "description": "Uses `days_valid` to calculate the date and time, in GMT, the sign request will expire if unsigned.",
                 "nullable": true
+              },
+              "parent_folder": {
+                "nullable": false,
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/Folder--Mini"
+                  },
+                  {
+                    "description": "The destination folder to place final, signed document and signing\nlog.\n\nWhen this value was not passed in when the signature request was \ncreated, then we will use a default folder which is either the parent\nfolder of the first source file in the payload if we have the permission\nto upload to that folder or a folder called \"My Sign Requests\"."
+                  }
+                ]
               }
             }
           }
