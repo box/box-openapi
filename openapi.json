@@ -14,7 +14,7 @@
             "url": "http://www.apache.org/licenses/LICENSE-2.0"
         },
         "version": "2.0.0",
-        "x-box-commit-hash": "183d9af824"
+        "x-box-commit-hash": "d3a7365495"
     },
     "servers": [
         {
@@ -9358,87 +9358,6 @@
                     },
                     "404": {
                         "description": "指定された`scope`と`templateKey`のメタデータテンプレートが見つからない場合にエラーを返します。エラーレスポンスには追加の詳細が含まれます。\n\n* `instance_not_found` - テンプレートが見つからなかった場合に返されます。Enterprise ID (`enterprise_12345`など) を含むテンプレート全体のスコープを必ず使用してください。",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ClientError"
-                                }
-                            }
-                        }
-                    },
-                    "default": {
-                        "description": "予期しないクライアントエラー。",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ClientError"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/metadata_query_indices": {
-            "get": {
-                "operationId": "get_metadata_query_indices",
-                "summary": "メタデータクエリインデックスのリストを取得",
-                "tags": [
-                    "検索"
-                ],
-                "x-box-tag": "search",
-                "x-box-sanitized": true,
-                "x-box-enable-explorer": true,
-                "description": "指定されたスコープとテンプレートキーのメタデータクエリインデックスを取得します。",
-                "parameters": [
-                    {
-                        "name": "scope",
-                        "description": "メタデータテンプレートのスコープ",
-                        "example": "global",
-                        "in": "query",
-                        "required": true,
-                        "schema": {
-                            "type": "string",
-                            "enum": [
-                                "global",
-                                "enterprise"
-                            ]
-                        }
-                    },
-                    {
-                        "name": "template_key",
-                        "description": "メタデータテンプレートの名前",
-                        "example": "properties",
-                        "in": "query",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "スコープとテンプレートキーのメタデータクエリインデックスのコレクションを返します。",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/MetadataQueryIndices"
-                                }
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "パラメータのいずれかが有効な形式でない場合はエラーを返します。",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ClientError"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "スコープとテンプレートの組み合わせが見つからない場合は、エラーを返します。",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -24467,6 +24386,16 @@
                                     "$ref": "#/components/schemas/SignRequestCreateSigner"
                                 },
                                 "description": "署名リクエストの署名者の配列。許可されている署名者の最大数は35です。"
+                            },
+                            "parent_folder": {
+                                "allOf": [
+                                    {
+                                        "$ref": "#/components/schemas/Folder--Mini"
+                                    },
+                                    {
+                                        "description": "The destination folder to place final, signed document and signing log. Only `ID` and `type` fields are required. The root folder, folder ID `0`, cannot be used and can also not be null.\n\nWhen this value is not passed in when the signature request, then we will use a default folder which is either the parent folder of the first source file in the payload if we have the permission to upload to that folder or a folder called \"My Sign Requests\"."
+                                    }
+                                ]
                             }
                         }
                     }
@@ -30319,34 +30248,6 @@
                                 }
                             ]
                         }
-                    }
-                }
-            },
-            "MetadataQueryIndices": {
-                "title": "Metadata query indices",
-                "type": "object",
-                "x-box-tag": "search",
-                "x-box-resource-id": "metadata_query_indices",
-                "description": "メタデータクエリインデックスのコレクション。",
-                "properties": {
-                    "entries": {
-                        "description": "メタデータクエリインデックスのコレクション。",
-                        "type": "array",
-                        "items": {
-                            "$ref": "#/components/schemas/MetadataQueryIndex"
-                        }
-                    },
-                    "limit": {
-                        "description": "このリクエストに使用された制限。",
-                        "default": 100,
-                        "example": 100,
-                        "type": "integer",
-                        "format": "int64"
-                    },
-                    "next_marker": {
-                        "description": "次の検索結果ページの開始場所のマーカー。",
-                        "example": "0!-M7487OpVfBTNBV-XsQjU50gQFlbFFu5nArMWD7Ck61GH_Qo40M1S2xN5zWZPBzEjaQS1SOjJiQoo5BsXEl1bCVLRZ2pTqo4SKp9tyqzWQK2L51KR_nC1EgF5I_TJSFw7uO2Bx4HweGETOjh5_2oPSWw5iMkM-OvGApeR0lGFO48FDKoyzJyLgz5aogxoKd8VE09CesOOnTnmZvrW0puylDc-hFjY5YLmWFBKox3SOWiSDwKFkmZGNHyjEzza1nSwbZg6CYsAdGsDwGJhuCeTNsFzP5Mo5qx9wMloS0lSPuf2CcBInbIJzl2CKlXF3FvqhANttpm2nzdBTQRSoJyJnjVBpf4Q_HjV2eb4KIZBBlLy067UCVdv2AAWQFd5E2i6s1YiGRTtgMEZntOSUYD4IYLMWWm5Ra7ke_SP32SL3GSjbBQYIyCVQ..",
-                        "type": "string"
                     }
                 }
             },
@@ -36423,9 +36324,6 @@
                 ],
                 "x-box-variant": "base",
                 "description": "署名リクエストオブジェクトを作成するリクエスト",
-                "required": [
-                    "parent_folder"
-                ],
                 "properties": {
                     "is_document_preparation_needed": {
                         "type": "boolean",
@@ -36466,16 +36364,6 @@
                         "type": "boolean",
                         "description": "3、8、13、18日目にドキュメントに署名するよう署名者に促します。リマインダは未署名の署名者にのみ送信されます。",
                         "example": true
-                    },
-                    "parent_folder": {
-                        "allOf": [
-                            {
-                                "$ref": "#/components/schemas/Folder--Mini"
-                            },
-                            {
-                                "description": "最終的な署名済みドキュメントと署名ログの保存先フォルダ。`ID`フィールドと`type`フィールドのみが必要です。ルートフォルダ (フォルダID `0`) は使用できません。"
-                            }
-                        ]
                     },
                     "name": {
                         "type": "string",
@@ -36625,6 +36513,17 @@
                                 "example": "2021-04-26T08:12:13.982Z",
                                 "description": "`days_valid`を使用すると、未署名の場合に署名リクエストの有効期限となる日時 (GMT) が計算されます。",
                                 "nullable": true
+                            },
+                            "parent_folder": {
+                                "nullable": false,
+                                "allOf": [
+                                    {
+                                        "$ref": "#/components/schemas/Folder--Mini"
+                                    },
+                                    {
+                                        "description": "The destination folder to place final, signed document and signing log.\n\nWhen this value was not passed in when the signature request was created, then we will use a default folder which is either the parent folder of the first source file in the payload if we have the permission to upload to that folder or a folder called \"My Sign Requests\"."
+                                    }
+                                ]
                             }
                         }
                     }
