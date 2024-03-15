@@ -14,7 +14,7 @@
       "url": "http://www.apache.org/licenses/LICENSE-2.0"
     },
     "version": "2.0.0",
-    "x-box-commit-hash": "5819125043"
+    "x-box-commit-hash": "dffd835dc2"
   },
   "servers": [
     {
@@ -23388,30 +23388,9 @@
                   },
                   "outcomes": {
                     "type": "array",
-                    "description": "A list of outcomes required to be configured at start time.",
+                    "description": "A configurable outcome the workflow should complete.",
                     "items": {
-                      "type": "object",
-                      "description": "A configurable outcome the workflow should complete. If you\nhave a `task_completion_rule`, you may input `all_assignees` or\n`any_assignee` in the `variable_value` field. Similarly, if you\nhave a `collaborator_role`, you may input `editor`, `viewer`,\n`previewer`, `uploader`, `previewer uploader`, `viewer uploader`\n, `co-owner` in the `variable_value` field.",
-                      "properties": {
-                        "id": {
-                          "type": "string",
-                          "description": "The id of the outcome",
-                          "example": "890375782"
-                        },
-                        "type": {
-                          "type": "string",
-                          "description": "The type of the outcome object",
-                          "example": "outcome",
-                          "enum": [
-                            "outcome"
-                          ]
-                        },
-                        "parameter": {
-                          "type": "string",
-                          "description": "This is a placeholder example for various objects that\ncan be passed in - refer to the guides section to find\nout more information.",
-                          "example": "placeholder"
-                        }
-                      }
+                      "$ref": "#/components/schemas/Outcome"
                     }
                   }
                 }
@@ -23919,6 +23898,194 @@
           },
           "default": {
             "description": "An unexpected client error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/file_activities": {
+      "get": {
+        "operationId": "get_file_activities",
+        "summary": "List file activities",
+        "tags": [
+          "File activities"
+        ],
+        "x-box-tag": "file_activities",
+        "description": "List file activities by file ID.",
+        "parameters": [
+          {
+            "name": "file_id",
+            "description": "File ID for which to retrieve activity",
+            "in": "query",
+            "required": true,
+            "example": "888578620991",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "activity_types",
+            "description": "Comma-separated list of activity types to return. This field is ignored if marker is passed in. Defaults to all activity types.",
+            "in": "query",
+            "example": "comment,task,annotation,versions,app_activity",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "annotation",
+                  "app_activity",
+                  "comment",
+                  "task",
+                  "versions"
+                ]
+              }
+            }
+          },
+          {
+            "name": "comment_fields",
+            "in": "query",
+            "description": "fields that are required for comments",
+            "example": "tagged_message,message,created_at,created_by,modified_at,permissions",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "versions_fields",
+            "in": "query",
+            "description": "fields that are required for versions",
+            "example": "created_by,end,start,type",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "annotation_fields",
+            "in": "query",
+            "description": "fields that are required for annotations",
+            "example": "file_version,description,created_at,created_by,modified_at,permissions,target,status",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "task_fields",
+            "in": "query",
+            "description": "fields that are required for tasks",
+            "example": "description,created_at,created_by,modified_at,permissions,completion_rule,status",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "app_activity_fields",
+            "in": "query",
+            "description": "fields that are required for `app_activity`",
+            "example": "rendered_text,occurred_at,created_by,activity_template,app",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "reply_limit",
+            "in": "query",
+            "description": "maximum number of replies the response should contain per each top level activity[annotation, comment]",
+            "example": 1,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Used to filter an annotation or a comment based on the status",
+            "example": "open",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "open",
+                "resolved",
+                "deleted"
+              ]
+            }
+          },
+          {
+            "name": "enable_replies",
+            "in": "query",
+            "description": "Whether or not replies should be returned",
+            "example": true,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "limit",
+            "description": "The maximum number of items to return per page.",
+            "in": "query",
+            "required": false,
+            "example": 1000,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "maximum": 1000
+            }
+          },
+          {
+            "name": "marker",
+            "description": "Defines the position marker at which to begin returning results. This is\nused when paginating using marker-based pagination.\n\nThis requires `usemarker` to be set to `true`.",
+            "in": "query",
+            "required": false,
+            "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Results of activity items for the requested file ID",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Activities"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error when the file is not found or user does not have access to the file or its activity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected error.",
             "content": {
               "application/json": {
                 "schema": {
@@ -24562,6 +24729,30 @@
           }
         }
       },
+      "ActivityFetchError": {
+        "title": "Activity fetch error",
+        "type": "object",
+        "required": [
+          "activity_type",
+          "error"
+        ],
+        "description": "A generic error for file activities endpoint",
+        "properties": {
+          "activity_type": {
+            "type": "string",
+            "enum": [
+              "annotation",
+              "app_activity",
+              "comment",
+              "task",
+              "versions"
+            ]
+          },
+          "error": {
+            "$ref": "#/components/schemas/ClientError"
+          }
+        }
+      },
       "SkillInvocation": {
         "title": "Skill webhook payload",
         "type": "object",
@@ -24909,6 +25100,1267 @@
                 "description": "The item that caused the event to trigger"
               }
             ]
+          }
+        }
+      },
+      "Activities": {
+        "title": "File activities",
+        "type": "object",
+        "x-box-resource-id": "file_activities",
+        "x-box-tag": "file_activities",
+        "description": "A list of file activities",
+        "allOf": [
+          {
+            "type": "object",
+            "description": "The part of an API response that describes marker\nbased pagination",
+            "properties": {
+              "limit": {
+                "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
+                "example": 1000,
+                "type": "integer",
+                "format": "int64"
+              },
+              "next_marker": {
+                "description": "The marker for the start of the next page of results.",
+                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                "type": "string",
+                "nullable": true
+              },
+              "prev_marker": {
+                "description": "The marker for the start of the previous page of results.",
+                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVih",
+                "type": "string",
+                "nullable": true
+              }
+            }
+          },
+          {
+            "properties": {
+              "entries": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Activity"
+                }
+              },
+              "errors": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/ActivityFetchError"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "Activity": {
+        "title": "File activity",
+        "type": "object",
+        "x-box-resource-id": "file_activity",
+        "x-box-tag": "file_activities",
+        "description": "File activity object",
+        "required": [
+          "activity_type",
+          "source",
+          "type"
+        ],
+        "properties": {
+          "activity_type": {
+            "type": "string"
+          },
+          "source": {
+            "type": "object",
+            "description": "One of `annotation`, `app_activity`, `comment`, `task`, or `versions` is not null.",
+            "properties": {
+              "annotation": {
+                "$ref": "#/components/schemas/Annotation"
+              },
+              "app_activity": {
+                "$ref": "#/components/schemas/AppActivity"
+              },
+              "comment": {
+                "$ref": "#/components/schemas/Fa_Comment--Full"
+              },
+              "task": {
+                "$ref": "#/components/schemas/Task--Full"
+              },
+              "versions": {
+                "$ref": "#/components/schemas/VersionsActivity"
+              }
+            }
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "activity"
+            ]
+          }
+        }
+      },
+      "Annotation": {
+        "title": "Annotation",
+        "type": "object",
+        "required": [
+          "file_version",
+          "target"
+        ],
+        "description": "Standard representation of an annotation.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Annotation--Base"
+          },
+          {
+            "properties": {
+              "created_at": {
+                "type": "string",
+                "format": "date-time",
+                "description": "When the annotation object was created.",
+                "example": "2012-12-12T10:53:43-08:00"
+              },
+              "created_by": {
+                "$ref": "#/components/schemas/FileActivityUser"
+              },
+              "description": {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "string",
+                    "example": "This is a test annotation"
+                  }
+                }
+              },
+              "file_version": {
+                "type": "object",
+                "description": "File version mini object returned with annotation.",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "A unique id of the resource",
+                    "example": "123"
+                  },
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "file_version"
+                    ],
+                    "example": "file_version"
+                  },
+                  "version_number": {
+                    "type": "integer",
+                    "example": 1
+                  }
+                }
+              },
+              "modified_at": {
+                "type": "string",
+                "format": "date-time",
+                "description": "When the annotation object was modified",
+                "example": "2012-12-12T10:53:43-08:00"
+              },
+              "modified_by": {
+                "$ref": "#/components/schemas/FileActivityUser"
+              },
+              "parent": {
+                "$ref": "#/components/schemas/Annotation--Base"
+              },
+              "permissions": {
+                "type": "object",
+                "properties": {
+                  "can_edit": {
+                    "type": "boolean",
+                    "example": true
+                  },
+                  "can_delete": {
+                    "type": "boolean",
+                    "example": false
+                  }
+                }
+              },
+              "replies": {
+                "type": "array",
+                "description": "An array of replies if the annotation has replies, else empty",
+                "items": {
+                  "$ref": "#/components/schemas/Reply"
+                }
+              },
+              "status": {
+                "type": "string",
+                "description": "status of the annotation",
+                "example": "resolved",
+                "enum": [
+                  "open",
+                  "resolved",
+                  "deleted"
+                ]
+              },
+              "target": {
+                "$ref": "#/components/schemas/AnnotationTarget"
+              },
+              "total_reply_count": {
+                "type": "number",
+                "description": "Total replies that are present for the annotation",
+                "example": 20
+              }
+            }
+          }
+        ]
+      },
+      "Annotation--Base": {
+        "title": "Annotation (Base)",
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "x-box-sanitized": true,
+        "x-box-variants": [
+          "base",
+          "standard"
+        ],
+        "x-box-variant": "base",
+        "description": "Base representation of an annotation.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "A unique id of the annotation",
+            "example": "123"
+          },
+          "type": {
+            "type": "string",
+            "description": "type of the object",
+            "example": "annotation",
+            "enum": [
+              "annotation"
+            ]
+          }
+        }
+      },
+      "AppActivity": {
+        "title": "App activity",
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "description": "App activity",
+        "properties": {
+          "activity_template": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "activity_template"
+                ]
+              }
+            }
+          },
+          "app": {
+            "$ref": "#/components/schemas/App--Mini"
+          },
+          "app_group": {
+            "$ref": "#/components/schemas/AppGroup--Mini"
+          },
+          "created_by": {
+            "$ref": "#/components/schemas/FileActivityUser"
+          },
+          "id": {
+            "type": "string"
+          },
+          "occurred_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the `app_activity` object was created.",
+            "example": "2012-12-12T10:53:43-08:00"
+          },
+          "rendered_text": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "app_activity"
+            ]
+          }
+        }
+      },
+      "Fa_Comment": {
+        "title": "Comment (Standard)",
+        "type": "object",
+        "description": "Standard representation of a comment.",
+        "x-box-sanitized": true,
+        "x-box-variants": [
+          "base",
+          "mini",
+          "standard",
+          "full"
+        ],
+        "x-box-variant": "standard",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Fa_Comment--Base"
+          },
+          {
+            "properties": {
+              "created_at": {
+                "type": "string",
+                "format": "date-time",
+                "description": "When the comment object was created.",
+                "example": "2012-12-12T10:53:43-08:00"
+              },
+              "created_by": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/FileActivityUser"
+                  },
+                  {
+                    "description": "A mini user object representing the author of the comment."
+                  }
+                ]
+              },
+              "is_reply_comment": {
+                "type": "boolean",
+                "description": "Whether or not this comment is a reply to another comment.",
+                "example": false
+              },
+              "item": {
+                "$ref": "#/components/schemas/Fa_Comment--Base"
+              },
+              "message": {
+                "type": "string",
+                "description": "The text of the comment, as provided by the user.",
+                "example": "Hey, this is my comment."
+              },
+              "modified_at": {
+                "type": "string",
+                "format": "date-time",
+                "description": "When the comment object was modified.",
+                "example": "2012-12-12T10:53:43-08:00"
+              },
+              "parent": {
+                "$ref": "#/components/schemas/Fa_Comment--Base"
+              },
+              "replies": {
+                "type": "array",
+                "description": "Array of reply comments",
+                "items": {
+                  "$ref": "#/components/schemas/Reply"
+                }
+              },
+              "status": {
+                "type": "string",
+                "description": "status of the comment",
+                "example": "resolved",
+                "enum": [
+                  "open",
+                  "resolved",
+                  "deleted"
+                ]
+              },
+              "total_reply_count": {
+                "type": "number",
+                "description": "Total replies that are present for the comment",
+                "example": 20
+              }
+            }
+          }
+        ]
+      },
+      "Fa_Comment--Base": {
+        "title": "Comment (Base)",
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "x-box-sanitized": true,
+        "x-box-variants": [
+          "base",
+          "mini",
+          "standard",
+          "full"
+        ],
+        "x-box-variant": "base",
+        "description": "Base representation of a comment.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "A unique id of the comment",
+            "example": "123"
+          },
+          "type": {
+            "type": "string",
+            "description": "type of the object",
+            "example": "comment",
+            "enum": [
+              "comment"
+            ]
+          }
+        }
+      },
+      "Fa_Comment--Full": {
+        "title": "Comment (Full)",
+        "type": "object",
+        "x-box-sanitized": true,
+        "x-box-variants": [
+          "base",
+          "mini",
+          "standard",
+          "full"
+        ],
+        "x-box-variant": "full",
+        "description": "Full representation of a comment.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Fa_Comment"
+          },
+          {
+            "properties": {
+              "tagged_message": {
+                "type": "string",
+                "description": "The string representing the comment text with @mentions included. @mention format is @[id:username] where id is user's Box ID and username is their display name.",
+                "example": "Hey, @[user_123:user1], this is my comment."
+              },
+              "permissions": {
+                "type": "object",
+                "properties": {
+                  "can_delete": {
+                    "type": "boolean"
+                  },
+                  "can_edit": {
+                    "type": "boolean"
+                  },
+                  "can_reply": {
+                    "type": "boolean"
+                  },
+                  "can_change_status": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "Task--Base": {
+        "title": "Task (Base)",
+        "type": "object",
+        "x-box-sanitized": true,
+        "x-box-variants": [
+          "base",
+          "full"
+        ],
+        "x-box-variant": "base",
+        "description": "The bare basic representation of a task, the minimal\namount of fields returned.",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "due_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the task was due.",
+            "example": "2012-12-12T10:53:43-08:00",
+            "nullable": true
+          },
+          "id": {
+            "type": "string",
+            "description": "A unique id of the task",
+            "example": "123"
+          },
+          "type": {
+            "type": "string",
+            "description": "type of the object",
+            "example": "task",
+            "enum": [
+              "task"
+            ]
+          }
+        }
+      },
+      "Task--Full": {
+        "title": "Task (Full)",
+        "type": "object",
+        "x-box-sanitized": true,
+        "x-box-variant": "full",
+        "description": "The full representation of a task.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Task--Base"
+          },
+          {
+            "properties": {
+              "assigned_to": {
+                "$ref": "#/components/schemas/TaskAssignees"
+              },
+              "completed_at": {
+                "type": "string",
+                "format": "date-time",
+                "description": "When the task was completed.",
+                "example": "2012-12-12T10:53:43-08:00",
+                "nullable": true
+              },
+              "completion_rule": {
+                "type": "string",
+                "description": "Rule to complete the task.",
+                "example": "any_assignee",
+                "enum": [
+                  "all_assignees",
+                  "any_assignee"
+                ]
+              },
+              "created_at": {
+                "type": "string",
+                "format": "date-time",
+                "description": "When the task was created.",
+                "example": "2012-12-12T10:53:43-08:00"
+              },
+              "created_by": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/FileActivityUser"
+                  },
+                  {
+                    "description": "User that created the task"
+                  }
+                ]
+              },
+              "description": {
+                "type": "string",
+                "description": "Description of the task.",
+                "example": "Pls work on this"
+              },
+              "modified_at": {
+                "type": "string",
+                "format": "date-time",
+                "description": "When the task was modified.",
+                "example": "2012-12-12T10:53:43-08:00"
+              },
+              "permissions": {
+                "type": "object",
+                "properties": {
+                  "can_create_task_collaborator": {
+                    "type": "boolean"
+                  },
+                  "can_create_task_link": {
+                    "type": "boolean"
+                  },
+                  "can_delete": {
+                    "type": "boolean"
+                  },
+                  "can_update": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "progress_at": {
+                "type": "string",
+                "format": "date-time",
+                "description": "When the task progress was started.",
+                "example": "2012-12-12T10:53:43-08:00"
+              },
+              "status": {
+                "type": "string",
+                "description": "Status of the task",
+                "example": "in_progress",
+                "enum": [
+                  "approved",
+                  "completed",
+                  "in_progress",
+                  "not_started",
+                  "rejected"
+                ]
+              },
+              "task_links": {
+                "$ref": "#/components/schemas/TaskLinks"
+              },
+              "task_type": {
+                "type": "string",
+                "description": "Type of the task",
+                "example": "approval",
+                "enum": [
+                  "approval",
+                  "general"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "VersionsActivity": {
+        "title": "Versions Activity",
+        "type": "object",
+        "description": "Versions activity.",
+        "properties": {
+          "action_by": {
+            "type": "array",
+            "description": "Users who performed one of the `action_types` (`created`, `deleted` or `restored`)",
+            "items": {
+              "$ref": "#/components/schemas/FileActivityUser"
+            }
+          },
+          "action_type": {
+            "type": "string",
+            "enum": [
+              "created",
+              "restored",
+              "trashed"
+            ]
+          },
+          "end": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Fa_File_Version"
+              },
+              {
+                "description": "End of a version object that is fetched from file versions FA Adaptor"
+              }
+            ]
+          },
+          "start": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Fa_File_Version"
+              },
+              {
+                "description": "Start of a version object that is fetched from file versions FA Adaptor. If a file has 2 versions -> 1 and 2, then start would be 1 and end would be 2."
+              }
+            ]
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "versions"
+            ]
+          }
+        }
+      },
+      "Reply": {
+        "title": "Reply",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "123",
+            "description": "reply object id."
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the reply object was created.",
+            "example": "2012-12-12T10:53:43-08:00"
+          },
+          "created_by": {
+            "$ref": "#/components/schemas/FileActivityUser"
+          },
+          "message": {
+            "type": "string",
+            "example": "Hey, this is my reply",
+            "description": "Reply message"
+          },
+          "parent": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "example": "123",
+                "description": "parent id"
+              },
+              "type": {
+                "type": "string",
+                "example": "annotation",
+                "description": "parent type"
+              }
+            }
+          },
+          "type": {
+            "type": "string",
+            "example": "comment",
+            "enum": [
+              "comment"
+            ],
+            "description": "Reply type"
+          }
+        },
+        "description": "Reply object"
+      },
+      "AnnotationTarget": {
+        "title": "Annotation Target",
+        "type": "object",
+        "description": "One of Region, Highlight, Drawing, Point.",
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/AnnotationTargetRegion"
+          },
+          {
+            "$ref": "#/components/schemas/AnnotationTargetDrawing"
+          },
+          {
+            "$ref": "#/components/schemas/AnnotationTargetHighlight"
+          },
+          {
+            "$ref": "#/components/schemas/AnnotationTargetPoint"
+          }
+        ]
+      },
+      "AnnotationTargetColor": {
+        "title": "Annotation Target Color",
+        "type": "string",
+        "format": "regex",
+        "example": "#000000",
+        "pattern": "^#([\\da-fA-F]{6}|[\\da-fA-F]{3})$",
+        "description": "Color in hex format"
+      },
+      "AnnotationTargetCoord": {
+        "title": "Annotation Target",
+        "type": "number",
+        "example": 50,
+        "description": "Annotation target `coord` value."
+      },
+      "AnnotationTargetDrawing": {
+        "title": "Annotation Target Drawing",
+        "type": "object",
+        "required": [
+          "location",
+          "path_groups",
+          "type"
+        ],
+        "description": "Annotation target drawing.",
+        "properties": {
+          "location": {
+            "$ref": "#/components/schemas/AnnotationTargetPage"
+          },
+          "path_groups": {
+            "type": "array",
+            "description": "List of paths with strokes of the Target.",
+            "items": {
+              "$ref": "#/components/schemas/AnnotationTargetPathGroup"
+            }
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "drawing"
+            ]
+          }
+        }
+      },
+      "AnnotationTargetHighlight": {
+        "title": "Annotation Target Highlight",
+        "type": "object",
+        "required": [
+          "location",
+          "shapes",
+          "type"
+        ],
+        "description": "Annotation target highlight.",
+        "properties": {
+          "location": {
+            "$ref": "#/components/schemas/AnnotationTargetPage"
+          },
+          "shapes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AnnotationTargetRect"
+            }
+          },
+          "text": {
+            "type": "string",
+            "example": "This is some highlighted text."
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "highlight"
+            ]
+          }
+        }
+      },
+      "AnnotationTargetPoint": {
+        "title": "Annotation Target Point",
+        "type": "object",
+        "required": [
+          "location",
+          "type",
+          "x",
+          "y"
+        ],
+        "description": "Annotation target point.",
+        "properties": {
+          "location": {
+            "$ref": "#/components/schemas/AnnotationTargetPage"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "point"
+            ]
+          },
+          "x": {
+            "$ref": "#/components/schemas/AnnotationTargetCoord"
+          },
+          "y": {
+            "$ref": "#/components/schemas/AnnotationTargetCoord"
+          }
+        }
+      },
+      "AnnotationTargetPage": {
+        "title": "Annotation Target Page",
+        "type": "object",
+        "required": [
+          "type",
+          "value"
+        ],
+        "description": "Annotation target page.",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "page"
+            ]
+          },
+          "value": {
+            "type": "integer",
+            "format": "int32",
+            "example": 5
+          }
+        }
+      },
+      "AnnotationTargetPath": {
+        "title": "Annotation Target Path",
+        "type": "object",
+        "description": "Path represents the coordinates of each point the target passes through.",
+        "properties": {
+          "points": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "x": {
+                  "$ref": "#/components/schemas/AnnotationTargetCoord"
+                },
+                "y": {
+                  "$ref": "#/components/schemas/AnnotationTargetCoord"
+                }
+              }
+            }
+          }
+        }
+      },
+      "AnnotationTargetPathGroup": {
+        "title": "Annotation Target Path Group",
+        "type": "object",
+        "required": [
+          "paths",
+          "stroke"
+        ],
+        "description": "Annotation target path group.",
+        "properties": {
+          "paths": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AnnotationTargetPath"
+            }
+          },
+          "stroke": {
+            "$ref": "#/components/schemas/AnnotationTargetStroke"
+          }
+        }
+      },
+      "AnnotationTargetRect": {
+        "title": "Annotation Target",
+        "type": "object",
+        "required": [
+          "height",
+          "type",
+          "width",
+          "x",
+          "y"
+        ],
+        "description": "Annotation target size and coordinates.",
+        "properties": {
+          "fill": {
+            "type": "object",
+            "properties": {
+              "color": {
+                "$ref": "#/components/schemas/AnnotationTargetColor"
+              }
+            }
+          },
+          "height": {
+            "type": "number",
+            "example": 50,
+            "description": "Height in pixels"
+          },
+          "stroke": {
+            "$ref": "#/components/schemas/AnnotationTargetStroke"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "rect"
+            ]
+          },
+          "width": {
+            "type": "number",
+            "example": 50,
+            "description": "Width in pixels"
+          },
+          "x": {
+            "$ref": "#/components/schemas/AnnotationTargetCoord"
+          },
+          "y": {
+            "$ref": "#/components/schemas/AnnotationTargetCoord"
+          }
+        }
+      },
+      "AnnotationTargetRegion": {
+        "title": "Annotation Target Region",
+        "type": "object",
+        "required": [
+          "location",
+          "shape",
+          "type"
+        ],
+        "description": "Annotation target region.",
+        "properties": {
+          "location": {
+            "$ref": "#/components/schemas/AnnotationTargetPage"
+          },
+          "shape": {
+            "$ref": "#/components/schemas/AnnotationTargetRect"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "region"
+            ]
+          }
+        }
+      },
+      "AnnotationTargetStroke": {
+        "title": "Annotation Target Stroke",
+        "type": "object",
+        "description": "Line of color that precisely follows a path.",
+        "required": [
+          "color",
+          "size"
+        ],
+        "properties": {
+          "color": {
+            "$ref": "#/components/schemas/AnnotationTargetColor"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32",
+            "example": 1,
+            "description": "Size in pixels"
+          }
+        }
+      },
+      "App--Mini": {
+        "title": "App (Mini)",
+        "x-box-variant": "mini",
+        "description": "A mini representation of an app, used when\nnested under another resource.",
+        "type": "object",
+        "properties": {
+          "icon_url": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "app"
+            ]
+          }
+        }
+      },
+      "AppGroup--Mini": {
+        "title": "App Group (Mini)",
+        "x-box-variant": "mini",
+        "description": "A mini `app_group` representation of an app, used when nested under another resource.",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "app_group"
+            ]
+          }
+        }
+      },
+      "Fa_File_Version": {
+        "title": "Fa File version",
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "description": "A standard representation of a file version from fa-adaptor",
+        "properties": {
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the `file_version` object was created.",
+            "example": "2012-12-12T10:53:43-08:00"
+          },
+          "created_by": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FileActivityUser"
+              },
+              {
+                "description": "A mini user object representing the user who uploaded the version."
+              }
+            ]
+          },
+          "id": {
+            "type": "string",
+            "nullable": false,
+            "description": "The unique identifier that represent a file version.",
+            "example": "12345"
+          },
+          "number": {
+            "description": "Version number.",
+            "type": "integer"
+          },
+          "restored_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the `file_version` object was restored."
+          },
+          "restored_by": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FileActivityUser"
+              },
+              {
+                "description": "A mini user object representing the user who restored the version."
+              }
+            ]
+          },
+          "trashed_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the `file_version` object was trashed.",
+            "example": "2012-12-12T10:53:43-08:00"
+          },
+          "trashed_by": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FileActivityUser"
+              },
+              {
+                "description": "A mini user object representing the user who trashed the version."
+              }
+            ]
+          },
+          "type": {
+            "type": "string",
+            "description": "`file_version`",
+            "example": "file_version",
+            "enum": [
+              "file_version"
+            ],
+            "nullable": false
+          }
+        }
+      },
+      "FileActivityUser": {
+        "title": "File activity user",
+        "type": "object",
+        "x-box-resource-id": "file_activity_user",
+        "x-box-tag": "file_activities",
+        "description": "File activity user, as can be returned when nested within other\nresources.",
+        "required": [
+          "type",
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The unique identifier for this user",
+            "example": "11446498"
+          },
+          "type": {
+            "type": "string",
+            "description": "`user`",
+            "example": "user",
+            "nullable": false,
+            "enum": [
+              "user"
+            ]
+          },
+          "name": {
+            "type": "string",
+            "description": "The display name of this user",
+            "example": "Aaron Levie",
+            "maxLength": 50,
+            "nullable": true
+          },
+          "login": {
+            "type": "string",
+            "description": "The primary email address of this user",
+            "example": "ceo@example.com",
+            "nullable": true
+          }
+        }
+      },
+      "TaskAssignees": {
+        "title": "Task Assignees",
+        "type": "object",
+        "required": [
+          "entries"
+        ],
+        "description": "Task assignees.",
+        "properties": {
+          "entries": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "completed_at": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "When the task assigned was completed.",
+                  "example": "2012-12-12T10:53:43-08:00",
+                  "nullable": true
+                },
+                "id": {
+                  "type": "string"
+                },
+                "modified_at": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "When the task assigned was modified.",
+                  "example": "2012-12-12T10:53:43-08:00"
+                },
+                "permissions": {
+                  "type": "object",
+                  "properties": {
+                    "can_delete": {
+                      "type": "boolean"
+                    },
+                    "can_update": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "role": {
+                  "type": "string",
+                  "enum": [
+                    "assignee",
+                    "creator"
+                  ]
+                },
+                "status": {
+                  "type": "string",
+                  "enum": [
+                    "approved",
+                    "completed",
+                    "not_started",
+                    "rejected"
+                  ]
+                },
+                "target": {
+                  "$ref": "#/components/schemas/FileActivityUser"
+                },
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "task_collaborator"
+                  ]
+                }
+              }
+            }
+          },
+          "next_marker": {
+            "type": "string",
+            "nullable": true
+          },
+          "limit": {
+            "type": "integer"
+          }
+        }
+      },
+      "TaskLinks": {
+        "title": "Task Links",
+        "type": "object",
+        "required": [
+          "entries"
+        ],
+        "description": "Task links.",
+        "properties": {
+          "entries": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "description": {
+                  "type": "string"
+                },
+                "id": {
+                  "type": "string"
+                },
+                "permissions": {
+                  "type": "object",
+                  "properties": {
+                    "can_delete": {
+                      "type": "boolean"
+                    },
+                    "can_update": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "target": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string"
+                    },
+                    "id": {
+                      "type": "string"
+                    },
+                    "sequence_id": {
+                      "type": "string"
+                    },
+                    "etag": {
+                      "type": "string"
+                    },
+                    "sha1": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "task": {
+                  "$ref": "#/components/schemas/Task--Base"
+                },
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "task_link"
+                  ]
+                }
+              }
+            }
+          },
+          "next_marker": {
+            "type": "string",
+            "nullable": true
+          },
+          "limit": {
+            "type": "integer"
           }
         }
       },
@@ -36589,6 +38041,98 @@
           }
         ]
       },
+      "CompletionRuleVariable": {
+        "title": "Completion rule variable",
+        "type": "object",
+        "description": "A completion\nrule object. Determines\nif an action should be completed\nby all or any assignees.",
+        "required": [
+          "type",
+          "variable_type",
+          "variable_value"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "variable"
+            ],
+            "description": "Completion\nRule object type.\n",
+            "example": "variable"
+          },
+          "variable_type": {
+            "type": "string",
+            "description": "Variable type\nfor the Completion\nRule object.\n",
+            "example": "task_completion_rule",
+            "enum": [
+              "task_completion_rule"
+            ]
+          },
+          "variable_value": {
+            "type": "string",
+            "description": "Variable\nvalues for a completion\nrule.\n",
+            "example": "all_assignees",
+            "enum": [
+              "all_assignees",
+              "any_assignees"
+            ]
+          }
+        }
+      },
+      "CollaboratorVariable": {
+        "title": "Collaborator variable",
+        "type": "object",
+        "description": "A collaborator\nobject. Allows to\nspecify a list of user\nID's that are affected\nby the workflow result.",
+        "required": [
+          "type",
+          "variable_type",
+          "variable_value"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "variable"
+            ],
+            "description": "Collaborator\nobject type.\n",
+            "example": "variable"
+          },
+          "variable_type": {
+            "type": "string",
+            "description": "Variable type \nfor the Collaborator\nobject.\n",
+            "example": "user_list",
+            "enum": [
+              "user_list"
+            ]
+          },
+          "variable_value": {
+            "type": "array",
+            "description": "A list of user IDs.",
+            "items": {
+              "type": "object",
+              "required": [
+                "type",
+                "id"
+              ],
+              "description": "User variable used\nin workflow outcomes.",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "user"
+                  ],
+                  "description": "The object type.",
+                  "example": "user"
+                },
+                "id": {
+                  "type": "string",
+                  "description": "User's ID.",
+                  "example": "636281"
+                }
+              }
+            }
+          }
+        }
+      },
       "FileOrFolderScope": {
         "title": "File or folder scope",
         "type": "object",
@@ -36896,6 +38440,120 @@
           "id",
           "type"
         ]
+      },
+      "Outcome": {
+        "title": "Outcome",
+        "type": "object",
+        "description": "An instance of an outcome.",
+        "required": [
+          "id"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "ID of a specific outcome",
+            "example": "17363629"
+          },
+          "collaborators": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CollaboratorVariable"
+              },
+              {
+                "description": "Lists collaborators\naffected by the workflow\nresult."
+              }
+            ]
+          },
+          "completion_rule": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CompletionRuleVariable"
+              },
+              {
+                "description": "Determines\nif an action should be completed\nby all or any assignees."
+              }
+            ]
+          },
+          "file_collaborator_role": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RoleVariable"
+              },
+              {
+                "description": "Determines if the\nworkflow outcome for\na file\naffects a specific\ncollaborator role."
+              }
+            ]
+          },
+          "task_collaborators": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CollaboratorVariable"
+              },
+              {
+                "description": "Lists collaborators\naffected by the task workflow\nresult."
+              }
+            ]
+          },
+          "role": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RoleVariable"
+              },
+              {
+                "description": "Determines if the\nworkflow outcome\naffects a specific\ncollaborator role."
+              }
+            ]
+          }
+        }
+      },
+      "RoleVariable": {
+        "title": "Role variable",
+        "type": "object",
+        "description": "Determines if the\nworkflow outcome\naffects a specific\ncollaborator role.",
+        "required": [
+          "type",
+          "variable_type",
+          "variable_value"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "variable"
+            ],
+            "description": "Role object type.\n",
+            "example": "variable"
+          },
+          "variable_type": {
+            "type": "string",
+            "description": "The variable type used\nby the object.\n",
+            "example": "collaborator_role",
+            "enum": [
+              "collaborator_role"
+            ]
+          },
+          "variable_value": {
+            "allOf": [
+              {
+                "type": "string",
+                "description": "The level of access granted.",
+                "example": "editor",
+                "enum": [
+                  "editor",
+                  "viewer",
+                  "previewer",
+                  "uploader",
+                  "previewer uploader",
+                  "viewer uploader",
+                  "co-owner"
+                ]
+              },
+              {
+                "description": "Variable values you can use\nfor the role parameter."
+              }
+            ]
+          }
+        }
       },
       "TimelineSkillCard": {
         "type": "object",
@@ -37879,6 +39537,11 @@
       "name": "Events",
       "description": "Events provide a way for an\napplication to subscribe to\nany actions performed by\nany user, users, or service in an enterprise.",
       "x-box-tag": "events"
+    },
+    {
+      "name": "File activities",
+      "description": "File activities",
+      "x-box-tag": "file_activities"
     },
     {
       "name": "File requests",
