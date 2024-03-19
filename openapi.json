@@ -14,7 +14,7 @@
             "url": "http://www.apache.org/licenses/LICENSE-2.0"
         },
         "version": "2.0.0",
-        "x-box-commit-hash": "5819125043"
+        "x-box-commit-hash": "9d605a3ec5"
     },
     "servers": [
         {
@@ -23388,30 +23388,9 @@
                                     },
                                     "outcomes": {
                                         "type": "array",
-                                        "description": "開始時に設定する必要がある結果のリスト。",
+                                        "description": "A configurable outcome the workflow should complete.",
                                         "items": {
-                                            "type": "object",
-                                            "description": "ワークフローで完了する必要がある設定可能な結果。`task_completion_rule`がある場合は、`all_assignees`または`any_assignee`を`variable_value`フィールドに入力できます。同様に、`collaborator_role`がある場合は、`editor`、`viewer`、`previewer`、`uploader`、`previewer uploader`、`viewer uploader`、`co-owner`を`variable_value`フィールドに入力できます。",
-                                            "properties": {
-                                                "id": {
-                                                    "type": "string",
-                                                    "description": "結果のID",
-                                                    "example": "890375782"
-                                                },
-                                                "type": {
-                                                    "type": "string",
-                                                    "description": "結果オブジェクトのタイプ",
-                                                    "example": "outcome",
-                                                    "enum": [
-                                                        "outcome"
-                                                    ]
-                                                },
-                                                "parameter": {
-                                                    "type": "string",
-                                                    "description": "これは、渡すことができるさまざまなオブジェクトを表すプレースホルダの例です。詳細については、ガイドセクションを参照してください。",
-                                                    "example": "placeholder"
-                                                }
-                                            }
+                                            "$ref": "#/components/schemas/Outcome"
                                         }
                                     }
                                 }
@@ -36589,6 +36568,98 @@
                     }
                 ]
             },
+            "CompletionRuleVariable": {
+                "title": "Completion rule variable",
+                "type": "object",
+                "description": "A completion rule object. Determines if an action should be completed by all or any assignees.",
+                "required": [
+                    "type",
+                    "variable_type",
+                    "variable_value"
+                ],
+                "properties": {
+                    "type": {
+                        "type": "string",
+                        "enum": [
+                            "variable"
+                        ],
+                        "description": "Completion Rule object type.",
+                        "example": "variable"
+                    },
+                    "variable_type": {
+                        "type": "string",
+                        "description": "Variable type for the Completion Rule object.",
+                        "example": "task_completion_rule",
+                        "enum": [
+                            "task_completion_rule"
+                        ]
+                    },
+                    "variable_value": {
+                        "type": "string",
+                        "description": "Variable values for a completion rule.",
+                        "example": "all_assignees",
+                        "enum": [
+                            "all_assignees",
+                            "any_assignees"
+                        ]
+                    }
+                }
+            },
+            "CollaboratorVariable": {
+                "title": "Collaborator variable",
+                "type": "object",
+                "description": "A collaborator object. Allows to specify a list of user ID's that are affected by the workflow result.",
+                "required": [
+                    "type",
+                    "variable_type",
+                    "variable_value"
+                ],
+                "properties": {
+                    "type": {
+                        "type": "string",
+                        "enum": [
+                            "variable"
+                        ],
+                        "description": "Collaborator object type.",
+                        "example": "variable"
+                    },
+                    "variable_type": {
+                        "type": "string",
+                        "description": "Variable type for the Collaborator object.",
+                        "example": "user_list",
+                        "enum": [
+                            "user_list"
+                        ]
+                    },
+                    "variable_value": {
+                        "type": "array",
+                        "description": "A list of user IDs.",
+                        "items": {
+                            "type": "object",
+                            "required": [
+                                "type",
+                                "id"
+                            ],
+                            "description": "User variable used in workflow outcomes.",
+                            "properties": {
+                                "type": {
+                                    "type": "string",
+                                    "enum": [
+                                        "user"
+                                    ],
+                                    "description": "The object type.",
+                                    "example": "user"
+                                },
+                                "id": {
+                                    "type": "string",
+                                    "description": "User's ID.",
+                                    "example": "636281"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
             "FileOrFolderScope": {
                 "title": "ファイルまたはフォルダのスコープ",
                 "type": "object",
@@ -36896,6 +36967,120 @@
                     "id",
                     "type"
                 ]
+            },
+            "Outcome": {
+                "title": "Outcome",
+                "type": "object",
+                "description": "An instance of an outcome.",
+                "required": [
+                    "id"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "description": "ID of a specific outcome",
+                        "example": "17363629"
+                    },
+                    "collaborators": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/CollaboratorVariable"
+                            },
+                            {
+                                "description": "Lists collaborators affected by the workflow result."
+                            }
+                        ]
+                    },
+                    "completion_rule": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/CompletionRuleVariable"
+                            },
+                            {
+                                "description": "Determines if an action should be completed by all or any assignees."
+                            }
+                        ]
+                    },
+                    "file_collaborator_role": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/RoleVariable"
+                            },
+                            {
+                                "description": "Determines if the workflow outcome for a file affects a specific collaborator role."
+                            }
+                        ]
+                    },
+                    "task_collaborators": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/CollaboratorVariable"
+                            },
+                            {
+                                "description": "Lists collaborators affected by the task workflow result."
+                            }
+                        ]
+                    },
+                    "role": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/RoleVariable"
+                            },
+                            {
+                                "description": "Determines if the workflow outcome affects a specific collaborator role."
+                            }
+                        ]
+                    }
+                }
+            },
+            "RoleVariable": {
+                "title": "Role variable",
+                "type": "object",
+                "description": "Determines if the workflow outcome affects a specific collaborator role.",
+                "required": [
+                    "type",
+                    "variable_type",
+                    "variable_value"
+                ],
+                "properties": {
+                    "type": {
+                        "type": "string",
+                        "enum": [
+                            "variable"
+                        ],
+                        "description": "Role object type.",
+                        "example": "variable"
+                    },
+                    "variable_type": {
+                        "type": "string",
+                        "description": "The variable type used by the object.",
+                        "example": "collaborator_role",
+                        "enum": [
+                            "collaborator_role"
+                        ]
+                    },
+                    "variable_value": {
+                        "allOf": [
+                            {
+                                "type": "string",
+                                "description": "付与されるアクセスレベル。",
+                                "example": "editor",
+                                "enum": [
+                                    "editor",
+                                    "viewer",
+                                    "previewer",
+                                    "uploader",
+                                    "previewer uploader",
+                                    "viewer uploader",
+                                    "co-owner"
+                                ]
+                            },
+                            {
+                                "description": "Variable values you can use for the role parameter."
+                            }
+                        ]
+                    }
+                }
             },
             "TimelineSkillCard": {
                 "type": "object",
