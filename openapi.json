@@ -27511,7 +27511,7 @@
 				]
 			},
 			"AiResponse": {
-				"title": "AI",
+				"title": "AI response",
 				"type": "object",
 				"x-box-resource-id": "ai_response",
 				"x-box-tag": "ai",
@@ -27520,7 +27520,7 @@
 					"answer": {
 						"type": "string",
 						"description": "The answer provided by the LLM.",
-						"example": "This document is about public API schemas."
+						"example": "Public APIs are important because of key and important reasons."
 					},
 					"created_at": {
 						"type": "string",
@@ -27530,7 +27530,7 @@
 					},
 					"completion_reason": {
 						"type": "string",
-						"description": "The reason the streamed response finishes.",
+						"description": "The reason the response finishes.",
 						"example": "done"
 					}
 				},
@@ -35013,14 +35013,14 @@
 				}
 			},
 			"Ai": {
-				"title": "AI",
+				"title": "AI ask request",
 				"type": "object",
 				"x-box-resource-id": "ai_ask_request",
 				"required": ["mode", "prompt", "items"],
 				"properties": {
 					"mode": {
 						"type": "string",
-						"description": "The mode specifies if this\nrequest is `qa` or `hubs_qa` depending\non what client it is supporting.",
+						"description": "The mode specifies if this request is for a single or multiple items.",
 						"enum": ["multiple_item_qa", "single_item_qa"],
 						"example": "multiple_item_qa",
 						"nullable": false
@@ -35028,15 +35028,19 @@
 					"prompt": {
 						"type": "string",
 						"description": "The prompt provided by the client\nto be answered by the LLM.",
-						"example": "What is this content about?"
+						"example": "What is the value provided by public APIs based on this document?"
 					},
 					"items": {
 						"type": "array",
 						"description": "The items to be\nprocessed by the LLM, often files.",
 						"minItems": 1,
-						"maxItems": 100,
+						"maxItems": 25,
 						"uniqueItems": true,
 						"items": {
+							"required": [
+								"id",
+								"type"
+							],
 							"type": "object",
 							"description": "The item to be processed by the LLM.",
 							"properties": {
@@ -35060,10 +35064,10 @@
 						}
 					}
 				},
-				"description": "AI request object"
+				"description": "AI ask request object"
 			},
 			"AiTextGen": {
-				"title": "AI Text Gen",
+				"title": "AI text gen request",
 				"x-box-resource-id": "ai_text_gen_request",
 				"type": "object",
 				"required": ["prompt", "items"],
@@ -35071,7 +35075,7 @@
 					"prompt": {
 						"type": "string",
 						"description": "The prompt provided by the client to be answered by the LLM.",
-						"example": "What is this content about?"
+						"example": "Write an email to a client about the importance of public APIs."
 					},
 					"items": {
 						"type": "array",
@@ -35085,7 +35089,7 @@
 							"properties": {
 								"id": {
 									"type": "string",
-									"description": "The id of the item",
+									"description": "The id of the item.",
 									"example": "123"
 								},
 								"type": {
@@ -35096,7 +35100,7 @@
 								},
 								"content": {
 									"type": "string",
-									"description": "The content of the item,\noften the text representation.",
+									"description": "The content to use as context for generating new text or editing existing text.",
 									"example": "This is file content."
 								}
 							}
@@ -35104,25 +35108,25 @@
 					},
 					"dialogue_history": {
 						"type": "array",
-						"description": "The context given along with a prompt to\ninform a response from the LLM.",
+						"description": "The history of prompts and answers previously passed to the LLM. This provides additional context to the LLM in generating the response",
 						"items": {
 							"type": "object",
 							"description": "A context object that can hold\nprior prompts and answers.",
 							"properties": {
 								"prompt": {
 									"type": "string",
-									"description": "The prompt provided by the client\nto be answered by the LLM.",
-									"example": "What is this content about?"
+									"description": "The prompt previously provided by the client and answered by the LLM",
+									"example": "Make my email about public APIs sound more professional."
 								},
 								"answer": {
 									"type": "string",
-									"description": "The answer provided by the LLM.",
-									"example": "This is about public API schemas"
+									"description": "The answer previously provided by the LLM.",
+									"example": "Here is the first draft of your professional email about public APIs."
 								},
 								"created_at": {
 									"type": "string",
 									"format": "date-time",
-									"description": "The ISO date formatted timestamp of when the\nanswer to the prompt was created.",
+									"description": "The ISO date formatted timestamp of when the\n previous answer to the prompt was created.",
 									"example": "2012-12-12T10:53:43-08:00"
 								}
 							}
