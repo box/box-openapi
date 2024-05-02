@@ -14,7 +14,7 @@
       "url": "http://www.apache.org/licenses/LICENSE-2.0"
     },
     "version": "2.0.0",
-    "x-box-commit-hash": "a2f6edcf0a"
+    "x-box-commit-hash": "db940e79a7"
   },
   "host": "api.box.com",
   "basePath": "/2.0",
@@ -16102,6 +16102,84 @@
           }
         }
       }
+    },
+    "/v2/ai/ask": {
+      "post": {
+        "operationId": "post_ai_ask",
+        "summary": "Send AI Ask request",
+        "tags": [
+          "AI"
+        ],
+        "description": "Sends an AI request to supported LLMs and returns an answer specifically focused on the user's question given the provided context.",
+        "responses": {
+          "200": {
+            "description": "A successful response including the answer from the LLM.",
+            "schema": {
+              "$ref": "#/definitions/AiResponse"
+            }
+          },
+          "400": {
+            "description": "An unexpected client error.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "500": {
+            "description": "An unexpected server error.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/AiAsk"
+            }
+          }
+        ]
+      }
+    },
+    "/v2/ai/text_gen": {
+      "post": {
+        "operationId": "post_ai_text_gen",
+        "summary": "Send AI Text Gen request",
+        "tags": [
+          "AI"
+        ],
+        "description": "Sends an AI request to supported LLMs and returns an answer specifically focused on the creation of new text.",
+        "responses": {
+          "200": {
+            "description": "A successful response including the answer from the LLM.",
+            "schema": {
+              "$ref": "#/definitions/AiResponse"
+            }
+          },
+          "400": {
+            "description": "An unexpected client error.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          },
+          "500": {
+            "description": "An unexpected server error.",
+            "schema": {
+              "$ref": "#/definitions/ClientError"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/AiTextGen"
+            }
+          }
+        ]
+      }
     }
   },
   "securityDefinitions": {
@@ -24017,6 +24095,156 @@
           "description": "Indicates whether or not channel member\naccess to the underlying box item\nshould be automatically managed.\nDepending on type of channel, access is managed\nthrough creating collaborations or shared links."
         }
       }
+    },
+    "AiResponse": {
+      "title": "AI Response",
+      "type": "object",
+      "required": [
+        "answer",
+        "created_at"
+      ],
+      "properties": {
+        "answer": {
+          "type": "string",
+          "description": "The answer provided by the LLM."
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The ISO date formatted timestamp of when the answer to the prompt was created."
+        },
+        "completion_reason": {
+          "type": "string",
+          "description": "The reason the response finishes."
+        }
+      },
+      "description": "AI response"
+    },
+    "AiAsk": {
+      "title": "AI Ask Request",
+      "type": "object",
+      "required": [
+        "mode",
+        "prompt",
+        "items"
+      ],
+      "properties": {
+        "mode": {
+          "type": "string",
+          "description": "The mode specifies if this request is for a single or multiple items.",
+          "enum": [
+            "multiple_item_qa",
+            "single_item_qa"
+          ]
+        },
+        "prompt": {
+          "type": "string",
+          "description": "The prompt provided by the client to be answered by the LLM."
+        },
+        "items": {
+          "type": "array",
+          "description": "The items to be processed by the LLM, often files.",
+          "minItems": 1,
+          "maxItems": 25,
+          "uniqueItems": true,
+          "items": {
+            "type": "object",
+            "description": "The item to be processed by the LLM.",
+            "required": [
+              "id",
+              "type"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "The id of the item"
+              },
+              "type": {
+                "type": "string",
+                "description": "The type of the item",
+                "enum": [
+                  "file"
+                ]
+              },
+              "content": {
+                "type": "string",
+                "description": "The content of the item, often the text representation."
+              }
+            }
+          }
+        }
+      },
+      "description": "AI Ask request object"
+    },
+    "AiTextGen": {
+      "title": "AI Text Gen Request",
+      "type": "object",
+      "required": [
+        "prompt",
+        "items"
+      ],
+      "properties": {
+        "prompt": {
+          "type": "string",
+          "description": "The prompt provided by the client to be answered by the LLM."
+        },
+        "items": {
+          "type": "array",
+          "description": "The items to be processed by the LLM, often files.",
+          "required": [
+            "id",
+            "type"
+          ],
+          "minItems": 1,
+          "maxItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "object",
+            "description": "The item to be processed by the LLM.",
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "The id of the item."
+              },
+              "type": {
+                "type": "string",
+                "description": "The type of the item.",
+                "enum": [
+                  "file"
+                ]
+              },
+              "content": {
+                "type": "string",
+                "description": "The content to use as context for generating new text or editing existing text."
+              }
+            }
+          }
+        },
+        "dialogue_history": {
+          "type": "array",
+          "description": "The history of prompts and answers previously passed to the LLM. This provides additional context to the LLM in generating the response.",
+          "items": {
+            "type": "object",
+            "description": "A context object that can hold prior prompts and answers.",
+            "properties": {
+              "prompt": {
+                "type": "string",
+                "description": "The prompt previously provided by the client and answered by the LLM."
+              },
+              "answer": {
+                "type": "string",
+                "description": "The answer previously provided by the LLM."
+              },
+              "created_at": {
+                "type": "string",
+                "format": "date-time",
+                "description": "The ISO date formatted timestamp of when the previous answer to the prompt was created."
+              }
+            }
+          }
+        }
+      },
+      "description": "AI Text Gen Request object"
     },
     "File": {
       "title": "File",
