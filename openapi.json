@@ -10334,19 +10334,14 @@
               {
                 "scope": "enterprise",
                 "templateKey": "contract",
-                "filters": {
-                  "category": "online"
-                }
-              }
-            ],
-            "x-example": [
-              {
-                "scope": "enterprise",
-                "templateKey": "contract",
-                "filters": {
-                  "category": "online",
-                  "contractValue": 1000000
-                }
+                "filters": [
+                  {
+                    "category": "online"
+                  },
+                  {
+                    "contractValue": 100000
+                  }
+                ]
               }
             ],
             "required": false,
@@ -17372,7 +17367,6 @@
                   "GROUP_EDITED",
                   "GROUP_REMOVE_ITEM",
                   "GROUP_REMOVE_USER",
-                  "ITEM_EMAIL_SEND",
                   "ITEM_MODIFY",
                   "ITEM_OPEN",
                   "ITEM_SHARED_UPDATE",
@@ -17400,7 +17394,6 @@
                   "RENAME",
                   "RETENTION_POLICY_ASSIGNMENT_ADD",
                   "SHARE",
-                  "SHARED_LINK_SEND",
                   "SHARE_EXPIRATION",
                   "SHIELD_ALERT",
                   "SHIELD_EXTERNAL_COLLAB_ACCESS_BLOCKED",
@@ -23881,112 +23874,6 @@
           }
         }
       }
-    },
-    "/v2/ai/ask": {
-      "post": {
-        "operationId": "post_ai_ask",
-        "summary": "Send AI Ask request",
-        "tags": [
-          "AI"
-        ],
-        "x-box-tag": "ai",
-        "x-box-enable-explorer": false,
-        "description": "Sends an AI request to supported LLMs and returns an answer specifically focused on the user's question given the provided context.",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AiAsk"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "A successful response including the answer from the LLM.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AiResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "An unexpected client error.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ClientError"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "An unexpected server error.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ClientError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/v2/ai/text_gen": {
-      "post": {
-        "operationId": "post_ai_text_gen",
-        "summary": "Send AI Text Gen request",
-        "tags": [
-          "AI"
-        ],
-        "x-box-tag": "ai",
-        "x-box-enable-explorer": false,
-        "description": "Sends an AI request to supported LLMs and returns an answer specifically focused on the creation of new text.",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AiTextGen"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "A successful response including the answer from the LLM.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AiResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "An unexpected client error.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ClientError"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "An unexpected server error.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ClientError"
-                }
-              }
-            }
-          }
-        }
-      }
     }
   },
   "components": {
@@ -24013,147 +23900,6 @@
       }
     },
     "schemas": {
-      "AiAsk": {
-        "title": "AI Ask Request",
-        "type": "object",
-        "x-box-tag": "ai",
-        "required": [
-          "mode",
-          "prompt",
-          "items"
-        ],
-        "properties": {
-          "mode": {
-            "type": "string",
-            "description": "The mode specifies if this request is for a single or multiple items.",
-            "enum": [
-              "multiple_item_qa",
-              "single_item_qa"
-            ],
-            "example": "multiple_item_qa",
-            "nullable": false
-          },
-          "prompt": {
-            "type": "string",
-            "description": "The prompt provided by the client to be answered by the LLM.",
-            "example": "What is the value provided by public APIs based on this document?"
-          },
-          "items": {
-            "type": "array",
-            "description": "The items to be processed by the LLM, often files.",
-            "minItems": 1,
-            "maxItems": 25,
-            "uniqueItems": true,
-            "items": {
-              "type": "object",
-              "description": "The item to be processed by the LLM.",
-              "required": [
-                "id",
-                "type"
-              ],
-              "properties": {
-                "id": {
-                  "type": "string",
-                  "description": "The id of the item",
-                  "example": "123"
-                },
-                "type": {
-                  "type": "string",
-                  "description": "The type of the item",
-                  "enum": [
-                    "file"
-                  ],
-                  "example": "file"
-                },
-                "content": {
-                  "type": "string",
-                  "description": "The content of the item, often the text representation.",
-                  "example": "This is file content."
-                }
-              }
-            }
-          }
-        },
-        "description": "AI Ask request object"
-      },
-      "AiTextGen": {
-        "title": "AI Text Gen Request",
-        "type": "object",
-        "x-box-tag": "ai",
-        "required": [
-          "prompt",
-          "items"
-        ],
-        "properties": {
-          "prompt": {
-            "type": "string",
-            "description": "The prompt provided by the client to be answered by the LLM.",
-            "example": "Write an email to a client about the importance of public APIs."
-          },
-          "items": {
-            "type": "array",
-            "description": "The items to be processed by the LLM, often files.",
-            "required": [
-              "id",
-              "type"
-            ],
-            "minItems": 1,
-            "maxItems": 1,
-            "uniqueItems": true,
-            "items": {
-              "type": "object",
-              "description": "The item to be processed by the LLM.",
-              "properties": {
-                "id": {
-                  "type": "string",
-                  "description": "The id of the item.",
-                  "example": "123"
-                },
-                "type": {
-                  "type": "string",
-                  "description": "The type of the item.",
-                  "enum": [
-                    "file"
-                  ],
-                  "example": "file"
-                },
-                "content": {
-                  "type": "string",
-                  "description": "The content to use as context for generating new text or editing existing text.",
-                  "example": "This is file content."
-                }
-              }
-            }
-          },
-          "dialogue_history": {
-            "type": "array",
-            "description": "The history of prompts and answers previously passed to the LLM. This provides additional context to the LLM in generating the response.",
-            "items": {
-              "type": "object",
-              "description": "A context object that can hold prior prompts and answers.",
-              "properties": {
-                "prompt": {
-                  "type": "string",
-                  "description": "The prompt previously provided by the client and answered by the LLM.",
-                  "example": "Make my email about public APIs sound more professional."
-                },
-                "answer": {
-                  "type": "string",
-                  "description": "The answer previously provided by the LLM.",
-                  "example": "Here is the first draft of your professional email about public APIs."
-                },
-                "created_at": {
-                  "type": "string",
-                  "format": "date-time",
-                  "description": "The ISO date formatted timestamp of when the previous answer to the prompt was created.",
-                  "example": "2012-12-12T10:53:43-08:00"
-                }
-              }
-            }
-          }
-        },
-        "description": "AI Text Gen Request object"
-      },
       "PostOAuth2Token": {
         "title": "Token request",
         "type": "object",
@@ -25161,35 +24907,6 @@
             "description": "The type of downscoped access token returned. This is only\nreturned if an access token has been downscoped."
           }
         }
-      },
-      "AiResponse": {
-        "title": "AI Response",
-        "type": "object",
-        "x-box-resource-id": "ai_response",
-        "x-box-tag": "ai",
-        "required": [
-          "answer",
-          "created_at"
-        ],
-        "properties": {
-          "answer": {
-            "type": "string",
-            "description": "The answer provided by the LLM.",
-            "example": "Public APIs are important because of key and important reasons."
-          },
-          "created_at": {
-            "type": "string",
-            "format": "date-time",
-            "description": "The ISO date formatted timestamp of when the answer to the prompt was created.",
-            "example": "2012-12-12T10:53:43-08:00"
-          },
-          "completion_reason": {
-            "type": "string",
-            "description": "The reason the response finishes.",
-            "example": "done"
-          }
-        },
-        "description": "AI response"
       },
       "Classification": {
         "title": "Classification",
@@ -26495,7 +26212,6 @@
                   "ITEM_COPY",
                   "ITEM_CREATE",
                   "ITEM_DOWNLOAD",
-                  "ITEM_EMAIL_SEND",
                   "ITEM_MAKE_CURRENT_VERSION",
                   "ITEM_MODIFY",
                   "ITEM_MOVE",
@@ -26536,7 +26252,6 @@
                   "RENAME",
                   "RETENTION_POLICY_ASSIGNMENT_ADD",
                   "SHARE",
-                  "SHARED_LINK_SEND",
                   "SHARE_EXPIRATION",
                   "SHIELD_ALERT",
                   "SHIELD_EXTERNAL_COLLAB_ACCESS_BLOCKED",
@@ -28575,7 +28290,6 @@
               },
               "folder_upload_email": {
                 "type": "object",
-                "description": "The `folder_upload_email` parameter is not `null` if one of the following options is **true**:\n\n  * The **Allow uploads to this folder via email** and the **Only allow email uploads from collaborators in this folder** are [enabled for a folder in the Admin Console](https://support.box.com/hc/en-us/articles/360043697534-Upload-to-Box-Through-Email), and the user has at least **Upload** permissions granted.\n\n  * The **Allow uploads to this folder via email** setting is enabled for a folder in the Admin Console, and the **Only allow email uploads from collaborators in this folder** setting is deactivated (unchecked).\n\nIf the conditions are not met, the parameter will have the following value: `folder_upload_email: null`",
                 "nullable": true,
                 "properties": {
                   "access": {
@@ -38078,91 +37792,50 @@
             "example": "contract"
           },
           "filters": {
-            "allOf": [
-              {
-                "anyOf": [
-                  {
-                    "$ref": "#/components/schemas/MetadataFieldFilterString"
-                  },
-                  {
-                    "$ref": "#/components/schemas/MetadataFieldFilterFloat"
-                  },
-                  {
-                    "$ref": "#/components/schemas/MetadataFieldFilterMultiSelect"
-                  },
-                  {
-                    "$ref": "#/components/schemas/MetadataFieldFilterFloatRange"
-                  },
-                  {
-                    "$ref": "#/components/schemas/MetadataFieldFilterDateRange"
-                  }
-                ]
-              },
-              {
-                "description": "Specifies which fields on the template to filter the search\nresults by. When more than one field is specified, the query\nperforms a logical `AND` to ensure that the instance of the\ntemplate matches each of the fields specified."
-              },
-              {
-                "example": {
-                  "category": "online",
-                  "contractValue": 1000000
+            "type": "object",
+            "description": "Specifies which fields on the template to filter the search\nresults by. When more than one field is specified, the query\nperforms a logical `AND` to ensure that the instance of the\ntemplate matches each of the fields specified.",
+            "example": {
+              "category": "online"
+            },
+            "additionalProperties": {
+              "allOf": [
+                {
+                  "oneOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "name": "metadata_field_filter",
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "Specifies the values to match for a `multiSelect` metadata\nfield. When performing a search, the query will essentially\nperform an `OR` operation to match any template where any of\nthe provided values match this field.",
+                      "example": [
+                        "online",
+                        "enterprise"
+                      ]
+                    },
+                    {
+                      "$ref": "#/components/schemas/MetadataFieldFilterFloatRange"
+                    },
+                    {
+                      "$ref": "#/components/schemas/MetadataFieldFilterDateRange"
+                    }
+                  ]
+                },
+                {
+                  "example": "online"
+                },
+                {
+                  "x-box-example-key": "category"
                 }
-              }
-            ]
+              ]
+            }
           }
-        }
-      },
-      "MetadataFieldFilterString": {
-        "title": "Metadata field filter (string)",
-        "type": "object",
-        "x-box-resource-id": "metadata_field_filter_string",
-        "description": "Specifies which text field on the template to filter the search\nresults by.",
-        "example": {
-          "category": "online"
-        },
-        "additionalProperties": {
-          "type": "string",
-          "description": "A mapping between a metadata `string` field key and\nthe value to match search results on.",
-          "example": "online",
-          "x-box-example-key": "category"
-        }
-      },
-      "MetadataFieldFilterFloat": {
-        "title": "Metadata field filter (float)",
-        "type": "object",
-        "x-box-resource-id": "metadata_field_filter_float",
-        "description": "Specifies which `float` field on the template to filter the search\nresults by.",
-        "example": {
-          "contractValue": 10000
-        },
-        "additionalProperties": {
-          "type": "number",
-          "description": "A mapping between a metadata `float` field key and\nthe value to match search results on.",
-          "example": 10000,
-          "x-box-example-key": "contractValue"
-        }
-      },
-      "MetadataFieldFilterMultiSelect": {
-        "title": "Metadata field filter (multi-select)",
-        "type": "object",
-        "x-box-resource-id": "metadata_field_filter_multi_select",
-        "description": "Specifies the values to match for a `multiSelect` metadata\nfield. When performing a search, the query will essentially\nperform an `OR` operation to match any template where any of\nthe provided values match this field.",
-        "example": {
-          "category": [
-            "online",
-            "enterprise"
-          ]
-        },
-        "additionalProperties": {
-          "type": "array",
-          "description": "A mapping between a metadata `multiSelect` field key and\nthe one or more values to match search results on.\n\nWhen performing a search, the query will essentially\nperform an `OR` operation to match any template where any of\nthe provided values match this field.",
-          "example": [
-            "online",
-            "enterprise"
-          ],
-          "items": {
-            "type": "string"
-          },
-          "x-box-example-key": "category"
         }
       },
       "MetadataFieldFilterFloatRange": {
@@ -38170,31 +37843,16 @@
         "type": "object",
         "x-box-resource-id": "metadata_field_filter_float_range",
         "description": "Specifies which `float` field on the template to filter the search\nresults by, specifying a range of values that can match.",
-        "example": {
-          "contractValue": {
-            "gt": 100000,
-            "lt": 200000
-          }
-        },
-        "additionalProperties": {
-          "type": "object",
-          "description": "Specifies which `float` field on the template to filter the search\nresults by, specifying a range of values that can match.",
-          "example": {
-            "gt": 100000,
-            "lt": 200000
+        "properties": {
+          "lt": {
+            "description": "Specifies the (inclusive) upper bound for the metadata field\nvalue. The value of a field must be lower than (`lt`) or\nequal to this value for the search query to match this\ntemplate.",
+            "type": "number",
+            "example": 200000
           },
-          "x-box-example-key": "value",
-          "properties": {
-            "lt": {
-              "description": "Specifies the (inclusive) upper bound for the metadata field\nvalue. The value of a field must be lower than (`lt`) or\nequal to this value for the search query to match this\ntemplate.",
-              "type": "number",
-              "example": 200000
-            },
-            "gt": {
-              "description": "Specifies the (inclusive) lower bound for the metadata field\nvalue. The value of a field must be greater than (`gt`) or\nequal to this value for the search query to match this\ntemplate.",
-              "type": "number",
-              "example": 100000
-            }
+          "gt": {
+            "description": "Specifies the (inclusive) lower bound for the metadata field\nvalue. The value of a field must be greater than (`gt`) or\nequal to this value for the search query to match this\ntemplate.",
+            "type": "number",
+            "example": 100000
           }
         }
       },
@@ -38203,33 +37861,18 @@
         "type": "object",
         "x-box-resource-id": "metadata_field_filter_date_range",
         "description": "Specifies which `date` field on the template to filter the search\nresults by, specifying a range of dates that can match.",
-        "example": {
-          "expirationDate": {
-            "lt": "2017-08-01T00:00:00Z",
-            "gt": "2016-08-01T00:00:00Z"
-          }
-        },
-        "additionalProperties": {
-          "type": "object",
-          "description": "Match a `date` metadata field to a range of values.",
-          "example": {
-            "lt": "2017-08-01T00:00:00Z",
-            "gt": "2016-08-01T00:00:00Z"
+        "properties": {
+          "lt": {
+            "description": "Specifies the (inclusive) upper bound for the metadata field\nvalue. The value of a field must be lower than (`lt`) or\nequal to this value for the search query to match this\ntemplate.",
+            "type": "string",
+            "format": "date-time",
+            "example": "2017-08-01T00:00:00Z"
           },
-          "x-box-example-key": "expirationDate",
-          "properties": {
-            "lt": {
-              "description": "Specifies the (inclusive) upper bound for the metadata field\nvalue. The value of a field must be lower than (`lt`) or\nequal to this value for the search query to match this\ntemplate.",
-              "type": "string",
-              "format": "date-time",
-              "example": "2017-08-01T00:00:00Z"
-            },
-            "gt": {
-              "description": "Specifies the (inclusive) lower bound for the metadata field\nvalue. The value of a field must be greater than (`gt`) or\nequal to this value for the search query to match this\ntemplate.",
-              "type": "string",
-              "format": "date-time",
-              "example": "2016-08-01T00:00:00Z"
-            }
+          "gt": {
+            "description": "Specifies the (inclusive) lower bound for the metadata field\nvalue. The value of a field must be greater than (`gt`) or\nequal to this value for the search query to match this\ntemplate.",
+            "type": "string",
+            "format": "date-time",
+            "example": "2016-08-01T00:00:00Z"
           }
         }
       }
@@ -38241,11 +37884,6 @@
     }
   ],
   "tags": [
-    {
-      "name": "AI",
-      "description": "A set of endpoints used to\ninteract with supported LLMs.",
-      "x-box-tag": "ai"
-    },
     {
       "name": "Authorization",
       "description": "A set of endpoints used to\nmanage user authorization process.",
