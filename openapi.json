@@ -10328,7 +10328,7 @@
           },
           {
             "name": "mdfilters",
-            "description": "Limits the search results to any items for which the metadata matches\nthe provided filter.\n\nThis parameter contains a list of 1 metadata template to filter\nthe search results by. This list can currently only\ncontain one entry, though this might be expanded in the future.\n\nThis parameter is required unless the `query` parameter is provided.",
+            "description": "Limits the search results to any items for which the metadata matches the provided filter.\nThis parameter is a list that specifies exactly **one** metadata template used to filter the search results. \nIt is required unless the `query` parameter is provided.",
             "in": "query",
             "example": [
               {
@@ -10351,8 +10351,7 @@
               "maxItems": 1,
               "items": {
                 "$ref": "#/components/schemas/MetadataFilter"
-              },
-              "description": "A list of metadata templates to filter the search results by.\n\nRequired unless `query` parameter is defined."
+              }
             }
           },
           {
@@ -17367,6 +17366,7 @@
                   "GROUP_EDITED",
                   "GROUP_REMOVE_ITEM",
                   "GROUP_REMOVE_USER",
+                  "ITEM_EMAIL_SEND",
                   "ITEM_MODIFY",
                   "ITEM_OPEN",
                   "ITEM_SHARED_UPDATE",
@@ -17394,6 +17394,7 @@
                   "RENAME",
                   "RETENTION_POLICY_ASSIGNMENT_ADD",
                   "SHARE",
+                  "SHARED_LINK_SEND",
                   "SHARE_EXPIRATION",
                   "SHIELD_ALERT",
                   "SHIELD_EXTERNAL_COLLAB_ACCESS_BLOCKED",
@@ -19405,12 +19406,12 @@
     "/legal_hold_policy_assignments/{legal_hold_policy_assignment_id}/files_on_hold": {
       "get": {
         "operationId": "get_legal_hold_policy_assignments_id_files_on_hold",
-        "summary": "List current file versions for legal hold policy assignment",
+        "summary": "List files with current file versions for legal hold policy assignment",
         "tags": [
           "Legal hold policy assignments"
         ],
         "x-box-tag": "legal_hold_policy_assignments",
-        "description": "Get a list of current file versions for a legal hold\nassignment.\n\nIn some cases you may want to get previous file versions instead. In these\ncases, use the `GET  /legal_hold_policy_assignments/:id/file_versions_on_hold`\nAPI instead to return any previous versions of a file for this legal hold\npolicy assignment.\n\nDue to ongoing re-architecture efforts this API might not return all file\nversions held for this policy ID. Instead, this API will only return the\nlatest file version held in the newly developed architecture. The `GET\n/file_version_legal_holds` API can be used to fetch current and past versions\nof files held within the legacy architecture.\n\nThe `GET /legal_hold_policy_assignments?policy_id={id}` API can be used to\nfind a list of policy assignments for a given policy ID.",
+        "description": "Get a list of files with current file versions for a legal hold\nassignment.\n\nIn some cases you may want to get previous file versions instead. In these\ncases, use the `GET  /legal_hold_policy_assignments/:id/file_versions_on_hold`\nAPI instead to return any previous versions of a file for this legal hold\npolicy assignment.\n\nDue to ongoing re-architecture efforts this API might not return all file\nversions held for this policy ID. Instead, this API will only return the\nlatest file version held in the newly developed architecture. The `GET\n/file_version_legal_holds` API can be used to fetch current and past versions\nof files held within the legacy architecture.\n\nThe `GET /legal_hold_policy_assignments?policy_id={id}` API can be used to\nfind a list of policy assignments for a given policy ID.",
         "parameters": [
           {
             "name": "legal_hold_policy_assignment_id",
@@ -19469,7 +19470,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/FileVersionLegalHolds"
+                  "$ref": "#/components/schemas/FilesOnHold"
                 }
               }
             }
@@ -19675,7 +19676,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/FileVersionLegalHolds"
+                  "$ref": "#/components/schemas/FileVersionsOnHold"
                 }
               }
             }
@@ -23874,6 +23875,112 @@
           }
         }
       }
+    },
+    "/ai/ask": {
+      "post": {
+        "operationId": "post_ai_ask",
+        "summary": "Send AI Ask request",
+        "tags": [
+          "AI"
+        ],
+        "x-box-tag": "ai",
+        "x-box-enable-explorer": false,
+        "description": "Sends an AI request to supported LLMs and returns an answer specifically focused on the user's question given the provided context.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AiAsk"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "A successful response including the answer from the LLM.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "An unexpected client error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "An unexpected server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ai/text_gen": {
+      "post": {
+        "operationId": "post_ai_text_gen",
+        "summary": "Send AI Text Gen request",
+        "tags": [
+          "AI"
+        ],
+        "x-box-tag": "ai",
+        "x-box-enable-explorer": false,
+        "description": "Sends an AI request to supported LLMs and returns an answer specifically focused on the creation of new text.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AiTextGen"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "A successful response including the answer from the LLM.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "An unexpected client error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "An unexpected server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -23900,6 +24007,147 @@
       }
     },
     "schemas": {
+      "AiAsk": {
+        "title": "AI Ask Request",
+        "type": "object",
+        "x-box-tag": "ai",
+        "required": [
+          "mode",
+          "prompt",
+          "items"
+        ],
+        "properties": {
+          "mode": {
+            "type": "string",
+            "description": "The mode specifies if this request is for a single or multiple items.",
+            "enum": [
+              "multiple_item_qa",
+              "single_item_qa"
+            ],
+            "example": "multiple_item_qa",
+            "nullable": false
+          },
+          "prompt": {
+            "type": "string",
+            "description": "The prompt provided by the client to be answered by the LLM.",
+            "example": "What is the value provided by public APIs based on this document?"
+          },
+          "items": {
+            "type": "array",
+            "description": "The items to be processed by the LLM, often files.",
+            "minItems": 1,
+            "maxItems": 25,
+            "uniqueItems": true,
+            "items": {
+              "type": "object",
+              "description": "The item to be processed by the LLM.",
+              "required": [
+                "id",
+                "type"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "The id of the item",
+                  "example": "123"
+                },
+                "type": {
+                  "type": "string",
+                  "description": "The type of the item",
+                  "enum": [
+                    "file"
+                  ],
+                  "example": "file"
+                },
+                "content": {
+                  "type": "string",
+                  "description": "The content of the item, often the text representation.",
+                  "example": "This is file content."
+                }
+              }
+            }
+          }
+        },
+        "description": "AI Ask request object"
+      },
+      "AiTextGen": {
+        "title": "AI Text Gen Request",
+        "type": "object",
+        "x-box-tag": "ai",
+        "required": [
+          "prompt",
+          "items"
+        ],
+        "properties": {
+          "prompt": {
+            "type": "string",
+            "description": "The prompt provided by the client to be answered by the LLM.",
+            "example": "Write an email to a client about the importance of public APIs."
+          },
+          "items": {
+            "type": "array",
+            "description": "The items to be processed by the LLM, often files.",
+            "required": [
+              "id",
+              "type"
+            ],
+            "minItems": 1,
+            "maxItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "type": "object",
+              "description": "The item to be processed by the LLM.",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "The id of the item.",
+                  "example": "123"
+                },
+                "type": {
+                  "type": "string",
+                  "description": "The type of the item.",
+                  "enum": [
+                    "file"
+                  ],
+                  "example": "file"
+                },
+                "content": {
+                  "type": "string",
+                  "description": "The content to use as context for generating new text or editing existing text.",
+                  "example": "This is file content."
+                }
+              }
+            }
+          },
+          "dialogue_history": {
+            "type": "array",
+            "description": "The history of prompts and answers previously passed to the LLM. This provides additional context to the LLM in generating the response.",
+            "items": {
+              "type": "object",
+              "description": "A context object that can hold prior prompts and answers.",
+              "properties": {
+                "prompt": {
+                  "type": "string",
+                  "description": "The prompt previously provided by the client and answered by the LLM.",
+                  "example": "Make my email about public APIs sound more professional."
+                },
+                "answer": {
+                  "type": "string",
+                  "description": "The answer previously provided by the LLM.",
+                  "example": "Here is the first draft of your professional email about public APIs."
+                },
+                "created_at": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "The ISO date formatted timestamp of when the previous answer to the prompt was created.",
+                  "example": "2012-12-12T10:53:43-08:00"
+                }
+              }
+            }
+          }
+        },
+        "description": "AI Text Gen Request object"
+      },
       "PostOAuth2Token": {
         "title": "Token request",
         "type": "object",
@@ -24907,6 +25155,35 @@
             "description": "The type of downscoped access token returned. This is only\nreturned if an access token has been downscoped."
           }
         }
+      },
+      "AiResponse": {
+        "title": "AI Response",
+        "type": "object",
+        "x-box-resource-id": "ai_response",
+        "x-box-tag": "ai",
+        "required": [
+          "answer",
+          "created_at"
+        ],
+        "properties": {
+          "answer": {
+            "type": "string",
+            "description": "The answer provided by the LLM.",
+            "example": "Public APIs are important because of key and important reasons."
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The ISO date formatted timestamp of when the answer to the prompt was created.",
+            "example": "2012-12-12T10:53:43-08:00"
+          },
+          "completion_reason": {
+            "type": "string",
+            "description": "The reason the response finishes.",
+            "example": "done"
+          }
+        },
+        "description": "AI response"
       },
       "Classification": {
         "title": "Classification",
@@ -26212,6 +26489,7 @@
                   "ITEM_COPY",
                   "ITEM_CREATE",
                   "ITEM_DOWNLOAD",
+                  "ITEM_EMAIL_SEND",
                   "ITEM_MAKE_CURRENT_VERSION",
                   "ITEM_MODIFY",
                   "ITEM_MOVE",
@@ -26252,6 +26530,7 @@
                   "RENAME",
                   "RETENTION_POLICY_ASSIGNMENT_ADD",
                   "SHARE",
+                  "SHARED_LINK_SEND",
                   "SHARE_EXPIRATION",
                   "SHIELD_ALERT",
                   "SHIELD_EXTERNAL_COLLAB_ACCESS_BLOCKED",
@@ -26380,8 +26659,8 @@
               "description": {
                 "type": "string",
                 "nullable": false,
-                "description": "The optional description of this file",
-                "maxLength": 256,
+                "description": "The optional description of this file.\nIf the description exceeds 255 characters, the first 255 characters\nare set as a file description and the rest of it is ignored.",
+                "maxLength": 255,
                 "example": "Contract for Q1 renewal"
               },
               "size": {
@@ -27545,6 +27824,94 @@
           }
         ]
       },
+      "FilesOnHold": {
+        "title": "Files on hold",
+        "type": "object",
+        "x-box-resource-id": "files_on_hold",
+        "x-box-tag": "legal_hold_policy_assignments",
+        "description": "A list of files on hold for legal policy assignment",
+        "allOf": [
+          {
+            "type": "object",
+            "description": "The part of an API response that describes marker\nbased pagination",
+            "properties": {
+              "limit": {
+                "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
+                "example": 1000,
+                "type": "integer",
+                "format": "int64"
+              },
+              "next_marker": {
+                "description": "The marker for the start of the next page of results.",
+                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                "type": "string",
+                "nullable": true
+              },
+              "prev_marker": {
+                "description": "The marker for the start of the previous page of results.",
+                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVih",
+                "type": "string",
+                "nullable": true
+              }
+            }
+          },
+          {
+            "properties": {
+              "entries": {
+                "type": "array",
+                "description": "A list of files",
+                "items": {
+                  "$ref": "#/components/schemas/File--Mini"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "FileVersionsOnHold": {
+        "title": "File versions on hold",
+        "type": "object",
+        "x-box-resource-id": "file_versions_on_hold",
+        "x-box-tag": "legal_hold_policy_assignments",
+        "description": "A list of files on hold for legal policy assignment",
+        "allOf": [
+          {
+            "type": "object",
+            "description": "The part of an API response that describes marker\nbased pagination",
+            "properties": {
+              "limit": {
+                "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
+                "example": 1000,
+                "type": "integer",
+                "format": "int64"
+              },
+              "next_marker": {
+                "description": "The marker for the start of the next page of results.",
+                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                "type": "string",
+                "nullable": true
+              },
+              "prev_marker": {
+                "description": "The marker for the start of the previous page of results.",
+                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVih",
+                "type": "string",
+                "nullable": true
+              }
+            }
+          },
+          {
+            "properties": {
+              "entries": {
+                "type": "array",
+                "description": "A list of file versions on hold.",
+                "items": {
+                  "$ref": "#/components/schemas/FileVersion"
+                }
+              }
+            }
+          }
+        ]
+      },
       "FileVersion": {
         "title": "File version",
         "type": "object",
@@ -27796,7 +28163,7 @@
         "type": "object",
         "x-box-resource-id": "file_version_legal_hold",
         "x-box-tag": "file_version_legal_holds",
-        "description": "File-Version-Legal-Hold is an entity representing all\nholds on a File Version.",
+        "description": "File version legal hold is an entity representing all\nholds on a File Version.",
         "properties": {
           "id": {
             "type": "string",
@@ -27851,7 +28218,7 @@
         "type": "object",
         "x-box-resource-id": "file_version_legal_holds",
         "x-box-tag": "file_version_legal_holds",
-        "description": "A list of file version legal holds.",
+        "description": "A list of file versions with legal holds.",
         "allOf": [
           {
             "type": "object",
@@ -28290,6 +28657,7 @@
               },
               "folder_upload_email": {
                 "type": "object",
+                "description": "The `folder_upload_email` parameter is not `null` if one of the following options is **true**:\n\n  * The **Allow uploads to this folder via email** and the **Only allow email uploads from collaborators in this folder** are [enabled for a folder in the Admin Console](https://support.box.com/hc/en-us/articles/360043697534-Upload-to-Box-Through-Email), and the user has at least **Upload** permissions granted.\n\n  * The **Allow uploads to this folder via email** setting is enabled for a folder in the Admin Console, and the **Only allow email uploads from collaborators in this folder** setting is deactivated (unchecked).\n\nIf the conditions are not met, the parameter will have the following value: `folder_upload_email: null`",
                 "nullable": true,
                 "properties": {
                   "access": {
@@ -37774,7 +38142,7 @@
         "type": "object",
         "x-box-resource-id": "metadata_filter",
         "x-box-tag": "search",
-        "description": "A metadata template to filter the search results by.",
+        "description": "A metadata template used to filter the search results.",
         "properties": {
           "scope": {
             "description": "Specifies the scope of the template to filter search results by.\n\nThis will be `enterprise_{enterprise_id}` for templates defined\nfor use in this enterprise, and `global` for general templates\nthat are available to all enterprises using Box.",
@@ -37787,7 +38155,7 @@
             ]
           },
           "templateKey": {
-            "description": "The key of the template to filter search results by.\n\nIn many cases the template key is automatically derived\nof its display name, for example `Contract Template` would\nbecome `contractTemplate`. In some cases the creator of the\ntemplate will have provided its own template key.\n\nPlease [list the templates for an enterprise][list], or\nget all instances on a [file][file] or [folder][folder]\nto inspect a template's key.\n\n[list]: e://get-metadata-templates-enterprise\n[file]: e://get-files-id-metadata\n[folder]: e://get-folders-id-metadata",
+            "description": "The key of the template used to filter search results.\n\nIn many cases the template key is automatically derived\nof its display name, for example `Contract Template` would\nbecome `contractTemplate`. In some cases the creator of the\ntemplate will have provided its own template key.\n\nPlease [list the templates for an enterprise][list], or\nget all instances on a [file][file] or [folder][folder]\nto inspect a template's key.\n\n[list]: e://get-metadata-templates-enterprise\n[file]: e://get-files-id-metadata\n[folder]: e://get-folders-id-metadata",
             "type": "string",
             "example": "contract"
           },
@@ -37808,7 +38176,7 @@
                       "type": "number"
                     },
                     {
-                      "name": "metadata_field_filter",
+                      "title": "Metadata field filter (multi-select)",
                       "type": "array",
                       "items": {
                         "type": "string"
@@ -37884,6 +38252,11 @@
     }
   ],
   "tags": [
+    {
+      "name": "AI",
+      "description": "A set of endpoints used to\ninteract with supported LLMs.",
+      "x-box-tag": "ai"
+    },
     {
       "name": "Authorization",
       "description": "A set of endpoints used to\nmanage user authorization process.",
