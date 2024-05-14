@@ -14,7 +14,7 @@
       "url": "http://www.apache.org/licenses/LICENSE-2.0"
     },
     "version": "2.0.0",
-    "x-box-commit-hash": "083d00339e"
+    "x-box-commit-hash": "3cc3020078"
   },
   "host": "api.box.com",
   "basePath": "/2.0",
@@ -6250,7 +6250,7 @@
           },
           {
             "name": "mdfilters",
-            "description": "Limits the search results to any items for which the metadata matches the provided filter.\nThis parameter is a list that specifies exactly **one** metadata template used to filter the search results. \nIt  unless the `query` parameter is provided.",
+            "description": "Limits the search results to any items for which the metadata matches the provided filter.\nThis parameter is a list that specifies exactly **one** metadata template used to filter the search results. \nIt is required unless the `query` parameter is provided.",
             "in": "query",
             "required": false,
             "type": "array",
@@ -12817,11 +12817,11 @@
     "/legal_hold_policy_assignments/{legal_hold_policy_assignment_id}/files_on_hold": {
       "get": {
         "operationId": "get_legal_hold_policy_assignments_id_files_on_hold",
-        "summary": "List current file versions for legal hold policy assignment",
+        "summary": "List files with current file versions for legal hold policy assignment",
         "tags": [
           "Legal hold policy assignments"
         ],
-        "description": "Get a list of current file versions for a legal hold\nassignment.\n\nIn some cases you may want to get previous file versions instead. In these\ncases, use the `GET  /legal_hold_policy_assignments/:id/file_versions_on_hold`\nAPI instead to return any previous versions of a file for this legal hold\npolicy assignment.\n\nDue to ongoing re-architecture efforts this API might not return all file\nversions held for this policy ID. Instead, this API will only return the\nlatest file version held in the newly developed architecture. The `GET\n/file_version_legal_holds` API can be used to fetch current and past versions\nof files held within the legacy architecture.\n\nThe `GET /legal_hold_policy_assignments?policy_id={id}` API can be used to\nfind a list of policy assignments for a given policy ID.",
+        "description": "Get a list of files with current file versions for a legal hold\nassignment.\n\nIn some cases you may want to get previous file versions instead. In these\ncases, use the `GET  /legal_hold_policy_assignments/:id/file_versions_on_hold`\nAPI instead to return any previous versions of a file for this legal hold\npolicy assignment.\n\nDue to ongoing re-architecture efforts this API might not return all file\nversions held for this policy ID. Instead, this API will only return the\nlatest file version held in the newly developed architecture. The `GET\n/file_version_legal_holds` API can be used to fetch current and past versions\nof files held within the legacy architecture.\n\nThe `GET /legal_hold_policy_assignments?policy_id={id}` API can be used to\nfind a list of policy assignments for a given policy ID.",
         "parameters": [
           {
             "name": "legal_hold_policy_assignment_id",
@@ -12861,7 +12861,7 @@
           "200": {
             "description": "Returns the list of current file versions held under legal hold for a\nspecific legal hold policy assignment.",
             "schema": {
-              "$ref": "#/definitions/FileVersionLegalHolds"
+              "$ref": "#/definitions/FilesOnHold"
             }
           },
           "default": {
@@ -13008,7 +13008,7 @@
           "200": {
             "description": "Returns the list of previous file versions held under legal hold for a\nspecific legal hold policy assignment.",
             "schema": {
-              "$ref": "#/definitions/FileVersionLegalHolds"
+              "$ref": "#/definitions/FileVersionsOnHold"
             }
           },
           "default": {
@@ -21237,7 +21237,14 @@
         },
         "next_stream_position": {
           "description": "The stream position of the start of the next page (chunk)\nof events.",
-          "type": "string"
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "number"
+            }
+          ]
         },
         "entries": {
           "type": "array",
@@ -21918,10 +21925,10 @@
         }
       ]
     },
-    "FileVersionLegalHolds": {
-      "title": "File version legal holds",
+    "FilesOnHold": {
+      "title": "Files on hold",
       "type": "object",
-      "description": "A list of file version legal holds.",
+      "description": "A list of files on hold for legal policy assignment",
       "allOf": [
         {
           "type": "object",
@@ -21946,9 +21953,9 @@
           "properties": {
             "entries": {
               "type": "array",
-              "description": "A list of file version legal holds",
+              "description": "A list of files",
               "items": {
-                "$ref": "#/definitions/FileVersionLegalHold"
+                "$ref": "#/definitions/File--Mini"
               }
             }
           }
@@ -21986,6 +21993,43 @@
               "description": "A list of file version retentions",
               "items": {
                 "$ref": "#/definitions/FileVersionRetention"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "FileVersionsOnHold": {
+      "title": "File versions on hold",
+      "type": "object",
+      "description": "A list of files on hold for legal policy assignment",
+      "allOf": [
+        {
+          "type": "object",
+          "description": "The part of an API response that describes marker\nbased pagination",
+          "properties": {
+            "limit": {
+              "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
+              "type": "integer",
+              "format": "int64"
+            },
+            "next_marker": {
+              "description": "The marker for the start of the next page of results.",
+              "type": "string"
+            },
+            "prev_marker": {
+              "description": "The marker for the start of the previous page of results.",
+              "type": "string"
+            }
+          }
+        },
+        {
+          "properties": {
+            "entries": {
+              "type": "array",
+              "description": "A list of file versions on hold.",
+              "items": {
+                "$ref": "#/definitions/FileVersion"
               }
             }
           }
@@ -22053,7 +22097,7 @@
     "FileVersionLegalHold": {
       "title": "File version legal hold",
       "type": "object",
-      "description": "File-Version-Legal-Hold is an entity representing all\nholds on a File Version.",
+      "description": "File version legal hold is an entity representing all\nholds on a File Version.",
       "properties": {
         "id": {
           "type": "string",
@@ -22099,6 +22143,43 @@
           "description": "Time that this File-Version-Legal-Hold was\ndeleted."
         }
       }
+    },
+    "FileVersionLegalHolds": {
+      "title": "File version legal holds",
+      "type": "object",
+      "description": "A list of file versions with legal holds.",
+      "allOf": [
+        {
+          "type": "object",
+          "description": "The part of an API response that describes marker\nbased pagination",
+          "properties": {
+            "limit": {
+              "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
+              "type": "integer",
+              "format": "int64"
+            },
+            "next_marker": {
+              "description": "The marker for the start of the next page of results.",
+              "type": "string"
+            },
+            "prev_marker": {
+              "description": "The marker for the start of the previous page of results.",
+              "type": "string"
+            }
+          }
+        },
+        {
+          "properties": {
+            "entries": {
+              "type": "array",
+              "description": "A list of file version legal holds",
+              "items": {
+                "$ref": "#/definitions/FileVersionLegalHold"
+              }
+            }
+          }
+        }
+      ]
     },
     "ShieldInformationBarrier": {
       "title": "Shield information barrier",
@@ -24249,8 +24330,8 @@
           "properties": {
             "description": {
               "type": "string",
-              "description": "The optional description of this file",
-              "maxLength": 256
+              "description": "The optional description of this file.\nIf the description exceeds 255 characters, the first 255 characters\nare set as a file description and the rest of it is ignored.",
+              "maxLength": 255
             },
             "size": {
               "type": "integer",
@@ -25388,11 +25469,11 @@
         },
         "ttl": {
           "description": "The time in minutes for which this server is available",
-          "type": "integer"
+          "type": "string"
         },
         "max_retries": {
           "description": "The maximum number of retries this server will\nallow before a new long poll should be started by\ngetting a [new list of server](#options-events).",
-          "type": "integer"
+          "type": "string"
         },
         "retry_timeout": {
           "description": "The maximum number of seconds without a response\nafter which you should retry the long poll connection.\n\nThis helps to overcome network issues where the long\npoll looks to be working but no packages are coming\nthrough.",
