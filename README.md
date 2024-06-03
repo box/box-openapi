@@ -18,9 +18,6 @@ following builds.
 [![OpenAPI (en)](https://img.shields.io/static/v1.svg?label=OpenAPI%203&message=Download&color=grey&labelColor=0361D4&style=for-the-badge&logoColor=white)](https://raw.githubusercontent.com/box/box-openapi/en/openapi.json)
 [![OpenAPI (jp)](https://img.shields.io/static/v1.svg?label=OpenAPI%203&message=ダウンロード&color=grey&labelColor=0361D4&style=for-the-badge&logoColor=white)](https://raw.githubusercontent.com/box/box-openapi/jp/openapi.json)
 
-[![Swagger (en)](https://img.shields.io/static/v1.svg?label=Swagger%202&message=Backported&color=grey&labelColor=0361D4&style=for-the-badge)](https://github.com/box/box-openapi/tree/swagger-2.0)
-[![Swagger (jp)](https://img.shields.io/static/v1.svg?label=Swagger%202&message=Legacy%20/%20Incomplete&color=grey&labelColor=lightgrey&style=for-the-badge)](https://github.com/box/box-openapi/tree/legacy-swagger-2.0/v2.0)
-
 ## Contribution
 
 * If you notice that the content requires improvements or you feel that some information is missing add a new [GitHub issue](https://github.com/box/box-openapi/issues) and describe the issue.
