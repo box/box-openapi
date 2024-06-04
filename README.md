@@ -6,7 +6,8 @@
 This repository contains the build system for the Box OpenAPI 3.0 Specification (OAS3) of the [Box Platform API](https://developers.box.com/).
 
 > **Note**: Due to changes in API schema development process, this repository is currently frozen. This means we are not actively contributing to the repository, apart from necessary fixes and improvements that help us to put the new process in place even faster.
-You can still use the raw sources for specification available in the **Download** section.
+
+You can still use the raw sources for specification available in the **Downloads** section.
 
 ## Downloads
 
@@ -16,14 +17,6 @@ following builds.
 
 [![OpenAPI (en)](https://img.shields.io/static/v1.svg?label=OpenAPI%203&message=Download&color=grey&labelColor=0361D4&style=for-the-badge&logoColor=white)](https://raw.githubusercontent.com/box/box-openapi/en/openapi.json)
 [![OpenAPI (jp)](https://img.shields.io/static/v1.svg?label=OpenAPI%203&message=ダウンロード&color=grey&labelColor=0361D4&style=for-the-badge&logoColor=white)](https://raw.githubusercontent.com/box/box-openapi/jp/openapi.json)
-
-[![Swagger (en)](https://img.shields.io/static/v1.svg?label=Swagger%202&message=Backported&color=grey&labelColor=0361D4&style=for-the-badge)](https://github.com/box/box-openapi/tree/swagger-2.0)
-[![Swagger (jp)](https://img.shields.io/static/v1.svg?label=Swagger%202&message=Legacy%20/%20Incomplete&color=grey&labelColor=lightgrey&style=for-the-badge)](https://github.com/box/box-openapi/tree/legacy-swagger-2.0/v2.0)
-
-## Swagger 2.0
-
-The older and incomplete Swagger 2.0 specification is still available on the
-[Swagger 2.0](https://github.com/box/box-openapi/tree/legacy-swagger-2.0/v2.0) branch.
 
 ## Contribution
 
