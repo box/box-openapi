@@ -19496,7 +19496,7 @@
         ],
         "x-box-tag": "file_version_retentions",
         "summary": "List file version retentions",
-        "description": "Retrieves all file version retentions for the given enterprise.\n\n**Note**:\nFile retention API is now **deprecated**. \nTo get information about files and file versions under retention,\nsee [files under retention](e://get-retention-policy-assignments-id-files-under-retention) or [file versions under retention](get-retention-policy-assignments-id-file-versions-under-retention) endpoints.",
+        "description": "Retrieves all file version retentions for the given enterprise.\n\n**Note**:\nFile retention API is now **deprecated**. \nTo get information about files and file versions under retention,\nsee [files under retention](e://get-retention-policy-assignments-id-files-under-retention) or [file versions under retention](e://get-retention-policy-assignments-id-file-versions-under-retention) endpoints.",
         "parameters": [
           {
             "name": "file_id",
@@ -19702,7 +19702,7 @@
         ],
         "x-box-tag": "file_version_retentions",
         "summary": "Get retention on file",
-        "description": "Returns information about a file version retention.\n\n**Note**:\nFile retention API is now **deprecated**. \nTo get information about files and file versions under retention,\nsee [files under retention](e://get-retention-policy-assignments-id-files-under-retention) or [file versions under retention](get-retention-policy-assignments-id-file-versions-under-retention) endpoints.",
+        "description": "Returns information about a file version retention.\n\n**Note**:\nFile retention API is now **deprecated**. \nTo get information about files and file versions under retention,\nsee [files under retention](e://get-retention-policy-assignments-id-files-under-retention) or [file versions under retention](e://get-retention-policy-assignments-id-file-versions-under-retention) endpoints.",
         "parameters": [
           {
             "name": "file_version_retention_id",
@@ -23879,7 +23879,7 @@
     "/ai/ask": {
       "post": {
         "operationId": "post_ai_ask",
-        "summary": "Send AI Ask request",
+        "summary": "Send AI question request",
         "tags": [
           "AI"
         ],
@@ -23932,7 +23932,7 @@
     "/ai/text_gen": {
       "post": {
         "operationId": "post_ai_text_gen",
-        "summary": "Send AI Text Gen request",
+        "summary": "Send AI request to generate text",
         "tags": [
           "AI"
         ],
@@ -24019,7 +24019,7 @@
         "properties": {
           "mode": {
             "type": "string",
-            "description": "The mode specifies if this request is for a single or multiple items.",
+            "description": "The mode specifies if this request is for a single or multiple items. If you select `single_item_qa` the `items` array can have one element only. Selecting `multiple_item_qa` allows you to provide up to 25 items.",
             "enum": [
               "multiple_item_qa",
               "single_item_qa"
@@ -24029,12 +24029,12 @@
           },
           "prompt": {
             "type": "string",
-            "description": "The prompt provided by the client to be answered by the LLM.",
+            "description": "The prompt provided by the client to be answered by the LLM. The prompt's length is limited to 10000 characters.",
             "example": "What is the value provided by public APIs based on this document?"
           },
           "items": {
             "type": "array",
-            "description": "The items to be processed by the LLM, often files.",
+            "description": "The items to be processed by the LLM, often files.\n\n**Note**: Box AI handles documents with text representations up to 1MB in size, or a maximum of 25 files, whichever comes first.\nIf the file size exceeds 1MB, the first 1MB of text representation will be processed.\nIf you set `mode` parameter to `single_item_qa`, the `items` array can have one element only. ",
             "minItems": 1,
             "maxItems": 25,
             "uniqueItems": true,
@@ -24048,12 +24048,12 @@
               "properties": {
                 "id": {
                   "type": "string",
-                  "description": "The id of the item",
+                  "description": "The id of the item.",
                   "example": "123"
                 },
                 "type": {
                   "type": "string",
-                  "description": "The type of the item",
+                  "description": "The type of the item.",
                   "enum": [
                     "file"
                   ],
@@ -24081,12 +24081,12 @@
         "properties": {
           "prompt": {
             "type": "string",
-            "description": "The prompt provided by the client to be answered by the LLM.",
+            "description": "The prompt provided by the client to be answered by the LLM. The prompt's length is limited to 10000 characters.",
             "example": "Write an email to a client about the importance of public APIs."
           },
           "items": {
             "type": "array",
-            "description": "The items to be processed by the LLM, often files.",
+            "description": "The items to be processed by the LLM, often files.\nTe array can include **exactly one** element.\n\n**Note**: Box AI handles documents with text representations up to 1MB in size.\nIf the file size exceeds 1MB, the first 1MB of text representation will be processed.",
             "required": [
               "id",
               "type"
@@ -24114,7 +24114,7 @@
                 "content": {
                   "type": "string",
                   "description": "The content to use as context for generating new text or editing existing text.",
-                  "example": "This is file content."
+                  "example": "This is file content that is relevant to the text gen request."
                 }
               }
             }
@@ -25618,6 +25618,30 @@
         "allOf": [
           {
             "type": "object",
+            "description": "The part of an API response that describes marker\nbased pagination",
+            "properties": {
+              "limit": {
+                "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
+                "example": 1000,
+                "type": "integer",
+                "format": "int64"
+              },
+              "next_marker": {
+                "description": "The marker for the start of the next page of results.",
+                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                "type": "string",
+                "nullable": true
+              },
+              "prev_marker": {
+                "description": "The marker for the start of the previous page of results.",
+                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVih",
+                "type": "string",
+                "nullable": true
+              }
+            }
+          },
+          {
+            "type": "object",
             "description": "The part of an API response that describes pagination",
             "properties": {
               "total_count": {
@@ -26600,6 +26624,9 @@
                   },
                   {
                     "$ref": "#/components/schemas/GenericSource"
+                  },
+                  {
+                    "$ref": "#/components/schemas/AppItemEventSource"
                   }
                 ]
               },
@@ -28269,7 +28296,7 @@
         "type": "object",
         "x-box-resource-id": "file_version_retention",
         "x-box-tag": "file_version_retentions",
-        "description": "A retention policy blocks permanent deletion of content\nfor a specified amount of time. Admins can apply policies to\nspecified folders, or an entire enterprise. A file version retention\nis a  record for a retained file version. To use this feature,\nyou must  have the manage retention policies scope enabled for your\nAPI key in your application management console.\n\n**Note**:\nFile retention API is now **deprecated**. \nTo get information about files and file versions under retention,\nsee [files under retention](e://get-retention-policy-assignments-id-files-under-retention) or [file versions under retention](get-retention-policy-assignments-id-file-versions-under-retention) endpoints.",
+        "description": "A retention policy blocks permanent deletion of content\nfor a specified amount of time. Admins can apply policies to\nspecified folders, or an entire enterprise. A file version retention\nis a  record for a retained file version. To use this feature,\nyou must  have the manage retention policies scope enabled for your\nAPI key in your application management console.\n\n**Note**:\nFile retention API is now **deprecated**. \nTo get information about files and file versions under retention,\nsee [files under retention](e://get-retention-policy-assignments-id-files-under-retention) or [file versions under retention](e://get-retention-policy-assignments-id-file-versions-under-retention) endpoints.",
         "properties": {
           "id": {
             "type": "string",
@@ -28333,7 +28360,7 @@
         "type": "object",
         "x-box-resource-id": "file_version_retentions",
         "x-box-tag": "file_version_retentions",
-        "description": "A list of file version retentions.\n\n**Note**:\nFile retention API is now **deprecated**. \nTo get information about files and file versions under retention,\nsee [files under retention](e://get-retention-policy-assignments-id-files-under-retention) or [file versions under retention](get-retention-policy-assignments-id-file-versions-under-retention) endpoints.",
+        "description": "A list of file version retentions.\n\n**Note**:\nFile retention API is now **deprecated**. \nTo get information about files and file versions under retention,\nsee [files under retention](e://get-retention-policy-assignments-id-files-under-retention) or [file versions under retention](e://get-retention-policy-assignments-id-file-versions-under-retention) endpoints.",
         "allOf": [
           {
             "type": "object",
@@ -29884,6 +29911,30 @@
         "x-box-tag": "folders",
         "description": "A list of files, folders, and web links in\ntheir mini representation.",
         "allOf": [
+          {
+            "type": "object",
+            "description": "The part of an API response that describes marker\nbased pagination",
+            "properties": {
+              "limit": {
+                "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
+                "example": 1000,
+                "type": "integer",
+                "format": "int64"
+              },
+              "next_marker": {
+                "description": "The marker for the start of the next page of results.",
+                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                "type": "string",
+                "nullable": true
+              },
+              "prev_marker": {
+                "description": "The marker for the start of the previous page of results.",
+                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVih",
+                "type": "string",
+                "nullable": true
+              }
+            }
+          },
           {
             "type": "object",
             "description": "The part of an API response that describes pagination",
@@ -35268,6 +35319,30 @@
         "allOf": [
           {
             "type": "object",
+            "description": "The part of an API response that describes marker\nbased pagination",
+            "properties": {
+              "limit": {
+                "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
+                "example": 1000,
+                "type": "integer",
+                "format": "int64"
+              },
+              "next_marker": {
+                "description": "The marker for the start of the next page of results.",
+                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                "type": "string",
+                "nullable": true
+              },
+              "prev_marker": {
+                "description": "The marker for the start of the previous page of results.",
+                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVih",
+                "type": "string",
+                "nullable": true
+              }
+            }
+          },
+          {
+            "type": "object",
             "description": "The part of an API response that describes pagination",
             "properties": {
               "total_count": {
@@ -37115,6 +37190,58 @@
               },
               {
                 "nullable": false
+              }
+            ]
+          }
+        }
+      },
+      "AppItemEventSource": {
+        "title": "AppItem Event source",
+        "type": "object",
+        "x-box-resource-id": "app_item_event_source",
+        "description": "The AppItem that triggered an event in the event stream.",
+        "required": [
+          "id",
+          "type",
+          "app_item_type"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The id of the AppItem",
+            "example": "6374669741"
+          },
+          "type": {
+            "type": "string",
+            "nullable": false,
+            "enum": [
+              "app_item"
+            ],
+            "description": "The type of the source that this event represents. Can be only `app_item`.\n",
+            "example": "app_item"
+          },
+          "app_item_type": {
+            "type": "string",
+            "description": "The type of the AppItem",
+            "example": "hubs"
+          },
+          "user": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/User--Mini"
+              },
+              {
+                "description": "The user that triggered the event."
+              }
+            ]
+          },
+          "group": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Group--Mini"
+              },
+              {
+                "description": "The group that triggered the event."
               }
             ]
           }
