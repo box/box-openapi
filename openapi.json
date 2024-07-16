@@ -15452,6 +15452,16 @@
               }
             }
           },
+          "404": {
+            "description": "Returns `not_found` when user was not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
           "default": {
             "description": "An unexpected client error.",
             "content": {
@@ -19496,7 +19506,7 @@
         ],
         "x-box-tag": "file_version_retentions",
         "summary": "List file version retentions",
-        "description": "Retrieves all file version retentions for the given enterprise.",
+        "description": "Retrieves all file version retentions for the given enterprise.\n\n**Note**:\nFile retention API is now **deprecated**. \nTo get information about files and file versions under retention,\nsee [files under retention](e://get-retention-policy-assignments-id-files-under-retention) or [file versions under retention](e://get-retention-policy-assignments-id-file-versions-under-retention) endpoints.",
         "parameters": [
           {
             "name": "file_id",
@@ -19702,7 +19712,7 @@
         ],
         "x-box-tag": "file_version_retentions",
         "summary": "Get retention on file",
-        "description": "Returns information about a file version retention.",
+        "description": "Returns information about a file version retention.\n\n**Note**:\nFile retention API is now **deprecated**. \nTo get information about files and file versions under retention,\nsee [files under retention](e://get-retention-policy-assignments-id-files-under-retention) or [file versions under retention](e://get-retention-policy-assignments-id-file-versions-under-retention) endpoints.",
         "parameters": [
           {
             "name": "file_version_retention_id",
@@ -23879,7 +23889,7 @@
     "/ai/ask": {
       "post": {
         "operationId": "post_ai_ask",
-        "summary": "Send AI Ask request",
+        "summary": "Send AI question request",
         "tags": [
           "AI"
         ],
@@ -23932,7 +23942,7 @@
     "/ai/text_gen": {
       "post": {
         "operationId": "post_ai_text_gen",
-        "summary": "Send AI Text Gen request",
+        "summary": "Send AI request to generate text",
         "tags": [
           "AI"
         ],
@@ -23955,6 +23965,93 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/AiResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "An unexpected client error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "An unexpected server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ai_agent_default": {
+      "get": {
+        "operationId": "get_ai_agent_default",
+        "summary": "Get AI agent default configuration",
+        "tags": [
+          "AI"
+        ],
+        "x-box-tag": "ai",
+        "x-box-enable-explorer": false,
+        "description": "Get the AI agent default config",
+        "parameters": [
+          {
+            "name": "mode",
+            "description": "The mode to filter the agent config to return.",
+            "in": "query",
+            "required": true,
+            "example": "ask",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ask",
+                "text_gen"
+              ]
+            }
+          },
+          {
+            "name": "language",
+            "description": "The ISO language code to return the agent config for.\nIf the language is not supported the default agent config is returned.",
+            "in": "query",
+            "required": false,
+            "example": "ja-JP",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "model",
+            "description": "The model to return the default agent config for.",
+            "in": "query",
+            "required": false,
+            "example": "openai__gpt_3_5_turbo",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A successful response including the default agent configuration.\nThis response can be one of the following two objects:\nAI agent for questions and AI agent for text generation. The response\ndepends on the agent configuration requested in this endpoint.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/AiAgentAsk"
+                    },
+                    {
+                      "$ref": "#/components/schemas/AiAgentTextGen"
+                    }
+                  ]
                 }
               }
             }
@@ -24012,14 +24109,14 @@
         "type": "object",
         "x-box-tag": "ai",
         "required": [
-          "mode",
           "prompt",
-          "items"
+          "items",
+          "mode"
         ],
         "properties": {
           "mode": {
             "type": "string",
-            "description": "The mode specifies if this request is for a single or multiple items.",
+            "description": "The mode specifies if this request is for a single or multiple items. If you select `single_item_qa` the `items` array can have one element only. Selecting `multiple_item_qa` allows you to provide up to 25 items.",
             "enum": [
               "multiple_item_qa",
               "single_item_qa"
@@ -24029,12 +24126,12 @@
           },
           "prompt": {
             "type": "string",
-            "description": "The prompt provided by the client to be answered by the LLM.",
+            "description": "The prompt provided by the client to be answered by the LLM. The prompt's length is limited to 10000 characters.",
             "example": "What is the value provided by public APIs based on this document?"
           },
           "items": {
             "type": "array",
-            "description": "The items to be processed by the LLM, often files.",
+            "description": "The items to be processed by the LLM, often files.\n\n**Note**: Box AI handles documents with text representations up to 1MB in size, or a maximum of 25 files, whichever comes first.\nIf the file size exceeds 1MB, the first 1MB of text representation will be processed.\nIf you set `mode` parameter to `single_item_qa`, the `items` array can have one element only. ",
             "minItems": 1,
             "maxItems": 25,
             "uniqueItems": true,
@@ -24048,12 +24145,12 @@
               "properties": {
                 "id": {
                   "type": "string",
-                  "description": "The id of the item",
+                  "description": "The id of the item.",
                   "example": "123"
                 },
                 "type": {
                   "type": "string",
-                  "description": "The type of the item",
+                  "description": "The type of the item.",
                   "enum": [
                     "file"
                   ],
@@ -24066,9 +24163,17 @@
                 }
               }
             }
+          },
+          "agent_config": {
+            "type": "string",
+            "description": "The JSON blob that contains overrides for the agent config.",
+            "example": "{\\\"id\\\":\\\"agent_32\\\",\\\"qa\\\":{\\\"embeddings\\\":{\\\"model\\\":\\\"text-embedding-ada-002\\\",\\\"strategy\\\":...}"
+          },
+          "ai_agent": {
+            "$ref": "#/components/schemas/AiAgentAsk"
           }
         },
-        "description": "AI Ask request object"
+        "description": "AI ask request object"
       },
       "AiTextGen": {
         "title": "AI Text Gen Request",
@@ -24081,12 +24186,12 @@
         "properties": {
           "prompt": {
             "type": "string",
-            "description": "The prompt provided by the client to be answered by the LLM.",
+            "description": "The prompt provided by the client to be answered by the LLM. The prompt's length is limited to 10000 characters.",
             "example": "Write an email to a client about the importance of public APIs."
           },
           "items": {
             "type": "array",
-            "description": "The items to be processed by the LLM, often files.",
+            "description": "The items to be processed by the LLM, often files.\nThe array can include **exactly one** element.\n\n**Note**: Box AI handles documents with text representations up to 1MB in size.\nIf the file size exceeds 1MB, the first 1MB of text representation will be processed.",
             "required": [
               "id",
               "type"
@@ -24114,7 +24219,7 @@
                 "content": {
                   "type": "string",
                   "description": "The content to use as context for generating new text or editing existing text.",
-                  "example": "This is file content."
+                  "example": "This is file content that is relevant to the text gen request."
                 }
               }
             }
@@ -24144,6 +24249,14 @@
                 }
               }
             }
+          },
+          "agent_config": {
+            "type": "string",
+            "description": "the JSON blob that contains overrides for the agent config",
+            "example": "{\\\"id\\\":\\\"agent_32\\\",\\\"qa\\\":{\\\"embeddings\\\":{\\\"model\\\":\\\"text-embedding-ada-002\\\",\\\"strategy\\\":...}"
+          },
+          "ai_agent": {
+            "$ref": "#/components/schemas/AiAgentTextGen"
           }
         },
         "description": "AI Text Gen Request object"
@@ -24578,7 +24691,7 @@
                 "items": {
                   "$ref": "#/components/schemas/SignRequestCreateSigner"
                 },
-                "description": "Array of signers for the signature request. 35 is the max number of signers permitted."
+                "description": "Array of signers for the signature request. 35 is the\nmax number of signers permitted.\n\n**Note**: It may happen that some signers belong to conflicting [segments](r://shield-information-barrier-segment-member) (user groups).\nThis means that due to the security policies, users are assigned to segments to prevent exchanges or communication that could lead to ethical conflicts.\nIn such a case, an attempt to send the sign request will result in an error.\n\nRead more about [segments and ethical walls](https://support.box.com/hc/en-us/articles/9920431507603-Understanding-Information-Barriers#h_01GFVJEHQA06N7XEZ4GCZ9GFAQ)."
               },
               "parent_folder": {
                 "allOf": [
@@ -25618,6 +25731,30 @@
         "allOf": [
           {
             "type": "object",
+            "description": "The part of an API response that describes marker\nbased pagination",
+            "properties": {
+              "limit": {
+                "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
+                "example": 1000,
+                "type": "integer",
+                "format": "int64"
+              },
+              "next_marker": {
+                "description": "The marker for the start of the next page of results.",
+                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                "type": "string",
+                "nullable": true
+              },
+              "prev_marker": {
+                "description": "The marker for the start of the previous page of results.",
+                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVih",
+                "type": "string",
+                "nullable": true
+              }
+            }
+          },
+          {
+            "type": "object",
             "description": "The part of an API response that describes pagination",
             "properties": {
               "total_count": {
@@ -26600,6 +26737,9 @@
                   },
                   {
                     "$ref": "#/components/schemas/GenericSource"
+                  },
+                  {
+                    "$ref": "#/components/schemas/AppItemEventSource"
                   }
                 ]
               },
@@ -28269,7 +28409,7 @@
         "type": "object",
         "x-box-resource-id": "file_version_retention",
         "x-box-tag": "file_version_retentions",
-        "description": "A retention policy blocks permanent deletion of content\nfor a specified amount of time. Admins can apply policies to\nspecified folders, or an entire enterprise. A file version retention\nis a  record for a retained file version. To use this feature,\nyou must  have the manage retention policies scope enabled for your\nAPI key via  your application management console. For more information\nabout retention policies, please visit our help documentation",
+        "description": "A retention policy blocks permanent deletion of content\nfor a specified amount of time. Admins can apply policies to\nspecified folders, or an entire enterprise. A file version retention\nis a  record for a retained file version. To use this feature,\nyou must  have the manage retention policies scope enabled for your\nAPI key in your application management console.\n\n**Note**:\nFile retention API is now **deprecated**. \nTo get information about files and file versions under retention,\nsee [files under retention](e://get-retention-policy-assignments-id-files-under-retention) or [file versions under retention](e://get-retention-policy-assignments-id-file-versions-under-retention) endpoints.",
         "properties": {
           "id": {
             "type": "string",
@@ -28333,7 +28473,7 @@
         "type": "object",
         "x-box-resource-id": "file_version_retentions",
         "x-box-tag": "file_version_retentions",
-        "description": "A list of file version retentions.",
+        "description": "A list of file version retentions.\n\n**Note**:\nFile retention API is now **deprecated**. \nTo get information about files and file versions under retention,\nsee [files under retention](e://get-retention-policy-assignments-id-files-under-retention) or [file versions under retention](e://get-retention-policy-assignments-id-file-versions-under-retention) endpoints.",
         "allOf": [
           {
             "type": "object",
@@ -29884,6 +30024,30 @@
         "x-box-tag": "folders",
         "description": "A list of files, folders, and web links in\ntheir mini representation.",
         "allOf": [
+          {
+            "type": "object",
+            "description": "The part of an API response that describes marker\nbased pagination",
+            "properties": {
+              "limit": {
+                "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
+                "example": 1000,
+                "type": "integer",
+                "format": "int64"
+              },
+              "next_marker": {
+                "description": "The marker for the start of the next page of results.",
+                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                "type": "string",
+                "nullable": true
+              },
+              "prev_marker": {
+                "description": "The marker for the start of the previous page of results.",
+                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVih",
+                "type": "string",
+                "nullable": true
+              }
+            }
+          },
           {
             "type": "object",
             "description": "The part of an API response that describes pagination",
@@ -33148,7 +33312,7 @@
                 "items": {
                   "$ref": "#/components/schemas/TemplateSigner"
                 },
-                "description": "Array of signers for the template."
+                "description": "Array of signers for the template.\n\n**Note**: It may happen that some signers specified in the template belong to conflicting [segments](r://shield-information-barrier-segment-member) (user groups).\nThis means that due to the security policies, users are assigned to segments to prevent exchanges or communication that could lead to ethical conflicts.\nIn such a case, an attempt to send a sign request based on a template that lists signers in conflicting segments will result in an error.\n\nRead more about [segments and ethical walls](https://support.box.com/hc/en-us/articles/9920431507603-Understanding-Information-Barriers#h_01GFVJEHQA06N7XEZ4GCZ9GFAQ)."
               },
               "additional_info": {
                 "description": "Additional information on which fields are required and which fields are not editable.",
@@ -35268,6 +35432,30 @@
         "allOf": [
           {
             "type": "object",
+            "description": "The part of an API response that describes marker\nbased pagination",
+            "properties": {
+              "limit": {
+                "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
+                "example": 1000,
+                "type": "integer",
+                "format": "int64"
+              },
+              "next_marker": {
+                "description": "The marker for the start of the next page of results.",
+                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                "type": "string",
+                "nullable": true
+              },
+              "prev_marker": {
+                "description": "The marker for the start of the previous page of results.",
+                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVih",
+                "type": "string",
+                "nullable": true
+              }
+            }
+          },
+          {
+            "type": "object",
             "description": "The part of an API response that describes pagination",
             "properties": {
               "total_count": {
@@ -36915,6 +37103,259 @@
           }
         ]
       },
+      "AiAgentBasicTextTool": {
+        "title": "AI agent basic text tool",
+        "type": "object",
+        "x-box-resource-id": "ai_agent_basic_text_tool",
+        "properties": {
+          "model": {
+            "type": "string",
+            "description": "The model to be used for the AI Agent for basic text.",
+            "example": "openai__gpt_3_5_turbo"
+          },
+          "system_message": {
+            "type": "string",
+            "description": "System messages try to help the LLM \"understand\" its role and what it is supposed to do.",
+            "example": "You are a helpful travel assistant specialized in budget travel"
+          },
+          "prompt_template": {
+            "type": "string",
+            "description": "The prompt template contains contextual information of the request and the user prompt. \nThe template may include inputs for `{current_date}`, `{user_question}`, and `{content}` depending on the use.\n\nFor [AI question request](e://post-ai-ask) endpoint, the `prompt_template` parameter **requires** inputs for `{current_date}`, `{user_question}`, and `{content}`.\n\nFor the [AI text generation endpoint](e://post-ai-text-gen):\n - `system_message` requires `{current_date}`\n - `prompt_template` requires `{user_question}`\n - `content_template` requires `{content}`",
+            "example": "It is `{current_date}`, and I have $8000 and want to spend a week in the Azores. What should I see?",
+            "maxLength": 10000
+          },
+          "num_tokens_for_completion": {
+            "type": "integer",
+            "description": "The number of tokens for completion.",
+            "example": 8400,
+            "minimum": 1
+          },
+          "llm_endpoint_params": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AiLlmEndpointParamsOpenAi"
+              },
+              {
+                "$ref": "#/components/schemas/AiLlmEndpointParamsGoogle"
+              }
+            ],
+            "description": "The parameters for the LLM endpoint specific to OpenAI / Google models."
+          }
+        },
+        "description": "AI agent tool used to handle basic text."
+      },
+      "AiAgentLongTextTool": {
+        "title": "AI agent long text tool",
+        "type": "object",
+        "x-box-resource-id": "ai_agent_long_text_tool",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AiAgentBasicTextTool"
+          },
+          {
+            "properties": {
+              "embeddings": {
+                "type": "object",
+                "properties": {
+                  "model": {
+                    "type": "string",
+                    "example": "openai__text_embedding_ada_002",
+                    "description": "The model to be used for the AI Agent for calculating embeddings."
+                  },
+                  "strategy": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "description": "The strategy to be used for the AI Agent for calculating embeddings.",
+                        "example": "basic"
+                      },
+                      "num_tokens_per_chunk": {
+                        "type": "integer",
+                        "description": "The number of tokens per chunk.",
+                        "example": 64,
+                        "minimum": 1
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "description": "AI agent tool used to to handle longer text."
+      },
+      "AiAgentBasicGenTool": {
+        "title": "AI agent basic text generation tool",
+        "type": "object",
+        "x-box-resource-id": "ai_agent_basic_gen_tool",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AiAgentLongTextTool"
+          },
+          {
+            "properties": {
+              "content_template": {
+                "type": "string",
+                "description": "How the content should be included in a request to the LLM, it should include `{content}`.",
+                "example": "---{content}---"
+              }
+            }
+          }
+        ],
+        "description": "AI agent basic tool used to generate text."
+      },
+      "AiLlmEndpointParamsGoogle": {
+        "title": "AI LLM endpoint params Google",
+        "type": "object",
+        "x-box-resource-id": "ai_llm_endpoint_params_google",
+        "required": [
+          "type"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "The type of the AI LLM endpoint params object for Google.",
+            "example": "google_params",
+            "enum": [
+              "google_params"
+            ],
+            "nullable": false
+          },
+          "temperature": {
+            "type": "number",
+            "description": "The temperature is used for sampling during response generation, which occurs when `top-P` and `top-K` are applied. \nTemperature controls the degree of randomness in token selection.",
+            "example": 0,
+            "minimum": 0,
+            "maximum": 2
+          },
+          "top_p": {
+            "type": "number",
+            "description": "`Top-P` changes how the model selects tokens for output. Tokens are selected from the most (see `top-K`) to least probable\nuntil the sum of their probabilities equals the `top-P` value.",
+            "example": 1,
+            "minimum": 0.1,
+            "maximum": 2
+          },
+          "top_k": {
+            "type": "number",
+            "description": "`Top-K` changes how the model selects tokens for output. A `top-K` of 1 means the next selected token is\nthe most probable among all tokens in the model's vocabulary (also called greedy decoding),\nwhile a `top-K` of 3 means that the next token is selected from among the three most probable tokens by using temperature.",
+            "example": 1,
+            "minimum": 0.1,
+            "maximum": 2
+          }
+        },
+        "description": "AI LLM Endpoint Params Google object."
+      },
+      "AiLlmEndpointParamsOpenAi": {
+        "title": "AI LLM endpoint params OpenAI",
+        "type": "object",
+        "x-box-resource-id": "ai_llm_endpoint_params_openai",
+        "required": [
+          "type"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "The type of the AI LLM endpoint params object for OpenAI.",
+            "example": "openai_params",
+            "enum": [
+              "openai_params"
+            ],
+            "nullable": false
+          },
+          "temperature": {
+            "type": "number",
+            "description": "What sampling temperature to use, between 0 and 2. Higher values like 0.8 will make the output more random, \nwhile lower values like 0.2 will make it more focused and deterministic. \nWe generally recommend altering this or `top_p` but not both.",
+            "example": 0,
+            "minimum": 0,
+            "maximum": 2
+          },
+          "top_p": {
+            "type": "number",
+            "example": 1,
+            "description": "An alternative to sampling with temperature, called nucleus sampling, where the model considers the results \nof the tokens with `top_p` probability mass. So 0.1 means only the tokens comprising the top 10% probability \nmass are considered. We generally recommend altering this or temperature but not both.",
+            "minimum": 0.1,
+            "maximum": 1
+          },
+          "frequency_penalty": {
+            "type": "number",
+            "description": "Number between -2.0 and 2.0. Positive values penalize new tokens based on their existing frequency in the \ntext so far, decreasing the model's likelihood to repeat the same line verbatim.",
+            "minimum": -2,
+            "maximum": 2,
+            "example": 1.5
+          },
+          "presence_penalty": {
+            "type": "number",
+            "description": "Number between -2.0 and 2.0. Positive values penalize new tokens based on whether they appear in the text so far, \nincreasing the model's likelihood to talk about new topics.",
+            "minimum": -2,
+            "maximum": 2,
+            "example": 1.5
+          },
+          "stop": {
+            "type": "string",
+            "description": "Up to 4 sequences where the API will stop generating further tokens.",
+            "example": "<|im_end|>"
+          }
+        },
+        "description": "AI LLM endpoint params OpenAI object."
+      },
+      "AiAgentAsk": {
+        "title": "AI agent for question requests",
+        "type": "object",
+        "x-box-resource-id": "ai_agent_ask_request",
+        "x-box-tag": "ai",
+        "required": [
+          "type"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "ai_agent_ask"
+            ],
+            "description": "The type of AI agent used to handle queries.",
+            "example": "ai_agent_ask",
+            "nullable": false
+          },
+          "long_text": {
+            "$ref": "#/components/schemas/AiAgentLongTextTool"
+          },
+          "basic_text": {
+            "$ref": "#/components/schemas/AiAgentBasicTextTool"
+          },
+          "long_text_multi": {
+            "$ref": "#/components/schemas/AiAgentLongTextTool"
+          },
+          "basic_text_multi": {
+            "$ref": "#/components/schemas/AiAgentBasicTextTool"
+          }
+        },
+        "description": "The AI agent used to handle queries."
+      },
+      "AiAgentTextGen": {
+        "title": "AI agent for text generation requests",
+        "type": "object",
+        "x-box-resource-id": "ai_agent_text_gen_request",
+        "x-box-tag": "ai",
+        "required": [
+          "type"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "ai_agent_text_gen"
+            ],
+            "description": "The type of AI agent used for generating text.",
+            "example": "ai_agent_text_gen",
+            "nullable": false
+          },
+          "basic_gen": {
+            "$ref": "#/components/schemas/AiAgentBasicGenTool"
+          }
+        },
+        "description": "The AI agent used for generating text."
+      },
       "CompletionRuleVariable": {
         "title": "Completion rule variable",
         "type": "object",
@@ -37115,6 +37556,58 @@
               },
               {
                 "nullable": false
+              }
+            ]
+          }
+        }
+      },
+      "AppItemEventSource": {
+        "title": "`AppItem` Event source",
+        "type": "object",
+        "x-box-resource-id": "app_item_event_source",
+        "description": "The `AppItem` that triggered an event in the event stream.",
+        "required": [
+          "id",
+          "type",
+          "app_item_type"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The id of the `AppItem`",
+            "example": "6374669741"
+          },
+          "type": {
+            "type": "string",
+            "nullable": false,
+            "enum": [
+              "app_item"
+            ],
+            "description": "The type of the source that this event represents. Can be only `app_item`.\n",
+            "example": "app_item"
+          },
+          "app_item_type": {
+            "type": "string",
+            "description": "The type of the `AppItem`",
+            "example": "hubs"
+          },
+          "user": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/User--Mini"
+              },
+              {
+                "description": "The user that triggered the event."
+              }
+            ]
+          },
+          "group": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Group--Mini"
+              },
+              {
+                "description": "The group that triggered the event."
               }
             ]
           }
@@ -37904,13 +38397,13 @@
           },
           "login_required": {
             "type": "boolean",
-            "description": "If set to true, signer will need to login to a Box account\nbefore signing the request. If the signer does not have\nan existing account, they will have an option to create\na free Box account.",
+            "description": "If set to true, the signer will need to log in to a Box account\nbefore signing the request. If the signer does not have\nan existing account, they will have the option to create\na free Box account. Cannot be selected in combination with\n`verification_phone_number`.",
             "example": true,
             "nullable": true
           },
           "verification_phone_number": {
             "type": "string",
-            "description": "If set, this phone number is be used to verify the signer\nvia two factor authentication before they are able to sign the document.",
+            "description": "If set, this phone number will be used to verify the signer\nvia two-factor authentication before they are able to sign the document.\nCannot be selected in combination with `login_required`.",
             "example": "6314578901",
             "nullable": true
           },
