@@ -24105,7 +24105,7 @@
     },
     "schemas": {
       "AiAsk": {
-        "title": "AI Ask Request",
+        "title": "AI ask request",
         "type": "object",
         "x-box-tag": "ai",
         "required": [
@@ -24166,7 +24166,7 @@
           },
           "agent_config": {
             "type": "string",
-            "description": "The JSON blob that contains overrides for the agent config.",
+            "description": "A JSON blob that contains overrides for the agent configuration.",
             "example": "{\\\"id\\\":\\\"agent_32\\\",\\\"qa\\\":{\\\"embeddings\\\":{\\\"model\\\":\\\"text-embedding-ada-002\\\",\\\"strategy\\\":...}"
           },
           "ai_agent": {
@@ -24176,7 +24176,7 @@
         "description": "AI ask request object"
       },
       "AiTextGen": {
-        "title": "AI Text Gen Request",
+        "title": "AI text gen request",
         "type": "object",
         "x-box-tag": "ai",
         "required": [
@@ -24252,14 +24252,14 @@
           },
           "agent_config": {
             "type": "string",
-            "description": "the JSON blob that contains overrides for the agent config",
+            "description": "A JSON blob that contains overrides for the agent configuration.",
             "example": "{\\\"id\\\":\\\"agent_32\\\",\\\"qa\\\":{\\\"embeddings\\\":{\\\"model\\\":\\\"text-embedding-ada-002\\\",\\\"strategy\\\":...}"
           },
           "ai_agent": {
             "$ref": "#/components/schemas/AiAgentTextGen"
           }
         },
-        "description": "AI Text Gen Request object"
+        "description": "AI text gen request object"
       },
       "PostOAuth2Token": {
         "title": "Token request",
@@ -25270,7 +25270,7 @@
         }
       },
       "AiResponse": {
-        "title": "AI Response",
+        "title": "AI response",
         "type": "object",
         "x-box-resource-id": "ai_response",
         "x-box-tag": "ai",
@@ -37103,10 +37103,10 @@
           }
         ]
       },
-      "AiAgentBasicTextTool": {
+      "AiAgentBasicTextToolAsk": {
         "title": "AI agent basic text tool",
         "type": "object",
-        "x-box-resource-id": "ai_agent_basic_text_tool",
+        "x-box-tag": "ai",
         "properties": {
           "model": {
             "type": "string",
@@ -37120,7 +37120,48 @@
           },
           "prompt_template": {
             "type": "string",
-            "description": "The prompt template contains contextual information of the request and the user prompt. \nThe template may include inputs for `{current_date}`, `{user_question}`, and `{content}` depending on the use.\n\nFor [AI question request](e://post-ai-ask) endpoint, the `prompt_template` parameter **requires** inputs for `{current_date}`, `{user_question}`, and `{content}`.\n\nFor the [AI text generation endpoint](e://post-ai-text-gen):\n - `system_message` requires `{current_date}`\n - `prompt_template` requires `{user_question}`\n - `content_template` requires `{content}`",
+            "description": "The prompt template contains contextual information of the request and the user prompt. \n\nThe template **requires** inputs for `{current_date}`, `{user_question}`, and `{content}`.",
+            "example": "It is `{current_date}`, and I have $8000 and want to spend a week in the Azores. What should I see?",
+            "maxLength": 10000
+          },
+          "num_tokens_for_completion": {
+            "type": "integer",
+            "description": "The number of tokens for completion.",
+            "example": 8400,
+            "minimum": 1
+          },
+          "llm_endpoint_params": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AiLlmEndpointParamsOpenAi"
+              },
+              {
+                "$ref": "#/components/schemas/AiLlmEndpointParamsGoogle"
+              }
+            ],
+            "description": "The parameters for the LLM endpoint specific to OpenAI / Google models."
+          }
+        },
+        "description": "AI agent tool used to handle basic text."
+      },
+      "AiAgentBasicTextToolTextGen": {
+        "title": "AI agent basic text tool",
+        "type": "object",
+        "x-box-tag": "ai",
+        "properties": {
+          "model": {
+            "type": "string",
+            "description": "The model to be used for the AI Agent for basic text.",
+            "example": "openai__gpt_3_5_turbo"
+          },
+          "system_message": {
+            "type": "string",
+            "description": "System messages try to help the LLM \"understand\" its role and what it is supposed to do.\nThis parameter requires using `{current_date}`.",
+            "example": "You are a helpful travel assistant specialized in budget travel"
+          },
+          "prompt_template": {
+            "type": "string",
+            "description": "The prompt template contains contextual information of the request and the user prompt.\n\n**Note:** The template must include input for `{user_question}`, and may include inputs for  `{current_date}` and`{content}` depending on the use.",
             "example": "It is `{current_date}`, and I have $8000 and want to spend a week in the Azores. What should I see?",
             "maxLength": 10000
           },
@@ -37147,10 +37188,10 @@
       "AiAgentLongTextTool": {
         "title": "AI agent long text tool",
         "type": "object",
-        "x-box-resource-id": "ai_agent_long_text_tool",
+        "x-box-tag": "ai",
         "allOf": [
           {
-            "$ref": "#/components/schemas/AiAgentBasicTextTool"
+            "$ref": "#/components/schemas/AiAgentBasicTextToolTextGen"
           },
           {
             "properties": {
@@ -37188,7 +37229,7 @@
       "AiAgentBasicGenTool": {
         "title": "AI agent basic text generation tool",
         "type": "object",
-        "x-box-resource-id": "ai_agent_basic_gen_tool",
+        "x-box-tag": "ai",
         "allOf": [
           {
             "$ref": "#/components/schemas/AiAgentLongTextTool"
@@ -37197,7 +37238,7 @@
             "properties": {
               "content_template": {
                 "type": "string",
-                "description": "How the content should be included in a request to the LLM, it should include `{content}`.",
+                "description": "How the content should be included in a request to the LLM. It must include `{content}`.",
                 "example": "---{content}---"
               }
             }
@@ -37208,7 +37249,6 @@
       "AiLlmEndpointParamsGoogle": {
         "title": "AI LLM endpoint params Google",
         "type": "object",
-        "x-box-resource-id": "ai_llm_endpoint_params_google",
         "required": [
           "type"
         ],
@@ -37249,7 +37289,6 @@
       "AiLlmEndpointParamsOpenAi": {
         "title": "AI LLM endpoint params OpenAI",
         "type": "object",
-        "x-box-resource-id": "ai_llm_endpoint_params_openai",
         "required": [
           "type"
         ],
@@ -37302,8 +37341,6 @@
       "AiAgentAsk": {
         "title": "AI agent for question requests",
         "type": "object",
-        "x-box-resource-id": "ai_agent_ask_request",
-        "x-box-tag": "ai",
         "required": [
           "type"
         ],
@@ -37321,13 +37358,13 @@
             "$ref": "#/components/schemas/AiAgentLongTextTool"
           },
           "basic_text": {
-            "$ref": "#/components/schemas/AiAgentBasicTextTool"
+            "$ref": "#/components/schemas/AiAgentBasicTextToolAsk"
           },
           "long_text_multi": {
             "$ref": "#/components/schemas/AiAgentLongTextTool"
           },
           "basic_text_multi": {
-            "$ref": "#/components/schemas/AiAgentBasicTextTool"
+            "$ref": "#/components/schemas/AiAgentBasicTextToolAsk"
           }
         },
         "description": "The AI agent used to handle queries."
@@ -37335,7 +37372,6 @@
       "AiAgentTextGen": {
         "title": "AI agent for text generation requests",
         "type": "object",
-        "x-box-resource-id": "ai_agent_text_gen_request",
         "x-box-tag": "ai",
         "required": [
           "type"
