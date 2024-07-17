@@ -24046,10 +24046,10 @@
                 "schema": {
                   "oneOf": [
                     {
-                      "$ref": "#/components/schemas/AiAgentAsk"
+                      "$ref": "#/components/schemas/AiAgentAskResponse"
                     },
                     {
-                      "$ref": "#/components/schemas/AiAgentTextGen"
+                      "$ref": "#/components/schemas/AiAgentTextGenResponse"
                     }
                   ]
                 }
@@ -25287,6 +25287,57 @@
           }
         },
         "description": "AI response"
+      },
+      "AiAgentAskResponse": {
+        "title": "AI agent for question requests",
+        "type": "object",
+        "x-box-resource-id": "ai_agent_ask",
+        "x-box-tag": "ai",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "ai_agent_ask"
+            ],
+            "description": "The type of AI agent used to handle queries.",
+            "example": "ai_agent_ask",
+            "nullable": false
+          },
+          "long_text": {
+            "$ref": "#/components/schemas/AiAgentLongTextTool"
+          },
+          "basic_text": {
+            "$ref": "#/components/schemas/AiAgentBasicTextToolAsk"
+          },
+          "long_text_multi": {
+            "$ref": "#/components/schemas/AiAgentLongTextTool"
+          },
+          "basic_text_multi": {
+            "$ref": "#/components/schemas/AiAgentBasicTextToolAsk"
+          }
+        },
+        "description": "The AI agent used to handle queries."
+      },
+      "AiAgentTextGenResponse": {
+        "title": "AI agent for text generation requests",
+        "type": "object",
+        "x-box-tag": "ai",
+        "x-box-resource-id": "ai_agent_text_gen",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "ai_agent_text_gen"
+            ],
+            "description": "The type of AI agent used for generating text.",
+            "example": "ai_agent_text_gen",
+            "nullable": false
+          },
+          "basic_gen": {
+            "$ref": "#/components/schemas/AiAgentBasicGenTool"
+          }
+        },
+        "description": "The AI agent used for generating text."
       },
       "Classification": {
         "title": "Classification",
@@ -37100,7 +37151,7 @@
         "properties": {
           "model": {
             "type": "string",
-            "description": "The model to be used for the AI Agent for basic text.",
+            "description": "The model used for the AI Agent for basic text.",
             "example": "openai__gpt_3_5_turbo"
           },
           "system_message": {
@@ -37162,15 +37213,21 @@
             "minimum": 1
           },
           "llm_endpoint_params": {
-            "oneOf": [
+            "allOf": [
               {
-                "$ref": "#/components/schemas/AiLlmEndpointParamsOpenAi"
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/AiLlmEndpointParamsOpenAi"
+                  },
+                  {
+                    "$ref": "#/components/schemas/AiLlmEndpointParamsGoogle"
+                  }
+                ]
               },
               {
-                "$ref": "#/components/schemas/AiLlmEndpointParamsGoogle"
+                "description": "The parameters for the LLM endpoint specific to OpenAI / Google models."
               }
-            ],
-            "description": "The parameters for the LLM endpoint specific to OpenAI / Google models."
+            ]
           }
         },
         "description": "AI agent tool used to handle basic text."
@@ -37179,6 +37236,7 @@
         "title": "AI agent long text tool",
         "type": "object",
         "x-box-tag": "ai",
+        "description": "AI agent tool used to to handle longer text.",
         "allOf": [
           {
             "$ref": "#/components/schemas/AiAgentBasicTextToolTextGen"
@@ -37191,14 +37249,14 @@
                   "model": {
                     "type": "string",
                     "example": "openai__text_embedding_ada_002",
-                    "description": "The model to be used for the AI Agent for calculating embeddings."
+                    "description": "The model used for the AI Agent for calculating embeddings."
                   },
                   "strategy": {
                     "type": "object",
                     "properties": {
                       "id": {
                         "type": "string",
-                        "description": "The strategy to be used for the AI Agent for calculating embeddings.",
+                        "description": "The strategy used for the AI Agent for calculating embeddings.",
                         "example": "basic"
                       },
                       "num_tokens_per_chunk": {
@@ -37213,8 +37271,7 @@
               }
             }
           }
-        ],
-        "description": "AI agent tool used to to handle longer text."
+        ]
       },
       "AiAgentBasicGenTool": {
         "title": "AI agent basic text generation tool",
@@ -37239,13 +37296,14 @@
       "AiLlmEndpointParamsGoogle": {
         "title": "AI LLM endpoint params Google",
         "type": "object",
+        "x-box-resource-id": "ai_llm_endpoint_params_google",
         "required": [
           "type"
         ],
         "properties": {
           "type": {
             "type": "string",
-            "description": "The type of the AI LLM endpoint params object for Google.",
+            "description": "The type of the AI LLM endpoint params object for Google.\nThis parameter is **required**.",
             "example": "google_params",
             "enum": [
               "google_params"
@@ -37274,18 +37332,19 @@
             "maximum": 2
           }
         },
-        "description": "AI LLM Endpoint Params Google object."
+        "description": "AI LLM endpoint params Google object"
       },
       "AiLlmEndpointParamsOpenAi": {
         "title": "AI LLM endpoint params OpenAI",
         "type": "object",
+        "x-box-resource-id": "ai_llm_endpoint_params_openai",
         "required": [
           "type"
         ],
         "properties": {
           "type": {
             "type": "string",
-            "description": "The type of the AI LLM endpoint params object for OpenAI.",
+            "description": "The type of the AI LLM endpoint params object for OpenAI.\nThis parameter is **required**.",
             "example": "openai_params",
             "enum": [
               "openai_params"
@@ -37340,7 +37399,7 @@
             "enum": [
               "ai_agent_ask"
             ],
-            "description": "The type of AI agent used to handle queries.",
+            "description": "The type of AI agent used to handle queries.\nThis parameter is **required**.",
             "example": "ai_agent_ask",
             "nullable": false
           },
@@ -37372,7 +37431,7 @@
             "enum": [
               "ai_agent_text_gen"
             ],
-            "description": "The type of AI agent used for generating text.",
+            "description": "The type of AI agent used for generating text.\nThis parameter is **required**.",
             "example": "ai_agent_text_gen",
             "nullable": false
           },
