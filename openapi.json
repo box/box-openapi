@@ -23958,9 +23958,7 @@
               "type": "string",
               "enum": [
                 "ask",
-                "text_gen",
-                "extract",
-                "extract_structured"
+                "text_gen"
               ]
             }
           },
@@ -23987,7 +23985,7 @@
         ],
         "responses": {
           "200": {
-            "description": "A successful response including the default agent configuration.\nThis response can be one of the following four objects:\nAI agent for questions, AI agent for text generation, AI agent\nfor freeform extract and AI agent for structured extract. The response\ndepends on the agent configuration requested in this endpoint.",
+            "description": "A successful response including the default agent configuration.\nThis response can be one of the following two objects:\nAI agent for questions and AI agent for text generation. The response\ndepends on the agent configuration requested in this endpoint.",
             "content": {
               "application/json": {
                 "schema": {
@@ -23997,120 +23995,8 @@
                     },
                     {
                       "$ref": "#/components/schemas/AiAgentTextGen"
-                    },
-                    {
-                      "$ref": "#/components/schemas/AiAgentExtract"
-                    },
-                    {
-                      "$ref": "#/components/schemas/AiAgentExtractStructured"
                     }
                   ]
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "An unexpected client error.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ClientError"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "An unexpected server error.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ClientError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/ai/extract": {
-      "post": {
-        "operationId": "post_ai_extract",
-        "summary": "Send AI extract request",
-        "tags": [
-          "AI"
-        ],
-        "x-box-tag": "ai",
-        "x-box-enable-explorer": false,
-        "description": "Sends an AI request to supported LLMs and returns an answer focused on key-value pairs.",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AiExtract"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "A successful response including the answer from the LLM.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AiResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "An unexpected client error.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ClientError"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "An unexpected server error.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ClientError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/ai/extract_structured": {
-      "post": {
-        "operationId": "post_ai_extract_structured",
-        "summary": "Send AI extract structured request",
-        "tags": [
-          "AI"
-        ],
-        "x-box-tag": "ai",
-        "x-box-enable-explorer": false,
-        "description": "Sends an AI request to supported LLMs and returns extracted key-value pairs.",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AiExtractStructured"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "A successful response including the answer from the LLM.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AiExtractResponse"
                 }
               }
             }
@@ -24294,26 +24180,7 @@
             "type": "array",
             "description": "The history of prompts and answers previously passed to the LLM. This provides additional context to the LLM in generating the response.",
             "items": {
-              "type": "object",
-              "description": "A context object that can hold prior prompts and answers.",
-              "properties": {
-                "prompt": {
-                  "type": "string",
-                  "description": "The prompt previously provided by the client and answered by the LLM.",
-                  "example": "Make my email about public APIs sound more professional."
-                },
-                "answer": {
-                  "type": "string",
-                  "description": "The answer previously provided by the LLM.",
-                  "example": "Here is the first draft of your professional email about public APIs."
-                },
-                "created_at": {
-                  "type": "string",
-                  "format": "date-time",
-                  "description": "The ISO date formatted timestamp of when the previous answer to the prompt was created.",
-                  "example": "2012-12-12T10:53:43-08:00"
-                }
-              }
+              "$ref": "#/components/schemas/AiDialogueHistory"
             }
           },
           "ai_agent": {
@@ -24321,149 +24188,6 @@
           }
         },
         "description": "AI text gen request object"
-      },
-      "AiExtractStructured": {
-        "title": "AI Extract Structured Request",
-        "type": "object",
-        "x-box-tag": "ai",
-        "required": [
-          "items"
-        ],
-        "properties": {
-          "items": {
-            "type": "array",
-            "description": "The items to be processed by the LLM, often files.",
-            "minItems": 1,
-            "maxItems": 1,
-            "uniqueItems": true,
-            "items": {
-              "$ref": "#/components/schemas/AiItem--Base"
-            }
-          },
-          "metadata_template": {
-            "type": "object",
-            "description": "The metadata template containing the fields to extract. Cannot be used\nin combination with `fields`.",
-            "properties": {
-              "template_key": {
-                "type": "string",
-                "description": "The name of the metadata template.",
-                "example": "invoiceTemplate"
-              },
-              "type": {
-                "type": "string",
-                "enum": [
-                  "metadata_template"
-                ],
-                "description": "Value is always `metadata_template`.",
-                "example": "metadata_template"
-              },
-              "scope": {
-                "type": "string",
-                "description": "The scope of the metadata template can either be global or\nenterprise_*. The global scope is used for templates that are\navailable to any Box enterprise. The enterprise_* scope represents\ntemplates that have been created within a specific enterprise,\nwhere * will be the ID of that enterprise.",
-                "example": "enterprise_12345"
-              }
-            }
-          },
-          "fields": {
-            "type": "array",
-            "description": "The fields to be extracted from the items. Cannot be used in combination\nwith `metadata_template`.",
-            "minItems": 1,
-            "uniqueItems": true,
-            "items": {
-              "type": "object",
-              "description": "The field to be extracted from the items.",
-              "required": [
-                "key"
-              ],
-              "properties": {
-                "key": {
-                  "type": "string",
-                  "description": "A unique identifier for the field.",
-                  "example": "name"
-                },
-                "description": {
-                  "type": "string",
-                  "description": "A description of the field.",
-                  "example": "The name of the person."
-                },
-                "displayName": {
-                  "type": "string",
-                  "description": "The display name of the field.",
-                  "example": "Name"
-                },
-                "prompt": {
-                  "type": "string",
-                  "description": "Context about the key that may include how to find and how to format it.",
-                  "example": "Name is the first and last name from the email address"
-                },
-                "type": {
-                  "type": "string",
-                  "description": "The type of the field. Can include but is not limited to string, float, date, enum, and multiSelect.",
-                  "example": "enum"
-                },
-                "options": {
-                  "type": "array",
-                  "description": "A list of options for this field. This is most often used in combination with the enum and multiSelect field types.",
-                  "items": {
-                    "type": "object",
-                    "required": [
-                      "key"
-                    ],
-                    "properties": {
-                      "key": {
-                        "type": "string",
-                        "description": "A unique identifier for the field.",
-                        "example": "First Name"
-                      }
-                    }
-                  },
-                  "example": [
-                    {
-                      "key": "First Name"
-                    },
-                    {
-                      "key": "Last Name"
-                    }
-                  ]
-                }
-              }
-            }
-          },
-          "ai_agent": {
-            "$ref": "#/components/schemas/AiAgentExtractStructured"
-          }
-        },
-        "description": "AI Extract Structured Request object."
-      },
-      "AiExtract": {
-        "title": "AI Extract Request",
-        "type": "object",
-        "x-box-tag": "ai",
-        "required": [
-          "prompt",
-          "items"
-        ],
-        "properties": {
-          "prompt": {
-            "type": "string",
-            "description": "The prompt provided by the client to be answered by the LLM that can \ninclude the JSON schema of the expected response.",
-            "example": "\\\"fields\\\":[{\\\"type\\\":\\\"string\\\",\\\"key\\\":\\\"name\\\",\\\"displayName\\\":\\\"Name\\\",\\\"description\\\":\\\"The customer name\\\",\\\"prompt\\\":\\\"Name is always the first word in the document\\\"},{\\\"type\\\":\\\"date\\\",\\\"key\\\":\\\"last_contacted_at\\\",\\\"displayName\\\":\\\"Last Contacted At\\\",\\\"description\\\":\\\"When this customer was last contacted at\\\"}]"
-          },
-          "items": {
-            "type": "array",
-            "description": "The items to be processed by the LLM, often files.",
-            "minItems": 1,
-            "maxItems": 1,
-            "uniqueItems": true,
-            "items": {
-              "$ref": "#/components/schemas/AiItem--Base"
-            }
-          },
-          "ai_agent": {
-            "$ref": "#/components/schemas/AiAgentExtract"
-          }
-        },
-        "description": "AI Extract request object."
       },
       "PostOAuth2Token": {
         "title": "Token request",
@@ -25538,13 +25262,6 @@
         },
         "description": "AI response"
       },
-      "AiExtractResponse": {
-        "title": "AI extract response",
-        "type": "object",
-        "x-box-resource-id": "ai_extract_response",
-        "x-box-tag": "ai",
-        "description": "AI extract response.\nThe content of this response may vary depending on\nthe requested configuration."
-      },
       "AiAgentAsk": {
         "title": "AI agent for question requests",
         "type": "object",
@@ -25559,7 +25276,7 @@
             "enum": [
               "ai_agent_ask"
             ],
-            "description": "The type of AI agent used to handle queries.\nThis parameter is **required**.",
+            "description": "The type of AI agent used to handle queries.",
             "example": "ai_agent_ask",
             "nullable": false
           },
@@ -25592,7 +25309,7 @@
             "enum": [
               "ai_agent_text_gen"
             ],
-            "description": "The type of AI agent used for generating text.\nThis parameter is **required**.",
+            "description": "The type of AI agent used for generating text.",
             "example": "ai_agent_text_gen",
             "nullable": false
           },
@@ -25601,60 +25318,6 @@
           }
         },
         "description": "The AI agent used for generating text."
-      },
-      "AiAgentExtract": {
-        "title": "AI agent for extract requests",
-        "type": "object",
-        "x-box-tag": "ai",
-        "x-box-resource-id": "ai_agent_extract",
-        "required": [
-          "type"
-        ],
-        "properties": {
-          "type": {
-            "type": "string",
-            "enum": [
-              "ai_agent_extract"
-            ],
-            "description": "The type of AI agent to be used for extraction.\nThis parameter is **required**.",
-            "example": "ai_agent_extract",
-            "nullable": false
-          },
-          "long_text": {
-            "$ref": "#/components/schemas/AiAgentLongTextTool"
-          },
-          "basic_text": {
-            "$ref": "#/components/schemas/AiAgentBasicTextToolExtract"
-          }
-        },
-        "description": "The AI Agent to be used for extraction."
-      },
-      "AiAgentExtractStructured": {
-        "title": "AI agent for structured extract request",
-        "type": "object",
-        "x-box-tag": "ai",
-        "x-box-resource-id": "ai_agent_extract_structured",
-        "required": [
-          "type"
-        ],
-        "properties": {
-          "type": {
-            "type": "string",
-            "enum": [
-              "ai_agent_extract_structured"
-            ],
-            "description": "The type of AI agent to be used for extraction.\nThis parameter is **required**.",
-            "example": "ai_agent_extract_structured",
-            "nullable": false
-          },
-          "long_text": {
-            "$ref": "#/components/schemas/AiAgentLongTextTool"
-          },
-          "basic_text": {
-            "$ref": "#/components/schemas/AiAgentBasicTextToolExtract"
-          }
-        },
-        "description": "The AI Agent to be used for structured extraction."
       },
       "Classification": {
         "title": "Classification",
@@ -37458,39 +37121,6 @@
           }
         ]
       },
-      "AiItem--Base": {
-        "title": "AI item (Base)",
-        "type": "object",
-        "required": [
-          "id",
-          "type"
-        ],
-        "x-box-variants": [
-          "base"
-        ],
-        "x-box-variant": "base",
-        "description": "The item to be processed by the LLM.",
-        "properties": {
-          "id": {
-            "type": "string",
-            "description": "The id of the item.",
-            "example": "123"
-          },
-          "type": {
-            "type": "string",
-            "description": "The type of the item.",
-            "enum": [
-              "file"
-            ],
-            "example": "file"
-          },
-          "content": {
-            "type": "string",
-            "description": "The content of the item, often the text representation.",
-            "example": "This is file content."
-          }
-        }
-      },
       "AiAgentBasicTextToolAsk": {
         "title": "AI agent basic text tool",
         "type": "object",
@@ -37575,47 +37205,6 @@
                 "description": "The parameters for the LLM endpoint specific to OpenAI / Google models."
               }
             ]
-          }
-        },
-        "description": "AI agent tool used to handle basic text."
-      },
-      "AiAgentBasicTextToolExtract": {
-        "title": "AI agent basic text tool",
-        "type": "object",
-        "x-box-tag": "ai",
-        "properties": {
-          "model": {
-            "type": "string",
-            "description": "The model used for the AI Agent for basic text.",
-            "example": "openai__gpt_3_5_turbo"
-          },
-          "system_message": {
-            "type": "string",
-            "description": "System messages try to help the LLM \"understand\" its role and what it is supposed to do.",
-            "example": "You are a helpful travel assistant specialized in budget travel"
-          },
-          "prompt_template": {
-            "type": "string",
-            "description": "The prompt template contains contextual information of the request and the user prompt. \n\nWhen passing `prompt_template` parameters, you **must include** inputs for `{current_date}`, `{user_question}`, and `{content}`.",
-            "example": "It is `{current_date}`, and I have $8000 and want to spend a week in the Azores. What should I see?",
-            "maxLength": 10000
-          },
-          "num_tokens_for_completion": {
-            "type": "integer",
-            "description": "The number of tokens for completion.",
-            "example": 8400,
-            "minimum": 1
-          },
-          "llm_endpoint_params": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/AiLlmEndpointParamsOpenAi"
-              },
-              {
-                "$ref": "#/components/schemas/AiLlmEndpointParamsGoogle"
-              }
-            ],
-            "description": "The parameters for the LLM endpoint specific to OpenAI / Google models."
           }
         },
         "description": "AI agent tool used to handle basic text."
@@ -37776,7 +37365,7 @@
         "description": "AI LLM endpoint params OpenAI object."
       },
       "AiCitation": {
-        "title": "Citation of the LLM's answer reference",
+        "title": "The citation of the LLM's answer reference",
         "type": "object",
         "properties": {
           "content": {
