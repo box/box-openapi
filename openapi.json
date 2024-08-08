@@ -14,7 +14,7 @@
       "url": "http://www.apache.org/licenses/LICENSE-2.0"
     },
     "version": "2.0.0",
-    "x-box-commit-hash": "c9d15e3555"
+    "x-box-commit-hash": "c7d707dbba"
   },
   "servers": [
     {
@@ -23891,7 +23891,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiResponse"
+                  "$ref": "#/components/schemas/AiAskResponse"
                 }
               }
             }
@@ -24144,6 +24144,18 @@
               }
             }
           },
+          "dialogue_history": {
+            "type": "array",
+            "description": "The history of prompts and answers previously passed to the LLM. This provides additional context to the LLM in generating the response.",
+            "items": {
+              "$ref": "#/components/schemas/AiDialogueHistory"
+            }
+          },
+          "include_citations": {
+            "type": "boolean",
+            "description": "A flag to indicate whether citations should be returned.",
+            "example": true
+          },
           "ai_agent": {
             "$ref": "#/components/schemas/AiAgentAsk"
           }
@@ -24203,26 +24215,7 @@
             "type": "array",
             "description": "The history of prompts and answers previously passed to the LLM. This provides additional context to the LLM in generating the response.",
             "items": {
-              "type": "object",
-              "description": "A context object that can hold prior prompts and answers.",
-              "properties": {
-                "prompt": {
-                  "type": "string",
-                  "description": "The prompt previously provided by the client and answered by the LLM.",
-                  "example": "Make my email about public APIs sound more professional."
-                },
-                "answer": {
-                  "type": "string",
-                  "description": "The answer previously provided by the LLM.",
-                  "example": "Here is the first draft of your professional email about public APIs."
-                },
-                "created_at": {
-                  "type": "string",
-                  "format": "date-time",
-                  "description": "The ISO date formatted timestamp of when the previous answer to the prompt was created.",
-                  "example": "2012-12-12T10:53:43-08:00"
-                }
-              }
+              "$ref": "#/components/schemas/AiDialogueHistory"
             }
           },
           "ai_agent": {
@@ -25268,11 +25261,50 @@
         },
         "description": "AI response"
       },
+      "AiAskResponse": {
+        "title": "AI ask response",
+        "x-box-resource-id": "ai_ask_response",
+        "x-box-tag": "ai",
+        "type": "object",
+        "required": [
+          "answer",
+          "created_at"
+        ],
+        "properties": {
+          "answer": {
+            "type": "string",
+            "description": "The answer provided by the LLM.",
+            "example": "Public APIs are important because of key and important reasons."
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The ISO date formatted timestamp of when the answer to the prompt was created.",
+            "example": "2012-12-12T10:53:43-08:00"
+          },
+          "completion_reason": {
+            "type": "string",
+            "description": "The reason the response finishes.",
+            "example": "done"
+          },
+          "citations": {
+            "type": "array",
+            "description": "The citations of the LLM's answer reference.",
+            "items": {
+              "$ref": "#/components/schemas/AiCitation"
+            }
+          }
+        },
+        "description": "AI ask response"
+      },
       "AiAgentAsk": {
         "title": "AI agent for question requests",
         "type": "object",
         "x-box-resource-id": "ai_agent_ask",
         "x-box-tag": "ai",
+        "required": [
+          "type"
+        ],
         "properties": {
           "type": {
             "type": "string",
@@ -25303,6 +25335,9 @@
         "type": "object",
         "x-box-tag": "ai",
         "x-box-resource-id": "ai_agent_text_gen",
+        "required": [
+          "type"
+        ],
         "properties": {
           "type": {
             "type": "string",
@@ -37363,6 +37398,59 @@
           }
         },
         "description": "AI LLM endpoint params OpenAI object."
+      },
+      "AiCitation": {
+        "title": "The citation of the LLM's answer reference",
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "string",
+            "description": "The specific content from where the answer was referenced.",
+            "example": "Public APIs are key drivers of innovation and growth."
+          },
+          "id": {
+            "type": "string",
+            "description": "The id of the item.",
+            "example": "123"
+          },
+          "type": {
+            "type": "string",
+            "description": "The type of the item.",
+            "enum": [
+              "file"
+            ],
+            "example": "file"
+          },
+          "name": {
+            "type": "string",
+            "description": "The name of the item.",
+            "example": "The importance of public APIs.pdf"
+          }
+        },
+        "description": "The citation of the LLM's answer reference."
+      },
+      "AiDialogueHistory": {
+        "title": "Dialogue history",
+        "type": "object",
+        "properties": {
+          "prompt": {
+            "type": "string",
+            "description": "The prompt previously provided by the client and answered by the LLM.",
+            "example": "Make my email about public APIs sound more professional."
+          },
+          "answer": {
+            "type": "string",
+            "description": "The answer previously provided by the LLM.",
+            "example": "Here is the first draft of your professional email about public APIs."
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The ISO date formatted timestamp of when the previous answer to the prompt was created.",
+            "example": "2012-12-12T10:53:43-08:00"
+          }
+        },
+        "description": "A context object that can hold prior prompts and answers."
       },
       "CompletionRuleVariable": {
         "title": "Completion rule variable",
