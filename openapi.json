@@ -14,7 +14,7 @@
       "url": "http://www.apache.org/licenses/LICENSE-2.0"
     },
     "version": "2.0.0",
-    "x-box-commit-hash": "c7d707dbba"
+    "x-box-commit-hash": "daaf133b65"
   },
   "servers": [
     {
@@ -23891,7 +23891,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiAskResponse"
+                  "$ref": "#/components/schemas/AiResponse--Full"
                 }
               }
             }
@@ -24671,39 +24671,50 @@
         ]
       },
       "IntegrationMappingSlackCreateRequest": {
-        "title": "Create integration mapping request",
+        "title": "Create Slack integration mapping request",
         "type": "object",
         "x-box-resource-id": "integration_mapping_slack_create_request",
         "description": "A request to create a\nSlack Integration Mapping object",
-        "properties": {
-          "partner_item": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/IntegrationMappingPartnerItemSlack"
+        "allOf": [
+          {
+            "type": "object",
+            "properties": {
+              "box_item": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/IntegrationMappingBoxItemSlack"
+                  }
+                ],
+                "nullable": false
+              },
+              "options": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/IntegrationMappingSlackOptions"
+                  }
+                ],
+                "nullable": false
               }
-            ],
-            "nullable": false
+            },
+            "required": [
+              "box_item"
+            ]
           },
-          "box_item": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/IntegrationMappingBoxItemSlack"
+          {
+            "properties": {
+              "partner_item": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/IntegrationMappingPartnerItemSlack"
+                  }
+                ],
+                "nullable": false
               }
-            ],
-            "nullable": false
-          },
-          "options": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/IntegrationMappingSlackOptions"
-              }
-            ],
-            "nullable": false
+            }
           }
-        },
+        ],
         "required": [
-          "partner_item",
-          "box_item"
+          "partner_item"
         ]
       },
       "ClientError": {
@@ -25237,6 +25248,11 @@
         "type": "object",
         "x-box-resource-id": "ai_response",
         "x-box-tag": "ai",
+        "x-box-variant": "standard",
+        "x-box-variants": [
+          "standard",
+          "full"
+        ],
         "required": [
           "answer",
           "created_at"
@@ -25261,40 +25277,36 @@
         },
         "description": "AI response"
       },
-      "AiAskResponse": {
-        "title": "AI ask response",
-        "x-box-resource-id": "ai_ask_response",
+      "AiResponse--Full": {
+        "title": "AI response (Full)",
+        "x-box-resource-id": "ai_response--full",
         "x-box-tag": "ai",
+        "x-box-variant": "full",
+        "x-box-variants": [
+          "standard",
+          "full"
+        ],
         "type": "object",
         "required": [
           "answer",
           "created_at"
         ],
-        "properties": {
-          "answer": {
-            "type": "string",
-            "description": "The answer provided by the LLM.",
-            "example": "Public APIs are important because of key and important reasons."
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AiResponse"
           },
-          "created_at": {
-            "type": "string",
-            "format": "date-time",
-            "description": "The ISO date formatted timestamp of when the answer to the prompt was created.",
-            "example": "2012-12-12T10:53:43-08:00"
-          },
-          "completion_reason": {
-            "type": "string",
-            "description": "The reason the response finishes.",
-            "example": "done"
-          },
-          "citations": {
-            "type": "array",
-            "description": "The citations of the LLM's answer reference.",
-            "items": {
-              "$ref": "#/components/schemas/AiCitation"
+          {
+            "properties": {
+              "citations": {
+                "type": "array",
+                "description": "The citations of the LLM's answer reference.",
+                "items": {
+                  "$ref": "#/components/schemas/AiCitation"
+                }
+              }
             }
           }
-        },
+        ],
         "description": "AI ask response"
       },
       "AiAgentAsk": {
@@ -29425,31 +29437,14 @@
         "x-box-resource-id": "integration_mapping",
         "x-box-tag": "integration_mappings",
         "x-box-variant": "standard",
-        "description": "A standard representation of an integration\nmapping object.",
+        "description": "A Slack specific representation of an integration\nmapping object.",
         "allOf": [
           {
             "$ref": "#/components/schemas/IntegrationMapping--Base"
           },
           {
+            "type": "object",
             "properties": {
-              "type": {
-                "type": "string",
-                "example": "integration_mapping",
-                "enum": [
-                  "integration_mapping"
-                ],
-                "description": "Mapping type",
-                "nullable": false
-              },
-              "partner_item": {
-                "oneOf": [
-                  {
-                    "$ref": "#/components/schemas/IntegrationMappingPartnerItemSlack"
-                  }
-                ],
-                "nullable": false,
-                "description": "Mapped item object for Slack"
-              },
               "box_item": {
                 "allOf": [
                   {
@@ -29466,11 +29461,8 @@
                 "nullable": false
               },
               "options": {
-                "type": "object",
                 "nullable": false,
-                "example": {},
-                "description": "Integration mapping options for Slack",
-                "anyOf": [
+                "allOf": [
                   {
                     "$ref": "#/components/schemas/IntegrationMappingSlackOptions"
                   }
@@ -29508,13 +29500,41 @@
                 "example": "2012-12-12T10:53:43-08:00",
                 "nullable": false
               }
+            },
+            "required": [
+              "box_item"
+            ]
+          },
+          {
+            "properties": {
+              "integration_type": {
+                "type": "string",
+                "nullable": false,
+                "description": "Identifies the Box partner app,\nwith which the mapping is associated.\nCurrently only supports Slack.\n(part of the composite key together with `id`)",
+                "example": "slack",
+                "enum": [
+                  "slack"
+                ]
+              },
+              "partner_item": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/IntegrationMappingPartnerItemSlack"
+                  }
+                ],
+                "nullable": false,
+                "example": {
+                  "id": "C12378991223",
+                  "type": "channel",
+                  "slack_org_id": "E1234567"
+                },
+                "description": "Mapped item object for Slack or Teams"
+              }
             }
           }
         ],
         "required": [
-          "type",
-          "partner_item",
-          "box_item"
+          "partner_item"
         ]
       },
       "IntegrationMapping--Base": {
@@ -29536,62 +29556,19 @@
             "example": "12345",
             "description": "A unique identifier of a folder mapping\n(part of a composite key together\nwith `integration_type`)"
           },
-          "integration_type": {
+          "type": {
             "type": "string",
-            "nullable": false,
-            "description": "Identifies the Box partner app,\nwith which the mapping is associated.\nCurrently only supports Slack.\n(part of the composite key together with `id`)",
-            "example": "slack",
+            "example": "integration_mapping",
             "enum": [
-              "slack"
-            ]
+              "integration_mapping"
+            ],
+            "description": "Mapping type",
+            "nullable": false
           }
-        }
-      },
-      "IntegrationMapping--Mini": {
-        "title": "Integration mapping (Mini)",
-        "type": "object",
-        "x-box-resource-id": "integration_mapping--mini",
-        "x-box-tag": "integration_mappings",
-        "x-box-variant": "mini",
-        "description": "A mini representation of an\nintegration mapping object.",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/IntegrationMapping--Base"
-          },
-          {
-            "properties": {
-              "partner_item_id": {
-                "type": "string",
-                "example": "C12351346",
-                "description": "ID of the mapped partner item",
-                "nullable": false
-              },
-              "partner_item_type": {
-                "type": "string",
-                "example": "channel",
-                "enum": [
-                  "channel"
-                ],
-                "description": "Domain-specific type of the mapped partner item",
-                "nullable": false
-              },
-              "box_item_id": {
-                "type": "string",
-                "example": "123124351",
-                "description": "ID of the Box item mapped to the object referenced in `partner_item_id`",
-                "nullable": false
-              },
-              "box_item_type": {
-                "type": "string",
-                "example": "folder",
-                "enum": [
-                  "folder"
-                ],
-                "description": "Type of the Box object referenced in `box_item_id`",
-                "nullable": false
-              }
-            }
-          }
+        },
+        "required": [
+          "id",
+          "type"
         ]
       },
       "IntegrationMappings": {
