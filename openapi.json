@@ -14,7 +14,7 @@
             "url": "http://www.apache.org/licenses/LICENSE-2.0"
         },
         "version": "2.0.0",
-        "x-box-commit-hash": "c7d707dbba"
+        "x-box-commit-hash": "75e07a386e"
     },
     "servers": [
         {
@@ -23891,7 +23891,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/AiAskResponse"
+                                    "$ref": "#/components/schemas/AiResponse--Full"
                                 }
                             }
                         }
@@ -24671,39 +24671,50 @@
                 ]
             },
             "IntegrationMappingSlackCreateRequest": {
-                "title": "統合マッピングリクエストを作成",
+                "title": "Create Slack integration mapping request",
                 "type": "object",
                 "x-box-resource-id": "integration_mapping_slack_create_request",
                 "description": "Slack統合マッピングオブジェクトを作成するリクエスト",
-                "properties": {
-                    "partner_item": {
-                        "allOf": [
-                            {
-                                "$ref": "#/components/schemas/IntegrationMappingPartnerItemSlack"
+                "allOf": [
+                    {
+                        "type": "object",
+                        "properties": {
+                            "box_item": {
+                                "allOf": [
+                                    {
+                                        "$ref": "#/components/schemas/IntegrationMappingBoxItemSlack"
+                                    }
+                                ],
+                                "nullable": false
+                            },
+                            "options": {
+                                "allOf": [
+                                    {
+                                        "$ref": "#/components/schemas/IntegrationMappingSlackOptions"
+                                    }
+                                ],
+                                "nullable": false
                             }
-                        ],
-                        "nullable": false
+                        },
+                        "required": [
+                            "box_item"
+                        ]
                     },
-                    "box_item": {
-                        "allOf": [
-                            {
-                                "$ref": "#/components/schemas/IntegrationMappingBoxItemSlack"
+                    {
+                        "properties": {
+                            "partner_item": {
+                                "allOf": [
+                                    {
+                                        "$ref": "#/components/schemas/IntegrationMappingPartnerItemSlack"
+                                    }
+                                ],
+                                "nullable": false
                             }
-                        ],
-                        "nullable": false
-                    },
-                    "options": {
-                        "allOf": [
-                            {
-                                "$ref": "#/components/schemas/IntegrationMappingSlackOptions"
-                            }
-                        ],
-                        "nullable": false
+                        }
                     }
-                },
+                ],
                 "required": [
-                    "partner_item",
-                    "box_item"
+                    "partner_item"
                 ]
             },
             "ClientError": {
@@ -25237,6 +25248,11 @@
                 "type": "object",
                 "x-box-resource-id": "ai_response",
                 "x-box-tag": "ai",
+                "x-box-variant": "standard",
+                "x-box-variants": [
+                    "standard",
+                    "full"
+                ],
                 "required": [
                     "answer",
                     "created_at"
@@ -25261,40 +25277,36 @@
                 },
                 "description": "AIの応答"
             },
-            "AiAskResponse": {
-                "title": "AIの質問への応答",
-                "x-box-resource-id": "ai_ask_response",
+            "AiResponse--Full": {
+                "title": "AI response (Full)",
+                "x-box-resource-id": "ai_response--full",
                 "x-box-tag": "ai",
+                "x-box-variant": "full",
+                "x-box-variants": [
+                    "standard",
+                    "full"
+                ],
                 "type": "object",
                 "required": [
                     "answer",
                     "created_at"
                 ],
-                "properties": {
-                    "answer": {
-                        "type": "string",
-                        "description": "LLMから提供された回答。",
-                        "example": "Public APIs are important because of key and important reasons."
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/AiResponse"
                     },
-                    "created_at": {
-                        "type": "string",
-                        "format": "date-time",
-                        "description": "プロンプトに対する回答が作成された時点のISO日付形式のタイムスタンプ。",
-                        "example": "2012-12-12T10:53:43-08:00"
-                    },
-                    "completion_reason": {
-                        "type": "string",
-                        "description": "応答が終了した理由。",
-                        "example": "done"
-                    },
-                    "citations": {
-                        "type": "array",
-                        "description": "LLMの回答で参照された部分の引用情報。",
-                        "items": {
-                            "$ref": "#/components/schemas/AiCitation"
+                    {
+                        "properties": {
+                            "citations": {
+                                "type": "array",
+                                "description": "LLMの回答で参照された部分の引用情報。",
+                                "items": {
+                                    "$ref": "#/components/schemas/AiCitation"
+                                }
+                            }
                         }
                     }
-                },
+                ],
                 "description": "AIの質問への応答"
             },
             "AiAgentAsk": {
@@ -29425,31 +29437,14 @@
                 "x-box-resource-id": "integration_mapping",
                 "x-box-tag": "integration_mappings",
                 "x-box-variant": "standard",
-                "description": "統合マッピングオブジェクトのStandard版の表示。",
+                "description": "A Slack specific representation of an integration mapping object.",
                 "allOf": [
                     {
                         "$ref": "#/components/schemas/IntegrationMapping--Base"
                     },
                     {
+                        "type": "object",
                         "properties": {
-                            "type": {
-                                "type": "string",
-                                "example": "integration_mapping",
-                                "enum": [
-                                    "integration_mapping"
-                                ],
-                                "description": "マッピングタイプ",
-                                "nullable": false
-                            },
-                            "partner_item": {
-                                "oneOf": [
-                                    {
-                                        "$ref": "#/components/schemas/IntegrationMappingPartnerItemSlack"
-                                    }
-                                ],
-                                "nullable": false,
-                                "description": "Slack用にマッピングされた項目オブジェクト"
-                            },
                             "box_item": {
                                 "allOf": [
                                     {
@@ -29466,11 +29461,8 @@
                                 "nullable": false
                             },
                             "options": {
-                                "type": "object",
                                 "nullable": false,
-                                "example": {},
-                                "description": "Slack用の統合マッピングオプション",
-                                "anyOf": [
+                                "allOf": [
                                     {
                                         "$ref": "#/components/schemas/IntegrationMappingSlackOptions"
                                     }
@@ -29508,13 +29500,41 @@
                                 "example": "2012-12-12T10:53:43-08:00",
                                 "nullable": false
                             }
+                        },
+                        "required": [
+                            "box_item"
+                        ]
+                    },
+                    {
+                        "properties": {
+                            "integration_type": {
+                                "type": "string",
+                                "nullable": false,
+                                "description": "マッピングが関連付けられているBoxパートナーアプリを示します。現在サポートされているのはSlackのみです (`id`とともに複合キーの一部)。",
+                                "example": "slack",
+                                "enum": [
+                                    "slack"
+                                ]
+                            },
+                            "partner_item": {
+                                "oneOf": [
+                                    {
+                                        "$ref": "#/components/schemas/IntegrationMappingPartnerItemSlack"
+                                    }
+                                ],
+                                "nullable": false,
+                                "example": {
+                                    "id": "C12378991223",
+                                    "type": "channel",
+                                    "slack_org_id": "E1234567"
+                                },
+                                "description": "Mapped item object for Slack or Teams"
+                            }
                         }
                     }
                 ],
                 "required": [
-                    "type",
-                    "partner_item",
-                    "box_item"
+                    "partner_item"
                 ]
             },
             "IntegrationMapping--Base": {
@@ -29536,62 +29556,19 @@
                         "example": "12345",
                         "description": "フォルダマッピングの一意の識別子 (`integration_type`とともに複合キーの一部)"
                     },
-                    "integration_type": {
+                    "type": {
                         "type": "string",
-                        "nullable": false,
-                        "description": "マッピングが関連付けられているBoxパートナーアプリを示します。現在サポートされているのはSlackのみです (`id`とともに複合キーの一部)。",
-                        "example": "slack",
+                        "example": "integration_mapping",
                         "enum": [
-                            "slack"
-                        ]
+                            "integration_mapping"
+                        ],
+                        "description": "マッピングタイプ",
+                        "nullable": false
                     }
-                }
-            },
-            "IntegrationMapping--Mini": {
-                "title": "統合マッピング (Mini)",
-                "type": "object",
-                "x-box-resource-id": "integration_mapping--mini",
-                "x-box-tag": "integration_mappings",
-                "x-box-variant": "mini",
-                "description": "統合マッピングオブジェクトのMini版の表示。",
-                "allOf": [
-                    {
-                        "$ref": "#/components/schemas/IntegrationMapping--Base"
-                    },
-                    {
-                        "properties": {
-                            "partner_item_id": {
-                                "type": "string",
-                                "example": "C12351346",
-                                "description": "マッピングされたパートナー項目のID",
-                                "nullable": false
-                            },
-                            "partner_item_type": {
-                                "type": "string",
-                                "example": "channel",
-                                "enum": [
-                                    "channel"
-                                ],
-                                "description": "マッピングされたパートナー項目のドメイン固有のタイプ",
-                                "nullable": false
-                            },
-                            "box_item_id": {
-                                "type": "string",
-                                "example": "123124351",
-                                "description": "`partner_item_id`で参照されるオブジェクトにマッピングされたBox項目のID",
-                                "nullable": false
-                            },
-                            "box_item_type": {
-                                "type": "string",
-                                "example": "folder",
-                                "enum": [
-                                    "folder"
-                                ],
-                                "description": "`box_item_id`で参照されるBoxオブジェクトのタイプ",
-                                "nullable": false
-                            }
-                        }
-                    }
+                },
+                "required": [
+                    "id",
+                    "type"
                 ]
             },
             "IntegrationMappings": {
@@ -37327,21 +37304,24 @@
                         "description": "温度はレスポンス生成時のサンプリングに使用されます。レスポンス生成は`top-P`と`top-K`が適用された場合に発生します。温度は、トークン選択におけるランダム性の程度を制御します。",
                         "example": 0,
                         "minimum": 0,
-                        "maximum": 2
+                        "maximum": 2,
+                        "nullable": true
                     },
                     "top_p": {
                         "type": "number",
                         "description": "`Top-P`では、モデルが出力用にトークンを選択する方法を変更します。トークンは、確率の合計が`top-P`値に等しくなるまで、確率の高いもの (`top-K`を参照) から低いものへと選択されます。",
                         "example": 1,
                         "minimum": 0.1,
-                        "maximum": 2
+                        "maximum": 2,
+                        "nullable": true
                     },
                     "top_k": {
                         "type": "number",
                         "description": "`Top-K`では、モデルが出力用にトークンを選択する方法を変更します。`top-K`が1の場合、次に選択されるトークンは、モデルの語彙に含まれるすべてのトークンの中で最も確率の高いものであることになります (グリーディデコードとも呼ばれます)。`top-K`が3の場合は、温度を使用して、最も確率が高い上位3つのトークンから次のトークンが選択されることになります。",
                         "example": 1,
                         "minimum": 0.1,
-                        "maximum": 2
+                        "maximum": 2,
+                        "nullable": true
                     }
                 },
                 "description": "AI LLMエンドポイントパラメータ (Google) オブジェクトです。"
@@ -37368,33 +37348,38 @@
                         "description": "使用するサンプリング温度 (0～2の間)。0.8のような高い値を指定すると、出力がよりランダムになるのに対し、0.2のような低い値を指定すると、出力はより焦点を絞った、決定的なものになります。一般的には、この値と`top_p`の両方ではなく、いずれかを変更することをお勧めします。",
                         "example": 0,
                         "minimum": 0,
-                        "maximum": 2
+                        "maximum": 2,
+                        "nullable": true
                     },
                     "top_p": {
                         "type": "number",
                         "example": 1,
                         "description": "温度によるサンプリングの代替手段 (核サンプリングと呼ばれます)。この場合、モデルは`top_p`の確率質量を持つトークンの結果を考慮します。つまり、0.1の場合は、上位10%の確率質量で構成されるトークンのみが考慮されます。一般的には、この値と温度の両方ではなく、いずれかを変更することをお勧めします。",
                         "minimum": 0.1,
-                        "maximum": 1
+                        "maximum": 1,
+                        "nullable": true
                     },
                     "frequency_penalty": {
                         "type": "number",
                         "description": "\\-2.0から2.0までの数値。正の値の場合は、新しいトークンがこれまでにテキストに出現した回数に基づいてそのトークンにペナルティを与え、モデルが同じ行をそのまま繰り返す可能性を低減させます。",
                         "minimum": -2,
                         "maximum": 2,
-                        "example": 1.5
+                        "example": 1.5,
+                        "nullable": true
                     },
                     "presence_penalty": {
                         "type": "number",
                         "description": "\\-2.0から2.0までの数値。正の値の場合は、新しいトークンがこれまでにテキストに出現したかどうかに基づいてそのトークンにペナルティを与え、モデルが新しいトピックについて語る可能性を引き上げます。",
                         "minimum": -2,
                         "maximum": 2,
-                        "example": 1.5
+                        "example": 1.5,
+                        "nullable": true
                     },
                     "stop": {
                         "type": "string",
                         "description": "APIがトークンをそれ以上生成するのを停止する、最大4つのシーケンス。",
-                        "example": "<|im_end|>"
+                        "example": "<|im_end|>",
+                        "nullable": true
                     }
                 },
                 "description": "AI LLMエンドポイントパラメータ (OpenAI) オブジェクト。"
