@@ -23993,7 +23993,9 @@
               "type": "string",
               "enum": [
                 "ask",
-                "text_gen"
+                "text_gen",
+                "extract",
+                "extract_structured"
               ]
             }
           },
@@ -24020,7 +24022,7 @@
         ],
         "responses": {
           "200": {
-            "description": "A successful response including the default agent configuration.\nThis response can be one of the following two objects:\nAI agent for questions and AI agent for text generation. The response\ndepends on the agent configuration requested in this endpoint.",
+            "description": "A successful response including the default agent configuration.\nThis response can be one of the following four objects:\nAI agent for questions, AI agent for text generation, AI agent\nfor freeform extract and AI agent for structured extract. The response\ndepends on the agent configuration requested in this endpoint.",
             "content": {
               "application/json": {
                 "schema": {
@@ -24030,6 +24032,12 @@
                     },
                     {
                       "$ref": "#/components/schemas/AiAgentTextGen"
+                    },
+                    {
+                      "$ref": "#/components/schemas/AiAgentExtract"
+                    },
+                    {
+                      "$ref": "#/components/schemas/AiAgentExtractStructured"
                     }
                   ]
                 }
@@ -24059,15 +24067,87 @@
         }
       }
     },
-    "/integration_mappings/teams": {
-      "get": {
-        "operationId": "get_integration_mappings_teams",
-        "summary": "List Teams integration mappings",
+    "/docgen_templates": {
+      "post": {
+        "operationId": "post_docgen_templates",
+        "summary": "Add file with docgen template",
         "tags": [
-          "Integration mappings"
+          "Docgen Template"
         ],
-        "x-box-tag": "integration_mappings",
-        "description": "Lists [Teams integration mappings](https://support.box.com/hc/en-us/articles/360044681474-Using-Box-for-Teams) in a users' enterprise.\nYou need Admin or Co-Admin role to\nuse this endpoint.",
+        "x-box-tag": "docgen_template",
+        "description": "Creates a Docgen template",
+        "requestBody": {
+          "description": "Docgen entity object to be marked as Docgen template",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DocgenTemplateCreateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The file which has now been marked as a Docgen template.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocgenTemplate--Base"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The server cannot or will not process the request due to an apparent client error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The client does not have access rights to the content or resource requested.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "The user has sent too many requests in a given amount of time.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected condition was encountered on the server.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "operationId": "get_docgen_templates",
+        "summary": "List docgen templates",
+        "tags": [
+          "Docgen Template"
+        ],
+        "x-box-tag": "docgen_template",
+        "description": "Lists docgen templates created by a user.",
         "parameters": [
           {
             "name": "marker",
@@ -24090,138 +24170,21 @@
               "format": "int64",
               "maximum": 1000
             }
-          },
-          {
-            "in": "query",
-            "name": "partner_item_type",
-            "schema": {
-              "type": "string",
-              "enum": [
-                "channel",
-                "team"
-              ],
-              "nullable": false
-            },
-            "description": "Mapped item type, for which the mapping should be returned",
-            "example": "channel"
-          },
-          {
-            "in": "query",
-            "name": "partner_item_id",
-            "schema": {
-              "type": "string",
-              "nullable": false
-            },
-            "description": "ID of the mapped item, for which the mapping should be returned",
-            "example": "12345"
-          },
-          {
-            "in": "query",
-            "name": "box_item_id",
-            "schema": {
-              "type": "string",
-              "nullable": false
-            },
-            "description": "Box item ID, for which the mappings should be returned",
-            "example": "12345"
-          },
-          {
-            "in": "query",
-            "name": "box_item_type",
-            "schema": {
-              "nullable": false,
-              "type": "string",
-              "enum": [
-                "folder"
-              ]
-            },
-            "description": "Box item type, for which the mappings should be returned",
-            "example": "folder"
           }
         ],
         "responses": {
           "200": {
-            "description": "Returns a collection of integration mappings",
+            "description": "Returns a collection of templates.",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/IntegrationMappingsTeams"
+                  "$ref": "#/components/schemas/DocgenTemplates"
                 }
               }
             }
           },
-          "400": {
-            "description": "The server cannot or will not process the\nrequest due to an apparent client error.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ClientError"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Returns a `not_found` error if the integration mapping could not be found.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ClientError"
-                }
-              }
-            }
-          },
-          "default": {
-            "description": "An unexpected client error.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ClientError"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "operationId": "post_integration_mappings_teams",
-        "summary": "Create Teams integration mapping",
-        "tags": [
-          "Integration mappings"
-        ],
-        "x-box-tag": "integration_mappings",
-        "description": "Creates a [Teams integration mapping](https://support.box.com/hc/en-us/articles/360044681474-Using-Box-for-Teams)\nby mapping a Teams channel to a Box item.\nYou need Admin or Co-Admin role to\nuse this endpoint.",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/IntegrationMappingTeamsCreateRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Returns the created integration mapping.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/IntegrationMappingTeams"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Returns a `bad_request` if an incorrect `options`\nwas supplied or the Box folder cannot be\nmapped to this `partner_item_id`.\nError codes:\n* `SERVICE_ACCOUNT_IS_NOT_A_COOWNER_OR_OWNER` - service account\ndoesn't have co-owner collaboration or is\nnot an owner of the `box_item_id`,\n* `SERVICE_ACCOUNT_IS_NOT_A_COLLABORATOR` - service account\nis not added as a collaborator,\n* `CHANNEL_ALREADY_MAPPED` - channel is already\n  mapped to another `box_item_id`,\n* `CHANNEL_NOT_FOUND` - channel does not exist or is archived\n* `TEAM_ALREADY_MAPPED` - team is already\n  mapped to another `box_item_id`,\n* `TEAM_NOT_FOUND` - team does not exist or is archived\n* `BOX_FOLDER_NOT_FOUND` - folder was not found,\n* `BOX_ENTERPRISE_MISMATCH` - Box folder must be\nowned by the enterprise, which is configured\nto use Box as Content layer for Teams,\n* `BOX_FOLDER_EXTERNALLY_OWNED` - Box folder must\nbe internally owned to the admin's enterprise,\n* `JWT_APP_NOT_AUTHORIZED` - JWT authorization error.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ClientError"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Returns a `not_found` error if the integration mapping could not be found.",
+          "401": {
+            "description": "Returned when the access token provided in the `Authorization` header\nis not recognized or not provided.",
             "content": {
               "application/json": {
                 "schema": {
@@ -24243,68 +24206,43 @@
         }
       }
     },
-    "/integration_mappings/teams/{integration_mapping_id}": {
-      "put": {
-        "operationId": "put_integration_mappings_teams_id",
-        "summary": "Update Teams integration mapping",
+    "/docgen_templates/{template_id}": {
+      "delete": {
+        "operationId": "delete_docgen_templates_id",
+        "summary": "Delete file as docgen template",
         "tags": [
-          "Integration mappings"
+          "Docgen Template"
         ],
-        "x-box-tag": "integration_mappings",
-        "description": "Updates a [Teams integration mapping](https://support.box.com/hc/en-us/articles/360044681474-Using-Box-for-Teams).\nSupports updating the Box folder ID and options.\nYou need Admin or Co-Admin role to\nuse this endpoint.",
+        "x-box-tag": "docgen_template",
+        "description": "Unmarks file as Docgen template",
         "parameters": [
           {
-            "name": "integration_mapping_id",
-            "description": "An ID of an integration mapping",
-            "example": "11235432",
+            "name": "template_id",
             "in": "path",
+            "description": "Id of file which will be unmarked as a docgen template",
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "example": "123"
           }
         ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "box_item": {
-                    "nullable": false,
-                    "allOf": [
-                      {
-                        "$ref": "#/components/schemas/IntegrationMappingBoxItemSlack"
-                      }
-                    ]
-                  },
-                  "options": {
-                    "nullable": false,
-                    "allOf": [
-                      {
-                        "$ref": "#/components/schemas/IntegrationMappingSlackOptions"
-                      }
-                    ]
-                  }
-                }
-              }
-            }
-          },
-          "description": "At least one of `box_item` and `options` must be provided."
-        },
         "responses": {
-          "200": {
-            "description": "Returns the updated integration mapping object.",
+          "204": {
+            "description": "Returns an empty response when the docgen template has been deleted."
+          },
+          "400": {
+            "description": "The server cannot or will not process the request due to an apparent client error.",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/IntegrationMappingTeams"
+                  "$ref": "#/components/schemas/ClientError"
                 }
               }
             }
           },
-          "400": {
-            "description": "Returns a `bad_request` if an incorrect `options` was\nsupplied or the Box folder cannot be mapped to this `partner_item`.\nError codes:\n* `SERVICE_ACCOUNT_IS_NOT_A_COOWNER_OR_OWNER` - service account\n  doesn't have co-owner collaboration or is\n  not an owner of the `box_item_id`,\n* `BOX_FOLDER_EXTERNALLY_OWNED` - Box folder must be\n  internally owned to the admin's enterprise,\n* `SERVICE_ACCOUNT_IS_NOT_A_COLLABORATOR` - service account\n      is not added as a collaborator,\n* `JWT_APP_NOT_AUTHORIZED` - JWT authorization error.",
+          "403": {
+            "description": "The client does not have access rights to the content or resource requested.",
             "content": {
               "application/json": {
                 "schema": {
@@ -24314,7 +24252,80 @@
             }
           },
           "404": {
-            "description": "Returns `not_found` if integration mapping object was not found.",
+            "description": "Returned if the template is not found or the user does not\nhave access to the associated template.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "The user has sent too many requests in a given amount of time.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected condition was encountered on the server.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "operationId": "get_docgen_templates_id",
+        "summary": "Get docgen template by id.",
+        "tags": [
+          "Docgen Template"
+        ],
+        "x-box-tag": "docgen_template",
+        "description": "Lists details of a specific docgen template.",
+        "parameters": [
+          {
+            "name": "template_id",
+            "description": "The ID of a docgen template.",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": 123
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns details of a template.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocgenTemplate"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Returned when the access token provided in the `Authorization` header\nis not recognized or not provided.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Returned if the template is not found or the user does not\nhave access to the associated template.",
             "content": {
               "application/json": {
                 "schema": {
@@ -24334,33 +24345,94 @@
             }
           }
         }
-      },
-      "delete": {
-        "operationId": "delete_integration_mappings_teams_id",
-        "summary": "Delete Teams integration mapping",
+      }
+    },
+    "/docgen_templates/{template_id}/tags": {
+      "get": {
+        "operationId": "get_docgen_templates_id_tags",
+        "summary": "List all docgen template tags in template.",
         "tags": [
-          "Integration mappings"
+          "Docgen Template Tags"
         ],
-        "x-box-tag": "integration_mappings",
-        "description": "Deletes a [Teams integration mapping](https://support.box.com/hc/en-us/articles/360044681474-Using-Box-for-Teams).\nYou need Admin or Co-Admin role to\nuse this endpoint.",
+        "x-box-tag": "docgen_tag",
+        "description": "List all tags in a document generation template.",
         "parameters": [
           {
-            "name": "integration_mapping_id",
-            "description": "An ID of an integration mapping",
-            "example": "11235432",
+            "name": "template_id",
             "in": "path",
             "required": true,
+            "description": "Id of template.",
             "schema": {
               "type": "string"
+            },
+            "example": 123
+          },
+          {
+            "name": "template_version_id",
+            "in": "query",
+            "required": false,
+            "description": "Id of template version.",
+            "schema": {
+              "type": "string"
+            },
+            "example": 123
+          },
+          {
+            "name": "marker",
+            "description": "Defines the position marker at which to begin returning results. This is\nused when paginating using marker-based pagination.\n\nThis requires `usemarker` to be set to `true`.",
+            "in": "query",
+            "required": false,
+            "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "description": "The maximum number of items to return per page.",
+            "in": "query",
+            "required": false,
+            "example": 1000,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "maximum": 1000
             }
           }
         ],
         "responses": {
-          "204": {
-            "description": "Empty body in response"
+          "200": {
+            "description": "A list of document generation template tags.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocgenTags"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The client does not have access rights to the content or resource requested.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
           },
           "404": {
-            "description": "Returns a `not_found` error if the integration mapping could not be found.",
+            "description": "The requested resource could not be found but may be available in the future.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "The user has sent too many requests in a given amount of time.",
             "content": {
               "application/json": {
                 "schema": {
@@ -24370,7 +24442,522 @@
             }
           },
           "default": {
+            "description": "An unexpected condition was encountered on the server.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/docgen_jobs/{job_id}": {
+      "get": {
+        "operationId": "get_docgen_jobs_id",
+        "summary": "Get docgen job by id",
+        "tags": [
+          "Docgen"
+        ],
+        "x-box-tag": "docgen",
+        "description": "List status of job.",
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "description": "Document generation job id.",
+            "schema": {
+              "type": "string"
+            },
+            "example": 123
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Status of the document generation job.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocgenJob"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The client does not have access rights to the content or resource requested.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Returned if the job is not found or the user does not\nhave access to the associated job.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "The user has sent too many requests in a given amount of time.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected condition was encountered on the server.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/docgen_jobs": {
+      "get": {
+        "operationId": "get_docgen_jobs",
+        "summary": "List all docgen jobs",
+        "tags": [
+          "Docgen"
+        ],
+        "x-box-tag": "docgen",
+        "description": "List of all document generation jobs for a user.",
+        "parameters": [
+          {
+            "name": "marker",
+            "description": "Defines the position marker at which to begin returning results. This is\nused when paginating using marker-based pagination.\n\nThis requires `usemarker` to be set to `true`.",
+            "in": "query",
+            "required": false,
+            "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "description": "The maximum number of items to return per page.",
+            "in": "query",
+            "required": false,
+            "example": 1000,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "maximum": 1000
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of document generation jobs.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocgenJobs--Full"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The client does not have access rights to the content or resource requested.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "The user has sent too many requests in a given amount of time.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected condition was encountered on the server.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/docgen_template_jobs/{template_id}": {
+      "get": {
+        "operationId": "get_docgen_template_jobs_id",
+        "summary": "Get list of all docgen jobs for template.",
+        "tags": [
+          "Docgen Template"
+        ],
+        "x-box-tag": "docgen_template",
+        "description": "Lists details of a document generation template including associated jobs list for a user",
+        "parameters": [
+          {
+            "name": "template_id",
+            "in": "path",
+            "description": "Id of template to fetch jobs for",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": 123
+          },
+          {
+            "name": "marker",
+            "description": "Defines the position marker at which to begin returning results. This is\nused when paginating using marker-based pagination.\n\nThis requires `usemarker` to be set to `true`.",
+            "in": "query",
+            "required": false,
+            "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "description": "The maximum number of items to return per page.",
+            "in": "query",
+            "required": false,
+            "example": 1000,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "maximum": 1000
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A single document generation template.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocgenJobs"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The client does not have access rights to the content or resource requested.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Returned if the template is not found or the user does not\nhave access to the associated template.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "The user has sent too many requests in a given amount of time.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected condition was encountered on the server.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/docgen_batch_jobs/{batch_id}": {
+      "get": {
+        "operationId": "get_docgen_batch_jobs_id",
+        "summary": "Get docgen jobs for batch id",
+        "tags": [
+          "Docgen"
+        ],
+        "x-box-tag": "docgen",
+        "description": "List docgen jobs in a batch",
+        "parameters": [
+          {
+            "name": "batch_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Document generation batch id.",
+            "example": 123
+          },
+          {
+            "name": "marker",
+            "description": "Defines the position marker at which to begin returning results. This is\nused when paginating using marker-based pagination.\n\nThis requires `usemarker` to be set to `true`.",
+            "in": "query",
+            "required": false,
+            "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "description": "The maximum number of items to return per page.",
+            "in": "query",
+            "required": false,
+            "example": 1000,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "maximum": 1000
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of docgen jobs in to a docgen batch",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocgenJobs"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The client does not have access rights to the content or resource requested.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Returned if the batch is not found or the user does not\nhave access to the associated batch.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "The user has sent too many requests in a given amount of time.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected condition was encountered on the server.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/docgen_batches": {
+      "post": {
+        "operationId": "post_docgen_batches",
+        "summary": "Create document using template",
+        "tags": [
+          "Docgen"
+        ],
+        "x-box-tag": "docgen",
+        "description": "API to submit document generation jobs.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DocgenBatchCreateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "The created Batch ID.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocgenBatch--Base"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The client does not have access rights to the content or resource requested.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "The user has sent too many requests in a given amount of time.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected condition was encountered on the server.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ai/extract": {
+      "post": {
+        "operationId": "post_ai_extract",
+        "summary": "Send AI Extract request",
+        "tags": [
+          "AI"
+        ],
+        "x-box-tag": "ai",
+        "x-box-enable-explorer": false,
+        "description": "Sends an AI request to supported LLMs and returns an answer specifically focused returning key-value pairs.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AiExtract"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "A successful response including the answer from the LLM.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiResponse"
+                }
+              }
+            }
+          },
+          "400": {
             "description": "An unexpected client error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "An unexpected server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ai/extract_structured": {
+      "post": {
+        "operationId": "post_ai_extract_structured",
+        "summary": "Send AI Extract Structured request",
+        "tags": [
+          "AI"
+        ],
+        "x-box-tag": "ai",
+        "x-box-enable-explorer": false,
+        "description": "Sends an AI request to supported LLMs and returns extracted key pairs and values.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AiExtractStructured"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "A successful response including the answer from the LLM.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiExtractResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "An unexpected client error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "An unexpected server error.",
             "content": {
               "application/json": {
                 "schema": {
@@ -24407,53 +24994,6 @@
       }
     },
     "schemas": {
-      "IntegrationMappingTeamsCreateRequest": {
-        "title": "Create teams integration mapping request",
-        "type": "object",
-        "x-box-resource-id": "integration_mapping_slack_create_request",
-        "description": "A request to create a\nTeams Integration Mapping object",
-        "allOf": [
-          {
-            "type": "object",
-            "properties": {
-              "box_item": {
-                "allOf": [
-                  {
-                    "$ref": "#/components/schemas/IntegrationMappingBoxItemSlack"
-                  }
-                ],
-                "nullable": false
-              },
-              "options": {
-                "allOf": [
-                  {
-                    "$ref": "#/components/schemas/IntegrationMappingSlackOptions"
-                  }
-                ],
-                "nullable": false
-              }
-            },
-            "required": [
-              "box_item"
-            ]
-          },
-          {
-            "properties": {
-              "partner_item": {
-                "allOf": [
-                  {
-                    "$ref": "#/components/schemas/IntegrationMappingPartnerItemTeams"
-                  }
-                ],
-                "nullable": false
-              }
-            }
-          }
-        ],
-        "required": [
-          "partner_item"
-        ]
-      },
       "AiAsk": {
         "title": "AI ask request",
         "type": "object",
@@ -24593,6 +25133,149 @@
           }
         },
         "description": "AI text gen request object"
+      },
+      "AiExtractStructured": {
+        "title": "AI Extract Structured Request",
+        "type": "object",
+        "x-box-tag": "ai",
+        "required": [
+          "items"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "The items to be processed by the LLM, often files.",
+            "minItems": 1,
+            "maxItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "$ref": "#/components/schemas/AiItem--Base"
+            }
+          },
+          "metadata_template": {
+            "type": "object",
+            "description": "The metadata template containing the fields to extract. Cannot be used\nin combination with `fields`.",
+            "properties": {
+              "template_key": {
+                "type": "string",
+                "description": "The name of the metadata template.",
+                "example": "invoiceTemplate"
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "metadata_template"
+                ],
+                "description": "Value is always `metadata_template`.",
+                "example": "metadata_template"
+              },
+              "scope": {
+                "type": "string",
+                "description": "The scope of the metadata template can either be global or\nenterprise_*. The global scope is used for templates that are\navailable to any Box enterprise. The enterprise_* scope represents\ntemplates that have been created within a specific enterprise,\nwhere * will be the ID of that enterprise.",
+                "example": "enterprise_12345"
+              }
+            }
+          },
+          "fields": {
+            "type": "array",
+            "description": "The fields to be extracted from the items. Cannot be used in combination\nwith `metadata_template`.",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "type": "object",
+              "description": "The field to be extracted from the items.",
+              "required": [
+                "key"
+              ],
+              "properties": {
+                "key": {
+                  "type": "string",
+                  "description": "A unique identifier for the field.",
+                  "example": "name"
+                },
+                "description": {
+                  "type": "string",
+                  "description": "A description of the field.",
+                  "example": "The name of the person."
+                },
+                "displayName": {
+                  "type": "string",
+                  "description": "The display name of the field.",
+                  "example": "Name"
+                },
+                "prompt": {
+                  "type": "string",
+                  "description": "Context about the key that may include how to find and how to format it.",
+                  "example": "Name is the first and last name from the email address"
+                },
+                "type": {
+                  "type": "string",
+                  "description": "The type of the field. Can include but is not limited to string, float, date, enum, and multiSelect.",
+                  "example": "enum"
+                },
+                "options": {
+                  "type": "array",
+                  "description": "A list of options for this field. This is most often used in combination with the enum and multiSelect field types.",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "key"
+                    ],
+                    "properties": {
+                      "key": {
+                        "type": "string",
+                        "description": "A unique identifier for the field.",
+                        "example": "First Name"
+                      }
+                    }
+                  },
+                  "example": [
+                    {
+                      "key": "First Name"
+                    },
+                    {
+                      "key": "Last Name"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "ai_agent": {
+            "$ref": "#/components/schemas/AiAgentExtractStructured"
+          }
+        },
+        "description": "AI Extract Structured Request object."
+      },
+      "AiExtract": {
+        "title": "AI Extract Request",
+        "type": "object",
+        "x-box-tag": "ai",
+        "required": [
+          "prompt",
+          "items"
+        ],
+        "properties": {
+          "prompt": {
+            "type": "string",
+            "description": "The prompt provided by the client to be answered by the LLM that can \ninclude the JSON schema of the expected response.",
+            "example": "\\\"fields\\\":[{\\\"type\\\":\\\"string\\\",\\\"key\\\":\\\"name\\\",\\\"displayName\\\":\\\"Name\\\",\\\"description\\\":\\\"The customer name\\\",\\\"prompt\\\":\\\"Name is always the first word in the document\\\"},{\\\"type\\\":\\\"date\\\",\\\"key\\\":\\\"last_contacted_at\\\",\\\"displayName\\\":\\\"Last Contacted At\\\",\\\"description\\\":\\\"When this customer was last contacted at\\\"}]"
+          },
+          "items": {
+            "type": "array",
+            "description": "The items to be processed by the LLM, often files.",
+            "minItems": 1,
+            "maxItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "$ref": "#/components/schemas/AiItem--Base"
+            }
+          },
+          "ai_agent": {
+            "$ref": "#/components/schemas/AiAgentExtract"
+          }
+        },
+        "description": "AI Extract request object."
       },
       "PostOAuth2Token": {
         "title": "Token request",
@@ -24767,6 +25450,174 @@
             "format": "token",
             "description": "The access token to revoke.",
             "example": "n22JPxrh18m4Y0wIZPIqYZK7VRrsMTWW"
+          }
+        }
+      },
+      "DocgenTemplateCreateRequest": {
+        "title": "Marking file as Docgen Template",
+        "type": "object",
+        "description": "The schema for marking document as Docgen Template.",
+        "required": [
+          "file"
+        ],
+        "properties": {
+          "file": {
+            "allOf": [
+              {
+                "title": "File reference",
+                "type": "object",
+                "description": "File reference",
+                "required": [
+                  "type",
+                  "id"
+                ],
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "description": "`file`",
+                    "example": "file",
+                    "enum": [
+                      "file"
+                    ],
+                    "nullable": false
+                  },
+                  "id": {
+                    "description": "ID of the object",
+                    "type": "string",
+                    "example": "42037322"
+                  }
+                }
+              },
+              {
+                "description": "Enable the file to create a docgen document from."
+              }
+            ]
+          }
+        }
+      },
+      "DocgenBatchCreateRequest": {
+        "title": "Create batch request",
+        "type": "object",
+        "description": "The schema for Docgen Document Generation post job request.",
+        "required": [
+          "file",
+          "input_source",
+          "destination_folder",
+          "output_type",
+          "document_generation_data"
+        ],
+        "properties": {
+          "file": {
+            "allOf": [
+              {
+                "title": "File reference",
+                "type": "object",
+                "description": "File reference",
+                "required": [
+                  "type",
+                  "id"
+                ],
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "description": "`file`",
+                    "example": "file",
+                    "enum": [
+                      "file"
+                    ],
+                    "nullable": false
+                  },
+                  "id": {
+                    "description": "ID of the object",
+                    "type": "string",
+                    "example": "42037322"
+                  }
+                }
+              },
+              {
+                "description": "Template file."
+              }
+            ]
+          },
+          "file_version": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FileVersion--Base"
+              },
+              {
+                "description": "File version of a template."
+              }
+            ]
+          },
+          "input_source": {
+            "type": "string",
+            "description": "source of input.",
+            "example": "api"
+          },
+          "destination_folder": {
+            "allOf": [
+              {
+                "title": "Folder reference",
+                "type": "object",
+                "description": "Folder reference",
+                "required": [
+                  "type",
+                  "id"
+                ],
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "description": "`folder`",
+                    "example": "folder",
+                    "enum": [
+                      "folder"
+                    ],
+                    "nullable": false
+                  },
+                  "id": {
+                    "description": "ID of the folder",
+                    "type": "string",
+                    "example": "42037322"
+                  }
+                }
+              },
+              {
+                "description": "Destination folder for generated files."
+              }
+            ]
+          },
+          "output_type": {
+            "type": "string",
+            "description": "Type of the output file.",
+            "example": "docx"
+          },
+          "document_generation_data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DocgenDocumentGenerationData"
+            }
+          }
+        }
+      },
+      "DocgenDocumentGenerationData": {
+        "title": "Document generation data",
+        "type": "object",
+        "description": "The schema for Docgen Document Generation post job request.",
+        "required": [
+          "generated_file_name",
+          "user_input"
+        ],
+        "properties": {
+          "generated_file_name": {
+            "type": "string",
+            "example": "New_Template",
+            "description": "File name of the output file"
+          },
+          "user_input": {
+            "type": "object",
+            "example": {
+              "name": "Aaron Levie"
+            }
           }
         }
       },
@@ -25041,50 +25892,39 @@
         ]
       },
       "IntegrationMappingSlackCreateRequest": {
-        "title": "Create Slack integration mapping request",
+        "title": "Create integration mapping request",
         "type": "object",
         "x-box-resource-id": "integration_mapping_slack_create_request",
         "description": "A request to create a\nSlack Integration Mapping object",
-        "allOf": [
-          {
-            "type": "object",
-            "properties": {
-              "box_item": {
-                "allOf": [
-                  {
-                    "$ref": "#/components/schemas/IntegrationMappingBoxItemSlack"
-                  }
-                ],
-                "nullable": false
-              },
-              "options": {
-                "allOf": [
-                  {
-                    "$ref": "#/components/schemas/IntegrationMappingSlackOptions"
-                  }
-                ],
-                "nullable": false
+        "properties": {
+          "partner_item": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/IntegrationMappingPartnerItemSlack"
               }
-            },
-            "required": [
-              "box_item"
-            ]
+            ],
+            "nullable": false
           },
-          {
-            "properties": {
-              "partner_item": {
-                "allOf": [
-                  {
-                    "$ref": "#/components/schemas/IntegrationMappingPartnerItemSlack"
-                  }
-                ],
-                "nullable": false
+          "box_item": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/IntegrationMappingBoxItemSlack"
               }
-            }
+            ],
+            "nullable": false
+          },
+          "options": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/IntegrationMappingSlackOptions"
+              }
+            ],
+            "nullable": false
           }
-        ],
+        },
         "required": [
-          "partner_item"
+          "partner_item",
+          "box_item"
         ]
       },
       "ClientError": {
@@ -25562,118 +26402,280 @@
           }
         }
       },
-      "IntegrationMappingTeams": {
-        "title": "Integration mapping Teams",
+      "DocgenBatch--Base": {
+        "title": "Docgen Batch (Base)",
         "type": "object",
-        "x-box-resource-id": "integration_mapping_teams",
-        "x-box-tag": "integration_mappings",
-        "x-box-variant": "standard",
-        "description": "A Microsoft Teams specific representation of an integration\nmapping object.",
+        "x-box-resource-id": "docgen_batch--base",
+        "x-box-tag": "files",
+        "x-box-variants": [
+          "base",
+          "standard"
+        ],
+        "x-box-variant": "base",
+        "description": "The bare basic representation of a docgen batch",
+        "required": [
+          "id",
+          "type"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "nullable": false,
+            "description": "The unique identifier that represent a batch.",
+            "example": "12345"
+          },
+          "type": {
+            "type": "string",
+            "description": "`docgen_batch`",
+            "example": "docgen_batch",
+            "enum": [
+              "docgen_batch"
+            ],
+            "nullable": false
+          }
+        }
+      },
+      "DocgenJob": {
+        "title": "Document generation batch job details",
+        "type": "object",
+        "description": "The schema is used in get Document Generation Batch jobs",
+        "x-box-resource-id": "docgen_job",
+        "x-box-tag": "docgen",
+        "required": [
+          "id",
+          "batch",
+          "template_file",
+          "template_file_version",
+          "status",
+          "output_type"
+        ],
         "allOf": [
           {
-            "$ref": "#/components/schemas/IntegrationMapping--Base"
+            "$ref": "#/components/schemas/DocgenJob--Base"
           },
           {
-            "type": "object",
             "properties": {
-              "box_item": {
+              "batch": {
                 "allOf": [
                   {
-                    "$ref": "#/components/schemas/Folder--Mini"
-                  }
-                ],
-                "description": "The Box folder, to which the object from the\npartner app domain (referenced in `partner_item_id`) is mapped",
-                "nullable": false
-              },
-              "is_manually_created": {
-                "type": "boolean",
-                "example": true,
-                "description": "Identifies whether the mapping has\nbeen manually set\n(as opposed to being automatically created)",
-                "nullable": false
-              },
-              "options": {
-                "nullable": false,
-                "allOf": [
+                    "$ref": "#/components/schemas/DocgenBatch--Base"
+                  },
                   {
-                    "$ref": "#/components/schemas/IntegrationMappingSlackOptions"
+                    "description": "Docgen Batch that job belongs to."
                   }
                 ]
+              },
+              "template_file": {
+                "allOf": [
+                  {
+                    "title": "File reference",
+                    "type": "object",
+                    "description": "File reference",
+                    "required": [
+                      "type",
+                      "id"
+                    ],
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "description": "`file`",
+                        "example": "file",
+                        "enum": [
+                          "file"
+                        ],
+                        "nullable": false
+                      },
+                      "id": {
+                        "description": "ID of the object",
+                        "type": "string",
+                        "example": "42037322"
+                      }
+                    }
+                  },
+                  {
+                    "description": "Docgen template used in the job."
+                  }
+                ]
+              },
+              "template_file_version": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/FileVersion--Base"
+                  },
+                  {
+                    "description": "File version of a template."
+                  }
+                ]
+              },
+              "output_file": {
+                "nullable": true,
+                "description": "The output file of the job.",
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "description": "`file`",
+                    "example": "file",
+                    "enum": [
+                      "file"
+                    ]
+                  },
+                  "id": {
+                    "description": "ID of the object",
+                    "type": "string",
+                    "example": "42037322"
+                  }
+                }
+              },
+              "output_file_version": {
+                "nullable": true,
+                "description": "File version of generated file.",
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "description": "`file_version`",
+                    "example": "file_version",
+                    "enum": [
+                      "file_version"
+                    ]
+                  },
+                  "id": {
+                    "description": "ID of the object",
+                    "type": "string",
+                    "example": "42037322"
+                  }
+                }
+              },
+              "status": {
+                "type": "string",
+                "description": "Status of the job.",
+                "enum": [
+                  "submitted",
+                  "completed",
+                  "failed",
+                  "completed_with_error",
+                  "pending"
+                ],
+                "example": "completed"
+              },
+              "output_type": {
+                "type": "string",
+                "description": "Type of the generated file.",
+                "example": "docx"
+              }
+            }
+          }
+        ]
+      },
+      "DocgenJob--Base": {
+        "title": "Docgen Job (Base)",
+        "type": "object",
+        "x-box-resource-id": "docgen_job--base",
+        "x-box-tag": "docgen",
+        "x-box-variants": [
+          "base",
+          "standard",
+          "full"
+        ],
+        "x-box-variant": "base",
+        "description": "The bare basic representation of a docgen job",
+        "required": [
+          "id",
+          "type"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "nullable": false,
+            "description": "The unique identifier that represent a docgen job.",
+            "example": "12345"
+          },
+          "type": {
+            "type": "string",
+            "description": "`docgen_job`",
+            "example": "docgen_job",
+            "enum": [
+              "docgen_job"
+            ],
+            "nullable": false
+          }
+        }
+      },
+      "DocgenJob--Full": {
+        "title": "Docgen Job (Full)",
+        "description": "The schema is to get a job",
+        "type": "object",
+        "x-box-resource-id": "docgen_job--full",
+        "x-box-tag": "docgen",
+        "required": [
+          "id",
+          "batch",
+          "created_by",
+          "enterprise",
+          "template_file",
+          "template_file_version",
+          "output_type",
+          "source",
+          "user_input",
+          "status"
+        ],
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/DocgenJob"
+          },
+          {
+            "properties": {
+              "created_at": {
+                "type": "string",
+                "readOnly": true,
+                "description": "Time of creation.",
+                "example": "2022-05-11T10:56:11-07:00"
               },
               "created_by": {
                 "allOf": [
                   {
-                    "$ref": "#/components/schemas/UserIntegrationMappings"
-                  }
-                ],
-                "description": "An object representing the user who\ncreated the integration mapping",
-                "nullable": false
-              },
-              "modified_by": {
-                "allOf": [
+                    "$ref": "#/components/schemas/User--Base"
+                  },
                   {
-                    "$ref": "#/components/schemas/UserIntegrationMappings"
+                    "description": "User who created the job"
                   }
-                ],
-                "description": "The user who\nlast modified the integration mapping",
-                "nullable": false
-              },
-              "created_at": {
-                "type": "string",
-                "format": "date-time",
-                "description": "When the integration mapping object was created",
-                "example": "2012-12-12T10:53:43-08:00",
-                "nullable": false
-              },
-              "modified_at": {
-                "type": "string",
-                "format": "date-time",
-                "description": "When the integration mapping object was last modified",
-                "example": "2012-12-12T10:53:43-08:00",
-                "nullable": false
-              }
-            },
-            "required": [
-              "box_item"
-            ]
-          },
-          {
-            "properties": {
-              "integration_type": {
-                "type": "string",
-                "nullable": false,
-                "description": "Identifies the Box partner app,\nwith which the mapping is associated.\nSupports Slack and Teams.\n(part of the composite key together with `id`)",
-                "example": "teams",
-                "enum": [
-                  "teams"
                 ]
               },
-              "partner_item": {
-                "oneOf": [
+              "enterprise": {
+                "allOf": [
                   {
-                    "$ref": "#/components/schemas/IntegrationMappingPartnerItemTeams"
+                    "$ref": "#/components/schemas/Enterprise--Base"
+                  },
+                  {
+                    "description": "Id of enterprise"
                   }
-                ],
-                "nullable": false,
+                ]
+              },
+              "source": {
+                "type": "string",
+                "readOnly": true,
+                "description": "Source of the request.",
+                "example": "api"
+              },
+              "user_input": {
+                "type": "object",
+                "description": "User details to fill tags.",
+                "readOnly": true,
                 "example": {
-                  "id": "C12378991223",
-                  "type": "channel",
-                  "tenant_id": "E1234567"
-                },
-                "description": "Mapped item object for Slack or Teams"
+                  "name": "Aaron Levie"
+                }
               }
             }
           }
-        ],
-        "required": [
-          "partner_item"
         ]
       },
-      "IntegrationMappingsTeams": {
-        "title": "Integration mappings Teams",
+      "DocgenJobs": {
+        "title": "Docgen jobs",
         "type": "object",
-        "x-box-resource-id": "integration_mappings_teams",
-        "x-box-tag": "integration_mappings",
-        "description": "A list of integration mapping\nobjects.",
+        "description": "The schema for a list of jobs, used for get template jobs and get batch jobs",
+        "x-box-tag": "docgen",
+        "x-box-resource-id": "docgen_jobs",
         "allOf": [
           {
             "type": "object",
@@ -25690,6 +26692,12 @@
                 "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
                 "type": "string",
                 "nullable": true
+              },
+              "prev_marker": {
+                "description": "The marker for the start of the previous page of results.",
+                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVih",
+                "type": "string",
+                "nullable": true
               }
             }
           },
@@ -25697,14 +26705,263 @@
             "properties": {
               "entries": {
                 "type": "array",
-                "description": "A list of integration mappings",
+                "description": "List of jobs.",
                 "items": {
-                  "$ref": "#/components/schemas/IntegrationMappingTeams"
+                  "$ref": "#/components/schemas/DocgenJob"
                 }
               }
             }
           }
         ]
+      },
+      "DocgenJobs--Full": {
+        "title": "Docgen jobs",
+        "type": "object",
+        "description": "The schema is for a more details list of jobs used for get Jobs for user",
+        "x-box-tag": "docgen",
+        "x-box-resource-id": "docgen_jobs--full",
+        "allOf": [
+          {
+            "type": "object",
+            "description": "The part of an API response that describes marker\nbased pagination",
+            "properties": {
+              "limit": {
+                "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
+                "example": 1000,
+                "type": "integer",
+                "format": "int64"
+              },
+              "next_marker": {
+                "description": "The marker for the start of the next page of results.",
+                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                "type": "string",
+                "nullable": true
+              },
+              "prev_marker": {
+                "description": "The marker for the start of the previous page of results.",
+                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVih",
+                "type": "string",
+                "nullable": true
+              }
+            }
+          },
+          {
+            "properties": {
+              "entries": {
+                "type": "array",
+                "description": "List of jobs.",
+                "items": {
+                  "$ref": "#/components/schemas/DocgenJob--Full"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "DocgenTemplate--Base": {
+        "title": "Docgen Template (Base)",
+        "type": "object",
+        "x-box-resource-id": "docgen_template--base",
+        "x-box-variants": [
+          "base",
+          "standard"
+        ],
+        "x-box-variant": "base",
+        "description": "A base representation of a docgen template, used when\nnested within another resource.",
+        "properties": {
+          "file": {
+            "allOf": [
+              {
+                "title": "File reference",
+                "type": "object",
+                "description": "File reference",
+                "required": [
+                  "type",
+                  "id"
+                ],
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "description": "`file`",
+                    "example": "file",
+                    "enum": [
+                      "file"
+                    ],
+                    "nullable": false
+                  },
+                  "id": {
+                    "description": "ID of the object",
+                    "type": "string",
+                    "example": "42037322"
+                  }
+                }
+              },
+              {
+                "description": "Enable the file to generate a document from."
+              }
+            ]
+          }
+        }
+      },
+      "DocgenTemplate": {
+        "title": "Docgen template",
+        "type": "object",
+        "description": "A docgen template object",
+        "x-box-tag": "docgen",
+        "x-box-resource-id": "docgen_template",
+        "x-box-variant": "standard",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/DocgenTemplate--Base"
+          },
+          {
+            "properties": {
+              "file_name": {
+                "type": "string",
+                "nullable": true,
+                "example": "Official contract",
+                "description": "The name of the template"
+              }
+            }
+          }
+        ]
+      },
+      "DocgenTemplates": {
+        "title": "Docgen templates",
+        "type": "object",
+        "description": "List of docgen templates.",
+        "x-box-tag": "docgen",
+        "x-box-resource-id": "docgen_templates",
+        "allOf": [
+          {
+            "type": "object",
+            "description": "The part of an API response that describes marker\nbased pagination",
+            "properties": {
+              "limit": {
+                "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
+                "example": 1000,
+                "type": "integer",
+                "format": "int64"
+              },
+              "next_marker": {
+                "description": "The marker for the start of the next page of results.",
+                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                "type": "string",
+                "nullable": true
+              },
+              "prev_marker": {
+                "description": "The marker for the start of the previous page of results.",
+                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVih",
+                "type": "string",
+                "nullable": true
+              }
+            }
+          },
+          {
+            "properties": {
+              "entries": {
+                "type": "array",
+                "description": "A list of templates.",
+                "items": {
+                  "$ref": "#/components/schemas/DocgenTemplate"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "DocgenTags": {
+        "title": "Docgen Tags",
+        "type": "object",
+        "description": "The schema for a list of tags, used for get template tags",
+        "x-box-tag": "docgen_tag",
+        "x-box-resource-id": "docgen_tags",
+        "allOf": [
+          {
+            "type": "object",
+            "description": "The part of an API response that describes marker\nbased pagination",
+            "properties": {
+              "limit": {
+                "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
+                "example": 1000,
+                "type": "integer",
+                "format": "int64"
+              },
+              "next_marker": {
+                "description": "The marker for the start of the next page of results.",
+                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                "type": "string",
+                "nullable": true
+              },
+              "prev_marker": {
+                "description": "The marker for the start of the previous page of results.",
+                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVih",
+                "type": "string",
+                "nullable": true
+              }
+            }
+          },
+          {
+            "properties": {
+              "entries": {
+                "type": "array",
+                "description": "List of tags.",
+                "items": {
+                  "$ref": "#/components/schemas/DocgenTag"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "DocgenTag": {
+        "title": "Document template tag details",
+        "type": "object",
+        "description": "The schema is used in get Document Template Tags",
+        "x-box-resource-id": "docgen_tag",
+        "x-box-sanitized": true,
+        "x-box-tag": "docgen",
+        "required": [
+          "tag_content",
+          "tag_type",
+          "json_paths"
+        ],
+        "properties": {
+          "tag_content": {
+            "readOnly": true,
+            "description": "The content of the tag.",
+            "type": "string",
+            "example": "{{item.name}}"
+          },
+          "tag_type": {
+            "readOnly": true,
+            "description": "Type of the tag.",
+            "type": "string",
+            "example": "text",
+            "enum": [
+              "text",
+              "arithmetic",
+              "conditional",
+              "for-loop",
+              "table-loop",
+              "image"
+            ]
+          },
+          "json_paths": {
+            "readOnly": true,
+            "type": "array",
+            "example": [
+              "products",
+              "products.name"
+            ],
+            "description": "List of the paths.",
+            "items": {
+              "readOnly": true,
+              "type": "string",
+              "example": "products.name"
+            }
+          }
+        }
       },
       "AccessToken": {
         "title": "Access token",
@@ -25823,6 +27080,13 @@
         ],
         "description": "AI ask response"
       },
+      "AiExtractResponse": {
+        "title": "AI extract response",
+        "type": "object",
+        "x-box-resource-id": "ai_extract_response",
+        "x-box-tag": "ai",
+        "description": "AI extract response.\nThe content of this response may vary depending on\nthe requested configuration."
+      },
       "AiAgentAsk": {
         "title": "AI agent for question requests",
         "type": "object",
@@ -25879,6 +27143,60 @@
           }
         },
         "description": "The AI agent used for generating text."
+      },
+      "AiAgentExtract": {
+        "title": "AI agent for extract requests",
+        "type": "object",
+        "x-box-tag": "ai",
+        "x-box-resource-id": "ai_agent_extract",
+        "required": [
+          "type"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "ai_agent_extract"
+            ],
+            "description": "The type of AI agent to be used for extraction.",
+            "example": "ai_agent_extract",
+            "nullable": false
+          },
+          "long_text": {
+            "$ref": "#/components/schemas/AiAgentLongTextTool"
+          },
+          "basic_text": {
+            "$ref": "#/components/schemas/AiAgentBasicTextToolExtract"
+          }
+        },
+        "description": "The AI Agent to be used for extraction."
+      },
+      "AiAgentExtractStructured": {
+        "title": "AI agent for structured extract request",
+        "type": "object",
+        "x-box-tag": "ai",
+        "x-box-resource-id": "ai_agent_extract_structured",
+        "required": [
+          "type"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "ai_agent_extract_structured"
+            ],
+            "description": "The type of AI agent to be used for extraction.",
+            "example": "ai_agent_extract_structured",
+            "nullable": false
+          },
+          "long_text": {
+            "$ref": "#/components/schemas/AiAgentLongTextTool"
+          },
+          "basic_text": {
+            "$ref": "#/components/schemas/AiAgentBasicTextToolExtract"
+          }
+        },
+        "description": "The AI Agent to be used for structured extraction."
       },
       "Classification": {
         "title": "Classification",
@@ -29946,19 +31264,36 @@
         }
       },
       "IntegrationMapping": {
-        "title": "Integration mapping Slack",
+        "title": "Integration mapping",
         "type": "object",
-        "x-box-resource-id": "integration_mapping_slack",
+        "x-box-resource-id": "integration_mapping",
         "x-box-tag": "integration_mappings",
         "x-box-variant": "standard",
-        "description": "A Slack specific representation of an integration\nmapping object.",
+        "description": "A standard representation of an integration\nmapping object.",
         "allOf": [
           {
             "$ref": "#/components/schemas/IntegrationMapping--Base"
           },
           {
-            "type": "object",
             "properties": {
+              "type": {
+                "type": "string",
+                "example": "integration_mapping",
+                "enum": [
+                  "integration_mapping"
+                ],
+                "description": "Mapping type",
+                "nullable": false
+              },
+              "partner_item": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/IntegrationMappingPartnerItemSlack"
+                  }
+                ],
+                "nullable": false,
+                "description": "Mapped item object for Slack"
+              },
               "box_item": {
                 "allOf": [
                   {
@@ -29975,8 +31310,11 @@
                 "nullable": false
               },
               "options": {
+                "type": "object",
                 "nullable": false,
-                "allOf": [
+                "example": {},
+                "description": "Integration mapping options for Slack",
+                "anyOf": [
                   {
                     "$ref": "#/components/schemas/IntegrationMappingSlackOptions"
                   }
@@ -30014,41 +31352,13 @@
                 "example": "2012-12-12T10:53:43-08:00",
                 "nullable": false
               }
-            },
-            "required": [
-              "box_item"
-            ]
-          },
-          {
-            "properties": {
-              "integration_type": {
-                "type": "string",
-                "nullable": false,
-                "description": "Identifies the Box partner app,\nwith which the mapping is associated.\nCurrently only supports Slack.\n(part of the composite key together with `id`)",
-                "example": "slack",
-                "enum": [
-                  "slack"
-                ]
-              },
-              "partner_item": {
-                "oneOf": [
-                  {
-                    "$ref": "#/components/schemas/IntegrationMappingPartnerItemSlack"
-                  }
-                ],
-                "nullable": false,
-                "example": {
-                  "id": "C12378991223",
-                  "type": "channel",
-                  "slack_org_id": "E1234567"
-                },
-                "description": "Mapped item object for Slack or Teams"
-              }
             }
           }
         ],
         "required": [
-          "partner_item"
+          "type",
+          "partner_item",
+          "box_item"
         ]
       },
       "IntegrationMapping--Base": {
@@ -30070,25 +31380,68 @@
             "example": "12345",
             "description": "A unique identifier of a folder mapping\n(part of a composite key together\nwith `integration_type`)"
           },
-          "type": {
+          "integration_type": {
             "type": "string",
-            "example": "integration_mapping",
+            "nullable": false,
+            "description": "Identifies the Box partner app,\nwith which the mapping is associated.\nCurrently only supports Slack.\n(part of the composite key together with `id`)",
+            "example": "slack",
             "enum": [
-              "integration_mapping"
-            ],
-            "description": "Mapping type",
-            "nullable": false
+              "slack"
+            ]
           }
-        },
-        "required": [
-          "id",
-          "type"
+        }
+      },
+      "IntegrationMapping--Mini": {
+        "title": "Integration mapping (Mini)",
+        "type": "object",
+        "x-box-resource-id": "integration_mapping--mini",
+        "x-box-tag": "integration_mappings",
+        "x-box-variant": "mini",
+        "description": "A mini representation of an\nintegration mapping object.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/IntegrationMapping--Base"
+          },
+          {
+            "properties": {
+              "partner_item_id": {
+                "type": "string",
+                "example": "C12351346",
+                "description": "ID of the mapped partner item",
+                "nullable": false
+              },
+              "partner_item_type": {
+                "type": "string",
+                "example": "channel",
+                "enum": [
+                  "channel"
+                ],
+                "description": "Domain-specific type of the mapped partner item",
+                "nullable": false
+              },
+              "box_item_id": {
+                "type": "string",
+                "example": "123124351",
+                "description": "ID of the Box item mapped to the object referenced in `partner_item_id`",
+                "nullable": false
+              },
+              "box_item_type": {
+                "type": "string",
+                "example": "folder",
+                "enum": [
+                  "folder"
+                ],
+                "description": "Type of the Box object referenced in `box_item_id`",
+                "nullable": false
+              }
+            }
+          }
         ]
       },
       "IntegrationMappings": {
-        "title": "Integration mappings Slack",
+        "title": "Integration mappings",
         "type": "object",
-        "x-box-resource-id": "integration_mappings_slack",
+        "x-box-resource-id": "integration_mappings",
         "x-box-tag": "integration_mappings",
         "description": "A list of integration mapping\nobjects.",
         "allOf": [
@@ -34074,17 +35427,6 @@
                 "description": "If provided, this value points signers that are assigned the same inputs and belongs to same signer group.\nA signer group is not a Box Group. It is an entity that belongs to the template itself and can only be used\nwithin Box Sign requests created from it.",
                 "example": "cd4ff89-8fc1-42cf-8b29-1890dedd26d7",
                 "nullable": true
-              },
-              "label": {
-                "type": "string",
-                "description": "A placeholder label for the signer set by the template creator to differentiate between signers.",
-                "example": "Jane Doe",
-                "nullable": true
-              },
-              "public_id": {
-                "type": "string",
-                "description": "An identifier for the signer. This can be used to identify a signer within the template.",
-                "example": "RJZYYVPR"
               }
             }
           }
@@ -37658,39 +39000,38 @@
           }
         ]
       },
-      "IntegrationMappingPartnerItemTeams": {
-        "title": "Integration mapping mapped item schema for type Teams",
+      "AiItem--Base": {
+        "title": "AI Item (Base)",
         "type": "object",
-        "description": "The schema for an integration mapping mapped item object for type Teams.",
-        "properties": {
-          "type": {
-            "type": "string",
-            "enum": [
-              "channel",
-              "team"
-            ],
-            "example": "channel",
-            "description": "Type of the mapped item referenced in `id`",
-            "nullable": false
-          },
-          "id": {
-            "type": "string",
-            "example": "C12378991223",
-            "description": "ID of the mapped item (of type referenced in `type`)",
-            "nullable": false
-          },
-          "tenant_id": {
-            "type": "string",
-            "example": "abcd-defg-1235-7890",
-            "description": "ID of the tenant that is registered with Microsoft Teams.",
-            "nullable": false
-          }
-        },
         "required": [
           "id",
-          "type",
-          "tenant_id"
-        ]
+          "type"
+        ],
+        "x-box-variants": [
+          "base"
+        ],
+        "x-box-variant": "base",
+        "description": "The item to be processed by the LLM.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The id of the item.",
+            "example": "123"
+          },
+          "type": {
+            "type": "string",
+            "description": "The type of the item.",
+            "enum": [
+              "file"
+            ],
+            "example": "file"
+          },
+          "content": {
+            "type": "string",
+            "description": "The content of the item, often the text representation.",
+            "example": "This is file content."
+          }
+        }
       },
       "AiAgentBasicTextToolAsk": {
         "title": "AI agent basic text tool",
@@ -37780,6 +39121,47 @@
         },
         "description": "AI agent tool used to handle basic text."
       },
+      "AiAgentBasicTextToolExtract": {
+        "title": "AI agent basic text tool",
+        "type": "object",
+        "x-box-tag": "ai",
+        "properties": {
+          "model": {
+            "type": "string",
+            "description": "The model used for the AI Agent for basic text.",
+            "example": "openai__gpt_3_5_turbo"
+          },
+          "system_message": {
+            "type": "string",
+            "description": "System messages try to help the LLM \"understand\" its role and what it is supposed to do.",
+            "example": "You are a helpful travel assistant specialized in budget travel"
+          },
+          "prompt_template": {
+            "type": "string",
+            "description": "The prompt template contains contextual information of the request and the user prompt. \n\nWhen passing `prompt_template` parameters, you **must include** inputs for `{current_date}`, `{user_question}`, and `{content}`.",
+            "example": "It is `{current_date}`, and I have $8000 and want to spend a week in the Azores. What should I see?",
+            "maxLength": 10000
+          },
+          "num_tokens_for_completion": {
+            "type": "integer",
+            "description": "The number of tokens for completion.",
+            "example": 8400,
+            "minimum": 1
+          },
+          "llm_endpoint_params": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AiLlmEndpointParamsOpenAi"
+              },
+              {
+                "$ref": "#/components/schemas/AiLlmEndpointParamsGoogle"
+              }
+            ],
+            "description": "The parameters for the LLM endpoint specific to OpenAI / Google models."
+          }
+        },
+        "description": "AI agent tool used to handle basic text."
+      },
       "AiAgentLongTextTool": {
         "title": "AI agent long text tool",
         "type": "object",
@@ -37863,24 +39245,21 @@
             "description": "The temperature is used for sampling during response generation, which occurs when `top-P` and `top-K` are applied. \nTemperature controls the degree of randomness in token selection.",
             "example": 0,
             "minimum": 0,
-            "maximum": 2,
-            "nullable": true
+            "maximum": 2
           },
           "top_p": {
             "type": "number",
             "description": "`Top-P` changes how the model selects tokens for output. Tokens are selected from the most (see `top-K`) to least probable\nuntil the sum of their probabilities equals the `top-P` value.",
             "example": 1,
             "minimum": 0.1,
-            "maximum": 2,
-            "nullable": true
+            "maximum": 2
           },
           "top_k": {
             "type": "number",
             "description": "`Top-K` changes how the model selects tokens for output. A `top-K` of 1 means the next selected token is\nthe most probable among all tokens in the model's vocabulary (also called greedy decoding),\nwhile a `top-K` of 3 means that the next token is selected from among the three most probable tokens by using temperature.",
             "example": 1,
             "minimum": 0.1,
-            "maximum": 2,
-            "nullable": true
+            "maximum": 2
           }
         },
         "description": "AI LLM endpoint params Google object"
@@ -37907,38 +39286,33 @@
             "description": "What sampling temperature to use, between 0 and 2. Higher values like 0.8 will make the output more random, \nwhile lower values like 0.2 will make it more focused and deterministic. \nWe generally recommend altering this or `top_p` but not both.",
             "example": 0,
             "minimum": 0,
-            "maximum": 2,
-            "nullable": true
+            "maximum": 2
           },
           "top_p": {
             "type": "number",
             "example": 1,
             "description": "An alternative to sampling with temperature, called nucleus sampling, where the model considers the results \nof the tokens with `top_p` probability mass. So 0.1 means only the tokens comprising the top 10% probability \nmass are considered. We generally recommend altering this or temperature but not both.",
             "minimum": 0.1,
-            "maximum": 1,
-            "nullable": true
+            "maximum": 1
           },
           "frequency_penalty": {
             "type": "number",
             "description": "Number between -2.0 and 2.0. Positive values penalize new tokens based on their existing frequency in the \ntext so far, decreasing the model's likelihood to repeat the same line verbatim.",
             "minimum": -2,
             "maximum": 2,
-            "example": 1.5,
-            "nullable": true
+            "example": 1.5
           },
           "presence_penalty": {
             "type": "number",
             "description": "Number between -2.0 and 2.0. Positive values penalize new tokens based on whether they appear in the text so far, \nincreasing the model's likelihood to talk about new topics.",
             "minimum": -2,
             "maximum": 2,
-            "example": 1.5,
-            "nullable": true
+            "example": 1.5
           },
           "stop": {
             "type": "string",
             "description": "Up to 4 sequences where the API will stop generating further tokens.",
-            "example": "<|im_end|>",
-            "nullable": true
+            "example": "<|im_end|>"
           }
         },
         "description": "AI LLM endpoint params OpenAI object."
@@ -39675,6 +41049,21 @@
       "name": "Terms of service user statuses",
       "description": "A set of endpoints used to\nmanage the status of terms of service\nfor a particular user.",
       "x-box-tag": "terms_of_service_user_statuses"
+    },
+    {
+      "name": "Docgen",
+      "description": "Docgen are used to generate documents\nusing a template.",
+      "x-box-tag": "docgen"
+    },
+    {
+      "name": "Docgen template",
+      "description": "Docgen are used to generate documents\nusing a template.",
+      "x-box-tag": "docgen_template"
+    },
+    {
+      "name": "Docgen tag",
+      "description": "Docgen tag",
+      "x-box-tag": "docgen_tag"
     },
     {
       "name": "Transfer folders",
