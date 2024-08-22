@@ -14,7 +14,7 @@
       "url": "http://www.apache.org/licenses/LICENSE-2.0"
     },
     "version": "2.0.0",
-    "x-box-commit-hash": "75e07a386e"
+    "x-box-commit-hash": "364d549be0"
   },
   "servers": [
     {
@@ -24179,20 +24179,20 @@
           "items": {
             "type": "array",
             "description": "The items to be processed by the LLM, often files.\nThe array can include **exactly one** element.\n\n**Note**: Box AI handles documents with text representations up to 1MB in size.\nIf the file size exceeds 1MB, the first 1MB of text representation will be processed.",
-            "required": [
-              "id",
-              "type"
-            ],
             "minItems": 1,
             "maxItems": 1,
             "uniqueItems": true,
             "items": {
+              "required": [
+                "id",
+                "type"
+              ],
               "type": "object",
               "description": "The item to be processed by the LLM.",
               "properties": {
                 "id": {
                   "type": "string",
-                  "description": "The id of the item.",
+                  "description": "The ID of the item.",
                   "example": "123"
                 },
                 "type": {
@@ -24213,7 +24213,7 @@
           },
           "dialogue_history": {
             "type": "array",
-            "description": "The history of prompts and answers previously passed to the LLM. This provides additional context to the LLM in generating the response.",
+            "description": "The history of prompts and answers previously passed to the LLM. This parameter provides the additional context to the LLM when generating the response.",
             "items": {
               "$ref": "#/components/schemas/AiDialogueHistory"
             }
@@ -24677,6 +24677,18 @@
         "description": "A request to create a\nSlack Integration Mapping object",
         "allOf": [
           {
+            "properties": {
+              "partner_item": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/IntegrationMappingPartnerItemSlack"
+                  }
+                ],
+                "nullable": false
+              }
+            }
+          },
+          {
             "type": "object",
             "properties": {
               "box_item": {
@@ -24699,18 +24711,6 @@
             "required": [
               "box_item"
             ]
-          },
-          {
-            "properties": {
-              "partner_item": {
-                "allOf": [
-                  {
-                    "$ref": "#/components/schemas/IntegrationMappingPartnerItemSlack"
-                  }
-                ],
-                "nullable": false
-              }
-            }
           }
         ],
         "required": [
@@ -25331,13 +25331,13 @@
             "$ref": "#/components/schemas/AiAgentLongTextTool"
           },
           "basic_text": {
-            "$ref": "#/components/schemas/AiAgentBasicTextToolAsk"
+            "$ref": "#/components/schemas/AiAgentBasicTextTool"
           },
           "long_text_multi": {
             "$ref": "#/components/schemas/AiAgentLongTextTool"
           },
           "basic_text_multi": {
-            "$ref": "#/components/schemas/AiAgentBasicTextToolAsk"
+            "$ref": "#/components/schemas/AiAgentBasicTextTool"
           }
         },
         "description": "The AI agent used to handle queries."
@@ -29432,15 +29432,42 @@
         }
       },
       "IntegrationMapping": {
-        "title": "Integration mapping",
+        "title": "Integration mapping Slack",
         "type": "object",
-        "x-box-resource-id": "integration_mapping",
+        "x-box-resource-id": "integration_mapping_slack",
         "x-box-tag": "integration_mappings",
         "x-box-variant": "standard",
         "description": "A Slack specific representation of an integration\nmapping object.",
         "allOf": [
           {
             "$ref": "#/components/schemas/IntegrationMapping--Base"
+          },
+          {
+            "properties": {
+              "integration_type": {
+                "type": "string",
+                "nullable": false,
+                "description": "Identifies the Box partner app,\nwith which the mapping is associated.\nCurrently only supports Slack.\n(part of the composite key together with `id`)",
+                "example": "slack",
+                "enum": [
+                  "slack"
+                ]
+              },
+              "partner_item": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/IntegrationMappingPartnerItemSlack"
+                  }
+                ],
+                "nullable": false,
+                "example": {
+                  "id": "C12378991223",
+                  "type": "channel",
+                  "slack_org_id": "E1234567"
+                },
+                "description": "Mapped item object for Slack or Teams"
+              }
+            }
           },
           {
             "type": "object",
@@ -29504,33 +29531,6 @@
             "required": [
               "box_item"
             ]
-          },
-          {
-            "properties": {
-              "integration_type": {
-                "type": "string",
-                "nullable": false,
-                "description": "Identifies the Box partner app,\nwith which the mapping is associated.\nCurrently only supports Slack.\n(part of the composite key together with `id`)",
-                "example": "slack",
-                "enum": [
-                  "slack"
-                ]
-              },
-              "partner_item": {
-                "oneOf": [
-                  {
-                    "$ref": "#/components/schemas/IntegrationMappingPartnerItemSlack"
-                  }
-                ],
-                "nullable": false,
-                "example": {
-                  "id": "C12378991223",
-                  "type": "channel",
-                  "slack_org_id": "E1234567"
-                },
-                "description": "Mapped item object for Slack or Teams"
-              }
-            }
           }
         ],
         "required": [
@@ -29572,9 +29572,9 @@
         ]
       },
       "IntegrationMappings": {
-        "title": "Integration mappings",
+        "title": "Integration mappings Slack",
         "type": "object",
-        "x-box-resource-id": "integration_mappings",
+        "x-box-resource-id": "integration_mappings_slack",
         "x-box-tag": "integration_mappings",
         "description": "A list of integration mapping\nobjects.",
         "allOf": [
@@ -33560,6 +33560,17 @@
                 "description": "If provided, this value points signers that are assigned the same inputs and belongs to same signer group.\nA signer group is not a Box Group. It is an entity that belongs to the template itself and can only be used\nwithin Box Sign requests created from it.",
                 "example": "cd4ff89-8fc1-42cf-8b29-1890dedd26d7",
                 "nullable": true
+              },
+              "label": {
+                "type": "string",
+                "description": "A placeholder label for the signer set by the template creator to differentiate between signers.",
+                "example": "Jane Doe",
+                "nullable": true
+              },
+              "public_id": {
+                "type": "string",
+                "description": "An identifier for the signer. This can be used to identify a signer within the template.",
+                "example": "RJZYYVPR"
               }
             }
           }
@@ -37133,7 +37144,7 @@
           }
         ]
       },
-      "AiAgentBasicTextToolAsk": {
+      "AiAgentBasicTextToolBase": {
         "title": "AI agent basic text tool",
         "type": "object",
         "x-box-tag": "ai",
@@ -37142,17 +37153,6 @@
             "type": "string",
             "description": "The model used for the AI Agent for basic text.",
             "example": "openai__gpt_3_5_turbo"
-          },
-          "system_message": {
-            "type": "string",
-            "description": "System messages try to help the LLM \"understand\" its role and what it is supposed to do.",
-            "example": "You are a helpful travel assistant specialized in budget travel"
-          },
-          "prompt_template": {
-            "type": "string",
-            "description": "The prompt template contains contextual information of the request and the user prompt. \n\nWhen passing `prompt_template` parameters, you **must include** inputs for `{current_date}`, `{user_question}`, and `{content}`.",
-            "example": "It is `{current_date}`, and I have $8000 and want to spend a week in the Azores. What should I see?",
-            "maxLength": 10000
           },
           "num_tokens_for_completion": {
             "type": "integer",
@@ -37174,54 +37174,102 @@
         },
         "description": "AI agent tool used to handle basic text."
       },
+      "AiAgentBasicTextTool": {
+        "title": "AI agent basic text tool",
+        "type": "object",
+        "x-box-tag": "ai",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AiAgentBasicTextToolBase"
+          },
+          {
+            "properties": {
+              "system_message": {
+                "type": "string",
+                "description": "System messages try to help the LLM \"understand\" its role and what it is supposed to do.",
+                "example": "You are a helpful travel assistant specialized in budget travel"
+              },
+              "prompt_template": {
+                "type": "string",
+                "description": "The prompt template contains contextual information of the request and the user prompt.\n\nWhen passing `prompt_template` parameters, you **must include** inputs for `{user_question}` and `{content}`.\n\nInput for `{current_date}` is optional, depending on the use.",
+                "example": "It is `{current_date}`, consider these travel options `{content}` and answer `{user_question}`",
+                "maxLength": 10000,
+                "pattern": "(\\{user_question\\}[\\s\\S]*?\\{content\\}|\\{content\\}[\\s\\S]*?\\{user_question\\})"
+              }
+            }
+          }
+        ],
+        "description": "AI agent tool used to handle basic text."
+      },
       "AiAgentBasicTextToolTextGen": {
         "title": "AI agent basic text tool",
         "type": "object",
         "x-box-tag": "ai",
-        "properties": {
-          "model": {
-            "type": "string",
-            "description": "The model to be used for the AI Agent for basic text.",
-            "example": "openai__gpt_3_5_turbo"
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AiAgentBasicTextToolBase"
           },
-          "system_message": {
-            "type": "string",
-            "description": "System messages try to help the LLM \"understand\" its role and what it is supposed to do.\nThis parameter requires using `{current_date}`.",
-            "example": "You are a helpful travel assistant specialized in budget travel"
-          },
-          "prompt_template": {
-            "type": "string",
-            "description": "The prompt template contains contextual information of the request and the user prompt.\n\nWhen using the `prompt_template` parameter, you **must include** input for `{user_question}`.\nInputs for  `{current_date}` and`{content}` are optional, depending on the use.",
-            "example": "It is `{current_date}`, and I have $8000 and want to spend a week in the Azores. What should I see?",
-            "maxLength": 10000
-          },
-          "num_tokens_for_completion": {
-            "type": "integer",
-            "description": "The number of tokens for completion.",
-            "example": 8400,
-            "minimum": 1
-          },
-          "llm_endpoint_params": {
-            "allOf": [
-              {
-                "oneOf": [
-                  {
-                    "$ref": "#/components/schemas/AiLlmEndpointParamsOpenAi"
-                  },
-                  {
-                    "$ref": "#/components/schemas/AiLlmEndpointParamsGoogle"
-                  }
-                ]
+          {
+            "properties": {
+              "system_message": {
+                "type": "string",
+                "description": "System messages try to help the LLM \"understand\" its role and what it is supposed to do.\nInput for `{current_date}` is optional, depending on the use.",
+                "example": "You are a helpful travel assistant specialized in budget travel"
               },
-              {
-                "description": "The parameters for the LLM endpoint specific to OpenAI / Google models."
+              "prompt_template": {
+                "type": "string",
+                "description": "The prompt template contains contextual information of the request and the user prompt.\n\nWhen using the `prompt_template` parameter, you **must include** input for `{user_question}`.\nInputs for `{current_date}` and `{content}` are optional, depending on the use.",
+                "example": "It is `{current_date}`, and I have $8000 and want to spend a week in the Azores. `{user_question}`",
+                "maxLength": 10000,
+                "pattern": "\\{user_question\\}"
               }
-            ]
+            }
           }
-        },
+        ],
         "description": "AI agent tool used to handle basic text."
       },
       "AiAgentLongTextTool": {
+        "title": "AI agent long text tool",
+        "type": "object",
+        "x-box-tag": "ai",
+        "description": "AI agent tool used to to handle longer text.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AiAgentBasicTextTool"
+          },
+          {
+            "properties": {
+              "embeddings": {
+                "type": "object",
+                "properties": {
+                  "model": {
+                    "type": "string",
+                    "example": "openai__text_embedding_ada_002",
+                    "description": "The model used for the AI Agent for calculating embeddings."
+                  },
+                  "strategy": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "description": "The strategy used for the AI Agent for calculating embeddings.",
+                        "example": "basic"
+                      },
+                      "num_tokens_per_chunk": {
+                        "type": "integer",
+                        "description": "The number of tokens per chunk.",
+                        "example": 64,
+                        "minimum": 1
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "AiAgentLongTextToolTextGen": {
         "title": "AI agent long text tool",
         "type": "object",
         "x-box-tag": "ai",
@@ -37268,13 +37316,13 @@
         "x-box-tag": "ai",
         "allOf": [
           {
-            "$ref": "#/components/schemas/AiAgentLongTextTool"
+            "$ref": "#/components/schemas/AiAgentLongTextToolTextGen"
           },
           {
             "properties": {
               "content_template": {
                 "type": "string",
-                "description": "How the content should be included in a request to the LLM.\nWhen passing this parameter, you must include `{content}`.",
+                "description": "How the content should be included in a request to the LLM.\nInput for `{content}` is optional, depending on the use.",
                 "example": "---{content}---"
               }
             }
