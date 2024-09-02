@@ -14,7 +14,7 @@
       "url": "http://www.apache.org/licenses/LICENSE-2.0"
     },
     "version": "2.0.0",
-    "x-box-commit-hash": "cbed5037e7"
+    "x-box-commit-hash": "24ce581001"
   },
   "servers": [
     {
@@ -926,6 +926,94 @@
           },
           "412": {
             "description": "Returns an error when the `If-Match` header does not match\nthe current `etag` value of the file. This indicates that the file\nhas changed since it was last requested.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/files/{file_id}/app_item_associations": {
+      "get": {
+        "operationId": "get_files_id_app_item_associations",
+        "summary": "List file app item associations",
+        "description": "**This is a beta feature, which means that its availability might be limited.**\nReturns all app items the file is associated with. This includes app items\nassociated with ancestors of the file. Assuming the context user has access\nto the file, the type/ids are revealed even if the context user does not\nhave **View** permission on the app item.",
+        "tags": [
+          "App item associations"
+        ],
+        "x-box-tag": "app_item_associations",
+        "parameters": [
+          {
+            "name": "file_id",
+            "description": "The unique identifier that represents a file.\n\nThe ID for any file can be determined\nby visiting a file in the web application\nand copying the ID from the URL. For example,\nfor the URL `https://*.app.box.com/files/123`\nthe `file_id` is `123`.",
+            "example": "12345",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "description": "The maximum number of items to return per page.",
+            "in": "query",
+            "required": false,
+            "example": 1000,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "maximum": 1000
+            }
+          },
+          {
+            "name": "marker",
+            "description": "Defines the position marker at which to begin returning results. This is\nused when paginating using marker-based pagination.\n\nThis requires `usemarker` to be set to `true`.",
+            "in": "query",
+            "required": false,
+            "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "application_type",
+            "description": "If given, only return app items for this application type",
+            "example": "hubs",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "nullable": false
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns a collection of app item objects. If there are no\napp items on this file, an empty collection will be returned.\nThis list includes app items on ancestors of this File.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppItemAssociations"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Returned if the file is not found, or the user does not\nhave access to the file.",
             "content": {
               "application/json": {
                 "schema": {
@@ -5525,6 +5613,95 @@
           },
           "503": {
             "description": "Returns an error when the operation takes longer\nthan 60 seconds. The operation will continue after\nthis response has been returned.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/folders/{folder_id}/app_item_associations": {
+      "get": {
+        "operationId": "get_folders_id_app_item_associations",
+        "summary": "List folder app item associations",
+        "description": "**This is a beta feature, which means that its availability might be limited.**\nReturns all app items the folder is associated with. This includes app items\nassociated with ancestors of the folder. Assuming the context user has access\nto the folder, the type/ids are revealed even if the context user does not\nhave **View** permission on the app item.",
+        "tags": [
+          "App item associations"
+        ],
+        "x-box-tag": "app_item_associations",
+        "parameters": [
+          {
+            "name": "folder_id",
+            "description": "The unique identifier that represent a folder.\n\nThe ID for any folder can be determined\nby visiting this folder in the web application\nand copying the ID from the URL. For example,\nfor the URL `https://*.app.box.com/folder/123`\nthe `folder_id` is `123`.\n\nThe root folder of a Box account is\nalways represented by the ID `0`.",
+            "example": "12345",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "nullable": false
+            }
+          },
+          {
+            "name": "limit",
+            "description": "The maximum number of items to return per page.",
+            "in": "query",
+            "required": false,
+            "example": 1000,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "maximum": 1000
+            }
+          },
+          {
+            "name": "marker",
+            "description": "Defines the position marker at which to begin returning results. This is\nused when paginating using marker-based pagination.\n\nThis requires `usemarker` to be set to `true`.",
+            "in": "query",
+            "required": false,
+            "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "application_type",
+            "description": "If given, returns only app items for this application type",
+            "example": "hubs",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "nullable": false
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns a collection of app item objects. If there are no\napp items on this folder an empty collection will be returned.\nThis list includes app items on ancestors of this folder.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppItemAssociations"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Returned if the folder is not found, or the user does not\nhave access to the folder.",
             "content": {
               "application/json": {
                 "schema": {
@@ -25359,6 +25536,143 @@
         },
         "description": "The AI agent used for generating text."
       },
+      "AppItem": {
+        "title": "App item",
+        "type": "object",
+        "x-box-tag": "app_item_associations",
+        "x-box-resource-id": "app_item_associations",
+        "description": "An app item represents an content object owned by an application. It can\ngroup files and folders together from different paths. That set can be shared\nvia a collaboration.",
+        "required": [
+          "id",
+          "type",
+          "application_type"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The unique identifier for this app item.",
+            "example": "12345678"
+          },
+          "type": {
+            "type": "string",
+            "description": "`app_item`",
+            "example": "app_item",
+            "enum": [
+              "app_item"
+            ]
+          },
+          "application_type": {
+            "type": "string",
+            "description": "The type of the app that owns this app item.",
+            "example": "hubs"
+          }
+        }
+      },
+      "AppItemAssociation": {
+        "title": "App item association",
+        "type": "object",
+        "x-box-tag": "app_item_associations",
+        "x-box-resource-id": "app_item_association",
+        "description": "An app item association represents an association between a file or\nfolder and an app item. Associations between a folder and an app item\ncascade down to all descendants of the folder.",
+        "required": [
+          "id",
+          "type",
+          "app_item",
+          "item"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The unique identifier for this app item association.",
+            "example": "12345678",
+            "nullable": false
+          },
+          "type": {
+            "type": "string",
+            "description": "`app_item_association`",
+            "example": "app_item_association",
+            "enum": [
+              "app_item_association"
+            ],
+            "nullable": false
+          },
+          "app_item": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AppItem"
+              },
+              {
+                "description": "The app item which is associated with the file or folder."
+              }
+            ],
+            "nullable": false
+          },
+          "item": {
+            "allOf": [
+              {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/File--Base"
+                  },
+                  {
+                    "$ref": "#/components/schemas/Folder--Base"
+                  },
+                  {
+                    "$ref": "#/components/schemas/WebLink--Base"
+                  }
+                ]
+              },
+              {
+                "description": "The file or folder which is associated with the app item."
+              }
+            ],
+            "nullable": false
+          }
+        }
+      },
+      "AppItemAssociations": {
+        "title": "App item associations",
+        "type": "object",
+        "x-box-tag": "app_item_associations",
+        "x-box-resource-id": "app_item_associations",
+        "description": "A list of app item associations",
+        "allOf": [
+          {
+            "type": "object",
+            "description": "The part of an API response that describes marker\nbased pagination",
+            "properties": {
+              "limit": {
+                "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
+                "example": 1000,
+                "type": "integer",
+                "format": "int64"
+              },
+              "next_marker": {
+                "description": "The marker for the start of the next page of results.",
+                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                "type": "string",
+                "nullable": true
+              },
+              "prev_marker": {
+                "description": "The marker for the start of the previous page of results.",
+                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVih",
+                "type": "string",
+                "nullable": true
+              }
+            }
+          },
+          {
+            "properties": {
+              "entries": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/AppItemAssociation"
+                }
+              }
+            }
+          }
+        ]
+      },
       "Classification": {
         "title": "Classification",
         "type": "object",
@@ -25614,7 +25928,18 @@
                 ]
               },
               {
-                "description": "The file or folder to which access is granted. The field is\n`null` when the collaboration `status` is `pending`."
+                "description": "The file or folder to which access is granted. The field is\n`null` when the collaboration `status` is `pending` or the\ncollaboration is created on an app item (see `app_item` field)."
+              }
+            ],
+            "nullable": true
+          },
+          "app_item": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AppItem"
+              },
+              {
+                "description": "An `app_item` to which access is granted. The field is `null`\nwhen the collaboration is created on an item (see `item`\nfield), or the `app_item` is inaccessible. The role cascades\nto all items associated with the `app_item`."
               }
             ],
             "nullable": true
@@ -27759,6 +28084,12 @@
                     "can_edit"
                   ]
                 }
+              },
+              "is_associated_with_app_item": {
+                "type": "boolean",
+                "example": true,
+                "nullable": false,
+                "description": "This field will return true if the file or any ancestor of the file\nis associated with at least one app item. Note that this will return\ntrue even if the context user does not have access to the app item(s)\nassociated with the file."
               }
             }
           }
@@ -29230,6 +29561,12 @@
                     "nullable": true
                   }
                 ]
+              },
+              "is_associated_with_app_item": {
+                "type": "boolean",
+                "example": true,
+                "nullable": false,
+                "description": "This field will return true if the folder or any ancestor of the\nfolder is associated with at least one app item. Note that this will\nreturn true even if the context user does not have access to the\napp item(s) associated with the folder."
               }
             }
           }
@@ -38891,6 +39228,10 @@
       "name": "AI",
       "description": "A set of endpoints used to\ninteract with supported LLMs.",
       "x-box-tag": "ai"
+    },
+    {
+      "name": "App item associations",
+      "x-box-tag": "app_item_associations"
     },
     {
       "name": "Authorization",
