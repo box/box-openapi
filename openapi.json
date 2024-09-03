@@ -14,7 +14,7 @@
             "url": "http://www.apache.org/licenses/LICENSE-2.0"
         },
         "version": "2.0.0",
-        "x-box-commit-hash": "75e07a386e"
+        "x-box-commit-hash": "24ce581001"
     },
     "servers": [
         {
@@ -926,6 +926,94 @@
                     },
                     "412": {
                         "description": "`If-Match`ヘッダーがファイルの現在の`etag`値と一致しない場合にエラーを返します。これは、ファイルが前回リクエストされたときから変更されていることを示します。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "予期しないクライアントエラー。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/files/{file_id}/app_item_associations": {
+            "get": {
+                "operationId": "get_files_id_app_item_associations",
+                "summary": "List file app item associations",
+                "description": "**This is a beta feature, which means that its availability might be limited.** Returns all app items the file is associated with. This includes app items associated with ancestors of the file. Assuming the context user has access to the file, the type/ids are revealed even if the context user does not have **View** permission on the app item.",
+                "tags": [
+                    "App item associations"
+                ],
+                "x-box-tag": "app_item_associations",
+                "parameters": [
+                    {
+                        "name": "file_id",
+                        "description": "ファイルを表す一意の識別子。\n\nファイルIDを確認するには、ウェブアプリケーションでファイルにアクセスして、URLからIDをコピーします。たとえば、URLが`https://*.app.box.com/files/123`の場合、`file_id`は`123`です。",
+                        "example": "12345",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "description": "返す項目の1ページあたりの最大数。",
+                        "in": "query",
+                        "required": false,
+                        "example": 1000,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64",
+                            "maximum": 1000
+                        }
+                    },
+                    {
+                        "name": "marker",
+                        "description": "結果が返される開始位置のマーカー。マーカーベースのページ割りを使用している場合に使用されます。\n\nこれを使用するには、`usemarker`を`true`に設定する必要があります。",
+                        "in": "query",
+                        "required": false,
+                        "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "application_type",
+                        "description": "If given, only return app items for this application type",
+                        "example": "hubs",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "nullable": false
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns a collection of app item objects. If there are no app items on this file, an empty collection will be returned. This list includes app items on ancestors of this File.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AppItemAssociations"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "ファイルが見つからない場合、またはユーザーにファイルへのアクセス権限が与えられていない場合に返されます。",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -5546,6 +5634,95 @@
                 }
             }
         },
+        "/folders/{folder_id}/app_item_associations": {
+            "get": {
+                "operationId": "get_folders_id_app_item_associations",
+                "summary": "List folder app item associations",
+                "description": "**This is a beta feature, which means that its availability might be limited.** Returns all app items the folder is associated with. This includes app items associated with ancestors of the folder. Assuming the context user has access to the folder, the type/ids are revealed even if the context user does not have **View** permission on the app item.",
+                "tags": [
+                    "App item associations"
+                ],
+                "x-box-tag": "app_item_associations",
+                "parameters": [
+                    {
+                        "name": "folder_id",
+                        "description": "フォルダを表す一意の識別子。\n\nフォルダIDを確認するには、ウェブアプリケーションでこのフォルダにアクセスして、URLからIDをコピーします。たとえば、URLが`https://*.app.box.com/folder/123`の場合、`folder_id`は`123`です。\n\nBoxアカウントのルートフォルダは常にID `0`で表されます。",
+                        "example": "12345",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "nullable": false
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "description": "返す項目の1ページあたりの最大数。",
+                        "in": "query",
+                        "required": false,
+                        "example": 1000,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64",
+                            "maximum": 1000
+                        }
+                    },
+                    {
+                        "name": "marker",
+                        "description": "結果が返される開始位置のマーカー。マーカーベースのページ割りを使用している場合に使用されます。\n\nこれを使用するには、`usemarker`を`true`に設定する必要があります。",
+                        "in": "query",
+                        "required": false,
+                        "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "application_type",
+                        "description": "If given, returns only app items for this application type",
+                        "example": "hubs",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "nullable": false
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns a collection of app item objects. If there are no app items on this folder an empty collection will be returned. This list includes app items on ancestors of this folder.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AppItemAssociations"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "フォルダが見つからない場合、またはユーザーにフォルダへのアクセス権限が与えられていない場合に返されます。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "予期しないクライアントエラー。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/folders/{folder_id}/items": {
             "get": {
                 "operationId": "get_folders_id_items",
@@ -6300,7 +6477,7 @@
                     "フォルダの分類"
                 ],
                 "x-box-tag": "folder_classifications",
-                "description": "フォルダに適用されている分類メタデータインスタンスを取得します。\n\nこのAPIは、`/folders/:id//enterprise_12345/securityClassification-6VMVochwUWo`のように、URLにEnterprise IDを明示的に含めることで呼び出すこともできます。",
+                "description": "フォルダに適用されている分類メタデータインスタンスを取得します。\n\nこのAPIは、`/folders/:id/enterprise_12345/securityClassification-6VMVochwUWo`のように、URLにEnterprise IDを明示的に含めることで呼び出すこともできます。",
                 "parameters": [
                     {
                         "name": "folder_id",
@@ -6374,7 +6551,7 @@
                     "フォルダの分類"
                 ],
                 "x-box-tag": "folder_classifications",
-                "description": "追加する分類のラベルを指定することで、フォルダに分類を追加します。\n\nこのAPIは、`/folders/:id//enterprise_12345/securityClassification-6VMVochwUWo`のように、URLにEnterprise IDを明示的に含めることで呼び出すこともできます。",
+                "description": "追加する分類のラベルを指定することで、フォルダに分類を追加します。\n\nこのAPIは、`/folders/:id/enterprise_12345/securityClassification-6VMVochwUWo`のように、URLにEnterprise IDを明示的に含めることで呼び出すこともできます。",
                 "parameters": [
                     {
                         "name": "folder_id",
@@ -6573,7 +6750,7 @@
                     "フォルダの分類"
                 ],
                 "x-box-tag": "folder_classifications",
-                "description": "フォルダからすべての分類を削除します。\n\nこのAPIは、`/folders/:id//enterprise_12345/securityClassification-6VMVochwUWo`のように、URLにEnterprise IDを明示的に含めることで呼び出すこともできます。",
+                "description": "フォルダからすべての分類を削除します。\n\nこのAPIは、`/folders/:id/enterprise_12345/securityClassification-6VMVochwUWo`のように、URLにEnterprise IDを明示的に含めることで呼び出すこともできます。",
                 "parameters": [
                     {
                         "name": "folder_id",
@@ -9783,14 +9960,7 @@
                         }
                     },
                     "204": {
-                        "description": "ロールが`owner`に変更されるとコラボレーションが削除されて、新しいコラボレーションが作成されます。古いコラボレーションの`owner`は、新しいコラボレーションの`co-owner`になります。",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Collaboration"
-                                }
-                            }
-                        }
+                        "description": "ロールが`owner`に変更されるとコラボレーションが削除されて、新しいコラボレーションが作成されます。古いコラボレーションの`owner`は、新しいコラボレーションの`co-owner`になります。"
                     },
                     "403": {
                         "description": "認証済みユーザーにコラボレーションを更新するための適切な権限がない場合にエラーを返します。\n\nさらに、このエラーは、企業の管理ダッシュボードで **\\[招待したコラボレータを自動的に削除する] の \\[フォルダの所有者に有効期限の延長を許可する]** の設定が有効になっていないコラボレーションの`expires_at`フィールドを更新しようとすると発生する可能性があります。",
@@ -24179,20 +24349,20 @@
                     "items": {
                         "type": "array",
                         "description": "LLMで処理する項目 (多くの場合はファイル)。この配列に含めることができる要素は**1つだけ**です。\n\n**注**: Box AIは、最大1 MBのテキストレプリゼンテーションを含むドキュメントを処理します。ファイルサイズが1 MBを超えた場合は、テキストレプリゼンテーションの最初の1 MBが処理されます。",
-                        "required": [
-                            "id",
-                            "type"
-                        ],
                         "minItems": 1,
                         "maxItems": 1,
                         "uniqueItems": true,
                         "items": {
+                            "required": [
+                                "id",
+                                "type"
+                            ],
                             "type": "object",
                             "description": "LLMで処理する項目。",
                             "properties": {
                                 "id": {
                                     "type": "string",
-                                    "description": "項目のID。",
+                                    "description": "The ID of the item.",
                                     "example": "123"
                                 },
                                 "type": {
@@ -24213,7 +24383,7 @@
                     },
                     "dialogue_history": {
                         "type": "array",
-                        "description": "これまでにLLMに渡されたプロンプトおよび回答の履歴。これにより、レスポンスの生成時にLLMに追加のコンテキストが提供されます。",
+                        "description": "The history of prompts and answers previously passed to the LLM. This parameter provides the additional context to the LLM when generating the response.",
                         "items": {
                             "$ref": "#/components/schemas/AiDialogueHistory"
                         }
@@ -24677,6 +24847,18 @@
                 "description": "Slack統合マッピングオブジェクトを作成するリクエスト",
                 "allOf": [
                     {
+                        "properties": {
+                            "partner_item": {
+                                "allOf": [
+                                    {
+                                        "$ref": "#/components/schemas/IntegrationMappingPartnerItemSlack"
+                                    }
+                                ],
+                                "nullable": false
+                            }
+                        }
+                    },
+                    {
                         "type": "object",
                         "properties": {
                             "box_item": {
@@ -24699,18 +24881,6 @@
                         "required": [
                             "box_item"
                         ]
-                    },
-                    {
-                        "properties": {
-                            "partner_item": {
-                                "allOf": [
-                                    {
-                                        "$ref": "#/components/schemas/IntegrationMappingPartnerItemSlack"
-                                    }
-                                ],
-                                "nullable": false
-                            }
-                        }
                     }
                 ],
                 "required": [
@@ -25331,13 +25501,13 @@
                         "$ref": "#/components/schemas/AiAgentLongTextTool"
                     },
                     "basic_text": {
-                        "$ref": "#/components/schemas/AiAgentBasicTextToolAsk"
+                        "$ref": "#/components/schemas/AiAgentBasicTextTool"
                     },
                     "long_text_multi": {
                         "$ref": "#/components/schemas/AiAgentLongTextTool"
                     },
                     "basic_text_multi": {
-                        "$ref": "#/components/schemas/AiAgentBasicTextToolAsk"
+                        "$ref": "#/components/schemas/AiAgentBasicTextTool"
                     }
                 },
                 "description": "クエリの処理に使用されるAIエージェント。"
@@ -25365,6 +25535,143 @@
                     }
                 },
                 "description": "テキストの生成に使用されるAIエージェント。"
+            },
+            "AppItem": {
+                "title": "App item",
+                "type": "object",
+                "x-box-tag": "app_item_associations",
+                "x-box-resource-id": "app_item_associations",
+                "description": "An app item represents an content object owned by an application. It can group files and folders together from different paths. That set can be shared via a collaboration.",
+                "required": [
+                    "id",
+                    "type",
+                    "application_type"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "description": "The unique identifier for this app item.",
+                        "example": "12345678"
+                    },
+                    "type": {
+                        "type": "string",
+                        "description": "`app_item`",
+                        "example": "app_item",
+                        "enum": [
+                            "app_item"
+                        ]
+                    },
+                    "application_type": {
+                        "type": "string",
+                        "description": "The type of the app that owns this app item.",
+                        "example": "hubs"
+                    }
+                }
+            },
+            "AppItemAssociation": {
+                "title": "App item association",
+                "type": "object",
+                "x-box-tag": "app_item_associations",
+                "x-box-resource-id": "app_item_association",
+                "description": "An app item association represents an association between a file or folder and an app item. Associations between a folder and an app item cascade down to all descendants of the folder.",
+                "required": [
+                    "id",
+                    "type",
+                    "app_item",
+                    "item"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "description": "The unique identifier for this app item association.",
+                        "example": "12345678",
+                        "nullable": false
+                    },
+                    "type": {
+                        "type": "string",
+                        "description": "`app_item_association`",
+                        "example": "app_item_association",
+                        "enum": [
+                            "app_item_association"
+                        ],
+                        "nullable": false
+                    },
+                    "app_item": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/AppItem"
+                            },
+                            {
+                                "description": "The app item which is associated with the file or folder."
+                            }
+                        ],
+                        "nullable": false
+                    },
+                    "item": {
+                        "allOf": [
+                            {
+                                "oneOf": [
+                                    {
+                                        "$ref": "#/components/schemas/File--Base"
+                                    },
+                                    {
+                                        "$ref": "#/components/schemas/Folder--Base"
+                                    },
+                                    {
+                                        "$ref": "#/components/schemas/WebLink--Base"
+                                    }
+                                ]
+                            },
+                            {
+                                "description": "The file or folder which is associated with the app item."
+                            }
+                        ],
+                        "nullable": false
+                    }
+                }
+            },
+            "AppItemAssociations": {
+                "title": "App item associations",
+                "type": "object",
+                "x-box-tag": "app_item_associations",
+                "x-box-resource-id": "app_item_associations",
+                "description": "A list of app item associations",
+                "allOf": [
+                    {
+                        "type": "object",
+                        "description": "マーカーベースのページ割りについて説明しているAPIレスポンスの部分",
+                        "properties": {
+                            "limit": {
+                                "description": "これらのエントリで使用された制限値。許容される最大値を超えていない限り、クエリパラメータの`limit`と等しくなります。最大値はAPIによって異なります。",
+                                "example": 1000,
+                                "type": "integer",
+                                "format": "int64"
+                            },
+                            "next_marker": {
+                                "description": "次の検索結果ページの開始場所のマーカー。",
+                                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                                "type": "string",
+                                "nullable": true
+                            },
+                            "prev_marker": {
+                                "description": "前の検索結果ページの開始場所のマーカー。",
+                                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVih",
+                                "type": "string",
+                                "nullable": true
+                            }
+                        }
+                    },
+                    {
+                        "properties": {
+                            "entries": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/AppItemAssociation"
+                                }
+                            }
+                        }
+                    }
+                ]
             },
             "Classification": {
                 "title": "分類",
@@ -25621,7 +25928,18 @@
                                 ]
                             },
                             {
-                                "description": "アクセスが許可されているファイルまたはフォルダ。コラボレーションの`status`が`pending`の場合、このフィールドは`null`です。"
+                                "description": "The file or folder to which access is granted. The field is `null` when the collaboration `status` is `pending` or the collaboration is created on an app item (see `app_item` field)."
+                            }
+                        ],
+                        "nullable": true
+                    },
+                    "app_item": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/AppItem"
+                            },
+                            {
+                                "description": "An `app_item` to which access is granted. The field is `null` when the collaboration is created on an item (see `item` field), or the `app_item` is inaccessible. The role cascades to all items associated with the `app_item`."
                             }
                         ],
                         "nullable": true
@@ -27766,6 +28084,12 @@
                                         "can_edit"
                                     ]
                                 }
+                            },
+                            "is_associated_with_app_item": {
+                                "type": "boolean",
+                                "example": true,
+                                "nullable": false,
+                                "description": "This field will return true if the file or any ancestor of the file is associated with at least one app item. Note that this will return true even if the context user does not have access to the app item(s) associated with the file."
                             }
                         }
                     }
@@ -29237,6 +29561,12 @@
                                         "nullable": true
                                     }
                                 ]
+                            },
+                            "is_associated_with_app_item": {
+                                "type": "boolean",
+                                "example": true,
+                                "nullable": false,
+                                "description": "This field will return true if the folder or any ancestor of the folder is associated with at least one app item. Note that this will return true even if the context user does not have access to the app item(s) associated with the folder."
                             }
                         }
                     }
@@ -29432,15 +29762,42 @@
                 }
             },
             "IntegrationMapping": {
-                "title": "統合マッピング",
+                "title": "Integration mapping Slack",
                 "type": "object",
-                "x-box-resource-id": "integration_mapping",
+                "x-box-resource-id": "integration_mapping_slack",
                 "x-box-tag": "integration_mappings",
                 "x-box-variant": "standard",
                 "description": "統合マッピングオブジェクトのSlack固有のレプリゼンテーション。",
                 "allOf": [
                     {
                         "$ref": "#/components/schemas/IntegrationMapping--Base"
+                    },
+                    {
+                        "properties": {
+                            "integration_type": {
+                                "type": "string",
+                                "nullable": false,
+                                "description": "マッピングが関連付けられているBoxパートナーアプリを示します。現在サポートされているのはSlackのみです (`id`とともに複合キーの一部)。",
+                                "example": "slack",
+                                "enum": [
+                                    "slack"
+                                ]
+                            },
+                            "partner_item": {
+                                "oneOf": [
+                                    {
+                                        "$ref": "#/components/schemas/IntegrationMappingPartnerItemSlack"
+                                    }
+                                ],
+                                "nullable": false,
+                                "example": {
+                                    "id": "C12378991223",
+                                    "type": "channel",
+                                    "slack_org_id": "E1234567"
+                                },
+                                "description": "SlackまたはTeams用にマッピングされた項目オブジェクト"
+                            }
+                        }
                     },
                     {
                         "type": "object",
@@ -29504,33 +29861,6 @@
                         "required": [
                             "box_item"
                         ]
-                    },
-                    {
-                        "properties": {
-                            "integration_type": {
-                                "type": "string",
-                                "nullable": false,
-                                "description": "マッピングが関連付けられているBoxパートナーアプリを示します。現在サポートされているのはSlackのみです (`id`とともに複合キーの一部)。",
-                                "example": "slack",
-                                "enum": [
-                                    "slack"
-                                ]
-                            },
-                            "partner_item": {
-                                "oneOf": [
-                                    {
-                                        "$ref": "#/components/schemas/IntegrationMappingPartnerItemSlack"
-                                    }
-                                ],
-                                "nullable": false,
-                                "example": {
-                                    "id": "C12378991223",
-                                    "type": "channel",
-                                    "slack_org_id": "E1234567"
-                                },
-                                "description": "SlackまたはTeams用にマッピングされた項目オブジェクト"
-                            }
-                        }
                     }
                 ],
                 "required": [
@@ -29572,9 +29902,9 @@
                 ]
             },
             "IntegrationMappings": {
-                "title": "統合マッピング",
+                "title": "Integration mappings Slack",
                 "type": "object",
-                "x-box-resource-id": "integration_mappings",
+                "x-box-resource-id": "integration_mappings_slack",
                 "x-box-tag": "integration_mappings",
                 "description": "統合マッピングオブジェクトのリスト。",
                 "allOf": [
@@ -33560,6 +33890,17 @@
                                 "description": "指定した場合、この値は、同じ入力が割り当てられ、同じ署名者グループに属している署名者を指します。署名者グループはBoxグループではありません。これは、テンプレート自体に属しているエンティティであり、そのテンプレートから作成されたBox Signリクエスト内でのみ使用できます。",
                                 "example": "cd4ff89-8fc1-42cf-8b29-1890dedd26d7",
                                 "nullable": true
+                            },
+                            "label": {
+                                "type": "string",
+                                "description": "A placeholder label for the signer set by the template creator to differentiate between signers.",
+                                "example": "Jane Doe",
+                                "nullable": true
+                            },
+                            "public_id": {
+                                "type": "string",
+                                "description": "An identifier for the signer. This can be used to identify a signer within the template.",
+                                "example": "RJZYYVPR"
                             }
                         }
                     }
@@ -37133,7 +37474,7 @@
                     }
                 ]
             },
-            "AiAgentBasicTextToolAsk": {
+            "AiAgentBasicTextToolBase": {
                 "title": "AIエージェントの基本テキストツール",
                 "type": "object",
                 "x-box-tag": "ai",
@@ -37142,17 +37483,6 @@
                         "type": "string",
                         "description": "基本的なテキスト用のAIエージェントに使用されるモデル。",
                         "example": "openai__gpt_3_5_turbo"
-                    },
-                    "system_message": {
-                        "type": "string",
-                        "description": "システムメッセージは、LLMがそれ自体の役割と実行するべき内容を「理解」するのを支援しようとします。",
-                        "example": "You are a helpful travel assistant specialized in budget travel"
-                    },
-                    "prompt_template": {
-                        "type": "string",
-                        "description": "プロンプトテンプレートには、リクエストのコンテキスト情報とユーザープロンプトが含まれます。 \n\n`prompt_template`パラメータを渡す場合、`{current_date}`、`{user_question}`、`{content}`の入力を**含める必要があります**。",
-                        "example": "It is `{current_date}`, and I have $8000 and want to spend a week in the Azores. What should I see?",
-                        "maxLength": 10000
                     },
                     "num_tokens_for_completion": {
                         "type": "integer",
@@ -37174,54 +37504,102 @@
                 },
                 "description": "基本的なテキストの処理に使用されるAIエージェントツール。"
             },
+            "AiAgentBasicTextTool": {
+                "title": "AIエージェントの基本テキストツール",
+                "type": "object",
+                "x-box-tag": "ai",
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/AiAgentBasicTextToolBase"
+                    },
+                    {
+                        "properties": {
+                            "system_message": {
+                                "type": "string",
+                                "description": "システムメッセージは、LLMがそれ自体の役割と実行するべき内容を「理解」するのを支援しようとします。",
+                                "example": "You are a helpful travel assistant specialized in budget travel"
+                            },
+                            "prompt_template": {
+                                "type": "string",
+                                "description": "プロンプトテンプレートには、リクエストのコンテキスト情報とユーザープロンプトが含まれます。\n\nWhen passing `prompt_template` parameters, you **must include** inputs for `{user_question}` and `{content}`.\n\nInput for `{current_date}` is optional, depending on the use.",
+                                "example": "It is `{current_date}`, consider these travel options `{content}` and answer `{user_question}`",
+                                "maxLength": 10000,
+                                "pattern": "(\\{user_question\\}[\\s\\S]*?\\{content\\}|\\{content\\}[\\s\\S]*?\\{user_question\\})"
+                            }
+                        }
+                    }
+                ],
+                "description": "基本的なテキストの処理に使用されるAIエージェントツール。"
+            },
             "AiAgentBasicTextToolTextGen": {
                 "title": "AIエージェントの基本テキストツール",
                 "type": "object",
                 "x-box-tag": "ai",
-                "properties": {
-                    "model": {
-                        "type": "string",
-                        "description": "基本的なテキスト用のAIエージェントに使用されるモデル。",
-                        "example": "openai__gpt_3_5_turbo"
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/AiAgentBasicTextToolBase"
                     },
-                    "system_message": {
-                        "type": "string",
-                        "description": "システムメッセージは、LLMがその役割と実行するべき内容を「理解」するのを支援します。このパラメータでは、`{current_date}`を使用する必要があります。",
-                        "example": "You are a helpful travel assistant specialized in budget travel"
-                    },
-                    "prompt_template": {
-                        "type": "string",
-                        "description": "プロンプトテンプレートには、リクエストのコンテキスト情報とユーザープロンプトが含まれます。\n\n`prompt_template`パラメータを使用する場合、`{user_question}`の入力を**含める必要があります**。`{current_date}`と`{content}`の入力は、用途に応じて省略できます。",
-                        "example": "It is `{current_date}`, and I have $8000 and want to spend a week in the Azores. What should I see?",
-                        "maxLength": 10000
-                    },
-                    "num_tokens_for_completion": {
-                        "type": "integer",
-                        "description": "完了に必要なトークンの数。",
-                        "example": 8400,
-                        "minimum": 1
-                    },
-                    "llm_endpoint_params": {
-                        "allOf": [
-                            {
-                                "oneOf": [
-                                    {
-                                        "$ref": "#/components/schemas/AiLlmEndpointParamsOpenAi"
-                                    },
-                                    {
-                                        "$ref": "#/components/schemas/AiLlmEndpointParamsGoogle"
-                                    }
-                                ]
+                    {
+                        "properties": {
+                            "system_message": {
+                                "type": "string",
+                                "description": "System messages try to help the LLM \"understand\" its role and what it is supposed to do. Input for `{current_date}` is optional, depending on the use.",
+                                "example": "You are a helpful travel assistant specialized in budget travel"
                             },
-                            {
-                                "description": "OpenAI/Googleモデルに固有のLLMエンドポイントのパラメータ。"
+                            "prompt_template": {
+                                "type": "string",
+                                "description": "プロンプトテンプレートには、リクエストのコンテキスト情報とユーザープロンプトが含まれます。\n\nWhen using the `prompt_template` parameter, you **must include** input for `{user_question}`. Inputs for `{current_date}` and `{content}` are optional, depending on the use.",
+                                "example": "It is `{current_date}`, and I have $8000 and want to spend a week in the Azores. `{user_question}`",
+                                "maxLength": 10000,
+                                "pattern": "\\{user_question\\}"
                             }
-                        ]
+                        }
                     }
-                },
+                ],
                 "description": "基本的なテキストの処理に使用されるAIエージェントツール。"
             },
             "AiAgentLongTextTool": {
+                "title": "AIエージェントの長いテキストツール",
+                "type": "object",
+                "x-box-tag": "ai",
+                "description": "長いテキストの処理に使用されるAIエージェントツール。",
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/AiAgentBasicTextTool"
+                    },
+                    {
+                        "properties": {
+                            "embeddings": {
+                                "type": "object",
+                                "properties": {
+                                    "model": {
+                                        "type": "string",
+                                        "example": "openai__text_embedding_ada_002",
+                                        "description": "埋め込みを計算するためのAIエージェントに使用されるモデル。"
+                                    },
+                                    "strategy": {
+                                        "type": "object",
+                                        "properties": {
+                                            "id": {
+                                                "type": "string",
+                                                "description": "埋め込みを計算するためのAIエージェントに使用される戦略。",
+                                                "example": "basic"
+                                            },
+                                            "num_tokens_per_chunk": {
+                                                "type": "integer",
+                                                "description": "チャンクごとのトークンの数。",
+                                                "example": 64,
+                                                "minimum": 1
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                ]
+            },
+            "AiAgentLongTextToolTextGen": {
                 "title": "AIエージェントの長いテキストツール",
                 "type": "object",
                 "x-box-tag": "ai",
@@ -37268,13 +37646,13 @@
                 "x-box-tag": "ai",
                 "allOf": [
                     {
-                        "$ref": "#/components/schemas/AiAgentLongTextTool"
+                        "$ref": "#/components/schemas/AiAgentLongTextToolTextGen"
                     },
                     {
                         "properties": {
                             "content_template": {
                                 "type": "string",
-                                "description": "LLMへのリクエストにコンテンツを含める方法。このパラメータを渡す場合は、`{content}`を含める必要があります。",
+                                "description": "How the content should be included in a request to the LLM. Input for `{content}` is optional, depending on the use.",
                                 "example": "---{content}---"
                             }
                         }
@@ -38850,6 +39228,10 @@
             "name": "AI",
             "description": "A set of endpoints used to\ninteract with supported LLMs.",
             "x-box-tag": "ai"
+        },
+        {
+            "name": "App item associations",
+            "x-box-tag": "app_item_associations"
         },
         {
             "name": "承認",
