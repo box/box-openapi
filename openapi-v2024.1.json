@@ -1,0 +1,1756 @@
+{
+  "openapi": "3.0.2",
+  "info": {
+    "title": "Box Platform API",
+    "description": "[Box Platform](https://box.dev) provides functionality to provide access to content stored within [Box](https://box.com). It provides endpoints for basic manipulation of files and folders, management of users within an enterprise, as well as more complex topics such as legal holds and retention policies.",
+    "termsOfService": "https://cloud.app.box.com/s/rmwxu64h1ipr41u49w3bbuvbsa29wku9",
+    "contact": {
+      "name": "Box, Inc",
+      "url": "https://box.dev",
+      "email": "devrel@box.com"
+    },
+    "license": {
+      "name": "Apache-2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0"
+    },
+    "version": "2024.0",
+    "x-box-commit-hash": "76b3e9a8ea"
+  },
+  "servers": [
+    {
+      "url": "https://api.box.com/2.0",
+      "description": "Box Platform API server"
+    }
+  ],
+  "paths": {
+    "/authorize": {
+      "get": {
+        "operationId": "get_authorize_v2024.0",
+        "summary": "Authorize user",
+        "description": "Authorize a user by sending them through the [Box](https://box.com)\nwebsite and request their permission to act on their behalf.\n\nThis is the first step when authenticating a user using\nOAuth 2.0. To request a user's authorization to use the Box APIs\non their behalf you will need to send a user to the URL with this\nformat.",
+        "tags": [
+          "Authorization"
+        ],
+        "x-box-tag": "authorization",
+        "security": [],
+        "servers": [
+          {
+            "url": "https://account.box.com/api/oauth2",
+            "description": "Server for client-side authentication"
+          }
+        ],
+        "parameters": [
+          {
+            "name": "response_type",
+            "description": "The type of response we'd like to receive.",
+            "in": "query",
+            "example": "code",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "token",
+              "enum": [
+                "code"
+              ]
+            }
+          },
+          {
+            "name": "client_id",
+            "description": "The Client ID of the application that is requesting to authenticate\nthe user. To get the Client ID for your application, log in to your\nBox developer console and click the **Edit Application** link for\nthe application you're working with. In the OAuth 2.0 Parameters section\nof the configuration page, find the item labelled `client_id`. The\ntext of that item is your application's Client ID.",
+            "in": "query",
+            "example": "ly1nj6n11vionaie65emwzk575hnnmrk",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "redirect_uri",
+            "description": "The URI to which Box redirects the browser after the user has granted\nor denied the application permission. This URI match one of the redirect\nURIs in the configuration of your application. It must be a\nvalid HTTPS URI and it needs to be able to handle the redirection to\ncomplete the next step in the OAuth 2.0 flow.\nAlthough this parameter is optional, it must be a part of the\nauthorization URL if you configured multiple redirect URIs\nfor the application in the developer console. A missing parameter causes\na `redirect_uri_missing` error after the user grants application access.",
+            "in": "query",
+            "example": "http://example.com/auth/callback",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "url"
+            }
+          },
+          {
+            "name": "state",
+            "description": "A custom string of your choice. Box will pass the same string to\nthe redirect URL when authentication is complete. This parameter\ncan be used to identify a user on redirect, as well as protect\nagainst hijacked sessions and other exploits.",
+            "in": "query",
+            "example": "my_state",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "scope",
+            "description": "A space-separated list of application scopes you'd like to\nauthenticate the user for. This defaults to all the scopes configured\nfor the application in its configuration page.",
+            "in": "query",
+            "example": "admin_readwrite",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Does not return any data, but rather should be used in the browser.",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string",
+                  "format": "html"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Does not return any data, but rather should be used in the browser.",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string",
+                  "format": "html"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/oauth2/token": {
+      "post": {
+        "operationId": "post_oauth2_token_v2024.0",
+        "summary": "Request access token",
+        "description": "Request an Access Token using either a client-side obtained OAuth 2.0\nauthorization code or a server-side JWT assertion.\n\nAn Access Token is a string that enables Box to verify that a\nrequest belongs to an authorized session. In the normal order of\noperations you will begin by requesting authentication from the\n[authorize](#get-authorize) endpoint and Box will send you an\nauthorization code.\n\nYou will then send this code to this endpoint to exchange it for\nan Access Token. The returned Access Token can then be used to to make\nBox API calls.",
+        "tags": [
+          "Authorization"
+        ],
+        "servers": [
+          {
+            "url": "https://api.box.com",
+            "description": "Server for server-side authentication"
+          }
+        ],
+        "x-box-tag": "authorization",
+        "security": [],
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/PostOAuth2Token"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Returns a new Access Token that can be used to make authenticated\nAPI calls by passing along the token in a authorization header as\nfollows `Authorization: Bearer <Token>`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessToken"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "An authentication error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OAuth2Error"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An authentication error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OAuth2Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/oauth2/token#refresh": {
+      "post": {
+        "operationId": "post_oauth2_token_v2024.0#refresh",
+        "summary": "Refresh access token",
+        "description": "Refresh an Access Token using its client ID, secret, and refresh token.",
+        "tags": [
+          "Authorization"
+        ],
+        "servers": [
+          {
+            "url": "https://api.box.com",
+            "description": "Server for server-side authentication"
+          }
+        ],
+        "x-box-tag": "authorization",
+        "x-box-is-variation": true,
+        "security": [],
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/PostOAuth2Token--RefreshAccessToken"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Returns a new Access Token that can be used to make authenticated\nAPI calls by passing along the token in a authorization header as\nfollows `Authorization: Bearer <Token>`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessToken"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "An authentication error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OAuth2Error"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An authentication error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OAuth2Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/oauth2/revoke": {
+      "post": {
+        "operationId": "post_oauth2_revoke_v2024.0",
+        "summary": "Revoke access token",
+        "description": "Revoke an active Access Token, effectively logging a user out\nthat has been previously authenticated.",
+        "tags": [
+          "Authorization"
+        ],
+        "servers": [
+          {
+            "url": "https://api.box.com",
+            "description": "Server for server-side authentication"
+          }
+        ],
+        "x-box-tag": "authorization",
+        "security": [],
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/PostOAuth2Revoke"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Returns an empty response when the token was successfully revoked."
+          },
+          "400": {
+            "description": "An authentication error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OAuth2Error"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An authentication error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OAuth2Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sign_requests/{sign_request_id}/cancel": {
+      "post": {
+        "operationId": "post_sign_requests_id_cancel_v2024.0",
+        "summary": "Cancel Box Sign request in the new version",
+        "tags": [
+          "Sign requests"
+        ],
+        "x-box-tag": "sign_requests",
+        "description": "This is the new description: Cancels a sign request.",
+        "parameters": [
+          {
+            "name": "sign_request_id",
+            "description": "The ID of the signature request",
+            "example": "33243242",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns a Sign Request object.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SignRequest"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Returns an error when the sign request cannot be found or the user does\nnot have access to the sign request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sign_requests/{sign_request_id}/resend": {
+      "post": {
+        "operationId": "post_sign_requests_id_resend_v2024.0",
+        "summary": "Resend Box Sign request in a new way",
+        "tags": [
+          "Sign requests"
+        ],
+        "x-box-tag": "sign_requests",
+        "description": "This is the new description: Resends a signature request email to all outstanding signers.",
+        "parameters": [
+          {
+            "name": "sign_request_id",
+            "description": "The ID of the signature request",
+            "example": "33243242",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Returns an empty response when the API call was successful.\nThe email notifications will be sent asynchronously."
+          },
+          "404": {
+            "description": "Returns an error when the signature request cannot be found or the user does\nnot have access to the signature request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sign_requests/{sign_request_id}": {
+      "get": {
+        "operationId": "get_sign_requests_id_v2024.0",
+        "summary": "Get Box Sign request by ID",
+        "tags": [
+          "Sign requests"
+        ],
+        "x-box-tag": "sign_requests",
+        "description": "This is the new description: Gets a sign request by ID.",
+        "parameters": [
+          {
+            "name": "sign_request_id",
+            "description": "The ID of the signature request",
+            "example": "33243242",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns a signature request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SignRequest"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Returns an error when the signature request cannot be found, the user does\nnot have access to the signature request, or `sign_files` and/or\n`parent_folder` is deleted.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sign_requests": {
+      "get": {
+        "operationId": "get_sign_requests_v2024.0",
+        "summary": "List Box Sign requests",
+        "tags": [
+          "Sign requests"
+        ],
+        "x-box-tag": "sign_requests",
+        "description": "This is the new description: Gets signature requests created by a user. If the `sign_files` and/or\n`parent_folder` are deleted, the signature request will not return in the list.",
+        "parameters": [
+          {
+            "name": "marker",
+            "description": "Defines the position marker at which to begin returning results. This is\nused when paginating using marker-based pagination.\n\nThis requires `usemarker` to be set to `true`.",
+            "in": "query",
+            "required": false,
+            "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "description": "The maximum number of items to return per page.",
+            "in": "query",
+            "required": false,
+            "example": 1000,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "maximum": 1000
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns a collection of sign requests",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SignRequests"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "post_sign_requests_v2024.0",
+        "summary": "Create Box Sign request",
+        "tags": [
+          "Sign requests"
+        ],
+        "x-box-tag": "sign_requests",
+        "description": "This is the new description: Creates a signature request. This involves preparing a document for signing and\nsending the signature request to signers.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SignRequestCreateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Returns a Box Sign request object.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SignRequest"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "OAuth2Security": {
+        "type": "oauth2",
+        "flows": {
+          "authorizationCode": {
+            "authorizationUrl": "https://account.box.com/api/oauth2/authorize",
+            "tokenUrl": "https://api.box.com/oauth2/token",
+            "scopes": {
+              "root_readonly": "Read all files and folders stored in Box",
+              "root_readwrite": "Read and write all files and folders stored in Box",
+              "manage_app_users": "Provision and manage app users",
+              "manage_managed_users": "Provision and manage managed users",
+              "manage_groups": "Manage an enterprise's groups",
+              "manage_webhook": "Create webhooks programmatically through the API",
+              "manage_enterprise_properties": "Manage enterprise properties",
+              "manage_data_retention": "Manage data retention polices",
+              "manage_legal_hold": "Manage Legal Holds"
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "PostOAuth2Token": {
+        "title": "Token request",
+        "type": "object",
+        "description": "A request for a new OAuth 2.0 token",
+        "required": [
+          "grant_type"
+        ],
+        "properties": {
+          "grant_type": {
+            "type": "string",
+            "format": "urn",
+            "example": "authorization_code",
+            "description": "The type of request being made, either using a client-side obtained\nauthorization code, a refresh token, a JWT assertion, client credentials\ngrant or another access token for the purpose of downscoping a token.",
+            "enum": [
+              "authorization_code",
+              "refresh_token",
+              "client_credentials",
+              "urn:ietf:params:oauth:grant-type:jwt-bearer",
+              "urn:ietf:params:oauth:grant-type:token-exchange"
+            ]
+          },
+          "client_id": {
+            "type": "string",
+            "description": "The Client ID of the application requesting an access token.\n\nUsed in combination with `authorization_code`, `client_credentials`, or\n`urn:ietf:params:oauth:grant-type:jwt-bearer` as the `grant_type`.",
+            "example": "ly1nj6n11vionaie65emwzk575hnnmrk"
+          },
+          "client_secret": {
+            "type": "string",
+            "description": "The client secret of the application requesting an access token.\n\nUsed in combination with `authorization_code`, `client_credentials`, or\n`urn:ietf:params:oauth:grant-type:jwt-bearer` as the `grant_type`.",
+            "example": "hOzsTeFlT6ko0dme22uGbQal04SBPYc1"
+          },
+          "code": {
+            "type": "string",
+            "format": "token",
+            "description": "The client-side authorization code passed to your application by\nBox in the browser redirect after the user has successfully\ngranted your application permission to make API calls on their\nbehalf.\n\nUsed in combination with `authorization_code` as the `grant_type`.",
+            "example": "n22JPxrh18m4Y0wIZPIqYZK7VRrsMTWW"
+          },
+          "refresh_token": {
+            "type": "string",
+            "format": "token",
+            "description": "A refresh token used to get a new access token with.\n\nUsed in combination with `refresh_token` as the `grant_type`.",
+            "example": "c3FIOG9vSGV4VHo4QzAyg5T1JvNnJoZ3ExaVNyQWw6WjRsanRKZG5lQk9qUE1BVQ"
+          },
+          "assertion": {
+            "type": "string",
+            "format": "jwt",
+            "description": "A JWT assertion for which to request a new access token.\n\nUsed in combination with `urn:ietf:params:oauth:grant-type:jwt-bearer`\nas the `grant_type`.",
+            "example": "xxxxx.yyyyy.zzzzz"
+          },
+          "subject_token": {
+            "type": "string",
+            "format": "token",
+            "description": "The token to exchange for a downscoped token. This can be a regular\naccess token, a JWT assertion, or an app token.\n\nUsed in combination with `urn:ietf:params:oauth:grant-type:token-exchange`\nas the `grant_type`.",
+            "example": "c3FIOG9vSGV4VHo4QzAyg5T1JvNnJoZ3ExaVNyQWw6WjRsanRKZG5lQk9qUE1BVQ"
+          },
+          "subject_token_type": {
+            "type": "string",
+            "example": "urn:ietf:params:oauth:token-type:access_token",
+            "description": "The type of `subject_token` passed in.\n\nUsed in combination with `urn:ietf:params:oauth:grant-type:token-exchange`\nas the `grant_type`.",
+            "enum": [
+              "urn:ietf:params:oauth:token-type:access_token"
+            ]
+          },
+          "actor_token": {
+            "type": "string",
+            "format": "token",
+            "description": "The token used to create an annotator token.\nThis is a JWT assertion.\n\nUsed in combination with `urn:ietf:params:oauth:grant-type:token-exchange`\nas the `grant_type`.",
+            "example": "c3FIOG9vSGV4VHo4QzAyg5T1JvNnJoZ3ExaVNyQWw6WjRsanRKZG5lQk9qUE1BVQ"
+          },
+          "actor_token_type": {
+            "type": "string",
+            "format": "urn",
+            "example": "urn:ietf:params:oauth:token-type:id_token",
+            "description": "The type of `actor_token` passed in.\n\nUsed in combination with `urn:ietf:params:oauth:grant-type:token-exchange`\nas the `grant_type`.",
+            "enum": [
+              "urn:ietf:params:oauth:token-type:id_token"
+            ]
+          },
+          "scope": {
+            "type": "string",
+            "format": "space_delimited_list",
+            "description": "The space-delimited list of scopes that you want apply to the\nnew access token.\n\nThe `subject_token` will need to have all of these scopes or\nthe call will error with **401 Unauthorized**.",
+            "example": "item_upload item_preview base_explorer"
+          },
+          "resource": {
+            "type": "string",
+            "format": "url",
+            "description": "Full URL for the file that the token should be generated for.",
+            "example": "https://api.box.com/2.0/files/123456"
+          },
+          "box_subject_type": {
+            "type": "string",
+            "example": "enterprise",
+            "description": "Used in combination with `client_credentials` as the `grant_type`.",
+            "enum": [
+              "enterprise",
+              "user"
+            ]
+          },
+          "box_subject_id": {
+            "type": "string",
+            "example": "123456789",
+            "description": "Used in combination with `client_credentials` as the `grant_type`.\nValue is determined by `box_subject_type`. If `user` use user ID and if\n`enterprise` use enterprise ID."
+          },
+          "box_shared_link": {
+            "type": "string",
+            "format": "url",
+            "description": "Full URL of the shared link on the file or folder\nthat the token should be generated for.",
+            "example": "https://cloud.box.com/s/123456"
+          }
+        }
+      },
+      "PostOAuth2Token--RefreshAccessToken": {
+        "title": "Refresh access token",
+        "type": "object",
+        "description": "A request to refresh an Access Token. Use this API to refresh an expired\nAccess Token using a valid Refresh Token.",
+        "required": [
+          "grant_type",
+          "client_id",
+          "client_secret",
+          "refresh_token"
+        ],
+        "properties": {
+          "grant_type": {
+            "type": "string",
+            "format": "urn",
+            "example": "refresh_token",
+            "description": "The type of request being made, in this case a refresh request.",
+            "enum": [
+              "refresh_token"
+            ]
+          },
+          "client_id": {
+            "type": "string",
+            "description": "The client ID of the application requesting to refresh the token.",
+            "example": "ly1nj6n11vionaie65emwzk575hnnmrk"
+          },
+          "client_secret": {
+            "type": "string",
+            "description": "The client secret of the application requesting to refresh the token.",
+            "example": "hOzsTeFlT6ko0dme22uGbQal04SBPYc1"
+          },
+          "refresh_token": {
+            "type": "string",
+            "format": "token",
+            "description": "The refresh token to refresh.",
+            "example": "c3FIOG9vSGV4VHo4QzAyg5T1JvNnJoZ3ExaVNyQWw6WjRsanRKZG5lQk9qUE1BVQ"
+          }
+        }
+      },
+      "PostOAuth2Revoke": {
+        "title": "Token revocation request",
+        "type": "object",
+        "description": "A request to revoke an OAuth 2.0 token",
+        "required": [
+          "grant_type"
+        ],
+        "properties": {
+          "client_id": {
+            "type": "string",
+            "description": "The Client ID of the application requesting to revoke the\naccess token.",
+            "example": "ly1nj6n11vionaie65emwzk575hnnmrk"
+          },
+          "client_secret": {
+            "type": "string",
+            "description": "The client secret of the application requesting to revoke\nan access token.",
+            "example": "hOzsTeFlT6ko0dme22uGbQal04SBPYc1"
+          },
+          "token": {
+            "type": "string",
+            "format": "token",
+            "description": "The access token to revoke.",
+            "example": "n22JPxrh18m4Y0wIZPIqYZK7VRrsMTWW"
+          }
+        }
+      },
+      "SignRequestCreateRequest": {
+        "title": "Create a Box Sign request",
+        "type": "object",
+        "description": "This is the new description: Creates a Box Sign request object.",
+        "required": [
+          "signers"
+        ],
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/SignRequest--Base"
+          },
+          {
+            "properties": {
+              "source_files": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/File--Base"
+                },
+                "description": "List of files to create a signing document from. This is currently limited to ten files. Only the ID and type fields are required for each file.",
+                "maxItems": 10,
+                "nullable": true
+              },
+              "signature_color": {
+                "type": "string",
+                "example": "blue",
+                "description": "Force a specific color for the signature (blue, black, or red)",
+                "enum": [
+                  "blue",
+                  "black",
+                  "red"
+                ],
+                "nullable": true
+              },
+              "signers": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/SignRequestCreateSigner"
+                },
+                "description": "Array of signers for the signature request. 35 is the\nmax number of signers permitted.\n\n**Note**: It may happen that some signers belong to conflicting [segments](r://shield-information-barrier-segment-member) (user groups).\nThis means that due to the security policies, users are assigned to segments to prevent exchanges or communication that could lead to ethical conflicts.\nIn such a case, an attempt to send the sign request will result in an error.\n\nRead more about [segments and ethical walls](https://support.box.com/hc/en-us/articles/9920431507603-Understanding-Information-Barriers#h_01GFVJEHQA06N7XEZ4GCZ9GFAQ)."
+              },
+              "parent_folder": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/Folder--Mini"
+                  },
+                  {
+                    "description": "The destination folder to place final, signed document and signing\nlog. Only `ID` and `type` fields are required. The root folder,\nfolder ID `0`, cannot be used and can also not be null.\n\nWhen this value is not passed in when the signature request, then\nwe will use a default folder which is either the parent folder of\nthe first source file in the payload if we have the permission to\nupload to that folder or a folder called \"My Sign Requests\"."
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "ClientError": {
+        "title": "Client error",
+        "type": "object",
+        "x-box-resource-id": "client_error_v2024.0",
+        "description": "A generic error",
+        "properties": {
+          "type": {
+            "description": "error",
+            "example": "error",
+            "type": "string",
+            "enum": [
+              "error"
+            ],
+            "nullable": false
+          },
+          "status": {
+            "description": "The HTTP status of the response.",
+            "example": 400,
+            "type": "integer",
+            "format": "int32",
+            "nullable": false
+          },
+          "code": {
+            "description": "A Box-specific error code",
+            "example": "item_name_invalid",
+            "type": "string",
+            "enum": [
+              "created",
+              "accepted",
+              "no_content",
+              "redirect",
+              "not_modified",
+              "bad_request",
+              "unauthorized",
+              "forbidden",
+              "not_found",
+              "method_not_allowed",
+              "conflict",
+              "precondition_failed",
+              "too_many_requests",
+              "internal_server_error",
+              "unavailable",
+              "item_name_invalid",
+              "insufficient_scope"
+            ]
+          },
+          "message": {
+            "description": "A short message describing the error.",
+            "example": "Method Not Allowed",
+            "type": "string",
+            "nullable": false
+          },
+          "context_info": {
+            "description": "A free-form object that contains additional context\nabout the error. The possible fields are defined on\na per-endpoint basis. `message` is only one example.",
+            "type": "object",
+            "nullable": true,
+            "properties": {
+              "message": {
+                "type": "string",
+                "description": "More details on the error.",
+                "example": "Something went wrong."
+              }
+            }
+          },
+          "help_url": {
+            "description": "A URL that links to more information about why this error occurred.",
+            "example": "https://developer.box.com/guides/api-calls/permissions-and-errors/common-errors/",
+            "type": "string",
+            "nullable": false
+          },
+          "request_id": {
+            "description": "A unique identifier for this response, which can be used\nwhen contacting Box support.",
+            "type": "string",
+            "example": "abcdef123456",
+            "nullable": false
+          }
+        }
+      },
+      "AccessToken": {
+        "title": "Access token",
+        "type": "object",
+        "x-box-resource-id": "access_token_v2024.0",
+        "x-box-tag": "authorization",
+        "description": "A token that can be used to make authenticated API calls.",
+        "properties": {
+          "access_token": {
+            "type": "string",
+            "format": "token",
+            "example": "c3FIOG9vSGV4VHo4QzAyg5T1JvNnJoZ3ExaVNyQWw6WjRsanRKZG5lQk9qUE1BVQ",
+            "description": "The requested access token."
+          },
+          "expires_in": {
+            "type": "integer",
+            "format": "int64",
+            "example": 3600,
+            "description": "The time in seconds by which this token will expire."
+          },
+          "token_type": {
+            "type": "string",
+            "enum": [
+              "bearer"
+            ],
+            "example": "bearer",
+            "description": "The type of access token returned."
+          },
+          "restricted_to": {
+            "type": "array",
+            "description": "The permissions that this access token permits,\nproviding a list of resources (files, folders, etc)\nand the scopes permitted for each of those resources.",
+            "items": {
+              "$ref": "#/components/schemas/FileOrFolderScope"
+            }
+          },
+          "refresh_token": {
+            "type": "string",
+            "format": "token",
+            "example": "c3FIOG9vSGV4VHo4QzAyg5T1JvNnJoZ3ExaVNyQWw6WjRsanRKZG5lQk9qUE1BVQ",
+            "description": "The refresh token for this access token, which can be used\nto request a new access token when the current one expires."
+          },
+          "issued_token_type": {
+            "type": "string",
+            "format": "urn",
+            "example": "urn:ietf:params:oauth:token-type:access_token",
+            "enum": [
+              "urn:ietf:params:oauth:token-type:access_token"
+            ],
+            "description": "The type of downscoped access token returned. This is only\nreturned if an access token has been downscoped."
+          }
+        }
+      },
+      "OAuth2Error": {
+        "title": "OAuth 2.0 error",
+        "type": "object",
+        "x-box-resource-id": "oauth2_error_v2024.0",
+        "x-box-tag": "authorization",
+        "description": "An OAuth 2.0 error",
+        "properties": {
+          "error": {
+            "type": "string",
+            "example": "invalid_client",
+            "description": "The type of the error returned."
+          },
+          "error_description": {
+            "type": "string",
+            "example": "The client credentials are not valid",
+            "description": "The type of the error returned."
+          }
+        }
+      },
+      "File--Mini": {
+        "title": "File (Mini)",
+        "type": "object",
+        "x-box-resource-id": "file_v2024.0--mini",
+        "x-box-variant": "mini",
+        "description": "A mini representation of a file, used when\nnested under another resource.",
+        "nullable": true,
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/File--Base"
+          },
+          {
+            "properties": {
+              "sequence_id": {
+                "allOf": [
+                  {
+                    "type": "string",
+                    "example": "3",
+                    "nullable": true,
+                    "description": "A numeric identifier that represents the most recent user event\nthat has been applied to this item.\n\nThis can be used in combination with the `GET /events`-endpoint\nto filter out user events that would have occurred before this\nidentifier was read.\n\nAn example would be where a Box Drive-like application\nwould fetch an item via the API, and then listen to incoming\nuser events for changes to the item. The application would\nignore any user events where the `sequence_id` in the event\nis smaller than or equal to the `sequence_id` in the originally\nfetched resource."
+                  },
+                  {
+                    "nullable": false
+                  }
+                ]
+              },
+              "name": {
+                "type": "string",
+                "description": "The name of the file",
+                "example": "Contract.pdf"
+              },
+              "sha1": {
+                "type": "string",
+                "format": "digest",
+                "nullable": false,
+                "example": "85136C79CBF9FE36BB9D05D0639C70C265C18D37",
+                "description": "The SHA1 hash of the file. This can be used to compare the contents\nof a file on Box with a local file."
+              },
+              "file_version": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/FileVersion--Mini"
+                  },
+                  {
+                    "description": "The information about the current version of the file."
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "File--Base": {
+        "title": "File (Base)",
+        "type": "object",
+        "x-box-resource-id": "file_v2024.0--base",
+        "x-box-tag": "files",
+        "x-box-variants": [
+          "base",
+          "mini",
+          "standard",
+          "full"
+        ],
+        "x-box-variant": "base",
+        "nullable": true,
+        "description": "The bare basic representation of a file, the minimal\namount of fields returned when using the `fields` query\nparameter.",
+        "required": [
+          "id",
+          "type"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "nullable": false,
+            "description": "The unique identifier that represent a file.\n\nThe ID for any file can be determined\nby visiting a file in the web application\nand copying the ID from the URL. For example,\nfor the URL `https://*.app.box.com/files/123`\nthe `file_id` is `123`.",
+            "example": "12345"
+          },
+          "etag": {
+            "type": "string",
+            "example": "1",
+            "nullable": true,
+            "description": "The HTTP `etag` of this file. This can be used within some API\nendpoints in the `If-Match` and `If-None-Match` headers to only\nperform changes on the file if (no) changes have happened."
+          },
+          "type": {
+            "type": "string",
+            "description": "`file`",
+            "example": "file",
+            "enum": [
+              "file"
+            ],
+            "nullable": false
+          }
+        }
+      },
+      "FileVersion--Mini": {
+        "title": "File version (Mini)",
+        "type": "object",
+        "x-box-resource-id": "file_version_v2024.0--mini",
+        "x-box-variant": "mini",
+        "description": "A mini representation of a file version, used when\nnested within another resource.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/FileVersion--Base"
+          },
+          {
+            "properties": {
+              "sha1": {
+                "type": "string",
+                "description": "The SHA1 hash of this version of the file.",
+                "example": "134b65991ed521fcfe4724b7d814ab8ded5185dc"
+              }
+            }
+          }
+        ]
+      },
+      "FileVersion--Base": {
+        "title": "File version (Base)",
+        "type": "object",
+        "x-box-resource-id": "file_version_v2024.0--base",
+        "x-box-variants": [
+          "base",
+          "mini",
+          "standard",
+          "full"
+        ],
+        "x-box-variant": "base",
+        "description": "The bare basic representation of a file version, the minimal\namount of fields returned when using the `fields` query\nparameter.",
+        "required": [
+          "id",
+          "type"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "nullable": false,
+            "description": "The unique identifier that represent a file version.",
+            "example": "12345"
+          },
+          "type": {
+            "type": "string",
+            "description": "`file_version`",
+            "example": "file_version",
+            "enum": [
+              "file_version"
+            ],
+            "nullable": false
+          }
+        }
+      },
+      "Folder--Mini": {
+        "title": "Folder (Mini)",
+        "type": "object",
+        "x-box-resource-id": "folder_v2024.0--mini",
+        "x-box-variant": "mini",
+        "description": "A mini representation of a file version, used when\nnested under another resource.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Folder--Base"
+          },
+          {
+            "properties": {
+              "sequence_id": {
+                "allOf": [
+                  {
+                    "type": "string",
+                    "example": "3",
+                    "nullable": true,
+                    "description": "A numeric identifier that represents the most recent user event\nthat has been applied to this item.\n\nThis can be used in combination with the `GET /events`-endpoint\nto filter out user events that would have occurred before this\nidentifier was read.\n\nAn example would be where a Box Drive-like application\nwould fetch an item via the API, and then listen to incoming\nuser events for changes to the item. The application would\nignore any user events where the `sequence_id` in the event\nis smaller than or equal to the `sequence_id` in the originally\nfetched resource."
+                  },
+                  {
+                    "nullable": false
+                  }
+                ]
+              },
+              "name": {
+                "type": "string",
+                "description": "The name of the folder.",
+                "example": "Contracts",
+                "nullable": false
+              }
+            }
+          }
+        ]
+      },
+      "Folder--Base": {
+        "title": "Folder (Base)",
+        "type": "object",
+        "x-box-resource-id": "folder_v2024.0--base",
+        "x-box-tag": "folders",
+        "x-box-variants": [
+          "base",
+          "mini",
+          "standard",
+          "full"
+        ],
+        "x-box-variant": "base",
+        "description": "The bare basic representation of a folder, the minimal\namount of fields returned when using the `fields` query\nparameter.",
+        "required": [
+          "id",
+          "type"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "nullable": false,
+            "description": "The unique identifier that represent a folder.\n\nThe ID for any folder can be determined\nby visiting a folder in the web application\nand copying the ID from the URL. For example,\nfor the URL `https://*.app.box.com/folders/123`\nthe `folder_id` is `123`.",
+            "example": "12345"
+          },
+          "etag": {
+            "type": "string",
+            "nullable": true,
+            "example": "1",
+            "description": "The HTTP `etag` of this folder. This can be used within some API\nendpoints in the `If-Match` and `If-None-Match` headers to only\nperform changes on the folder if (no) changes have happened."
+          },
+          "type": {
+            "type": "string",
+            "description": "`folder`",
+            "example": "folder",
+            "enum": [
+              "folder"
+            ],
+            "nullable": false
+          }
+        }
+      },
+      "SignRequest--Base": {
+        "title": "Box Sign request (Base)",
+        "type": "object",
+        "x-box-resource-id": "sign_request_v2024.0--base",
+        "x-box-tag": "sign_requests",
+        "x-box-variants": [
+          "standard",
+          "base"
+        ],
+        "x-box-variant": "base",
+        "description": "This is the new description: A standard representation of a signature request object.",
+        "properties": {
+          "is_document_preparation_needed": {
+            "type": "boolean",
+            "description": "Indicates if the sender should receive a `prepare_url` in the response to complete document preparation using the UI.",
+            "example": true
+          },
+          "redirect_url": {
+            "type": "string",
+            "example": "https://www.example.com",
+            "description": "When specified, the signature request will be redirected to this url when a document is signed.",
+            "nullable": true
+          },
+          "declined_redirect_url": {
+            "type": "string",
+            "example": "https://declined-redirect.com",
+            "description": "The uri that a signer will be redirected to after declining to sign a document.",
+            "nullable": true
+          },
+          "are_text_signatures_enabled": {
+            "type": "boolean",
+            "description": "Disables the usage of signatures generated by typing (text).",
+            "example": true,
+            "default": true
+          },
+          "email_subject": {
+            "type": "string",
+            "example": "Sign Request from Acme",
+            "description": "Subject of sign request email. This is cleaned by sign request. If this field is not passed, a default subject will be used.",
+            "nullable": true
+          },
+          "email_message": {
+            "type": "string",
+            "example": "Hello! Please sign the document below",
+            "description": "Message to include in sign request email. The field is cleaned through sanitization of specific characters. However, some html tags are allowed. Links included in the message are also converted to hyperlinks in the email. The message may contain the following html tags including `a`, `abbr`, `acronym`, `b`, `blockquote`, `code`, `em`, `i`, `ul`, `li`, `ol`, and `strong`. Be aware that when the text to html ratio is too high, the email may end up in spam filters. Custom styles on these tags are not allowed. If this field is not passed, a default message will be used.",
+            "nullable": true
+          },
+          "are_reminders_enabled": {
+            "type": "boolean",
+            "description": "Reminds signers to sign a document on day 3, 8, 13 and 18. Reminders are only sent to outstanding signers.",
+            "example": true
+          },
+          "name": {
+            "type": "string",
+            "example": "name",
+            "description": "Name of the signature request."
+          },
+          "prefill_tags": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SignRequestPrefillTag"
+            },
+            "description": "When a document contains sign-related tags in the content, you can prefill them using this `prefill_tags` by referencing the 'id' of the tag as the `external_id` field of the prefill tag."
+          },
+          "days_valid": {
+            "type": "integer",
+            "description": "Set the number of days after which the created signature request will automatically expire if not completed. By default, we do not apply any expiration date on signature requests, and the signature request does not expire.",
+            "minimum": 0,
+            "maximum": 730,
+            "example": 2,
+            "nullable": true
+          },
+          "external_id": {
+            "type": "string",
+            "description": "This can be used to reference an ID in an external system that the sign request is related to.",
+            "example": "123",
+            "nullable": true
+          },
+          "is_phone_verification_required_to_view": {
+            "type": "boolean",
+            "description": "Forces signers to verify a text message prior to viewing the document. You must specify the phone number of signers to have this setting apply to them.",
+            "example": true,
+            "nullable": true
+          },
+          "template_id": {
+            "type": "string",
+            "example": "123075213-af2c8822-3ef2-4952-8557-52d69c2fe9cb",
+            "description": "When a signature request is created from a template this field will indicate the id of that template.",
+            "nullable": true
+          },
+          "external_system_name": {
+            "type": "string",
+            "nullable": true,
+            "example": "Box",
+            "description": "Used as an optional system name to appear in the signature log next to the signers who have been assigned the `embed_url_external_id`."
+          }
+        }
+      },
+      "SignRequest": {
+        "title": "Box Sign request",
+        "type": "object",
+        "x-box-resource-id": "sign_request_v2024.0",
+        "x-box-tag": "sign_requests",
+        "x-box-variants": [
+          "standard",
+          "base"
+        ],
+        "x-box-variant": "standard",
+        "description": "This is the new description: A Box Sign request object.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/SignRequest--Base"
+          },
+          {
+            "properties": {
+              "type": {
+                "type": "string",
+                "example": "sign-request",
+                "enum": [
+                  "sign-request"
+                ],
+                "description": "object type"
+              },
+              "source_files": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/File--Base"
+                },
+                "description": "List of files to create a signing document from. This is currently limited to ten files. Only the ID and type fields are required for each file."
+              },
+              "signers": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/SignRequestSigner"
+                },
+                "description": "Array of signers for the signature request."
+              },
+              "signature_color": {
+                "type": "string",
+                "example": "blue",
+                "description": "Force a specific color for the signature (blue, black, or red).",
+                "nullable": true
+              },
+              "id": {
+                "type": "string",
+                "example": "12345",
+                "description": "Box Sign request ID."
+              },
+              "prepare_url": {
+                "type": "string",
+                "example": "https://prepareurl.com",
+                "description": "This URL is returned if `is_document_preparation_needed` is\nset to `true` in the request. The parameter is used to prepare\nthe signature request\nusing the UI. The signature request is not\nsent until the preparation\nphase is complete.",
+                "nullable": true
+              },
+              "signing_log": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/File--Mini"
+                  },
+                  {
+                    "description": "Reference to a file that holds a log of all signer activity for\nthe request."
+                  }
+                ]
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "converting",
+                  "created",
+                  "sent",
+                  "viewed",
+                  "signed",
+                  "cancelled",
+                  "declined",
+                  "error_converting",
+                  "error_sending",
+                  "expired",
+                  "finalizing",
+                  "error_finalizing"
+                ],
+                "example": "converting",
+                "description": "Describes the status of the signature request."
+              },
+              "sign_files": {
+                "type": "object",
+                "properties": {
+                  "files": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/File--Mini"
+                    }
+                  },
+                  "is_ready_for_download": {
+                    "type": "boolean",
+                    "example": true,
+                    "description": "Indicates whether the `sign_files` documents are processing\nand the PDFs may be out of date. A change to any document\nrequires processing on all `sign_files`. We\nrecommended waiting until processing is finished\n(and this value is true) before downloading the PDFs."
+                  }
+                },
+                "description": "List of files that will be signed, which are copies of the original\nsource files. A new version of these files are created as signers sign\nand can be downloaded at any point in the signing process."
+              },
+              "auto_expire_at": {
+                "type": "string",
+                "format": "date-time",
+                "example": "2021-04-26T08:12:13.982Z",
+                "description": "Uses `days_valid` to calculate the date and time, in GMT, the sign request will expire if unsigned.",
+                "nullable": true
+              },
+              "parent_folder": {
+                "nullable": false,
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/Folder--Mini"
+                  },
+                  {
+                    "description": "The destination folder to place final, signed document and signing\nlog.\n\nWhen this value was not passed in when the signature request was \ncreated, then we will use a default folder which is either the parent\nfolder of the first source file in the payload if we have the permission\nto upload to that folder or a folder called \"My Sign Requests\"."
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "SignRequests": {
+        "title": "Box Sign requests",
+        "type": "object",
+        "x-box-resource-id": "sign_requests_v2024.0",
+        "x-box-tag": "sign_requests",
+        "description": "This is the new description: A standard representation of a signature request, as returned from any Box Sign\nAPI endpoints by default.",
+        "allOf": [
+          {
+            "type": "object",
+            "description": "The part of an API response that describes marker\nbased pagination",
+            "properties": {
+              "limit": {
+                "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
+                "example": 1000,
+                "type": "integer",
+                "format": "int64"
+              },
+              "next_marker": {
+                "description": "The marker for the start of the next page of results.",
+                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                "type": "string",
+                "nullable": true
+              }
+            }
+          },
+          {
+            "properties": {
+              "entries": {
+                "type": "array",
+                "description": "A list of Box Sign requests.",
+                "items": {
+                  "$ref": "#/components/schemas/SignRequest"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "FileOrFolderScope": {
+        "title": "File or folder scope",
+        "type": "object",
+        "description": "A relation between a resource (file or folder) and the scopes for which the resource can be accessed",
+        "properties": {
+          "scope": {
+            "type": "string",
+            "description": "The scopes for the resource access",
+            "example": "item_download",
+            "enum": [
+              "annotation_edit",
+              "annotation_view_all",
+              "annotation_view_self",
+              "base_explorer",
+              "base_picker",
+              "base_preview",
+              "base_upload",
+              "item_delete",
+              "item_download",
+              "item_preview",
+              "item_rename",
+              "item_share",
+              "item_upload"
+            ]
+          },
+          "object": {
+            "allOf": [
+              {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/Folder--Mini"
+                  },
+                  {
+                    "$ref": "#/components/schemas/File--Mini"
+                  }
+                ]
+              },
+              {
+                "description": "The file or folder resource"
+              }
+            ]
+          }
+        }
+      },
+      "SignRequestCreateSigner": {
+        "title": "Signer fields used to create a Box Sign request object.",
+        "type": "object",
+        "description": "This is the new description: The schema for a Signer object used in\nfor creating a Box Sign request object.",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "Email address of the signer.\nThe email address of the signer is required when making signature requests, except when using templates that are configured to include emails.",
+            "example": "example@gmail.com",
+            "nullable": true
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "signer",
+              "approver",
+              "final_copy_reader"
+            ],
+            "description": "Defines the role of the signer in the signature request. A `signer`\nmust sign the document and an `approver` must approve the document. A\n`final_copy_reader` only receives the final signed document and signing\nlog.",
+            "example": "signer",
+            "default": "signer"
+          },
+          "is_in_person": {
+            "type": "boolean",
+            "description": "Used in combination with an embed URL for a sender. After the\nsender signs, they are redirected to the next `in_person` signer.",
+            "example": true
+          },
+          "order": {
+            "type": "integer",
+            "description": "Order of the signer",
+            "minimum": 0,
+            "example": 2
+          },
+          "embed_url_external_user_id": {
+            "type": "string",
+            "description": "User ID for the signer in an external application responsible\nfor authentication when accessing the embed URL.",
+            "example": "1234",
+            "nullable": true
+          },
+          "redirect_url": {
+            "type": "string",
+            "description": "The URL that a signer will be redirected\nto after signing a document. Defining this URL\noverrides default or global redirect URL\nsettings for a specific signer.\nIf no declined redirect URL is specified,\nthis URL will be used for decline actions as well.",
+            "example": "https://example.com",
+            "nullable": true
+          },
+          "declined_redirect_url": {
+            "type": "string",
+            "description": "The URL that a signer will be redirect\nto after declining to sign a document.\nDefining this URL overrides default or global\ndeclined redirect URL settings for a specific signer.",
+            "example": "https://declined-example.com",
+            "nullable": true
+          },
+          "login_required": {
+            "type": "boolean",
+            "description": "If set to true, the signer will need to log in to a Box account\nbefore signing the request. If the signer does not have\nan existing account, they will have the option to create\na free Box account. Cannot be selected in combination with\n`verification_phone_number`.",
+            "example": true,
+            "nullable": true
+          },
+          "verification_phone_number": {
+            "type": "string",
+            "description": "If set, this phone number will be used to verify the signer\nvia two-factor authentication before they are able to sign the document.\nCannot be selected in combination with `login_required`.",
+            "example": "6314578901",
+            "nullable": true
+          },
+          "password": {
+            "type": "string",
+            "writeOnly": true,
+            "description": "If set, the signer is required to enter the password before they are able\nto sign a document. This field is write only.",
+            "example": "SecretPassword123",
+            "nullable": true
+          },
+          "signer_group_id": {
+            "type": "string",
+            "description": "If set, signers who have the same value will be assigned to the same input and to the same signer group.\nA signer group is not a Box Group. It is an entity that belongs to a Sign Request and can only be\nused/accessed within this Sign Request. A signer group is expected to have more than one signer.\nIf the provided value is only used for one signer, this value will be ignored and request will be handled\nas it was intended for an individual signer. The value provided can be any string and only used to\ndetermine which signers belongs to same group. A successful response will provide a generated UUID value\ninstead for signers in the same signer group.",
+            "example": "cd4ff89-8fc1-42cf-8b29-1890dedd26d7",
+            "nullable": true
+          },
+          "suppress_notifications": {
+            "type": "boolean",
+            "nullable": true,
+            "example": false,
+            "description": "If true, no emails about the sign request will be sent"
+          }
+        }
+      },
+      "SignRequestPrefillTag": {
+        "title": "Sign request prefill tag",
+        "type": "object",
+        "description": "This is the new description: Prefill tags are used to prefill placeholders with signer input data. Only\none value field can be included.",
+        "properties": {
+          "document_tag_id": {
+            "type": "string",
+            "example": "1234",
+            "description": "This references the ID of a specific tag contained in a file of the signature request.",
+            "nullable": true
+          },
+          "text_value": {
+            "type": "string",
+            "example": "text",
+            "description": "Text prefill value",
+            "nullable": true
+          },
+          "checkbox_value": {
+            "type": "boolean",
+            "example": true,
+            "description": "Checkbox prefill value",
+            "nullable": true
+          },
+          "date_value": {
+            "type": "string",
+            "format": "date",
+            "example": "2021-04-26",
+            "description": "Date prefill value",
+            "nullable": true
+          }
+        }
+      },
+      "SignRequestSignerInput": {
+        "title": "Sign Request Signer Input",
+        "type": "object",
+        "description": "This is the new description: Input created by a Signer on a Sign Request",
+        "required": [
+          "page_index"
+        ],
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/SignRequestPrefillTag"
+          },
+          {
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "signature",
+                  "date",
+                  "text",
+                  "checkbox",
+                  "radio",
+                  "dropdown"
+                ],
+                "description": "Type of input",
+                "example": "text"
+              },
+              "content_type": {
+                "type": "string",
+                "enum": [
+                  "signature",
+                  "initial",
+                  "stamp",
+                  "date",
+                  "checkbox",
+                  "text",
+                  "full_name",
+                  "first_name",
+                  "last_name",
+                  "company",
+                  "title",
+                  "email",
+                  "attachment",
+                  "radio",
+                  "dropdown"
+                ],
+                "description": "Content type of input",
+                "example": "signature"
+              },
+              "page_index": {
+                "type": "integer",
+                "description": "Index of page that the input is on",
+                "example": 4
+              },
+              "read_only": {
+                "type": "boolean",
+                "description": "Whether this input was defined as read-only(immutable by signers) or not",
+                "example": true
+              }
+            }
+          }
+        ]
+      },
+      "SignRequestSigner": {
+        "title": "Signer fields for Box Sign request response",
+        "type": "object",
+        "description": "This is the new description: The schema for a Signer object used\non the body of a Box Sign request object.",
+        "required": [
+          "email"
+        ],
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/SignRequestCreateSigner"
+          },
+          {
+            "properties": {
+              "has_viewed_document": {
+                "type": "boolean",
+                "readOnly": true,
+                "example": true,
+                "description": "Set to `true` if the signer views the document"
+              },
+              "signer_decision": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "signed",
+                      "declined"
+                    ],
+                    "example": "signed",
+                    "description": "Type of decision made by the signer."
+                  },
+                  "finalized_at": {
+                    "type": "string",
+                    "format": "date-time",
+                    "example": "2021-04-26T08:12:13.982Z",
+                    "description": "Date and Time that the decision was made."
+                  },
+                  "additional_info": {
+                    "type": "string",
+                    "example": "Requesting changes before signing.",
+                    "description": "Additional info about the decision, such as the decline reason from the signer.",
+                    "nullable": true
+                  }
+                },
+                "description": "Final decision made by the signer.",
+                "nullable": true
+              },
+              "inputs": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/SignRequestSignerInput"
+                },
+                "readOnly": true
+              },
+              "embed_url": {
+                "type": "string",
+                "readOnly": true,
+                "example": "https://example.com",
+                "description": "URL to direct a signer to for signing",
+                "nullable": true
+              },
+              "iframeable_embed_url": {
+                "type": "string",
+                "nullable": true,
+                "example": "https://app.box.com/embed/sign/document/gfhr4222-a331-494b-808b-79bc7f3992a3/f14d7098-a331-494b-808b-79bc7f3992a4",
+                "description": "This URL is specifically designed for\nsigning documents within an HTML `iframe` tag.\nIt will be returned in the response\nonly if the `embed_url_external_user_id`\nparameter was passed in the\n`create Box Sign request` call."
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  "security": [
+    {
+      "OAuth2Security": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "Authorization",
+      "description": "A set of endpoints used to\nmanage user authorization process.",
+      "x-box-tag": "authorization",
+      "x-box-priority": true
+    },
+    {
+      "name": "Box Sign requests",
+      "description": "Box Sign requests are used\nto submit a file for\nsignature.",
+      "x-box-tag": "sign_requests"
+    }
+  ],
+  "externalDocs": {
+    "description": "Box Developer Documentation",
+    "url": "https://developer.box.com"
+  }
+}
