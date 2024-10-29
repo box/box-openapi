@@ -14,7 +14,7 @@
             "url": "http://www.apache.org/licenses/LICENSE-2.0"
         },
         "version": "2.0.0",
-        "x-box-commit-hash": "04f2210a1d"
+        "x-box-commit-hash": "30e62e9e7d"
     },
     "servers": [
         {
@@ -24041,7 +24041,7 @@
                 "operationId": "post_ai_ask",
                 "summary": "質問を送信",
                 "description": "サポートされているLLMにAIリクエストを送信し、提供されたコンテキストを考慮してユーザーの質問に特化した回答を返します。",
-                "x-stability-level": "beta",
+                "x-stability-level": "stable",
                 "requestBody": {
                     "content": {
                         "application/json": {
@@ -24095,7 +24095,7 @@
                 "operationId": "post_ai_text_gen",
                 "summary": "テキストを生成",
                 "description": "サポートされている大規模言語モデル (LLM) にAIリクエストを送信し、提供されたプロンプトに基づいて生成されたテキストを返します。",
-                "x-stability-level": "beta",
+                "x-stability-level": "stable",
                 "requestBody": {
                     "content": {
                         "application/json": {
@@ -24149,7 +24149,7 @@
                 "operationId": "get_ai_agent_default",
                 "summary": "AIエージェントのデフォルト構成を取得",
                 "description": "AIエージェントのデフォルト構成を取得します",
-                "x-stability-level": "beta",
+                "x-stability-level": "stable",
                 "parameters": [
                     {
                         "name": "mode",
@@ -24505,6 +24505,9 @@
                             },
                             {
                                 "$ref": "#/components/schemas/AiLlmEndpointParamsGoogle"
+                            },
+                            {
+                                "$ref": "#/components/schemas/AiLlmEndpointParamsAWS"
                             }
                         ]
                     }
@@ -24988,6 +24991,42 @@
                 "x-box-variants": [
                     "base"
                 ]
+            },
+            "AiLlmEndpointParamsAWS": {
+                "description": "AI LLM endpoint params AWS object",
+                "type": "object",
+                "properties": {
+                    "type": {
+                        "description": "The type of the AI LLM endpoint params object for AWS. This parameter is **required**.",
+                        "type": "string",
+                        "example": "aws_params",
+                        "enum": [
+                            "aws_params"
+                        ],
+                        "nullable": false
+                    },
+                    "temperature": {
+                        "description": "What sampling temperature to use, between 0 and 1. Higher values like 0.8 will make the output more random, while lower values like 0.2 will make it more focused and deterministic. We generally recommend altering this or `top_p` but not both.",
+                        "type": "number",
+                        "example": 0.5,
+                        "maximum": 1,
+                        "minimum": 0,
+                        "nullable": true
+                    },
+                    "top_p": {
+                        "description": "temperatureによるサンプリングの代替手段 (核サンプリングと呼ばれます)。この場合、モデルは`top_p`の確率質量を持つトークンの結果を考慮します。つまり、0.1の場合は、上位10%の確率質量で構成されるトークンのみが考慮されます。一般的には、この値とtemperatureの両方ではなく、いずれかを変更することをお勧めします。",
+                        "type": "number",
+                        "example": 0.5,
+                        "maximum": 1,
+                        "minimum": 0,
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "type"
+                ],
+                "title": "AI LLM endpoint params AWS",
+                "x-box-resource-id": "ai_llm_endpoint_params_aws"
             },
             "AiLlmEndpointParamsGoogle": {
                 "description": "AI LLMエンドポイントパラメータ (Google) オブジェクトです。",
@@ -25676,14 +25715,10 @@
                     "context_info": {
                         "description": "このエラーに関する追加コンテキストを含む自由形式のオブジェクト。使用できるフィールドは、エンドポイントごとに定義されています。`message`は唯一の例です。",
                         "type": "object",
-                        "nullable": true,
-                        "properties": {
-                            "message": {
-                                "description": "エラーの詳細。",
-                                "type": "string",
-                                "example": "Something went wrong."
-                            }
-                        }
+                        "example": {
+                            "message": "Something went wrong"
+                        },
+                        "nullable": true
                     },
                     "help_url": {
                         "description": "このエラーの原因に関する詳細情報にリンクされたURL。",
