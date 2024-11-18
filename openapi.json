@@ -14,7 +14,7 @@
             "url": "http://www.apache.org/licenses/LICENSE-2.0"
         },
         "version": "2.0.0",
-        "x-box-commit-hash": "98d60db47f"
+        "x-box-commit-hash": "8edc17f8ac"
     },
     "servers": [
         {
@@ -6252,6 +6252,28 @@
                             "name"
                         ],
                         "explode": false
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "返す項目の1ページあたりの最大数。",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64",
+                            "maximum": 1000
+                        },
+                        "example": 1000
+                    },
+                    {
+                        "name": "marker",
+                        "in": "query",
+                        "description": "結果が返される開始位置のマーカー。マーカーベースのページ割りを使用している場合に使用されます。\n\nこれを使用するには、`usemarker`を`true`に設定する必要があります。",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii"
                     }
                 ],
                 "responses": {
@@ -7839,6 +7861,28 @@
                             "format": "uuid"
                         },
                         "example": "01234500-12f1-1234-aa12-b1d234cb567e"
+                    },
+                    {
+                        "name": "marker",
+                        "in": "query",
+                        "description": "結果が返される開始位置のマーカー。マーカーベースのページ割りを使用している場合に使用されます。\n\nこれを使用するには、`usemarker`を`true`に設定する必要があります。",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii"
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "返す項目の1ページあたりの最大数。",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64",
+                            "maximum": 1000
+                        },
+                        "example": 1000
                     }
                 ],
                 "responses": {
@@ -10089,7 +10133,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Collaborations"
+                                    "$ref": "#/components/schemas/CollaborationsOffsetPaginated"
                                 }
                             }
                         }
@@ -16347,7 +16391,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Collaborations"
+                                    "$ref": "#/components/schemas/CollaborationsOffsetPaginated"
                                 }
                             }
                         }
@@ -17785,7 +17829,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Items"
+                                    "$ref": "#/components/schemas/ItemsOffsetPaginated"
                                 }
                             }
                         }
@@ -25962,12 +26006,12 @@
                                 "type": "object",
                                 "properties": {
                                     "enterprise_has_strong_password_required_for_external_users": {
-                                        "description": "このコンテンツを所有する会社が、このコンテンツでコラボレーションを行うために強力なパスワードを必要とするかどうか。",
+                                        "description": "Whether or not the enterprise that owns the content requires a strong password to collaborate on the content, or enforces an exposed password detection for the external collaborators.",
                                         "type": "boolean",
                                         "example": true
                                     },
                                     "user_has_strong_password": {
-                                        "description": "ユーザーが自分のアカウントに強力なパスワードを設定しているかどうか。強力なパスワードが必要ない場合、このフィールドは`null`です。",
+                                        "description": "Whether or not the user has a strong and not exposed password set for their account. The field is `null` when a strong password is not required.",
                                         "type": "boolean",
                                         "example": true,
                                         "nullable": true
@@ -26269,6 +26313,26 @@
                         }
                     },
                     {
+                        "properties": {
+                            "entries": {
+                                "description": "コラボレーションのリスト",
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/Collaboration"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "title": "Collaborations",
+                "x-box-resource-id": "collaborations",
+                "x-box-tag": "user_collaborations"
+            },
+            "CollaborationsOffsetPaginated": {
+                "description": "コラボレーションのリスト",
+                "type": "object",
+                "allOf": [
+                    {
                         "type": "object",
                         "description": "ページ割りについて説明しているAPIレスポンスの部分",
                         "properties": {
@@ -26289,30 +26353,6 @@
                                 "type": "integer",
                                 "format": "int64",
                                 "example": 2000
-                            },
-                            "order": {
-                                "description": "項目が返される順序。\n\nこのフィールドは、オフセットベースのページ割りを使用する呼び出しのみで返されます。マーカーベースでページ割りされたAPIでは、このフィールドは省略されます。",
-                                "type": "array",
-                                "items": {
-                                    "type": "object",
-                                    "description": "ページ割りの順序",
-                                    "properties": {
-                                        "by": {
-                                            "description": "並べ替えに使用するフィールド",
-                                            "type": "string",
-                                            "example": "type"
-                                        },
-                                        "direction": {
-                                            "description": "並べ替えの方向 (昇順または降順)",
-                                            "type": "string",
-                                            "example": "ASC",
-                                            "enum": [
-                                                "ASC",
-                                                "DESC"
-                                            ]
-                                        }
-                                    }
-                                }
                             }
                         }
                     },
@@ -26329,7 +26369,7 @@
                     }
                 ],
                 "title": "Collaborations",
-                "x-box-resource-id": "collaborations",
+                "x-box-resource-id": "collaborations_offset_paginated",
                 "x-box-tag": "user_collaborations"
             },
             "CollaboratorVariable": {
@@ -30806,6 +30846,84 @@
                 ],
                 "title": "Items",
                 "x-box-resource-id": "items",
+                "x-box-tag": "folders"
+            },
+            "ItemsOffsetPaginated": {
+                "description": "Mini版の表示に含まれるファイル、フォルダ、ウェブリンクのリスト。",
+                "type": "object",
+                "allOf": [
+                    {
+                        "type": "object",
+                        "description": "ページ割りについて説明しているAPIレスポンスの部分",
+                        "properties": {
+                            "total_count": {
+                                "description": "コレクション全体の最後のエントリのオフセットに1を加算した値。コレクション内のエントリの合計数は、`total_count`よりも少ない場合があります。\n\nこのフィールドは、オフセットベースのページ割りを使用する呼び出しのみで返されます。マーカーベースでページ割りされたAPIでは、このフィールドは省略されます。",
+                                "type": "integer",
+                                "format": "int64",
+                                "example": 5000
+                            },
+                            "limit": {
+                                "description": "これらのエントリで使用された制限値。許容される最大値を超えていない限り、クエリパラメータの`limit`と等しくなります。最大値はAPIによって異なります。",
+                                "type": "integer",
+                                "format": "int64",
+                                "example": 1000
+                            },
+                            "offset": {
+                                "description": "このセットに含まれる最初のエントリのゼロから始まるオフセット。これは、`offset`クエリパラメータと同じになります。\n\nこのフィールドは、オフセットベースのページ割りを使用する呼び出しのみで返されます。マーカーベースでページ割りされたAPIでは、このフィールドは省略されます。",
+                                "type": "integer",
+                                "format": "int64",
+                                "example": 2000
+                            },
+                            "order": {
+                                "description": "項目が返される順序。\n\nこのフィールドは、オフセットベースのページ割りを使用する呼び出しのみで返されます。マーカーベースでページ割りされたAPIでは、このフィールドは省略されます。",
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "description": "ページ割りの順序",
+                                    "properties": {
+                                        "by": {
+                                            "description": "並べ替えに使用するフィールド",
+                                            "type": "string",
+                                            "example": "type"
+                                        },
+                                        "direction": {
+                                            "description": "並べ替えの方向 (昇順または降順)",
+                                            "type": "string",
+                                            "example": "ASC",
+                                            "enum": [
+                                                "ASC",
+                                                "DESC"
+                                            ]
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "properties": {
+                            "entries": {
+                                "description": "このコレクション内の項目。",
+                                "type": "array",
+                                "items": {
+                                    "oneOf": [
+                                        {
+                                            "$ref": "#/components/schemas/File--Full"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/Folder--Mini"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/WebLink"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                ],
+                "title": "Items",
+                "x-box-resource-id": "items_offset_paginated",
                 "x-box-tag": "folders"
             },
             "KeywordSkillCard": {
