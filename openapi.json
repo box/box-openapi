@@ -14,7 +14,7 @@
       "url": "http://www.apache.org/licenses/LICENSE-2.0"
     },
     "version": "2.0.0",
-    "x-box-commit-hash": "8edc17f8ac"
+    "x-box-commit-hash": ""
   },
   "servers": [
     {
@@ -24333,7 +24333,7 @@
       "post": {
         "operationId": "post_ai_extract",
         "summary": "Extract metadata (freeform)",
-        "description": "Sends an AI request to supported Large Language Models (LLMs) and extracts metadata in form of key-value pairs.\nFreeform metadata extraction does not require any metadata template setup before sending the request.",
+        "description": "Sends an AI request to supported Large Language Models (LLMs) and extracts metadata in form of key-value pairs.\nIn this request, both the prompt and the output can be freeform.\nMetadata template setup before sending the request is not required.",
         "x-stability-level": "beta",
         "requestBody": {
           "content": {
@@ -24387,7 +24387,7 @@
       "post": {
         "operationId": "post_ai_extract_structured",
         "summary": "Extract metadata (structured)",
-        "description": "Sends an AI request to supported Large Language Models (LLMs) and returns extracted metadata as a set of key-value pairs.\nFor this request, you need to use an already defined metadata template or a define a schema yourself.\nTo learn more about creating templates, see [Creating metadata templates in the Admin Console](https://support.box.com/hc/en-us/articles/360044194033-Customizing-Metadata-Templates)\nor use the [metadata template API](g://metadata/templates/create).",
+        "description": "Sends an AI request to supported Large Language Models (LLMs) and returns extracted metadata as a set of key-value pairs.\nFor this request, you either need a metadata template or a list of fields you want to extract.\nInput is **either** a metadata template or a list of fields to ensure the structure.\nTo learn more about creating templates, see [Creating metadata templates in the Admin Console](https://support.box.com/hc/en-us/articles/360044194033-Customizing-Metadata-Templates)\nor use the [metadata template API](g://metadata/templates/create).",
         "x-stability-level": "beta",
         "requestBody": {
           "content": {
@@ -24440,14 +24440,10 @@
     "/docgen_templates": {
       "post": {
         "operationId": "post_docgen_templates",
-        "summary": "Add file with docgen template",
-        "tags": [
-          "Docgen Template"
-        ],
-        "x-box-tag": "docgen_template",
-        "description": "Creates a Docgen template",
+        "summary": "Add a Doc Gen template",
+        "description": "Creates a Doc Gen template",
         "requestBody": {
-          "description": "Docgen entity object to be marked as Docgen template",
+          "description": "Creates a Doc Gen template based on a provided file.",
           "required": true,
           "content": {
             "application/json": {
@@ -24508,38 +24504,38 @@
               }
             }
           }
-        }
+        },
+        "x-box-tag": "docgen_template",
+        "tags": [
+          "Doc Gen Templates"
+        ]
       },
       "get": {
         "operationId": "get_docgen_templates",
-        "summary": "List docgen templates",
-        "tags": [
-          "Docgen Template"
-        ],
-        "x-box-tag": "docgen_template",
-        "description": "Lists docgen templates created by a user.",
+        "summary": "List Doc Gen templates",
+        "description": "Lists Doc Gen templates created by a user",
         "parameters": [
           {
             "name": "marker",
-            "description": "Defines the position marker at which to begin returning results. This is\nused when paginating using marker-based pagination.\n\nThis requires `usemarker` to be set to `true`.",
             "in": "query",
+            "description": "Defines the position marker at which to begin returning results. This is\nused when paginating using marker-based pagination.\n\nThis requires `usemarker` to be set to `true`.",
             "required": false,
-            "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
             "schema": {
               "type": "string"
-            }
+            },
+            "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii"
           },
           {
             "name": "limit",
-            "description": "The maximum number of items to return per page.",
             "in": "query",
+            "description": "The maximum number of items to return per page.",
             "required": false,
-            "example": 1000,
             "schema": {
               "type": "integer",
               "format": "int64",
               "maximum": 1000
-            }
+            },
+            "example": 1000
           }
         ],
         "responses": {
@@ -24573,23 +24569,23 @@
               }
             }
           }
-        }
+        },
+        "x-box-tag": "docgen_template",
+        "tags": [
+          "Doc Gen Templates"
+        ]
       }
     },
     "/docgen_templates/{template_id}": {
       "delete": {
         "operationId": "delete_docgen_templates_id",
-        "summary": "Delete file as docgen template",
-        "tags": [
-          "Docgen Template"
-        ],
-        "x-box-tag": "docgen_template",
-        "description": "Unmarks file as Docgen template",
+        "summary": "Delete association between Doc Gen template and file",
+        "description": "Unmarks file as Doc Gen template",
         "parameters": [
           {
             "name": "template_id",
             "in": "path",
-            "description": "Id of file which will be unmarked as a docgen template",
+            "description": "ID of file which no longer will be marked as a Doc Gen template.",
             "required": true,
             "schema": {
               "type": "string"
@@ -24599,7 +24595,7 @@
         ],
         "responses": {
           "204": {
-            "description": "Returns an empty response when the docgen template has been deleted."
+            "description": "Returns an empty response when a file is no longer marked as Doc Gen template."
           },
           "400": {
             "description": "The server cannot or will not process the request due to an apparent client error.",
@@ -24651,21 +24647,21 @@
               }
             }
           }
-        }
+        },
+        "x-box-tag": "docgen_template",
+        "tags": [
+          "Doc Gen templates"
+        ]
       },
       "get": {
         "operationId": "get_docgen_templates_id",
-        "summary": "Get docgen template by id.",
-        "tags": [
-          "Docgen Template"
-        ],
-        "x-box-tag": "docgen_template",
-        "description": "Lists details of a specific docgen template.",
+        "summary": "Get Doc Gen template by ID",
+        "description": "Lists details of a specific Doc Gen template.",
         "parameters": [
           {
             "name": "template_id",
-            "description": "The ID of a docgen template.",
             "in": "path",
+            "description": "The ID of a docgen template.",
             "required": true,
             "schema": {
               "type": "string"
@@ -24675,7 +24671,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Returns details of a template.",
+            "description": "Returns a template.",
             "content": {
               "application/json": {
                 "schema": {
@@ -24714,24 +24710,141 @@
               }
             }
           }
-        }
+        },
+        "x-box-tag": "docgen_template",
+        "tags": [
+          "Doc Gen Templates"
+        ]
+      }
+    },
+    "/docgen_templates/{template_id}/tags": {
+      "get": {
+        "operationId": "get_docgen_templates_id_tags",
+        "summary": "List all docgen template tags in template",
+        "description": "List all tags in a Doc Gen template.",
+        "parameters": [
+          {
+            "name": "template_id",
+            "in": "path",
+            "description": "Id of template.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": 123
+          },
+          {
+            "name": "template_version_id",
+            "in": "query",
+            "description": "Id of template version.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": 123
+          },
+          {
+            "name": "marker",
+            "in": "query",
+            "description": "Defines the position marker at which to begin returning results. This is\nused when paginating using marker-based pagination.\n\nThis requires `usemarker` to be set to `true`.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "The maximum number of items to return per page.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "maximum": 1000
+            },
+            "example": 1000
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of document generation template tags.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocgenTags"
+                }
+              }
+            }
+          },
+          "202": {
+            "description": "Processing tags for the file.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocgenTagsProcessingMessage"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The client does not have access rights to the content or resource requested.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The requested resource could not be found but may be available in the future.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "The user has sent too many requests in a given amount of time.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected condition was encountered on the server.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        },
+        "x-box-tag": "docgen_template",
+        "tags": [
+          "Doc Gen Templates"
+        ]
       }
     },
     "/docgen_jobs/{job_id}": {
       "get": {
         "operationId": "get_docgen_jobs_id",
-        "summary": "Get docgen job by id",
-        "tags": [
-          "Docgen"
-        ],
-        "x-box-tag": "docgen",
+        "summary": "Get Doc Gen job by ID",
         "description": "List status of job.",
         "parameters": [
           {
             "name": "job_id",
             "in": "path",
+            "description": "Document generation job ID.",
             "required": true,
-            "description": "Document generation job id.",
             "schema": {
               "type": "string"
             },
@@ -24789,40 +24902,40 @@
               }
             }
           }
-        }
+        },
+        "x-box-tag": "docgen",
+        "tags": [
+          "Doc Gen"
+        ]
       }
     },
     "/docgen_jobs": {
       "get": {
         "operationId": "get_docgen_jobs",
-        "summary": "List all docgen jobs",
-        "tags": [
-          "Docgen"
-        ],
-        "x-box-tag": "docgen",
+        "summary": "List all Doc Gen jobs",
         "description": "List of all document generation jobs for a user.",
         "parameters": [
           {
             "name": "marker",
-            "description": "Defines the position marker at which to begin returning results. This is\nused when paginating using marker-based pagination.\n\nThis requires `usemarker` to be set to `true`.",
             "in": "query",
+            "description": "Defines the position marker at which to begin returning results. This is\nused when paginating using marker-based pagination.\n\nThis requires `usemarker` to be set to `true`.",
             "required": false,
-            "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
             "schema": {
               "type": "string"
-            }
+            },
+            "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii"
           },
           {
             "name": "limit",
-            "description": "The maximum number of items to return per page.",
             "in": "query",
+            "description": "The maximum number of items to return per page.",
             "required": false,
-            "example": 1000,
             "schema": {
               "type": "integer",
               "format": "int64",
               "maximum": 1000
-            }
+            },
+            "example": 1000
           }
         ],
         "responses": {
@@ -24866,18 +24979,18 @@
               }
             }
           }
-        }
+        },
+        "x-box-tag": "docgen",
+        "tags": [
+          "Doc Gen"
+        ]
       }
     },
-    "/v2/docgen_template_jobs/{template_id}": {
+    "/docgen_template_jobs/{template_id}": {
       "get": {
         "operationId": "get_docgen_template_jobs_id",
-        "summary": "Get list of all docgen jobs for template.",
-        "tags": [
-          "Docgen Template"
-        ],
-        "x-box-tag": "docgen_template",
-        "description": "Lists details of a document generation template including associated jobs list for a user",
+        "summary": "Get list of all Doc Gen jobs for template",
+        "description": "Lists details of a Doc Gen template including associated jobs. list for a user",
         "parameters": [
           {
             "name": "template_id",
@@ -24891,30 +25004,30 @@
           },
           {
             "name": "marker",
-            "description": "Defines the position marker at which to begin returning results. This is\nused when paginating using marker-based pagination.\n\nThis requires `usemarker` to be set to `true`.",
             "in": "query",
+            "description": "Defines the position marker at which to begin returning results. This is\nused when paginating using marker-based pagination.\n\nThis requires `usemarker` to be set to `true`.",
             "required": false,
-            "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
             "schema": {
               "type": "string"
-            }
+            },
+            "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii"
           },
           {
             "name": "limit",
-            "description": "The maximum number of items to return per page.",
             "in": "query",
+            "description": "The maximum number of items to return per page.",
             "required": false,
-            "example": 1000,
             "schema": {
               "type": "integer",
               "format": "int64",
               "maximum": 1000
-            }
+            },
+            "example": 1000
           }
         ],
         "responses": {
           "200": {
-            "description": "A single document generation template.",
+            "description": "A single Doc Gen template.",
             "content": {
               "application/json": {
                 "schema": {
@@ -24963,55 +25076,55 @@
               }
             }
           }
-        }
+        },
+        "x-box-tag": "docgen_template",
+        "tags": [
+          "Doc Gen Templates"
+        ]
       }
     },
     "/docgen_batch_jobs/{batch_id}": {
       "get": {
         "operationId": "get_docgen_batch_jobs_id",
-        "summary": "Get docgen jobs for batch id",
-        "tags": [
-          "Docgen"
-        ],
-        "x-box-tag": "docgen",
-        "description": "List docgen jobs in a batch",
+        "summary": "Get Doc Gen jobs for batch with a specific ID",
+        "description": "Lists Doc Gen jobs in a batch",
         "parameters": [
           {
             "name": "batch_id",
             "in": "path",
+            "description": "Document generation batch ID.",
             "required": true,
             "schema": {
               "type": "string"
             },
-            "description": "Document generation batch id.",
             "example": 123
           },
           {
             "name": "marker",
-            "description": "Defines the position marker at which to begin returning results. This is\nused when paginating using marker-based pagination.\n\nThis requires `usemarker` to be set to `true`.",
             "in": "query",
+            "description": "Defines the position marker at which to begin returning results. This is\nused when paginating using marker-based pagination.\n\nThis requires `usemarker` to be set to `true`.",
             "required": false,
-            "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
             "schema": {
               "type": "string"
-            }
+            },
+            "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii"
           },
           {
             "name": "limit",
-            "description": "The maximum number of items to return per page.",
             "in": "query",
+            "description": "The maximum number of items to return per page.",
             "required": false,
-            "example": 1000,
             "schema": {
               "type": "integer",
               "format": "int64",
               "maximum": 1000
-            }
+            },
+            "example": 1000
           }
         ],
         "responses": {
           "200": {
-            "description": "List of docgen jobs in to a docgen batch",
+            "description": "Returns a list of Doc Gen jobs in a Doc Gen batch.",
             "content": {
               "application/json": {
                 "schema": {
@@ -25060,17 +25173,17 @@
               }
             }
           }
-        }
+        },
+        "x-box-tag": "docgen",
+        "tags": [
+          "Doc Gen"
+        ]
       }
     },
     "/docgen_batches": {
       "post": {
         "operationId": "post_docgen_batches",
-        "summary": "Create document using template",
-        "tags": [
-          "Docgen"
-        ],
-        "x-box-tag": "docgen",
+        "summary": "Generate document using Doc Gen",
         "description": "API to submit document generation jobs.",
         "requestBody": {
           "required": true,
@@ -25123,7 +25236,11 @@
               }
             }
           }
-        }
+        },
+        "x-box-tag": "docgen",
+        "tags": [
+          "Doc Gen"
+        ]
       }
     }
   },
@@ -27570,6 +27687,779 @@
         "x-box-resource-id": "device_pinners",
         "x-box-tag": "device_pinners"
       },
+      "DocgenBatch--Base": {
+        "description": "The basic representation of a Doc Gen batch object.",
+        "type": "object",
+        "properties": {
+          "id": {
+            "description": "The unique identifier that represents a batch.",
+            "type": "string",
+            "example": "12345",
+            "nullable": false
+          },
+          "type": {
+            "description": "`docgen_batch`",
+            "type": "string",
+            "example": "docgen_batch",
+            "enum": [
+              "docgen_batch"
+            ],
+            "nullable": false
+          }
+        },
+        "required": [
+          "id",
+          "type"
+        ],
+        "title": "Doc Gen batch (Base)",
+        "x-box-resource-id": "docgen_batch--base",
+        "x-box-tag": "files",
+        "x-box-variant": "base",
+        "x-box-variants": [
+          "base",
+          "standard"
+        ]
+      },
+      "DocgenBatchCreateRequest": {
+        "description": "The schema for creating a Doc Gen job batch request.",
+        "type": "object",
+        "properties": {
+          "file": {
+            "allOf": [
+              {
+                "title": "File reference",
+                "type": "object",
+                "description": "File reference",
+                "required": [
+                  "type",
+                  "id"
+                ],
+                "properties": {
+                  "type": {
+                    "description": "`file`",
+                    "type": "string",
+                    "example": "file",
+                    "enum": [
+                      "file"
+                    ],
+                    "nullable": false
+                  },
+                  "id": {
+                    "description": "ID of the object",
+                    "type": "string",
+                    "example": "42037322"
+                  }
+                }
+              },
+              {
+                "description": "Template file."
+              }
+            ]
+          },
+          "file_version": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FileVersion--Base"
+              },
+              {
+                "description": "File version of a template."
+              }
+            ]
+          },
+          "input_source": {
+            "description": "Source of input.",
+            "type": "string",
+            "example": "api"
+          },
+          "destination_folder": {
+            "allOf": [
+              {
+                "title": "Folder reference",
+                "type": "object",
+                "description": "Folder reference",
+                "required": [
+                  "type",
+                  "id"
+                ],
+                "properties": {
+                  "type": {
+                    "description": "`folder`",
+                    "type": "string",
+                    "example": "folder",
+                    "enum": [
+                      "folder"
+                    ],
+                    "nullable": false
+                  },
+                  "id": {
+                    "description": "ID of the folder",
+                    "type": "string",
+                    "example": "42037322"
+                  }
+                }
+              },
+              {
+                "description": "Destination folder for the generated files."
+              }
+            ]
+          },
+          "output_type": {
+            "description": "Type of the output file.",
+            "type": "string",
+            "example": "docx"
+          },
+          "document_generation_data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DocgenDocumentGenerationData"
+            }
+          }
+        },
+        "required": [
+          "file",
+          "input_source",
+          "destination_folder",
+          "output_type",
+          "document_generation_data"
+        ],
+        "title": "Create batch request"
+      },
+      "DocgenDocumentGenerationData": {
+        "description": "The schema for for creating a Doc Gen job request.",
+        "type": "object",
+        "properties": {
+          "generated_file_name": {
+            "description": "File name of the output file.",
+            "type": "string",
+            "example": "New_Template"
+          },
+          "user_input": {
+            "type": "object",
+            "example": {
+              "name": "Aaron Levie"
+            }
+          }
+        },
+        "required": [
+          "generated_file_name",
+          "user_input"
+        ],
+        "title": "Document generation data"
+      },
+      "DocgenJob": {
+        "description": "A standard representation of a Doc Gen job.",
+        "type": "object",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/DocgenJob--Base"
+          },
+          {
+            "properties": {
+              "batch": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/DocgenBatch--Base"
+                  },
+                  {
+                    "description": "Doc Gen batch that the job belongs to."
+                  }
+                ]
+              },
+              "template_file": {
+                "allOf": [
+                  {
+                    "title": "File reference",
+                    "type": "object",
+                    "description": "File reference",
+                    "required": [
+                      "type",
+                      "id"
+                    ],
+                    "properties": {
+                      "type": {
+                        "description": "`file`",
+                        "type": "string",
+                        "example": "file",
+                        "enum": [
+                          "file"
+                        ],
+                        "nullable": false
+                      },
+                      "id": {
+                        "description": "ID of the object",
+                        "type": "string",
+                        "example": "42037322"
+                      }
+                    }
+                  },
+                  {
+                    "description": "Doc Gen template used in the job."
+                  }
+                ]
+              },
+              "template_file_version": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/FileVersion--Base"
+                  },
+                  {
+                    "description": "File version of a template."
+                  }
+                ]
+              },
+              "output_file": {
+                "description": "The output file of the job.",
+                "type": "object",
+                "nullable": true,
+                "properties": {
+                  "type": {
+                    "description": "`file`",
+                    "type": "string",
+                    "example": "file",
+                    "enum": [
+                      "file"
+                    ]
+                  },
+                  "id": {
+                    "description": "ID of the object.",
+                    "type": "string",
+                    "example": "42037322"
+                  }
+                }
+              },
+              "output_file_version": {
+                "description": "File version of generated file.",
+                "type": "object",
+                "nullable": true,
+                "properties": {
+                  "type": {
+                    "description": "`file_version`",
+                    "type": "string",
+                    "example": "file_version",
+                    "enum": [
+                      "file_version"
+                    ]
+                  },
+                  "id": {
+                    "description": "ID of the object.",
+                    "type": "string",
+                    "example": "42037322"
+                  }
+                }
+              },
+              "status": {
+                "description": "Status of the job.",
+                "type": "string",
+                "example": "completed",
+                "enum": [
+                  "submitted",
+                  "completed",
+                  "failed",
+                  "completed_with_error",
+                  "pending"
+                ]
+              },
+              "output_type": {
+                "description": "Type of the generated file.",
+                "type": "string",
+                "example": "docx"
+              }
+            }
+          }
+        ],
+        "required": [
+          "id",
+          "batch",
+          "template_file",
+          "template_file_version",
+          "status",
+          "output_type"
+        ],
+        "title": "Doc Gen job",
+        "x-box-resource-id": "docgen_job",
+        "x-box-tag": "docgen",
+        "x-box-variant": "standard",
+        "x-box-variants": [
+          "base",
+          "standard",
+          "full"
+        ]
+      },
+      "DocgenJob--Base": {
+        "description": "The basic representation of a Doc Gen job.",
+        "type": "object",
+        "properties": {
+          "id": {
+            "description": "The unique identifier that represent a Doc Gen job.",
+            "type": "string",
+            "example": "12345",
+            "nullable": false
+          },
+          "type": {
+            "description": "`docgen_job`",
+            "type": "string",
+            "example": "docgen_job",
+            "enum": [
+              "docgen_job"
+            ],
+            "nullable": false
+          }
+        },
+        "required": [
+          "id",
+          "type"
+        ],
+        "title": "Doc Gen job (Base)",
+        "x-box-resource-id": "docgen_job--base",
+        "x-box-tag": "docgen",
+        "x-box-variant": "base",
+        "x-box-variants": [
+          "base",
+          "standard",
+          "full"
+        ]
+      },
+      "DocgenJob--Full": {
+        "description": "A full representation of a Doc Gen job.",
+        "type": "object",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/DocgenJob"
+          },
+          {
+            "properties": {
+              "created_at": {
+                "description": "Time of job creation.",
+                "type": "string",
+                "example": "2022-05-11T10:56:11-07:00",
+                "readOnly": true
+              },
+              "created_by": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/User--Base"
+                  },
+                  {
+                    "description": "User who created the job."
+                  }
+                ]
+              },
+              "enterprise": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/Enterprise--Base"
+                  },
+                  {
+                    "description": "ID of the enterprise."
+                  }
+                ]
+              },
+              "source": {
+                "description": "Source of the request.",
+                "type": "string",
+                "example": "api",
+                "readOnly": true
+              },
+              "user_input": {
+                "description": "User details to fill tags.",
+                "type": "object",
+                "example": {
+                  "name": "Aaron Levie"
+                },
+                "readOnly": true
+              }
+            }
+          }
+        ],
+        "required": [
+          "id",
+          "batch",
+          "created_by",
+          "enterprise",
+          "template_file",
+          "template_file_version",
+          "output_type",
+          "source",
+          "user_input",
+          "status"
+        ],
+        "title": "Doc Gen job (Full)",
+        "x-box-resource-id": "docgen_job--full",
+        "x-box-tag": "docgen",
+        "x-box-variant": "full",
+        "x-box-variants": [
+          "base",
+          "standard",
+          "full"
+        ]
+      },
+      "DocgenJobs": {
+        "description": "A list of Doc Gen jobs with a standard set of parameters.",
+        "type": "object",
+        "allOf": [
+          {
+            "type": "object",
+            "description": "The part of an API response that describes marker\nbased pagination",
+            "properties": {
+              "limit": {
+                "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
+                "type": "integer",
+                "format": "int64",
+                "example": 1000
+              },
+              "next_marker": {
+                "description": "The marker for the start of the next page of results.",
+                "type": "string",
+                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                "nullable": true
+              },
+              "prev_marker": {
+                "description": "The marker for the start of the previous page of results.",
+                "type": "string",
+                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVih",
+                "nullable": true
+              }
+            }
+          },
+          {
+            "properties": {
+              "entries": {
+                "description": "List of jobs.",
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/DocgenJob"
+                }
+              }
+            }
+          }
+        ],
+        "title": "Doc Gen jobs",
+        "x-box-resource-id": "docgen_jobs",
+        "x-box-tag": "docgen",
+        "x-box-variant": "base",
+        "x-box-variants": [
+          "standard",
+          "full"
+        ]
+      },
+      "DocgenJobs--Full": {
+        "description": "A list of Doc Gen jobs with a full set of parameters.",
+        "type": "object",
+        "allOf": [
+          {
+            "type": "object",
+            "description": "The part of an API response that describes marker\nbased pagination",
+            "properties": {
+              "limit": {
+                "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
+                "type": "integer",
+                "format": "int64",
+                "example": 1000
+              },
+              "next_marker": {
+                "description": "The marker for the start of the next page of results.",
+                "type": "string",
+                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                "nullable": true
+              },
+              "prev_marker": {
+                "description": "The marker for the start of the previous page of results.",
+                "type": "string",
+                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVih",
+                "nullable": true
+              }
+            }
+          },
+          {
+            "properties": {
+              "entries": {
+                "description": "List of jobs.",
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/DocgenJob--Full"
+                }
+              }
+            }
+          }
+        ],
+        "title": "Doc Gen jobs (Full)",
+        "x-box-resource-id": "docgen_jobs--full",
+        "x-box-tag": "docgen",
+        "x-box-variant": "full",
+        "x-box-variants": [
+          "standard",
+          "full"
+        ]
+      },
+      "DocgenTag": {
+        "description": "A doc gen template tag object.",
+        "type": "object",
+        "properties": {
+          "tag_content": {
+            "description": "The content of the tag.",
+            "type": "string",
+            "example": "{{item.name}}",
+            "readOnly": true
+          },
+          "tag_type": {
+            "description": "Type of the tag.",
+            "type": "string",
+            "example": "text",
+            "enum": [
+              "text",
+              "arithmetic",
+              "conditional",
+              "for-loop",
+              "table-loop",
+              "image"
+            ],
+            "readOnly": true
+          },
+          "json_paths": {
+            "description": "List of the paths.",
+            "type": "array",
+            "items": {
+              "readOnly": true,
+              "type": "string",
+              "example": "products.name"
+            },
+            "example": [
+              "products",
+              "products.name"
+            ],
+            "readOnly": true
+          }
+        },
+        "required": [
+          "tag_content",
+          "tag_type",
+          "json_paths"
+        ],
+        "title": "Doc Gen template tag",
+        "x-box-resource-id": "docgen_tag",
+        "x-box-sanitized": true,
+        "x-box-tag": "docgen_template"
+      },
+      "DocgenTags": {
+        "description": "A list of Doc Gen tags.",
+        "type": "object",
+        "allOf": [
+          {
+            "type": "object",
+            "description": "The part of an API response that describes marker\nbased pagination",
+            "properties": {
+              "limit": {
+                "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
+                "type": "integer",
+                "format": "int64",
+                "example": 1000
+              },
+              "next_marker": {
+                "description": "The marker for the start of the next page of results.",
+                "type": "string",
+                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                "nullable": true
+              },
+              "prev_marker": {
+                "description": "The marker for the start of the previous page of results.",
+                "type": "string",
+                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVih",
+                "nullable": true
+              }
+            }
+          },
+          {
+            "properties": {
+              "entries": {
+                "description": "List of tags.",
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/DocgenTag"
+                }
+              }
+            }
+          }
+        ],
+        "title": "Doc Gen tags",
+        "x-box-resource-id": "docgen_tags",
+        "x-box-tag": "docgen_template"
+      },
+      "DocgenTagsProcessingMessage": {
+        "description": "A message informing that document tags are still being processed.",
+        "type": "object",
+        "properties": {
+          "message": {
+            "description": "A message about that document tags are being processed.",
+            "type": "string",
+            "example": "Processing tags for this file.",
+            "readOnly": true
+          }
+        },
+        "required": [
+          "message"
+        ],
+        "title": "Doc Gen tags processing message",
+        "x-box-resource-id": "docgen_tags_processing_message",
+        "x-box-tag": "docgen_template"
+      },
+      "DocgenTemplate": {
+        "description": "A Doc Gen template object.",
+        "type": "object",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/DocgenTemplate--Base"
+          },
+          {
+            "properties": {
+              "file_name": {
+                "description": "The name of the template",
+                "type": "string",
+                "example": "Official contract",
+                "nullable": true
+              }
+            }
+          }
+        ],
+        "title": "Doc Gen template",
+        "x-box-resource-id": "docgen_template",
+        "x-box-tag": "docgen_template",
+        "x-box-variant": "standard",
+        "x-box-variants": [
+          "base",
+          "standard"
+        ]
+      },
+      "DocgenTemplate--Base": {
+        "description": "A base representation of a doc gen template, used when\nnested within another resource.",
+        "type": "object",
+        "properties": {
+          "file": {
+            "allOf": [
+              {
+                "title": "File reference",
+                "type": "object",
+                "description": "File reference",
+                "required": [
+                  "type",
+                  "id"
+                ],
+                "properties": {
+                  "type": {
+                    "description": "`file`",
+                    "type": "string",
+                    "example": "file",
+                    "enum": [
+                      "file"
+                    ],
+                    "nullable": false
+                  },
+                  "id": {
+                    "description": "ID of the object",
+                    "type": "string",
+                    "example": "42037322"
+                  }
+                }
+              },
+              {
+                "description": "Enable the file to generate a document from."
+              }
+            ]
+          }
+        },
+        "title": "Docgen template (Base)",
+        "x-box-resource-id": "docgen_template--base",
+        "x-box-variant": "base",
+        "x-box-variants": [
+          "base",
+          "standard"
+        ]
+      },
+      "DocgenTemplateCreateRequest": {
+        "description": "The schema for marking document as Doc Gen template.",
+        "type": "object",
+        "properties": {
+          "file": {
+            "allOf": [
+              {
+                "title": "File reference",
+                "type": "object",
+                "description": "File reference",
+                "required": [
+                  "type",
+                  "id"
+                ],
+                "properties": {
+                  "type": {
+                    "description": "`file`",
+                    "type": "string",
+                    "example": "file",
+                    "enum": [
+                      "file"
+                    ],
+                    "nullable": false
+                  },
+                  "id": {
+                    "description": "ID of the object",
+                    "type": "string",
+                    "example": "42037322"
+                  }
+                }
+              },
+              {
+                "description": "Marks the file as a Doc Gen template to generate the document from."
+              }
+            ]
+          }
+        },
+        "required": [
+          "file"
+        ],
+        "title": "Mark file as Docgen Template"
+      },
+      "DocgenTemplates": {
+        "description": "List of doc gen templates.",
+        "type": "object",
+        "allOf": [
+          {
+            "type": "object",
+            "description": "The part of an API response that describes marker\nbased pagination",
+            "properties": {
+              "limit": {
+                "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
+                "type": "integer",
+                "format": "int64",
+                "example": 1000
+              },
+              "next_marker": {
+                "description": "The marker for the start of the next page of results.",
+                "type": "string",
+                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                "nullable": true
+              },
+              "prev_marker": {
+                "description": "The marker for the start of the previous page of results.",
+                "type": "string",
+                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVih",
+                "nullable": true
+              }
+            }
+          },
+          {
+            "properties": {
+              "entries": {
+                "description": "A list of templates.",
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/DocgenTemplate"
+                }
+              }
+            }
+          }
+        ],
+        "title": "Doc Gen templates",
+        "x-box-resource-id": "docgen_templates",
+        "x-box-tag": "docgen_template"
+      },
       "EmailAlias": {
         "description": "An email alias for a user.",
         "type": "object",
@@ -28260,7 +29150,7 @@
                     }
                   },
                   {
-                    "description": "The shared link for this file. This will be\n`null` if no shared link has been created for this\nfile."
+                    "description": "The shared link for this file. This value will be\n`null` if no shared link has been created for this\nfile."
                   },
                   {
                     "nullable": true
@@ -28273,7 +29163,7 @@
                     "$ref": "#/components/schemas/Folder--Mini"
                   },
                   {
-                    "description": "The folder that this file is located within."
+                    "description": "The folder that this file is located within.\nThis value may be `null` for some folders such as\nthe root folder or the trash folder."
                   }
                 ],
                 "nullable": true
@@ -40511,16 +41401,6 @@
       "x-box-tag": "device_pinners"
     },
     {
-      "name": "Docgen",
-      "description": "Docgen are used to generate documents\nusing a template.",
-      "x-box-tag": "docgen"
-    },
-    {
-      "name": "Docgen template",
-      "description": "Docgen are used to generate documents\nusing a template.",
-      "x-box-tag": "docgen_template"
-    },
-    {
       "name": "Domain restrictions (User exemptions)",
       "description": "A set of endpoints that allow exempting users\nfrom restrictions imposed by the list of\nallowed collaboration domains for a specific enterprise.",
       "x-box-tag": "collaboration_allowlist_exempt_targets"
@@ -40809,6 +41689,16 @@
       "name": "Zip Downloads",
       "description": "Zip downloads represent a successful request\nto create a ZIP archive with files and folders.",
       "x-box-tag": "zip_downloads"
+    },
+    {
+      "name": "Doc Gen",
+      "description": "Doc Gen is used to automatically generate documents.",
+      "x-box-tag": "docgen"
+    },
+    {
+      "name": "Doc Gen templates",
+      "description": "Doc Gen templates are used as input to generate documents.",
+      "x-box-tag": "docgen_template"
     }
   ],
   "externalDocs": {
