@@ -14,7 +14,7 @@
       "url": "http://www.apache.org/licenses/LICENSE-2.0"
     },
     "version": "2.0.0",
-    "x-box-commit-hash": "a46c886ab1"
+    "x-box-commit-hash": "324e40ffd7"
   },
   "servers": [
     {
@@ -24325,7 +24325,7 @@
       "post": {
         "operationId": "post_ai_extract",
         "summary": "Extract metadata (freeform)",
-        "description": "Sends an AI request to supported Large Language Models (LLMs) and extracts metadata in form of key-value pairs.\nFreeform metadata extraction does not require any metadata template setup before sending the request.",
+        "description": "Sends an AI request to supported Large Language Models (LLMs) and extracts metadata in form of key-value pairs.\nIn this request, both the prompt and the output can be freeform.\nMetadata template setup before sending the request is not required.",
         "x-stability-level": "beta",
         "requestBody": {
           "content": {
@@ -24379,7 +24379,7 @@
       "post": {
         "operationId": "post_ai_extract_structured",
         "summary": "Extract metadata (structured)",
-        "description": "Sends an AI request to supported Large Language Models (LLMs) and returns extracted metadata as a set of key-value pairs.\nFor this request, you need to use an already defined metadata template or a define a schema yourself.\nTo learn more about creating templates, see [Creating metadata templates in the Admin Console](https://support.box.com/hc/en-us/articles/360044194033-Customizing-Metadata-Templates)\nor use the [metadata template API](g://metadata/templates/create).",
+        "description": "Sends an AI request to supported Large Language Models (LLMs) and returns extracted metadata as a set of key-value pairs.\nFor this request, you either need a metadata template or a list of fields you want to extract.\nInput is **either** a metadata template or a list of fields to ensure the structure.\nTo learn more about creating templates, see [Creating metadata templates in the Admin Console](https://support.box.com/hc/en-us/articles/360044194033-Customizing-Metadata-Templates)\nor use the [metadata template API](g://metadata/templates/create).",
         "x-stability-level": "beta",
         "requestBody": {
           "content": {
@@ -24537,7 +24537,7 @@
         "x-box-tag": "ai"
       },
       "AiAgentBasicTextTool": {
-        "description": "AI agent tool used to handle basic text.",
+        "description": "AI agent processor used to handle basic text.",
         "type": "object",
         "allOf": [
           {
@@ -24564,7 +24564,7 @@
         "x-box-tag": "ai"
       },
       "AiAgentBasicTextToolBase": {
-        "description": "AI agent tool used to handle basic text.",
+        "description": "AI agent processor used to handle basic text.",
         "type": "object",
         "properties": {
           "model": {
@@ -24597,7 +24597,7 @@
         "x-box-tag": "ai"
       },
       "AiAgentBasicTextToolTextGen": {
-        "description": "AI agent tool used to handle basic text.",
+        "description": "AI agent processor used to handle basic text.",
         "type": "object",
         "allOf": [
           {
@@ -24677,8 +24677,43 @@
         "x-box-resource-id": "ai_agent_extract_structured",
         "x-box-tag": "ai"
       },
+      "AiAgentInfo": {
+        "description": "The information on the models and processors used in the request.",
+        "type": "object",
+        "properties": {
+          "models": {
+            "description": "The models used for the request",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "description": "The name of the model used for the request",
+                  "type": "string",
+                  "example": "azure__openai__text_embedding_ada_002"
+                },
+                "provider": {
+                  "description": "The provider that owns the model used for the request",
+                  "type": "string",
+                  "example": "azure"
+                },
+                "supported_purpose": {
+                  "description": "The supported purpose utilized by the model used for the request",
+                  "type": "string",
+                  "example": "embedding"
+                }
+              }
+            }
+          },
+          "processor": {
+            "description": "The processor used for the request",
+            "type": "string"
+          }
+        },
+        "title": "The information on the models and processors used in the request."
+      },
       "AiAgentLongTextTool": {
-        "description": "AI agent tool used to to handle longer text.",
+        "description": "AI agent processor used to to handle longer text.",
         "type": "object",
         "allOf": [
           {
@@ -24706,6 +24741,7 @@
                         "description": "The number of tokens per chunk.",
                         "type": "integer",
                         "example": 64,
+                        "maximum": 512,
                         "minimum": 1
                       }
                     }
@@ -24719,7 +24755,7 @@
         "x-box-tag": "ai"
       },
       "AiAgentLongTextToolTextGen": {
-        "description": "AI agent tool used to to handle longer text.",
+        "description": "AI agent processor used to to handle longer text.",
         "type": "object",
         "allOf": [
           {
@@ -24747,6 +24783,7 @@
                         "description": "The number of tokens per chunk.",
                         "type": "integer",
                         "example": 64,
+                        "maximum": 512,
                         "minimum": 1
                       }
                     }
@@ -25230,6 +25267,9 @@
             "description": "The reason the response finishes.",
             "type": "string",
             "example": "done"
+          },
+          "ai_agent_info": {
+            "$ref": "#/components/schemas/AiAgentInfo"
           }
         },
         "required": [
@@ -27563,7 +27603,7 @@
                     }
                   },
                   {
-                    "description": "The shared link for this file. This will be\n`null` if no shared link has been created for this\nfile."
+                    "description": "The shared link for this file. This value will be\n`null` if no shared link has been created for this\nfile."
                   },
                   {
                     "nullable": true
@@ -27576,7 +27616,7 @@
                     "$ref": "#/components/schemas/Folder--Mini"
                   },
                   {
-                    "description": "The folder that this file is located within."
+                    "description": "The folder that this file is located within.\nThis value may be `null` for some folders such as\nthe root folder or the trash folder."
                   }
                 ],
                 "nullable": true
