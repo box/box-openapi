@@ -14,7 +14,7 @@
             "url": "http://www.apache.org/licenses/LICENSE-2.0"
         },
         "version": "2.0.0",
-        "x-box-commit-hash": "a46c886ab1"
+        "x-box-commit-hash": "fd1d1837fd"
     },
     "servers": [
         {
@@ -625,6 +625,11 @@
                                                         "description": "親項目のID",
                                                         "type": "string",
                                                         "example": "123"
+                                                    },
+                                                    "user_id": {
+                                                        "description": "The input for `user_id` is optional. Moving to non-root folder is not allowed when `user_id` is present. Parent folder id should be zero when `user_id` is provided.",
+                                                        "type": "string",
+                                                        "example": "12346930"
                                                     }
                                                 }
                                             },
@@ -5295,15 +5300,27 @@
                                         "example": true
                                     },
                                     "parent": {
-                                        "description": "このフォルダの親フォルダ。フォルダを移動したり、ごみ箱からフォルダを復元したりするときに使用します。",
-                                        "type": "object",
-                                        "properties": {
-                                            "id": {
-                                                "description": "新しい親フォルダのID",
-                                                "type": "string",
-                                                "example": "0"
+                                        "allOf": [
+                                            {
+                                                "type": "object",
+                                                "description": "この項目の親",
+                                                "properties": {
+                                                    "id": {
+                                                        "description": "親項目のID",
+                                                        "type": "string",
+                                                        "example": "123"
+                                                    },
+                                                    "user_id": {
+                                                        "description": "The input for `user_id` is optional. Moving to non-root folder is not allowed when `user_id` is present. Parent folder id should be zero when `user_id` is provided.",
+                                                        "type": "string",
+                                                        "example": "12346930"
+                                                    }
+                                                }
+                                            },
+                                            {
+                                                "description": "このフォルダの親フォルダ。フォルダを移動したり、ごみ箱からフォルダを復元したりするときに使用します。"
                                             }
-                                        }
+                                        ]
                                     },
                                     "shared_link": {
                                         "allOf": [
@@ -13219,6 +13236,11 @@
                                                         "description": "親項目のID",
                                                         "type": "string",
                                                         "example": "123"
+                                                    },
+                                                    "user_id": {
+                                                        "description": "The input for `user_id` is optional. Moving to non-root folder is not allowed when `user_id` is present. Parent folder id should be zero when `user_id` is provided.",
+                                                        "type": "string",
+                                                        "example": "12346930"
                                                     }
                                                 }
                                             },
@@ -24325,7 +24347,7 @@
             "post": {
                 "operationId": "post_ai_extract",
                 "summary": "メタデータを抽出 (自由形式)",
-                "description": "サポートされている大規模言語モデル (LLM) にAIリクエストを送信し、メタデータをキー/値ペアの形式で抽出します。自由形式のメタデータの抽出では、リクエストを送信する前にメタデータテンプレートの設定は必要ありません。",
+                "description": "Sends an AI request to supported Large Language Models (LLMs) and extracts metadata in form of key-value pairs. In this request, both the prompt and the output can be freeform. Metadata template setup before sending the request is not required.",
                 "x-stability-level": "beta",
                 "requestBody": {
                     "content": {
@@ -24379,7 +24401,7 @@
             "post": {
                 "operationId": "post_ai_extract_structured",
                 "summary": "メタデータを抽出 (構造化)",
-                "description": "サポートされている大規模言語モデル (LLM) にAIリクエストを送信し、抽出されたメタデータを一連のキー/値ペアとして返します。このリクエストでは、すでに定義済みのメタデータテンプレートを使用するか、自分でスキーマを定義する必要があります。テンプレートの作成の詳細については、[メタデータテンプレートのカスタマイズ](https://support.box.com/hc/en-us/articles/360044194033-Customizing-Metadata-Templates)を参照するか、[メタデータテンプレートAPI](g://metadata/templates/create)を使用してください。",
+                "description": "Sends an AI request to supported Large Language Models (LLMs) and returns extracted metadata as a set of key-value pairs. For this request, you either need a metadata template or a list of fields you want to extract. Input is **either** a metadata template or a list of fields to ensure the structure. To learn more about creating templates, see [Creating metadata templates in the Admin Console](https://support.box.com/hc/en-us/articles/360044194033-Customizing-Metadata-Templates) or use the [metadata template API](g://metadata/templates/create).",
                 "x-stability-level": "beta",
                 "requestBody": {
                     "content": {
@@ -24537,7 +24559,7 @@
                 "x-box-tag": "ai"
             },
             "AiAgentBasicTextTool": {
-                "description": "基本テキストの処理に使用されるAIエージェントツール。",
+                "description": "AI agent processor used to handle basic text.",
                 "type": "object",
                 "allOf": [
                     {
@@ -24564,7 +24586,7 @@
                 "x-box-tag": "ai"
             },
             "AiAgentBasicTextToolBase": {
-                "description": "基本テキストの処理に使用されるAIエージェントツール。",
+                "description": "AI agent processor used to handle basic text.",
                 "type": "object",
                 "properties": {
                     "model": {
@@ -24597,7 +24619,7 @@
                 "x-box-tag": "ai"
             },
             "AiAgentBasicTextToolTextGen": {
-                "description": "基本テキストの処理に使用されるAIエージェントツール。",
+                "description": "AI agent processor used to handle basic text.",
                 "type": "object",
                 "allOf": [
                     {
@@ -24677,8 +24699,43 @@
                 "x-box-resource-id": "ai_agent_extract_structured",
                 "x-box-tag": "ai"
             },
+            "AiAgentInfo": {
+                "description": "The information on the models and processors used in the request.",
+                "type": "object",
+                "properties": {
+                    "models": {
+                        "description": "The models used for the request",
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "description": "The name of the model used for the request",
+                                    "type": "string",
+                                    "example": "azure__openai__text_embedding_ada_002"
+                                },
+                                "provider": {
+                                    "description": "The provider that owns the model used for the request",
+                                    "type": "string",
+                                    "example": "azure"
+                                },
+                                "supported_purpose": {
+                                    "description": "The supported purpose utilized by the model used for the request",
+                                    "type": "string",
+                                    "example": "embedding"
+                                }
+                            }
+                        }
+                    },
+                    "processor": {
+                        "description": "The processor used for the request",
+                        "type": "string"
+                    }
+                },
+                "title": "The information on the models and processors used in the request."
+            },
             "AiAgentLongTextTool": {
-                "description": "長いテキストの処理に使用されるAIエージェントツール。",
+                "description": "AI agent processor used to to handle longer text.",
                 "type": "object",
                 "allOf": [
                     {
@@ -24706,6 +24763,7 @@
                                                 "description": "チャンクごとのトークンの数。",
                                                 "type": "integer",
                                                 "example": 64,
+                                                "maximum": 512,
                                                 "minimum": 1
                                             }
                                         }
@@ -24719,7 +24777,7 @@
                 "x-box-tag": "ai"
             },
             "AiAgentLongTextToolTextGen": {
-                "description": "長いテキストの処理に使用されるAIエージェントツール。",
+                "description": "AI agent processor used to to handle longer text.",
                 "type": "object",
                 "allOf": [
                     {
@@ -24747,6 +24805,7 @@
                                                 "description": "チャンクごとのトークンの数。",
                                                 "type": "integer",
                                                 "example": 64,
+                                                "maximum": 512,
                                                 "minimum": 1
                                             }
                                         }
@@ -25230,6 +25289,9 @@
                         "description": "応答が終了した理由。",
                         "type": "string",
                         "example": "done"
+                    },
+                    "ai_agent_info": {
+                        "$ref": "#/components/schemas/AiAgentInfo"
                     }
                 },
                 "required": [
@@ -27562,7 +27624,7 @@
                                         }
                                     },
                                     {
-                                        "description": "このファイルの共有リンク。このファイルに対してまだ共有リンクが作成されていない場合は、`null`になります。"
+                                        "description": "The shared link for this file. This value will be `null` if no shared link has been created for this file."
                                     },
                                     {
                                         "nullable": true
@@ -27575,7 +27637,7 @@
                                         "$ref": "#/components/schemas/Folder--Mini"
                                     },
                                     {
-                                        "description": "このファイルが配置されているフォルダ。"
+                                        "description": "The folder that this file is located within. This value may be `null` for some folders such as the root folder or the trash folder."
                                     }
                                 ],
                                 "nullable": true
