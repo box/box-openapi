@@ -13,7 +13,7 @@ on:
       - jp-partial
   # Run for PRs on main and staging
   pull_request:
-    branches: [main, staging]
+    branches: [ main, staging ]
 
 jobs:
   # The lint job checks that all content is sanitized,
@@ -23,19 +23,19 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
-    # We use node 14 and Python 3.8
+    # We use node 18 and Python 3.12
     strategy:
       matrix:
-        node-version: [14.x]
-        python-version: [3.8]
+        node-version: [ 18.x ]
+        python-version: [ 3.12 ]
 
     # The following steps are performed for each lint job
     steps:
       - name: Check out the repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
 
@@ -45,7 +45,7 @@ jobs:
           pip install yamllint
 
       - name: Set up Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
 
@@ -64,10 +64,10 @@ jobs:
     if: github.ref == 'refs/heads/main'
     timeout-minutes: 10
 
-    # We use node 14.X
+    # We use node 18.X
     strategy:
       matrix:
-        node-version: [14.x]
+        node-version: [ 18.x ]
 
     # Requires the lint and test jobs to pass first
     needs:
@@ -76,29 +76,23 @@ jobs:
     # The following steps are performed for each job
     steps:
       - name: Check out the repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
 
-      - name: Build content
-        run: |
-          yarn install
-          yarn build:spec
-          yarn build:content
-
       - name: Push API specification
-        uses: s0/git-publish-subdir-action@v2.4.0
+        uses: s0/git-publish-subdir-action@v2.6.0
         env:
           REPO: self
           BRANCH: en
-          FOLDER: compiled/spec
+          FOLDER: openapi
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Notify other repositories of update
-        uses: peter-evans/repository-dispatch@v1
+        uses: peter-evans/repository-dispatch@v3
         with:
           token: ${{ secrets.REPO_ACCESS_TOKEN }}
           repository: box/box-postman
@@ -106,35 +100,41 @@ jobs:
           client-payload: "{}"
 
       - name: "Trigger Netlify deployment"
-        uses: joelwmale/webhook-action@2.0.2
+        uses: joelwmale/webhook-action@2.4.1
         env:
           WEBHOOK_URL: ${{ secrets.NETLIFY_BOXDEV_WEBHOOK }}
           data: "{}"
 
       - name: "Trigger Netlify deployment (Box.dev mirror)"
-        uses: joelwmale/webhook-action@2.0.2
+        uses: joelwmale/webhook-action@2.4.1
         env:
           WEBHOOK_URL: ${{ secrets.NETLIFY_BOXDEV_MIRROR_WEBHOOK }}
           data: "{}"
 
-      - name: Send Slack notification
-        uses: Ilshidur/action-slack@2.0.2
-        env:
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-          SLACK_USERNAME: GitHub Actions
-          SLACK_AVATAR: "https://avatars3.githubusercontent.com/u/8659759?s=200&v=4"
+      - name: Send Slack using Slack GHA notification
+        uses: slackapi/slack-github-action@v1.27.0
         with:
-          args: "Pushed latest OpenAPI changes to `en` branch :rocket:"
+          payload: |
+            {
+              "text": "Pushed latest OpenAPI changes to `en` branch :rocket:",
+              "icon_url": "https://avatars3.githubusercontent.com/u/8659759?s=200&v=4",
+              "username": "GitHub Actions"
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
 
-      - name: Send Slack notification
-        uses: Ilshidur/action-slack@2.0.2
+      - name: Send Slack using Slack GHA notification
+        uses: slackapi/slack-github-action@v1.27.0
         if: ${{ failure() }}
-        env:
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-          SLACK_USERNAME: GitHub Actions
-          SLACK_AVATAR: "https://avatars3.githubusercontent.com/u/8659759?s=200&v=4"
         with:
-          args: "Error running `deploy` job in OpenAPI CI"
+          payload: |
+            {
+              "text": "Error running `deploy` job in OpenAPI CI",
+              "icon_url": "https://avatars3.githubusercontent.com/u/8659759?s=200&v=4",
+              "username": "GitHub Actions"
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
 
   # The deploy task actually deploys any changes to the en-staging branch
   push-to-en-staging:
@@ -143,10 +143,10 @@ jobs:
     if: github.ref == 'refs/heads/staging'
     timeout-minutes: 10
 
-    # We use node 14.X
+    # We use node 18.X
     strategy:
       matrix:
-        node-version: [14.x]
+        node-version: [ 18.x ]
 
     # Requires the lint and test jobs to pass first
     needs:
@@ -155,50 +155,51 @@ jobs:
     # The following steps are performed for each job
     steps:
       - name: Check out the repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
 
-      - name: Build content
-        run: |
-          yarn install
-          yarn build:spec
-
       - name: Push API specification
-        uses: s0/git-publish-subdir-action@v2.4.0
+        uses: s0/git-publish-subdir-action@v2.6.0
         env:
           REPO: self
-          BRANCH: en-staging
-          FOLDER: compiled/spec
+          BRANCH: staging
+          FOLDER: openapi
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: "Trigger Netlify deployment"
-        uses: joelwmale/webhook-action@2.0.2
+        uses: joelwmale/webhook-action@2.4.1
         env:
           WEBHOOK_URL: ${{ secrets.NETLIFY_BOXDEV_STAGING_WEBHOOK }}
           data: "{}"
 
-      - name: Send Slack notification
-        uses: Ilshidur/action-slack@2.0.2
-        env:
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-          SLACK_USERNAME: GitHub Actions
-          SLACK_AVATAR: "https://avatars3.githubusercontent.com/u/8659759?s=200&v=4"
+      - name: Send Slack using Slack GHA notification
+        uses: slackapi/slack-github-action@v1.27.0
         with:
-          args: "Pushed latest OpenAPI changes to `en-staging` branch :rocket:"
+          payload: |
+            {
+              "text": "Pushed latest OpenAPI changes to `en-staging` branch :rocket:",
+              "icon_url": "https://avatars3.githubusercontent.com/u/8659759?s=200&v=4",
+              "username": "GitHub Actions"
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
 
-      - name: Send Slack notification
-        uses: Ilshidur/action-slack@2.0.2
+      - name: Send Slack using Slack GHA notification
+        uses: slackapi/slack-github-action@v1.27.0
         if: ${{ failure() }}
-        env:
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-          SLACK_USERNAME: GitHub Actions
-          SLACK_AVATAR: "https://avatars3.githubusercontent.com/u/8659759?s=200&v=4"
         with:
-          args: "Error running `deploy-staging` job in OpenAPI CI"
+          payload: |
+            {
+              "text": "Error running `deploy-staging` job in OpenAPI CI",
+              "icon_url": "https://avatars3.githubusercontent.com/u/8659759?s=200&v=4",
+              "username": "GitHub Actions"
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
 
   # Build the OpenAPI spec and validate using Codegen
   validate-spec:
@@ -209,17 +210,17 @@ jobs:
     # The following steps are performed for each job
     steps:
       - name: Check out the repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: box-openapi
 
-      - name: Set up Node.js 16.x
-        uses: actions/setup-node@v3
+      - name: Set up Node.js 20.x
+        uses: actions/setup-node@v4
         with:
-          node-version: 16.x
+          node-version: 20.x
 
       - name: Check out the Codegen repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: box/box-codegen
           ref: main
@@ -232,5 +233,4 @@ jobs:
           npm install
           cd scripts
           npm install
-          cp $GITHUB_WORKSPACE/box-openapi/openapi.json .
-          npm run generate ./openapi.json output typescript,swift,python,c#
+          npm run generate $GITHUB_WORKSPACE/box-openapi/openapi/openapi.json output typescript,swift,python,c#
