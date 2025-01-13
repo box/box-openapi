@@ -14,7 +14,7 @@
             "url": "http://www.apache.org/licenses/LICENSE-2.0"
         },
         "version": "2.0.0",
-        "x-box-commit-hash": "9ec0f8628c"
+        "x-box-commit-hash": "e2318a7194"
     },
     "servers": [
         {
@@ -24288,7 +24288,7 @@
                         "schema": {
                             "type": "string"
                         },
-                        "example": "openai__gpt_3_5_turbo"
+                        "example": "azure__openai__gpt_4o_mini"
                     }
                 ],
                 "responses": {
@@ -24592,7 +24592,7 @@
                     "model": {
                         "description": "基本テキストに対するAIエージェントで使用されるモデル。特定のモデル値については、[利用可能なモデルのリスト](g://box-ai/supported-models)を参照してください。",
                         "type": "string",
-                        "example": "azure__openai__gpt_3_5_turbo_16k"
+                        "example": "azure__openai__gpt_4o_mini"
                     },
                     "num_tokens_for_completion": {
                         "description": "完了に必要なトークンの数。",
@@ -24749,7 +24749,7 @@
                                     "model": {
                                         "description": "埋め込みを計算するためのAIエージェントに使用されるモデル。",
                                         "type": "string",
-                                        "example": "openai__text_embedding_ada_002"
+                                        "example": "azure__openai__text_embedding_ada_002"
                                     },
                                     "strategy": {
                                         "type": "object",
@@ -24791,7 +24791,7 @@
                                     "model": {
                                         "description": "埋め込みを計算するためのAIエージェントに使用されるモデル。",
                                         "type": "string",
-                                        "example": "openai__text_embedding_ada_002"
+                                        "example": "azure__openai__text_embedding_ada_002"
                                     },
                                     "strategy": {
                                         "type": "object",
@@ -28343,8 +28343,7 @@
                     }
                 ],
                 "title": "ファイル (競合)",
-                "x-box-resource-id": "file_conflict",
-                "x-box-tag": null
+                "x-box-resource-id": "file_conflict"
             },
             "FileOrFolderScope": {
                 "description": "リソース (ファイルまたはフォルダ) とそのリソースにアクセスできるスコープの関係",
@@ -28367,7 +28366,8 @@
                             "item_preview",
                             "item_rename",
                             "item_share",
-                            "item_upload"
+                            "item_upload",
+                            "item_read"
                         ]
                     },
                     "object": {
@@ -30427,7 +30427,38 @@
                 "type": "object",
                 "allOf": [
                     {
-                        "$ref": "#/components/schemas/IntegrationMapping--Base"
+                        "$ref": "#/components/schemas/IntegrationMappingBase"
+                    },
+                    {
+                        "type": "object",
+                        "properties": {
+                            "box_item": {
+                                "description": "パートナーアプリのドメインのオブジェクト (`partner_item_id`で参照) のマッピング先であるBoxフォルダ",
+                                "allOf": [
+                                    {
+                                        "$ref": "#/components/schemas/Folder--Mini"
+                                    }
+                                ],
+                                "nullable": false
+                            },
+                            "created_at": {
+                                "description": "統合マッピングオブジェクトが作成された日時",
+                                "type": "string",
+                                "format": "date-time",
+                                "example": "2012-12-12T10:53:43-08:00",
+                                "nullable": false
+                            },
+                            "modified_at": {
+                                "description": "統合マッピングオブジェクトが最後に変更された日時",
+                                "type": "string",
+                                "format": "date-time",
+                                "example": "2012-12-12T10:53:43-08:00",
+                                "nullable": false
+                            }
+                        },
+                        "required": [
+                            "box_item"
+                        ]
                     },
                     {
                         "properties": {
@@ -30487,37 +30518,6 @@
                                 ]
                             }
                         }
-                    },
-                    {
-                        "type": "object",
-                        "properties": {
-                            "box_item": {
-                                "description": "パートナーアプリのドメインのオブジェクト (`partner_item_id`で参照) のマッピング先であるBoxフォルダ",
-                                "allOf": [
-                                    {
-                                        "$ref": "#/components/schemas/Folder--Mini"
-                                    }
-                                ],
-                                "nullable": false
-                            },
-                            "created_at": {
-                                "description": "統合マッピングオブジェクトが作成された日時",
-                                "type": "string",
-                                "format": "date-time",
-                                "example": "2012-12-12T10:53:43-08:00",
-                                "nullable": false
-                            },
-                            "modified_at": {
-                                "description": "統合マッピングオブジェクトが最後に変更された日時",
-                                "type": "string",
-                                "format": "date-time",
-                                "example": "2012-12-12T10:53:43-08:00",
-                                "nullable": false
-                            }
-                        },
-                        "required": [
-                            "box_item"
-                        ]
                     }
                 ],
                 "required": [
@@ -30525,10 +30525,9 @@
                 ],
                 "title": "Slack統合マッピング",
                 "x-box-resource-id": "integration_mapping_slack",
-                "x-box-tag": "integration_mappings",
-                "x-box-variant": "standard"
+                "x-box-tag": "integration_mappings"
             },
-            "IntegrationMapping--Base": {
+            "IntegrationMappingBase": {
                 "description": "統合マッピングオブジェクトのBase版の表示。",
                 "type": "object",
                 "properties": {
@@ -30552,15 +30551,7 @@
                     "id",
                     "type"
                 ],
-                "title": "統合マッピング (Base)",
-                "x-box-resource-id": "integration_mapping--base",
-                "x-box-tag": "integration_mappings",
-                "x-box-variant": "base",
-                "x-box-variants": [
-                    "base",
-                    "standard",
-                    "mini"
-                ]
+                "title": "統合マッピング"
             },
             "IntegrationMappingBoxItemSlack": {
                 "description": "Slackタイプの統合マッピングのBox項目オブジェクトのスキーマ",
@@ -38218,8 +38209,7 @@
                     }
                 ],
                 "title": "ユーザー (コラボレーション)",
-                "x-box-resource-id": "user_collaborations",
-                "x-box-variant": "collaborations"
+                "x-box-resource-id": "user_collaborations"
             },
             "User--Full": {
                 "description": "任意のユーザーAPIエンドポイントから返される可能性があるユーザーのFull版の表示。",
