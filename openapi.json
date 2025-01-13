@@ -13,8 +13,8 @@
       "name": "Apache-2.0",
       "url": "http://www.apache.org/licenses/LICENSE-2.0"
     },
-    "version": "2.0.0",
-    "x-box-commit-hash": "e83bf201d8"
+    "version": "2024.0",
+    "x-box-commit-hash": "7bca5e4887"
   },
   "servers": [
     {
@@ -625,6 +625,11 @@
                             "description": "The ID of parent item",
                             "type": "string",
                             "example": "123"
+                          },
+                          "user_id": {
+                            "description": "The input for `user_id` is optional. Moving to non-root folder is not allowed when `user_id` is present. Parent folder id should be zero when `user_id` is provided.",
+                            "type": "string",
+                            "example": "12346930"
                           }
                         }
                       },
@@ -5295,15 +5300,27 @@
                     "example": true
                   },
                   "parent": {
-                    "description": "The parent folder for this folder. Use this to move\nthe folder or to restore it out of the trash.",
-                    "type": "object",
-                    "properties": {
-                      "id": {
-                        "description": "The ID of the new parent folder",
-                        "type": "string",
-                        "example": "0"
+                    "allOf": [
+                      {
+                        "type": "object",
+                        "description": "The parent for this item",
+                        "properties": {
+                          "id": {
+                            "description": "The ID of parent item",
+                            "type": "string",
+                            "example": "123"
+                          },
+                          "user_id": {
+                            "description": "The input for `user_id` is optional. Moving to non-root folder is not allowed when `user_id` is present. Parent folder id should be zero when `user_id` is provided.",
+                            "type": "string",
+                            "example": "12346930"
+                          }
+                        }
+                      },
+                      {
+                        "description": "The parent folder for this folder. Use this to move\nthe folder or to restore it out of the trash."
                       }
-                    }
+                    ]
                   },
                   "shared_link": {
                     "allOf": [
@@ -6252,6 +6269,28 @@
               "name"
             ],
             "explode": false
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "The maximum number of items to return per page.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "maximum": 1000
+            },
+            "example": 1000
+          },
+          {
+            "name": "marker",
+            "in": "query",
+            "description": "Defines the position marker at which to begin returning results. This is\nused when paginating using marker-based pagination.\n\nThis requires `usemarker` to be set to `true`.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii"
           }
         ],
         "responses": {
@@ -7839,6 +7878,28 @@
               "format": "uuid"
             },
             "example": "01234500-12f1-1234-aa12-b1d234cb567e"
+          },
+          {
+            "name": "marker",
+            "in": "query",
+            "description": "Defines the position marker at which to begin returning results. This is\nused when paginating using marker-based pagination.\n\nThis requires `usemarker` to be set to `true`.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "The maximum number of items to return per page.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "maximum": 1000
+            },
+            "example": 1000
           }
         ],
         "responses": {
@@ -10089,7 +10150,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Collaborations"
+                  "$ref": "#/components/schemas/CollaborationsOffsetPaginated"
                 }
               }
             }
@@ -13175,6 +13236,11 @@
                             "description": "The ID of parent item",
                             "type": "string",
                             "example": "123"
+                          },
+                          "user_id": {
+                            "description": "The input for `user_id` is optional. Moving to non-root folder is not allowed when `user_id` is present. Parent folder id should be zero when `user_id` is provided.",
+                            "type": "string",
+                            "example": "12346930"
                           }
                         }
                       },
@@ -16347,7 +16413,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Collaborations"
+                  "$ref": "#/components/schemas/CollaborationsOffsetPaginated"
                 }
               }
             }
@@ -17785,7 +17851,52 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Items"
+                  "$ref": "#/components/schemas/ItemsOffsetPaginated"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        },
+        "x-box-tag": "collections",
+        "tags": [
+          "Collections"
+        ]
+      }
+    },
+    "/collections/{collection_id}": {
+      "get": {
+        "operationId": "get_collections_id",
+        "summary": "Get collection by ID",
+        "description": "Retrieves a collection by its ID.",
+        "parameters": [
+          {
+            "name": "collection_id",
+            "in": "path",
+            "description": "The ID of the collection.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "926489"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns an array of items in the collection.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Collection"
                 }
               }
             }
@@ -18076,20 +18187,12 @@
                   "can_owner_extend_retention": {
                     "description": "Whether the owner of a file will be allowed to\nextend the retention.",
                     "type": "boolean",
-                    "example": true,
-                    "enum": [
-                      true,
-                      false
-                    ]
+                    "example": true
                   },
                   "are_owners_notified": {
                     "description": "Whether owner and co-owners of a file are notified\nwhen the policy nears expiration.",
                     "type": "boolean",
-                    "example": true,
-                    "enum": [
-                      true,
-                      false
-                    ]
+                    "example": true
                   },
                   "custom_notification_recipients": {
                     "description": "A list of users notified when\nthe retention policy duration is about to end.",
@@ -24185,7 +24288,7 @@
             "schema": {
               "type": "string"
             },
-            "example": "openai__gpt_3_5_turbo"
+            "example": "azure__openai__gpt_4o_mini"
           }
         ],
         "responses": {
@@ -24244,7 +24347,7 @@
       "post": {
         "operationId": "post_ai_extract",
         "summary": "Extract metadata (freeform)",
-        "description": "Sends an AI request to supported Large Language Models (LLMs) and extracts metadata in form of key-value pairs.\nFreeform metadata extraction does not require any metadata template setup before sending the request.",
+        "description": "Sends an AI request to supported Large Language Models (LLMs) and extracts metadata in form of key-value pairs.\nIn this request, both the prompt and the output can be freeform.\nMetadata template setup before sending the request is not required.",
         "x-stability-level": "beta",
         "requestBody": {
           "content": {
@@ -24298,7 +24401,7 @@
       "post": {
         "operationId": "post_ai_extract_structured",
         "summary": "Extract metadata (structured)",
-        "description": "Sends an AI request to supported Large Language Models (LLMs) and returns extracted metadata as a set of key-value pairs.\nFor this request, you need to use an already defined metadata template or a define a schema yourself.\nTo learn more about creating templates, see [Creating metadata templates in the Admin Console](https://support.box.com/hc/en-us/articles/360044194033-Customizing-Metadata-Templates)\nor use the [metadata template API](g://metadata/templates/create).",
+        "description": "Sends an AI request to supported Large Language Models (LLMs) and returns extracted metadata as a set of key-value pairs.\nFor this request, you either need a metadata template or a list of fields you want to extract.\nInput is **either** a metadata template or a list of fields to ensure the structure.\nTo learn more about creating templates, see [Creating metadata templates in the Admin Console](https://support.box.com/hc/en-us/articles/360044194033-Customizing-Metadata-Templates)\nor use the [metadata template API](g://metadata/templates/create).",
         "x-stability-level": "beta",
         "requestBody": {
           "content": {
@@ -24456,7 +24559,7 @@
         "x-box-tag": "ai"
       },
       "AiAgentBasicTextTool": {
-        "description": "AI agent tool used to handle basic text.",
+        "description": "AI agent processor used to handle basic text.",
         "type": "object",
         "allOf": [
           {
@@ -24483,13 +24586,13 @@
         "x-box-tag": "ai"
       },
       "AiAgentBasicTextToolBase": {
-        "description": "AI agent tool used to handle basic text.",
+        "description": "AI agent processor used to handle basic text.",
         "type": "object",
         "properties": {
           "model": {
             "description": "The model used for the AI agent for basic text. For specific model values, see the [available models list](g://box-ai/supported-models).",
             "type": "string",
-            "example": "azure__openai__gpt_3_5_turbo_16k"
+            "example": "azure__openai__gpt_4o_mini"
           },
           "num_tokens_for_completion": {
             "description": "The number of tokens for completion.",
@@ -24505,6 +24608,9 @@
               },
               {
                 "$ref": "#/components/schemas/AiLlmEndpointParamsGoogle"
+              },
+              {
+                "$ref": "#/components/schemas/AiLlmEndpointParamsAWS"
               }
             ]
           }
@@ -24513,7 +24619,7 @@
         "x-box-tag": "ai"
       },
       "AiAgentBasicTextToolTextGen": {
-        "description": "AI agent tool used to handle basic text.",
+        "description": "AI agent processor used to handle basic text.",
         "type": "object",
         "allOf": [
           {
@@ -24593,8 +24699,43 @@
         "x-box-resource-id": "ai_agent_extract_structured",
         "x-box-tag": "ai"
       },
+      "AiAgentInfo": {
+        "description": "The information on the models and processors used in the request.",
+        "type": "object",
+        "properties": {
+          "models": {
+            "description": "The models used for the request",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "description": "The name of the model used for the request",
+                  "type": "string",
+                  "example": "azure__openai__text_embedding_ada_002"
+                },
+                "provider": {
+                  "description": "The provider that owns the model used for the request",
+                  "type": "string",
+                  "example": "azure"
+                },
+                "supported_purpose": {
+                  "description": "The supported purpose utilized by the model used for the request",
+                  "type": "string",
+                  "example": "embedding"
+                }
+              }
+            }
+          },
+          "processor": {
+            "description": "The processor used for the request",
+            "type": "string"
+          }
+        },
+        "title": "The information on the models and processors used in the request."
+      },
       "AiAgentLongTextTool": {
-        "description": "AI agent tool used to to handle longer text.",
+        "description": "AI agent processor used to to handle longer text.",
         "type": "object",
         "allOf": [
           {
@@ -24608,7 +24749,7 @@
                   "model": {
                     "description": "The model used for the AI agent for calculating embeddings.",
                     "type": "string",
-                    "example": "openai__text_embedding_ada_002"
+                    "example": "azure__openai__text_embedding_ada_002"
                   },
                   "strategy": {
                     "type": "object",
@@ -24622,6 +24763,7 @@
                         "description": "The number of tokens per chunk.",
                         "type": "integer",
                         "example": 64,
+                        "maximum": 512,
                         "minimum": 1
                       }
                     }
@@ -24635,7 +24777,7 @@
         "x-box-tag": "ai"
       },
       "AiAgentLongTextToolTextGen": {
-        "description": "AI agent tool used to to handle longer text.",
+        "description": "AI agent processor used to to handle longer text.",
         "type": "object",
         "allOf": [
           {
@@ -24649,7 +24791,7 @@
                   "model": {
                     "description": "The model used for the AI agent for calculating embeddings.",
                     "type": "string",
-                    "example": "openai__text_embedding_ada_002"
+                    "example": "azure__openai__text_embedding_ada_002"
                   },
                   "strategy": {
                     "type": "object",
@@ -24663,6 +24805,7 @@
                         "description": "The number of tokens per chunk.",
                         "type": "integer",
                         "example": 64,
+                        "maximum": 512,
                         "minimum": 1
                       }
                     }
@@ -24989,6 +25132,42 @@
           "base"
         ]
       },
+      "AiLlmEndpointParamsAWS": {
+        "description": "AI LLM endpoint params AWS object",
+        "type": "object",
+        "properties": {
+          "type": {
+            "description": "The type of the AI LLM endpoint params object for AWS.\nThis parameter is **required**.",
+            "type": "string",
+            "example": "aws_params",
+            "enum": [
+              "aws_params"
+            ],
+            "nullable": false
+          },
+          "temperature": {
+            "description": "What sampling temperature to use, between 0 and 1. Higher values like 0.8 will make the output more random, \nwhile lower values like 0.2 will make it more focused and deterministic. \nWe generally recommend altering this or `top_p` but not both.",
+            "type": "number",
+            "example": 0.5,
+            "maximum": 1,
+            "minimum": 0,
+            "nullable": true
+          },
+          "top_p": {
+            "description": "An alternative to sampling with temperature, called nucleus sampling, where the model considers the results \nof the tokens with `top_p` probability mass. So 0.1 means only the tokens comprising the top 10% probability \nmass are considered. We generally recommend altering this or temperature but not both.",
+            "type": "number",
+            "example": 0.5,
+            "maximum": 1,
+            "minimum": 0,
+            "nullable": true
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "title": "AI LLM endpoint params AWS",
+        "x-box-resource-id": "ai_llm_endpoint_params_aws"
+      },
       "AiLlmEndpointParamsGoogle": {
         "description": "AI LLM endpoint params Google object",
         "type": "object",
@@ -25110,6 +25289,9 @@
             "description": "The reason the response finishes.",
             "type": "string",
             "example": "done"
+          },
+          "ai_agent_info": {
+            "$ref": "#/components/schemas/AiAgentInfo"
           }
         },
         "required": [
@@ -25879,12 +26061,12 @@
                 "type": "object",
                 "properties": {
                   "enterprise_has_strong_password_required_for_external_users": {
-                    "description": "Whether or not the enterprise that owns the content requires\na strong password to collaborate on the content.",
+                    "description": "Whether or not the enterprise that owns the content requires\na strong password to collaborate on the content, or enforces\nan exposed password detection for the external collaborators.",
                     "type": "boolean",
                     "example": true
                   },
                   "user_has_strong_password": {
-                    "description": "Whether or not the user has a strong password set for their\naccount. The field is `null` when a strong password is not\nrequired.",
+                    "description": "Whether or not the user has a strong and not exposed password set\nfor their account. The field is `null` when a strong password is\nnot required.",
                     "type": "boolean",
                     "example": true,
                     "nullable": true
@@ -26186,6 +26368,26 @@
             }
           },
           {
+            "properties": {
+              "entries": {
+                "description": "A list of collaborations",
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Collaboration"
+                }
+              }
+            }
+          }
+        ],
+        "title": "Collaborations",
+        "x-box-resource-id": "collaborations",
+        "x-box-tag": "user_collaborations"
+      },
+      "CollaborationsOffsetPaginated": {
+        "description": "A list of collaborations",
+        "type": "object",
+        "allOf": [
+          {
             "type": "object",
             "description": "The part of an API response that describes pagination",
             "properties": {
@@ -26206,30 +26408,6 @@
                 "type": "integer",
                 "format": "int64",
                 "example": 2000
-              },
-              "order": {
-                "description": "The order by which items are returned.\n\nThis field is only returned for calls that use offset-based pagination.\nFor marker-based paginated APIs, this field will be omitted.",
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "description": "The order in which a pagination is ordered",
-                  "properties": {
-                    "by": {
-                      "description": "The field to order by",
-                      "type": "string",
-                      "example": "type"
-                    },
-                    "direction": {
-                      "description": "The direction to order by, either ascending or descending",
-                      "type": "string",
-                      "example": "ASC",
-                      "enum": [
-                        "ASC",
-                        "DESC"
-                      ]
-                    }
-                  }
-                }
               }
             }
           },
@@ -26246,7 +26424,7 @@
           }
         ],
         "title": "Collaborations",
-        "x-box-resource-id": "collaborations",
+        "x-box-resource-id": "collaborations_offset_paginated",
         "x-box-tag": "user_collaborations"
       },
       "CollaboratorVariable": {
@@ -26921,6 +27099,12 @@
                   "DOWNLOAD",
                   "EDIT",
                   "EDIT_USER",
+                  "EDR_CROWDSTRIKE_DEVICE_DETECTED",
+                  "EDR_CROWDSTRIKE_NO_BOX_TOOLS",
+                  "EDR_CROWDSTRIKE_BOX_TOOLS_OUTDATED",
+                  "EDR_CROWDSTRIKE_DRIVE_OUTDATED",
+                  "EDR_CROWDSTRIKE_ACCESS_ALLOWED_NO_CROWDSTRIKE_DEVICE",
+                  "EDR_CROWDSTRIKE_ACCESS_REVOKED",
                   "EMAIL_ALIAS_CONFIRM",
                   "EMAIL_ALIAS_REMOVE",
                   "ENABLE_TWO_FACTOR_AUTH",
@@ -27447,7 +27631,7 @@
                     }
                   },
                   {
-                    "description": "The shared link for this file. This will be\n`null` if no shared link has been created for this\nfile."
+                    "description": "The shared link for this file. This value will be\n`null` if no shared link has been created for this\nfile."
                   },
                   {
                     "nullable": true
@@ -27460,7 +27644,7 @@
                     "$ref": "#/components/schemas/Folder--Mini"
                   },
                   {
-                    "description": "The folder that this file is located within."
+                    "description": "The folder that this file is located within.\nThis value may be `null` for some folders such as\nthe root folder or the trash folder."
                   }
                 ],
                 "nullable": true
@@ -27833,11 +28017,7 @@
               "is_accessible_via_shared_link": {
                 "description": "Specifies if the file can be accessed\nvia the direct shared link or a shared link\nto a parent folder.",
                 "type": "boolean",
-                "example": true,
-                "enum": [
-                  true,
-                  false
-                ]
+                "example": true
               },
               "allowed_invitee_roles": {
                 "description": "A list of the types of roles that user can be invited at\nwhen sharing this file.",
@@ -28164,8 +28344,7 @@
           }
         ],
         "title": "File (Conflict)",
-        "x-box-resource-id": "file_conflict",
-        "x-box-tag": null
+        "x-box-resource-id": "file_conflict"
       },
       "FileOrFolderScope": {
         "description": "A relation between a resource (file or folder) and the scopes for which the resource can be accessed",
@@ -28188,7 +28367,8 @@
               "item_preview",
               "item_rename",
               "item_share",
-              "item_upload"
+              "item_upload",
+              "item_read"
             ]
           },
           "object": {
@@ -29683,11 +29863,7 @@
               "is_accessible_via_shared_link": {
                 "description": "Specifies if the folder can be accessed\nwith the direct shared link or a shared link\nto a parent folder.",
                 "type": "boolean",
-                "example": true,
-                "enum": [
-                  true,
-                  false
-                ]
+                "example": true
               },
               "can_non_owners_view_collaborators": {
                 "description": "Specifies if collaborators who are not owners\nof this folder are restricted from viewing other\ncollaborations on this folder.\n\nIt also restricts non-owners from inviting new\ncollaborators.",
@@ -30252,7 +30428,38 @@
         "type": "object",
         "allOf": [
           {
-            "$ref": "#/components/schemas/IntegrationMapping--Base"
+            "$ref": "#/components/schemas/IntegrationMappingBase"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "box_item": {
+                "description": "The Box folder, to which the object from the\npartner app domain (referenced in `partner_item_id`) is mapped",
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/Folder--Mini"
+                  }
+                ],
+                "nullable": false
+              },
+              "created_at": {
+                "description": "When the integration mapping object was created",
+                "type": "string",
+                "format": "date-time",
+                "example": "2012-12-12T10:53:43-08:00",
+                "nullable": false
+              },
+              "modified_at": {
+                "description": "When the integration mapping object was last modified",
+                "type": "string",
+                "format": "date-time",
+                "example": "2012-12-12T10:53:43-08:00",
+                "nullable": false
+              }
+            },
+            "required": [
+              "box_item"
+            ]
           },
           {
             "properties": {
@@ -30312,37 +30519,6 @@
                 ]
               }
             }
-          },
-          {
-            "type": "object",
-            "properties": {
-              "box_item": {
-                "description": "The Box folder, to which the object from the\npartner app domain (referenced in `partner_item_id`) is mapped",
-                "allOf": [
-                  {
-                    "$ref": "#/components/schemas/Folder--Mini"
-                  }
-                ],
-                "nullable": false
-              },
-              "created_at": {
-                "description": "When the integration mapping object was created",
-                "type": "string",
-                "format": "date-time",
-                "example": "2012-12-12T10:53:43-08:00",
-                "nullable": false
-              },
-              "modified_at": {
-                "description": "When the integration mapping object was last modified",
-                "type": "string",
-                "format": "date-time",
-                "example": "2012-12-12T10:53:43-08:00",
-                "nullable": false
-              }
-            },
-            "required": [
-              "box_item"
-            ]
           }
         ],
         "required": [
@@ -30350,10 +30526,9 @@
         ],
         "title": "Integration mapping Slack",
         "x-box-resource-id": "integration_mapping_slack",
-        "x-box-tag": "integration_mappings",
-        "x-box-variant": "standard"
+        "x-box-tag": "integration_mappings"
       },
-      "IntegrationMapping--Base": {
+      "IntegrationMappingBase": {
         "description": "A base representation of an\nintegration mapping object.",
         "type": "object",
         "properties": {
@@ -30377,15 +30552,7 @@
           "id",
           "type"
         ],
-        "title": "Integration mapping (Base)",
-        "x-box-resource-id": "integration_mapping--base",
-        "x-box-tag": "integration_mappings",
-        "x-box-variant": "base",
-        "x-box-variants": [
-          "base",
-          "standard",
-          "mini"
-        ]
+        "title": "Integration mapping"
       },
       "IntegrationMappingBoxItemSlack": {
         "description": "The schema for an integration mapping Box item object for type Slack",
@@ -30723,6 +30890,84 @@
         ],
         "title": "Items",
         "x-box-resource-id": "items",
+        "x-box-tag": "folders"
+      },
+      "ItemsOffsetPaginated": {
+        "description": "A list of files, folders, and web links in\ntheir mini representation.",
+        "type": "object",
+        "allOf": [
+          {
+            "type": "object",
+            "description": "The part of an API response that describes pagination",
+            "properties": {
+              "total_count": {
+                "description": "One greater than the offset of the last entry in the entire collection.\nThe total number of entries in the collection may be less than\n`total_count`.\n\nThis field is only returned for calls that use offset-based pagination.\nFor marker-based paginated APIs, this field will be omitted.",
+                "type": "integer",
+                "format": "int64",
+                "example": 5000
+              },
+              "limit": {
+                "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
+                "type": "integer",
+                "format": "int64",
+                "example": 1000
+              },
+              "offset": {
+                "description": "The 0-based offset of the first entry in this set. This will be the same\nas the `offset` query parameter.\n\nThis field is only returned for calls that use offset-based pagination.\nFor marker-based paginated APIs, this field will be omitted.",
+                "type": "integer",
+                "format": "int64",
+                "example": 2000
+              },
+              "order": {
+                "description": "The order by which items are returned.\n\nThis field is only returned for calls that use offset-based pagination.\nFor marker-based paginated APIs, this field will be omitted.",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "description": "The order in which a pagination is ordered",
+                  "properties": {
+                    "by": {
+                      "description": "The field to order by",
+                      "type": "string",
+                      "example": "type"
+                    },
+                    "direction": {
+                      "description": "The direction to order by, either ascending or descending",
+                      "type": "string",
+                      "example": "ASC",
+                      "enum": [
+                        "ASC",
+                        "DESC"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "properties": {
+              "entries": {
+                "description": "The items in this collection.",
+                "type": "array",
+                "items": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/File--Full"
+                    },
+                    {
+                      "$ref": "#/components/schemas/Folder--Mini"
+                    },
+                    {
+                      "$ref": "#/components/schemas/WebLink"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ],
+        "title": "Items",
+        "x-box-resource-id": "items_offset_paginated",
         "x-box-tag": "folders"
       },
       "KeywordSkillCard": {
@@ -31518,9 +31763,15 @@
               "amount": "100"
             },
             "additionalProperties": {
-              "type": "string",
-              "description": "The value for the argument being used in the metadata search.\n\nThe type of this parameter must match the type of the corresponding\nmetadata template field.",
-              "example": "100",
+              "allOf": [
+                {},
+                {
+                  "description": "The value for the argument being used in the metadata search.\n\nThe type of this parameter must match the type of the corresponding\nmetadata template field."
+                },
+                {
+                  "example": "100"
+                }
+              ],
               "x-box-example-key": "amount"
             }
           },
@@ -33958,12 +34209,6 @@
             "example": "123",
             "nullable": true
           },
-          "is_phone_verification_required_to_view": {
-            "description": "Forces signers to verify a text message prior to viewing the document. You must specify the phone number of signers to have this setting apply to them.",
-            "type": "boolean",
-            "example": true,
-            "nullable": true
-          },
           "template_id": {
             "description": "When a signature request is created from a template this field will indicate the id of that template.",
             "type": "string",
@@ -34091,15 +34336,9 @@
             "nullable": true
           },
           "login_required": {
-            "description": "If set to true, the signer will need to log in to a Box account\nbefore signing the request. If the signer does not have\nan existing account, they will have the option to create\na free Box account. Cannot be selected in combination with\n`verification_phone_number`.",
+            "description": "If set to true, the signer will need to log in to a Box account\nbefore signing the request. If the signer does not have\nan existing account, they will have the option to create\na free Box account.",
             "type": "boolean",
             "example": true,
-            "nullable": true
-          },
-          "verification_phone_number": {
-            "description": "If set, this phone number will be used to verify the signer\nvia two-factor authentication before they are able to sign the document.\nCannot be selected in combination with `login_required`.",
-            "type": "string",
-            "example": "6314578901",
             "nullable": true
           },
           "password": {
@@ -37971,8 +38210,7 @@
           }
         ],
         "title": "User (Collaborations)",
-        "x-box-resource-id": "user_collaborations",
-        "x-box-variant": "collaborations"
+        "x-box-resource-id": "user_collaborations"
       },
       "User--Full": {
         "description": "A full representation of a user, as can be returned from any\nuser API endpoint.",
@@ -39557,6 +39795,11 @@
       "name": "AI",
       "description": "A set of endpoints used to\ninteract with supported LLMs.",
       "x-box-tag": "ai"
+    },
+    {
+      "name": "AI Studio",
+      "description": "A set of endpoints used to\ninteract with AI Studio.",
+      "x-box-tag": "ai_studio"
     },
     {
       "name": "App item associations",
