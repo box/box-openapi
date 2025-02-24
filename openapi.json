@@ -14,7 +14,7 @@
             "url": "http://www.apache.org/licenses/LICENSE-2.0"
         },
         "version": "2024.0",
-        "x-box-commit-hash": "0432ad6b27"
+        "x-box-commit-hash": "37fc802212"
     },
     "servers": [
         {
@@ -23870,8 +23870,7 @@
                             "type": "string",
                             "enum": [
                                 "channel"
-                            ],
-                            "nullable": false
+                            ]
                         },
                         "example": "channel"
                     },
@@ -23880,8 +23879,7 @@
                         "in": "query",
                         "description": "マッピングが返される、マッピングされた項目のID",
                         "schema": {
-                            "type": "string",
-                            "nullable": false
+                            "type": "string"
                         },
                         "example": "12345"
                     },
@@ -24056,16 +24054,14 @@
                                             {
                                                 "$ref": "#/components/schemas/IntegrationMappingBoxItemSlack"
                                             }
-                                        ],
-                                        "nullable": false
+                                        ]
                                     },
                                     "options": {
                                         "allOf": [
                                             {
                                                 "$ref": "#/components/schemas/IntegrationMappingSlackOptions"
                                             }
-                                        ],
-                                        "nullable": false
+                                        ]
                                     }
                                 }
                             }
@@ -24378,7 +24374,6 @@
                 "operationId": "post_ai_extract",
                 "summary": "メタデータを抽出 (自由形式)",
                 "description": "サポートされている大規模言語モデル (LLM) にAIリクエストを送信し、メタデータをキー/値ペアの形式で抽出します。このリクエストでは、プロンプトと出力の両方を自由形式にすることができます。リクエストを送信する前に、メタデータテンプレートの設定は必要ありません。",
-                "x-stability-level": "beta",
                 "requestBody": {
                     "content": {
                         "application/json": {
@@ -24432,7 +24427,6 @@
                 "operationId": "post_ai_extract_structured",
                 "summary": "メタデータを抽出 (構造化)",
                 "description": "サポートされている大規模言語モデル (LLM) にAIリクエストを送信し、抽出されたメタデータを一連のキー/値ペアとして返します。このリクエストには、メタデータテンプレートか、抽出するフィールドのリストが必要です。入力は、メタデータテンプレート、または構造を確保するためのフィールドのリストの**いずれか**です。テンプレートの作成の詳細については、[メタデータテンプレートのカスタマイズ](https://support.box.com/hc/en-us/articles/360044194033-Customizing-Metadata-Templates)を参照するか、[メタデータテンプレートAPI](g://metadata/templates/create)を使用してください。",
-                "x-stability-level": "beta",
                 "requestBody": {
                     "content": {
                         "application/json": {
@@ -24479,6 +24473,377 @@
                     "AI"
                 ],
                 "x-box-enable-explorer": false
+            }
+        },
+        "/ai_agents": {
+            "get": {
+                "operationId": "get_ai_agents",
+                "summary": "List AI agents",
+                "description": "Lists AI agents based on the provided parameters.",
+                "parameters": [
+                    {
+                        "name": "mode",
+                        "in": "query",
+                        "description": "The mode to filter the agent config to return. Possible values are: `ask`, `text_gen`, and `extract`.",
+                        "required": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "example": [
+                            "ask",
+                            "text_gen",
+                            "extract"
+                        ],
+                        "explode": false
+                    },
+                    {
+                        "name": "fields",
+                        "in": "query",
+                        "description": "The fields to return in the response.",
+                        "required": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "example": [
+                            "ask",
+                            "text_gen",
+                            "extract"
+                        ],
+                        "explode": false
+                    },
+                    {
+                        "name": "agent_state",
+                        "in": "query",
+                        "description": "The state of the agents to return. Possible values are: `enabled`, `disabled` and `enabled_for_selected_users`.",
+                        "required": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "example": [
+                            "enabled"
+                        ],
+                        "explode": false
+                    },
+                    {
+                        "name": "include_box_default",
+                        "in": "query",
+                        "description": "Whether to include the Box default agents in the response.",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean",
+                            "default": false
+                        },
+                        "example": true
+                    },
+                    {
+                        "name": "marker",
+                        "in": "query",
+                        "description": "Defines the position marker at which to begin returning results.",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii"
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "返す項目の1ページあたりの最大数。",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64",
+                            "maximum": 1000
+                        },
+                        "example": 1000
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "A successful response including the agents list.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AiMultipleAgentResponse"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "予期しないクライアントエラー。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "予期しないサーバーエラー。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-box-tag": "ai_studio",
+                "tags": [
+                    "AI Studio"
+                ]
+            },
+            "post": {
+                "operationId": "post_ai_agents",
+                "summary": "Create AI agent",
+                "description": "Creates an AI agent. At least one of the following capabilities must be provided: `ask`, `text_gen`, `extract`.",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CreateAiAgent"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Definition of created AI agent.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AiSingleAgentResponse--Full"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "予期しないクライアントエラー。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "予期しないサーバーエラー。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-box-tag": "ai_studio",
+                "tags": [
+                    "AI Studio"
+                ]
+            }
+        },
+        "/ai_agents/{agent_id}": {
+            "put": {
+                "operationId": "put_ai_agents_id",
+                "summary": "Update AI agent",
+                "description": "Updates an AI agent.",
+                "parameters": [
+                    {
+                        "name": "agent_id",
+                        "in": "path",
+                        "description": "The ID of the agent to update.",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "1234"
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CreateAiAgent"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Definition of created AI agent.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AiSingleAgentResponse--Full"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "予期しないクライアントエラー。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "予期しないサーバーエラー。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-box-tag": "ai_studio",
+                "tags": [
+                    "AI Studio"
+                ]
+            },
+            "get": {
+                "operationId": "get_ai_agents_id",
+                "summary": "Get AI agent by agent ID",
+                "description": "Gets an AI Agent using the `agent_id` parameter.",
+                "parameters": [
+                    {
+                        "name": "agent_id",
+                        "in": "path",
+                        "description": "The agent id to get.",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "1234"
+                    },
+                    {
+                        "name": "fields",
+                        "in": "query",
+                        "description": "The fields to return in the response.",
+                        "required": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "example": [
+                            "ask",
+                            "text_gen",
+                            "extract"
+                        ],
+                        "explode": false
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "A successful response including the agent.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AiSingleAgentResponse--Full"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "予期しないクライアントエラー。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "予期しないサーバーエラー。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-box-tag": "ai_studio",
+                "tags": [
+                    "AI Studio"
+                ]
+            },
+            "delete": {
+                "operationId": "delete_ai_agents_id",
+                "summary": "Delete AI agent",
+                "description": "Deletes an AI agent using the provided parameters.",
+                "parameters": [
+                    {
+                        "name": "agent_id",
+                        "in": "path",
+                        "description": "The ID of the agent to delete.",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "1234"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "A successful response with no content."
+                    },
+                    "400": {
+                        "description": "予期しないクライアントエラー。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Returned if the AI agent is not found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "予期しないサーバーエラー。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-box-tag": "ai_studio",
+                "tags": [
+                    "AI Studio"
+                ]
             }
         }
     },
@@ -24534,6 +24899,20 @@
                 "title": "アクセストークン",
                 "x-box-resource-id": "access_token",
                 "x-box-tag": "authorization"
+            },
+            "AiAgentAllowedEntity": {
+                "description": "The entity with type and ID.",
+                "type": "object",
+                "oneOf": [
+                    {
+                        "$ref": "#/components/schemas/User--Base"
+                    },
+                    {
+                        "$ref": "#/components/schemas/Group--Base"
+                    }
+                ],
+                "title": "The entity with type and ID",
+                "x-box-resource-id": "ai_agent_allowed_entity"
             },
             "AiAgentAsk": {
                 "description": "クエリの処理に使用されるAIエージェント。",
@@ -24759,7 +25138,8 @@
                     },
                     "processor": {
                         "description": "リクエストに使用されるプロセッサ",
-                        "type": "string"
+                        "type": "string",
+                        "example": "basic_text"
                     }
                 },
                 "title": "リクエストで使用されるモデルおよびプロセッサに関する情報。"
@@ -24848,6 +25228,33 @@
                 "title": "AIエージェントの長いテキストツール",
                 "x-box-tag": "ai"
             },
+            "AiAgentReference": {
+                "description": "クエリの処理に使用されるAIエージェント。",
+                "type": "object",
+                "properties": {
+                    "type": {
+                        "description": "クエリの処理に使用されるAIエージェントのタイプ。",
+                        "type": "string",
+                        "example": "ai_agent_id",
+                        "enum": [
+                            "ai_agent_id"
+                        ],
+                        "nullable": false
+                    },
+                    "id": {
+                        "description": "The ID of an Agent",
+                        "type": "string",
+                        "example": "14031",
+                        "nullable": false
+                    }
+                },
+                "required": [
+                    "type"
+                ],
+                "title": "AI agent reference",
+                "x-box-resource-id": "ai_agent_reference",
+                "x-box-tag": "ai"
+            },
             "AiAgentTextGen": {
                 "description": "テキストの生成に使用されるAIエージェント。",
                 "type": "object",
@@ -24877,7 +25284,7 @@
                 "type": "object",
                 "properties": {
                     "mode": {
-                        "description": "このモードでは、このリクエストの対象となる項目を1つにするか複数にするかを指定します。`single_item_qa`を選択すると、`items`配列には要素を1つしか含めることができません。`multiple_item_qa`を選択すると、最大25項目を指定できます。",
+                        "description": "Box AI handles text documents with text representations up to 1MB in size, or a maximum of 25 files, whichever comes first. If the text file size exceeds 1MB, the first 1MB of text representation will be processed. Box AI handles image documents with a resolution of 1024 x 1024 pixels, with a maximum of 5 images or 5 pages for multi-page images. If the number of image or image pages exceeds 5, the first 5 images or pages will be processed. If you set mode parameter to `single_item_qa`, the items array can have one element only. Currently Box AI does not support multi-modal requests. If both images and text are sent Box AI will only process the text.",
                         "type": "string",
                         "example": "multiple_item_qa",
                         "enum": [
@@ -24892,7 +25299,7 @@
                         "example": "What is the value provided by public APIs based on this document?"
                     },
                     "items": {
-                        "description": "LLMで処理する項目 (多くの場合はファイル)。\n\n**注**: Box AIは、最大1 MBのテキストレプリゼンテーションを含むドキュメント、または最大25ファイルを処理します (いずれか早い方)。ファイルサイズが1 MBを超えた場合は、テキストレプリゼンテーションの最初の1 MBが処理されます。`mode`パラメータを`single_item_qa`に設定した場合、`items`配列には要素を1つしか含めることができません。 ",
+                        "description": "LLMで処理する項目 (多くの場合はファイル)。",
                         "type": "array",
                         "items": {
                             "$ref": "#/components/schemas/AiItemAsk"
@@ -24914,7 +25321,21 @@
                         "example": true
                     },
                     "ai_agent": {
-                        "$ref": "#/components/schemas/AiAgentAsk"
+                        "allOf": [
+                            {
+                                "oneOf": [
+                                    {
+                                        "$ref": "#/components/schemas/AiAgentAsk"
+                                    },
+                                    {
+                                        "$ref": "#/components/schemas/AiAgentReference"
+                                    }
+                                ]
+                            },
+                            {
+                                "description": "The AI agent to be used to handle the request."
+                            }
+                        ]
                     }
                 },
                 "required": [
@@ -24998,7 +25419,21 @@
                         "uniqueItems": true
                     },
                     "ai_agent": {
-                        "$ref": "#/components/schemas/AiAgentExtract"
+                        "allOf": [
+                            {
+                                "oneOf": [
+                                    {
+                                        "$ref": "#/components/schemas/AiAgentReference"
+                                    },
+                                    {
+                                        "$ref": "#/components/schemas/AiAgentExtract"
+                                    }
+                                ]
+                            },
+                            {
+                                "description": "The AI agent to be used for the extraction."
+                            }
+                        ]
                     }
                 },
                 "required": [
@@ -25047,7 +25482,7 @@
                                 ]
                             },
                             "scope": {
-                                "description": "メタデータテンプレートのスコープ。globalまたはenterpriseを指定できます。 \n\n* **global**スコープは、任意のBox Enterpriseで利用できるテンプレートに使用されます。 \n* **enterprise**スコープは、特定のEnterprise内で作成されたテンプレートを表し、そのEnterpriseのIDが含まれます。",
+                                "description": "メタデータテンプレートのスコープ。globalまたはenterpriseを指定できます。\n\n* **global**スコープは、任意のBox Enterpriseで利用できるテンプレートに使用されます。\n* **enterprise**スコープは、特定のEnterprise内で作成されたテンプレートを表し、そのEnterpriseのIDが含まれます。",
                                 "type": "string",
                                 "example": "enterprise_12345",
                                 "maxLength": 40
@@ -25120,7 +25555,21 @@
                         "uniqueItems": true
                     },
                     "ai_agent": {
-                        "$ref": "#/components/schemas/AiAgentExtractStructured"
+                        "allOf": [
+                            {
+                                "oneOf": [
+                                    {
+                                        "$ref": "#/components/schemas/AiAgentReference"
+                                    },
+                                    {
+                                        "$ref": "#/components/schemas/AiAgentExtractStructured"
+                                    }
+                                ]
+                            },
+                            {
+                                "description": "The AI agent to be used for the structured extraction."
+                            }
+                        ]
                     }
                 },
                 "required": [
@@ -25130,7 +25579,7 @@
                 "x-box-tag": "ai"
             },
             "AiExtractStructuredResponse": {
-                "description": "AIの応答",
+                "description": "AI extract structured response",
                 "type": "object",
                 "properties": {
                     "answer": {
@@ -25155,7 +25604,7 @@
                     "answer",
                     "created_at"
                 ],
-                "title": "AIの応答",
+                "title": "AI extract structured response",
                 "x-box-resource-id": "ai_extract_structured_response",
                 "x-box-tag": "ai"
             },
@@ -25360,6 +25809,53 @@
                 "title": "AI LLMエンドポイントパラメータ (OpenAI)",
                 "x-box-resource-id": "ai_llm_endpoint_params_openai"
             },
+            "AiMultipleAgentResponse": {
+                "description": "List of AI Agents with pagination.",
+                "type": "object",
+                "allOf": [
+                    {
+                        "type": "object",
+                        "description": "マーカーベースのページ割りについて説明しているAPIレスポンスの部分",
+                        "properties": {
+                            "limit": {
+                                "description": "これらのエントリで使用された制限値。許容される最大値を超えていない限り、クエリパラメータの`limit`と等しくなります。最大値はAPIによって異なります。",
+                                "type": "integer",
+                                "format": "int64",
+                                "example": 1000
+                            },
+                            "next_marker": {
+                                "description": "次の検索結果ページの開始場所のマーカー。",
+                                "type": "string",
+                                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                                "nullable": true
+                            },
+                            "prev_marker": {
+                                "description": "前の検索結果ページの開始場所のマーカー。",
+                                "type": "string",
+                                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVih",
+                                "nullable": true
+                            }
+                        }
+                    },
+                    {
+                        "properties": {
+                            "entries": {
+                                "description": "The list of AI Agents.",
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/AiSingleAgentResponse--Full"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "required": [
+                    "entries"
+                ],
+                "title": "AI agents list",
+                "x-box-resource-id": "ai_multiple_agent_response",
+                "x-box-tag": "ai_studio"
+            },
             "AiResponse": {
                 "description": "AIの応答",
                 "type": "object",
@@ -25429,6 +25925,337 @@
                     "full"
                 ]
             },
+            "AiSingleAgentResponse": {
+                "description": "Standard representation of an AI Agent instance.",
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "description": "The unique identifier of the AI Agent.",
+                        "type": "string",
+                        "example": "1234567890"
+                    },
+                    "type": {
+                        "description": "The type of agent used to handle queries.",
+                        "type": "string",
+                        "example": "ai_agent",
+                        "enum": [
+                            "ai_agent"
+                        ]
+                    },
+                    "origin": {
+                        "description": "The provider of the AI Agent.",
+                        "type": "string",
+                        "example": "CUSTOM"
+                    },
+                    "name": {
+                        "description": "The name of the AI Agent.",
+                        "type": "string",
+                        "example": "This is my Agent"
+                    },
+                    "access_state": {
+                        "description": "The state of the AI Agent. Possible values are: `enabled`, `disabled`, and `enabled_for_selected_users`.",
+                        "type": "string",
+                        "example": "enabled",
+                        "title": "Access State",
+                        "x-box-tag": "ai_studio"
+                    },
+                    "created_by": {
+                        "description": "The user who created this agent.",
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/User--Base"
+                            }
+                        ]
+                    },
+                    "created_at": {
+                        "description": "The ISO date-time formatted timestamp of when this AI agent was created.",
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2022-01-01T00:00:00Z"
+                    },
+                    "modified_by": {
+                        "description": "The user who most recently modified this agent.",
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/User--Base"
+                            }
+                        ]
+                    },
+                    "modified_at": {
+                        "description": "The ISO date-time formatted timestamp of when this AI agent was recently modified.",
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2022-01-01T00:00:00Z"
+                    },
+                    "icon_reference": {
+                        "description": "The icon reference of the AI Agent.",
+                        "type": "string",
+                        "example": "https://cdn01.boxcdn.net/app-assets/aistudio/avatars/logo_analytics.svg",
+                        "minLength": 1
+                    },
+                    "allowed_entities": {
+                        "description": "List of allowed users or groups.",
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/AiAgentAllowedEntity"
+                        }
+                    }
+                },
+                "required": [
+                    "id",
+                    "origin",
+                    "name",
+                    "access_state"
+                ],
+                "title": "AI agent",
+                "x-box-resource-id": "ai_single_agent_response",
+                "x-box-tag": "ai_studio",
+                "x-box-variant": "standard",
+                "x-box-variants": [
+                    "standard",
+                    "full"
+                ]
+            },
+            "AiSingleAgentResponse--Full": {
+                "description": "Full representation of an AI Agent instance.",
+                "type": "object",
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/AiSingleAgentResponse"
+                    },
+                    {
+                        "properties": {
+                            "ask": {
+                                "$ref": "#/components/schemas/AiStudioAgentAsk"
+                            },
+                            "text_gen": {
+                                "$ref": "#/components/schemas/AiStudioAgentTextGen"
+                            },
+                            "extract": {
+                                "$ref": "#/components/schemas/AiStudioAgentExtract"
+                            }
+                        }
+                    }
+                ],
+                "required": [
+                    "id",
+                    "origin",
+                    "name",
+                    "access_state"
+                ],
+                "title": "AI agent (Full)",
+                "x-box-resource-id": "ai_single_agent_response--full",
+                "x-box-tag": "ai_studio",
+                "x-box-variant": "full",
+                "x-box-variants": [
+                    "standard",
+                    "full"
+                ]
+            },
+            "AiStudioAgentAsk": {
+                "description": "The AI Agent to be used for ask.",
+                "type": "object",
+                "properties": {
+                    "type": {
+                        "description": "クエリの処理に使用されるAIエージェントのタイプ。",
+                        "type": "string",
+                        "example": "ai_agent_ask",
+                        "enum": [
+                            "ai_agent_ask"
+                        ],
+                        "nullable": false
+                    },
+                    "access_state": {
+                        "description": "The state of the AI Agent capability. Possible values are: `enabled` and `disabled`.",
+                        "type": "string",
+                        "example": "enabled",
+                        "title": "Capability Access State",
+                        "x-box-tag": "ai_studio"
+                    },
+                    "description": {
+                        "description": "The description of the AI Agent.",
+                        "type": "string",
+                        "example": "This is ASK Agent"
+                    },
+                    "custom_instructions": {
+                        "description": "Custom instructions for the agent.",
+                        "type": "string",
+                        "example": "This is a custom instruction",
+                        "nullable": true
+                    },
+                    "long_text": {
+                        "$ref": "#/components/schemas/AiStudioAgentLongTextTool"
+                    },
+                    "basic_text": {
+                        "$ref": "#/components/schemas/AiStudioAgentBasicTextTool"
+                    },
+                    "long_text_multi": {
+                        "$ref": "#/components/schemas/AiStudioAgentLongTextTool"
+                    },
+                    "basic_text_multi": {
+                        "$ref": "#/components/schemas/AiStudioAgentBasicTextTool"
+                    }
+                },
+                "required": [
+                    "type",
+                    "access_state",
+                    "description"
+                ],
+                "title": "AI agent capability ask",
+                "x-box-resource-id": "ai_studio_agent_ask",
+                "x-box-tag": "ai_studio"
+            },
+            "AiStudioAgentBasicGenTool": {
+                "description": "テキストの生成に使用されるAIエージェントの基本ツール。",
+                "type": "object",
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/AiAgentBasicGenTool"
+                    },
+                    {
+                        "properties": {
+                            "is_custom_instructions_included": {
+                                "description": "True if system message contains custom instructions placeholder, false otherwise",
+                                "type": "boolean",
+                                "example": false
+                            }
+                        }
+                    }
+                ],
+                "title": "AIエージェントの基本テキスト生成ツール",
+                "x-box-tag": "ai"
+            },
+            "AiStudioAgentBasicTextTool": {
+                "description": "基本テキストの処理に使用されるAIエージェントプロセッサ。",
+                "type": "object",
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/AiAgentBasicTextTool"
+                    },
+                    {
+                        "properties": {
+                            "is_custom_instructions_included": {
+                                "description": "True if system message contains custom instructions placeholder, false otherwise",
+                                "type": "boolean",
+                                "example": false
+                            }
+                        }
+                    }
+                ],
+                "title": "AIエージェントの基本テキストツール",
+                "x-box-tag": "ai"
+            },
+            "AiStudioAgentExtract": {
+                "description": "The AI Agent to be used for extraction.",
+                "type": "object",
+                "properties": {
+                    "type": {
+                        "description": "抽出に使用されるAIエージェントのタイプ。",
+                        "type": "string",
+                        "example": "ai_agent_extract",
+                        "enum": [
+                            "ai_agent_extract"
+                        ],
+                        "nullable": false
+                    },
+                    "access_state": {
+                        "description": "The state of the AI Agent capability. Possible values are: `enabled` and `disabled`.",
+                        "type": "string",
+                        "example": "enabled",
+                        "title": "Capability Access State",
+                        "x-box-tag": "ai_studio"
+                    },
+                    "description": {
+                        "description": "The description of the AI Agent.",
+                        "type": "string",
+                        "example": "This is ASK Agent"
+                    },
+                    "custom_instructions": {
+                        "description": "Custom instructions for the agent.",
+                        "type": "string",
+                        "example": "This is a custom instruction",
+                        "nullable": true
+                    },
+                    "long_text": {
+                        "$ref": "#/components/schemas/AiStudioAgentLongTextTool"
+                    },
+                    "basic_text": {
+                        "$ref": "#/components/schemas/AiStudioAgentBasicTextTool"
+                    }
+                },
+                "required": [
+                    "type",
+                    "access_state",
+                    "description"
+                ],
+                "title": "AI agent capability extract",
+                "x-box-resource-id": "ai_studio_agent_extract",
+                "x-box-tag": "ai_studio"
+            },
+            "AiStudioAgentLongTextTool": {
+                "description": "長いテキストの処理に使用されるAIエージェントプロセッサ。",
+                "type": "object",
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/AiAgentLongTextTool"
+                    },
+                    {
+                        "properties": {
+                            "is_custom_instructions_included": {
+                                "description": "True if system message contains custom instructions placeholder, false otherwise",
+                                "type": "boolean",
+                                "example": false
+                            }
+                        }
+                    }
+                ],
+                "title": "AIエージェントの長いテキストツール",
+                "x-box-tag": "ai"
+            },
+            "AiStudioAgentTextGen": {
+                "description": "テキストの生成に使用されるAIエージェント。",
+                "type": "object",
+                "properties": {
+                    "type": {
+                        "description": "テキストの生成に使用されるAIエージェントのタイプ。",
+                        "type": "string",
+                        "example": "ai_agent_text_gen",
+                        "enum": [
+                            "ai_agent_text_gen"
+                        ],
+                        "nullable": false
+                    },
+                    "access_state": {
+                        "description": "The state of the AI Agent capability. Possible values are: `enabled` and `disabled`.",
+                        "type": "string",
+                        "example": "enabled",
+                        "title": "Capability Access State",
+                        "x-box-tag": "ai_studio"
+                    },
+                    "description": {
+                        "description": "The description of the AI Agent.",
+                        "type": "string",
+                        "example": "This is ASK Agent"
+                    },
+                    "custom_instructions": {
+                        "description": "Custom instructions for the agent.",
+                        "type": "string",
+                        "example": "This is a custom instruction",
+                        "nullable": true
+                    },
+                    "basic_gen": {
+                        "$ref": "#/components/schemas/AiStudioAgentBasicGenTool"
+                    }
+                },
+                "required": [
+                    "type",
+                    "access_state",
+                    "description"
+                ],
+                "title": "AI agent capability text generation",
+                "x-box-resource-id": "ai_studio_agent_text_gen",
+                "x-box-tag": "ai_studio"
+            },
             "AiTextGen": {
                 "description": "AIへのテキスト生成リクエストオブジェクト",
                 "type": "object",
@@ -25481,7 +26308,21 @@
                         }
                     },
                     "ai_agent": {
-                        "$ref": "#/components/schemas/AiAgentTextGen"
+                        "allOf": [
+                            {
+                                "oneOf": [
+                                    {
+                                        "$ref": "#/components/schemas/AiAgentReference"
+                                    },
+                                    {
+                                        "$ref": "#/components/schemas/AiAgentTextGen"
+                                    }
+                                ]
+                            },
+                            {
+                                "description": "The AI agent to be used for generating text."
+                            }
+                        ]
                     }
                 },
                 "required": [
@@ -26930,6 +27771,61 @@
                 "title": "競合エラー",
                 "x-box-resource-id": "conflict_error",
                 "x-box-tag": "uploads"
+            },
+            "CreateAiAgent": {
+                "description": "The schema for AI agent create request.",
+                "type": "object",
+                "properties": {
+                    "type": {
+                        "description": "The type of agent used to handle queries.",
+                        "type": "string",
+                        "example": "ai_agent",
+                        "enum": [
+                            "ai_agent"
+                        ]
+                    },
+                    "name": {
+                        "description": "The name of the AI Agent.",
+                        "type": "string",
+                        "example": "My AI Agent"
+                    },
+                    "access_state": {
+                        "description": "The state of the AI Agent. Possible values are: `enabled`, `disabled`, and `enabled_for_selected_users`.",
+                        "type": "string",
+                        "example": "enabled",
+                        "title": "Access State",
+                        "x-box-tag": "ai_studio"
+                    },
+                    "icon_reference": {
+                        "description": "The icon reference of the AI Agent. It should have format of the URL `https://cdn01.boxcdn.net/app-assets/aistudio/avatars/<file_name>` where possible values of `file_name` are: `logo_boxAi.png`,`logo_stamp.png`,`logo_legal.png`,`logo_finance.png`,`logo_config.png`,`logo_handshake.png`,`logo_analytics.png`,`logo_classification.png`",
+                        "type": "string",
+                        "example": "https://cdn01.boxcdn.net/app-assets/aistudio/avatars/logo_analytics.svg",
+                        "minLength": 1
+                    },
+                    "allowed_entities": {
+                        "description": "List of allowed users or groups.",
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/AiAgentAllowedEntity"
+                        }
+                    },
+                    "ask": {
+                        "$ref": "#/components/schemas/AiStudioAgentAsk"
+                    },
+                    "text_gen": {
+                        "$ref": "#/components/schemas/AiStudioAgentTextGen"
+                    },
+                    "extract": {
+                        "$ref": "#/components/schemas/AiStudioAgentExtract"
+                    }
+                },
+                "required": [
+                    "type",
+                    "name",
+                    "access_state"
+                ],
+                "title": "Create AI agent request",
+                "x-box-tag": "ai_studio"
             },
             "DevicePinner": {
                 "description": "デバイスピンを使用すると、どのデバイスでネイティブBoxアプリケーションの使用を許可するかを会社レベルで制御できます。",
@@ -30527,22 +31423,19 @@
                                 "example": "slack",
                                 "enum": [
                                     "slack"
-                                ],
-                                "nullable": false
+                                ]
                             },
                             "is_manually_created": {
                                 "description": "マッピングが (自動作成されたのではなく) 手動で設定されているかどうかを示します",
                                 "type": "boolean",
-                                "example": true,
-                                "nullable": false
+                                "example": true
                             },
                             "options": {
                                 "allOf": [
                                     {
                                         "$ref": "#/components/schemas/IntegrationMappingSlackOptions"
                                     }
-                                ],
-                                "nullable": false
+                                ]
                             },
                             "created_by": {
                                 "description": "統合マッピングを作成したユーザーを表すオブジェクト",
@@ -30550,8 +31443,7 @@
                                     {
                                         "$ref": "#/components/schemas/UserIntegrationMappings"
                                     }
-                                ],
-                                "nullable": false
+                                ]
                             },
                             "modified_by": {
                                 "description": "統合マッピングを最後に変更したユーザー",
@@ -30559,8 +31451,7 @@
                                     {
                                         "$ref": "#/components/schemas/UserIntegrationMappings"
                                     }
-                                ],
-                                "nullable": false
+                                ]
                             },
                             "partner_item": {
                                 "description": "Slack用にマッピングされた項目オブジェクト",
@@ -30569,49 +31460,38 @@
                                     "type": "channel",
                                     "slack_org_id": "E1234567"
                                 },
-                                "nullable": false,
                                 "oneOf": [
                                     {
                                         "$ref": "#/components/schemas/IntegrationMappingPartnerItemSlack"
                                     }
                                 ]
-                            }
-                        }
-                    },
-                    {
-                        "type": "object",
-                        "properties": {
+                            },
                             "box_item": {
                                 "description": "パートナーアプリのドメインのオブジェクト (`partner_item_id`で参照) のマッピング先であるBoxフォルダ",
                                 "allOf": [
                                     {
                                         "$ref": "#/components/schemas/Folder--Mini"
                                     }
-                                ],
-                                "nullable": false
+                                ]
                             },
                             "created_at": {
                                 "description": "統合マッピングオブジェクトが作成された日時",
                                 "type": "string",
                                 "format": "date-time",
-                                "example": "2012-12-12T10:53:43-08:00",
-                                "nullable": false
+                                "example": "2012-12-12T10:53:43-08:00"
                             },
                             "modified_at": {
                                 "description": "統合マッピングオブジェクトが最後に変更された日時",
                                 "type": "string",
                                 "format": "date-time",
-                                "example": "2012-12-12T10:53:43-08:00",
-                                "nullable": false
+                                "example": "2012-12-12T10:53:43-08:00"
                             }
-                        },
-                        "required": [
-                            "box_item"
-                        ]
+                        }
                     }
                 ],
                 "required": [
-                    "partner_item"
+                    "partner_item",
+                    "box_item"
                 ],
                 "title": "Slack統合マッピング",
                 "x-box-resource-id": "integration_mapping_slack",
@@ -30624,8 +31504,7 @@
                     "id": {
                         "description": "フォルダマッピングの一意の識別子 (`integration_type`とともに複合キーの一部)",
                         "type": "string",
-                        "example": "12345",
-                        "nullable": false
+                        "example": "12345"
                     },
                     "type": {
                         "description": "マッピングタイプ",
@@ -30633,8 +31512,7 @@
                         "example": "integration_mapping",
                         "enum": [
                             "integration_mapping"
-                        ],
-                        "nullable": false
+                        ]
                     }
                 },
                 "required": [
@@ -30710,46 +31588,32 @@
             "IntegrationMappingSlackCreateRequest": {
                 "description": "Slack統合マッピングオブジェクトを作成するリクエスト",
                 "type": "object",
-                "allOf": [
-                    {
-                        "properties": {
-                            "partner_item": {
-                                "allOf": [
-                                    {
-                                        "$ref": "#/components/schemas/IntegrationMappingPartnerItemSlack"
-                                    }
-                                ],
-                                "nullable": false
+                "properties": {
+                    "partner_item": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/IntegrationMappingPartnerItemSlack"
                             }
-                        }
+                        ]
                     },
-                    {
-                        "type": "object",
-                        "properties": {
-                            "box_item": {
-                                "allOf": [
-                                    {
-                                        "$ref": "#/components/schemas/IntegrationMappingBoxItemSlack"
-                                    }
-                                ],
-                                "nullable": false
-                            },
-                            "options": {
-                                "allOf": [
-                                    {
-                                        "$ref": "#/components/schemas/IntegrationMappingSlackOptions"
-                                    }
-                                ],
-                                "nullable": false
+                    "box_item": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/IntegrationMappingBoxItemSlack"
                             }
-                        },
-                        "required": [
-                            "box_item"
+                        ]
+                    },
+                    "options": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/IntegrationMappingSlackOptions"
+                            }
                         ]
                     }
-                ],
+                },
                 "required": [
-                    "partner_item"
+                    "partner_item",
+                    "box_item"
                 ],
                 "title": "Slack統合マッピングリクエストを作成",
                 "x-box-resource-id": "integration_mapping_slack_create_request"
@@ -30761,8 +31625,7 @@
                     "is_access_management_disabled": {
                         "description": "基になるBox項目に対するチャンネルメンバーのアクセスを自動で管理する必要があるかどうかを示します。チャンネルのタイプによっては、アクセスがコラボレーションまたは共有リンクの作成により管理されます。",
                         "type": "boolean",
-                        "example": true,
-                        "nullable": false
+                        "example": true
                     }
                 },
                 "title": "Slackタイプ用の統合マッピングオプション"
