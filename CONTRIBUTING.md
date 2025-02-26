@@ -1,35 +1,46 @@
 # Contributing
 
-All contributions are welcome to this project.
+The `box-openapi` project is now in read-only mode for external contributions. 
+While direct contributions via pull requests are no longer accepted, we encourage users to report issues, 
+propose changes, and provide feedback through GitHub Issues.
 
-## Contributor License Agreement
+## How to Contribute
 
-Before a contribution can be merged into this project, please fill out the
-Contributor License Agreement (CLA). Any new contributor will be prompted to
-sign this agreement our CLA bot upon creating a pull request.
+### Reporting Issues
 
-## Development
+If you find a bug, inconsistency, or have a feature suggestion, please submit an issue:
 
-To contribute to this project we highly recommend reading our guides on
-making contributions.
+- Navigate to the Issues tab.
+- Click New Issue and select the appropriate template.
+- Provide a clear and concise description of the problem or request.
+- Include any relevant examples, logs, or links to documentation.
 
-1. [Installation & setup](./docs/index.md)
-1. [Notes for Box employees](./docs/boxers.md)
-1. [The OpenAPI structure and custom attributes](./docs/structure.md)
-1. [Adding a new API resource](./docs/add-resource.md)
-1. [Base, mini, standard, and full API resources](./docs/variants.md)
-1. [Adding a new API endpoint](./docs/add-endpoint.md)
-1. [Contributing a pull request](./docs/pull-request.md)
-1. [Markdown styleguide](./docs/markdown.md)
-1. [Updating dependencies](./docs/dependencies.md)
+### Proposing Changes
 
-## Deployment
+If you have suggestions for improvements, follow these steps:
 
-When pushing to the `main` or `staging` branch, GitHub actions will run the
-linter and tests and will push the compiled OpenAPI spec to the `en` and
-`en-staging` branches respectively.
+- Open an issue detailing the proposed change.
+- Clearly explain why the change is needed and how it benefits the project.
+- If your proposal is accepted, our team will implement and review the changes.
 
-## Translation
+### Security Issues
+
+For security vulnerabilities, please do not open a public issue. 
+Instead, report them responsibly by following [Box’s security disclosure guidelines](https://www.box.com/about-us/security).
+
+What Happens Next?
+- Our team will review submitted issues on a regular basis.
+- Approved fixes or enhancements will be prioritized based on impact and feasibility.
+- Updates will be communicated through GitHub discussions or release notes.
+
+## Thank You
+
+We appreciate your engagement and contributions to improving box-openapi. Your feedback helps us maintain and enhance the project while ensuring stability and consistency.
+
+For any further questions, feel free to engage in discussions on GitHub.
+
+
+# Translation
 
 On a regular schedule a snapshot of the `en` branch is created on the
 `en-snapshot` branch and imported into our in-house translation system
