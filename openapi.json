@@ -14,7 +14,7 @@
       "url": "http://www.apache.org/licenses/LICENSE-2.0"
     },
     "version": "2024.0",
-    "x-box-commit-hash": "265cf4a391"
+    "x-box-commit-hash": "27a1ebc2ec"
   },
   "servers": [
     {
@@ -24207,6 +24207,300 @@
         ]
       }
     },
+    "/integration_mappings/teams": {
+      "get": {
+        "operationId": "get_integration_mappings_teams",
+        "summary": "List Teams integration mappings",
+        "description": "Lists [Teams integration mappings](https://support.box.com/hc/en-us/articles/360044681474-Using-Box-for-Teams) in a users' enterprise.\nYou need Admin or Co-Admin role to\nuse this endpoint.",
+        "x-stability-level": "beta",
+        "parameters": [
+          {
+            "name": "partner_item_type",
+            "in": "query",
+            "description": "Mapped item type, for which the mapping should be returned",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "channel",
+                "team"
+              ]
+            },
+            "example": "channel"
+          },
+          {
+            "name": "partner_item_id",
+            "in": "query",
+            "description": "ID of the mapped item, for which the mapping should be returned",
+            "schema": {
+              "type": "string"
+            },
+            "example": "12345"
+          },
+          {
+            "name": "box_item_id",
+            "in": "query",
+            "description": "Box item ID, for which the mappings should be returned",
+            "schema": {
+              "type": "string"
+            },
+            "example": "12345"
+          },
+          {
+            "name": "box_item_type",
+            "in": "query",
+            "description": "Box item type, for which the mappings should be returned",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "folder"
+              ]
+            },
+            "example": "folder"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns a collection of integration mappings",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntegrationMappingsTeams"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The server cannot or will not process the\nrequest due to an apparent client error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Returns a `not_found` error if the integration mapping could not be found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        },
+        "x-box-tag": "integration_mappings",
+        "tags": [
+          "Integration mappings"
+        ]
+      },
+      "post": {
+        "operationId": "post_integration_mappings_teams",
+        "summary": "Create Teams integration mapping",
+        "description": "Creates a [Teams integration mapping](https://support.box.com/hc/en-us/articles/360044681474-Using-Box-for-Teams)\nby mapping a Teams channel to a Box item.\nYou need Admin or Co-Admin role to\nuse this endpoint.",
+        "x-stability-level": "beta",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IntegrationMappingTeamsCreateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Returns the created integration mapping.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntegrationMappingTeams"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Returns a `bad_request` if an incorrect `options`\nwas supplied or the Box folder cannot be\nmapped to this `partner_item_id`.\nError codes:\n  * `SERVICE_ACCOUNT_IS_NOT_A_COOWNER_OR_OWNER` - service account\n  doesn't have co-owner collaboration or is\n  not an owner of the `box_item_id`,\n  * `CHANNEL_ALREADY_MAPPED` - channel is already\n    mapped to another `box_item_id`,\n  * `TEAM_ALREADY_MAPPED` - team is already\n    mapped to another `box_item_id`,\n  * `BOX_ENTERPRISE_MISMATCH` - Box folder must be\n  owned by the enterprise, which is configured\n  to use Box as Content layer for Teams,\n  * `BOX_FOLDER_EXTERNALLY_OWNED` - Box folder must\n  be internally owned to the admin's enterprise\n  * `FOLDER_ALREADY_MAPPED` - Box folder must not be mapped to another integration mapping.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Returns a `not_found` error if the integration mapping, record or folder could not be found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        },
+        "x-box-tag": "integration_mappings",
+        "tags": [
+          "Integration mappings"
+        ]
+      }
+    },
+    "/integration_mappings/teams/{integration_mapping_id}": {
+      "put": {
+        "operationId": "put_integration_mappings_teams_id",
+        "summary": "Update Teams integration mapping",
+        "description": "Updates a [Teams integration mapping](https://support.box.com/hc/en-us/articles/360044681474-Using-Box-for-Teams).\nSupports updating the Box folder ID and options.\nYou need Admin or Co-Admin role to\nuse this endpoint.",
+        "x-stability-level": "beta",
+        "parameters": [
+          {
+            "name": "integration_mapping_id",
+            "in": "path",
+            "description": "An ID of an integration mapping",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "11235432"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "box_item": {
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/FolderReference"
+                      },
+                      {
+                        "description": "The Box folder, to which the object from the partner app domain is mapped"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Returns the updated integration mapping object.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntegrationMappingTeams"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Returns a `bad_request` if an incorrect `options` was\nsupplied or the Box folder cannot be mapped to this `partner_item`.\nError codes:\n* `SERVICE_ACCOUNT_IS_NOT_A_COOWNER_OR_OWNER` - service account\n  doesn't have co-owner collaboration or is\n  not an owner of the `box_item_id`,\n* `BOX_FOLDER_EXTERNALLY_OWNED` - Box folder must be\n  internally owned to the admin's enterprise,\n* `FOLDER_ALREADY_MAPPED` - Box folder must not be mapped to another integration mapping.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Returns `not_found` if integration mapping object was not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        },
+        "x-box-tag": "integration_mappings",
+        "tags": [
+          "Integration mappings"
+        ]
+      },
+      "delete": {
+        "operationId": "delete_integration_mappings_teams_id",
+        "summary": "Delete Teams integration mapping",
+        "description": "Deletes a [Teams integration mapping](https://support.box.com/hc/en-us/articles/360044681474-Using-Box-for-Teams).\nYou need Admin or Co-Admin role to\nuse this endpoint.",
+        "x-stability-level": "beta",
+        "parameters": [
+          {
+            "name": "integration_mapping_id",
+            "in": "path",
+            "description": "An ID of an integration mapping",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "11235432"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Empty body in response"
+          },
+          "404": {
+            "description": "Returns a `not_found` error if the integration mapping could not be found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        },
+        "x-box-tag": "integration_mappings",
+        "tags": [
+          "Integration mappings"
+        ]
+      }
+    },
     "/ai/ask": {
       "post": {
         "operationId": "post_ai_ask",
@@ -31079,6 +31373,31 @@
         "x-box-resource-id": "folder_locks",
         "x-box-tag": "folder_locks"
       },
+      "FolderReference": {
+        "description": "Folder reference",
+        "type": "object",
+        "properties": {
+          "type": {
+            "description": "`folder`",
+            "type": "string",
+            "example": "folder",
+            "enum": [
+              "folder"
+            ],
+            "nullable": false
+          },
+          "id": {
+            "description": "ID of the folder",
+            "type": "string",
+            "example": "42037322"
+          }
+        },
+        "required": [
+          "type",
+          "id"
+        ],
+        "title": "Folder reference"
+      },
       "GenericSource": {
         "description": "A generic event source type.",
         "type": "object",
@@ -31631,6 +31950,74 @@
         ],
         "title": "Integration mapping mapped item schema for type Slack"
       },
+      "IntegrationMappingPartnerItemTeams": {
+        "description": "The schema for an integration mapping mapped item object for type Teams.",
+        "type": "object",
+        "properties": {
+          "type": {
+            "description": "Type of the mapped item referenced in `id`",
+            "type": "string",
+            "example": "channel",
+            "enum": [
+              "channel",
+              "team"
+            ]
+          },
+          "id": {
+            "description": "ID of the mapped item (of type referenced in `type`)",
+            "type": "string",
+            "example": "19%ABCD-Avgfggkggyftdtfgghjhkhkhh%40thread:tacv2"
+          },
+          "tenant_id": {
+            "description": "ID of the tenant that is registered with Microsoft Teams.",
+            "type": "string",
+            "example": "abcd-defg-1235-7890"
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "tenant_id"
+        ],
+        "title": "Integration mapping mapped item schema for type Teams"
+      },
+      "IntegrationMappingPartnerItemTeamsCreateRequest": {
+        "description": "The schema for an integration mapping mapped item object for type Teams.",
+        "type": "object",
+        "properties": {
+          "type": {
+            "description": "Type of the mapped item referenced in `id`",
+            "type": "string",
+            "example": "channel",
+            "enum": [
+              "channel",
+              "team"
+            ]
+          },
+          "id": {
+            "description": "ID of the mapped item (of type referenced in `type`)",
+            "type": "string",
+            "example": "19%ABCD-Avgfggkggyftdtfgghjhkhkhh%40thread:tacv2"
+          },
+          "tenant_id": {
+            "description": "ID of the tenant that is registered with Microsoft Teams.",
+            "type": "string",
+            "example": "abcd-defg-1235-7890"
+          },
+          "team_id": {
+            "description": "ID of the team that is registered with Microsoft Teams.",
+            "type": "string",
+            "example": "hjgjgjg-bhhj-564a-b643-hghgj685u"
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "tenant_id",
+          "team_id"
+        ],
+        "title": "Integration mapping mapped item schema for type Teams"
+      },
       "IntegrationMappingSlackCreateRequest": {
         "description": "A request to create a Slack Integration Mapping object",
         "type": "object",
@@ -31676,6 +32063,105 @@
         },
         "title": "Integration mapping options for type Slack"
       },
+      "IntegrationMappingTeams": {
+        "description": "A Microsoft Teams specific representation of an integration\nmapping object.",
+        "type": "object",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/IntegrationMappingBase"
+          },
+          {
+            "properties": {
+              "integration_type": {
+                "description": "Identifies the Box partner app,\nwith which the mapping is associated.\nSupports Slack and Teams.\n(part of the composite key together with `id`)",
+                "type": "string",
+                "example": "teams",
+                "enum": [
+                  "teams"
+                ]
+              },
+              "is_overridden_by_manual_mapping": {
+                "description": "Identifies whether the mapping has\nbeen manually set by the team owner from UI for channels\n(as opposed to being automatically created)",
+                "type": "boolean",
+                "example": true
+              },
+              "partner_item": {
+                "description": "Mapped item object for Teams",
+                "example": {
+                  "id": "19%3ABCD-Avgfggkggyftdtfgghjhkhkhh%40thread:tacv2",
+                  "type": "channel",
+                  "tenant_id": "E1234567",
+                  "team_id": "hjgjgjg-bhhj-564a-b643-hghgj685u"
+                },
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/IntegrationMappingPartnerItemTeams"
+                  }
+                ]
+              },
+              "box_item": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/FolderReference"
+                  },
+                  {
+                    "description": "The Box folder, to which the object from the\npartner app domain (referenced in `partner_item_id`) is mapped"
+                  }
+                ]
+              },
+              "created_at": {
+                "description": "When the integration mapping object was created",
+                "type": "string",
+                "format": "date-time",
+                "example": "2012-12-12T10:53:43-08:00"
+              },
+              "modified_at": {
+                "description": "When the integration mapping object was last modified",
+                "type": "string",
+                "format": "date-time",
+                "example": "2012-12-12T10:53:43-08:00"
+              }
+            }
+          }
+        ],
+        "required": [
+          "partner_item",
+          "box_item"
+        ],
+        "title": "Integration mapping Teams",
+        "x-box-resource-id": "integration_mapping_teams",
+        "x-box-tag": "integration_mappings",
+        "x-box-variant": "standard"
+      },
+      "IntegrationMappingTeamsCreateRequest": {
+        "description": "A request to create a Teams Integration Mapping object",
+        "type": "object",
+        "properties": {
+          "partner_item": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/IntegrationMappingPartnerItemTeamsCreateRequest"
+              }
+            ]
+          },
+          "box_item": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FolderReference"
+              },
+              {
+                "description": "The Box folder, to which the object from the\npartner app domain (referenced in `partner_item_id`) is mapped"
+              }
+            ]
+          }
+        },
+        "required": [
+          "partner_item",
+          "box_item"
+        ],
+        "title": "Create teams integration mapping request",
+        "x-box-resource-id": "integration_mapping_teams_create_request"
+      },
       "IntegrationMappings": {
         "description": "A list of integration mapping\nobjects.",
         "type": "object",
@@ -31712,6 +32198,26 @@
         ],
         "title": "Integration mappings Slack",
         "x-box-resource-id": "integration_mappings_slack",
+        "x-box-tag": "integration_mappings"
+      },
+      "IntegrationMappingsTeams": {
+        "description": "A list of integration mapping\nobjects.",
+        "type": "object",
+        "allOf": [
+          {
+            "properties": {
+              "entries": {
+                "description": "A list of integration mappings",
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/IntegrationMappingTeams"
+                }
+              }
+            }
+          }
+        ],
+        "title": "Integration mappings Teams",
+        "x-box-resource-id": "integration_mappings_teams",
         "x-box-tag": "integration_mappings"
       },
       "Invite": {
