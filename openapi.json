@@ -14,7 +14,7 @@
             "url": "http://www.apache.org/licenses/LICENSE-2.0"
         },
         "version": "2024.0",
-        "x-box-commit-hash": "37fc802212"
+        "x-box-commit-hash": "27a1ebc2ec"
     },
     "servers": [
         {
@@ -11529,7 +11529,7 @@
                         }
                     },
                     "304": {
-                        "description": "`If-None-Match`ヘッダーがフォルダの現在の`etag`値と一致する場合は、空のレスポンスを返します。これは、フォルダが前回リクエストされたときから変更されていないことを示します。"
+                        "description": "`If-None-Match`ヘッダーがファイルの現在の`etag`値と一致する場合は、空のレスポンスを返します。これは、ファイルが前回リクエストされたときから変更されていないことを示します。"
                     },
                     "default": {
                         "description": "予期しないクライアントエラー。",
@@ -13528,7 +13528,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "共有リンクが有効で、ユーザーがそのリンクに対するアクセス権限を持っている場合は、Full版のファイルリソースを返します。",
+                        "description": "Returns a full web link resource if the shared link is valid and the user has access to it.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -13538,7 +13538,7 @@
                         }
                     },
                     "304": {
-                        "description": "`If-None-Match`ヘッダーがフォルダの現在の`etag`値と一致する場合は、空のレスポンスを返します。これは、フォルダが前回リクエストされたときから変更されていないことを示します。"
+                        "description": "Returns an empty response when the `If-None-Match` header matches the current `etag` value of the web link. This indicates that the web link has not changed since it was last requested."
                     },
                     "default": {
                         "description": "予期しないクライアントエラー。",
@@ -14212,6 +14212,51 @@
                 "x-box-tag": "shared_links_web_links",
                 "tags": [
                     "共有リンク (ウェブリンク)"
+                ]
+            }
+        },
+        "/shared_items#app_items": {
+            "get": {
+                "operationId": "get_shared_items#app_items",
+                "summary": "Find app item for shared link",
+                "description": "Returns the app item represented by a shared link.\n\nThe link can originate from the current enterprise or another.",
+                "parameters": [
+                    {
+                        "name": "boxapi",
+                        "in": "header",
+                        "description": "共有リンクとその共有リンクの省略可能なパスワードを含むヘッダー。\n\nThe format for this header is `shared_link=[link]&shared_link_password=[password]`",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "shared_link=[example.com]&shared_link_password=[xyz123]"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns a full app item resource if the shared link is valid and the user has access to it.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AppItem"
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "予期しないクライアントエラー。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-box-tag": "shared_links_app_items",
+                "tags": [
+                    "Shared links (App Items)"
                 ]
             }
         },
@@ -24162,6 +24207,300 @@
                 ]
             }
         },
+        "/integration_mappings/teams": {
+            "get": {
+                "operationId": "get_integration_mappings_teams",
+                "summary": "List Teams integration mappings",
+                "description": "Lists [Teams integration mappings](https://support.box.com/hc/en-us/articles/360044681474-Using-Box-for-Teams) in a users' enterprise. You need Admin or Co-Admin role to use this endpoint.",
+                "x-stability-level": "beta",
+                "parameters": [
+                    {
+                        "name": "partner_item_type",
+                        "in": "query",
+                        "description": "マッピングが返される、マッピングされた項目タイプ",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "channel",
+                                "team"
+                            ]
+                        },
+                        "example": "channel"
+                    },
+                    {
+                        "name": "partner_item_id",
+                        "in": "query",
+                        "description": "マッピングが返される、マッピングされた項目のID",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "12345"
+                    },
+                    {
+                        "name": "box_item_id",
+                        "in": "query",
+                        "description": "マッピングが返される、Box項目ID",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "12345"
+                    },
+                    {
+                        "name": "box_item_type",
+                        "in": "query",
+                        "description": "マッピングが返される、Box項目タイプ",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "folder"
+                            ]
+                        },
+                        "example": "folder"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "統合マッピングのコレクションを返します。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IntegrationMappingsTeams"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "クライアントエラーが原因で、サーバーはリクエストを処理できないか、処理しません。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "統合マッピングが見つからなかった場合、`not_found`エラーを返します。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "予期しないクライアントエラー。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-box-tag": "integration_mappings",
+                "tags": [
+                    "統合マッピング"
+                ]
+            },
+            "post": {
+                "operationId": "post_integration_mappings_teams",
+                "summary": "Create Teams integration mapping",
+                "description": "Creates a [Teams integration mapping](https://support.box.com/hc/en-us/articles/360044681474-Using-Box-for-Teams) by mapping a Teams channel to a Box item. You need Admin or Co-Admin role to use this endpoint.",
+                "x-stability-level": "beta",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/IntegrationMappingTeamsCreateRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "作成された統合マッピングを返します。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IntegrationMappingTeams"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "誤った`options`が指定された場合またはBoxフォルダをこの`partner_item_id`にマッピングできない場合に`bad_request`を返します。エラーコードは以下のとおりです。\n\n* `SERVICE_ACCOUNT_IS_NOT_A_COOWNER_OR_OWNER` - サービスアカウントに共同所有者のコラボレーションがないか、サービスアカウントが`box_item_id`の所有者ではありません。\n* `CHANNEL_ALREADY_MAPPED` - チャンネルがすでに別の`box_item_id`にマッピングされています。\n* `TEAM_ALREADY_MAPPED` - team is already mapped to another `box_item_id`,\n* `BOX_ENTERPRISE_MISMATCH` - Box folder must be owned by the enterprise, which is configured to use Box as Content layer for Teams,\n* `BOX_FOLDER_EXTERNALLY_OWNED` - Box folder must be internally owned to the admin's enterprise\n* `FOLDER_ALREADY_MAPPED` - Box folder must not be mapped to another integration mapping.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Returns a `not_found` error if the integration mapping, record or folder could not be found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "予期しないクライアントエラー。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-box-tag": "integration_mappings",
+                "tags": [
+                    "統合マッピング"
+                ]
+            }
+        },
+        "/integration_mappings/teams/{integration_mapping_id}": {
+            "put": {
+                "operationId": "put_integration_mappings_teams_id",
+                "summary": "Update Teams integration mapping",
+                "description": "Updates a [Teams integration mapping](https://support.box.com/hc/en-us/articles/360044681474-Using-Box-for-Teams). Supports updating the Box folder ID and options. You need Admin or Co-Admin role to use this endpoint.",
+                "x-stability-level": "beta",
+                "parameters": [
+                    {
+                        "name": "integration_mapping_id",
+                        "in": "path",
+                        "description": "統合マッピングのID",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "11235432"
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "box_item": {
+                                        "allOf": [
+                                            {
+                                                "$ref": "#/components/schemas/FolderReference"
+                                            },
+                                            {
+                                                "description": "The Box folder, to which the object from the partner app domain is mapped"
+                                            }
+                                        ]
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "更新された統合マッピングオブジェクトを返します。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IntegrationMappingTeams"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "誤った`options`が指定された場合またはBoxフォルダをこの`partner_item`にマッピングできない場合に`bad_request`を返します。エラーコードは以下のとおりです。\n\n* `SERVICE_ACCOUNT_IS_NOT_A_COOWNER_OR_OWNER` - サービスアカウントに共同所有者のコラボレーションがないか、サービスアカウントが`box_item_id`の所有者ではありません。\n* `BOX_FOLDER_EXTERNALLY_OWNED` - Boxフォルダは、管理者の企業内で所有されている必要があります。\n* `FOLDER_ALREADY_MAPPED` - Box folder must not be mapped to another integration mapping.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "統合マッピングオブジェクトが見つからなかった場合は`not_found`を返します。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "予期しないクライアントエラー。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-box-tag": "integration_mappings",
+                "tags": [
+                    "統合マッピング"
+                ]
+            },
+            "delete": {
+                "operationId": "delete_integration_mappings_teams_id",
+                "summary": "Delete Teams integration mapping",
+                "description": "Deletes a [Teams integration mapping](https://support.box.com/hc/en-us/articles/360044681474-Using-Box-for-Teams). You need Admin or Co-Admin role to use this endpoint.",
+                "x-stability-level": "beta",
+                "parameters": [
+                    {
+                        "name": "integration_mapping_id",
+                        "in": "path",
+                        "description": "統合マッピングのID",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "11235432"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "レスポンスの本文は空です。"
+                    },
+                    "404": {
+                        "description": "統合マッピングが見つからなかった場合、`not_found`エラーを返します。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "予期しないクライアントエラー。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-box-tag": "integration_mappings",
+                "tags": [
+                    "統合マッピング"
+                ]
+            }
+        },
         "/ai/ask": {
             "post": {
                 "operationId": "post_ai_ask",
@@ -31033,6 +31372,31 @@
                 "x-box-resource-id": "folder_locks",
                 "x-box-tag": "folder_locks"
             },
+            "FolderReference": {
+                "description": "フォルダの参照",
+                "type": "object",
+                "properties": {
+                    "type": {
+                        "description": "`folder`",
+                        "type": "string",
+                        "example": "folder",
+                        "enum": [
+                            "folder"
+                        ],
+                        "nullable": false
+                    },
+                    "id": {
+                        "description": "フォルダのID",
+                        "type": "string",
+                        "example": "42037322"
+                    }
+                },
+                "required": [
+                    "type",
+                    "id"
+                ],
+                "title": "フォルダの参照"
+            },
             "GenericSource": {
                 "description": "汎用的なイベントソースタイプ。",
                 "type": "object",
@@ -31585,6 +31949,74 @@
                 ],
                 "title": "Slackタイプの統合マッピングのマッピングされた項目スキーマ"
             },
+            "IntegrationMappingPartnerItemTeams": {
+                "description": "The schema for an integration mapping mapped item object for type Teams.",
+                "type": "object",
+                "properties": {
+                    "type": {
+                        "description": "`id`で参照されるマッピングされた項目のタイプ",
+                        "type": "string",
+                        "example": "channel",
+                        "enum": [
+                            "channel",
+                            "team"
+                        ]
+                    },
+                    "id": {
+                        "description": "(`type`で参照されるタイプの) マッピングされた項目のID",
+                        "type": "string",
+                        "example": "19%ABCD-Avgfggkggyftdtfgghjhkhkhh%40thread:tacv2"
+                    },
+                    "tenant_id": {
+                        "description": "ID of the tenant that is registered with Microsoft Teams.",
+                        "type": "string",
+                        "example": "abcd-defg-1235-7890"
+                    }
+                },
+                "required": [
+                    "id",
+                    "type",
+                    "tenant_id"
+                ],
+                "title": "Integration mapping mapped item schema for type Teams"
+            },
+            "IntegrationMappingPartnerItemTeamsCreateRequest": {
+                "description": "The schema for an integration mapping mapped item object for type Teams.",
+                "type": "object",
+                "properties": {
+                    "type": {
+                        "description": "`id`で参照されるマッピングされた項目のタイプ",
+                        "type": "string",
+                        "example": "channel",
+                        "enum": [
+                            "channel",
+                            "team"
+                        ]
+                    },
+                    "id": {
+                        "description": "(`type`で参照されるタイプの) マッピングされた項目のID",
+                        "type": "string",
+                        "example": "19%ABCD-Avgfggkggyftdtfgghjhkhkhh%40thread:tacv2"
+                    },
+                    "tenant_id": {
+                        "description": "ID of the tenant that is registered with Microsoft Teams.",
+                        "type": "string",
+                        "example": "abcd-defg-1235-7890"
+                    },
+                    "team_id": {
+                        "description": "ID of the team that is registered with Microsoft Teams.",
+                        "type": "string",
+                        "example": "hjgjgjg-bhhj-564a-b643-hghgj685u"
+                    }
+                },
+                "required": [
+                    "id",
+                    "type",
+                    "tenant_id",
+                    "team_id"
+                ],
+                "title": "Integration mapping mapped item schema for type Teams"
+            },
             "IntegrationMappingSlackCreateRequest": {
                 "description": "Slack統合マッピングオブジェクトを作成するリクエスト",
                 "type": "object",
@@ -31630,6 +32062,105 @@
                 },
                 "title": "Slackタイプ用の統合マッピングオプション"
             },
+            "IntegrationMappingTeams": {
+                "description": "A Microsoft Teams specific representation of an integration mapping object.",
+                "type": "object",
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/IntegrationMappingBase"
+                    },
+                    {
+                        "properties": {
+                            "integration_type": {
+                                "description": "Identifies the Box partner app, with which the mapping is associated. Supports Slack and Teams. (part of the composite key together with `id`)",
+                                "type": "string",
+                                "example": "teams",
+                                "enum": [
+                                    "teams"
+                                ]
+                            },
+                            "is_overridden_by_manual_mapping": {
+                                "description": "Identifies whether the mapping has been manually set by the team owner from UI for channels (as opposed to being automatically created)",
+                                "type": "boolean",
+                                "example": true
+                            },
+                            "partner_item": {
+                                "description": "Mapped item object for Teams",
+                                "example": {
+                                    "id": "19%3ABCD-Avgfggkggyftdtfgghjhkhkhh%40thread:tacv2",
+                                    "type": "channel",
+                                    "tenant_id": "E1234567",
+                                    "team_id": "hjgjgjg-bhhj-564a-b643-hghgj685u"
+                                },
+                                "oneOf": [
+                                    {
+                                        "$ref": "#/components/schemas/IntegrationMappingPartnerItemTeams"
+                                    }
+                                ]
+                            },
+                            "box_item": {
+                                "allOf": [
+                                    {
+                                        "$ref": "#/components/schemas/FolderReference"
+                                    },
+                                    {
+                                        "description": "パートナーアプリのドメインのオブジェクト (`partner_item_id`で参照) のマッピング先であるBoxフォルダ"
+                                    }
+                                ]
+                            },
+                            "created_at": {
+                                "description": "統合マッピングオブジェクトが作成された日時",
+                                "type": "string",
+                                "format": "date-time",
+                                "example": "2012-12-12T10:53:43-08:00"
+                            },
+                            "modified_at": {
+                                "description": "統合マッピングオブジェクトが最後に変更された日時",
+                                "type": "string",
+                                "format": "date-time",
+                                "example": "2012-12-12T10:53:43-08:00"
+                            }
+                        }
+                    }
+                ],
+                "required": [
+                    "partner_item",
+                    "box_item"
+                ],
+                "title": "Integration mapping Teams",
+                "x-box-resource-id": "integration_mapping_teams",
+                "x-box-tag": "integration_mappings",
+                "x-box-variant": "standard"
+            },
+            "IntegrationMappingTeamsCreateRequest": {
+                "description": "A request to create a Teams Integration Mapping object",
+                "type": "object",
+                "properties": {
+                    "partner_item": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/IntegrationMappingPartnerItemTeamsCreateRequest"
+                            }
+                        ]
+                    },
+                    "box_item": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/FolderReference"
+                            },
+                            {
+                                "description": "パートナーアプリのドメインのオブジェクト (`partner_item_id`で参照) のマッピング先であるBoxフォルダ"
+                            }
+                        ]
+                    }
+                },
+                "required": [
+                    "partner_item",
+                    "box_item"
+                ],
+                "title": "Create teams integration mapping request",
+                "x-box-resource-id": "integration_mapping_teams_create_request"
+            },
             "IntegrationMappings": {
                 "description": "統合マッピングオブジェクトのリスト。",
                 "type": "object",
@@ -31666,6 +32197,26 @@
                 ],
                 "title": "Slack統合マッピング",
                 "x-box-resource-id": "integration_mappings_slack",
+                "x-box-tag": "integration_mappings"
+            },
+            "IntegrationMappingsTeams": {
+                "description": "統合マッピングオブジェクトのリスト。",
+                "type": "object",
+                "allOf": [
+                    {
+                        "properties": {
+                            "entries": {
+                                "description": "統合マッピングのリスト",
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/IntegrationMappingTeams"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "title": "Integration mappings Teams",
+                "x-box-resource-id": "integration_mappings_teams",
                 "x-box-tag": "integration_mappings"
             },
             "Invite": {
@@ -35311,6 +35862,12 @@
                         "example": true,
                         "nullable": true
                     },
+                    "verification_phone_number": {
+                        "description": "設定した場合、2要素認証での署名者の認証にこの電話番号が使用されます。認証されると、署名者はドキュメントに署名できるようになります。`login_required`と組み合わせて選択することはできません。",
+                        "type": "string",
+                        "example": "6314578901",
+                        "nullable": true
+                    },
                     "password": {
                         "description": "設定した場合、署名者は、このパスワードを入力しないと、ドキュメントに署名できません。このフィールドは書き込み専用です。",
                         "type": "string",
@@ -36662,64 +37219,60 @@
             "TemplateSigner": {
                 "description": "テンプレートの署名者のスキーマ",
                 "type": "object",
-                "allOf": [
-                    {
-                        "properties": {
-                            "inputs": {
-                                "type": "array",
-                                "items": {
-                                    "$ref": "#/components/schemas/TemplateSignerInput"
-                                },
-                                "readOnly": true
-                            },
-                            "email": {
-                                "description": "署名者のメールアドレス",
-                                "type": "string",
-                                "example": "example@mail.com",
-                                "nullable": true
-                            },
-                            "role": {
-                                "description": "署名リクエストに含まれる署名者の役割を定義します。役割が`signer`の場合はドキュメントの署名する必要があり、`approver`の場合はドキュメントを承認します。また、最終的な署名済みドキュメントと署名ログを受け取るのは、`final_copy_reader`役割のみです。",
-                                "type": "string",
-                                "example": "signer",
-                                "default": "signer",
-                                "enum": [
-                                    "signer",
-                                    "approver",
-                                    "final_copy_reader"
-                                ]
-                            },
-                            "is_in_person": {
-                                "description": "署名者の埋め込みURLと組み合わせて使用されます。送信者が署名すると、その次の`in_person`署名者にリダイレクトされます。",
-                                "type": "boolean",
-                                "example": true
-                            },
-                            "order": {
-                                "description": "署名者の順序",
-                                "type": "integer",
-                                "example": 2,
-                                "minimum": 0
-                            },
-                            "signer_group_id": {
-                                "description": "指定した場合、この値は、同じ入力が割り当てられ、同じ署名者グループに属している署名者を指します。署名者グループはBoxグループではありません。これは、テンプレート自体に属しているエンティティであり、そのテンプレートから作成されたBox Signリクエスト内でのみ使用できます。",
-                                "type": "string",
-                                "example": "cd4ff89-8fc1-42cf-8b29-1890dedd26d7",
-                                "nullable": true
-                            },
-                            "label": {
-                                "description": "テンプレート作成者が署名者を区別するために設定した、署名者のプレースホルダラベル。",
-                                "type": "string",
-                                "example": "Jane Doe",
-                                "nullable": true
-                            },
-                            "public_id": {
-                                "description": "署名者の識別子。これは、テンプレート内で署名者を識別するために使用できます。",
-                                "type": "string",
-                                "example": "RJZYYVPR"
-                            }
-                        }
+                "properties": {
+                    "inputs": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/TemplateSignerInput"
+                        },
+                        "readOnly": true
+                    },
+                    "email": {
+                        "description": "署名者のメールアドレス",
+                        "type": "string",
+                        "example": "example@mail.com",
+                        "nullable": true
+                    },
+                    "role": {
+                        "description": "署名リクエストに含まれる署名者の役割を定義します。役割が`signer`の場合はドキュメントの署名する必要があり、`approver`の場合はドキュメントを承認します。また、最終的な署名済みドキュメントと署名ログを受け取るのは、`final_copy_reader`役割のみです。",
+                        "type": "string",
+                        "example": "signer",
+                        "default": "signer",
+                        "enum": [
+                            "signer",
+                            "approver",
+                            "final_copy_reader"
+                        ]
+                    },
+                    "is_in_person": {
+                        "description": "署名者の埋め込みURLと組み合わせて使用されます。送信者が署名すると、その次の`in_person`署名者にリダイレクトされます。",
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "order": {
+                        "description": "署名者の順序",
+                        "type": "integer",
+                        "example": 2,
+                        "minimum": 0
+                    },
+                    "signer_group_id": {
+                        "description": "指定した場合、この値は、同じ入力が割り当てられ、同じ署名者グループに属している署名者を指します。署名者グループはBoxグループではありません。これは、テンプレート自体に属しているエンティティであり、そのテンプレートから作成されたBox Signリクエスト内でのみ使用できます。",
+                        "type": "string",
+                        "example": "cd4ff89-8fc1-42cf-8b29-1890dedd26d7",
+                        "nullable": true
+                    },
+                    "label": {
+                        "description": "テンプレート作成者が署名者を区別するために設定した、署名者のプレースホルダラベル。",
+                        "type": "string",
+                        "example": "Jane Doe",
+                        "nullable": true
+                    },
+                    "public_id": {
+                        "description": "署名者の識別子。これは、テンプレート内で署名者を識別するために使用できます。",
+                        "type": "string",
+                        "example": "RJZYYVPR"
                     }
-                ],
+                },
                 "title": "テンプレートの署名者フィールド"
             },
             "TemplateSignerInput": {
@@ -40975,6 +41528,11 @@
             "name": "共有リンク (ウェブリンク)",
             "description": "Web links for files are URLs that are generated\nfor web links in Box,\nwhich provide direct, read-only access to the resource.",
             "x-box-tag": "shared_links_web_links"
+        },
+        {
+            "name": "Shared links (App Items)",
+            "description": "URLs generated for app items stored in Box,\nwhich provide direct, read-only access to the resource.",
+            "x-box-tag": "shared_links_app_items"
         },
         {
             "name": "Shield情報バリア",
