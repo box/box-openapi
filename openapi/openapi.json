@@ -14,7 +14,7 @@
       "url": "http://www.apache.org/licenses/LICENSE-2.0"
     },
     "version": "2024.0",
-    "x-box-commit-hash": "8c0223a248"
+    "x-box-commit-hash": "f5abf083c2"
   },
   "servers": [
     {
@@ -3926,9 +3926,7 @@
                       "example": "/currentState"
                     },
                     "value": {
-                      "description": "The value to be set or tested.\n\nRequired for `add`, `replace`, and `test` operations. For `add`,\nif the value exists already the previous value will be overwritten\nby the new value. For `replace`, the value must exist before\nreplacing.\n\nFor `test`, the existing value at the `path` location must match\nthe specified value.",
-                      "type": "string",
-                      "example": "reviewed"
+                      "$ref": "#/components/schemas/MetadataInstanceValue"
                     },
                     "from": {
                       "description": "The location in the metadata JSON object to move or copy a value\nfrom. Required for `move` or `copy` operations and must be in the\nformat of a [JSON-Pointer](https://tools.ietf.org/html/rfc6901).",
@@ -5448,7 +5446,7 @@
         },
         "responses": {
           "200": {
-            "description": "Returns a folder object for the updated folder\n\nNot all available fields are returned by default. Use the\n[fields](#param-fields) query parameter to explicitly request\nany specific fields.\n\nThis call will return synchronously. This holds true even when\nmoving folders with a large a large number of items in all of its\ndescendants. For very large folders, this means the call could\ntake minutes or hours to return.",
+            "description": "Returns a folder object for the updated folder\n\nNot all available fields are returned by default. Use the\n[fields](#param-fields) query parameter to explicitly request\nany specific fields.\n\nIf the user is moving folders with a large number of items in all of\ntheir descendants, the call will be run asynchronously. If the\noperation is not completed within 10 minutes, the user will receive\na 200 OK response, and the operation will continue running.",
             "content": {
               "application/json": {
                 "schema": {
@@ -7143,9 +7141,7 @@
                       "example": "/currentState"
                     },
                     "value": {
-                      "description": "The value to be set or tested.\n\nRequired for `add`, `replace`, and `test` operations. For `add`,\nif the value exists already the previous value will be overwritten\nby the new value. For `replace`, the value must exist before\nreplacing.\n\nFor `test`, the existing value at the `path` location must match\nthe specified value.",
-                      "type": "string",
-                      "example": "reviewed"
+                      "$ref": "#/components/schemas/MetadataInstanceValue"
                     },
                     "from": {
                       "description": "The location in the metadata JSON object to move or copy a value\nfrom. Required for `move` or `copy` operations and must be in the\nformat of a [JSON-Pointer](https://tools.ietf.org/html/rfc6901).",
@@ -15297,7 +15293,7 @@
       "put": {
         "operationId": "put_users_id_folders_0",
         "summary": "Transfer owned folders",
-        "description": "Move all of the items (files, folders and workflows) owned by a user into\nanother user's account\n\nOnly the root folder (`0`) can be transferred.\n\nFolders can only be moved across users by users with administrative\npermissions.\n\nAll existing shared links and folder-level collaborations are transferred\nduring the operation. Please note that while collaborations at the individual\nfile-level are transferred during the operation, the collaborations are\ndeleted when the original user is deleted.\n\nThis call will be performed synchronously which might lead to a slow response\nwhen the source user has a large number of items in all of its folders.\n\nIf the destination path has a metadata cascade policy attached to any of\nthe parent folders, a metadata cascade operation will be kicked off\nasynchronously.\n\nThere is currently no way to check for when this operation is finished.\n\nThe destination folder's name will be in the format `{User}'s Files and\nFolders`, where `{User}` is the display name of the user.\n\nTo make this API call your application will need to have the \"Read and write\nall files and folders stored in Box\" scope enabled.\n\nPlease make sure the destination user has access to `Relay` or `Relay Lite`,\nand has access to the files and folders involved in the workflows being\ntransferred.\n\nAdmins will receive an email when the operation is completed.",
+        "description": "Move all of the items (files, folders and workflows) owned by a user into\nanother user's account\n\nOnly the root folder (`0`) can be transferred.\n\nFolders can only be moved across users by users with administrative\npermissions.\n\nAll existing shared links and folder-level collaborations are transferred\nduring the operation. Please note that while collaborations at the individual\nfile-level are transferred during the operation, the collaborations are\ndeleted when the original user is deleted.\n\nIf the user has a large number of items across all folders, the call will\nbe run asynchronously. If the operation is not completed within 10 minutes,\nthe user will receive a 200 OK response, and the operation will continue running.\n\nIf the destination path has a metadata cascade policy attached to any of\nthe parent folders, a metadata cascade operation will be kicked off\nasynchronously.\n\nThere is currently no way to check for when this operation is finished.\n\nThe destination folder's name will be in the format `{User}'s Files and\nFolders`, where `{User}` is the display name of the user.\n\nTo make this API call your application will need to have the \"Read and write\nall files and folders stored in Box\" scope enabled.\n\nPlease make sure the destination user has access to `Relay` or `Relay Lite`,\nand has access to the files and folders involved in the workflows being\ntransferred.\n\nAdmins will receive an email when the operation is completed.",
         "parameters": [
           {
             "name": "user_id",
@@ -26365,13 +26361,13 @@
           {
             "properties": {
               "ask": {
-                "$ref": "#/components/schemas/AiStudioAgentAsk"
+                "$ref": "#/components/schemas/AiStudioAgentAskResponse"
               },
               "text_gen": {
-                "$ref": "#/components/schemas/AiStudioAgentTextGen"
+                "$ref": "#/components/schemas/AiStudioAgentTextGenResponse"
               },
               "extract": {
-                "$ref": "#/components/schemas/AiStudioAgentExtract"
+                "$ref": "#/components/schemas/AiStudioAgentExtractResponse"
               }
             }
           }
@@ -26440,8 +26436,61 @@
           "access_state",
           "description"
         ],
-        "title": "AI agent capability ask",
+        "title": "AI agent capability ask request",
         "x-box-resource-id": "ai_studio_agent_ask",
+        "x-box-tag": "ai_studio"
+      },
+      "AiStudioAgentAskResponse": {
+        "description": "The AI Agent to be used for ask.",
+        "type": "object",
+        "properties": {
+          "type": {
+            "description": "The type of AI agent used to handle queries.",
+            "type": "string",
+            "example": "ai_agent_ask",
+            "enum": [
+              "ai_agent_ask"
+            ],
+            "nullable": false
+          },
+          "access_state": {
+            "description": "The state of the AI Agent capability. Possible values are: `enabled` and `disabled`.",
+            "type": "string",
+            "example": "enabled",
+            "title": "Capability Access State",
+            "x-box-tag": "ai_studio"
+          },
+          "description": {
+            "description": "The description of the AI Agent.",
+            "type": "string",
+            "example": "This is ASK Agent"
+          },
+          "custom_instructions": {
+            "description": "Custom instructions for the agent.",
+            "type": "string",
+            "example": "This is a custom instruction",
+            "nullable": true
+          },
+          "long_text": {
+            "$ref": "#/components/schemas/AiStudioAgentLongTextToolResponse"
+          },
+          "basic_text": {
+            "$ref": "#/components/schemas/AiStudioAgentBasicTextToolResponse"
+          },
+          "long_text_multi": {
+            "$ref": "#/components/schemas/AiStudioAgentLongTextToolResponse"
+          },
+          "basic_text_multi": {
+            "$ref": "#/components/schemas/AiStudioAgentBasicTextToolResponse"
+          }
+        },
+        "required": [
+          "type",
+          "access_state",
+          "description"
+        ],
+        "title": "AI agent capability ask",
+        "x-box-resource-id": "ai_studio_agent_ask_response",
         "x-box-tag": "ai_studio"
       },
       "AiStudioAgentBasicGenTool": {
@@ -26457,6 +26506,31 @@
                 "description": "True if system message contains custom instructions placeholder, false otherwise",
                 "type": "boolean",
                 "example": false
+              }
+            }
+          }
+        ],
+        "title": "AI agent basic text generation tool request",
+        "x-box-tag": "ai"
+      },
+      "AiStudioAgentBasicGenToolResponse": {
+        "description": "AI agent basic tool used to generate text.",
+        "type": "object",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AiStudioAgentBasicGenTool"
+          },
+          {
+            "properties": {
+              "warnings": {
+                "description": "Warnings concerning tool",
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "example": [
+                  "MODEL_INACTIVE"
+                ]
               }
             }
           }
@@ -26477,6 +26551,31 @@
                 "description": "True if system message contains custom instructions placeholder, false otherwise",
                 "type": "boolean",
                 "example": false
+              }
+            }
+          }
+        ],
+        "title": "AI agent basic text tool request",
+        "x-box-tag": "ai"
+      },
+      "AiStudioAgentBasicTextToolResponse": {
+        "description": "AI agent processor used to handle basic text.",
+        "type": "object",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AiStudioAgentBasicTextTool"
+          },
+          {
+            "properties": {
+              "warnings": {
+                "description": "Warnings concerning tool",
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "example": [
+                  "MODEL_INACTIVE"
+                ]
               }
             }
           }
@@ -26527,8 +26626,55 @@
           "access_state",
           "description"
         ],
-        "title": "AI agent capability extract",
+        "title": "AI agent capability extract request",
         "x-box-resource-id": "ai_studio_agent_extract",
+        "x-box-tag": "ai_studio"
+      },
+      "AiStudioAgentExtractResponse": {
+        "description": "The AI Agent to be used for extraction.",
+        "type": "object",
+        "properties": {
+          "type": {
+            "description": "The type of AI agent to be used for extraction.",
+            "type": "string",
+            "example": "ai_agent_extract",
+            "enum": [
+              "ai_agent_extract"
+            ],
+            "nullable": false
+          },
+          "access_state": {
+            "description": "The state of the AI Agent capability. Possible values are: `enabled` and `disabled`.",
+            "type": "string",
+            "example": "enabled",
+            "title": "Capability Access State",
+            "x-box-tag": "ai_studio"
+          },
+          "description": {
+            "description": "The description of the AI Agent.",
+            "type": "string",
+            "example": "This is ASK Agent"
+          },
+          "custom_instructions": {
+            "description": "Custom instructions for the agent.",
+            "type": "string",
+            "example": "This is a custom instruction",
+            "nullable": true
+          },
+          "long_text": {
+            "$ref": "#/components/schemas/AiStudioAgentLongTextToolResponse"
+          },
+          "basic_text": {
+            "$ref": "#/components/schemas/AiStudioAgentBasicTextToolResponse"
+          }
+        },
+        "required": [
+          "type",
+          "access_state",
+          "description"
+        ],
+        "title": "AI agent capability extract",
+        "x-box-resource-id": "ai_studio_agent_extract_response",
         "x-box-tag": "ai_studio"
       },
       "AiStudioAgentLongTextTool": {
@@ -26544,6 +26690,31 @@
                 "description": "True if system message contains custom instructions placeholder, false otherwise",
                 "type": "boolean",
                 "example": false
+              }
+            }
+          }
+        ],
+        "title": "AI agent long text tool request",
+        "x-box-tag": "ai"
+      },
+      "AiStudioAgentLongTextToolResponse": {
+        "description": "AI agent processor used to to handle longer text.",
+        "type": "object",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AiStudioAgentLongTextTool"
+          },
+          {
+            "properties": {
+              "warnings": {
+                "description": "Warnings concerning tool",
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "example": [
+                  "MODEL_INACTIVE"
+                ]
               }
             }
           }
@@ -26591,8 +26762,52 @@
           "access_state",
           "description"
         ],
-        "title": "AI agent capability text generation",
+        "title": "AI agent capability text generation request",
         "x-box-resource-id": "ai_studio_agent_text_gen",
+        "x-box-tag": "ai_studio"
+      },
+      "AiStudioAgentTextGenResponse": {
+        "description": "The AI agent used for generating text.",
+        "type": "object",
+        "properties": {
+          "type": {
+            "description": "The type of AI agent used for generating text.",
+            "type": "string",
+            "example": "ai_agent_text_gen",
+            "enum": [
+              "ai_agent_text_gen"
+            ],
+            "nullable": false
+          },
+          "access_state": {
+            "description": "The state of the AI Agent capability. Possible values are: `enabled` and `disabled`.",
+            "type": "string",
+            "example": "enabled",
+            "title": "Capability Access State",
+            "x-box-tag": "ai_studio"
+          },
+          "description": {
+            "description": "The description of the AI Agent.",
+            "type": "string",
+            "example": "This is ASK Agent"
+          },
+          "custom_instructions": {
+            "description": "Custom instructions for the agent.",
+            "type": "string",
+            "example": "This is a custom instruction",
+            "nullable": true
+          },
+          "basic_gen": {
+            "$ref": "#/components/schemas/AiStudioAgentBasicGenToolResponse"
+          }
+        },
+        "required": [
+          "type",
+          "access_state",
+          "description"
+        ],
+        "title": "AI agent capability text generation",
+        "x-box-resource-id": "ai_studio_agent_text_gen_response",
         "x-box-tag": "ai_studio"
       },
       "AiTextGen": {
@@ -29669,7 +29884,8 @@
           }
         ],
         "title": "File (Conflict)",
-        "x-box-resource-id": "file_conflict"
+        "x-box-resource-id": "file_conflict",
+        "x-box-tag": null
       },
       "FileOrFolderScope": {
         "description": "A relation between a resource (file or folder) and the scopes for which the resource can be accessed",
@@ -33245,6 +33461,29 @@
         "title": "Metadata filter",
         "x-box-resource-id": "metadata_filter",
         "x-box-tag": "search"
+      },
+      "MetadataInstanceValue": {
+        "description": "The value to be set or tested.\n\nRequired for `add`, `replace`, and `test` operations. For `add`,\nif the value exists already the previous value will be overwritten\nby the new value. For `replace`, the value must exist before\nreplacing.\n\nFor `test`, the existing value at the `path` location must match\nthe specified value.",
+        "example": "reviewed",
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "integer"
+          },
+          {
+            "type": "number",
+            "format": "float"
+          },
+          {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        ],
+        "title": "Metadata Instance Value"
       },
       "MetadataQuery": {
         "description": "Create a search using SQL-like syntax to return items that match specific\nmetadata.",
