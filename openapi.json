@@ -14,7 +14,7 @@
             "url": "http://www.apache.org/licenses/LICENSE-2.0"
         },
         "version": "2024.0",
-        "x-box-commit-hash": "8c0223a248"
+        "x-box-commit-hash": "f5abf083c2"
     },
     "servers": [
         {
@@ -3926,9 +3926,7 @@
                                             "example": "/currentState"
                                         },
                                         "value": {
-                                            "description": "設定またはテストする値。\n\n`add`、`replace`、`test`操作では必須です。`add`の場合、値がすでに存在するときは、古い値が新しい値で上書きされます。`replace`の場合、置換の前に値がすでに存在している必要があります。\n\n`test`の場合、`path`の位置にある既存の値が指定した値と一致している必要があります。",
-                                            "type": "string",
-                                            "example": "reviewed"
+                                            "$ref": "#/components/schemas/MetadataInstanceValue"
                                         },
                                         "from": {
                                             "description": "値の移動元またはコピー元であるメタデータJSONオブジェクト内の場所。`move`または`copy`操作には必須であり、[JSON-Pointer](https://tools.ietf.org/html/rfc6901)の形式である必要があります。",
@@ -5448,7 +5446,7 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "更新されたフォルダのフォルダオブジェクトを返します\n\n使用可能なすべてのフィールドがデフォルトで返されるとは限りません。特定のフィールドを明示的にリクエストするには、[fields](#param-fields)クエリパラメータを使用します。\n\nこの呼び出しは同期的に復帰します。これは、すべての子孫に大量の項目が含まれているフォルダを移動する場合にも当てはまります。つまり、非常に大きいフォルダの場合は、この呼び出しが復帰するまでに数分または数時間かかる場合があります。",
+                        "description": "更新されたフォルダのフォルダオブジェクトを返します\n\n使用可能なすべてのフィールドがデフォルトで返されるとは限りません。特定のフィールドを明示的にリクエストするには、[fields](#param-fields)クエリパラメータを使用します。\n\nIf the user is moving folders with a large number of items in all of their descendants, the call will be run asynchronously. If the operation is not completed within 10 minutes, the user will receive a 200 OK response, and the operation will continue running.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -7143,9 +7141,7 @@
                                             "example": "/currentState"
                                         },
                                         "value": {
-                                            "description": "設定またはテストする値。\n\n`add`、`replace`、`test`操作では必須です。`add`の場合、値がすでに存在するときは、古い値が新しい値で上書きされます。`replace`の場合、置換の前に値がすでに存在している必要があります。\n\n`test`の場合、`path`の位置にある既存の値が指定した値と一致している必要があります。",
-                                            "type": "string",
-                                            "example": "reviewed"
+                                            "$ref": "#/components/schemas/MetadataInstanceValue"
                                         },
                                         "from": {
                                             "description": "値の移動元またはコピー元であるメタデータJSONオブジェクト内の場所。`move`または`copy`操作には必須であり、[JSON-Pointer](https://tools.ietf.org/html/rfc6901)の形式である必要があります。",
@@ -15297,7 +15293,7 @@
             "put": {
                 "operationId": "put_users_id_folders_0",
                 "summary": "所有フォルダの移動",
-                "description": "ユーザーが所有するすべての項目 (ファイル、フォルダ、およびワークフロー) を別のユーザーのアカウントに移動します。\n\n転送できるのは、ルートフォルダ (`0`) のみです。\n\nユーザー間でフォルダを移動できるのは、管理者権限を持つユーザーのみです。\n\n既存の共有リンクとフォルダレベルのコラボレーションはすべて、操作中に転送されます。個々のファイルレベルでのコラボレーションは操作中に転送されますが、元のユーザーが削除されるとこれらのコラボレーションは削除されることに注意してください。\n\nこの呼び出しは同期的に実行されるため、移動元のユーザーのすべてのフォルダに多数の項目がある場合は、レスポンスが遅くなる可能性があります。\n\n宛先パスのいずれかの親フォルダにメタデータカスケードポリシーが適用されている場合は、メタデータカスケード操作が非同期的に開始されます。\n\n現時点では、この操作がいつ終了したのかを確認する方法はありません。\n\n宛先フォルダの名前は、`{User}'s Files and\nFolders`形式になります。この場合、`{User}`はユーザーの表示名です。\n\nこのAPIコールを行うには、アプリケーションで \\[Boxに格納されているすべてのファイルとフォルダの読み取りと書き込み] スコープを有効にしておく必要があります。\n\n転送先ユーザーが`Relay`または`Relay Lite`にアクセスできることと転送中のワークフローに関与するファイルやフォルダにアクセスできることを確認してください。\n\n操作が完了すると、管理者にメールが届きます。",
+                "description": "ユーザーが所有するすべての項目 (ファイル、フォルダ、およびワークフロー) を別のユーザーのアカウントに移動します。\n\n転送できるのは、ルートフォルダ (`0`) のみです。\n\nユーザー間でフォルダを移動できるのは、管理者権限を持つユーザーのみです。\n\n既存の共有リンクとフォルダレベルのコラボレーションはすべて、操作中に転送されます。個々のファイルレベルでのコラボレーションは操作中に転送されますが、元のユーザーが削除されるとこれらのコラボレーションは削除されることに注意してください。\n\nIf the user has a large number of items across all folders, the call will be run asynchronously. If the operation is not completed within 10 minutes, the user will receive a 200 OK response, and the operation will continue running.\n\n宛先パスのいずれかの親フォルダにメタデータカスケードポリシーが適用されている場合は、メタデータカスケード操作が非同期的に開始されます。\n\n現時点では、この操作がいつ終了したのかを確認する方法はありません。\n\n宛先フォルダの名前は、`{User}'s Files and\nFolders`形式になります。この場合、`{User}`はユーザーの表示名です。\n\nこのAPIコールを行うには、アプリケーションで \\[Boxに格納されているすべてのファイルとフォルダの読み取りと書き込み] スコープを有効にしておく必要があります。\n\n転送先ユーザーが`Relay`または`Relay Lite`にアクセスできることと転送中のワークフローに関与するファイルやフォルダにアクセスできることを確認してください。\n\n操作が完了すると、管理者にメールが届きます。",
                 "parameters": [
                     {
                         "name": "user_id",
@@ -26365,13 +26361,13 @@
                     {
                         "properties": {
                             "ask": {
-                                "$ref": "#/components/schemas/AiStudioAgentAsk"
+                                "$ref": "#/components/schemas/AiStudioAgentAskResponse"
                             },
                             "text_gen": {
-                                "$ref": "#/components/schemas/AiStudioAgentTextGen"
+                                "$ref": "#/components/schemas/AiStudioAgentTextGenResponse"
                             },
                             "extract": {
-                                "$ref": "#/components/schemas/AiStudioAgentExtract"
+                                "$ref": "#/components/schemas/AiStudioAgentExtractResponse"
                             }
                         }
                     }
@@ -26440,8 +26436,61 @@
                     "access_state",
                     "description"
                 ],
-                "title": "AIエージェントの機能 (質問)",
+                "title": "AI agent capability ask request",
                 "x-box-resource-id": "ai_studio_agent_ask",
+                "x-box-tag": "ai_studio"
+            },
+            "AiStudioAgentAskResponse": {
+                "description": "質問に使用されるAIエージェント。",
+                "type": "object",
+                "properties": {
+                    "type": {
+                        "description": "クエリの処理に使用されるAIエージェントのタイプ。",
+                        "type": "string",
+                        "example": "ai_agent_ask",
+                        "enum": [
+                            "ai_agent_ask"
+                        ],
+                        "nullable": false
+                    },
+                    "access_state": {
+                        "description": "AIエージェントの機能の状態。使用可能な値は`enabled`、`disabled`です。",
+                        "type": "string",
+                        "example": "enabled",
+                        "title": "機能のアクセス状態",
+                        "x-box-tag": "ai_studio"
+                    },
+                    "description": {
+                        "description": "AIエージェントの説明。",
+                        "type": "string",
+                        "example": "This is ASK Agent"
+                    },
+                    "custom_instructions": {
+                        "description": "エージェントに対するカスタム指示。",
+                        "type": "string",
+                        "example": "This is a custom instruction",
+                        "nullable": true
+                    },
+                    "long_text": {
+                        "$ref": "#/components/schemas/AiStudioAgentLongTextToolResponse"
+                    },
+                    "basic_text": {
+                        "$ref": "#/components/schemas/AiStudioAgentBasicTextToolResponse"
+                    },
+                    "long_text_multi": {
+                        "$ref": "#/components/schemas/AiStudioAgentLongTextToolResponse"
+                    },
+                    "basic_text_multi": {
+                        "$ref": "#/components/schemas/AiStudioAgentBasicTextToolResponse"
+                    }
+                },
+                "required": [
+                    "type",
+                    "access_state",
+                    "description"
+                ],
+                "title": "AIエージェントの機能 (質問)",
+                "x-box-resource-id": "ai_studio_agent_ask_response",
                 "x-box-tag": "ai_studio"
             },
             "AiStudioAgentBasicGenTool": {
@@ -26457,6 +26506,31 @@
                                 "description": "システムメッセージにカスタム指示のプレースホルダが含まれる場合はtrue、それ以外の場合はfalse",
                                 "type": "boolean",
                                 "example": false
+                            }
+                        }
+                    }
+                ],
+                "title": "AI agent basic text generation tool request",
+                "x-box-tag": "ai"
+            },
+            "AiStudioAgentBasicGenToolResponse": {
+                "description": "テキストの生成に使用されるAIエージェントの基本ツール。",
+                "type": "object",
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/AiStudioAgentBasicGenTool"
+                    },
+                    {
+                        "properties": {
+                            "warnings": {
+                                "description": "Warnings concerning tool",
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                },
+                                "example": [
+                                    "MODEL_INACTIVE"
+                                ]
                             }
                         }
                     }
@@ -26477,6 +26551,31 @@
                                 "description": "システムメッセージにカスタム指示のプレースホルダが含まれる場合はtrue、それ以外の場合はfalse",
                                 "type": "boolean",
                                 "example": false
+                            }
+                        }
+                    }
+                ],
+                "title": "AI agent basic text tool request",
+                "x-box-tag": "ai"
+            },
+            "AiStudioAgentBasicTextToolResponse": {
+                "description": "基本テキストの処理に使用されるAIエージェントプロセッサ。",
+                "type": "object",
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/AiStudioAgentBasicTextTool"
+                    },
+                    {
+                        "properties": {
+                            "warnings": {
+                                "description": "Warnings concerning tool",
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                },
+                                "example": [
+                                    "MODEL_INACTIVE"
+                                ]
                             }
                         }
                     }
@@ -26527,8 +26626,55 @@
                     "access_state",
                     "description"
                 ],
-                "title": "AIエージェントの機能 (抽出)",
+                "title": "AI agent capability extract request",
                 "x-box-resource-id": "ai_studio_agent_extract",
+                "x-box-tag": "ai_studio"
+            },
+            "AiStudioAgentExtractResponse": {
+                "description": "抽出に使用されるAIエージェント。",
+                "type": "object",
+                "properties": {
+                    "type": {
+                        "description": "抽出に使用されるAIエージェントのタイプ。",
+                        "type": "string",
+                        "example": "ai_agent_extract",
+                        "enum": [
+                            "ai_agent_extract"
+                        ],
+                        "nullable": false
+                    },
+                    "access_state": {
+                        "description": "AIエージェントの機能の状態。使用可能な値は`enabled`、`disabled`です。",
+                        "type": "string",
+                        "example": "enabled",
+                        "title": "機能のアクセス状態",
+                        "x-box-tag": "ai_studio"
+                    },
+                    "description": {
+                        "description": "AIエージェントの説明。",
+                        "type": "string",
+                        "example": "This is ASK Agent"
+                    },
+                    "custom_instructions": {
+                        "description": "エージェントに対するカスタム指示。",
+                        "type": "string",
+                        "example": "This is a custom instruction",
+                        "nullable": true
+                    },
+                    "long_text": {
+                        "$ref": "#/components/schemas/AiStudioAgentLongTextToolResponse"
+                    },
+                    "basic_text": {
+                        "$ref": "#/components/schemas/AiStudioAgentBasicTextToolResponse"
+                    }
+                },
+                "required": [
+                    "type",
+                    "access_state",
+                    "description"
+                ],
+                "title": "AIエージェントの機能 (抽出)",
+                "x-box-resource-id": "ai_studio_agent_extract_response",
                 "x-box-tag": "ai_studio"
             },
             "AiStudioAgentLongTextTool": {
@@ -26544,6 +26690,31 @@
                                 "description": "システムメッセージにカスタム指示のプレースホルダが含まれる場合はtrue、それ以外の場合はfalse",
                                 "type": "boolean",
                                 "example": false
+                            }
+                        }
+                    }
+                ],
+                "title": "AI agent long text tool request",
+                "x-box-tag": "ai"
+            },
+            "AiStudioAgentLongTextToolResponse": {
+                "description": "長いテキストの処理に使用されるAIエージェントプロセッサ。",
+                "type": "object",
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/AiStudioAgentLongTextTool"
+                    },
+                    {
+                        "properties": {
+                            "warnings": {
+                                "description": "Warnings concerning tool",
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                },
+                                "example": [
+                                    "MODEL_INACTIVE"
+                                ]
                             }
                         }
                     }
@@ -26591,8 +26762,52 @@
                     "access_state",
                     "description"
                 ],
-                "title": "AIエージェントの機能 (テキスト生成)",
+                "title": "AI agent capability text generation request",
                 "x-box-resource-id": "ai_studio_agent_text_gen",
+                "x-box-tag": "ai_studio"
+            },
+            "AiStudioAgentTextGenResponse": {
+                "description": "テキストの生成に使用されるAIエージェント。",
+                "type": "object",
+                "properties": {
+                    "type": {
+                        "description": "テキストの生成に使用されるAIエージェントのタイプ。",
+                        "type": "string",
+                        "example": "ai_agent_text_gen",
+                        "enum": [
+                            "ai_agent_text_gen"
+                        ],
+                        "nullable": false
+                    },
+                    "access_state": {
+                        "description": "AIエージェントの機能の状態。使用可能な値は`enabled`、`disabled`です。",
+                        "type": "string",
+                        "example": "enabled",
+                        "title": "機能のアクセス状態",
+                        "x-box-tag": "ai_studio"
+                    },
+                    "description": {
+                        "description": "AIエージェントの説明。",
+                        "type": "string",
+                        "example": "This is ASK Agent"
+                    },
+                    "custom_instructions": {
+                        "description": "エージェントに対するカスタム指示。",
+                        "type": "string",
+                        "example": "This is a custom instruction",
+                        "nullable": true
+                    },
+                    "basic_gen": {
+                        "$ref": "#/components/schemas/AiStudioAgentBasicGenToolResponse"
+                    }
+                },
+                "required": [
+                    "type",
+                    "access_state",
+                    "description"
+                ],
+                "title": "AIエージェントの機能 (テキスト生成)",
+                "x-box-resource-id": "ai_studio_agent_text_gen_response",
                 "x-box-tag": "ai_studio"
             },
             "AiTextGen": {
@@ -29668,7 +29883,8 @@
                     }
                 ],
                 "title": "ファイル (競合)",
-                "x-box-resource-id": "file_conflict"
+                "x-box-resource-id": "file_conflict",
+                "x-box-tag": null
             },
             "FileOrFolderScope": {
                 "description": "リソース (ファイルまたはフォルダ) とそのリソースにアクセスできるスコープの関係",
@@ -33244,6 +33460,29 @@
                 "title": "メタデータフィルタ",
                 "x-box-resource-id": "metadata_filter",
                 "x-box-tag": "search"
+            },
+            "MetadataInstanceValue": {
+                "description": "設定またはテストする値。\n\n`add`、`replace`、`test`操作では必須です。`add`の場合、値がすでに存在するときは、古い値が新しい値で上書きされます。`replace`の場合、置換の前に値がすでに存在している必要があります。\n\n`test`の場合、`path`の位置にある既存の値が指定した値と一致している必要があります。",
+                "example": "reviewed",
+                "oneOf": [
+                    {
+                        "type": "string"
+                    },
+                    {
+                        "type": "integer"
+                    },
+                    {
+                        "type": "number",
+                        "format": "float"
+                    },
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "title": "Metadata Instance Value"
             },
             "MetadataQuery": {
                 "description": "SQLに似た構文で特定のメタデータと一致する項目を返す検索を作成します。",
