@@ -13,8 +13,8 @@
       "name": "Apache-2.0",
       "url": "http://www.apache.org/licenses/LICENSE-2.0"
     },
-    "version": "2.0.0",
-    "x-box-commit-hash": ""
+    "version": "2024.0",
+    "x-box-commit-hash": "f5abf083c2"
   },
   "servers": [
     {
@@ -625,6 +625,11 @@
                             "description": "The ID of parent item",
                             "type": "string",
                             "example": "123"
+                          },
+                          "user_id": {
+                            "description": "The input for `user_id` is optional. Moving to non-root folder is not allowed when `user_id` is present. Parent folder id should be zero when `user_id` is provided.",
+                            "type": "string",
+                            "example": "12346930"
                           }
                         }
                       },
@@ -3921,9 +3926,7 @@
                       "example": "/currentState"
                     },
                     "value": {
-                      "description": "The value to be set or tested.\n\nRequired for `add`, `replace`, and `test` operations. For `add`,\nif the value exists already the previous value will be overwritten\nby the new value. For `replace`, the value must exist before\nreplacing.\n\nFor `test`, the existing value at the `path` location must match\nthe specified value.",
-                      "type": "string",
-                      "example": "reviewed"
+                      "$ref": "#/components/schemas/MetadataInstanceValue"
                     },
                     "from": {
                       "description": "The location in the metadata JSON object to move or copy a value\nfrom. Required for `move` or `copy` operations and must be in the\nformat of a [JSON-Pointer](https://tools.ietf.org/html/rfc6901).",
@@ -5295,15 +5298,27 @@
                     "example": true
                   },
                   "parent": {
-                    "description": "The parent folder for this folder. Use this to move\nthe folder or to restore it out of the trash.",
-                    "type": "object",
-                    "properties": {
-                      "id": {
-                        "description": "The ID of the new parent folder",
-                        "type": "string",
-                        "example": "0"
+                    "allOf": [
+                      {
+                        "type": "object",
+                        "description": "The parent for this item",
+                        "properties": {
+                          "id": {
+                            "description": "The ID of parent item",
+                            "type": "string",
+                            "example": "123"
+                          },
+                          "user_id": {
+                            "description": "The input for `user_id` is optional. Moving to non-root folder is not allowed when `user_id` is present. Parent folder id should be zero when `user_id` is provided.",
+                            "type": "string",
+                            "example": "12346930"
+                          }
+                        }
+                      },
+                      {
+                        "description": "The parent folder for this folder. Use this to move\nthe folder or to restore it out of the trash."
                       }
-                    }
+                    ]
                   },
                   "shared_link": {
                     "allOf": [
@@ -5431,7 +5446,7 @@
         },
         "responses": {
           "200": {
-            "description": "Returns a folder object for the updated folder\n\nNot all available fields are returned by default. Use the\n[fields](#param-fields) query parameter to explicitly request\nany specific fields.\n\nThis call will return synchronously. This holds true even when\nmoving folders with a large a large number of items in all of its\ndescendants. For very large folders, this means the call could\ntake minutes or hours to return.",
+            "description": "Returns a folder object for the updated folder\n\nNot all available fields are returned by default. Use the\n[fields](#param-fields) query parameter to explicitly request\nany specific fields.\n\nIf the user is moving folders with a large number of items in all of\ntheir descendants, the call will be run asynchronously. If the\noperation is not completed within 10 minutes, the user will receive\na 200 OK response, and the operation will continue running.",
             "content": {
               "application/json": {
                 "schema": {
@@ -7126,9 +7141,7 @@
                       "example": "/currentState"
                     },
                     "value": {
-                      "description": "The value to be set or tested.\n\nRequired for `add`, `replace`, and `test` operations. For `add`,\nif the value exists already the previous value will be overwritten\nby the new value. For `replace`, the value must exist before\nreplacing.\n\nFor `test`, the existing value at the `path` location must match\nthe specified value.",
-                      "type": "string",
-                      "example": "reviewed"
+                      "$ref": "#/components/schemas/MetadataInstanceValue"
                     },
                     "from": {
                       "description": "The location in the metadata JSON object to move or copy a value\nfrom. Required for `move` or `copy` operations and must be in the\nformat of a [JSON-Pointer](https://tools.ietf.org/html/rfc6901).",
@@ -11512,7 +11525,7 @@
             }
           },
           "304": {
-            "description": "Returns an empty response when the `If-None-Match` header matches\nthe current `etag` value of the folder. This indicates that the folder\nhas not changed since it was last requested."
+            "description": "Returns an empty response when the `If-None-Match` header matches\nthe current `etag` value of the file. This indicates that the file\nhas not changed since it was last requested."
           },
           "default": {
             "description": "An unexpected client error.",
@@ -13219,6 +13232,11 @@
                             "description": "The ID of parent item",
                             "type": "string",
                             "example": "123"
+                          },
+                          "user_id": {
+                            "description": "The input for `user_id` is optional. Moving to non-root folder is not allowed when `user_id` is present. Parent folder id should be zero when `user_id` is provided.",
+                            "type": "string",
+                            "example": "12346930"
                           }
                         }
                       },
@@ -13506,7 +13524,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Returns a full file resource if the shared link is valid and\nthe user has access to it.",
+            "description": "Returns a full web link resource if the shared link is valid and\nthe user has access to it.",
             "content": {
               "application/json": {
                 "schema": {
@@ -13516,7 +13534,7 @@
             }
           },
           "304": {
-            "description": "Returns an empty response when the `If-None-Match` header matches\nthe current `etag` value of the folder. This indicates that the folder\nhas not changed since it was last requested."
+            "description": "Returns an empty response when the `If-None-Match` header matches\nthe current `etag` value of the web link. This indicates that the web link\nhas not changed since it was last requested."
           },
           "default": {
             "description": "An unexpected client error.",
@@ -14190,6 +14208,51 @@
         "x-box-tag": "shared_links_web_links",
         "tags": [
           "Shared links (Web Links)"
+        ]
+      }
+    },
+    "/shared_items#app_items": {
+      "get": {
+        "operationId": "get_shared_items#app_items",
+        "summary": "Find app item for shared link",
+        "description": "Returns the app item represented by a shared link.\n\nThe link can originate from the current enterprise or another.",
+        "parameters": [
+          {
+            "name": "boxapi",
+            "in": "header",
+            "description": "A header containing the shared link and optional password for the\nshared link.\n\nThe format for this header is `shared_link=[link]&shared_link_password=[password]`",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "shared_link=[example.com]&shared_link_password=[xyz123]"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns a full app item resource if the shared link is valid and\nthe user has access to it.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppItem"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        },
+        "x-box-tag": "shared_links_app_items",
+        "tags": [
+          "Shared links (App Items)"
         ]
       }
     },
@@ -15230,7 +15293,7 @@
       "put": {
         "operationId": "put_users_id_folders_0",
         "summary": "Transfer owned folders",
-        "description": "Move all of the items (files, folders and workflows) owned by a user into\nanother user's account\n\nOnly the root folder (`0`) can be transferred.\n\nFolders can only be moved across users by users with administrative\npermissions.\n\nAll existing shared links and folder-level collaborations are transferred\nduring the operation. Please note that while collaborations at the individual\nfile-level are transferred during the operation, the collaborations are\ndeleted when the original user is deleted.\n\nThis call will be performed synchronously which might lead to a slow response\nwhen the source user has a large number of items in all of its folders.\n\nIf the destination path has a metadata cascade policy attached to any of\nthe parent folders, a metadata cascade operation will be kicked off\nasynchronously.\n\nThere is currently no way to check for when this operation is finished.\n\nThe destination folder's name will be in the format `{User}'s Files and\nFolders`, where `{User}` is the display name of the user.\n\nTo make this API call your application will need to have the \"Read and write\nall files and folders stored in Box\" scope enabled.\n\nPlease make sure the destination user has access to `Relay` or `Relay Lite`,\nand has access to the files and folders involved in the workflows being\ntransferred.\n\nAdmins will receive an email when the operation is completed.",
+        "description": "Move all of the items (files, folders and workflows) owned by a user into\nanother user's account\n\nOnly the root folder (`0`) can be transferred.\n\nFolders can only be moved across users by users with administrative\npermissions.\n\nAll existing shared links and folder-level collaborations are transferred\nduring the operation. Please note that while collaborations at the individual\nfile-level are transferred during the operation, the collaborations are\ndeleted when the original user is deleted.\n\nIf the user has a large number of items across all folders, the call will\nbe run asynchronously. If the operation is not completed within 10 minutes,\nthe user will receive a 200 OK response, and the operation will continue running.\n\nIf the destination path has a metadata cascade policy attached to any of\nthe parent folders, a metadata cascade operation will be kicked off\nasynchronously.\n\nThere is currently no way to check for when this operation is finished.\n\nThe destination folder's name will be in the format `{User}'s Files and\nFolders`, where `{User}` is the display name of the user.\n\nTo make this API call your application will need to have the \"Read and write\nall files and folders stored in Box\" scope enabled.\n\nPlease make sure the destination user has access to `Relay` or `Relay Lite`,\nand has access to the files and folders involved in the workflows being\ntransferred.\n\nAdmins will receive an email when the operation is completed.",
         "parameters": [
           {
             "name": "user_id",
@@ -23193,7 +23256,7 @@
         },
         "x-box-tag": "sign_requests",
         "tags": [
-          "Sign requests"
+          "Box Sign requests"
         ]
       }
     },
@@ -23241,7 +23304,7 @@
         },
         "x-box-tag": "sign_requests",
         "tags": [
-          "Sign requests"
+          "Box Sign requests"
         ]
       }
     },
@@ -23296,7 +23359,7 @@
         },
         "x-box-tag": "sign_requests",
         "tags": [
-          "Sign requests"
+          "Box Sign requests"
         ]
       }
     },
@@ -23327,6 +23390,33 @@
               "maximum": 1000
             },
             "example": 1000
+          },
+          {
+            "name": "senders",
+            "in": "query",
+            "description": "A list of sender emails to filter the signature requests by sender.\nIf provided, `shared_requests` must be set to `true`.",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "example": [
+              "sender1@boxdemo.com",
+              "sender2@boxdemo.com"
+            ]
+          },
+          {
+            "name": "shared_requests",
+            "in": "query",
+            "description": "If set to `true`, only includes requests that user is not an owner,\nbut user is a collaborator. Collaborator access is determined by the\nuser access level of the sign files of the request.\nDefault is `false`. Must be set to `true` if `senders` are provided.",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            },
+            "example": true
           }
         ],
         "responses": {
@@ -23353,7 +23443,7 @@
         },
         "x-box-tag": "sign_requests",
         "tags": [
-          "Sign requests"
+          "Box Sign requests"
         ]
       },
       "post": {
@@ -23393,7 +23483,7 @@
         },
         "x-box-tag": "sign_requests",
         "tags": [
-          "Sign requests"
+          "Box Sign requests"
         ]
       }
     },
@@ -23716,7 +23806,7 @@
         },
         "x-box-tag": "sign_templates",
         "tags": [
-          "Sign templates"
+          "Box Sign templates"
         ]
       }
     },
@@ -23781,7 +23871,7 @@
         },
         "x-box-tag": "sign_templates",
         "tags": [
-          "Sign templates"
+          "Box Sign templates"
         ]
       }
     },
@@ -23821,8 +23911,7 @@
               "type": "string",
               "enum": [
                 "channel"
-              ],
-              "nullable": false
+              ]
             },
             "example": "channel"
           },
@@ -23831,8 +23920,7 @@
             "in": "query",
             "description": "ID of the mapped item, for which the mapping should be returned",
             "schema": {
-              "type": "string",
-              "nullable": false
+              "type": "string"
             },
             "example": "12345"
           },
@@ -24007,16 +24095,14 @@
                       {
                         "$ref": "#/components/schemas/IntegrationMappingBoxItemSlack"
                       }
-                    ],
-                    "nullable": false
+                    ]
                   },
                   "options": {
                     "allOf": [
                       {
                         "$ref": "#/components/schemas/IntegrationMappingSlackOptions"
                       }
-                    ],
-                    "nullable": false
+                    ]
                   }
                 }
               }
@@ -24117,6 +24203,300 @@
         ]
       }
     },
+    "/integration_mappings/teams": {
+      "get": {
+        "operationId": "get_integration_mappings_teams",
+        "summary": "List Teams integration mappings",
+        "description": "Lists [Teams integration mappings](https://support.box.com/hc/en-us/articles/360044681474-Using-Box-for-Teams) in a users' enterprise.\nYou need Admin or Co-Admin role to\nuse this endpoint.",
+        "x-stability-level": "beta",
+        "parameters": [
+          {
+            "name": "partner_item_type",
+            "in": "query",
+            "description": "Mapped item type, for which the mapping should be returned",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "channel",
+                "team"
+              ]
+            },
+            "example": "channel"
+          },
+          {
+            "name": "partner_item_id",
+            "in": "query",
+            "description": "ID of the mapped item, for which the mapping should be returned",
+            "schema": {
+              "type": "string"
+            },
+            "example": "12345"
+          },
+          {
+            "name": "box_item_id",
+            "in": "query",
+            "description": "Box item ID, for which the mappings should be returned",
+            "schema": {
+              "type": "string"
+            },
+            "example": "12345"
+          },
+          {
+            "name": "box_item_type",
+            "in": "query",
+            "description": "Box item type, for which the mappings should be returned",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "folder"
+              ]
+            },
+            "example": "folder"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns a collection of integration mappings",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntegrationMappingsTeams"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The server cannot or will not process the\nrequest due to an apparent client error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Returns a `not_found` error if the integration mapping could not be found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        },
+        "x-box-tag": "integration_mappings",
+        "tags": [
+          "Integration mappings"
+        ]
+      },
+      "post": {
+        "operationId": "post_integration_mappings_teams",
+        "summary": "Create Teams integration mapping",
+        "description": "Creates a [Teams integration mapping](https://support.box.com/hc/en-us/articles/360044681474-Using-Box-for-Teams)\nby mapping a Teams channel to a Box item.\nYou need Admin or Co-Admin role to\nuse this endpoint.",
+        "x-stability-level": "beta",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IntegrationMappingTeamsCreateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Returns the created integration mapping.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntegrationMappingTeams"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Returns a `bad_request` if an incorrect `options`\nwas supplied or the Box folder cannot be\nmapped to this `partner_item_id`.\nError codes:\n  * `SERVICE_ACCOUNT_IS_NOT_A_COOWNER_OR_OWNER` - service account\n  doesn't have co-owner collaboration or is\n  not an owner of the `box_item_id`,\n  * `CHANNEL_ALREADY_MAPPED` - channel is already\n    mapped to another `box_item_id`,\n  * `TEAM_ALREADY_MAPPED` - team is already\n    mapped to another `box_item_id`,\n  * `BOX_ENTERPRISE_MISMATCH` - Box folder must be\n  owned by the enterprise, which is configured\n  to use Box as Content layer for Teams,\n  * `BOX_FOLDER_EXTERNALLY_OWNED` - Box folder must\n  be internally owned to the admin's enterprise\n  * `FOLDER_ALREADY_MAPPED` - Box folder must not be mapped to another integration mapping.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Returns a `not_found` error if the integration mapping, record or folder could not be found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        },
+        "x-box-tag": "integration_mappings",
+        "tags": [
+          "Integration mappings"
+        ]
+      }
+    },
+    "/integration_mappings/teams/{integration_mapping_id}": {
+      "put": {
+        "operationId": "put_integration_mappings_teams_id",
+        "summary": "Update Teams integration mapping",
+        "description": "Updates a [Teams integration mapping](https://support.box.com/hc/en-us/articles/360044681474-Using-Box-for-Teams).\nSupports updating the Box folder ID and options.\nYou need Admin or Co-Admin role to\nuse this endpoint.",
+        "x-stability-level": "beta",
+        "parameters": [
+          {
+            "name": "integration_mapping_id",
+            "in": "path",
+            "description": "An ID of an integration mapping",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "11235432"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "box_item": {
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/FolderReference"
+                      },
+                      {
+                        "description": "The Box folder, to which the object from the partner app domain is mapped"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Returns the updated integration mapping object.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntegrationMappingTeams"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Returns a `bad_request` if an incorrect `options` was\nsupplied or the Box folder cannot be mapped to this `partner_item`.\nError codes:\n* `SERVICE_ACCOUNT_IS_NOT_A_COOWNER_OR_OWNER` - service account\n  doesn't have co-owner collaboration or is\n  not an owner of the `box_item_id`,\n* `BOX_FOLDER_EXTERNALLY_OWNED` - Box folder must be\n  internally owned to the admin's enterprise,\n* `FOLDER_ALREADY_MAPPED` - Box folder must not be mapped to another integration mapping.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Returns `not_found` if integration mapping object was not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        },
+        "x-box-tag": "integration_mappings",
+        "tags": [
+          "Integration mappings"
+        ]
+      },
+      "delete": {
+        "operationId": "delete_integration_mappings_teams_id",
+        "summary": "Delete Teams integration mapping",
+        "description": "Deletes a [Teams integration mapping](https://support.box.com/hc/en-us/articles/360044681474-Using-Box-for-Teams).\nYou need Admin or Co-Admin role to\nuse this endpoint.",
+        "x-stability-level": "beta",
+        "parameters": [
+          {
+            "name": "integration_mapping_id",
+            "in": "path",
+            "description": "An ID of an integration mapping",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "11235432"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Empty body in response"
+          },
+          "404": {
+            "description": "Returns a `not_found` error if the integration mapping could not be found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        },
+        "x-box-tag": "integration_mappings",
+        "tags": [
+          "Integration mappings"
+        ]
+      }
+    },
     "/ai/ask": {
       "post": {
         "operationId": "post_ai_ask",
@@ -24142,6 +24522,9 @@
                 }
               }
             }
+          },
+          "204": {
+            "description": "No content is available to answer the question. This is returned when the request item is a hub, but content in the hubs is not indexed. To ensure content in the hub is indexed, make sure Box AI for Hubs in the Admin Console was enabled before hub creation."
           },
           "500": {
             "description": "An unexpected server error.",
@@ -24266,7 +24649,7 @@
             "schema": {
               "type": "string"
             },
-            "example": "openai__gpt_3_5_turbo"
+            "example": "azure__openai__gpt_4o_mini"
           }
         ],
         "responses": {
@@ -24326,7 +24709,6 @@
         "operationId": "post_ai_extract",
         "summary": "Extract metadata (freeform)",
         "description": "Sends an AI request to supported Large Language Models (LLMs) and extracts metadata in form of key-value pairs.\nIn this request, both the prompt and the output can be freeform.\nMetadata template setup before sending the request is not required.",
-        "x-stability-level": "beta",
         "requestBody": {
           "content": {
             "application/json": {
@@ -24380,7 +24762,6 @@
         "operationId": "post_ai_extract_structured",
         "summary": "Extract metadata (structured)",
         "description": "Sends an AI request to supported Large Language Models (LLMs) and returns extracted metadata as a set of key-value pairs.\nFor this request, you either need a metadata template or a list of fields you want to extract.\nInput is **either** a metadata template or a list of fields to ensure the structure.\nTo learn more about creating templates, see [Creating metadata templates in the Admin Console](https://support.box.com/hc/en-us/articles/360044194033-Customizing-Metadata-Templates)\nor use the [metadata template API](g://metadata/templates/create).",
-        "x-stability-level": "beta",
         "requestBody": {
           "content": {
             "application/json": {
@@ -24396,7 +24777,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiExtractResponse"
+                  "$ref": "#/components/schemas/AiExtractStructuredResponse"
                 }
               }
             }
@@ -24438,17 +24819,20 @@
           {
             "name": "mode",
             "in": "query",
-            "description": "The mode to filter the agent config to return.",
+            "description": "The mode to filter the agent config to return. Possible values are: `ask`, `text_gen`, and `extract`.",
             "required": false,
             "schema": {
-              "type": "string",
-              "enum": [
-                "ask",
-                "text_gen",
-                "extract"
-              ]
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
             },
-            "example": "ask"
+            "example": [
+              "ask",
+              "text_gen",
+              "extract"
+            ],
+            "explode": false
           },
           {
             "name": "fields",
@@ -24471,16 +24855,29 @@
           {
             "name": "agent_state",
             "in": "query",
-            "description": "The state of the agent to return.",
+            "description": "The state of the agents to return. Possible values are: `enabled`, `disabled` and `enabled_for_selected_users`.",
             "required": false,
             "schema": {
-              "type": "string",
-              "enum": [
-                "enabled",
-                "disabled"
-              ]
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
             },
-            "example": "enabled"
+            "example": [
+              "enabled"
+            ],
+            "explode": false
+          },
+          {
+            "name": "include_box_default",
+            "in": "query",
+            "description": "Whether to include the Box default agents in the response.",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            },
+            "example": true
           },
           {
             "name": "marker",
@@ -24539,13 +24936,13 @@
         },
         "x-box-tag": "ai_studio",
         "tags": [
-          "AI"
+          "AI Studio"
         ]
       },
       "post": {
         "operationId": "post_ai_agents",
         "summary": "Create AI agent",
-        "description": "Creates an AI agent.",
+        "description": "Creates an AI agent. At least one of the following capabilities must be provided: `ask`, `text_gen`, `extract`.",
         "requestBody": {
           "content": {
             "application/json": {
@@ -24561,7 +24958,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiSingleAgentResponse"
+                  "$ref": "#/components/schemas/AiSingleAgentResponse--Full"
                 }
               }
             }
@@ -24589,7 +24986,7 @@
         },
         "x-box-tag": "ai_studio",
         "tags": [
-          "AI"
+          "AI Studio"
         ]
       }
     },
@@ -24625,7 +25022,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiSingleAgentResponse"
+                  "$ref": "#/components/schemas/AiSingleAgentResponse--Full"
                 }
               }
             }
@@ -24653,7 +25050,7 @@
         },
         "x-box-tag": "ai_studio",
         "tags": [
-          "AI"
+          "AI Studio"
         ]
       },
       "get": {
@@ -24696,7 +25093,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiSingleAgentResponse"
+                  "$ref": "#/components/schemas/AiSingleAgentResponse--Full"
                 }
               }
             }
@@ -24724,7 +25121,7 @@
         },
         "x-box-tag": "ai_studio",
         "tags": [
-          "AI"
+          "AI Studio"
         ]
       },
       "delete": {
@@ -24757,6 +25154,16 @@
               }
             }
           },
+          "404": {
+            "description": "Returned if the AI agent is not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
           "500": {
             "description": "An unexpected server error.",
             "content": {
@@ -24770,813 +25177,7 @@
         },
         "x-box-tag": "ai_studio",
         "tags": [
-          "AI"
-        ]
-      }
-    },
-    "/docgen_templates": {
-      "post": {
-        "operationId": "post_docgen_templates",
-        "summary": "Add a Box Doc Gen template",
-        "description": "Creates a Box Doc Gen template.",
-        "requestBody": {
-          "description": "Creates a Box Doc Gen template based on a provided file.",
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/DocgenTemplateCreateRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "The file which has now been marked as a Docgen template.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DocgenTemplate--Base"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "The server cannot or will not process the request due to an apparent client error.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ClientError"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "The client does not have access rights to the content or resource requested.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ClientError"
-                }
-              }
-            }
-          },
-          "429": {
-            "description": "The user has sent too many requests in a given amount of time.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ClientError"
-                }
-              }
-            }
-          },
-          "default": {
-            "description": "An unexpected condition was encountered on the server.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ClientError"
-                }
-              }
-            }
-          }
-        },
-        "x-box-tag": "docgen_template",
-        "tags": [
-          "Box Doc Gen Templates"
-        ]
-      },
-      "get": {
-        "operationId": "get_docgen_templates",
-        "summary": "List Box Doc Gen templates",
-        "description": "Lists Box Doc Gen templates created by a user",
-        "parameters": [
-          {
-            "name": "marker",
-            "in": "query",
-            "description": "Defines the position marker at which to begin returning results. This is\nused when paginating using marker-based pagination.\n\nThis requires `usemarker` to be set to `true`.",
-            "required": false,
-            "schema": {
-              "type": "string"
-            },
-            "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii"
-          },
-          {
-            "name": "limit",
-            "in": "query",
-            "description": "The maximum number of items to return per page.",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int64",
-              "maximum": 1000
-            },
-            "example": 1000
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Returns a collection of templates.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DocgenTemplates"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Returned when the access token provided in the `Authorization` header\nis not recognized or not provided.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ClientError"
-                }
-              }
-            }
-          },
-          "default": {
-            "description": "An unexpected client error.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ClientError"
-                }
-              }
-            }
-          }
-        },
-        "x-box-tag": "docgen_template",
-        "tags": [
-          "Box Doc Gen Templates"
-        ]
-      }
-    },
-    "/docgen_templates/{template_id}": {
-      "delete": {
-        "operationId": "delete_docgen_templates_id",
-        "summary": "Delete Box Doc Gen template marking",
-        "description": "Unmarks file as Box Doc Gen template",
-        "parameters": [
-          {
-            "name": "template_id",
-            "in": "path",
-            "description": "ID of file which no longer will be marked as a Box Doc Gen template.",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "example": "123"
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "Returns an empty response when a file is no longer marked as Box Box Doc Gen template."
-          },
-          "400": {
-            "description": "The server cannot or will not process the request due to an apparent client error.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ClientError"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "The client does not have access rights to the content or resource requested.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ClientError"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Returned if the template is not found or the user does not\nhave access to the associated template.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ClientError"
-                }
-              }
-            }
-          },
-          "429": {
-            "description": "The user has sent too many requests in a given amount of time.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ClientError"
-                }
-              }
-            }
-          },
-          "default": {
-            "description": "An unexpected condition was encountered on the server.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ClientError"
-                }
-              }
-            }
-          }
-        },
-        "x-box-tag": "docgen_template",
-        "tags": [
-          "Box Doc Gen templates"
-        ]
-      },
-      "get": {
-        "operationId": "get_docgen_templates_id",
-        "summary": "Get Box Doc Gen template by ID",
-        "description": "Lists details of a specific Box Doc Gen template.",
-        "parameters": [
-          {
-            "name": "template_id",
-            "in": "path",
-            "description": "The ID of a Box Doc Gen template.",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "example": 123
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Returns a template.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DocgenTemplate"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Returned when the access token provided in the `Authorization` header\nis not recognized or not provided.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ClientError"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Returned if the template is not found or the user does not\nhave access to the associated template.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ClientError"
-                }
-              }
-            }
-          },
-          "default": {
-            "description": "An unexpected client error.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ClientError"
-                }
-              }
-            }
-          }
-        },
-        "x-box-tag": "docgen_template",
-        "tags": [
-          "Box Doc Gen Templates"
-        ]
-      }
-    },
-    "/docgen_templates/{template_id}/tags": {
-      "get": {
-        "operationId": "get_docgen_templates_id_tags",
-        "summary": "List all docgen template tags in template",
-        "description": "Lists all tags in a Box Doc Gen template.",
-        "parameters": [
-          {
-            "name": "template_id",
-            "in": "path",
-            "description": "ID of template.",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "example": 123
-          },
-          {
-            "name": "template_version_id",
-            "in": "query",
-            "description": "Id of template version.",
-            "required": false,
-            "schema": {
-              "type": "string"
-            },
-            "example": 123
-          },
-          {
-            "name": "marker",
-            "in": "query",
-            "description": "Defines the position marker at which to begin returning results. This is\nused when paginating using marker-based pagination.\n\nThis requires `usemarker` to be set to `true`.",
-            "required": false,
-            "schema": {
-              "type": "string"
-            },
-            "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii"
-          },
-          {
-            "name": "limit",
-            "in": "query",
-            "description": "The maximum number of items to return per page.",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int64",
-              "maximum": 1000
-            },
-            "example": 1000
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "A list of document generation template tags.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DocgenTags"
-                }
-              }
-            }
-          },
-          "202": {
-            "description": "Processing tags for the file.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DocgenTagsProcessingMessage"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "The client does not have access rights to the content or resource requested.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ClientError"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "The requested resource could not be found but may be available in the future.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ClientError"
-                }
-              }
-            }
-          },
-          "429": {
-            "description": "The user has sent too many requests in a given amount of time.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ClientError"
-                }
-              }
-            }
-          },
-          "default": {
-            "description": "An unexpected condition was encountered on the server.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ClientError"
-                }
-              }
-            }
-          }
-        },
-        "x-box-tag": "docgen_template",
-        "tags": [
-          "Box Doc Gen Templates"
-        ]
-      }
-    },
-    "/docgen_jobs/{job_id}": {
-      "get": {
-        "operationId": "get_docgen_jobs_id",
-        "summary": "Get Box Doc Gen job by ID",
-        "description": "List status of job.",
-        "parameters": [
-          {
-            "name": "job_id",
-            "in": "path",
-            "description": "Document generation job ID.",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "example": 123
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Status of the document generation job.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DocgenJob"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "The client does not have access rights to the content or resource requested.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ClientError"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Returned if the job is not found or the user does not\nhave access to the associated job.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ClientError"
-                }
-              }
-            }
-          },
-          "429": {
-            "description": "The user has sent too many requests in a given amount of time.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ClientError"
-                }
-              }
-            }
-          },
-          "default": {
-            "description": "An unexpected condition was encountered on the server.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ClientError"
-                }
-              }
-            }
-          }
-        },
-        "x-box-tag": "docgen",
-        "tags": [
-          "Box Doc Gen"
-        ]
-      }
-    },
-    "/docgen_jobs": {
-      "get": {
-        "operationId": "get_docgen_jobs",
-        "summary": "List all Box Doc Gen jobs",
-        "description": "Lists all document generation jobs for a user.",
-        "parameters": [
-          {
-            "name": "marker",
-            "in": "query",
-            "description": "Defines the position marker at which to begin returning results. This is\nused when paginating using marker-based pagination.\n\nThis requires `usemarker` to be set to `true`.",
-            "required": false,
-            "schema": {
-              "type": "string"
-            },
-            "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii"
-          },
-          {
-            "name": "limit",
-            "in": "query",
-            "description": "The maximum number of items to return per page.",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int64",
-              "maximum": 1000
-            },
-            "example": 1000
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "A list of document generation jobs.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DocgenJobs--Full"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "The client does not have access rights to the content or resource requested.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ClientError"
-                }
-              }
-            }
-          },
-          "429": {
-            "description": "The user has sent too many requests in a given amount of time.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ClientError"
-                }
-              }
-            }
-          },
-          "default": {
-            "description": "An unexpected condition was encountered on the server.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ClientError"
-                }
-              }
-            }
-          }
-        },
-        "x-box-tag": "docgen",
-        "tags": [
-          "Box Doc Gen"
-        ]
-      }
-    },
-    "/docgen_template_jobs/{template_id}": {
-      "get": {
-        "operationId": "get_docgen_template_jobs_id",
-        "summary": "Get list of all Box Doc Gen jobs for template",
-        "description": "Lists details of a Box Doc Gen template including associated jobs. list for a user",
-        "parameters": [
-          {
-            "name": "template_id",
-            "in": "path",
-            "description": "Id of template to fetch jobs for",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "example": 123
-          },
-          {
-            "name": "marker",
-            "in": "query",
-            "description": "Defines the position marker at which to begin returning results. This is\nused when paginating using marker-based pagination.\n\nThis requires `usemarker` to be set to `true`.",
-            "required": false,
-            "schema": {
-              "type": "string"
-            },
-            "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii"
-          },
-          {
-            "name": "limit",
-            "in": "query",
-            "description": "The maximum number of items to return per page.",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int64",
-              "maximum": 1000
-            },
-            "example": 1000
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "A single Box Doc Gen template.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DocgenJobs"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "The client does not have access rights to the content or resource requested.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ClientError"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Returned if the template is not found or the user does not\nhave access to the associated template.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ClientError"
-                }
-              }
-            }
-          },
-          "429": {
-            "description": "The user has sent too many requests in a given amount of time.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ClientError"
-                }
-              }
-            }
-          },
-          "default": {
-            "description": "An unexpected condition was encountered on the server.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ClientError"
-                }
-              }
-            }
-          }
-        },
-        "x-box-tag": "docgen_template",
-        "tags": [
-          "Box Doc Gen Templates"
-        ]
-      }
-    },
-    "/docgen_batch_jobs/{batch_id}": {
-      "get": {
-        "operationId": "get_docgen_batch_jobs_id",
-        "summary": "Get Box Doc Gen jobs in batch with a specific ID",
-        "description": "Lists Box Doc Gen jobs in a batch",
-        "parameters": [
-          {
-            "name": "batch_id",
-            "in": "path",
-            "description": "Document generation batch ID.",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "example": 123
-          },
-          {
-            "name": "marker",
-            "in": "query",
-            "description": "Defines the position marker at which to begin returning results. This is\nused when paginating using marker-based pagination.\n\nThis requires `usemarker` to be set to `true`.",
-            "required": false,
-            "schema": {
-              "type": "string"
-            },
-            "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii"
-          },
-          {
-            "name": "limit",
-            "in": "query",
-            "description": "The maximum number of items to return per page.",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int64",
-              "maximum": 1000
-            },
-            "example": 1000
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Returns a list of Box Doc Gen jobs in a Box Doc Gen batch.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DocgenJobs"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "The client does not have access rights to the content or resource requested.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ClientError"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Returned if the batch is not found or the user does not\nhave access to the associated batch.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ClientError"
-                }
-              }
-            }
-          },
-          "429": {
-            "description": "The user has sent too many requests in a given amount of time.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ClientError"
-                }
-              }
-            }
-          },
-          "default": {
-            "description": "An unexpected condition was encountered on the server.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ClientError"
-                }
-              }
-            }
-          }
-        },
-        "x-box-tag": "docgen",
-        "tags": [
-          "Box Doc Gen"
-        ]
-      }
-    },
-    "/docgen_batches": {
-      "post": {
-        "operationId": "post_docgen_batches",
-        "summary": "Generate document based on Box Doc Gen template",
-        "description": "Generates a document based on a Box Doc Gen template.",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/DocgenBatchCreateRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "202": {
-            "description": "The created Batch ID.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DocgenBatch--Base"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "The client does not have access rights to the content or resource requested.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ClientError"
-                }
-              }
-            }
-          },
-          "429": {
-            "description": "The user has sent too many requests in a given amount of time.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ClientError"
-                }
-              }
-            }
-          },
-          "default": {
-            "description": "An unexpected condition was encountered on the server.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ClientError"
-                }
-              }
-            }
-          }
-        },
-        "x-box-tag": "docgen",
-        "tags": [
-          "Box Doc Gen"
+          "AI Studio"
         ]
       }
     }
@@ -25634,15 +25235,19 @@
         "x-box-resource-id": "access_token",
         "x-box-tag": "authorization"
       },
-      "AiAgentAccessState": {
-        "description": "The state of the AI Agent.",
-        "type": "string",
-        "example": "enabled",
-        "enum": [
-          "enabled",
-          "disabled"
+      "AiAgentAllowedEntity": {
+        "description": "The entity with type and ID.",
+        "type": "object",
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/User--Base"
+          },
+          {
+            "$ref": "#/components/schemas/Group--Base"
+          }
         ],
-        "title": "Access State"
+        "title": "The entity with type and ID",
+        "x-box-resource-id": "ai_agent_allowed_entity"
       },
       "AiAgentAsk": {
         "description": "The AI agent used to handle queries.",
@@ -25698,7 +25303,7 @@
         "x-box-tag": "ai"
       },
       "AiAgentBasicTextTool": {
-        "description": "AI agent tool used to handle basic text.",
+        "description": "AI agent processor used to handle basic text.",
         "type": "object",
         "allOf": [
           {
@@ -25725,13 +25330,13 @@
         "x-box-tag": "ai"
       },
       "AiAgentBasicTextToolBase": {
-        "description": "AI agent tool used to handle basic text.",
+        "description": "AI agent processor used to handle basic text.",
         "type": "object",
         "properties": {
           "model": {
             "description": "The model used for the AI agent for basic text. For specific model values, see the [available models list](g://box-ai/supported-models).",
             "type": "string",
-            "example": "azure__openai__gpt_3_5_turbo_16k"
+            "example": "azure__openai__gpt_4o_mini"
           },
           "num_tokens_for_completion": {
             "description": "The number of tokens for completion.",
@@ -25758,7 +25363,7 @@
         "x-box-tag": "ai"
       },
       "AiAgentBasicTextToolTextGen": {
-        "description": "AI agent tool used to handle basic text.",
+        "description": "AI agent processor used to handle basic text.",
         "type": "object",
         "allOf": [
           {
@@ -25838,8 +25443,44 @@
         "x-box-resource-id": "ai_agent_extract_structured",
         "x-box-tag": "ai"
       },
+      "AiAgentInfo": {
+        "description": "The information on the models and processors used in the request.",
+        "type": "object",
+        "properties": {
+          "models": {
+            "description": "The models used for the request",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "description": "The name of the model used for the request",
+                  "type": "string",
+                  "example": "azure__openai__text_embedding_ada_002"
+                },
+                "provider": {
+                  "description": "The provider that owns the model used for the request",
+                  "type": "string",
+                  "example": "azure"
+                },
+                "supported_purpose": {
+                  "description": "The supported purpose utilized by the model used for the request",
+                  "type": "string",
+                  "example": "embedding"
+                }
+              }
+            }
+          },
+          "processor": {
+            "description": "The processor used for the request",
+            "type": "string",
+            "example": "basic_text"
+          }
+        },
+        "title": "The information on the models and processors used in the request."
+      },
       "AiAgentLongTextTool": {
-        "description": "AI agent tool used to to handle longer text.",
+        "description": "AI agent processor used to to handle longer text.",
         "type": "object",
         "allOf": [
           {
@@ -25853,7 +25494,7 @@
                   "model": {
                     "description": "The model used for the AI agent for calculating embeddings.",
                     "type": "string",
-                    "example": "openai__text_embedding_ada_002"
+                    "example": "azure__openai__text_embedding_ada_002"
                   },
                   "strategy": {
                     "type": "object",
@@ -25867,6 +25508,7 @@
                         "description": "The number of tokens per chunk.",
                         "type": "integer",
                         "example": 64,
+                        "maximum": 512,
                         "minimum": 1
                       }
                     }
@@ -25880,7 +25522,7 @@
         "x-box-tag": "ai"
       },
       "AiAgentLongTextToolTextGen": {
-        "description": "AI agent tool used to to handle longer text.",
+        "description": "AI agent processor used to to handle longer text.",
         "type": "object",
         "allOf": [
           {
@@ -25894,7 +25536,7 @@
                   "model": {
                     "description": "The model used for the AI agent for calculating embeddings.",
                     "type": "string",
-                    "example": "openai__text_embedding_ada_002"
+                    "example": "azure__openai__text_embedding_ada_002"
                   },
                   "strategy": {
                     "type": "object",
@@ -25908,6 +25550,7 @@
                         "description": "The number of tokens per chunk.",
                         "type": "integer",
                         "example": 64,
+                        "maximum": 512,
                         "minimum": 1
                       }
                     }
@@ -25918,6 +25561,33 @@
           }
         ],
         "title": "AI agent long text tool",
+        "x-box-tag": "ai"
+      },
+      "AiAgentReference": {
+        "description": "The AI agent used to handle queries.",
+        "type": "object",
+        "properties": {
+          "type": {
+            "description": "The type of AI agent used to handle queries.",
+            "type": "string",
+            "example": "ai_agent_id",
+            "enum": [
+              "ai_agent_id"
+            ],
+            "nullable": false
+          },
+          "id": {
+            "description": "The ID of an Agent",
+            "type": "string",
+            "example": "14031",
+            "nullable": false
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "title": "AI agent reference",
+        "x-box-resource-id": "ai_agent_reference",
         "x-box-tag": "ai"
       },
       "AiAgentTextGen": {
@@ -25949,7 +25619,7 @@
         "type": "object",
         "properties": {
           "mode": {
-            "description": "The mode specifies if this request is for a single or multiple items. If you select `single_item_qa` the `items` array can have one element only. Selecting `multiple_item_qa` allows you to provide up to 25 items.",
+            "description": "Box AI handles text documents with text representations up to 1MB in size, or a maximum of 25 files, whichever comes first. If the text file size exceeds 1MB, the first 1MB of text representation will be processed. Box AI handles image documents with a resolution of 1024 x 1024 pixels, with a maximum of 5 images or 5 pages for multi-page images. If the number of image or image pages exceeds 5, the first 5 images or pages will be processed. If you set mode parameter to `single_item_qa`, the items array can have one element only. Currently Box AI does not support multi-modal requests. If both images and text are sent Box AI will only process the text.",
             "type": "string",
             "example": "multiple_item_qa",
             "enum": [
@@ -25964,10 +25634,10 @@
             "example": "What is the value provided by public APIs based on this document?"
           },
           "items": {
-            "description": "The items to be processed by the LLM, often files.\n\n**Note**: Box AI handles documents with text representations up to 1MB in size, or a maximum of 25 files, whichever comes first.\nIf the file size exceeds 1MB, the first 1MB of text representation will be processed.\nIf you set `mode` parameter to `single_item_qa`, the `items` array can have one element only. ",
+            "description": "The items to be processed by the LLM, often files.",
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/AiItem--Base"
+              "$ref": "#/components/schemas/AiItemAsk"
             },
             "maxItems": 25,
             "minItems": 1,
@@ -25986,7 +25656,21 @@
             "example": true
           },
           "ai_agent": {
-            "$ref": "#/components/schemas/AiAgentAsk"
+            "allOf": [
+              {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/AiAgentAsk"
+                  },
+                  {
+                    "$ref": "#/components/schemas/AiAgentReference"
+                  }
+                ]
+              },
+              {
+                "description": "The AI agent to be used to handle the request."
+              }
+            ]
           }
         },
         "required": [
@@ -25994,7 +25678,8 @@
           "items",
           "mode"
         ],
-        "title": "AI ask request"
+        "title": "AI ask request",
+        "x-box-tag": "ai"
       },
       "AiCitation": {
         "description": "The citation of the LLM's answer reference.",
@@ -26069,14 +25754,29 @@
             "uniqueItems": true
           },
           "ai_agent": {
-            "$ref": "#/components/schemas/AiAgentExtract"
+            "allOf": [
+              {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/AiAgentReference"
+                  },
+                  {
+                    "$ref": "#/components/schemas/AiAgentExtract"
+                  }
+                ]
+              },
+              {
+                "description": "The AI agent to be used for the extraction."
+              }
+            ]
           }
         },
         "required": [
           "prompt",
           "items"
         ],
-        "title": "AI metadata freeform extraction request"
+        "title": "AI metadata freeform extraction request",
+        "x-box-tag": "ai"
       },
       "AiExtractResponse": {
         "description": "AI extract response.\nThe content of this response may vary depending on\nthe requested configuration.",
@@ -26117,7 +25817,7 @@
                 ]
               },
               "scope": {
-                "description": "The scope of the metadata template that can either be global or\nenterprise. \n* The **global** scope is used for templates that are\navailable to any Box enterprise. \n* The **enterprise** scope represents templates created within a specific enterprise,\n  containing the ID of that enterprise.",
+                "description": "The scope of the metadata template that can either be global or\nenterprise.\n* The **global** scope is used for templates that are\navailable to any Box enterprise.\n* The **enterprise** scope represents templates created within a specific enterprise,\n  containing the ID of that enterprise.",
                 "type": "string",
                 "example": "enterprise_12345",
                 "maxLength": 40
@@ -26190,13 +25890,58 @@
             "uniqueItems": true
           },
           "ai_agent": {
-            "$ref": "#/components/schemas/AiAgentExtractStructured"
+            "allOf": [
+              {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/AiAgentReference"
+                  },
+                  {
+                    "$ref": "#/components/schemas/AiAgentExtractStructured"
+                  }
+                ]
+              },
+              {
+                "description": "The AI agent to be used for the structured extraction."
+              }
+            ]
           }
         },
         "required": [
           "items"
         ],
-        "title": "AI Extract Structured Request"
+        "title": "AI Extract Structured Request",
+        "x-box-tag": "ai"
+      },
+      "AiExtractStructuredResponse": {
+        "description": "AI extract structured response",
+        "type": "object",
+        "properties": {
+          "answer": {
+            "$ref": "#/components/schemas/AiExtractResponse"
+          },
+          "created_at": {
+            "description": "The ISO date formatted timestamp of when the answer to the prompt was created.",
+            "type": "string",
+            "format": "date-time",
+            "example": "2012-12-12T10:53:43-08:00"
+          },
+          "completion_reason": {
+            "description": "The reason the response finishes.",
+            "type": "string",
+            "example": "done"
+          },
+          "ai_agent_info": {
+            "$ref": "#/components/schemas/AiAgentInfo"
+          }
+        },
+        "required": [
+          "answer",
+          "created_at"
+        ],
+        "title": "AI extract structured response",
+        "x-box-resource-id": "ai_extract_structured_response",
+        "x-box-tag": "ai"
       },
       "AiItem--Base": {
         "description": "The item to be processed by the LLM.",
@@ -26230,6 +25975,36 @@
         "x-box-variants": [
           "base"
         ]
+      },
+      "AiItemAsk": {
+        "description": "The item to be processed by the LLM for ask requests.",
+        "type": "object",
+        "properties": {
+          "id": {
+            "description": "The ID of the file.",
+            "type": "string",
+            "example": "123"
+          },
+          "type": {
+            "description": "The type of the item. A `hubs` item must be used as a single item.",
+            "type": "string",
+            "example": "file",
+            "enum": [
+              "file",
+              "hubs"
+            ]
+          },
+          "content": {
+            "description": "The content of the item, often the text representation.",
+            "example": "This is file content.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "type"
+        ],
+        "title": "AI Item Ask"
       },
       "AiLlmEndpointParamsAWS": {
         "description": "AI LLM endpoint params AWS object",
@@ -26388,6 +26163,12 @@
                 "type": "string",
                 "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
                 "nullable": true
+              },
+              "prev_marker": {
+                "description": "The marker for the start of the previous page of results.",
+                "type": "string",
+                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVih",
+                "nullable": true
               }
             }
           },
@@ -26397,7 +26178,7 @@
                 "description": "The list of AI Agents.",
                 "type": "array",
                 "items": {
-                  "$ref": "#/components/schemas/AiSingleAgentResponse"
+                  "$ref": "#/components/schemas/AiSingleAgentResponse--Full"
                 }
               }
             }
@@ -26429,6 +26210,9 @@
             "description": "The reason the response finishes.",
             "type": "string",
             "example": "done"
+          },
+          "ai_agent_info": {
+            "$ref": "#/components/schemas/AiAgentInfo"
           }
         },
         "required": [
@@ -26477,7 +26261,7 @@
         ]
       },
       "AiSingleAgentResponse": {
-        "description": "An AI Agent instance.",
+        "description": "Standard representation of an AI Agent instance.",
         "type": "object",
         "properties": {
           "id": {
@@ -26504,119 +26288,526 @@
             "example": "This is my Agent"
           },
           "access_state": {
-            "$ref": "#/components/schemas/AiAgentAccessState"
+            "description": "The state of the AI Agent. Possible values are: `enabled`, `disabled`, and `enabled_for_selected_users`.",
+            "type": "string",
+            "example": "enabled",
+            "title": "Access State",
+            "x-box-tag": "ai_studio"
           },
-          "is_enterprise_default": {
-            "description": "If the agent is default for enterprise.",
-            "type": "boolean",
-            "example": true
+          "created_by": {
+            "description": "The user who created this agent.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/User--Base"
+              }
+            ]
           },
-          "ask": {
-            "$ref": "#/components/schemas/AiStudioAgentAsk"
+          "created_at": {
+            "description": "The ISO date-time formatted timestamp of when this AI agent was created.",
+            "type": "string",
+            "format": "date-time",
+            "example": "2022-01-01T00:00:00Z"
           },
-          "text_gen": {
-            "$ref": "#/components/schemas/AiStudioAgentTextGen"
+          "modified_by": {
+            "description": "The user who most recently modified this agent.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/User--Base"
+              }
+            ]
           },
-          "extract": {
-            "$ref": "#/components/schemas/AiStudioAgentExtract"
+          "modified_at": {
+            "description": "The ISO date-time formatted timestamp of when this AI agent was recently modified.",
+            "type": "string",
+            "format": "date-time",
+            "example": "2022-01-01T00:00:00Z"
+          },
+          "icon_reference": {
+            "description": "The icon reference of the AI Agent.",
+            "type": "string",
+            "example": "https://cdn01.boxcdn.net/app-assets/aistudio/avatars/logo_analytics.svg",
+            "minLength": 1
+          },
+          "allowed_entities": {
+            "description": "List of allowed users or groups.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AiAgentAllowedEntity"
+            }
           }
         },
         "required": [
           "id",
           "origin",
           "name",
-          "access_state",
-          "is_enterprise_default"
+          "access_state"
         ],
         "title": "AI agent",
         "x-box-resource-id": "ai_single_agent_response",
-        "x-box-tag": "ai_studio"
+        "x-box-tag": "ai_studio",
+        "x-box-variant": "standard",
+        "x-box-variants": [
+          "standard",
+          "full"
+        ]
+      },
+      "AiSingleAgentResponse--Full": {
+        "description": "Full representation of an AI Agent instance.",
+        "type": "object",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AiSingleAgentResponse"
+          },
+          {
+            "properties": {
+              "ask": {
+                "$ref": "#/components/schemas/AiStudioAgentAskResponse"
+              },
+              "text_gen": {
+                "$ref": "#/components/schemas/AiStudioAgentTextGenResponse"
+              },
+              "extract": {
+                "$ref": "#/components/schemas/AiStudioAgentExtractResponse"
+              }
+            }
+          }
+        ],
+        "required": [
+          "id",
+          "origin",
+          "name",
+          "access_state"
+        ],
+        "title": "AI agent (Full)",
+        "x-box-resource-id": "ai_single_agent_response--full",
+        "x-box-tag": "ai_studio",
+        "x-box-variant": "full",
+        "x-box-variants": [
+          "standard",
+          "full"
+        ]
       },
       "AiStudioAgentAsk": {
         "description": "The AI Agent to be used for ask.",
         "type": "object",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/AiAgentAsk"
+        "properties": {
+          "type": {
+            "description": "The type of AI agent used to handle queries.",
+            "type": "string",
+            "example": "ai_agent_ask",
+            "enum": [
+              "ai_agent_ask"
+            ],
+            "nullable": false
           },
-          {
-            "properties": {
-              "access_state": {
-                "$ref": "#/components/schemas/AiAgentAccessState"
-              },
-              "description": {
-                "description": "The description of the AI Agent.",
-                "type": "string",
-                "example": "This is ASK Agent"
-              }
-            }
+          "access_state": {
+            "description": "The state of the AI Agent capability. Possible values are: `enabled` and `disabled`.",
+            "type": "string",
+            "example": "enabled",
+            "title": "Capability Access State",
+            "x-box-tag": "ai_studio"
+          },
+          "description": {
+            "description": "The description of the AI Agent.",
+            "type": "string",
+            "example": "This is ASK Agent"
+          },
+          "custom_instructions": {
+            "description": "Custom instructions for the agent.",
+            "type": "string",
+            "example": "This is a custom instruction",
+            "nullable": true
+          },
+          "long_text": {
+            "$ref": "#/components/schemas/AiStudioAgentLongTextTool"
+          },
+          "basic_text": {
+            "$ref": "#/components/schemas/AiStudioAgentBasicTextTool"
+          },
+          "long_text_multi": {
+            "$ref": "#/components/schemas/AiStudioAgentLongTextTool"
+          },
+          "basic_text_multi": {
+            "$ref": "#/components/schemas/AiStudioAgentBasicTextTool"
           }
-        ],
+        },
         "required": [
           "type",
           "access_state",
           "description"
         ],
-        "title": "AI studio agent for question requests",
+        "title": "AI agent capability ask request",
         "x-box-resource-id": "ai_studio_agent_ask",
         "x-box-tag": "ai_studio"
+      },
+      "AiStudioAgentAskResponse": {
+        "description": "The AI Agent to be used for ask.",
+        "type": "object",
+        "properties": {
+          "type": {
+            "description": "The type of AI agent used to handle queries.",
+            "type": "string",
+            "example": "ai_agent_ask",
+            "enum": [
+              "ai_agent_ask"
+            ],
+            "nullable": false
+          },
+          "access_state": {
+            "description": "The state of the AI Agent capability. Possible values are: `enabled` and `disabled`.",
+            "type": "string",
+            "example": "enabled",
+            "title": "Capability Access State",
+            "x-box-tag": "ai_studio"
+          },
+          "description": {
+            "description": "The description of the AI Agent.",
+            "type": "string",
+            "example": "This is ASK Agent"
+          },
+          "custom_instructions": {
+            "description": "Custom instructions for the agent.",
+            "type": "string",
+            "example": "This is a custom instruction",
+            "nullable": true
+          },
+          "long_text": {
+            "$ref": "#/components/schemas/AiStudioAgentLongTextToolResponse"
+          },
+          "basic_text": {
+            "$ref": "#/components/schemas/AiStudioAgentBasicTextToolResponse"
+          },
+          "long_text_multi": {
+            "$ref": "#/components/schemas/AiStudioAgentLongTextToolResponse"
+          },
+          "basic_text_multi": {
+            "$ref": "#/components/schemas/AiStudioAgentBasicTextToolResponse"
+          }
+        },
+        "required": [
+          "type",
+          "access_state",
+          "description"
+        ],
+        "title": "AI agent capability ask",
+        "x-box-resource-id": "ai_studio_agent_ask_response",
+        "x-box-tag": "ai_studio"
+      },
+      "AiStudioAgentBasicGenTool": {
+        "description": "AI agent basic tool used to generate text.",
+        "type": "object",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AiAgentBasicGenTool"
+          },
+          {
+            "properties": {
+              "is_custom_instructions_included": {
+                "description": "True if system message contains custom instructions placeholder, false otherwise",
+                "type": "boolean",
+                "example": false
+              }
+            }
+          }
+        ],
+        "title": "AI agent basic text generation tool request",
+        "x-box-tag": "ai"
+      },
+      "AiStudioAgentBasicGenToolResponse": {
+        "description": "AI agent basic tool used to generate text.",
+        "type": "object",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AiStudioAgentBasicGenTool"
+          },
+          {
+            "properties": {
+              "warnings": {
+                "description": "Warnings concerning tool",
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "example": [
+                  "MODEL_INACTIVE"
+                ]
+              }
+            }
+          }
+        ],
+        "title": "AI agent basic text generation tool",
+        "x-box-tag": "ai"
+      },
+      "AiStudioAgentBasicTextTool": {
+        "description": "AI agent processor used to handle basic text.",
+        "type": "object",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AiAgentBasicTextTool"
+          },
+          {
+            "properties": {
+              "is_custom_instructions_included": {
+                "description": "True if system message contains custom instructions placeholder, false otherwise",
+                "type": "boolean",
+                "example": false
+              }
+            }
+          }
+        ],
+        "title": "AI agent basic text tool request",
+        "x-box-tag": "ai"
+      },
+      "AiStudioAgentBasicTextToolResponse": {
+        "description": "AI agent processor used to handle basic text.",
+        "type": "object",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AiStudioAgentBasicTextTool"
+          },
+          {
+            "properties": {
+              "warnings": {
+                "description": "Warnings concerning tool",
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "example": [
+                  "MODEL_INACTIVE"
+                ]
+              }
+            }
+          }
+        ],
+        "title": "AI agent basic text tool",
+        "x-box-tag": "ai"
       },
       "AiStudioAgentExtract": {
         "description": "The AI Agent to be used for extraction.",
         "type": "object",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/AiAgentExtract"
+        "properties": {
+          "type": {
+            "description": "The type of AI agent to be used for extraction.",
+            "type": "string",
+            "example": "ai_agent_extract",
+            "enum": [
+              "ai_agent_extract"
+            ],
+            "nullable": false
           },
-          {
-            "properties": {
-              "access_state": {
-                "$ref": "#/components/schemas/AiAgentAccessState"
-              },
-              "description": {
-                "description": "The description of the AI Agent.",
-                "type": "string",
-                "example": "This is ASK Agent"
-              }
-            }
+          "access_state": {
+            "description": "The state of the AI Agent capability. Possible values are: `enabled` and `disabled`.",
+            "type": "string",
+            "example": "enabled",
+            "title": "Capability Access State",
+            "x-box-tag": "ai_studio"
+          },
+          "description": {
+            "description": "The description of the AI Agent.",
+            "type": "string",
+            "example": "This is ASK Agent"
+          },
+          "custom_instructions": {
+            "description": "Custom instructions for the agent.",
+            "type": "string",
+            "example": "This is a custom instruction",
+            "nullable": true
+          },
+          "long_text": {
+            "$ref": "#/components/schemas/AiStudioAgentLongTextTool"
+          },
+          "basic_text": {
+            "$ref": "#/components/schemas/AiStudioAgentBasicTextTool"
           }
-        ],
+        },
         "required": [
           "type",
           "access_state",
           "description"
         ],
-        "title": "AI studio agent for extract request",
+        "title": "AI agent capability extract request",
         "x-box-resource-id": "ai_studio_agent_extract",
         "x-box-tag": "ai_studio"
+      },
+      "AiStudioAgentExtractResponse": {
+        "description": "The AI Agent to be used for extraction.",
+        "type": "object",
+        "properties": {
+          "type": {
+            "description": "The type of AI agent to be used for extraction.",
+            "type": "string",
+            "example": "ai_agent_extract",
+            "enum": [
+              "ai_agent_extract"
+            ],
+            "nullable": false
+          },
+          "access_state": {
+            "description": "The state of the AI Agent capability. Possible values are: `enabled` and `disabled`.",
+            "type": "string",
+            "example": "enabled",
+            "title": "Capability Access State",
+            "x-box-tag": "ai_studio"
+          },
+          "description": {
+            "description": "The description of the AI Agent.",
+            "type": "string",
+            "example": "This is ASK Agent"
+          },
+          "custom_instructions": {
+            "description": "Custom instructions for the agent.",
+            "type": "string",
+            "example": "This is a custom instruction",
+            "nullable": true
+          },
+          "long_text": {
+            "$ref": "#/components/schemas/AiStudioAgentLongTextToolResponse"
+          },
+          "basic_text": {
+            "$ref": "#/components/schemas/AiStudioAgentBasicTextToolResponse"
+          }
+        },
+        "required": [
+          "type",
+          "access_state",
+          "description"
+        ],
+        "title": "AI agent capability extract",
+        "x-box-resource-id": "ai_studio_agent_extract_response",
+        "x-box-tag": "ai_studio"
+      },
+      "AiStudioAgentLongTextTool": {
+        "description": "AI agent processor used to to handle longer text.",
+        "type": "object",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AiAgentLongTextTool"
+          },
+          {
+            "properties": {
+              "is_custom_instructions_included": {
+                "description": "True if system message contains custom instructions placeholder, false otherwise",
+                "type": "boolean",
+                "example": false
+              }
+            }
+          }
+        ],
+        "title": "AI agent long text tool request",
+        "x-box-tag": "ai"
+      },
+      "AiStudioAgentLongTextToolResponse": {
+        "description": "AI agent processor used to to handle longer text.",
+        "type": "object",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AiStudioAgentLongTextTool"
+          },
+          {
+            "properties": {
+              "warnings": {
+                "description": "Warnings concerning tool",
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "example": [
+                  "MODEL_INACTIVE"
+                ]
+              }
+            }
+          }
+        ],
+        "title": "AI agent long text tool",
+        "x-box-tag": "ai"
       },
       "AiStudioAgentTextGen": {
         "description": "The AI agent used for generating text.",
         "type": "object",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/AiAgentTextGen"
+        "properties": {
+          "type": {
+            "description": "The type of AI agent used for generating text.",
+            "type": "string",
+            "example": "ai_agent_text_gen",
+            "enum": [
+              "ai_agent_text_gen"
+            ],
+            "nullable": false
           },
-          {
-            "properties": {
-              "access_state": {
-                "$ref": "#/components/schemas/AiAgentAccessState"
-              },
-              "description": {
-                "description": "The description of the AI Agent.",
-                "type": "string",
-                "example": "This is ASK Agent"
-              }
-            }
+          "access_state": {
+            "description": "The state of the AI Agent capability. Possible values are: `enabled` and `disabled`.",
+            "type": "string",
+            "example": "enabled",
+            "title": "Capability Access State",
+            "x-box-tag": "ai_studio"
+          },
+          "description": {
+            "description": "The description of the AI Agent.",
+            "type": "string",
+            "example": "This is ASK Agent"
+          },
+          "custom_instructions": {
+            "description": "Custom instructions for the agent.",
+            "type": "string",
+            "example": "This is a custom instruction",
+            "nullable": true
+          },
+          "basic_gen": {
+            "$ref": "#/components/schemas/AiStudioAgentBasicGenTool"
           }
-        ],
+        },
         "required": [
           "type",
           "access_state",
           "description"
         ],
-        "title": "AI studio agent for text generation requests",
+        "title": "AI agent capability text generation request",
         "x-box-resource-id": "ai_studio_agent_text_gen",
+        "x-box-tag": "ai_studio"
+      },
+      "AiStudioAgentTextGenResponse": {
+        "description": "The AI agent used for generating text.",
+        "type": "object",
+        "properties": {
+          "type": {
+            "description": "The type of AI agent used for generating text.",
+            "type": "string",
+            "example": "ai_agent_text_gen",
+            "enum": [
+              "ai_agent_text_gen"
+            ],
+            "nullable": false
+          },
+          "access_state": {
+            "description": "The state of the AI Agent capability. Possible values are: `enabled` and `disabled`.",
+            "type": "string",
+            "example": "enabled",
+            "title": "Capability Access State",
+            "x-box-tag": "ai_studio"
+          },
+          "description": {
+            "description": "The description of the AI Agent.",
+            "type": "string",
+            "example": "This is ASK Agent"
+          },
+          "custom_instructions": {
+            "description": "Custom instructions for the agent.",
+            "type": "string",
+            "example": "This is a custom instruction",
+            "nullable": true
+          },
+          "basic_gen": {
+            "$ref": "#/components/schemas/AiStudioAgentBasicGenToolResponse"
+          }
+        },
+        "required": [
+          "type",
+          "access_state",
+          "description"
+        ],
+        "title": "AI agent capability text generation",
+        "x-box-resource-id": "ai_studio_agent_text_gen_response",
         "x-box-tag": "ai_studio"
       },
       "AiTextGen": {
@@ -26671,14 +26862,29 @@
             }
           },
           "ai_agent": {
-            "$ref": "#/components/schemas/AiAgentTextGen"
+            "allOf": [
+              {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/AiAgentReference"
+                  },
+                  {
+                    "$ref": "#/components/schemas/AiAgentTextGen"
+                  }
+                ]
+              },
+              {
+                "description": "The AI agent to be used for generating text."
+              }
+            ]
           }
         },
         "required": [
           "prompt",
           "items"
         ],
-        "title": "AI text gen request"
+        "title": "AI text gen request",
+        "x-box-tag": "ai"
       },
       "AppItem": {
         "description": "An app item represents an content object owned by an application. It can\ngroup files and folders together from different paths. That set can be shared\nvia a collaboration.",
@@ -28139,12 +28345,24 @@
             "example": "My AI Agent"
           },
           "access_state": {
-            "$ref": "#/components/schemas/AiAgentAccessState"
+            "description": "The state of the AI Agent. Possible values are: `enabled`, `disabled`, and `enabled_for_selected_users`.",
+            "type": "string",
+            "example": "enabled",
+            "title": "Access State",
+            "x-box-tag": "ai_studio"
           },
-          "is_enterprise_default": {
-            "description": "If the agent is default for enterprise.",
-            "type": "boolean",
-            "example": false
+          "icon_reference": {
+            "description": "The icon reference of the AI Agent. It should have format of the URL `https://cdn01.boxcdn.net/app-assets/aistudio/avatars/<file_name>`\nwhere possible values of `file_name` are: `logo_boxAi.png`,`logo_stamp.png`,`logo_legal.png`,`logo_finance.png`,`logo_config.png`,`logo_handshake.png`,`logo_analytics.png`,`logo_classification.png`",
+            "type": "string",
+            "example": "https://cdn01.boxcdn.net/app-assets/aistudio/avatars/logo_analytics.svg",
+            "minLength": 1
+          },
+          "allowed_entities": {
+            "description": "List of allowed users or groups.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AiAgentAllowedEntity"
+            }
           },
           "ask": {
             "$ref": "#/components/schemas/AiStudioAgentAsk"
@@ -28159,10 +28377,10 @@
         "required": [
           "type",
           "name",
-          "access_state",
-          "is_enterprise_default"
+          "access_state"
         ],
-        "title": "Create AI agent request"
+        "title": "Create AI agent request",
+        "x-box-tag": "ai_studio"
       },
       "DevicePinner": {
         "description": "Device pins allow enterprises to control what devices can\nuse native Box applications.",
@@ -28256,769 +28474,6 @@
         "title": "Device pinners",
         "x-box-resource-id": "device_pinners",
         "x-box-tag": "device_pinners"
-      },
-      "DocgenBatch--Base": {
-        "description": "The basic representation of a Box Doc Gen batch object.",
-        "type": "object",
-        "properties": {
-          "id": {
-            "description": "The unique identifier that represents a batch.",
-            "type": "string",
-            "example": "12345",
-            "nullable": false
-          },
-          "type": {
-            "description": "`docgen_batch`",
-            "type": "string",
-            "example": "docgen_batch",
-            "enum": [
-              "docgen_batch"
-            ],
-            "nullable": false
-          }
-        },
-        "required": [
-          "id",
-          "type"
-        ],
-        "title": "Box Doc Gen batch (Base)",
-        "x-box-resource-id": "docgen_batch--base",
-        "x-box-tag": "docgen",
-        "x-box-variant": "base",
-        "x-box-variants": [
-          "base"
-        ]
-      },
-      "DocgenBatchCreateRequest": {
-        "description": "The schema for creating a Box Doc Gen job batch request.",
-        "type": "object",
-        "properties": {
-          "file": {
-            "allOf": [
-              {
-                "title": "File reference",
-                "type": "object",
-                "description": "File reference",
-                "required": [
-                  "type",
-                  "id"
-                ],
-                "properties": {
-                  "type": {
-                    "description": "`file`",
-                    "type": "string",
-                    "example": "file",
-                    "enum": [
-                      "file"
-                    ],
-                    "nullable": false
-                  },
-                  "id": {
-                    "description": "ID of the object",
-                    "type": "string",
-                    "example": "42037322"
-                  }
-                }
-              },
-              {
-                "description": "A Box Doc Gen template that is used to generate the document."
-              }
-            ]
-          },
-          "file_version": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/FileVersion--Base"
-              },
-              {
-                "description": "File version of a template."
-              }
-            ]
-          },
-          "input_source": {
-            "description": "Source of input. The value has to be `api` for all the API-based document generation requests.",
-            "type": "string",
-            "example": "api"
-          },
-          "destination_folder": {
-            "allOf": [
-              {
-                "title": "Folder reference",
-                "type": "object",
-                "description": "Folder reference",
-                "required": [
-                  "type",
-                  "id"
-                ],
-                "properties": {
-                  "type": {
-                    "description": "`folder`",
-                    "type": "string",
-                    "example": "folder",
-                    "enum": [
-                      "folder"
-                    ],
-                    "nullable": false
-                  },
-                  "id": {
-                    "description": "ID of the folder",
-                    "type": "string",
-                    "example": "42037322"
-                  }
-                }
-              },
-              {
-                "description": "Destination folder for the generated files."
-              }
-            ]
-          },
-          "output_type": {
-            "description": "Type of the output file.",
-            "type": "string",
-            "example": "docx"
-          },
-          "document_generation_data": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/DocgenDocumentGenerationData"
-            }
-          }
-        },
-        "required": [
-          "file",
-          "input_source",
-          "destination_folder",
-          "output_type",
-          "document_generation_data"
-        ],
-        "title": "Create batch request"
-      },
-      "DocgenDocumentGenerationData": {
-        "description": "The schema for for creating a Box Doc Gen job request.",
-        "type": "object",
-        "properties": {
-          "generated_file_name": {
-            "description": "File name of the output file.",
-            "type": "string",
-            "example": "New_Template"
-          },
-          "user_input": {
-            "type": "object",
-            "example": {
-              "name": "Aaron Levie"
-            }
-          }
-        },
-        "required": [
-          "generated_file_name",
-          "user_input"
-        ],
-        "title": "Document generation data"
-      },
-      "DocgenJob": {
-        "description": "A standard representation of a Box Doc Gen job.",
-        "type": "object",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/DocgenJob--Base"
-          },
-          {
-            "properties": {
-              "batch": {
-                "allOf": [
-                  {
-                    "$ref": "#/components/schemas/DocgenBatch--Base"
-                  },
-                  {
-                    "description": "Box Doc Gen batch that the job belongs to."
-                  }
-                ]
-              },
-              "template_file": {
-                "allOf": [
-                  {
-                    "title": "File reference",
-                    "type": "object",
-                    "description": "File reference",
-                    "required": [
-                      "type",
-                      "id"
-                    ],
-                    "properties": {
-                      "type": {
-                        "description": "`file`",
-                        "type": "string",
-                        "example": "file",
-                        "enum": [
-                          "file"
-                        ],
-                        "nullable": false
-                      },
-                      "id": {
-                        "description": "ID of the object",
-                        "type": "string",
-                        "example": "42037322"
-                      }
-                    }
-                  },
-                  {
-                    "description": "Box Doc Gen template used in the job."
-                  }
-                ]
-              },
-              "template_file_version": {
-                "allOf": [
-                  {
-                    "$ref": "#/components/schemas/FileVersion--Base"
-                  },
-                  {
-                    "description": "File version of a template."
-                  }
-                ]
-              },
-              "output_file": {
-                "description": "The output file of the job.",
-                "type": "object",
-                "nullable": true,
-                "properties": {
-                  "type": {
-                    "description": "`file`",
-                    "type": "string",
-                    "example": "file",
-                    "enum": [
-                      "file"
-                    ]
-                  },
-                  "id": {
-                    "description": "ID of the object.",
-                    "type": "string",
-                    "example": "42037322"
-                  }
-                }
-              },
-              "output_file_version": {
-                "description": "File version of generated file.",
-                "type": "object",
-                "nullable": true,
-                "properties": {
-                  "type": {
-                    "description": "`file_version`",
-                    "type": "string",
-                    "example": "file_version",
-                    "enum": [
-                      "file_version"
-                    ]
-                  },
-                  "id": {
-                    "description": "ID of the object.",
-                    "type": "string",
-                    "example": "42037322"
-                  }
-                }
-              },
-              "status": {
-                "description": "Status of the job.",
-                "type": "string",
-                "example": "completed",
-                "enum": [
-                  "submitted",
-                  "completed",
-                  "failed",
-                  "completed_with_error",
-                  "pending"
-                ]
-              },
-              "output_type": {
-                "description": "Type of the generated file.",
-                "type": "string",
-                "example": "docx"
-              }
-            }
-          }
-        ],
-        "required": [
-          "id",
-          "batch",
-          "template_file",
-          "template_file_version",
-          "status",
-          "output_type"
-        ],
-        "title": "Box Doc Gen job",
-        "x-box-resource-id": "docgen_job",
-        "x-box-tag": "docgen",
-        "x-box-variant": "standard",
-        "x-box-variants": [
-          "base",
-          "standard",
-          "full"
-        ]
-      },
-      "DocgenJob--Base": {
-        "description": "The basic representation of a Box Doc Gen job.",
-        "type": "object",
-        "properties": {
-          "id": {
-            "description": "The unique identifier that represent a Box Doc Gen job.",
-            "type": "string",
-            "example": "12345",
-            "nullable": false
-          },
-          "type": {
-            "description": "`docgen_job`",
-            "type": "string",
-            "example": "docgen_job",
-            "enum": [
-              "docgen_job"
-            ],
-            "nullable": false
-          }
-        },
-        "required": [
-          "id",
-          "type"
-        ],
-        "title": "Box Doc Gen job (Base)",
-        "x-box-resource-id": "docgen_job--base",
-        "x-box-tag": "docgen",
-        "x-box-variant": "base",
-        "x-box-variants": [
-          "base",
-          "standard",
-          "full"
-        ]
-      },
-      "DocgenJob--Full": {
-        "description": "A full representation of a Box Doc Gen job.",
-        "type": "object",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/DocgenJob"
-          },
-          {
-            "properties": {
-              "created_at": {
-                "description": "Time of job creation.",
-                "type": "string",
-                "example": "2022-05-11T10:56:11-07:00",
-                "readOnly": true
-              },
-              "created_by": {
-                "allOf": [
-                  {
-                    "$ref": "#/components/schemas/User--Base"
-                  },
-                  {
-                    "description": "User who created the job."
-                  }
-                ]
-              },
-              "enterprise": {
-                "allOf": [
-                  {
-                    "$ref": "#/components/schemas/Enterprise--Base"
-                  },
-                  {
-                    "description": "ID of the enterprise."
-                  }
-                ]
-              },
-              "source": {
-                "description": "Source of the request.",
-                "type": "string",
-                "example": "api",
-                "readOnly": true
-              }
-            }
-          }
-        ],
-        "required": [
-          "id",
-          "batch",
-          "created_by",
-          "enterprise",
-          "template_file",
-          "template_file_version",
-          "output_type",
-          "source",
-          "status"
-        ],
-        "title": "Box Doc Gen job (Full)",
-        "x-box-resource-id": "docgen_job--full",
-        "x-box-tag": "docgen",
-        "x-box-variant": "full",
-        "x-box-variants": [
-          "base",
-          "standard",
-          "full"
-        ]
-      },
-      "DocgenJobs": {
-        "description": "A list of Box Doc Gen jobs with a standard set of parameters.",
-        "type": "object",
-        "allOf": [
-          {
-            "type": "object",
-            "description": "The part of an API response that describes marker\nbased pagination",
-            "properties": {
-              "limit": {
-                "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
-                "type": "integer",
-                "format": "int64",
-                "example": 1000
-              },
-              "next_marker": {
-                "description": "The marker for the start of the next page of results.",
-                "type": "string",
-                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
-                "nullable": true
-              },
-              "prev_marker": {
-                "description": "The marker for the start of the previous page of results.",
-                "type": "string",
-                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVih",
-                "nullable": true
-              }
-            }
-          },
-          {
-            "properties": {
-              "entries": {
-                "description": "List of jobs.",
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/DocgenJob"
-                }
-              }
-            }
-          }
-        ],
-        "title": "Box Doc Gen jobs",
-        "x-box-resource-id": "docgen_jobs",
-        "x-box-tag": "docgen",
-        "x-box-variant": "base",
-        "x-box-variants": [
-          "standard",
-          "full"
-        ]
-      },
-      "DocgenJobs--Full": {
-        "description": "A list of Box Doc Gen jobs with a full set of parameters.",
-        "type": "object",
-        "allOf": [
-          {
-            "type": "object",
-            "description": "The part of an API response that describes marker\nbased pagination",
-            "properties": {
-              "limit": {
-                "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
-                "type": "integer",
-                "format": "int64",
-                "example": 1000
-              },
-              "next_marker": {
-                "description": "The marker for the start of the next page of results.",
-                "type": "string",
-                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
-                "nullable": true
-              },
-              "prev_marker": {
-                "description": "The marker for the start of the previous page of results.",
-                "type": "string",
-                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVih",
-                "nullable": true
-              }
-            }
-          },
-          {
-            "properties": {
-              "entries": {
-                "description": "List of jobs.",
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/DocgenJob--Full"
-                }
-              }
-            }
-          }
-        ],
-        "title": "Box Doc Gen jobs (Full)",
-        "x-box-resource-id": "docgen_jobs--full",
-        "x-box-tag": "docgen",
-        "x-box-variant": "full",
-        "x-box-variants": [
-          "standard",
-          "full"
-        ]
-      },
-      "DocgenTag": {
-        "description": "A doc gen template tag object.",
-        "type": "object",
-        "properties": {
-          "tag_content": {
-            "description": "The content of the tag.",
-            "type": "string",
-            "example": "{{item.name}}",
-            "readOnly": true
-          },
-          "tag_type": {
-            "description": "Type of the tag.",
-            "type": "string",
-            "example": "text",
-            "enum": [
-              "text",
-              "arithmetic",
-              "conditional",
-              "for-loop",
-              "table-loop",
-              "image"
-            ],
-            "readOnly": true
-          },
-          "json_paths": {
-            "description": "List of the paths.",
-            "type": "array",
-            "items": {
-              "readOnly": true,
-              "type": "string",
-              "example": "products.name"
-            },
-            "example": [
-              "products",
-              "products.name"
-            ],
-            "readOnly": true
-          }
-        },
-        "required": [
-          "tag_content",
-          "tag_type",
-          "json_paths"
-        ],
-        "title": "Box Doc Gen template tag",
-        "x-box-resource-id": "docgen_tag",
-        "x-box-sanitized": true,
-        "x-box-tag": "docgen_template"
-      },
-      "DocgenTags": {
-        "description": "A list of Box Doc Gen tags.",
-        "type": "object",
-        "allOf": [
-          {
-            "type": "object",
-            "description": "The part of an API response that describes marker\nbased pagination",
-            "properties": {
-              "limit": {
-                "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
-                "type": "integer",
-                "format": "int64",
-                "example": 1000
-              },
-              "next_marker": {
-                "description": "The marker for the start of the next page of results.",
-                "type": "string",
-                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
-                "nullable": true
-              },
-              "prev_marker": {
-                "description": "The marker for the start of the previous page of results.",
-                "type": "string",
-                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVih",
-                "nullable": true
-              }
-            }
-          },
-          {
-            "properties": {
-              "entries": {
-                "description": "List of tags.",
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/DocgenTag"
-                }
-              }
-            }
-          }
-        ],
-        "title": "Box Doc Gen tags",
-        "x-box-resource-id": "docgen_tags",
-        "x-box-tag": "docgen_template"
-      },
-      "DocgenTagsProcessingMessage": {
-        "description": "A message informing that document tags are still being processed.",
-        "type": "object",
-        "properties": {
-          "message": {
-            "description": "A message about that document tags are being processed.",
-            "type": "string",
-            "example": "Processing tags for this file.",
-            "readOnly": true
-          }
-        },
-        "required": [
-          "message"
-        ],
-        "title": "Box Doc Gen tags processing message",
-        "x-box-resource-id": "docgen_tags_processing_message",
-        "x-box-tag": "docgen_template"
-      },
-      "DocgenTemplate": {
-        "description": "A Box Doc Gen template object.",
-        "type": "object",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/DocgenTemplate--Base"
-          },
-          {
-            "properties": {
-              "file_name": {
-                "description": "The name of the template",
-                "type": "string",
-                "example": "Official contract",
-                "nullable": true
-              }
-            }
-          }
-        ],
-        "title": "Box Doc Gen template",
-        "x-box-resource-id": "docgen_template",
-        "x-box-tag": "docgen_template",
-        "x-box-variant": "standard",
-        "x-box-variants": [
-          "base",
-          "standard"
-        ]
-      },
-      "DocgenTemplate--Base": {
-        "description": "A base representation of a doc gen template, used when\nnested within another resource.",
-        "type": "object",
-        "properties": {
-          "file": {
-            "allOf": [
-              {
-                "title": "File reference",
-                "type": "object",
-                "description": "File reference",
-                "required": [
-                  "type",
-                  "id"
-                ],
-                "properties": {
-                  "type": {
-                    "description": "`file`",
-                    "type": "string",
-                    "example": "file",
-                    "enum": [
-                      "file"
-                    ],
-                    "nullable": false
-                  },
-                  "id": {
-                    "description": "ID of the object",
-                    "type": "string",
-                    "example": "42037322"
-                  }
-                }
-              },
-              {
-                "description": "Enable the file to generate a document from."
-              }
-            ]
-          }
-        },
-        "title": "Docgen template (Base)",
-        "x-box-resource-id": "docgen_template--base",
-        "x-box-variant": "base",
-        "x-box-variants": [
-          "base",
-          "standard"
-        ]
-      },
-      "DocgenTemplateCreateRequest": {
-        "description": "The schema for marking document as Box Doc Gen template.",
-        "type": "object",
-        "properties": {
-          "file": {
-            "allOf": [
-              {
-                "title": "File reference",
-                "type": "object",
-                "description": "File reference",
-                "required": [
-                  "type",
-                  "id"
-                ],
-                "properties": {
-                  "type": {
-                    "description": "`file`",
-                    "type": "string",
-                    "example": "file",
-                    "enum": [
-                      "file"
-                    ],
-                    "nullable": false
-                  },
-                  "id": {
-                    "description": "ID of the object",
-                    "type": "string",
-                    "example": "42037322"
-                  }
-                }
-              },
-              {
-                "description": "Marks the file as a Box Doc Gen template to generate the document from."
-              }
-            ]
-          }
-        },
-        "required": [
-          "file"
-        ],
-        "title": "Mark file as Docgen Template"
-      },
-      "DocgenTemplates": {
-        "description": "List of doc gen templates.",
-        "type": "object",
-        "allOf": [
-          {
-            "type": "object",
-            "description": "The part of an API response that describes marker\nbased pagination",
-            "properties": {
-              "limit": {
-                "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
-                "type": "integer",
-                "format": "int64",
-                "example": 1000
-              },
-              "next_marker": {
-                "description": "The marker for the start of the next page of results.",
-                "type": "string",
-                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
-                "nullable": true
-              },
-              "prev_marker": {
-                "description": "The marker for the start of the previous page of results.",
-                "type": "string",
-                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVih",
-                "nullable": true
-              }
-            }
-          },
-          {
-            "properties": {
-              "entries": {
-                "description": "A list of templates.",
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/DocgenTemplate"
-                }
-              }
-            }
-          }
-        ],
-        "title": "Box Doc Gen templates",
-        "x-box-resource-id": "docgen_templates",
-        "x-box-tag": "docgen_template"
       },
       "EmailAlias": {
         "description": "An email alias for a user.",
@@ -29184,6 +28639,12 @@
                   "DOWNLOAD",
                   "EDIT",
                   "EDIT_USER",
+                  "EDR_CROWDSTRIKE_DEVICE_DETECTED",
+                  "EDR_CROWDSTRIKE_NO_BOX_TOOLS",
+                  "EDR_CROWDSTRIKE_BOX_TOOLS_OUTDATED",
+                  "EDR_CROWDSTRIKE_DRIVE_OUTDATED",
+                  "EDR_CROWDSTRIKE_ACCESS_ALLOWED_NO_CROWDSTRIKE_DEVICE",
+                  "EDR_CROWDSTRIKE_ACCESS_REVOKED",
                   "EMAIL_ALIAS_CONFIRM",
                   "EMAIL_ALIAS_REMOVE",
                   "ENABLE_TWO_FACTOR_AUTH",
@@ -30229,13 +29690,13 @@
                                   "description": "The width by height size of this representation in pixels."
                                 },
                                 "paged": {
-                                  "type": "boolean",
-                                  "example": true,
+                                  "type": "string",
+                                  "example": "true",
                                   "description": "Indicates if the representation is build up out of multiple\npages."
                                 },
                                 "thumb": {
-                                  "type": "boolean",
-                                  "example": true,
+                                  "type": "string",
+                                  "example": "true",
                                   "description": "Indicates if the representation can be used as a thumbnail of\nthe file."
                                 }
                               }
@@ -30447,7 +29908,8 @@
               "item_preview",
               "item_rename",
               "item_share",
-              "item_upload"
+              "item_upload",
+              "item_read"
             ]
           },
           "object": {
@@ -32127,6 +31589,31 @@
         "x-box-resource-id": "folder_locks",
         "x-box-tag": "folder_locks"
       },
+      "FolderReference": {
+        "description": "Folder reference",
+        "type": "object",
+        "properties": {
+          "type": {
+            "description": "`folder`",
+            "type": "string",
+            "example": "folder",
+            "enum": [
+              "folder"
+            ],
+            "nullable": false
+          },
+          "id": {
+            "description": "ID of the folder",
+            "type": "string",
+            "example": "42037322"
+          }
+        },
+        "required": [
+          "type",
+          "id"
+        ],
+        "title": "Folder reference"
+      },
       "GenericSource": {
         "description": "A generic event source type.",
         "type": "object",
@@ -32507,7 +31994,7 @@
         "type": "object",
         "allOf": [
           {
-            "$ref": "#/components/schemas/IntegrationMapping--Base"
+            "$ref": "#/components/schemas/IntegrationMappingBase"
           },
           {
             "properties": {
@@ -32517,22 +32004,19 @@
                 "example": "slack",
                 "enum": [
                   "slack"
-                ],
-                "nullable": false
+                ]
               },
               "is_manually_created": {
                 "description": "Identifies whether the mapping has\nbeen manually set\n(as opposed to being automatically created)",
                 "type": "boolean",
-                "example": true,
-                "nullable": false
+                "example": true
               },
               "options": {
                 "allOf": [
                   {
                     "$ref": "#/components/schemas/IntegrationMappingSlackOptions"
                   }
-                ],
-                "nullable": false
+                ]
               },
               "created_by": {
                 "description": "An object representing the user who\ncreated the integration mapping",
@@ -32540,8 +32024,7 @@
                   {
                     "$ref": "#/components/schemas/UserIntegrationMappings"
                   }
-                ],
-                "nullable": false
+                ]
               },
               "modified_by": {
                 "description": "The user who\nlast modified the integration mapping",
@@ -32549,8 +32032,7 @@
                   {
                     "$ref": "#/components/schemas/UserIntegrationMappings"
                   }
-                ],
-                "nullable": false
+                ]
               },
               "partner_item": {
                 "description": "Mapped item object for Slack",
@@ -32559,64 +32041,51 @@
                   "type": "channel",
                   "slack_org_id": "E1234567"
                 },
-                "nullable": false,
                 "oneOf": [
                   {
                     "$ref": "#/components/schemas/IntegrationMappingPartnerItemSlack"
                   }
                 ]
-              }
-            }
-          },
-          {
-            "type": "object",
-            "properties": {
+              },
               "box_item": {
                 "description": "The Box folder, to which the object from the\npartner app domain (referenced in `partner_item_id`) is mapped",
                 "allOf": [
                   {
                     "$ref": "#/components/schemas/Folder--Mini"
                   }
-                ],
-                "nullable": false
+                ]
               },
               "created_at": {
                 "description": "When the integration mapping object was created",
                 "type": "string",
                 "format": "date-time",
-                "example": "2012-12-12T10:53:43-08:00",
-                "nullable": false
+                "example": "2012-12-12T10:53:43-08:00"
               },
               "modified_at": {
                 "description": "When the integration mapping object was last modified",
                 "type": "string",
                 "format": "date-time",
-                "example": "2012-12-12T10:53:43-08:00",
-                "nullable": false
+                "example": "2012-12-12T10:53:43-08:00"
               }
-            },
-            "required": [
-              "box_item"
-            ]
+            }
           }
         ],
         "required": [
-          "partner_item"
+          "partner_item",
+          "box_item"
         ],
         "title": "Integration mapping Slack",
         "x-box-resource-id": "integration_mapping_slack",
-        "x-box-tag": "integration_mappings",
-        "x-box-variant": "standard"
+        "x-box-tag": "integration_mappings"
       },
-      "IntegrationMapping--Base": {
+      "IntegrationMappingBase": {
         "description": "A base representation of an\nintegration mapping object.",
         "type": "object",
         "properties": {
           "id": {
             "description": "A unique identifier of a folder mapping\n(part of a composite key together\nwith `integration_type`)",
             "type": "string",
-            "example": "12345",
-            "nullable": false
+            "example": "12345"
           },
           "type": {
             "description": "Mapping type",
@@ -32624,23 +32093,14 @@
             "example": "integration_mapping",
             "enum": [
               "integration_mapping"
-            ],
-            "nullable": false
+            ]
           }
         },
         "required": [
           "id",
           "type"
         ],
-        "title": "Integration mapping (Base)",
-        "x-box-resource-id": "integration_mapping--base",
-        "x-box-tag": "integration_mappings",
-        "x-box-variant": "base",
-        "x-box-variants": [
-          "base",
-          "standard",
-          "mini"
-        ]
+        "title": "Integration mapping"
       },
       "IntegrationMappingBoxItemSlack": {
         "description": "The schema for an integration mapping Box item object for type Slack",
@@ -32706,49 +32166,103 @@
         ],
         "title": "Integration mapping mapped item schema for type Slack"
       },
-      "IntegrationMappingSlackCreateRequest": {
-        "description": "A request to create a\nSlack Integration Mapping object",
+      "IntegrationMappingPartnerItemTeams": {
+        "description": "The schema for an integration mapping mapped item object for type Teams.",
         "type": "object",
-        "allOf": [
-          {
-            "properties": {
-              "partner_item": {
-                "allOf": [
-                  {
-                    "$ref": "#/components/schemas/IntegrationMappingPartnerItemSlack"
-                  }
-                ],
-                "nullable": false
-              }
-            }
+        "properties": {
+          "type": {
+            "description": "Type of the mapped item referenced in `id`",
+            "type": "string",
+            "example": "channel",
+            "enum": [
+              "channel",
+              "team"
+            ]
           },
-          {
-            "type": "object",
-            "properties": {
-              "box_item": {
-                "allOf": [
-                  {
-                    "$ref": "#/components/schemas/IntegrationMappingBoxItemSlack"
-                  }
-                ],
-                "nullable": false
-              },
-              "options": {
-                "allOf": [
-                  {
-                    "$ref": "#/components/schemas/IntegrationMappingSlackOptions"
-                  }
-                ],
-                "nullable": false
+          "id": {
+            "description": "ID of the mapped item (of type referenced in `type`)",
+            "type": "string",
+            "example": "19%ABCD-Avgfggkggyftdtfgghjhkhkhh%40thread:tacv2"
+          },
+          "tenant_id": {
+            "description": "ID of the tenant that is registered with Microsoft Teams.",
+            "type": "string",
+            "example": "abcd-defg-1235-7890"
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "tenant_id"
+        ],
+        "title": "Integration mapping mapped item schema for type Teams"
+      },
+      "IntegrationMappingPartnerItemTeamsCreateRequest": {
+        "description": "The schema for an integration mapping mapped item object for type Teams.",
+        "type": "object",
+        "properties": {
+          "type": {
+            "description": "Type of the mapped item referenced in `id`",
+            "type": "string",
+            "example": "channel",
+            "enum": [
+              "channel",
+              "team"
+            ]
+          },
+          "id": {
+            "description": "ID of the mapped item (of type referenced in `type`)",
+            "type": "string",
+            "example": "19%ABCD-Avgfggkggyftdtfgghjhkhkhh%40thread:tacv2"
+          },
+          "tenant_id": {
+            "description": "ID of the tenant that is registered with Microsoft Teams.",
+            "type": "string",
+            "example": "abcd-defg-1235-7890"
+          },
+          "team_id": {
+            "description": "ID of the team that is registered with Microsoft Teams.",
+            "type": "string",
+            "example": "hjgjgjg-bhhj-564a-b643-hghgj685u"
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "tenant_id",
+          "team_id"
+        ],
+        "title": "Integration mapping mapped item schema for type Teams"
+      },
+      "IntegrationMappingSlackCreateRequest": {
+        "description": "A request to create a Slack Integration Mapping object",
+        "type": "object",
+        "properties": {
+          "partner_item": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/IntegrationMappingPartnerItemSlack"
               }
-            },
-            "required": [
-              "box_item"
+            ]
+          },
+          "box_item": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/IntegrationMappingBoxItemSlack"
+              }
+            ]
+          },
+          "options": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/IntegrationMappingSlackOptions"
+              }
             ]
           }
-        ],
+        },
         "required": [
-          "partner_item"
+          "partner_item",
+          "box_item"
         ],
         "title": "Create Slack integration mapping request",
         "x-box-resource-id": "integration_mapping_slack_create_request"
@@ -32760,11 +32274,109 @@
           "is_access_management_disabled": {
             "description": "Indicates whether or not channel member\naccess to the underlying box item\nshould be automatically managed.\nDepending on type of channel, access is managed\nthrough creating collaborations or shared links.",
             "type": "boolean",
-            "example": true,
-            "nullable": false
+            "example": true
           }
         },
         "title": "Integration mapping options for type Slack"
+      },
+      "IntegrationMappingTeams": {
+        "description": "A Microsoft Teams specific representation of an integration\nmapping object.",
+        "type": "object",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/IntegrationMappingBase"
+          },
+          {
+            "properties": {
+              "integration_type": {
+                "description": "Identifies the Box partner app,\nwith which the mapping is associated.\nSupports Slack and Teams.\n(part of the composite key together with `id`)",
+                "type": "string",
+                "example": "teams",
+                "enum": [
+                  "teams"
+                ]
+              },
+              "is_overridden_by_manual_mapping": {
+                "description": "Identifies whether the mapping has\nbeen manually set by the team owner from UI for channels\n(as opposed to being automatically created)",
+                "type": "boolean",
+                "example": true
+              },
+              "partner_item": {
+                "description": "Mapped item object for Teams",
+                "example": {
+                  "id": "19%3ABCD-Avgfggkggyftdtfgghjhkhkhh%40thread:tacv2",
+                  "type": "channel",
+                  "tenant_id": "E1234567",
+                  "team_id": "hjgjgjg-bhhj-564a-b643-hghgj685u"
+                },
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/IntegrationMappingPartnerItemTeams"
+                  }
+                ]
+              },
+              "box_item": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/FolderReference"
+                  },
+                  {
+                    "description": "The Box folder, to which the object from the\npartner app domain (referenced in `partner_item_id`) is mapped"
+                  }
+                ]
+              },
+              "created_at": {
+                "description": "When the integration mapping object was created",
+                "type": "string",
+                "format": "date-time",
+                "example": "2012-12-12T10:53:43-08:00"
+              },
+              "modified_at": {
+                "description": "When the integration mapping object was last modified",
+                "type": "string",
+                "format": "date-time",
+                "example": "2012-12-12T10:53:43-08:00"
+              }
+            }
+          }
+        ],
+        "required": [
+          "partner_item",
+          "box_item"
+        ],
+        "title": "Integration mapping Teams",
+        "x-box-resource-id": "integration_mapping_teams",
+        "x-box-tag": "integration_mappings",
+        "x-box-variant": "standard"
+      },
+      "IntegrationMappingTeamsCreateRequest": {
+        "description": "A request to create a Teams Integration Mapping object",
+        "type": "object",
+        "properties": {
+          "partner_item": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/IntegrationMappingPartnerItemTeamsCreateRequest"
+              }
+            ]
+          },
+          "box_item": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FolderReference"
+              },
+              {
+                "description": "The Box folder, to which the object from the\npartner app domain (referenced in `partner_item_id`) is mapped"
+              }
+            ]
+          }
+        },
+        "required": [
+          "partner_item",
+          "box_item"
+        ],
+        "title": "Create teams integration mapping request",
+        "x-box-resource-id": "integration_mapping_teams_create_request"
       },
       "IntegrationMappings": {
         "description": "A list of integration mapping\nobjects.",
@@ -32802,6 +32414,26 @@
         ],
         "title": "Integration mappings Slack",
         "x-box-resource-id": "integration_mappings_slack",
+        "x-box-tag": "integration_mappings"
+      },
+      "IntegrationMappingsTeams": {
+        "description": "A list of integration mapping\nobjects.",
+        "type": "object",
+        "allOf": [
+          {
+            "properties": {
+              "entries": {
+                "description": "A list of integration mappings",
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/IntegrationMappingTeams"
+                }
+              }
+            }
+          }
+        ],
+        "title": "Integration mappings Teams",
+        "x-box-resource-id": "integration_mappings_teams",
         "x-box-tag": "integration_mappings"
       },
       "Invite": {
@@ -33829,6 +33461,29 @@
         "title": "Metadata filter",
         "x-box-resource-id": "metadata_filter",
         "x-box-tag": "search"
+      },
+      "MetadataInstanceValue": {
+        "description": "The value to be set or tested.\n\nRequired for `add`, `replace`, and `test` operations. For `add`,\nif the value exists already the previous value will be overwritten\nby the new value. For `replace`, the value must exist before\nreplacing.\n\nFor `test`, the existing value at the `path` location must match\nthe specified value.",
+        "example": "reviewed",
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "integer"
+          },
+          {
+            "type": "number",
+            "format": "float"
+          },
+          {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        ],
+        "title": "Metadata Instance Value"
       },
       "MetadataQuery": {
         "description": "Create a search using SQL-like syntax to return items that match specific\nmetadata.",
@@ -36214,6 +35869,24 @@
                   }
                 ],
                 "nullable": false
+              },
+              "collaborator_level": {
+                "description": "The collaborator level of the user to the sign request. Values can include \"owner\", \"editor\", and \"viewer\"",
+                "type": "string",
+                "example": "owner",
+                "nullable": true
+              },
+              "sender_email": {
+                "description": "The email address of the sender of the sign request.",
+                "type": "string",
+                "example": "sender@box.com",
+                "nullable": true
+              },
+              "sender_id": {
+                "description": "The user ID of the sender of the sign request.",
+                "type": "integer",
+                "example": 12345,
+                "nullable": true
               }
             }
           }
@@ -36295,12 +35968,6 @@
             "description": "This can be used to reference an ID in an external system that the sign request is related to.",
             "type": "string",
             "example": "123",
-            "nullable": true
-          },
-          "is_phone_verification_required_to_view": {
-            "description": "Forces signers to verify a text message prior to viewing the document. You must specify the phone number of signers to have this setting apply to them.",
-            "type": "boolean",
-            "example": true,
             "nullable": true
           },
           "template_id": {
@@ -36430,7 +36097,7 @@
             "nullable": true
           },
           "login_required": {
-            "description": "If set to true, the signer will need to log in to a Box account\nbefore signing the request. If the signer does not have\nan existing account, they will have the option to create\na free Box account. Cannot be selected in combination with\n`verification_phone_number`.",
+            "description": "If set to true, the signer will need to log in to a Box account\nbefore signing the request. If the signer does not have\nan existing account, they will have the option to create\na free Box account.",
             "type": "boolean",
             "example": true,
             "nullable": true
@@ -37792,64 +37459,78 @@
       "TemplateSigner": {
         "description": "The schema for a Signer for Templates",
         "type": "object",
-        "allOf": [
-          {
-            "properties": {
-              "inputs": {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/TemplateSignerInput"
-                },
-                "readOnly": true
-              },
-              "email": {
-                "description": "Email address of the signer",
-                "type": "string",
-                "example": "example@mail.com",
-                "nullable": true
-              },
-              "role": {
-                "description": "Defines the role of the signer in the signature request. A role of\n`signer` needs to sign the document, a role `approver`\napproves the document and\na `final_copy_reader` role only\nreceives the final signed document and signing log.",
-                "type": "string",
-                "example": "signer",
-                "default": "signer",
-                "enum": [
-                  "signer",
-                  "approver",
-                  "final_copy_reader"
-                ]
-              },
-              "is_in_person": {
-                "description": "Used in combination with an embed URL for a sender.\nAfter the sender signs, they will be\nredirected to the next `in_person` signer.",
-                "type": "boolean",
-                "example": true
-              },
-              "order": {
-                "description": "Order of the signer",
-                "type": "integer",
-                "example": 2,
-                "minimum": 0
-              },
-              "signer_group_id": {
-                "description": "If provided, this value points signers that are assigned the same inputs and belongs to same signer group.\nA signer group is not a Box Group. It is an entity that belongs to the template itself and can only be used\nwithin Box Sign requests created from it.",
-                "type": "string",
-                "example": "cd4ff89-8fc1-42cf-8b29-1890dedd26d7",
-                "nullable": true
-              },
-              "label": {
-                "description": "A placeholder label for the signer set by the template creator to differentiate between signers.",
-                "type": "string",
-                "example": "Jane Doe",
-                "nullable": true
-              },
-              "public_id": {
-                "description": "An identifier for the signer. This can be used to identify a signer within the template.",
-                "type": "string",
-                "example": "RJZYYVPR"
-              }
-            }
+        "properties": {
+          "inputs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TemplateSignerInput"
+            },
+            "readOnly": true
+          },
+          "email": {
+            "description": "Email address of the signer",
+            "type": "string",
+            "example": "example@mail.com",
+            "nullable": true
+          },
+          "role": {
+            "description": "Defines the role of the signer in the signature request. A role of\n`signer` needs to sign the document, a role `approver`\napproves the document and\na `final_copy_reader` role only\nreceives the final signed document and signing log.",
+            "type": "string",
+            "example": "signer",
+            "default": "signer",
+            "enum": [
+              "signer",
+              "approver",
+              "final_copy_reader"
+            ]
+          },
+          "is_in_person": {
+            "description": "Used in combination with an embed URL for a sender.\nAfter the sender signs, they will be\nredirected to the next `in_person` signer.",
+            "type": "boolean",
+            "example": true
+          },
+          "order": {
+            "description": "Order of the signer",
+            "type": "integer",
+            "example": 2,
+            "minimum": 0
+          },
+          "signer_group_id": {
+            "description": "If provided, this value points signers that are assigned the same inputs and belongs to same signer group.\nA signer group is not a Box Group. It is an entity that belongs to the template itself and can only be used\nwithin Box Sign requests created from it.",
+            "type": "string",
+            "example": "cd4ff89-8fc1-42cf-8b29-1890dedd26d7",
+            "nullable": true
+          },
+          "label": {
+            "description": "A placeholder label for the signer set by the template creator to differentiate between signers.",
+            "type": "string",
+            "example": "Jane Doe",
+            "nullable": true
+          },
+          "public_id": {
+            "description": "An identifier for the signer. This can be used to identify a signer within the template.",
+            "type": "string",
+            "example": "RJZYYVPR"
+          },
+          "is_password_required": {
+            "description": "If true for signers with a defined email, the password provided when the template was created is used by default. \nIf true for signers without a specified / defined email, the creator needs to provide a password when using the template.",
+            "type": "boolean",
+            "example": true,
+            "nullable": true
+          },
+          "is_phone_number_required": {
+            "description": "If true for signers with a defined email, the phone number provided when the template was created is used by default. \nIf true for signers without a specified / defined email, the template creator needs to provide a phone number when creating a request.",
+            "type": "boolean",
+            "example": true,
+            "nullable": true
+          },
+          "login_required": {
+            "description": "If true, the signer is required to login to access the document.",
+            "type": "boolean",
+            "example": true,
+            "nullable": true
           }
-        ],
+        },
         "title": "Signer fields for Templates"
       },
       "TemplateSignerInput": {
@@ -40310,8 +39991,7 @@
           }
         ],
         "title": "User (Collaborations)",
-        "x-box-resource-id": "user_collaborations",
-        "x-box-variant": "collaborations"
+        "x-box-resource-id": "user_collaborations"
       },
       "User--Full": {
         "description": "A full representation of a user, as can be returned from any\nuser API endpoint.",
@@ -41899,18 +41579,8 @@
     },
     {
       "name": "AI Studio",
-      "description": "A set of AI Studio endpoints used to\nmanage agents",
+      "description": "A set of endpoints used to\ninteract with AI Studio.",
       "x-box-tag": "ai_studio"
-    },
-    {
-      "name": "Box Doc Gen",
-      "description": "Box Doc Gen is used to automatically generate documents.",
-      "x-box-tag": "docgen"
-    },
-    {
-      "name": "Box Doc Gen templates",
-      "description": "Box Doc Gen templates are used as input to generate documents.",
-      "x-box-tag": "docgen_template"
     },
     {
       "name": "App item associations",
@@ -42116,6 +41786,11 @@
       "name": "Shared links (Web Links)",
       "description": "Web links for files are URLs that are generated\nfor web links in Box,\nwhich provide direct, read-only access to the resource.",
       "x-box-tag": "shared_links_web_links"
+    },
+    {
+      "name": "Shared links (App Items)",
+      "description": "URLs generated for app items stored in Box,\nwhich provide direct, read-only access to the resource.",
+      "x-box-tag": "shared_links_app_items"
     },
     {
       "name": "Shield information barriers",
