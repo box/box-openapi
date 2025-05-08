@@ -14,7 +14,7 @@
       "url": "http://www.apache.org/licenses/LICENSE-2.0"
     },
     "version": "2024.0",
-    "x-box-commit-hash": "f5abf083c2"
+    "x-box-commit-hash": "6f7e141054"
   },
   "servers": [
     {
@@ -25345,18 +25345,7 @@
             "minimum": 1
           },
           "llm_endpoint_params": {
-            "description": "The parameters for the LLM endpoint specific to OpenAI / Google models.",
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/AiLlmEndpointParamsOpenAi"
-              },
-              {
-                "$ref": "#/components/schemas/AiLlmEndpointParamsGoogle"
-              },
-              {
-                "$ref": "#/components/schemas/AiLlmEndpointParamsAWS"
-              }
-            ]
+            "$ref": "#/components/schemas/AiLlmEndpointParams"
           }
         },
         "title": "AI agent basic text tool",
@@ -26006,6 +25995,25 @@
         ],
         "title": "AI Item Ask"
       },
+      "AiLlmEndpointParams": {
+        "description": "The parameters for the LLM endpoint specific to a model.",
+        "type": "object",
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/AiLlmEndpointParamsOpenAi"
+          },
+          {
+            "$ref": "#/components/schemas/AiLlmEndpointParamsGoogle"
+          },
+          {
+            "$ref": "#/components/schemas/AiLlmEndpointParamsAWS"
+          },
+          {
+            "$ref": "#/components/schemas/AiLlmEndpointParamsIBM"
+          }
+        ],
+        "title": "AI LLM endpoint parameters"
+      },
       "AiLlmEndpointParamsAWS": {
         "description": "AI LLM endpoint params AWS object",
         "type": "object",
@@ -26085,6 +26093,46 @@
         ],
         "title": "AI LLM endpoint params Google",
         "x-box-resource-id": "ai_llm_endpoint_params_google"
+      },
+      "AiLlmEndpointParamsIBM": {
+        "description": "AI LLM endpoint params IBM object",
+        "type": "object",
+        "properties": {
+          "type": {
+            "description": "The type of the AI LLM endpoint params object for IBM.\nThis parameter is **required**.",
+            "type": "string",
+            "example": "ibm_params",
+            "enum": [
+              "ibm_params"
+            ],
+            "nullable": false
+          },
+          "temperature": {
+            "description": "What sampling temperature to use, between 0 and 1. Higher values like 0.8 will make the output more random, \nwhile lower values like 0.2 will make it more focused and deterministic. \nWe generally recommend altering this or `top_p` but not both.",
+            "type": "number",
+            "example": 0.5,
+            "nullable": true
+          },
+          "top_p": {
+            "description": "An alternative to sampling with temperature, called nucleus sampling, where the model considers the results \nof the tokens with `top_p` probability mass. So 0.1 means only the tokens comprising the top 10% probability \nmass are considered. We generally recommend altering this or temperature but not both.",
+            "type": "number",
+            "example": 0.5,
+            "maximum": 1,
+            "minimum": 0.1,
+            "nullable": true
+          },
+          "top_k": {
+            "description": "`Top-K` changes how the model selects tokens for output. A `top-K` of 1 means the next selected token is\nthe most probable among all tokens in the model's vocabulary (also called greedy decoding),\nwhile a `top-K` of 3 means that the next token is selected from among the three most probable tokens by using temperature.",
+            "type": "number",
+            "example": 1,
+            "nullable": true
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "title": "AI LLM endpoint params IBM",
+        "x-box-resource-id": "ai_llm_endpoint_params_ibm"
       },
       "AiLlmEndpointParamsOpenAi": {
         "description": "AI LLM endpoint params OpenAI object.",
