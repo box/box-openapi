@@ -14,7 +14,7 @@
             "url": "http://www.apache.org/licenses/LICENSE-2.0"
         },
         "version": "2024.0",
-        "x-box-commit-hash": "f5abf083c2"
+        "x-box-commit-hash": "b7df007a8b"
     },
     "servers": [
         {
@@ -25345,18 +25345,7 @@
                         "minimum": 1
                     },
                     "llm_endpoint_params": {
-                        "description": "OpenAI/Googleモデルに固有のLLMエンドポイントのパラメータ。",
-                        "oneOf": [
-                            {
-                                "$ref": "#/components/schemas/AiLlmEndpointParamsOpenAi"
-                            },
-                            {
-                                "$ref": "#/components/schemas/AiLlmEndpointParamsGoogle"
-                            },
-                            {
-                                "$ref": "#/components/schemas/AiLlmEndpointParamsAWS"
-                            }
-                        ]
+                        "$ref": "#/components/schemas/AiLlmEndpointParams"
                     }
                 },
                 "title": "AIエージェントの基本テキストツール",
@@ -25749,7 +25738,7 @@
                         "items": {
                             "$ref": "#/components/schemas/AiItem--Base"
                         },
-                        "maxItems": 1,
+                        "maxItems": 25,
                         "minItems": 1,
                         "uniqueItems": true
                     },
@@ -25795,7 +25784,7 @@
                         "items": {
                             "$ref": "#/components/schemas/AiItem--Base"
                         },
-                        "maxItems": 1,
+                        "maxItems": 25,
                         "minItems": 1,
                         "uniqueItems": true
                     },
@@ -26006,6 +25995,25 @@
                 ],
                 "title": "項目に関するAIへの質問"
             },
+            "AiLlmEndpointParams": {
+                "description": "The parameters for the LLM endpoint specific to a model.",
+                "type": "object",
+                "oneOf": [
+                    {
+                        "$ref": "#/components/schemas/AiLlmEndpointParamsOpenAi"
+                    },
+                    {
+                        "$ref": "#/components/schemas/AiLlmEndpointParamsGoogle"
+                    },
+                    {
+                        "$ref": "#/components/schemas/AiLlmEndpointParamsAWS"
+                    },
+                    {
+                        "$ref": "#/components/schemas/AiLlmEndpointParamsIBM"
+                    }
+                ],
+                "title": "AI LLM endpoint parameters"
+            },
             "AiLlmEndpointParamsAWS": {
                 "description": "AI LLMエンドポイントパラメータ (AWS) オブジェクト。",
                 "type": "object",
@@ -26085,6 +26093,46 @@
                 ],
                 "title": "AI LLMエンドポイントパラメータ (Google)",
                 "x-box-resource-id": "ai_llm_endpoint_params_google"
+            },
+            "AiLlmEndpointParamsIBM": {
+                "description": "AI LLM endpoint params IBM object",
+                "type": "object",
+                "properties": {
+                    "type": {
+                        "description": "The type of the AI LLM endpoint params object for IBM. This parameter is **required**.",
+                        "type": "string",
+                        "example": "ibm_params",
+                        "enum": [
+                            "ibm_params"
+                        ],
+                        "nullable": false
+                    },
+                    "temperature": {
+                        "description": "使用するサンプリングtemperature (0～1の間)。0.8のような高い値を指定すると、出力がよりランダムになるのに対し、0.2のような低い値を指定すると、出力はより焦点を絞った、決定的なものになります。一般的には、この値と`top_p`の両方ではなく、いずれかを変更することをお勧めします。",
+                        "type": "number",
+                        "example": 0.5,
+                        "nullable": true
+                    },
+                    "top_p": {
+                        "description": "temperatureによるサンプリングの代替手段 (核サンプリングと呼ばれます)。この場合、モデルは`top_p`の確率質量を持つトークンの結果を考慮します。つまり、0.1の場合は、上位10%の確率質量で構成されるトークンのみが考慮されます。一般的には、この値とtemperatureの両方ではなく、いずれかを変更することをお勧めします。",
+                        "type": "number",
+                        "example": 0.5,
+                        "maximum": 1,
+                        "minimum": 0.1,
+                        "nullable": true
+                    },
+                    "top_k": {
+                        "description": "`Top-K`では、モデルが出力用にトークンを選択する方法を変更します。`top-K`が1の場合、次に選択されるトークンは、モデルの語彙に含まれるすべてのトークンの中で最も確率の高いものであることになります (グリーディデコードとも呼ばれます)。`top-K`が3の場合は、temperatureを使用して、最も確率が高い上位3つのトークンから次のトークンが選択されることになります。",
+                        "type": "number",
+                        "example": 1,
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "type"
+                ],
+                "title": "AI LLM endpoint params IBM",
+                "x-box-resource-id": "ai_llm_endpoint_params_ibm"
             },
             "AiLlmEndpointParamsOpenAi": {
                 "description": "AI LLMエンドポイントパラメータ (OpenAI) オブジェクト。",
