@@ -14,12 +14,12 @@
             "url": "http://www.apache.org/licenses/LICENSE-2.0"
         },
         "version": "2025.0",
-        "x-box-commit-hash": "8f64ba5ffc"
+        "x-box-commit-hash": "270a65e798"
     },
     "servers": [
         {
             "url": "https://api.box.com/2.0",
-            "description": "Box Platform APIサーバー"
+            "description": "Box Platform API server."
         }
     ],
     "paths": {
@@ -184,7 +184,7 @@
             "delete": {
                 "operationId": "delete_docgen_templates_id_v2025.0",
                 "summary": "Box Doc Genテンプレートを削除",
-                "description": "ファイルのBox Doc Genテンプレートの設定を解除します",
+                "description": "Unmarks file as Box Doc Gen template.",
                 "parameters": [
                     {
                         "name": "template_id",
@@ -739,7 +739,7 @@
             "get": {
                 "operationId": "get_docgen_batch_jobs_id_v2025.0",
                 "summary": "バッチIDを指定してBox Doc Genジョブを取得",
-                "description": "バッチ内のBox Doc Genジョブのリストを取得します",
+                "description": "Lists Box Doc Gen jobs in a batch.",
                 "parameters": [
                     {
                         "name": "batch_id",
@@ -910,6 +910,672 @@
                 "x-box-tag": "docgen",
                 "tags": [
                     "Box Doc Gen"
+                ]
+            }
+        },
+        "/hubs": {
+            "get": {
+                "operationId": "get_hubs_v2025.0",
+                "summary": "List all hubs",
+                "description": "Retrieves all hubs for requesting user.",
+                "x-stability-level": "beta",
+                "parameters": [
+                    {
+                        "name": "query",
+                        "in": "query",
+                        "description": "The query string to search for hubs.",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Box"
+                    },
+                    {
+                        "name": "scope",
+                        "in": "query",
+                        "description": "The scope of the hubs to retrieve. Possible values include `editable`, `view_only`, and `all`. Default is `all`.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "all"
+                        },
+                        "example": "all"
+                    },
+                    {
+                        "name": "sort",
+                        "in": "query",
+                        "description": "The field to sort results by. Possible values include `name`, `updated_at`, `last_accessed_at`, `view_count`, and `relevance`. Default is `relevance`.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "relevance"
+                        },
+                        "example": "name"
+                    },
+                    {
+                        "name": "direction",
+                        "in": "query",
+                        "description": "結果を並べ替える方向。アルファベットの昇順 (`ASC`) または降順 (`DESC`) のいずれかを指定できます。",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "ASC",
+                                "DESC"
+                            ]
+                        },
+                        "example": "ASC"
+                    },
+                    {
+                        "name": "marker",
+                        "in": "query",
+                        "description": "結果が返される開始位置のマーカー。マーカーベースのページ割りを使用している場合に使用されます。",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii"
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "返す項目の1ページあたりの最大数。",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64",
+                            "maximum": 1000
+                        },
+                        "example": 1000
+                    },
+                    {
+                        "$ref": "#/components/parameters/BoxVersionHeader"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns all hubs for the given user or enterprise.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Hubs"
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "予期しないクライアントエラー。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-box-tag": "hubs",
+                "tags": [
+                    "Hubs"
+                ]
+            }
+        },
+        "/enterprise_hubs": {
+            "get": {
+                "operationId": "get_enterprise_hubs_v2025.0",
+                "summary": "List all hubs for requesting enterprise",
+                "description": "Retrieves all hubs for a given enterprise.\n\nAdmins or Hub Co-admins of an enterprise with GCM scope can make this call.",
+                "x-stability-level": "beta",
+                "parameters": [
+                    {
+                        "name": "query",
+                        "in": "query",
+                        "description": "The query string to search for hubs.",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "Box"
+                    },
+                    {
+                        "name": "sort",
+                        "in": "query",
+                        "description": "The field to sort results by. Possible values include `name`, `updated_at`, `last_accessed_at`, `view_count`, and `relevance`. Default is `relevance`.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "relevance"
+                        },
+                        "example": "name"
+                    },
+                    {
+                        "name": "direction",
+                        "in": "query",
+                        "description": "結果を並べ替える方向。アルファベットの昇順 (`ASC`) または降順 (`DESC`) のいずれかを指定できます。",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "ASC",
+                                "DESC"
+                            ]
+                        },
+                        "example": "ASC"
+                    },
+                    {
+                        "name": "marker",
+                        "in": "query",
+                        "description": "結果が返される開始位置のマーカー。マーカーベースのページ割りを使用している場合に使用されます。",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii"
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "返す項目の1ページあたりの最大数。",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64",
+                            "maximum": 1000
+                        },
+                        "example": 1000
+                    },
+                    {
+                        "$ref": "#/components/parameters/BoxVersionHeader"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns all hubs for the given user or enterprise.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Hubs"
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "予期しないクライアントエラー。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-box-tag": "hubs",
+                "tags": [
+                    "Hubs"
+                ]
+            }
+        },
+        "/hubs/{hub_id}": {
+            "get": {
+                "operationId": "get_hubs_id_v2025.0",
+                "summary": "Get hub information by ID",
+                "description": "Retrieves details for a hub by its ID.",
+                "x-stability-level": "beta",
+                "parameters": [
+                    {
+                        "name": "hub_id",
+                        "in": "path",
+                        "description": "The unique identifier that represent a hub.\n\nThe ID for any hub can be determined by visiting this hub in the web application and copying the ID from the URL. For example, for the URL `https://*.app.box.com/hubs/123` the `hub_id` is `123`.",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "12345"
+                    },
+                    {
+                        "$ref": "#/components/parameters/BoxVersionHeader"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns a hub object.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Hub"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "`Authorization`ヘッダーで指定されているアクセストークンが認識されないか、指定されていない場合に返されます。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Returned if the hub is not found, or the user does not have access to the hub.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "予期しないクライアントエラー。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-box-tag": "hubs",
+                "tags": [
+                    "Hubs"
+                ]
+            },
+            "delete": {
+                "operationId": "delete_hubs_id_v2025.0",
+                "summary": "Delete hub",
+                "description": "Deletes a single hub.",
+                "x-stability-level": "beta",
+                "parameters": [
+                    {
+                        "name": "hub_id",
+                        "in": "path",
+                        "description": "The unique identifier that represent a hub.\n\nThe ID for any hub can be determined by visiting this hub in the web application and copying the ID from the URL. For example, for the URL `https://*.app.box.com/hubs/123` the `hub_id` is `123`.",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "12345"
+                    },
+                    {
+                        "$ref": "#/components/parameters/BoxVersionHeader"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "A blank response is returned if the hub was successfully deleted."
+                    },
+                    "401": {
+                        "description": "`Authorization`ヘッダーで指定されているアクセストークンが認識されないか、指定されていない場合に返されます。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Returned if the hub is not found or has already been deleted, or the user does not have access to the hub.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "予期しないクライアントエラー。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-box-tag": "hubs",
+                "tags": [
+                    "Hubs"
+                ]
+            }
+        },
+        "/hub_collaborations": {
+            "get": {
+                "operationId": "get_hub_collaborations_v2025.0",
+                "summary": "Get hub collaborations",
+                "description": "Retrieves all collaborations for a hub.",
+                "x-stability-level": "beta",
+                "parameters": [
+                    {
+                        "name": "hub_id",
+                        "in": "query",
+                        "description": "The unique identifier that represent a hub.\n\nThe ID for any hub can be determined by visiting this hub in the web application and copying the ID from the URL. For example, for the URL `https://*.app.box.com/hubs/123` the `hub_id` is `123`.",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "12345"
+                    },
+                    {
+                        "name": "marker",
+                        "in": "query",
+                        "description": "結果が返される開始位置のマーカー。マーカーベースのページ割りを使用している場合に使用されます。\n\nこれを使用するには、`usemarker`を`true`に設定する必要があります。",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii"
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "返す項目の1ページあたりの最大数。",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64",
+                            "maximum": 1000
+                        },
+                        "example": 1000
+                    },
+                    {
+                        "$ref": "#/components/parameters/BoxVersionHeader"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Retrieves the collaborations associated with the specified hub.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HubCollaborations"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "`Authorization`ヘッダーで指定されているアクセストークンが認識されないか、指定されていない場合に返されます。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Returned if the hub is not found, or the user does not have access to the hub.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "予期しないクライアントエラー。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-box-tag": "hub_collaborations",
+                "tags": [
+                    "Hub Collaborations"
+                ]
+            },
+            "post": {
+                "operationId": "post_hub_collaborations_v2025.0",
+                "summary": "Create hub collaboration",
+                "description": "Adds a collaboration for a single user or a single group to a hub.\n\nCollaborations can be created using email address, user IDs, or group IDs.",
+                "x-stability-level": "beta",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/BoxVersionHeader"
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/HubCollaborationCreateRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Returns a new hub collaboration object.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HubCollaboration"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "ユーザーにコラボレーションを作成するための適切な権限がない場合にエラーを返します。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "予期しないクライアントエラー。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-box-tag": "hub_collaborations",
+                "tags": [
+                    "Hub Collaborations"
+                ]
+            }
+        },
+        "/hub_collaborations/{hub_collaboration_id}": {
+            "get": {
+                "operationId": "get_hub_collaborations_id_v2025.0",
+                "summary": "Get hub collaboration by collaboration ID",
+                "description": "Retrieves details for a hub collaboration by collaboration ID.",
+                "x-stability-level": "beta",
+                "parameters": [
+                    {
+                        "name": "hub_collaboration_id",
+                        "in": "path",
+                        "description": "The ID of the hub collaboration.",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "1234"
+                    },
+                    {
+                        "$ref": "#/components/parameters/BoxVersionHeader"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns a hub collaboration object.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HubCollaboration"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "`Authorization`ヘッダーで指定されているアクセストークンが認識されないか、指定されていない場合に返されます。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Returned if the hub is not found, or the user does not have access to the hub.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "予期しないクライアントエラー。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-box-tag": "hub_collaborations",
+                "tags": [
+                    "Hub Collaborations"
+                ]
+            },
+            "put": {
+                "operationId": "put_hub_collaborations_id_v2025.0",
+                "summary": "Update hub collaboration",
+                "description": "Updates a hub collaboration. Can be used to change the hub role.",
+                "x-stability-level": "beta",
+                "parameters": [
+                    {
+                        "name": "hub_collaboration_id",
+                        "in": "path",
+                        "description": "The ID of the hub collaboration.",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "1234"
+                    },
+                    {
+                        "$ref": "#/components/parameters/BoxVersionHeader"
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/HubCollaborationUpdateRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Returns an updated hub collaboration object.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HubCollaboration"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "認証済みユーザーにコラボレーションを更新するための適切な権限がない場合にエラーを返します。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "予期しないクライアントエラー。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-box-tag": "hub_collaborations",
+                "tags": [
+                    "Hub Collaborations"
+                ]
+            },
+            "delete": {
+                "operationId": "delete_hub_collaborations_id_v2025.0",
+                "summary": "Remove hub collaboration",
+                "description": "Deletes a single hub collaboration.",
+                "x-stability-level": "beta",
+                "parameters": [
+                    {
+                        "name": "hub_collaboration_id",
+                        "in": "path",
+                        "description": "The ID of the hub collaboration.",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "1234"
+                    },
+                    {
+                        "$ref": "#/components/parameters/BoxVersionHeader"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "A blank response is returned if the hub collaboration was successfully deleted."
+                    },
+                    "404": {
+                        "description": "Returns an error if the hub collaboration could not be found, or the authenticated user does not have access to the hub collaboration.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "予期しないクライアントエラー。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-box-tag": "hub_collaborations",
+                "tags": [
+                    "Hub Collaborations"
                 ]
             }
         },
@@ -1155,7 +1821,7 @@
             "BoxVersionHeader": {
                 "name": "box-version",
                 "in": "header",
-                "description": "Version header",
+                "description": "Version header.",
                 "allowEmptyValue": false,
                 "required": true,
                 "schema": {
@@ -1169,11 +1835,11 @@
         },
         "schemas": {
             "ClientError": {
-                "description": "一般的なエラー",
+                "description": "A generic error.",
                 "type": "object",
                 "properties": {
                     "type": {
-                        "description": "エラー",
+                        "description": "The value will always be `error`.",
                         "type": "string",
                         "example": "error",
                         "enum": [
@@ -1189,7 +1855,7 @@
                         "nullable": false
                     },
                     "code": {
-                        "description": "Box固有のエラーコード",
+                        "description": "A Box-specific error code.",
                         "type": "string",
                         "example": "item_name_invalid",
                         "enum": [
@@ -1221,14 +1887,10 @@
                     "context_info": {
                         "description": "このエラーに関する追加コンテキストを含む自由形式のオブジェクト。使用できるフィールドは、エンドポイントごとに定義されています。`message`は唯一の例です。",
                         "type": "object",
-                        "nullable": true,
-                        "properties": {
-                            "message": {
-                                "description": "エラーの詳細。",
-                                "type": "string",
-                                "example": "Something went wrong."
-                            }
-                        }
+                        "example": {
+                            "message": "Something went wrong"
+                        },
+                        "nullable": true
                     },
                     "help_url": {
                         "description": "このエラーの原因に関する詳細情報にリンクされたURL。",
@@ -1257,7 +1919,7 @@
                         "nullable": false
                     },
                     "type": {
-                        "description": "`docgen_batch`",
+                        "description": "The value will always be `docgen_batch`.",
                         "type": "string",
                         "example": "docgen_batch",
                         "enum": [
@@ -1312,14 +1974,14 @@
                             {
                                 "title": "フォルダの参照",
                                 "type": "object",
-                                "description": "フォルダの参照",
+                                "description": "Folder reference.",
                                 "required": [
                                     "type",
                                     "id"
                                 ],
                                 "properties": {
                                     "type": {
-                                        "description": "`folder`",
+                                        "description": "The value will always be `folder`.",
                                         "type": "string",
                                         "example": "folder",
                                         "enum": [
@@ -1328,7 +1990,7 @@
                                         "nullable": false
                                     },
                                     "id": {
-                                        "description": "フォルダのID",
+                                        "description": "ID of the folder.",
                                         "type": "string",
                                         "example": "42037322"
                                     }
@@ -1430,7 +2092,7 @@
                                             },
                                             {
                                                 "title": "OpenAPI 3.0 null schema type",
-                                                "description": "The definition for a null schema type in OpenAPI 3.0",
+                                                "description": "The definition for a null schema type in OpenAPI `3.0`.",
                                                 "type": "object",
                                                 "nullable": true,
                                                 "additionalProperties": false
@@ -1451,7 +2113,7 @@
                                             },
                                             {
                                                 "title": "OpenAPI 3.0 null schema type",
-                                                "description": "The definition for a null schema type in OpenAPI 3.0",
+                                                "description": "The definition for a null schema type in OpenAPI `3.0`.",
                                                 "type": "object",
                                                 "nullable": true,
                                                 "additionalProperties": false
@@ -1512,7 +2174,7 @@
                         "nullable": false
                     },
                     "type": {
-                        "description": "`docgen_job`",
+                        "description": "The value will always be `docgen_job`.",
                         "type": "string",
                         "example": "docgen_job",
                         "enum": [
@@ -1606,7 +2268,7 @@
                 "allOf": [
                     {
                         "type": "object",
-                        "description": "マーカーベースのページ割りについて説明しているAPIレスポンスの部分",
+                        "description": "The part of an API response that describes marker based pagination.",
                         "properties": {
                             "limit": {
                                 "description": "これらのエントリで使用された制限値。許容される最大値を超えていない限り、クエリパラメータの`limit`と等しくなります。最大値はAPIによって異なります。",
@@ -1655,7 +2317,7 @@
                 "allOf": [
                     {
                         "type": "object",
-                        "description": "マーカーベースのページ割りについて説明しているAPIレスポンスの部分",
+                        "description": "The part of an API response that describes marker based pagination.",
                         "properties": {
                             "limit": {
                                 "description": "これらのエントリで使用された制限値。許容される最大値を超えていない限り、クエリパラメータの`limit`と等しくなります。最大値はAPIによって異なります。",
@@ -1753,7 +2415,7 @@
                 "allOf": [
                     {
                         "type": "object",
-                        "description": "マーカーベースのページ割りについて説明しているAPIレスポンスの部分",
+                        "description": "The part of an API response that describes marker based pagination.",
                         "properties": {
                             "limit": {
                                 "description": "これらのエントリで使用された制限値。許容される最大値を超えていない限り、クエリパラメータの`limit`と等しくなります。最大値はAPIによって異なります。",
@@ -1819,7 +2481,7 @@
                     {
                         "properties": {
                             "file_name": {
-                                "description": "テンプレートの名前",
+                                "description": "テンプレートの名前。",
                                 "type": "string",
                                 "example": "Official contract",
                                 "nullable": true
@@ -1885,7 +2547,7 @@
                 "allOf": [
                     {
                         "type": "object",
-                        "description": "マーカーベースのページ割りについて説明しているAPIレスポンスの部分",
+                        "description": "The part of an API response that describes marker based pagination.",
                         "properties": {
                             "limit": {
                                 "description": "これらのエントリで使用された制限値。許容される最大値を超えていない限り、クエリパラメータの`limit`と等しくなります。最大値はAPIによって異なります。",
@@ -1928,12 +2590,12 @@
                 "type": "object",
                 "properties": {
                     "id": {
-                        "description": "この企業の一意の識別子",
+                        "description": "この会社の一意の識別子。",
                         "type": "string",
                         "example": "1910967"
                     },
                     "type": {
-                        "description": "`enterprise`",
+                        "description": "The value will always be `enterprise`.",
                         "type": "string",
                         "example": "enterprise",
                         "enum": [
@@ -1945,11 +2607,11 @@
                 "title": "企業の参照"
             },
             "FileReference": {
-                "description": "ファイルの参照",
+                "description": "File reference.",
                 "type": "object",
                 "properties": {
                     "type": {
-                        "description": "`file`",
+                        "description": "The value will always be `file`.",
                         "type": "string",
                         "example": "file",
                         "enum": [
@@ -1958,7 +2620,7 @@
                         "nullable": false
                     },
                     "id": {
-                        "description": "オブジェクトのID",
+                        "description": "ID of the object.",
                         "type": "string",
                         "example": "42037322",
                         "nullable": false
@@ -1981,7 +2643,7 @@
                         "nullable": false
                     },
                     "type": {
-                        "description": "`file_version`",
+                        "description": "The value will always be `file_version`.",
                         "type": "string",
                         "example": "file_version",
                         "enum": [
@@ -1995,6 +2657,472 @@
                     "type"
                 ],
                 "title": "ファイルバージョン (Base)"
+            },
+            "Group--Base": {
+                "description": "グループのBase版の表示。",
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "description": "The unique identifier for this object.",
+                        "type": "string",
+                        "example": "11446498"
+                    },
+                    "type": {
+                        "description": "The value will always be `group`.",
+                        "type": "string",
+                        "example": "group",
+                        "enum": [
+                            "group"
+                        ]
+                    }
+                },
+                "required": [
+                    "id",
+                    "type"
+                ],
+                "title": "グループ (Base)"
+            },
+            "Group--Mini": {
+                "description": "グループのIDや名前を含むグループのMini版の表示。",
+                "type": "object",
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/Group--Base"
+                    },
+                    {
+                        "properties": {
+                            "name": {
+                                "description": "The name of the group.",
+                                "type": "string",
+                                "example": "Support"
+                            },
+                            "group_type": {
+                                "description": "グループのタイプ。",
+                                "type": "string",
+                                "example": "managed_group",
+                                "enum": [
+                                    "managed_group",
+                                    "all_users_group"
+                                ]
+                            }
+                        }
+                    }
+                ],
+                "title": "グループ (Mini)"
+            },
+            "Hub": {
+                "description": "A standard representation of a hub, as returned from any hubs API endpoints by default.",
+                "type": "object",
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/Hub--Base"
+                    },
+                    {
+                        "properties": {
+                            "title": {
+                                "description": "The title given to the hub.",
+                                "type": "string",
+                                "example": "Contracts"
+                            },
+                            "description": {
+                                "description": "The description of the hub. First 200 characters are returned.",
+                                "type": "string",
+                                "example": "All the contracts for the company."
+                            },
+                            "created_at": {
+                                "description": "このフォルダが作成された日時。ルートフォルダやごみ箱フォルダなど、一部のフォルダの場合、この値は`null`になる場合があります。",
+                                "type": "string",
+                                "format": "date-time",
+                                "example": "2012-12-12T10:53:43Z"
+                            },
+                            "updated_at": {
+                                "description": "The date and time when the hub was last updated.",
+                                "type": "string",
+                                "format": "date-time",
+                                "example": "2012-12-12T10:53:43Z"
+                            },
+                            "created_by": {
+                                "allOf": [
+                                    {
+                                        "$ref": "#/components/schemas/User--Mini"
+                                    },
+                                    {
+                                        "description": "The user who created this hub."
+                                    }
+                                ]
+                            },
+                            "updated_by": {
+                                "allOf": [
+                                    {
+                                        "$ref": "#/components/schemas/User--Mini"
+                                    },
+                                    {
+                                        "description": "The user who last modified this hub."
+                                    }
+                                ]
+                            },
+                            "view_count": {
+                                "description": "The number of views for the hub.",
+                                "type": "integer",
+                                "format": "int32",
+                                "example": 506
+                            },
+                            "is_ai_enabled": {
+                                "description": "Indicates if AI features are enabled for the hub.",
+                                "type": "boolean",
+                                "example": true
+                            },
+                            "is_collaboration_restricted_to_enterprise": {
+                                "description": "Indicates if collaboration is restricted to the enterprise.",
+                                "type": "boolean",
+                                "example": true
+                            },
+                            "can_non_owners_invite": {
+                                "description": "Indicates if non-owners can invite others to the hub.",
+                                "type": "boolean",
+                                "example": true
+                            },
+                            "can_shared_link_be_created": {
+                                "description": "Indicates if a shared link can be created for the hub.",
+                                "type": "boolean",
+                                "example": true
+                            }
+                        }
+                    }
+                ],
+                "title": "Hub",
+                "x-box-resource-id": "hub_v2025.0",
+                "x-box-variant": "standard"
+            },
+            "Hub--Base": {
+                "description": "The bare basic representation of a hub.",
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "description": "The unique identifier that represent a hub.\n\nThe ID for any hub can be determined by visiting a hub in the web application and copying the ID from the URL. For example, for the URL `https://*.app.box.com/hubs/123` the `hub_id` is `123`.",
+                        "type": "string",
+                        "example": "12345"
+                    },
+                    "type": {
+                        "description": "The value will always be `hubs`.",
+                        "type": "string",
+                        "example": "hubs",
+                        "enum": [
+                            "hubs"
+                        ]
+                    }
+                },
+                "required": [
+                    "id",
+                    "type"
+                ],
+                "title": "Hub (Base)",
+                "x-box-resource-id": "hub_v2025.0--base",
+                "x-box-tag": "hubs",
+                "x-box-variant": "base",
+                "x-box-variants": [
+                    "base",
+                    "standard"
+                ]
+            },
+            "HubAccessGrantee": {
+                "description": "アクセス権限が付与されるユーザーまたはグループ。",
+                "type": "object",
+                "oneOf": [
+                    {
+                        "$ref": "#/components/schemas/HubCollaborationUser"
+                    },
+                    {
+                        "$ref": "#/components/schemas/Group--Mini"
+                    }
+                ],
+                "title": "Hub Accessible By"
+            },
+            "HubCollaboration": {
+                "description": "A hub collaboration object grants a user or group access to a hub with permissions defined by a specific role.",
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "description": "このコラボレーションの一意の識別子。",
+                        "type": "string",
+                        "example": "12345678"
+                    },
+                    "type": {
+                        "description": "The value will always be `hub_collaboration`.",
+                        "type": "string",
+                        "example": "hub_collaboration",
+                        "enum": [
+                            "hub_collaboration"
+                        ]
+                    },
+                    "hub": {
+                        "$ref": "#/components/schemas/Hub--Base"
+                    },
+                    "accessible_by": {
+                        "$ref": "#/components/schemas/HubAccessGrantee"
+                    },
+                    "role": {
+                        "description": "The level of access granted to hub. Possible values are `editor`, `viewer`, and `co-owner`.",
+                        "type": "string",
+                        "example": "editor"
+                    },
+                    "status": {
+                        "description": "コラボレーション招待のステータス。ステータスが`pending`の場合、`login`と`name`は空の文字列を返します。",
+                        "type": "string",
+                        "example": "accepted",
+                        "enum": [
+                            "accepted",
+                            "pending",
+                            "rejected"
+                        ]
+                    },
+                    "acceptance_requirements_status": {
+                        "type": "object",
+                        "properties": {
+                            "terms_of_service_requirement": {
+                                "type": "object",
+                                "properties": {
+                                    "is_accepted": {
+                                        "description": "サービス利用規約に同意済みかどうか。利用規約への同意が必要ない場合、このフィールドは`null`です。",
+                                        "type": "boolean",
+                                        "example": true,
+                                        "nullable": true
+                                    },
+                                    "terms_of_service": {
+                                        "allOf": [
+                                            {
+                                                "$ref": "#/components/schemas/TermsOfService--Base"
+                                            },
+                                            {
+                                                "description": "コラボレーションが承認される前に同意する必要があるサービス利用規約。 利用規約への同意が必要ない場合、このフィールドは`null`です。"
+                                            }
+                                        ]
+                                    }
+                                }
+                            },
+                            "strong_password_requirement": {
+                                "type": "object",
+                                "properties": {
+                                    "enterprise_has_strong_password_required_for_external_users": {
+                                        "description": "コンテンツを所有する企業が、コンテンツのコラボレーションに強力なパスワードを要求するかどうか、または外部コラボレータに対して漏えいが確認されたパスワードの検出を適用するかどうか。",
+                                        "type": "boolean",
+                                        "example": true
+                                    },
+                                    "user_has_strong_password": {
+                                        "description": "ユーザーのアカウントに対して、強力なパスワードの要求と漏えいが確認されたパスワードの検出が設定されているかどうか。強力なパスワードが要求されていない場合、このフィールドは`null`になります。",
+                                        "type": "boolean",
+                                        "example": true,
+                                        "nullable": true
+                                    }
+                                }
+                            },
+                            "two_factor_authentication_requirement": {
+                                "type": "object",
+                                "properties": {
+                                    "enterprise_has_two_factor_auth_enabled": {
+                                        "description": "このコンテンツを所有する会社が、このコンテンツでのコラボレーションを行うために2要素認証を有効にする必要があるかどうか。",
+                                        "type": "boolean",
+                                        "example": true
+                                    },
+                                    "user_has_two_factor_authentication_enabled": {
+                                        "description": "ユーザーが2要素認証を有効にしているかどうか。2要素認証が必要ない場合、このフィールドは`null`です。",
+                                        "type": "boolean",
+                                        "example": true,
+                                        "nullable": true
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "required": [
+                    "id",
+                    "type"
+                ],
+                "title": "Hub Collaboration",
+                "x-box-resource-id": "hub_collaboration_v2025.0",
+                "x-box-tag": "hub_collaborations"
+            },
+            "HubCollaborationCreateRequest": {
+                "description": "Request body for creating a new Hub collaboration.",
+                "type": "object",
+                "properties": {
+                    "hub": {
+                        "description": "Hubs reference.",
+                        "type": "object",
+                        "properties": {
+                            "type": {
+                                "description": "The value will always be `hubs`.",
+                                "type": "string",
+                                "example": "hubs",
+                                "enum": [
+                                    "hubs"
+                                ]
+                            },
+                            "id": {
+                                "description": "ID of the object.",
+                                "type": "string",
+                                "example": "42037322"
+                            }
+                        },
+                        "required": [
+                            "type",
+                            "id"
+                        ],
+                        "title": "Hubs reference"
+                    },
+                    "accessible_by": {
+                        "description": "The user or group who gets access to the item.",
+                        "type": "object",
+                        "properties": {
+                            "type": {
+                                "description": "The type of collaborator to invite. Possible values are `user` or `group`.",
+                                "type": "string",
+                                "example": "user"
+                            },
+                            "id": {
+                                "description": "ユーザーまたはグループのID。\n\n`login`を使用してメールアドレスでユーザーを指定することもできます。",
+                                "type": "string",
+                                "example": "23522323"
+                            },
+                            "login": {
+                                "description": "The email address of the user who gets access to the item.\n\n`id`を使用してユーザーIDでユーザーを指定することもできます。",
+                                "type": "string",
+                                "example": "john@example.com"
+                            }
+                        },
+                        "required": [
+                            "type"
+                        ]
+                    },
+                    "role": {
+                        "description": "The level of access granted to hub. Possible values are `editor`, `viewer`, and `co-owner`.",
+                        "type": "string",
+                        "example": "editor"
+                    }
+                },
+                "required": [
+                    "hub",
+                    "accessible_by",
+                    "role"
+                ],
+                "title": "Hub Collaboration Create Request"
+            },
+            "HubCollaborationUpdateRequest": {
+                "description": "Request body for updating an existing Hub collaboration.",
+                "type": "object",
+                "properties": {
+                    "role": {
+                        "description": "The level of access granted to hub. Possible values are `editor`, `viewer`, and `co-owner`.",
+                        "type": "string",
+                        "example": "editor"
+                    }
+                },
+                "title": "Hub Collaboration Update Request"
+            },
+            "HubCollaborationUser": {
+                "description": "ユーザーのMini版の表示は、ステータスが`pending`の場合にのみ返すことができます。",
+                "type": "object",
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/User--Base"
+                    },
+                    {
+                        "properties": {
+                            "name": {
+                                "description": "このユーザーの表示名。コラボレーションのステータスが`pending`の場合、空の文字列が返されます。",
+                                "type": "string",
+                                "example": "Aaron Levie",
+                                "maxLength": 50,
+                                "nullable": false
+                            },
+                            "login": {
+                                "description": "このユーザーのプライマリメールアドレス。コラボレーションのステータスが`pending`の場合、空の文字列が返されます。",
+                                "type": "string",
+                                "format": "email",
+                                "example": "ceo@example.com",
+                                "nullable": false
+                            }
+                        }
+                    }
+                ],
+                "title": "Hub Collaboration User"
+            },
+            "HubCollaborations": {
+                "description": "A list of hub collaborations.",
+                "type": "object",
+                "allOf": [
+                    {
+                        "properties": {
+                            "entries": {
+                                "description": "A list of hub collaborations.",
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/HubCollaboration"
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "type": "object",
+                        "description": "The part of an API response that describes marker based pagination.",
+                        "properties": {
+                            "limit": {
+                                "description": "これらのエントリで使用された制限値。許容される最大値を超えていない限り、クエリパラメータの`limit`と等しくなります。最大値はAPIによって異なります。",
+                                "type": "integer",
+                                "format": "int64",
+                                "example": 1000
+                            },
+                            "next_marker": {
+                                "description": "次の検索結果ページの開始場所のマーカー。",
+                                "type": "string",
+                                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                                "nullable": true
+                            }
+                        }
+                    }
+                ],
+                "title": "Hub Collaborations",
+                "x-box-resource-id": "hub_collaborations_v2025.0",
+                "x-box-tag": "hub_collaborations"
+            },
+            "Hubs": {
+                "description": "A paginated list of hubs.",
+                "type": "object",
+                "allOf": [
+                    {
+                        "properties": {
+                            "entries": {
+                                "description": "A list of hubs.",
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/Hub"
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "type": "object",
+                        "description": "The part of an API response that describes marker based pagination.",
+                        "properties": {
+                            "limit": {
+                                "description": "これらのエントリで使用された制限値。許容される最大値を超えていない限り、クエリパラメータの`limit`と等しくなります。最大値はAPIによって異なります。",
+                                "type": "integer",
+                                "format": "int64",
+                                "example": 1000
+                            },
+                            "next_marker": {
+                                "description": "次の検索結果ページの開始場所のマーカー。",
+                                "type": "string",
+                                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                                "nullable": true
+                            }
+                        }
+                    }
+                ],
+                "title": "Hubs",
+                "x-box-resource-id": "hubs_v2025.0",
+                "x-box-tag": "hubs"
             },
             "ShieldList": {
                 "description": "ShieldリストのStandard版の表示。",
@@ -2026,7 +3154,7 @@
                         ]
                     },
                     "description": {
-                        "description": "Shieldリストの説明",
+                        "description": "Description of Shield List.",
                         "type": "string",
                         "example": "A list of things that are shielded"
                     },
@@ -2071,12 +3199,12 @@
                 "type": "object",
                 "properties": {
                     "id": {
-                        "description": "このリストの一意のグローバル識別子",
+                        "description": "Unique global identifier for this list.",
                         "type": "string",
                         "example": "12345678-1234-1234-1234-123456789012"
                     },
                     "type": {
-                        "description": "オブジェクトのタイプ",
+                        "description": "オブジェクトのタイプ。",
                         "type": "string",
                         "example": "shield_list",
                         "enum": [
@@ -2084,7 +3212,7 @@
                         ]
                     },
                     "name": {
-                        "description": "Shieldリストの名前",
+                        "description": "Name of Shield List.",
                         "type": "string",
                         "example": "My Shield List"
                     },
@@ -2110,7 +3238,7 @@
                 "x-box-tag": "shield_lists"
             },
             "ShieldListContent": {
-                "description": "Shieldリストのコンテンツの表示",
+                "description": "Representation of content of a Shield List.",
                 "type": "object",
                 "oneOf": [
                     {
@@ -2214,7 +3342,7 @@
                         ]
                     },
                     "email_addresses": {
-                        "description": "メールアドレスのリスト",
+                        "description": "List of emails.",
                         "type": "array",
                         "items": {
                             "type": "string"
@@ -2249,7 +3377,7 @@
                         ]
                     },
                     "integrations": {
-                        "description": "統合のリスト",
+                        "description": "List of integration.",
                         "type": "array",
                         "items": {
                             "type": "object",
@@ -2309,7 +3437,7 @@
                 "x-box-tag": "shield_lists"
             },
             "ShieldListContentRequest": {
-                "description": "Shieldリストのコンテンツの表示",
+                "description": "Representation of content of a Shield List.",
                 "type": "object",
                 "oneOf": [
                     {
@@ -2328,13 +3456,13 @@
                 "title": "リクエストに対するShieldリストのコンテンツ"
             },
             "ShieldLists": {
-                "description": "Shieldリストオブジェクトのリスト",
+                "description": "List of Shield List objects.",
                 "type": "object",
                 "allOf": [
                     {
                         "properties": {
                             "entries": {
-                                "description": "Shieldリストオブジェクトのリスト",
+                                "description": "A list of shield list objects.",
                                 "type": "array",
                                 "items": {
                                     "$ref": "#/components/schemas/ShieldList--Mini"
@@ -2357,7 +3485,7 @@
                         "example": "My Shield List"
                     },
                     "description": {
-                        "description": "Shieldリストの説明: 省略可。",
+                        "description": "Optional description of Shield List.",
                         "type": "string",
                         "example": "A list of things that are shielded"
                     },
@@ -2389,7 +3517,7 @@
                         "example": "My Shield List"
                     },
                     "description": {
-                        "description": "Shieldリストの説明: 省略可。",
+                        "description": "Optional description of Shield List.",
                         "type": "string",
                         "example": "A list of things that are shielded"
                     },
@@ -2411,17 +3539,41 @@
                 "title": "Shieldリスト更新リクエストを作成",
                 "x-box-tag": "shield_lists"
             },
+            "TermsOfService--Base": {
+                "description": "1つのサービス利用規約に該当するとみなされるルートレベルのレコード。",
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "description": "このサービス利用規約の一意の識別子。",
+                        "type": "string",
+                        "example": "11446498"
+                    },
+                    "type": {
+                        "description": "The value will always be `terms_of_service`.",
+                        "type": "string",
+                        "example": "terms_of_service",
+                        "enum": [
+                            "terms_of_service"
+                        ]
+                    }
+                },
+                "required": [
+                    "id",
+                    "type"
+                ],
+                "title": "サービス利用規約 (Base)"
+            },
             "User--Base": {
                 "description": "他のリソース内にネストされたときに使用されるユーザーのMini版の表示。",
                 "type": "object",
                 "properties": {
                     "id": {
-                        "description": "このユーザーの一意の識別子",
+                        "description": "The unique identifier for this user.",
                         "type": "string",
                         "example": "11446498"
                     },
                     "type": {
-                        "description": "user",
+                        "description": "The value will always be `user`.",
                         "type": "string",
                         "example": "user",
                         "enum": [
@@ -2435,6 +3587,32 @@
                     "id"
                 ],
                 "title": "ユーザー (Base)"
+            },
+            "User--Mini": {
+                "description": "他のリソース内にネストされたときに返される可能性があるユーザーのMini版の表示。",
+                "type": "object",
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/User--Base"
+                    },
+                    {
+                        "properties": {
+                            "name": {
+                                "description": "The display name of this user.",
+                                "type": "string",
+                                "example": "Aaron Levie",
+                                "maxLength": 50
+                            },
+                            "login": {
+                                "description": "The primary email address of this user.",
+                                "type": "string",
+                                "format": "email",
+                                "example": "ceo@example.com"
+                            }
+                        }
+                    }
+                ],
+                "title": "ユーザー (Mini)"
             }
         },
         "securitySchemes": {
@@ -2477,13 +3655,23 @@
             "x-box-tag": "docgen_template"
         },
         {
+            "name": "Hubs",
+            "description": "A set of endpoints used to manage Hubs.",
+            "x-box-tag": "hubs"
+        },
+        {
+            "name": "Hub Collaborations",
+            "description": "A set of endpoints used to manage collaborations within a Hub.",
+            "x-box-tag": "hub_collaborations"
+        },
+        {
             "name": "Shieldリスト",
             "description": "Shield List allow an administrator to create a list \nwhich will be shared between different\nShield Smart Access and Threat Prection rules.",
             "x-box-tag": "shield_lists"
         }
     ],
     "externalDocs": {
-        "description": "Box Developerドキュメント",
+        "description": "Box Developer Documentation.",
         "url": "https://developer.box.com"
     }
 }
