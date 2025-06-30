@@ -14,7 +14,7 @@
             "url": "http://www.apache.org/licenses/LICENSE-2.0"
         },
         "version": "2024.0",
-        "x-box-commit-hash": "270a65e798"
+        "x-box-commit-hash": "c96bf15203"
     },
     "servers": [
         {
@@ -25272,6 +25272,9 @@
                     "basic_text": {
                         "$ref": "#/components/schemas/AiAgentBasicTextTool"
                     },
+                    "spreadsheet": {
+                        "$ref": "#/components/schemas/AiAgentSpreadsheetTool"
+                    },
                     "long_text_multi": {
                         "$ref": "#/components/schemas/AiAgentLongTextTool"
                     },
@@ -25593,6 +25596,28 @@
                 ],
                 "title": "AIエージェントの参照",
                 "x-box-resource-id": "ai_agent_reference",
+                "x-box-tag": "ai"
+            },
+            "AiAgentSpreadsheetTool": {
+                "description": "The AI agent tool used to handle spreadsheets and tabular data.",
+                "type": "object",
+                "properties": {
+                    "model": {
+                        "description": "The model used for the AI agent for spreadsheets. For specific model values, see the [available models list](g://box-ai/supported-models).",
+                        "type": "string",
+                        "example": "azure__openai__gpt_4o_mini"
+                    },
+                    "num_tokens_for_completion": {
+                        "description": "完了に必要なトークンの数。",
+                        "type": "integer",
+                        "example": 8400,
+                        "minimum": 1
+                    },
+                    "llm_endpoint_params": {
+                        "$ref": "#/components/schemas/AiLlmEndpointParams"
+                    }
+                },
+                "title": "AI agent spreadsheet tool",
                 "x-box-tag": "ai"
             },
             "AiAgentTextGen": {
@@ -26452,7 +26477,7 @@
                 ]
             },
             "AiStudioAgentAsk": {
-                "description": "質問に使用されるAIエージェント。",
+                "description": "The AI agent to be used to handle queries.",
                 "type": "object",
                 "properties": {
                     "type": {
@@ -26472,15 +26497,27 @@
                         "x-box-tag": "ai_studio"
                     },
                     "description": {
-                        "description": "AIエージェントの説明。",
+                        "description": "The description of the AI agent.",
                         "type": "string",
                         "example": "This is ASK Agent"
                     },
                     "custom_instructions": {
-                        "description": "エージェントに対するカスタム指示。",
+                        "description": "Custom instructions for the AI agent.",
                         "type": "string",
                         "example": "This is a custom instruction",
                         "nullable": true
+                    },
+                    "suggested_questions": {
+                        "description": "Suggested questions for the AI agent. If null, suggested question will be generated. If empty, no suggested questions will be displayed.",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "example": [
+                            "What is in this file?",
+                            "What are the main highlights of this document?"
+                        ],
+                        "maxItems": 4
                     },
                     "long_text": {
                         "$ref": "#/components/schemas/AiStudioAgentLongTextTool"
@@ -26488,10 +26525,19 @@
                     "basic_text": {
                         "$ref": "#/components/schemas/AiStudioAgentBasicTextTool"
                     },
+                    "basic_image": {
+                        "$ref": "#/components/schemas/AiStudioAgentBasicTextTool"
+                    },
+                    "spreadsheet": {
+                        "$ref": "#/components/schemas/AiStudioAgentSpreadsheetTool"
+                    },
                     "long_text_multi": {
                         "$ref": "#/components/schemas/AiStudioAgentLongTextTool"
                     },
                     "basic_text_multi": {
+                        "$ref": "#/components/schemas/AiStudioAgentBasicTextTool"
+                    },
+                    "basic_image_multi": {
                         "$ref": "#/components/schemas/AiStudioAgentBasicTextTool"
                     }
                 },
@@ -26505,11 +26551,11 @@
                 "x-box-tag": "ai_studio"
             },
             "AiStudioAgentAskResponse": {
-                "description": "質問に使用されるAIエージェント。",
+                "description": "The AI agent to be used to ask questions.",
                 "type": "object",
                 "properties": {
                     "type": {
-                        "description": "クエリの処理に使用されるAIエージェントのタイプ。",
+                        "description": "The type of AI agent used to ask questions.",
                         "type": "string",
                         "example": "ai_agent_ask",
                         "enum": [
@@ -26525,15 +26571,27 @@
                         "x-box-tag": "ai_studio"
                     },
                     "description": {
-                        "description": "AIエージェントの説明。",
+                        "description": "The description of the AI agent.",
                         "type": "string",
                         "example": "This is ASK Agent"
                     },
                     "custom_instructions": {
-                        "description": "エージェントに対するカスタム指示。",
+                        "description": "Custom instructions for the AI agent.",
                         "type": "string",
                         "example": "This is a custom instruction",
                         "nullable": true
+                    },
+                    "suggested_questions": {
+                        "description": "Suggested questions for the AI agent. If null, suggested question will be generated. If empty, no suggested questions will be displayed.",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "example": [
+                            "What is in this file?",
+                            "What are the main highlights of this document?"
+                        ],
+                        "maxItems": 4
                     },
                     "long_text": {
                         "$ref": "#/components/schemas/AiStudioAgentLongTextToolResponse"
@@ -26541,10 +26599,19 @@
                     "basic_text": {
                         "$ref": "#/components/schemas/AiStudioAgentBasicTextToolResponse"
                     },
+                    "basic_image": {
+                        "$ref": "#/components/schemas/AiStudioAgentBasicTextToolResponse"
+                    },
+                    "spreadsheet": {
+                        "$ref": "#/components/schemas/AiStudioAgentSpreadsheetToolResponse"
+                    },
                     "long_text_multi": {
                         "$ref": "#/components/schemas/AiStudioAgentLongTextToolResponse"
                     },
                     "basic_text_multi": {
+                        "$ref": "#/components/schemas/AiStudioAgentBasicTextToolResponse"
+                    },
+                    "basic_image_multi": {
                         "$ref": "#/components/schemas/AiStudioAgentBasicTextToolResponse"
                     }
                 },
@@ -26648,11 +26715,11 @@
                 "x-box-tag": "ai"
             },
             "AiStudioAgentExtract": {
-                "description": "抽出に使用されるAIエージェント。",
+                "description": "The AI agent to be used for metadata extraction.",
                 "type": "object",
                 "properties": {
                     "type": {
-                        "description": "抽出に使用されるAIエージェントのタイプ。",
+                        "description": "The type of AI agent to be used for metadata extraction.",
                         "type": "string",
                         "example": "ai_agent_extract",
                         "enum": [
@@ -26668,12 +26735,12 @@
                         "x-box-tag": "ai_studio"
                     },
                     "description": {
-                        "description": "AIエージェントの説明。",
+                        "description": "The description of the AI agent.",
                         "type": "string",
                         "example": "This is ASK Agent"
                     },
                     "custom_instructions": {
-                        "description": "エージェントに対するカスタム指示。",
+                        "description": "Custom instructions for the AI agent.",
                         "type": "string",
                         "example": "This is a custom instruction",
                         "nullable": true
@@ -26682,6 +26749,9 @@
                         "$ref": "#/components/schemas/AiStudioAgentLongTextTool"
                     },
                     "basic_text": {
+                        "$ref": "#/components/schemas/AiStudioAgentBasicTextTool"
+                    },
+                    "basic_image": {
                         "$ref": "#/components/schemas/AiStudioAgentBasicTextTool"
                     }
                 },
@@ -26695,11 +26765,11 @@
                 "x-box-tag": "ai_studio"
             },
             "AiStudioAgentExtractResponse": {
-                "description": "抽出に使用されるAIエージェント。",
+                "description": "The AI agent to be used for metadata extraction.",
                 "type": "object",
                 "properties": {
                     "type": {
-                        "description": "抽出に使用されるAIエージェントのタイプ。",
+                        "description": "The type of AI agent to be used for metadata extraction.",
                         "type": "string",
                         "example": "ai_agent_extract",
                         "enum": [
@@ -26715,12 +26785,12 @@
                         "x-box-tag": "ai_studio"
                     },
                     "description": {
-                        "description": "AIエージェントの説明。",
+                        "description": "The description of the AI agent.",
                         "type": "string",
                         "example": "This is ASK Agent"
                     },
                     "custom_instructions": {
-                        "description": "エージェントに対するカスタム指示。",
+                        "description": "Custom instructions for the AI agent.",
                         "type": "string",
                         "example": "This is a custom instruction",
                         "nullable": true
@@ -26729,6 +26799,9 @@
                         "$ref": "#/components/schemas/AiStudioAgentLongTextToolResponse"
                     },
                     "basic_text": {
+                        "$ref": "#/components/schemas/AiStudioAgentBasicTextToolResponse"
+                    },
+                    "basic_image": {
                         "$ref": "#/components/schemas/AiStudioAgentBasicTextToolResponse"
                     }
                 },
@@ -26786,8 +26859,47 @@
                 "title": "AIエージェントの長いテキストツール",
                 "x-box-tag": "ai"
             },
+            "AiStudioAgentSpreadsheetTool": {
+                "description": "The AI agent tool used to handle spreadsheets and tabular data.",
+                "type": "object",
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/AiAgentSpreadsheetTool"
+                    },
+                    {
+                        "properties": {}
+                    }
+                ],
+                "title": "AI agent spreadsheet tool",
+                "x-box-tag": "ai"
+            },
+            "AiStudioAgentSpreadsheetToolResponse": {
+                "description": "The AI agent tool used to handle spreadsheets and tabular data.",
+                "type": "object",
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/AiStudioAgentSpreadsheetTool"
+                    },
+                    {
+                        "properties": {
+                            "warnings": {
+                                "description": "Warnings concerning tool.",
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                },
+                                "example": [
+                                    "MODEL_INACTIVE"
+                                ]
+                            }
+                        }
+                    }
+                ],
+                "title": "AI agent spreadsheet tool",
+                "x-box-tag": "ai"
+            },
             "AiStudioAgentTextGen": {
-                "description": "テキストの生成に使用されるAIエージェント。",
+                "description": "The AI agent to be used to generate text.",
                 "type": "object",
                 "properties": {
                     "type": {
@@ -26807,15 +26919,27 @@
                         "x-box-tag": "ai_studio"
                     },
                     "description": {
-                        "description": "AIエージェントの説明。",
+                        "description": "The description of the AI agent.",
                         "type": "string",
                         "example": "This is ASK Agent"
                     },
                     "custom_instructions": {
-                        "description": "エージェントに対するカスタム指示。",
+                        "description": "Custom instructions for the AI agent.",
                         "type": "string",
                         "example": "This is a custom instruction",
                         "nullable": true
+                    },
+                    "suggested_questions": {
+                        "description": "Suggested questions for the AI agent. If null, suggested question will be generated. If empty, no suggested questions will be displayed.",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "example": [
+                            "What is in this file?",
+                            "What are the main highlights of this document?"
+                        ],
+                        "maxItems": 4
                     },
                     "basic_gen": {
                         "$ref": "#/components/schemas/AiStudioAgentBasicGenTool"
@@ -26831,7 +26955,7 @@
                 "x-box-tag": "ai_studio"
             },
             "AiStudioAgentTextGenResponse": {
-                "description": "テキストの生成に使用されるAIエージェント。",
+                "description": "The AI agent to be used to generate text.",
                 "type": "object",
                 "properties": {
                     "type": {
@@ -26851,15 +26975,27 @@
                         "x-box-tag": "ai_studio"
                     },
                     "description": {
-                        "description": "AIエージェントの説明。",
+                        "description": "The description of the AI agent.",
                         "type": "string",
                         "example": "This is ASK Agent"
                     },
                     "custom_instructions": {
-                        "description": "エージェントに対するカスタム指示。",
+                        "description": "Custom instructions for the AI agent.",
                         "type": "string",
                         "example": "This is a custom instruction",
                         "nullable": true
+                    },
+                    "suggested_questions": {
+                        "description": "Suggested questions for the AI agent. If null, suggested question will be generated. If empty, no suggested questions will be displayed.",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "example": [
+                            "What is in this file?",
+                            "What are the main highlights of this document?"
+                        ],
+                        "maxItems": 4
                     },
                     "basic_gen": {
                         "$ref": "#/components/schemas/AiStudioAgentBasicGenToolResponse"
