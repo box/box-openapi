@@ -14,7 +14,7 @@
       "url": "http://www.apache.org/licenses/LICENSE-2.0"
     },
     "version": "2025.0",
-    "x-box-commit-hash": "c96bf15203"
+    "x-box-commit-hash": "6768dcc5a7"
   },
   "servers": [
     {
@@ -1018,6 +1018,73 @@
         "tags": [
           "Hubs"
         ]
+      },
+      "post": {
+        "operationId": "post_hubs_v2025.0",
+        "summary": "Create hub",
+        "description": "Creates a new Hub.",
+        "x-stability-level": "beta",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/BoxVersionHeader"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HubCreateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Returns a new Hub object.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Hub"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Returned if any of the request parameters are not valid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Returns an error when the user does not have the\nright permissions to create a Hub.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        },
+        "x-box-tag": "hubs",
+        "tags": [
+          "Hubs"
+        ]
       }
     },
     "/enterprise_hubs": {
@@ -1184,6 +1251,83 @@
           "Hubs"
         ]
       },
+      "put": {
+        "operationId": "put_hubs_id_v2025.0",
+        "summary": "Update hub information by ID",
+        "description": "Updates a Hub. Can be used to change title, description, or Hub settings.",
+        "x-stability-level": "beta",
+        "parameters": [
+          {
+            "name": "hub_id",
+            "in": "path",
+            "description": "The unique identifier that represent a hub.\n\nThe ID for any hub can be determined\nby visiting this hub in the web application\nand copying the ID from the URL. For example,\nfor the URL `https://*.app.box.com/hubs/123`\nthe `hub_id` is `123`.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "12345"
+          },
+          {
+            "$ref": "#/components/parameters/BoxVersionHeader"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HubUpdateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Returns a Hub object.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Hub"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Returned when the access token provided in the `Authorization` header\nis not recognized or not provided.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Returned if the Hub is not found, or the user does not\nhave access to the Hub.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        },
+        "x-box-tag": "hubs",
+        "tags": [
+          "Hubs"
+        ]
+      },
       "delete": {
         "operationId": "delete_hubs_id_v2025.0",
         "summary": "Delete hub",
@@ -1220,6 +1364,75 @@
           },
           "404": {
             "description": "Returned if the hub is not found or has already been deleted, or the user\ndoes not have access to the hub.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        },
+        "x-box-tag": "hubs",
+        "tags": [
+          "Hubs"
+        ]
+      }
+    },
+    "/hubs/{hub_id}/copy": {
+      "post": {
+        "operationId": "post_hubs_id_copy_v2025.0",
+        "summary": "Copy hub",
+        "description": "Creates a copy of a Hub.\n\nThe original Hub will not be modified.",
+        "x-stability-level": "beta",
+        "parameters": [
+          {
+            "name": "hub_id",
+            "in": "path",
+            "description": "The unique identifier that represent a hub.\n\nThe ID for any hub can be determined\nby visiting this hub in the web application\nand copying the ID from the URL. For example,\nfor the URL `https://*.app.box.com/hubs/123`\nthe `hub_id` is `123`.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "12345"
+          },
+          {
+            "$ref": "#/components/parameters/BoxVersionHeader"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HubCopyRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Returns a new Hub object.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Hub"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Returns an error when the user does not have the\nright permissions to create a Hub.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1576,6 +1789,176 @@
         "x-box-tag": "hub_collaborations",
         "tags": [
           "Hub Collaborations"
+        ]
+      }
+    },
+    "/hub_items": {
+      "get": {
+        "operationId": "get_hub_items_v2025.0",
+        "summary": "Get hub items",
+        "description": "Retrieves all items associated with a Hub.",
+        "x-stability-level": "beta",
+        "parameters": [
+          {
+            "name": "hub_id",
+            "in": "query",
+            "description": "The unique identifier that represent a hub.\n\nThe ID for any hub can be determined\nby visiting this hub in the web application\nand copying the ID from the URL. For example,\nfor the URL `https://*.app.box.com/hubs/123`\nthe `hub_id` is `123`.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "12345"
+          },
+          {
+            "name": "marker",
+            "in": "query",
+            "description": "Defines the position marker at which to begin returning results. This is\nused when paginating using marker-based pagination.\n\nThis requires `usemarker` to be set to `true`.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "The maximum number of items to return per page.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "maximum": 1000
+            },
+            "example": 1000
+          },
+          {
+            "$ref": "#/components/parameters/BoxVersionHeader"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Retrieves the items associated with the specified Hub.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HubItems"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Returned when the access token provided in the `Authorization` header\nis not recognized or not provided.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Returned if the Hub is not found, or the user does not\nhave access to the Hub.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        },
+        "x-box-tag": "hub_items",
+        "tags": [
+          "Hub Items"
+        ]
+      }
+    },
+    "/hubs/{hub_id}/manage_items": {
+      "post": {
+        "operationId": "post_hubs_id_manage_items_v2025.0",
+        "summary": "Manage hub items",
+        "description": "Adds and/or removes Hub items from a Hub.",
+        "x-stability-level": "beta",
+        "parameters": [
+          {
+            "name": "hub_id",
+            "in": "path",
+            "description": "The unique identifier that represent a hub.\n\nThe ID for any hub can be determined\nby visiting this hub in the web application\nand copying the ID from the URL. For example,\nfor the URL `https://*.app.box.com/hubs/123`\nthe `hub_id` is `123`.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "12345"
+          },
+          {
+            "$ref": "#/components/parameters/BoxVersionHeader"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HubItemsManageRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "207": {
+            "description": "Retrieves the status of all the operations.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HubItemsManageResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Returned when the access token provided in the `Authorization` header\nis not recognized or not provided.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Returned if the Hub is not found, or the user does not\nhave access to the Hub.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        },
+        "x-box-tag": "hub_items",
+        "tags": [
+          "Hub Items"
         ]
       }
     },
@@ -2660,6 +3043,31 @@
         ],
         "title": "File version (Base)"
       },
+      "FolderReference": {
+        "description": "Folder reference.",
+        "type": "object",
+        "properties": {
+          "type": {
+            "description": "The value will always be `folder`.",
+            "type": "string",
+            "example": "folder",
+            "enum": [
+              "folder"
+            ],
+            "nullable": false
+          },
+          "id": {
+            "description": "ID of the folder.",
+            "type": "string",
+            "example": "42037322"
+          }
+        },
+        "required": [
+          "type",
+          "id"
+        ],
+        "title": "Folder reference"
+      },
       "Group--Base": {
         "description": "A base representation of a group.",
         "type": "object",
@@ -2839,6 +3247,17 @@
           }
         ],
         "title": "Hub Accessible By"
+      },
+      "HubAction": {
+        "description": "The action to perform on a Hub item.",
+        "type": "string",
+        "example": "add",
+        "enum": [
+          "add",
+          "remove"
+        ],
+        "nullable": false,
+        "title": "Hub Action"
       },
       "HubCollaboration": {
         "description": "A hub collaboration object grants a user or group access \nto a hub with permissions defined by a specific role.",
@@ -3087,6 +3506,265 @@
         "title": "Hub Collaborations",
         "x-box-resource-id": "hub_collaborations_v2025.0",
         "x-box-tag": "hub_collaborations"
+      },
+      "HubCopyRequest": {
+        "description": "Request schema for copying a Hub.",
+        "type": "object",
+        "properties": {
+          "title": {
+            "description": "Title of the Hub. It cannot be empty and should be less than 50 characters.",
+            "type": "string",
+            "example": "Hub Title",
+            "maxLength": 50
+          },
+          "description": {
+            "description": "Description of the Hub.",
+            "type": "string",
+            "example": "This is a description of the Hub."
+          }
+        },
+        "title": "Hub Copy Request"
+      },
+      "HubCreateRequest": {
+        "description": "Request schema for creating a new Hub.",
+        "type": "object",
+        "properties": {
+          "title": {
+            "description": "Title of the Hub. It cannot be empty and should be less than 50 characters.",
+            "type": "string",
+            "example": "Hub Title",
+            "maxLength": 50
+          },
+          "description": {
+            "description": "Description of the Hub.",
+            "type": "string",
+            "example": "This is a description of the Hub."
+          }
+        },
+        "required": [
+          "title"
+        ],
+        "title": "Hub Create Request"
+      },
+      "HubItem": {
+        "description": "A Hub Item is a Box Item that is referenced in a Hub.",
+        "type": "object",
+        "properties": {
+          "id": {
+            "description": "The unique identifier for this item.",
+            "type": "string",
+            "example": "12345678"
+          },
+          "type": {
+            "description": "The type of the item.",
+            "type": "string",
+            "example": "file",
+            "enum": [
+              "file",
+              "folder",
+              "web_link"
+            ]
+          },
+          "name": {
+            "description": "The name of the item.",
+            "type": "string",
+            "example": "My File"
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "name"
+        ],
+        "title": "Hub Item",
+        "x-box-resource-id": "hub_item_v2025.0",
+        "x-box-tag": "hub_items"
+      },
+      "HubItemOperation": {
+        "description": "An operation to perform on a Hub item.",
+        "type": "object",
+        "properties": {
+          "action": {
+            "description": "The action to perform on a Hub item.",
+            "type": "string",
+            "example": "add",
+            "enum": [
+              "add",
+              "remove"
+            ],
+            "nullable": false,
+            "title": "Hub Action"
+          },
+          "item": {
+            "description": "Reference to an item that can be added to a Hub.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/FileReference"
+              },
+              {
+                "$ref": "#/components/schemas/FolderReference"
+              },
+              {
+                "$ref": "#/components/schemas/WeblinkReference"
+              }
+            ],
+            "title": "Hub Item Reference"
+          }
+        },
+        "required": [
+          "action",
+          "item"
+        ],
+        "title": "Hub Item Operation"
+      },
+      "HubItemOperationResult": {
+        "description": "Result of a Hub item operation.",
+        "type": "object",
+        "properties": {
+          "action": {
+            "description": "The action performed on the item.",
+            "type": "string",
+            "example": "add"
+          },
+          "item": {
+            "$ref": "#/components/schemas/HubItemReference"
+          },
+          "status": {
+            "description": "The HTTP status code of the operation.",
+            "type": "integer",
+            "example": 200
+          },
+          "error": {
+            "description": "Error message if the operation failed.",
+            "type": "string",
+            "example": "Item not found"
+          }
+        },
+        "title": "Hub Item Operation Result"
+      },
+      "HubItemReference": {
+        "description": "Reference to an item that can be added to a Hub.",
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/FileReference"
+          },
+          {
+            "$ref": "#/components/schemas/FolderReference"
+          },
+          {
+            "$ref": "#/components/schemas/WeblinkReference"
+          }
+        ],
+        "title": "Hub Item Reference"
+      },
+      "HubItems": {
+        "description": "A list of Hub items.",
+        "type": "object",
+        "allOf": [
+          {
+            "properties": {
+              "entries": {
+                "description": "A list of Hub items.",
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/HubItem"
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "description": "The part of an API response that describes marker\nbased pagination.",
+            "properties": {
+              "limit": {
+                "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
+                "type": "integer",
+                "format": "int64",
+                "example": 1000
+              },
+              "next_marker": {
+                "description": "The marker for the start of the next page of results.",
+                "type": "string",
+                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                "nullable": true
+              }
+            }
+          }
+        ],
+        "title": "Hub Items",
+        "x-box-resource-id": "hub_items_v2025.0",
+        "x-box-tag": "hub_items"
+      },
+      "HubItemsManageRequest": {
+        "description": "Request schema for managing Hub items.",
+        "type": "object",
+        "properties": {
+          "operations": {
+            "description": "List of operations to perform on Hub items.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HubItemOperation"
+            }
+          }
+        },
+        "title": "Hub Items Manage Request"
+      },
+      "HubItemsManageResponse": {
+        "description": "Response schema for the status of Hub items management operations.",
+        "type": "object",
+        "properties": {
+          "operations": {
+            "description": "List of operations performed on Hub items.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HubItemOperationResult"
+            }
+          }
+        },
+        "required": [
+          "operations"
+        ],
+        "title": "Hub Items Manage Response",
+        "x-box-resource-id": "hub_items_manage_response_v2025.0",
+        "x-box-tag": "hub_items"
+      },
+      "HubUpdateRequest": {
+        "description": "Request schema for updating an existing Hub.",
+        "type": "object",
+        "properties": {
+          "title": {
+            "description": "Title of the Hub. It cannot be empty and should be less than 50 characters.",
+            "type": "string",
+            "example": "Hub Title",
+            "maxLength": 50
+          },
+          "description": {
+            "description": "Description of the Hub.",
+            "type": "string",
+            "example": "This is a description of the Hub."
+          },
+          "is_ai_enabled": {
+            "description": "Indicates if AI features are enabled for the Hub.",
+            "type": "boolean",
+            "example": true
+          },
+          "is_collaboration_restricted_to_enterprise": {
+            "description": "Indicates if collaboration is restricted to the enterprise.",
+            "type": "boolean",
+            "example": true
+          },
+          "can_non_owners_invite": {
+            "description": "Indicates if non-owners can invite others to the Hub.",
+            "type": "boolean",
+            "example": true
+          },
+          "can_shared_link_be_created": {
+            "description": "Indicates if a shared link can be created for the Hub.",
+            "type": "boolean",
+            "example": true
+          }
+        },
+        "title": "Hub Update Request"
       },
       "Hubs": {
         "description": "A paginated list of hubs.",
@@ -3615,6 +4293,32 @@
           }
         ],
         "title": "User (Mini)"
+      },
+      "WeblinkReference": {
+        "description": "Weblink reference.",
+        "type": "object",
+        "properties": {
+          "type": {
+            "description": "The value will always be `weblink`.",
+            "type": "string",
+            "example": "weblink",
+            "enum": [
+              "weblink"
+            ],
+            "nullable": false
+          },
+          "id": {
+            "description": "ID of the weblink.",
+            "type": "string",
+            "example": "42037322",
+            "nullable": false
+          }
+        },
+        "required": [
+          "type",
+          "id"
+        ],
+        "title": "Weblink reference"
       }
     },
     "securitySchemes": {
@@ -3665,6 +4369,11 @@
       "name": "Hub Collaborations",
       "description": "A set of endpoints used to manage collaborations within a Hub.",
       "x-box-tag": "hub_collaborations"
+    },
+    {
+      "name": "Hub Items",
+      "description": "A set of endpoints used to manage items within a Hub.",
+      "x-box-tag": "hub_items"
     },
     {
       "name": "Shield lists",
