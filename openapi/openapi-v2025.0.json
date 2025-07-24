@@ -14,7 +14,7 @@
       "url": "http://www.apache.org/licenses/LICENSE-2.0"
     },
     "version": "2025.0",
-    "x-box-commit-hash": "bbd8d4cb57"
+    "x-box-commit-hash": "9408e39d9e"
   },
   "servers": [
     {
@@ -2197,6 +2197,302 @@
           "Shield lists"
         ]
       }
+    },
+    "/archives": {
+      "get": {
+        "operationId": "get_archives_v2025.0",
+        "summary": "List archives",
+        "description": "Retrieves archives for an enterprise.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/BoxVersionHeader"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "The maximum number of items to return per page.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "maximum": 1000
+            },
+            "example": 1000
+          },
+          {
+            "name": "marker",
+            "in": "query",
+            "description": "Defines the position marker at which to begin returning results. This is\nused when paginating using marker-based pagination.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns a list of archives in the enterprise.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Archives"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Returns an error if some of the parameters are missing or\nnot valid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Returned when the access token provided in the `Authorization` header\nis not recognized or not provided.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Returns an error if the authenticated user does not have the right\npermissions to list archives.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "An unexpected server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        },
+        "x-box-tag": "archives",
+        "tags": [
+          "Archives"
+        ]
+      },
+      "post": {
+        "operationId": "post_archives_v2025.0",
+        "summary": "Create archive",
+        "description": "Creates an archive.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/BoxVersionHeader"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "description": "The name of the archive.",
+                    "type": "string",
+                    "example": "Some Archive"
+                  }
+                },
+                "required": [
+                  "name"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Returns a new archive object.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Archive"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Returns an error if some of the parameters are missing or\nnot valid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Returned when the access token provided in the `Authorization` header\nis not recognized or not provided.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Returns an error if the authenticated user does not have the right\npermissions to create an archive.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Returns an error if an archive with the given name already exists.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "An unexpected server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        },
+        "x-box-tag": "archives",
+        "tags": [
+          "Archives"
+        ]
+      }
+    },
+    "/archives/{archive_id}": {
+      "delete": {
+        "operationId": "delete_archives_id_v2025.0",
+        "summary": "Delete archive",
+        "description": "Permanently deletes an archive.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/BoxVersionHeader"
+          },
+          {
+            "name": "archive_id",
+            "in": "path",
+            "description": "The ID of the archive.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "982312"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Returns an empty response when the archive has been deleted."
+          },
+          "400": {
+            "description": "Returns an error if the archive is not empty.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Returned when the access token provided in the `Authorization` header\nis not recognized or not provided.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Returns an error if the user does not have the right\npermissions to delete the archive.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Returns an error if the archive is not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "An unexpected server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        },
+        "x-box-tag": "archives",
+        "tags": [
+          "Archives"
+        ]
+      }
     }
   },
   "components": {
@@ -2217,6 +2513,89 @@
       }
     },
     "schemas": {
+      "Archive": {
+        "description": "An archive is a folder dedicated to storing content that is\nredundant, outdated, or trivial. Content in an archive is not accessible to its\nowner and collaborators.\nTo use this feature, you must request GCM scope for your Box application.",
+        "type": "object",
+        "properties": {
+          "id": {
+            "description": "The unique identifier that represents an archive.",
+            "type": "string",
+            "example": "12345",
+            "nullable": false
+          },
+          "type": {
+            "description": "The value will always be `archive`.",
+            "type": "string",
+            "example": "archive",
+            "enum": [
+              "archive"
+            ],
+            "nullable": false
+          },
+          "name": {
+            "description": "The name of the archive.\n\nThe following restrictions to the archive name apply: names containing\nnon-printable ASCII characters, forward and backward slashes\n(`/`, `\\`), names with trailing spaces, and names `.` and `..` are\nnot allowed.",
+            "type": "string",
+            "example": "Archive",
+            "maxLength": 100,
+            "minLength": 1,
+            "nullable": false
+          },
+          "size": {
+            "description": "The size of the archive in bytes.",
+            "type": "integer",
+            "format": "int64",
+            "example": 123456789,
+            "nullable": false
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "name",
+          "size"
+        ],
+        "title": "Archive",
+        "x-box-resource-id": "archive_v2025.0",
+        "x-box-tag": "archives"
+      },
+      "Archives": {
+        "description": "A list of archives.",
+        "type": "object",
+        "allOf": [
+          {
+            "properties": {
+              "entries": {
+                "description": "A list in which each entry represents an archive object.",
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Archive"
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "description": "The part of an API response that describes marker\nbased pagination.",
+            "properties": {
+              "limit": {
+                "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
+                "type": "integer",
+                "format": "int64",
+                "example": 1000
+              },
+              "next_marker": {
+                "description": "The marker for the start of the next page of results.",
+                "type": "string",
+                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                "nullable": true
+              }
+            }
+          }
+        ],
+        "title": "Archives",
+        "x-box-resource-id": "archives_v2025.0",
+        "x-box-tag": "archives"
+      },
       "ClientError": {
         "description": "A generic error.",
         "type": "object",
@@ -4350,6 +4729,11 @@
     }
   ],
   "tags": [
+    {
+      "name": "Archives",
+      "description": "A set of endpoints used to manage archives.",
+      "x-box-tag": "archives"
+    },
     {
       "name": "Box Doc Gen",
       "description": "Doc Gen is used to automatically generate documents.",
