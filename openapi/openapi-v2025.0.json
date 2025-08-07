@@ -14,7 +14,7 @@
       "url": "http://www.apache.org/licenses/LICENSE-2.0"
     },
     "version": "2025.0",
-    "x-box-commit-hash": "24c2e06d6c"
+    "x-box-commit-hash": "13ddace33b"
   },
   "servers": [
     {
@@ -2479,6 +2479,64 @@
           "Archives"
         ]
       }
+    },
+    "/external_users/submit_delete_job": {
+      "post": {
+        "operationId": "post_external_users_submit_delete_job_v2025.0",
+        "summary": "Submit job to delete external users",
+        "description": "Delete external users from current user enterprise. This will remove each\nexternal user from all invited collaborations within the current enterprise.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/BoxVersionHeader"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExternalUsersSubmitDeleteJobRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "207": {
+            "description": "Multi-status response containing the result for each external user deletion request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExternalUsersSubmitDeleteJobResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Returns an error if the authenticated user does not have the right\npermissions to delete external users.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        },
+        "x-box-tag": "external_users",
+        "tags": [
+          "External Users"
+        ]
+      }
     }
   },
   "components": {
@@ -3355,6 +3413,68 @@
           }
         },
         "title": "Enterprise reference"
+      },
+      "ExternalUserDeletionResult": {
+        "description": "Result of a single external user deletion request.",
+        "type": "object",
+        "properties": {
+          "user_id": {
+            "description": "The ID of the external user.",
+            "type": "string",
+            "example": "12345"
+          },
+          "status": {
+            "description": "HTTP status code for a specific user's deletion request.",
+            "type": "integer",
+            "example": 202
+          },
+          "detail": {
+            "description": "Deletion request status details.",
+            "type": "string",
+            "example": "Successfully submitted for deletion"
+          }
+        },
+        "required": [
+          "user_id",
+          "status"
+        ],
+        "title": "External User Deletion Result"
+      },
+      "ExternalUsersSubmitDeleteJobRequest": {
+        "description": "Request to submit a job to delete external users from the current enterprise.",
+        "type": "object",
+        "properties": {
+          "external_users": {
+            "description": "List of external users to delete.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserReference"
+            }
+          }
+        },
+        "required": [
+          "external_users"
+        ],
+        "title": "External Users Submit Delete Job Request"
+      },
+      "ExternalUsersSubmitDeleteJobResponse": {
+        "description": "Multi-status response containing the result for each external user deletion request.",
+        "type": "object",
+        "properties": {
+          "entries": {
+            "description": "Array of results of each external user deletion request.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExternalUserDeletionResult"
+            }
+          }
+        },
+        "required": [
+          "entries"
+        ],
+        "title": "External Users Submit Delete Job Response",
+        "x-box-resource-id": "external_users_submit_delete_job_response_v2025.0",
+        "x-box-tag": "external_users"
       },
       "FileReference": {
         "description": "File reference.",
@@ -4659,6 +4779,30 @@
         ],
         "title": "User (Mini)"
       },
+      "UserReference": {
+        "description": "User reference.",
+        "type": "object",
+        "properties": {
+          "type": {
+            "description": "The value is always `user`.",
+            "type": "string",
+            "example": "user",
+            "enum": [
+              "user"
+            ]
+          },
+          "id": {
+            "description": "The unique identifier for the user.",
+            "type": "string",
+            "example": "12345"
+          }
+        },
+        "required": [
+          "type",
+          "id"
+        ],
+        "title": "User reference"
+      },
       "WeblinkReference": {
         "description": "Weblink reference.",
         "type": "object",
@@ -4729,6 +4873,11 @@
       "name": "Box Doc Gen templates",
       "description": "Doc Gen templates are used as input to generate documents.",
       "x-box-tag": "docgen_template"
+    },
+    {
+      "name": "External Users",
+      "description": "External users are collaborators from outside of your enterprise.",
+      "x-box-tag": "external_users"
     },
     {
       "name": "Hubs",
