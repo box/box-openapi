@@ -14,7 +14,7 @@
             "url": "http://www.apache.org/licenses/LICENSE-2.0"
         },
         "version": "2024.0",
-        "x-box-commit-hash": "8a28adebc4"
+        "x-box-commit-hash": "04730436d5"
     },
     "servers": [
         {
@@ -868,7 +868,7 @@
             "delete": {
                 "operationId": "delete_files_id",
                 "summary": "ファイルを削除",
-                "description": "ファイルを削除します (完全に削除するか、ごみ箱に移動します)。\n\n項目がBoxから完全に削除されるか、ごみ箱に移動されるかは、会社の設定により決定されます。",
+                "description": "ファイルを削除します (完全に削除するか、ごみ箱に移動します)。\n\nThe enterprise settings determine whether the item will be permanently deleted from Box or moved to the trash.",
                 "parameters": [
                     {
                         "name": "file_id",
@@ -3149,7 +3149,7 @@
             "post": {
                 "operationId": "post_files_id_versions_current",
                 "summary": "ファイルバージョンを昇格",
-                "description": "特定のファイルバージョンを昇格させます。\n\n以前のバージョンが存在する場合は、この方法を使用して古いバージョンのいずれかをバージョン履歴の先頭に移動できます。\n\nこれにより、古いバージョンの新しいコピーが作成されて、バージョン履歴の先頭に配置されます。このファイルは古いバージョンとまったく同じ内容になり、ハッシュダイジェスト、`etag`、およびファイル名も同じになります。\n\nコメントなど、他のプロパティが以前の値に更新されることはありません。\n\nこのエンドポイントは、PDF、DOC、PPTXなどのファイル形式で機能するため、Box Notesの復元には使用しないでください。",
+                "description": "特定のファイルバージョンを昇格させます。\n\n以前のバージョンが存在する場合は、この方法を使用して古いバージョンのいずれかをバージョン履歴の先頭に移動できます。\n\nThis creates a new copy of the old version and puts it at the top of the versions history. The file will have the exact same contents as the older version, with the same hash digest, `etag`, and name as the original.\n\nコメントなど、他のプロパティが以前の値に更新されることはありません。\n\nこのエンドポイントは、PDF、DOC、PPTXなどのファイル形式で機能するため、Box Notesの復元には使用しないでください。",
                 "parameters": [
                     {
                         "name": "file_id",
@@ -4147,20 +4147,7 @@
                                         "description": "このファイルに適用するBox Skillカードのリスト。",
                                         "type": "array",
                                         "items": {
-                                            "oneOf": [
-                                                {
-                                                    "$ref": "#/components/schemas/KeywordSkillCard"
-                                                },
-                                                {
-                                                    "$ref": "#/components/schemas/TimelineSkillCard"
-                                                },
-                                                {
-                                                    "$ref": "#/components/schemas/TranscriptSkillCard"
-                                                },
-                                                {
-                                                    "$ref": "#/components/schemas/StatusSkillCard"
-                                                }
-                                            ]
+                                            "$ref": "#/components/schemas/SkillCard"
                                         }
                                     }
                                 },
@@ -4270,20 +4257,7 @@
                                         "value": {
                                             "allOf": [
                                                 {
-                                                    "oneOf": [
-                                                        {
-                                                            "$ref": "#/components/schemas/KeywordSkillCard"
-                                                        },
-                                                        {
-                                                            "$ref": "#/components/schemas/TimelineSkillCard"
-                                                        },
-                                                        {
-                                                            "$ref": "#/components/schemas/TranscriptSkillCard"
-                                                        },
-                                                        {
-                                                            "$ref": "#/components/schemas/StatusSkillCard"
-                                                        }
-                                                    ]
+                                                    "$ref": "#/components/schemas/SkillCard"
                                                 },
                                                 {
                                                     "description": "カードのリスト内の`path`で定義された位置に挿入されるカード。"
@@ -10270,7 +10244,7 @@
                                         ]
                                     },
                                     "is_access_only": {
-                                        "description": "`true`に設定した場合、コラボレータは共有項目にアクセスできますが、これらの項目は \\[すべてのファイル] リストに表示されません。また、コラボレータには共有項目のルートフォルダのパスも表示されません。",
+                                        "description": "If set to `true`, collaborators have access to shared items, but such items won't be visible in the All Files list. Additionally, collaborators won't see the path to the root folder for the shared item.",
                                         "type": "boolean",
                                         "example": true
                                     },
@@ -10385,7 +10359,7 @@
                     {
                         "name": "created_at_range",
                         "in": "query",
-                        "description": "指定した日付範囲内に作成されたすべての項目に検索結果を絞り込みます。\n\n日付範囲はコンマ区切りのRFC3339タイムスタンプとして定義されます。\n\n開始日が省略されている場合 (`,2014-05-17T13:35:01-07:00`)、終了日より前に作成された項目がすべて返されます。\n\n終了日が省略されている場合 (`2014-05-15T13:35:01-07:00,`)、代わりに現在の日付が終了日として使用されます。",
+                        "description": "指定した日付範囲内に作成されたすべての項目に検索結果を絞り込みます。\n\n日付範囲はコンマ区切りのRFC3339タイムスタンプとして定義されます。\n\nIf the start date is omitted (`,2014-05-17T13:35:01-07:00`) anything created before the end date will be returned.\n\n終了日が省略されている場合 (`2014-05-15T13:35:01-07:00,`)、代わりに現在の日付が終了日として使用されます。",
                         "required": false,
                         "schema": {
                             "type": "array",
@@ -10674,7 +10648,7 @@
                     {
                         "name": "deleted_at_range",
                         "in": "query",
-                        "description": "指定した日付範囲内に削除されたすべての項目に検索結果を絞り込みます。\n\n日付範囲はコンマ区切りのRFC3339タイムスタンプとして定義されます。\n\n開始日が省略されている場合 (`2014-05-17T13:35:01-07:00`)、終了日より前に削除された項目がすべて返されます。\n\n終了日が省略されている場合 (`2014-05-15T13:35:01-07:00`)、代わりに現在の日付が終了日として使用されます。\n\n`trash_content`パラメータは`trashed_only`に設定する必要があります。\n\nごみ箱内検索が実行されていない場合は、空の結果が返されます。\n\n2023年2月1日以降利用できるデータです。",
+                        "description": "指定した日付範囲内に削除されたすべての項目に検索結果を絞り込みます。\n\n日付範囲はコンマ区切りのRFC3339タイムスタンプとして定義されます。\n\nIf the start date is omitted (`2014-05-17T13:35:01-07:00`), anything deleted before the end date will be returned.\n\n終了日が省略されている場合 (`2014-05-15T13:35:01-07:00`)、代わりに現在の日付が終了日として使用されます。\n\n`trash_content`パラメータは`trashed_only`に設定する必要があります。\n\nごみ箱内検索が実行されていない場合は、空の結果が返されます。\n\n2023年2月1日以降利用できるデータです。",
                         "required": false,
                         "schema": {
                             "type": "array",
@@ -10694,14 +10668,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "oneOf": [
-                                        {
-                                            "$ref": "#/components/schemas/SearchResults"
-                                        },
-                                        {
-                                            "$ref": "#/components/schemas/SearchResultsWithSharedLinks"
-                                        }
-                                    ]
+                                    "$ref": "#/components/schemas/SearchResultsResponse"
                                 }
                             }
                         }
@@ -10806,7 +10773,7 @@
                                         "example": "2012-12-12T10:53:43-08:00"
                                     },
                                     "completion_rule": {
-                                        "description": "タスクが完了と見なされる前にそのタスクを完了する必要がある担当者を定義します。\n\n* `all_assignees` (デフォルト) - タスクが完了と見なされるには、すべての担当者がそのタスクをレビューまたは承認する必要があります。\n* `any_assignee` - いずれか1人の担当者がタスクをレビューまたは承認すれば、タスクが完了と見なされます。",
+                                        "description": "タスクが完了と見なされる前にそのタスクを完了する必要がある担当者を定義します。\n\n* `all_assignees` (default) requires all assignees to review or approve the task in order for it to be considered completed.\n* `any_assignee` accepts any one assignee to review or approve the task in order for it to be considered completed.",
                                         "type": "string",
                                         "example": "all_assignees",
                                         "default": "all_assignees",
@@ -10978,7 +10945,7 @@
                                         "example": "2012-12-12T10:53:43-08:00"
                                     },
                                     "completion_rule": {
-                                        "description": "タスクが完了と見なされる前にそのタスクを完了する必要がある担当者を定義します。\n\n* `all_assignees` (デフォルト) - タスクが完了と見なされるには、すべての担当者がそのタスクをレビューまたは承認する必要があります。\n* `any_assignee` - いずれか1人の担当者がタスクをレビューまたは承認すれば、タスクが完了と見なされます。",
+                                        "description": "タスクが完了と見なされる前にそのタスクを完了する必要がある担当者を定義します。\n\n* `all_assignees` (default) requires all assignees to review or approve the task in order for it to be considered completed.\n* `any_assignee` accepts any one assignee to review or approve the task in order for it to be considered completed.",
                                         "type": "string",
                                         "example": "all_assignees",
                                         "enum": [
@@ -17371,20 +17338,7 @@
                                                 "description": "このファイルに適用するBox Skillカードのリスト。",
                                                 "type": "array",
                                                 "items": {
-                                                    "oneOf": [
-                                                        {
-                                                            "$ref": "#/components/schemas/KeywordSkillCard"
-                                                        },
-                                                        {
-                                                            "$ref": "#/components/schemas/TimelineSkillCard"
-                                                        },
-                                                        {
-                                                            "$ref": "#/components/schemas/TranscriptSkillCard"
-                                                        },
-                                                        {
-                                                            "$ref": "#/components/schemas/StatusSkillCard"
-                                                        }
-                                                    ]
+                                                    "$ref": "#/components/schemas/SkillCard"
                                                 }
                                             }
                                         }
@@ -24662,20 +24616,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "oneOf": [
-                                        {
-                                            "$ref": "#/components/schemas/AiAgentAsk"
-                                        },
-                                        {
-                                            "$ref": "#/components/schemas/AiAgentTextGen"
-                                        },
-                                        {
-                                            "$ref": "#/components/schemas/AiAgentExtract"
-                                        },
-                                        {
-                                            "$ref": "#/components/schemas/AiAgentExtractStructured"
-                                        }
-                                    ]
+                                    "$ref": "#/components/schemas/AiAgent"
                                 }
                             }
                         }
@@ -25216,7 +25157,7 @@
                         "description": "このアクセストークンで許可される権限を返します。これにより、リソース (ファイルやフォルダなど) のリストと、各リソースで許可されるスコープが提供されます。",
                         "type": "array",
                         "items": {
-                            "$ref": "#/components/schemas/FileOrFolderScope"
+                            "$ref": "#/components/schemas/ResourceScope"
                         }
                     },
                     "refresh_token": {
@@ -25238,6 +25179,25 @@
                 "title": "アクセストークン",
                 "x-box-resource-id": "access_token",
                 "x-box-tag": "authorization"
+            },
+            "AiAgent": {
+                "description": "Can be one of the following objects:\n\n* 質問用のAIエージェント\n* テキスト生成用のAIエージェント\n* 自由形式のメタデータ抽出用のAIエージェント\n* AI agent for structured metadata extraction.",
+                "type": "object",
+                "oneOf": [
+                    {
+                        "$ref": "#/components/schemas/AiAgentAsk"
+                    },
+                    {
+                        "$ref": "#/components/schemas/AiAgentTextGen"
+                    },
+                    {
+                        "$ref": "#/components/schemas/AiAgentExtract"
+                    },
+                    {
+                        "$ref": "#/components/schemas/AiAgentExtractStructured"
+                    }
+                ],
+                "title": "AIエージェント"
             },
             "AiAgentAllowedEntity": {
                 "description": "タイプとIDが指定されたエンティティ。",
@@ -25688,14 +25648,7 @@
                     "ai_agent": {
                         "allOf": [
                             {
-                                "oneOf": [
-                                    {
-                                        "$ref": "#/components/schemas/AiAgentAsk"
-                                    },
-                                    {
-                                        "$ref": "#/components/schemas/AiAgentReference"
-                                    }
-                                ]
+                                "$ref": "#/components/schemas/AiAskAgent"
                             },
                             {
                                 "description": "リクエストの処理に使用されるAIエージェント。"
@@ -25710,6 +25663,19 @@
                 ],
                 "title": "AIへの質問リクエスト",
                 "x-box-tag": "ai"
+            },
+            "AiAskAgent": {
+                "description": "The AI agent to be used to handle the AI ask request.",
+                "type": "object",
+                "oneOf": [
+                    {
+                        "$ref": "#/components/schemas/AiAgentReference"
+                    },
+                    {
+                        "$ref": "#/components/schemas/AiAgentAsk"
+                    }
+                ],
+                "title": "AI ask request agent"
             },
             "AiCitation": {
                 "description": "LLMの回答で参照された部分の引用情報。",
@@ -25786,14 +25752,7 @@
                     "ai_agent": {
                         "allOf": [
                             {
-                                "oneOf": [
-                                    {
-                                        "$ref": "#/components/schemas/AiAgentReference"
-                                    },
-                                    {
-                                        "$ref": "#/components/schemas/AiAgentExtract"
-                                    }
-                                ]
+                                "$ref": "#/components/schemas/AiExtractAgent"
                             },
                             {
                                 "description": "抽出に使用されるAIエージェント。"
@@ -25807,6 +25766,19 @@
                 ],
                 "title": "AIへのメタデータ抽出 (自由形式) リクエスト",
                 "x-box-tag": "ai"
+            },
+            "AiExtractAgent": {
+                "description": "The AI agent to be used to handle the AI metadata freeform extraction request.",
+                "type": "object",
+                "oneOf": [
+                    {
+                        "$ref": "#/components/schemas/AiAgentReference"
+                    },
+                    {
+                        "$ref": "#/components/schemas/AiAgentExtract"
+                    }
+                ],
+                "title": "AI metadata freeform extraction request agent"
             },
             "AiExtractResponse": {
                 "description": "AIによる抽出のレスポンス。このレスポンスのコンテンツは、リクエストされた構成に応じて異なる場合があります。",
@@ -25922,14 +25894,7 @@
                     "ai_agent": {
                         "allOf": [
                             {
-                                "oneOf": [
-                                    {
-                                        "$ref": "#/components/schemas/AiAgentReference"
-                                    },
-                                    {
-                                        "$ref": "#/components/schemas/AiAgentExtractStructured"
-                                    }
-                                ]
+                                "$ref": "#/components/schemas/AiExtractStructuredAgent"
                             },
                             {
                                 "description": "抽出 (構造化) に使用されるAIエージェント。"
@@ -25942,6 +25907,19 @@
                 ],
                 "title": "AIによる抽出 (構造化) リクエスト",
                 "x-box-tag": "ai"
+            },
+            "AiExtractStructuredAgent": {
+                "description": "The AI agent to be used to handle the AI extract structured request.",
+                "type": "object",
+                "oneOf": [
+                    {
+                        "$ref": "#/components/schemas/AiAgentReference"
+                    },
+                    {
+                        "$ref": "#/components/schemas/AiAgentExtractStructured"
+                    }
+                ],
+                "title": "AI Extract Structured Request agent"
             },
             "AiExtractStructuredResponse": {
                 "description": "AIによる抽出 (構造化) のレスポンス。",
@@ -27064,14 +27042,7 @@
                     "ai_agent": {
                         "allOf": [
                             {
-                                "oneOf": [
-                                    {
-                                        "$ref": "#/components/schemas/AiAgentReference"
-                                    },
-                                    {
-                                        "$ref": "#/components/schemas/AiAgentTextGen"
-                                    }
-                                ]
+                                "$ref": "#/components/schemas/AiTextGenAgent"
                             },
                             {
                                 "description": "テキストの生成に使用されるAIエージェント。"
@@ -27085,6 +27056,19 @@
                 ],
                 "title": "AIへのテキスト生成リクエスト",
                 "x-box-tag": "ai"
+            },
+            "AiTextGenAgent": {
+                "description": "The AI agent to be used to handle the AI text generation request.",
+                "type": "object",
+                "oneOf": [
+                    {
+                        "$ref": "#/components/schemas/AiAgentReference"
+                    },
+                    {
+                        "$ref": "#/components/schemas/AiAgentTextGen"
+                    }
+                ],
+                "title": "AI text gen request agent"
             },
             "AppItem": {
                 "description": "アプリ項目は、アプリケーションが所有するコンテンツオブジェクトを表します。これは、さまざまなパスからファイルやフォルダをまとめてグループ化でき、そのセットは、コラボレーションを利用して共有できます。",
@@ -27118,6 +27102,22 @@
                 "x-box-resource-id": "app_item",
                 "x-box-tag": "app_item_associations"
             },
+            "AppItemAssociatedItem": {
+                "description": "The file, folder or web link which is associated with the app item.",
+                "type": "object",
+                "oneOf": [
+                    {
+                        "$ref": "#/components/schemas/File--Base"
+                    },
+                    {
+                        "$ref": "#/components/schemas/Folder--Base"
+                    },
+                    {
+                        "$ref": "#/components/schemas/WebLink--Base"
+                    }
+                ],
+                "title": "App item associated item"
+            },
             "AppItemAssociation": {
                 "description": "アプリ項目の関連付けは、ファイルやフォルダとアプリ項目の関連付けを表します。フォルダとアプリ項目の関連付けは、そのフォルダのすべての子孫にカスケードされます。",
                 "type": "object",
@@ -27149,25 +27149,7 @@
                         "nullable": false
                     },
                     "item": {
-                        "allOf": [
-                            {
-                                "oneOf": [
-                                    {
-                                        "$ref": "#/components/schemas/File--Base"
-                                    },
-                                    {
-                                        "$ref": "#/components/schemas/Folder--Base"
-                                    },
-                                    {
-                                        "$ref": "#/components/schemas/WebLink--Base"
-                                    }
-                                ]
-                            },
-                            {
-                                "description": "アプリ項目に関連付けられているファイルまたはフォルダ。"
-                            }
-                        ],
-                        "nullable": false
+                        "$ref": "#/components/schemas/AppItemAssociatedItem"
                     }
                 },
                 "required": [
@@ -27584,17 +27566,7 @@
                     "item": {
                         "allOf": [
                             {
-                                "oneOf": [
-                                    {
-                                        "$ref": "#/components/schemas/File"
-                                    },
-                                    {
-                                        "$ref": "#/components/schemas/Folder"
-                                    },
-                                    {
-                                        "$ref": "#/components/schemas/WebLink"
-                                    }
-                                ]
+                                "$ref": "#/components/schemas/CollaborationItem"
                             },
                             {
                                 "description": "アクセスが許可されているファイルまたはフォルダ。コラボレーションの`status`が`pending`の場合またはコラボレーションがアプリ項目に作成されている場合 (`app_item`フィールド参照)、このフィールドは`null`です。"
@@ -27614,21 +27586,7 @@
                         "nullable": true
                     },
                     "accessible_by": {
-                        "allOf": [
-                            {
-                                "oneOf": [
-                                    {
-                                        "$ref": "#/components/schemas/User--Collaborations"
-                                    },
-                                    {
-                                        "$ref": "#/components/schemas/Group--Mini"
-                                    }
-                                ]
-                            },
-                            {
-                                "description": "アクセス権限が付与されるユーザーまたはグループ。"
-                            }
-                        ]
+                        "$ref": "#/components/schemas/CollaborationAccessGrantee"
                     },
                     "invite_email": {
                         "description": "登録済みユーザーでない未登録コラボレータを招待するために使用されたメールアドレス。",
@@ -27659,7 +27617,7 @@
                         "nullable": true
                     },
                     "is_access_only": {
-                        "description": "`true`に設定した場合、コラボレータは共有項目にアクセスできますが、これらの項目は \\[すべてのファイル] リストに表示されません。また、コラボレータには共有項目のルートフォルダのパスも表示されません。",
+                        "description": "If set to `true`, collaborators have access to shared items, but such items won't be visible in the All Files list. Additionally, collaborators won't see the path to the root folder for the shared item.",
                         "type": "boolean",
                         "example": true
                     },
@@ -27783,6 +27741,19 @@
                 "title": "Collaboration",
                 "x-box-resource-id": "collaboration",
                 "x-box-tag": "user_collaborations"
+            },
+            "CollaborationAccessGrantee": {
+                "description": "アクセス権限が付与されるユーザーまたはグループ。",
+                "type": "object",
+                "oneOf": [
+                    {
+                        "$ref": "#/components/schemas/User--Collaborations"
+                    },
+                    {
+                        "$ref": "#/components/schemas/Group--Mini"
+                    }
+                ],
+                "title": "Collaboration access grantee"
             },
             "CollaborationAllowlistEntries": {
                 "description": "コラボレーションが許可されたドメインのリスト。",
@@ -28022,6 +27993,22 @@
                 "title": "許可されたコラボレーションドメインからユーザーを除外",
                 "x-box-resource-id": "collaboration_allowlist_exempt_targets",
                 "x-box-tag": "collaboration_allowlist_exempt_targets"
+            },
+            "CollaborationItem": {
+                "description": "A collaboration item.",
+                "type": "object",
+                "oneOf": [
+                    {
+                        "$ref": "#/components/schemas/File"
+                    },
+                    {
+                        "$ref": "#/components/schemas/Folder"
+                    },
+                    {
+                        "$ref": "#/components/schemas/WebLink"
+                    }
+                ],
+                "title": "Collaboration item"
             },
             "Collaborations": {
                 "description": "コラボレーションのリスト。",
@@ -28957,26 +28944,7 @@
                     "source": {
                         "allOf": [
                             {
-                                "oneOf": [
-                                    {
-                                        "$ref": "#/components/schemas/User"
-                                    },
-                                    {
-                                        "$ref": "#/components/schemas/EventSource"
-                                    },
-                                    {
-                                        "$ref": "#/components/schemas/File"
-                                    },
-                                    {
-                                        "$ref": "#/components/schemas/Folder"
-                                    },
-                                    {
-                                        "$ref": "#/components/schemas/GenericSource"
-                                    },
-                                    {
-                                        "$ref": "#/components/schemas/AppItemEventSource"
-                                    }
-                                ]
+                                "$ref": "#/components/schemas/EventSourceResource"
                             },
                             {
                                 "description": "このイベントをトリガーしたリソース。詳細については、イベントトリガーに関するガイドを確認してください。"
@@ -29064,6 +29032,31 @@
                 ],
                 "title": "イベントソース",
                 "x-box-resource-id": "event_source"
+            },
+            "EventSourceResource": {
+                "description": "The resource that triggered an event.",
+                "type": "object",
+                "oneOf": [
+                    {
+                        "$ref": "#/components/schemas/User"
+                    },
+                    {
+                        "$ref": "#/components/schemas/EventSource"
+                    },
+                    {
+                        "$ref": "#/components/schemas/File"
+                    },
+                    {
+                        "$ref": "#/components/schemas/Folder"
+                    },
+                    {
+                        "$ref": "#/components/schemas/GenericSource"
+                    },
+                    {
+                        "$ref": "#/components/schemas/AppItemEventSource"
+                    }
+                ],
+                "title": "Event source resource"
             },
             "Events": {
                 "description": "イベントオブジェクトのリスト。",
@@ -29713,7 +29706,7 @@
                                                         "description": "このアクセストークンで許可される権限を返します。これにより、リソース (ファイルやフォルダなど) のリストと、各リソースで許可されるスコープが提供されます。",
                                                         "type": "array",
                                                         "items": {
-                                                            "$ref": "#/components/schemas/FileOrFolderScope"
+                                                            "$ref": "#/components/schemas/ResourceScope"
                                                         }
                                                     }
                                                 }
@@ -30086,51 +30079,6 @@
                 "title": "ファイル (競合)",
                 "x-box-resource-id": "file_conflict",
                 "x-box-tag": null
-            },
-            "FileOrFolderScope": {
-                "description": "リソース (ファイルまたはフォルダ) とそのリソースにアクセスできるスコープの関係。",
-                "type": "object",
-                "properties": {
-                    "scope": {
-                        "description": "リソースへのアクセスのスコープ。",
-                        "type": "string",
-                        "example": "item_download",
-                        "enum": [
-                            "annotation_edit",
-                            "annotation_view_all",
-                            "annotation_view_self",
-                            "base_explorer",
-                            "base_picker",
-                            "base_preview",
-                            "base_upload",
-                            "item_delete",
-                            "item_download",
-                            "item_preview",
-                            "item_rename",
-                            "item_share",
-                            "item_upload",
-                            "item_read"
-                        ]
-                    },
-                    "object": {
-                        "allOf": [
-                            {
-                                "oneOf": [
-                                    {
-                                        "$ref": "#/components/schemas/Folder--Mini"
-                                    },
-                                    {
-                                        "$ref": "#/components/schemas/File--Mini"
-                                    }
-                                ]
-                            },
-                            {
-                                "description": "ファイルまたはフォルダのリソース。"
-                            }
-                        ]
-                    }
-                },
-                "title": "ファイルまたはフォルダのスコープ"
             },
             "FileRequest": {
                 "description": "任意のファイルリクエストAPIエンドポイントからデフォルトで返されるファイルリクエストのStandard版の表示。",
@@ -32241,7 +32189,7 @@
                                     "type": "channel",
                                     "slack_org_id": "E1234567"
                                 },
-                                "oneOf": [
+                                "allOf": [
                                     {
                                         "$ref": "#/components/schemas/IntegrationMappingPartnerItemSlack"
                                     }
@@ -32509,7 +32457,7 @@
                                     "tenant_id": "E1234567",
                                     "team_id": "hjgjgjg-bhhj-564a-b643-hghgj685u"
                                 },
-                                "oneOf": [
+                                "allOf": [
                                     {
                                         "$ref": "#/components/schemas/IntegrationMappingPartnerItemTeams"
                                     }
@@ -32710,6 +32658,22 @@
                 "x-box-resource-id": "invite",
                 "x-box-tag": "invites"
             },
+            "Item": {
+                "description": "An item represents a file, folder, or web link.",
+                "type": "object",
+                "oneOf": [
+                    {
+                        "$ref": "#/components/schemas/File--Full"
+                    },
+                    {
+                        "$ref": "#/components/schemas/Folder--Mini"
+                    },
+                    {
+                        "$ref": "#/components/schemas/WebLink"
+                    }
+                ],
+                "title": "Item"
+            },
             "Items": {
                 "description": "Mini版の表示に含まれるファイル、フォルダ、ウェブリンクのリスト。",
                 "type": "object",
@@ -32792,17 +32756,7 @@
                                 "description": "このコレクション内の項目。",
                                 "type": "array",
                                 "items": {
-                                    "oneOf": [
-                                        {
-                                            "$ref": "#/components/schemas/File--Full"
-                                        },
-                                        {
-                                            "$ref": "#/components/schemas/Folder--Mini"
-                                        },
-                                        {
-                                            "$ref": "#/components/schemas/WebLink"
-                                        }
-                                    ]
+                                    "$ref": "#/components/schemas/Item"
                                 }
                             }
                         }
@@ -32870,17 +32824,7 @@
                                 "description": "このコレクション内の項目。",
                                 "type": "array",
                                 "items": {
-                                    "oneOf": [
-                                        {
-                                            "$ref": "#/components/schemas/File--Full"
-                                        },
-                                        {
-                                            "$ref": "#/components/schemas/Folder--Mini"
-                                        },
-                                        {
-                                            "$ref": "#/components/schemas/WebLink"
-                                        }
-                                    ]
+                                    "$ref": "#/components/schemas/Item"
                                 }
                             }
                         }
@@ -33198,6 +33142,22 @@
                     "standard"
                 ]
             },
+            "LegalHoldPolicyAssignedItem": {
+                "description": "The item that the legal hold policy is assigned to. Includes type and ID.",
+                "type": "object",
+                "oneOf": [
+                    {
+                        "$ref": "#/components/schemas/File"
+                    },
+                    {
+                        "$ref": "#/components/schemas/Folder"
+                    },
+                    {
+                        "$ref": "#/components/schemas/WebLink"
+                    }
+                ],
+                "title": "Legal hold policy item"
+            },
             "LegalHoldPolicyAssignment": {
                 "description": "リーガルホールド割り当ては、ユーザー、フォルダ、ファイル、またはファイルバージョンにリーガルホールドポリシーを割り当てる目的に使用されます。\n\nリーガルホールド割り当てを作成すると、その割り当ての「apply-to」エンティティに属するファイルバージョンにホールドが適用されます。",
                 "type": "object",
@@ -33220,20 +33180,10 @@
                             "assigned_to": {
                                 "allOf": [
                                     {
-                                        "oneOf": [
-                                            {
-                                                "$ref": "#/components/schemas/File"
-                                            },
-                                            {
-                                                "$ref": "#/components/schemas/Folder"
-                                            },
-                                            {
-                                                "$ref": "#/components/schemas/WebLink"
-                                            }
-                                        ]
+                                        "$ref": "#/components/schemas/LegalHoldPolicyAssignedItem"
                                     },
                                     {
-                                        "description": "リーガルホールドポリシーを割り当てる項目。タイプとIDを含みます。"
+                                        "description": "The item that the legal hold policy is assigned to. Includes type and ID."
                                     }
                                 ]
                             },
@@ -33646,32 +33596,7 @@
                         "additionalProperties": {
                             "allOf": [
                                 {
-                                    "oneOf": [
-                                        {
-                                            "type": "string"
-                                        },
-                                        {
-                                            "type": "number"
-                                        },
-                                        {
-                                            "title": "Metadata field filter (multi-select)",
-                                            "type": "array",
-                                            "items": {
-                                                "type": "string"
-                                            },
-                                            "description": "Specifies the values to match for a `multiSelect` metadata\nfield. When performing a search, the query will essentially\nperform an `OR` operation to match any template where any of\nthe provided values match this field.",
-                                            "example": [
-                                                "online",
-                                                "enterprise"
-                                            ]
-                                        },
-                                        {
-                                            "$ref": "#/components/schemas/MetadataFieldFilterFloatRange"
-                                        },
-                                        {
-                                            "$ref": "#/components/schemas/MetadataFieldFilterDateRange"
-                                        }
-                                    ]
+                                    "$ref": "#/components/schemas/MetadataFilterValue"
                                 },
                                 {
                                     "example": "online"
@@ -33686,6 +33611,36 @@
                 "title": "メタデータフィルタ",
                 "x-box-resource-id": "metadata_filter",
                 "x-box-tag": "search"
+            },
+            "MetadataFilterValue": {
+                "description": "A value of metadata filter.",
+                "oneOf": [
+                    {
+                        "type": "string"
+                    },
+                    {
+                        "type": "number"
+                    },
+                    {
+                        "title": "Metadata field filter (multi-select)",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "description": "Specifies the values to match for a `multiSelect` metadata\nfield. When performing a search, the query will essentially\nperform an `OR` operation to match any template where any of\nthe provided values match this field.",
+                        "example": [
+                            "online",
+                            "enterprise"
+                        ]
+                    },
+                    {
+                        "$ref": "#/components/schemas/MetadataFieldFilterFloatRange"
+                    },
+                    {
+                        "$ref": "#/components/schemas/MetadataFieldFilterDateRange"
+                    }
+                ],
+                "title": "Metadata filter value"
             },
             "MetadataInstanceValue": {
                 "description": "設定またはテストする値。\n\n`add`、`replace`、`test`操作では必須です。`add`の場合、値がすでに存在するときは、古い値が新しい値で上書きされます。`replace`の場合、置換の前に値がすでに存在している必要があります。\n\n`test`の場合、`path`の位置にある既存の値が指定した値と一致している必要があります。",
@@ -33808,68 +33763,18 @@
                 ],
                 "title": "メタデータクエリの検索リクエスト"
             },
-            "MetadataQueryIndex": {
-                "description": "メタデータクエリインデックス。",
+            "MetadataQueryResultItem": {
+                "description": "The mini representation of a file or folder.",
                 "type": "object",
-                "properties": {
-                    "id": {
-                        "description": "メタデータクエリインデックスのID。",
-                        "type": "string",
-                        "example": "-9876"
+                "oneOf": [
+                    {
+                        "$ref": "#/components/schemas/File--Full"
                     },
-                    "type": {
-                        "description": "値は常に`metadata_query_index`。",
-                        "type": "string",
-                        "example": "metadata_query_index",
-                        "nullable": false
-                    },
-                    "status": {
-                        "description": "メタデータクエリインデックスのステータス。",
-                        "type": "string",
-                        "example": "active",
-                        "enum": [
-                            "building",
-                            "active",
-                            "disabled"
-                        ],
-                        "nullable": false
-                    },
-                    "fields": {
-                        "description": "インデックスを構成するテンプレートフィールドのリスト。",
-                        "type": "array",
-                        "items": {
-                            "type": "object",
-                            "description": "インデックスを構成するフィールド。",
-                            "allOf": [
-                                {
-                                    "properties": {
-                                        "key": {
-                                            "description": "メタデータテンプレートのフィールドキー。",
-                                            "type": "string",
-                                            "example": "vendor name"
-                                        },
-                                        "sort_direction": {
-                                            "description": "フィールドの並べ替え方向。",
-                                            "type": "string",
-                                            "example": "asc",
-                                            "enum": [
-                                                "asc",
-                                                "desc"
-                                            ]
-                                        }
-                                    }
-                                }
-                            ]
-                        }
+                    {
+                        "$ref": "#/components/schemas/Folder--Full"
                     }
-                },
-                "required": [
-                    "type",
-                    "status"
                 ],
-                "title": "Metadata query index",
-                "x-box-resource-id": "metadata_query_index",
-                "x-box-tag": "search"
+                "title": "Metadata query search result item"
             },
             "MetadataQueryResults": {
                 "description": "メタデータクエリと一致したファイルおよびフォルダのページ。",
@@ -33879,14 +33784,7 @@
                         "description": "検索語句と一致するファイルやフォルダのMini版の表示。\n\nデフォルトでは、このエンドポイントによって、項目に関する最も基本的な情報のみが返されます。各項目のその他のフィールド (メタデータのいずれかを含む) を取得するには、クエリで`fields`属性を使用します。",
                         "type": "array",
                         "items": {
-                            "oneOf": [
-                                {
-                                    "$ref": "#/components/schemas/File--Full"
-                                },
-                                {
-                                    "$ref": "#/components/schemas/Folder--Full"
-                                }
-                            ]
+                            "$ref": "#/components/schemas/MetadataQueryResultItem"
                         },
                         "x-box-resource-variant": 1
                     },
@@ -34054,7 +33952,7 @@
                                                     {
                                                         "properties": {
                                                             "id": {
-                                                                "description": "オプションの内部的な一意の識別子。",
+                                                                "description": "The internal unique identifier of the option.",
                                                                 "type": "string",
                                                                 "example": "45dc2849-a4a7-40a9-a751-4a699a589190"
                                                             }
@@ -34474,17 +34372,7 @@
                     "item": {
                         "allOf": [
                             {
-                                "oneOf": [
-                                    {
-                                        "$ref": "#/components/schemas/File--Full"
-                                    },
-                                    {
-                                        "$ref": "#/components/schemas/Folder--Full"
-                                    },
-                                    {
-                                        "$ref": "#/components/schemas/WebLink"
-                                    }
-                                ]
+                                "$ref": "#/components/schemas/RecentItemResource"
                             },
                             {
                                 "description": "最近アクセスした項目。"
@@ -34518,6 +34406,22 @@
                 "title": "最近使用した項目",
                 "x-box-resource-id": "recent_item",
                 "x-box-tag": "recent_items"
+            },
+            "RecentItemResource": {
+                "description": "A recently accessed item resource. This can be a file, folder, or web link.",
+                "type": "object",
+                "oneOf": [
+                    {
+                        "$ref": "#/components/schemas/File--Full"
+                    },
+                    {
+                        "$ref": "#/components/schemas/Folder--Full"
+                    },
+                    {
+                        "$ref": "#/components/schemas/WebLink"
+                    }
+                ],
+                "title": "Recent item resource"
             },
             "RecentItems": {
                 "description": "最近使用した項目のリスト。",
@@ -34561,6 +34465,50 @@
                 ],
                 "title": "最近使用した項目",
                 "x-box-resource-id": "recent_items"
+            },
+            "Resource": {
+                "description": "ファイルまたはフォルダのリソース。",
+                "type": "object",
+                "oneOf": [
+                    {
+                        "$ref": "#/components/schemas/Folder--Mini"
+                    },
+                    {
+                        "$ref": "#/components/schemas/File--Mini"
+                    }
+                ],
+                "title": "Resource"
+            },
+            "ResourceScope": {
+                "description": "リソース (ファイルまたはフォルダ) とそのリソースにアクセスできるスコープの関係。",
+                "type": "object",
+                "properties": {
+                    "scope": {
+                        "description": "リソースへのアクセスのスコープ。",
+                        "type": "string",
+                        "example": "item_download",
+                        "enum": [
+                            "annotation_edit",
+                            "annotation_view_all",
+                            "annotation_view_self",
+                            "base_explorer",
+                            "base_picker",
+                            "base_preview",
+                            "base_upload",
+                            "item_delete",
+                            "item_download",
+                            "item_preview",
+                            "item_rename",
+                            "item_share",
+                            "item_upload",
+                            "item_read"
+                        ]
+                    },
+                    "object": {
+                        "$ref": "#/components/schemas/Resource"
+                    }
+                },
+                "title": "Resource scope"
             },
             "RetentionPolicies": {
                 "description": "リテンションポリシーのリスト。",
@@ -34885,39 +34833,6 @@
                 "x-box-resource-id": "retention_policy_assignment",
                 "x-box-tag": "retention_policy_assignments"
             },
-            "RetentionPolicyAssignment--Base": {
-                "description": "リテンションポリシー割り当てのBase版の表示。",
-                "type": "object",
-                "properties": {
-                    "id": {
-                        "description": "ファイルバージョンを表す一意の識別子。",
-                        "type": "string",
-                        "example": "12345",
-                        "nullable": false
-                    },
-                    "type": {
-                        "description": "値は常に`retention_policy_assignment`になります。",
-                        "type": "string",
-                        "example": "retention_policy_assignment",
-                        "enum": [
-                            "retention_policy_assignment"
-                        ],
-                        "nullable": false
-                    }
-                },
-                "required": [
-                    "id",
-                    "type"
-                ],
-                "title": "リテンションポリシー割り当て (Base)",
-                "x-box-resource-id": "retention_policy_assignment--base",
-                "x-box-tag": "retention_policy_assignments",
-                "x-box-variant": "base",
-                "x-box-variants": [
-                    "base",
-                    "standard"
-                ]
-            },
             "RetentionPolicyAssignments": {
                 "description": "リテンションポリシー割り当てのリスト。",
                 "type": "object",
@@ -35005,6 +34920,22 @@
                 ],
                 "title": "役割変数"
             },
+            "SearchResultItem": {
+                "description": "An item in search results. This can be a file, folder, or web link.",
+                "type": "object",
+                "oneOf": [
+                    {
+                        "$ref": "#/components/schemas/File--Full"
+                    },
+                    {
+                        "$ref": "#/components/schemas/Folder--Full"
+                    },
+                    {
+                        "$ref": "#/components/schemas/WebLink"
+                    }
+                ],
+                "title": "Search results item"
+            },
             "SearchResultWithSharedLink": {
                 "description": "検索クエリと一致したファイル、フォルダ、ウェブリンクの単一リスト (項目がユーザーと共有されたときに使用された共有リンクに関する追加情報を含む)。\n\nこのレスポンス形式は、`include_recent_shared_links`クエリパラメータが`true`に設定されている場合にのみ返されます。",
                 "type": "object",
@@ -35018,17 +34949,7 @@
                     "item": {
                         "allOf": [
                             {
-                                "oneOf": [
-                                    {
-                                        "$ref": "#/components/schemas/File--Full"
-                                    },
-                                    {
-                                        "$ref": "#/components/schemas/Folder--Full"
-                                    },
-                                    {
-                                        "$ref": "#/components/schemas/WebLink"
-                                    }
-                                ]
+                                "$ref": "#/components/schemas/SearchResultWithSharedLinkItem"
                             },
                             {
                                 "description": "検索クエリと一致したファイル、フォルダ、またはウェブリンク。"
@@ -35044,6 +34965,22 @@
                 "title": "検索結果 (共有リンクを含む)",
                 "x-box-resource-id": "search_result_with_shared_link",
                 "x-box-tag": "search"
+            },
+            "SearchResultWithSharedLinkItem": {
+                "description": "An item in search results with a shared link. This can be a file, folder, or web link.",
+                "type": "object",
+                "oneOf": [
+                    {
+                        "$ref": "#/components/schemas/File--Full"
+                    },
+                    {
+                        "$ref": "#/components/schemas/Folder--Full"
+                    },
+                    {
+                        "$ref": "#/components/schemas/WebLink"
+                    }
+                ],
+                "title": "Search result item"
             },
             "SearchResults": {
                 "description": "検索クエリに一致するファイル、フォルダ、およびウェブリンクのリスト。",
@@ -35087,17 +35024,7 @@
                                 "description": "指定されたクエリの検索結果。",
                                 "type": "array",
                                 "items": {
-                                    "oneOf": [
-                                        {
-                                            "$ref": "#/components/schemas/File--Full"
-                                        },
-                                        {
-                                            "$ref": "#/components/schemas/Folder--Full"
-                                        },
-                                        {
-                                            "$ref": "#/components/schemas/WebLink"
-                                        }
-                                    ]
+                                    "$ref": "#/components/schemas/SearchResultItem"
                                 }
                             }
                         }
@@ -35109,6 +35036,19 @@
                 "title": "検索結果",
                 "x-box-resource-id": "search_results",
                 "x-box-tag": "search"
+            },
+            "SearchResultsResponse": {
+                "description": "Search result from the content search endpoint.",
+                "type": "object",
+                "oneOf": [
+                    {
+                        "$ref": "#/components/schemas/SearchResults"
+                    },
+                    {
+                        "$ref": "#/components/schemas/SearchResultsWithSharedLinks"
+                    }
+                ],
+                "title": "Search results response"
             },
             "SearchResultsWithSharedLinks": {
                 "description": "検索クエリと一致したファイル、フォルダ、ウェブリンクのリスト (項目がユーザーと共有されたときに使用されたすべての共有リンクに関する追加情報を含む)。\n\nこのレスポンス形式は、`include_recent_shared_links`クエリパラメータが`true`に設定されている場合にのみ返されます。",
@@ -36829,6 +36769,25 @@
                 "x-box-resource-id": "sign_templates",
                 "x-box-tag": "sign_templates"
             },
+            "SkillCard": {
+                "description": "Box Skill card.",
+                "type": "object",
+                "oneOf": [
+                    {
+                        "$ref": "#/components/schemas/KeywordSkillCard"
+                    },
+                    {
+                        "$ref": "#/components/schemas/TimelineSkillCard"
+                    },
+                    {
+                        "$ref": "#/components/schemas/TranscriptSkillCard"
+                    },
+                    {
+                        "$ref": "#/components/schemas/StatusSkillCard"
+                    }
+                ],
+                "title": "Box Skill card"
+            },
             "SkillCardsMetadata": {
                 "description": "Boxスキルの使用に割り当てられたメタデータ。",
                 "type": "object",
@@ -36879,255 +36838,12 @@
                         "description": "このファイルに適用されているBox Skillカードのリスト。",
                         "type": "array",
                         "items": {
-                            "oneOf": [
-                                {
-                                    "$ref": "#/components/schemas/KeywordSkillCard"
-                                },
-                                {
-                                    "$ref": "#/components/schemas/TimelineSkillCard"
-                                },
-                                {
-                                    "$ref": "#/components/schemas/TranscriptSkillCard"
-                                },
-                                {
-                                    "$ref": "#/components/schemas/StatusSkillCard"
-                                }
-                            ]
+                            "$ref": "#/components/schemas/SkillCard"
                         }
                     }
                 },
                 "title": "Skillsメタデータインスタンス",
                 "x-box-resource-id": "skill_cards_metadata",
-                "x-box-tag": "skills"
-            },
-            "SkillInvocation": {
-                "description": "スキルの`invocation_url`に送信されるBoxスキルのペイロード。",
-                "type": "object",
-                "properties": {
-                    "type": {
-                        "description": "値は常に`skill_invocation`になります。",
-                        "type": "string",
-                        "example": "skill_invocation",
-                        "enum": [
-                            "skill_invocation"
-                        ]
-                    },
-                    "id": {
-                        "description": "呼び出しリクエストの一意の識別子。",
-                        "type": "string",
-                        "example": "fd1d2e53-35f5-41fb-9c25-4ba326daf2f9_341016304"
-                    },
-                    "skill": {
-                        "allOf": [
-                            {
-                                "title": "スキル",
-                                "type": "object",
-                                "description": "スキルを表すオブジェクト。",
-                                "properties": {
-                                    "id": {
-                                        "description": "このスキルの一意の識別子。",
-                                        "type": "string",
-                                        "example": "11446498"
-                                    },
-                                    "type": {
-                                        "description": "値は常に`skill`になります。",
-                                        "type": "string",
-                                        "example": "skill",
-                                        "enum": [
-                                            "skill"
-                                        ]
-                                    },
-                                    "name": {
-                                        "description": "スキルの名前。",
-                                        "type": "string",
-                                        "example": "Hello World Skill"
-                                    },
-                                    "api_key": {
-                                        "description": "アプリケーションのクライアントID。",
-                                        "type": "string",
-                                        "example": "hxel2s12wd2h9r8ne103c4gjbqefofih"
-                                    }
-                                }
-                            },
-                            {
-                                "description": "この呼び出しをトリガーしたスキル。"
-                            }
-                        ]
-                    },
-                    "token": {
-                        "description": "この項目の読み取り専用および読み取り/書き込みアクセス権限トークン。",
-                        "type": "object",
-                        "properties": {
-                            "read": {
-                                "description": "アクセストークンの基本情報。",
-                                "type": "object",
-                                "properties": {
-                                    "access_token": {
-                                        "description": "リクエストされたアクセストークン。",
-                                        "type": "string",
-                                        "format": "token",
-                                        "example": "c3FIOG9vSGV4VHo4QzAyg5T1JvNnJoZ3ExaVNyQWw6WjRsanRKZG5lQk9qUE1BVQ"
-                                    },
-                                    "expires_in": {
-                                        "description": "このトークンが期限切れになるまでの秒数。",
-                                        "type": "integer",
-                                        "format": "int64",
-                                        "example": 3600
-                                    },
-                                    "token_type": {
-                                        "description": "返されるアクセストークンのタイプ。",
-                                        "type": "string",
-                                        "example": "bearer",
-                                        "enum": [
-                                            "bearer"
-                                        ]
-                                    },
-                                    "restricted_to": {
-                                        "description": "このアクセストークンで許可される権限を返します。これにより、リソース (ファイルやフォルダなど) のリストと、各リソースで許可されるスコープが提供されます。",
-                                        "type": "string",
-                                        "example": "[{\"scope\":\"gcm\"}, {\"scope\":\"item_upload\",\"object_id\":933941692081,\"object_type\":\"file\"}, {\"scope\":\"manage_skill_invocations\"}]"
-                                    }
-                                }
-                            },
-                            "write": {
-                                "description": "アクセストークンの基本情報。",
-                                "type": "object",
-                                "properties": {
-                                    "access_token": {
-                                        "description": "リクエストされたアクセストークン。",
-                                        "type": "string",
-                                        "format": "token",
-                                        "example": "c3FIOG9vSGV4VHo4QzAyg5T1JvNnJoZ3ExaVNyQWw6WjRsanRKZG5lQk9qUE1BVQ"
-                                    },
-                                    "expires_in": {
-                                        "description": "このトークンが期限切れになるまでの秒数。",
-                                        "type": "integer",
-                                        "format": "int64",
-                                        "example": 3600
-                                    },
-                                    "token_type": {
-                                        "description": "返されるアクセストークンのタイプ。",
-                                        "type": "string",
-                                        "example": "bearer",
-                                        "enum": [
-                                            "bearer"
-                                        ]
-                                    },
-                                    "restricted_to": {
-                                        "description": "このアクセストークンで許可される権限を返します。これにより、リソース (ファイルやフォルダなど) のリストと、各リソースで許可されるスコープが提供されます。",
-                                        "type": "string",
-                                        "example": "[{\"scope\":\"gcm\"}, {\"scope\":\"item_upload\",\"object_id\":933941692081,\"object_type\":\"file\"}, {\"scope\":\"manage_skill_invocations\"}]"
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    "status": {
-                        "description": "このイベントの詳細のステータス。",
-                        "type": "object",
-                        "properties": {
-                            "state": {
-                                "description": "このイベントの状態。\n\n* `invoked` - ファイルへのスキルの適用を開始するためにイベント詳細を使用してスキルをトリガーしました。\n* `processing` - 現在処理中です。\n* `success` - 処理が正常に完了しました。\n* `transient_failure` - 再試行可能な問題が発生しました。\n* `permanent_failure` - 再試行しても解決できない永続的な問題が発生しました。",
-                                "type": "string",
-                                "example": "invoked",
-                                "enum": [
-                                    "invoked",
-                                    "processing",
-                                    "success",
-                                    "transient_failure",
-                                    "permanent_failure"
-                                ]
-                            },
-                            "message": {
-                                "description": "ステータス情報。",
-                                "type": "string",
-                                "example": "Example"
-                            },
-                            "error_code": {
-                                "description": "エラーコード情報 (エラーが発生した場合)。",
-                                "type": "string",
-                                "example": "400"
-                            },
-                            "additional_info": {
-                                "description": "追加のステータス情報。",
-                                "type": "string",
-                                "example": "Example"
-                            }
-                        }
-                    },
-                    "created_at": {
-                        "description": "この呼び出しが作成された日時。",
-                        "type": "string",
-                        "format": "date-time",
-                        "example": "2012-12-12T10:53:43-08:00"
-                    },
-                    "trigger": {
-                        "description": "呼び出しをトリガーしたアクション。",
-                        "type": "string",
-                        "example": "FILE_CONTENT"
-                    },
-                    "enterprise": {
-                        "allOf": [
-                            {
-                                "title": "Enterprise",
-                                "type": "object",
-                                "description": "Box Enterpriseのレプリゼンテーション。",
-                                "properties": {
-                                    "id": {
-                                        "description": "この会社の一意の識別子。",
-                                        "type": "string",
-                                        "example": "11446498"
-                                    },
-                                    "type": {
-                                        "description": "値は常に`enterprise`になります。",
-                                        "type": "string",
-                                        "example": "enterprise",
-                                        "enum": [
-                                            "enterprise"
-                                        ]
-                                    },
-                                    "name": {
-                                        "description": "企業の名前。",
-                                        "type": "string",
-                                        "example": "Acme Inc."
-                                    }
-                                }
-                            },
-                            {
-                                "description": "この呼び出しをトリガーする対象になった企業。"
-                            }
-                        ]
-                    },
-                    "source": {
-                        "allOf": [
-                            {
-                                "oneOf": [
-                                    {
-                                        "$ref": "#/components/schemas/File"
-                                    },
-                                    {
-                                        "$ref": "#/components/schemas/Folder"
-                                    }
-                                ]
-                            },
-                            {
-                                "description": "呼び出しがトリガーされる原因となった項目。"
-                            }
-                        ]
-                    },
-                    "event": {
-                        "allOf": [
-                            {
-                                "$ref": "#/components/schemas/Event"
-                            },
-                            {
-                                "description": "この呼び出しをトリガーしたイベント。"
-                            }
-                        ]
-                    }
-                },
-                "title": "スキルのWebhookペイロード",
-                "x-box-resource-id": "skill_invocation",
                 "x-box-tag": "skills"
             },
             "StatusSkillCard": {
@@ -37538,7 +37254,7 @@
                         "example": "2012-12-12T10:53:43-08:00"
                     },
                     "completion_rule": {
-                        "description": "タスクが完了と見なされる前にそのタスクを完了する必要がある担当者を定義します。\n\n* `all_assignees` - タスクが完了と見なされるには、すべての担当者がそのタスクをレビューまたは承認する必要があります。\n* `any_assignee` - いずれか1人の担当者がタスクをレビューまたは承認すれば、タスクが完了と見なされます。",
+                        "description": "タスクが完了と見なされる前にそのタスクを完了する必要がある担当者を定義します。\n\n* `all_assignees` requires all assignees to review or approve the task in order for it to be considered completed.\n* `any_assignee` accepts any one assignee to review or approve the task in order for it to be considered completed.",
                         "type": "string",
                         "example": "all_assignees",
                         "enum": [
@@ -41032,126 +40748,6 @@
                     "standard"
                 ]
             },
-            "WebhookInvocation": {
-                "description": "イベント発生時にWebhookアドレスに送信されるイベント。",
-                "type": "object",
-                "properties": {
-                    "id": {
-                        "description": "このWebhook呼び出しの一意の識別子。",
-                        "type": "string",
-                        "example": "11446498"
-                    },
-                    "type": {
-                        "description": "値は常に`webhook_event`になります。",
-                        "type": "string",
-                        "example": "webhook_event",
-                        "enum": [
-                            "webhook_event"
-                        ]
-                    },
-                    "webhook": {
-                        "allOf": [
-                            {
-                                "$ref": "#/components/schemas/Webhook"
-                            },
-                            {
-                                "description": "このイベントをトリガーしたWebhookオブジェクト。"
-                            }
-                        ]
-                    },
-                    "created_by": {
-                        "allOf": [
-                            {
-                                "$ref": "#/components/schemas/User--Mini"
-                            },
-                            {
-                                "description": "このイベントをトリガーしたユーザー。"
-                            }
-                        ]
-                    },
-                    "created_at": {
-                        "description": "Webhookイベントがトリガーされた日時を示すタイムスタンプ。",
-                        "type": "string",
-                        "format": "date-time",
-                        "example": "2012-12-12T10:53:43-08:00"
-                    },
-                    "trigger": {
-                        "allOf": [
-                            {
-                                "title": "Webhookトリガー",
-                                "example": "FILE.UPLOADED",
-                                "type": "string",
-                                "description": "このWebhookをトリガーしたイベント名。",
-                                "enum": [
-                                    "FILE.UPLOADED",
-                                    "FILE.PREVIEWED",
-                                    "FILE.DOWNLOADED",
-                                    "FILE.TRASHED",
-                                    "FILE.DELETED",
-                                    "FILE.RESTORED",
-                                    "FILE.COPIED",
-                                    "FILE.MOVED",
-                                    "FILE.LOCKED",
-                                    "FILE.UNLOCKED",
-                                    "FILE.RENAMED",
-                                    "COMMENT.CREATED",
-                                    "COMMENT.UPDATED",
-                                    "COMMENT.DELETED",
-                                    "TASK_ASSIGNMENT.CREATED",
-                                    "TASK_ASSIGNMENT.UPDATED",
-                                    "METADATA_INSTANCE.CREATED",
-                                    "METADATA_INSTANCE.UPDATED",
-                                    "METADATA_INSTANCE.DELETED",
-                                    "FOLDER.CREATED",
-                                    "FOLDER.RENAMED",
-                                    "FOLDER.DOWNLOADED",
-                                    "FOLDER.RESTORED",
-                                    "FOLDER.DELETED",
-                                    "FOLDER.COPIED",
-                                    "FOLDER.MOVED",
-                                    "FOLDER.TRASHED",
-                                    "WEBHOOK.DELETED",
-                                    "COLLABORATION.CREATED",
-                                    "COLLABORATION.ACCEPTED",
-                                    "COLLABORATION.REJECTED",
-                                    "COLLABORATION.REMOVED",
-                                    "COLLABORATION.UPDATED",
-                                    "SHARED_LINK.DELETED",
-                                    "SHARED_LINK.CREATED",
-                                    "SHARED_LINK.UPDATED",
-                                    "SIGN_REQUEST.COMPLETED",
-                                    "SIGN_REQUEST.DECLINED",
-                                    "SIGN_REQUEST.EXPIRED",
-                                    "SIGN_REQUEST.SIGNER_EMAIL_BOUNCED"
-                                ]
-                            },
-                            {
-                                "description": "このWebhookをトリガーしたイベント名。"
-                            }
-                        ]
-                    },
-                    "source": {
-                        "allOf": [
-                            {
-                                "oneOf": [
-                                    {
-                                        "$ref": "#/components/schemas/File"
-                                    },
-                                    {
-                                        "$ref": "#/components/schemas/Folder"
-                                    }
-                                ]
-                            },
-                            {
-                                "description": "イベントがトリガーされる原因となった項目。"
-                            }
-                        ]
-                    }
-                },
-                "title": "Webhook (V2) ペイロード",
-                "x-box-resource-id": "webhook_invocation",
-                "x-box-tag": "webhooks"
-            },
             "Webhooks": {
                 "description": "Webhookのリスト。",
                 "type": "object",
@@ -41458,54 +41054,6 @@
                 "x-box-resource-id": "workflow",
                 "x-box-variant": "standard"
             },
-            "Workflow--Full": {
-                "description": "Box Relayワークフローは、名前が付けられたフローのコレクションを表すオブジェクトです。\n\nアプリケーションは、このリソースを使用するために、開発者コンソールでの`Manage Box Relay`アプリケーションスコープの使用が承認されている必要があります。",
-                "type": "object",
-                "allOf": [
-                    {
-                        "$ref": "#/components/schemas/Workflow"
-                    },
-                    {
-                        "properties": {
-                            "created_at": {
-                                "description": "Boxでこのワークフローが作成された日時。",
-                                "type": "string",
-                                "format": "date-time",
-                                "example": "2012-12-12T10:53:43-08:00"
-                            },
-                            "modified_at": {
-                                "description": "Boxでこのワークフローが最後に更新された日時。",
-                                "type": "string",
-                                "format": "date-time",
-                                "example": "2012-12-12T10:53:43-08:00"
-                            },
-                            "created_by": {
-                                "allOf": [
-                                    {
-                                        "$ref": "#/components/schemas/User--Base"
-                                    },
-                                    {
-                                        "description": "このワークフローを作成したユーザー。"
-                                    }
-                                ]
-                            },
-                            "modified_by": {
-                                "allOf": [
-                                    {
-                                        "$ref": "#/components/schemas/User--Base"
-                                    },
-                                    {
-                                        "description": "このワークフローを最後に変更したユーザー。"
-                                    }
-                                ]
-                            }
-                        }
-                    }
-                ],
-                "title": "ワークフロー (Full)",
-                "x-box-resource-id": "workflow--full",
-                "x-box-variant": "full"
-            },
             "Workflow--Mini": {
                 "description": "Box Relayワークフローは、名前が付けられたフローのコレクションを表すオブジェクトです。\n\nアプリケーションは、このリソースを使用するために、開発者コンソールでの`Manage Box Relay`アプリケーションスコープの使用が承認されている必要があります。",
                 "type": "object",
@@ -41545,8 +41093,7 @@
                 "x-box-variant": "mini",
                 "x-box-variants": [
                     "mini",
-                    "standard",
-                    "full"
+                    "standard"
                 ]
             },
             "Workflows": {
