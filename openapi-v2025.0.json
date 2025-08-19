@@ -14,7 +14,7 @@
             "url": "http://www.apache.org/licenses/LICENSE-2.0"
         },
         "version": "2025.0",
-        "x-box-commit-hash": "04730436d5"
+        "x-box-commit-hash": "e231c9d1b8"
     },
     "servers": [
         {
@@ -2479,6 +2479,64 @@
                     "Archives"
                 ]
             }
+        },
+        "/external_users/submit_delete_job": {
+            "post": {
+                "operationId": "post_external_users_submit_delete_job_v2025.0",
+                "summary": "Submit job to delete external users",
+                "description": "Delete external users from current user enterprise. This will remove each external user from all invited collaborations within the current enterprise.",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/BoxVersionHeader"
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ExternalUsersSubmitDeleteJobRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "207": {
+                        "description": "Multi-status response containing the result for each external user deletion request.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ExternalUsersSubmitDeleteJobResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Returns an error if the listed external users are not found, or the authenticated user does not have the right permissions to delete external users.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "予期しないクライアントエラー。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-box-tag": "external_users",
+                "tags": [
+                    "External Users"
+                ]
+            }
         }
     },
     "components": {
@@ -3353,6 +3411,68 @@
                     }
                 },
                 "title": "企業の参照"
+            },
+            "ExternalUserDeletionResult": {
+                "description": "Result of a single external user deletion request.",
+                "type": "object",
+                "properties": {
+                    "user_id": {
+                        "description": "The ID of the external user.",
+                        "type": "string",
+                        "example": "12345"
+                    },
+                    "status": {
+                        "description": "HTTP status code for a specific user's deletion request.",
+                        "type": "integer",
+                        "example": 202
+                    },
+                    "detail": {
+                        "description": "Deletion request status details.",
+                        "type": "string",
+                        "example": "Successfully submitted for deletion"
+                    }
+                },
+                "required": [
+                    "user_id",
+                    "status"
+                ],
+                "title": "External User Deletion Result"
+            },
+            "ExternalUsersSubmitDeleteJobRequest": {
+                "description": "Request to submit a job to delete external users from the current enterprise.",
+                "type": "object",
+                "properties": {
+                    "external_users": {
+                        "description": "List of external users to delete.",
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/UserReference"
+                        }
+                    }
+                },
+                "required": [
+                    "external_users"
+                ],
+                "title": "External Users Submit Delete Job Request"
+            },
+            "ExternalUsersSubmitDeleteJobResponse": {
+                "description": "Multi-status response containing the result for each external user deletion request.",
+                "type": "object",
+                "properties": {
+                    "entries": {
+                        "description": "Array of results of each external user deletion request.",
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ExternalUserDeletionResult"
+                        }
+                    }
+                },
+                "required": [
+                    "entries"
+                ],
+                "title": "External Users Submit Delete Job Response",
+                "x-box-resource-id": "external_users_submit_delete_job_response_v2025.0",
+                "x-box-tag": "external_users"
             },
             "FileReference": {
                 "description": "ファイルの参照。",
@@ -4434,7 +4554,7 @@
                         ]
                     },
                     "ip_addresses": {
-                        "description": "IPとCIDRのリスト。",
+                        "description": "List of ip addresses and CIDRs.",
                         "type": "array",
                         "items": {
                             "type": "string"
@@ -4634,8 +4754,32 @@
                 ],
                 "title": "ユーザー (Mini)"
             },
+            "UserReference": {
+                "description": "ユーザーの参照。",
+                "type": "object",
+                "properties": {
+                    "type": {
+                        "description": "値は常に`user`になります。",
+                        "type": "string",
+                        "example": "user",
+                        "enum": [
+                            "user"
+                        ]
+                    },
+                    "id": {
+                        "description": "ユーザーの一意の識別子。",
+                        "type": "string",
+                        "example": "12345"
+                    }
+                },
+                "required": [
+                    "type",
+                    "id"
+                ],
+                "title": "ユーザーの参照"
+            },
             "WeblinkReference": {
-                "description": "ウェブリンクの参照。",
+                "description": "Web link reference.",
                 "type": "object",
                 "properties": {
                     "type": {
@@ -4648,7 +4792,7 @@
                         "nullable": false
                     },
                     "id": {
-                        "description": "ウェブリンクのID。",
+                        "description": "ID of the web link.",
                         "type": "string",
                         "example": "42037322",
                         "nullable": false
@@ -4658,7 +4802,7 @@
                     "type",
                     "id"
                 ],
-                "title": "ウェブリンクの参照"
+                "title": "Web link reference"
             }
         },
         "securitySchemes": {
@@ -4706,6 +4850,11 @@
             "x-box-tag": "docgen_template"
         },
         {
+            "name": "External Users",
+            "description": "External users are collaborators from outside of your enterprise.",
+            "x-box-tag": "external_users"
+        },
+        {
             "name": "Hubs",
             "description": "A set of endpoints used to manage Hubs.",
             "x-box-tag": "hubs"
@@ -4722,7 +4871,7 @@
         },
         {
             "name": "Shieldリスト",
-            "description": "Shield List allow an administrator to create a list \nwhich will be shared between different\nShield Smart Access and Threat Prection rules.",
+            "description": "Shield List allow an administrator to create a list\nwhich will be shared between different\nShield Smart Access and Threat Detection rules.",
             "x-box-tag": "shield_lists"
         }
     ],
