@@ -14,7 +14,7 @@
       "url": "http://www.apache.org/licenses/LICENSE-2.0"
     },
     "version": "2025.0",
-    "x-box-commit-hash": "b9f1309925"
+    "x-box-commit-hash": "d970a6f960"
   },
   "servers": [
     {
@@ -932,12 +932,21 @@
           {
             "name": "categories",
             "in": "query",
-            "description": "The comma-delimited list of the enterprise configuration categories. \nAllowed values: `security`, `content_and_sharing`, `user_settings`, `shield`.",
+            "description": "A comma-separated list of the enterprise configuration categories.\nAllowed values: `security`, `content_and_sharing`, `user_settings`, `shield`.",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
             },
-            "example": "security,content_and_sharing,user_settings,shield"
+            "example": [
+              "security",
+              "content_and_sharing",
+              "user_settings",
+              "shield"
+            ],
+            "explode": false
           },
           {
             "$ref": "#/components/parameters/BoxVersionHeader"
@@ -2812,16 +2821,6 @@
         },
         "title": "Collaboration permissions"
       },
-      "CollaborationRestriction": {
-        "description": "The collaboration restriction.",
-        "type": "string",
-        "example": "internal",
-        "enum": [
-          "internal",
-          "external"
-        ],
-        "title": "Collaboration restriction"
-      },
       "CustomSessionDurationGroupItem": {
         "description": "A custom session duration group item.",
         "type": "object",
@@ -3757,7 +3756,9 @@
                   "value": {
                     "type": "array",
                     "items": {
-                      "$ref": "#/components/schemas/CollaborationRestriction"
+                      "type": "string",
+                      "description": "The collaboration restriction. Possible values: `internal`, `external`.",
+                      "example": "internal"
                     },
                     "example": [
                       "internal"
@@ -3803,7 +3804,7 @@
                 "$ref": "#/components/schemas/EnterpriseConfigurationItem"
               },
               {
-                "description": "The external collaboration status."
+                "description": "The external collaboration status.\nPossible values: `enable_external_collaboration`, `limit_collaboration_to_allowlisted_domains`, `limit_collaboration_to_users_within_enterprise`."
               },
               {
                 "properties": {
@@ -3811,10 +3812,6 @@
                     "description": "The external collaboration status.",
                     "type": "string",
                     "example": "enable_external_collaboration",
-                    "enum": [
-                      "enable_external_collaboration",
-                      "limit_collaboration_to_allowlisted_domains"
-                    ],
                     "nullable": true
                   }
                 }
