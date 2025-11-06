@@ -14,7 +14,7 @@
       "url": "http://www.apache.org/licenses/LICENSE-2.0"
     },
     "version": "2025.0",
-    "x-box-commit-hash": "e7c3dfefde"
+    "x-box-commit-hash": "d6e8fe6183"
   },
   "servers": [
     {
@@ -2292,7 +2292,7 @@
             }
           },
           "400": {
-            "description": "Returns an error if some of the parameters are missing or\nnot valid.",
+            "description": "Returned when some of the parameters are missing or not valid.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2312,7 +2312,7 @@
             }
           },
           "403": {
-            "description": "Returns an error if the authenticated user does not have the right\npermissions to list archives.",
+            "description": "Returned when the authenticated user does not have the right\npermissions to list archives.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2322,7 +2322,7 @@
             }
           },
           "500": {
-            "description": "An unexpected server error.",
+            "description": "Returned when an unexpected server error occurs.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2332,7 +2332,7 @@
             }
           },
           "default": {
-            "description": "An unexpected client error.",
+            "description": "Returned when an unexpected client error occurs.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2357,6 +2357,7 @@
           }
         ],
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
@@ -2366,6 +2367,16 @@
                     "description": "The name of the archive.",
                     "type": "string",
                     "example": "Some Archive"
+                  },
+                  "description": {
+                    "description": "The description of the archive.",
+                    "type": "string",
+                    "example": "This is an archive for important documents."
+                  },
+                  "storage_policy_id": {
+                    "description": "The ID of the storage policy that the archive is assigned to.",
+                    "type": "string",
+                    "example": "100001"
                   }
                 },
                 "required": [
@@ -2387,7 +2398,7 @@
             }
           },
           "400": {
-            "description": "Returns an error if some of the parameters are missing or\nnot valid.",
+            "description": "Returned when some of the parameters are missing or not valid.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2407,7 +2418,7 @@
             }
           },
           "403": {
-            "description": "Returns an error if the authenticated user does not have the right\npermissions to create an archive.",
+            "description": "Returned when the authenticated user does not have the right\npermissions to create an archive.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2417,7 +2428,7 @@
             }
           },
           "409": {
-            "description": "Returns an error if an archive with the given name already exists.",
+            "description": "Returned when an archive with the given name already exists.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2427,7 +2438,7 @@
             }
           },
           "500": {
-            "description": "An unexpected server error.",
+            "description": "Returned when an unexpected server error occurs.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2437,7 +2448,7 @@
             }
           },
           "default": {
-            "description": "An unexpected client error.",
+            "description": "Returned when an unexpected client error occurs.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2542,6 +2553,134 @@
         "tags": [
           "Archives"
         ]
+      },
+      "put": {
+        "operationId": "put_archives_id_v2025.0",
+        "summary": "Update archive",
+        "description": "Updates an archive.\n\nTo learn more about the archive APIs, see the [Archive API Guide](g://archives).",
+        "parameters": [
+          {
+            "name": "archive_id",
+            "in": "path",
+            "description": "The ID of the archive.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "982312"
+          },
+          {
+            "$ref": "#/components/parameters/BoxVersionHeader"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "description": "The name of the archive.",
+                    "type": "string",
+                    "example": "Some Archive"
+                  },
+                  "description": {
+                    "description": "The description of the archive.",
+                    "type": "string",
+                    "example": "This is an archive for important documents."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Returns the updated archive object.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Archive"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Returned when some of the parameters are not valid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Returned when the access token provided in the `Authorization` header\nis not recognized or not provided.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Returned when the authenticated user does not have the right\npermissions to update the archive.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Returned when the archive is not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Returned when an archive with the given name already exists.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Returned when an unexpected server error occurs.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Returned when an unexpected client error occurs.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        },
+        "x-box-tag": "archives",
+        "tags": [
+          "Archives"
+        ]
       }
     },
     "/external_users/submit_delete_job": {
@@ -2632,7 +2771,7 @@
             "nullable": false
           },
           "type": {
-            "description": "The value will always be `archive`.",
+            "description": "The value is always `archive`.",
             "type": "string",
             "example": "archive",
             "enum": [
@@ -2654,6 +2793,40 @@
             "format": "int64",
             "example": 123456789,
             "nullable": false
+          },
+          "description": {
+            "description": "The description of the archive.",
+            "type": "string",
+            "example": "This is an archive for important documents.",
+            "maxLength": 255,
+            "minLength": 0,
+            "nullable": true
+          },
+          "owned_by": {
+            "description": "The part of an archive API response that describes the user who owns the archive.",
+            "type": "object",
+            "example": {
+              "id": "12345",
+              "type": "user"
+            },
+            "properties": {
+              "id": {
+                "description": "The unique identifier that represents a user who owns the archive.",
+                "type": "string",
+                "example": "12345",
+                "nullable": false
+              },
+              "type": {
+                "description": "The value is always `user`.",
+                "type": "string",
+                "example": "user",
+                "nullable": false
+              }
+            },
+            "required": [
+              "id",
+              "type"
+            ]
           }
         },
         "required": [
@@ -6629,11 +6802,11 @@
         "type": "object",
         "properties": {
           "type": {
-            "description": "The value will always be `weblink`.",
+            "description": "The value will always be `web_link`.",
             "type": "string",
-            "example": "weblink",
+            "example": "web_link",
             "enum": [
-              "weblink"
+              "web_link"
             ],
             "nullable": false
           },
