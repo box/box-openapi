@@ -14,7 +14,7 @@
             "url": "http://www.apache.org/licenses/LICENSE-2.0"
         },
         "version": "2024.0",
-        "x-box-commit-hash": "989ee7d3a1"
+        "x-box-commit-hash": "851befaf8c"
     },
     "servers": [
         {
@@ -36504,9 +36504,27 @@
                                 "example": 4
                             },
                             "read_only": {
-                                "description": "この入力が読み取り専用 (署名者による変更不可) として定義されているかどうか。",
+                                "description": "Indicates whether this input is read-only (cannot be modified by signers).",
                                 "type": "boolean",
                                 "example": true
+                            },
+                            "validation": {
+                                "description": "Specifies the formatting rules that signers must follow for text field inputs. If set, this validation is mandatory.",
+                                "example": {
+                                    "validation_type": "email"
+                                },
+                                "anyOf": [
+                                    {
+                                        "$ref": "#/components/schemas/SignRequestSignerInputValidation"
+                                    },
+                                    {
+                                        "title": "OpenAPI 3.0 null schema type",
+                                        "description": "The definition for a null schema type in OpenAPI `3.0`.",
+                                        "type": "object",
+                                        "nullable": true,
+                                        "additionalProperties": false
+                                    }
+                                ]
                             }
                         }
                     }
@@ -36515,6 +36533,239 @@
                     "page_index"
                 ],
                 "title": "署名リクエストの署名者の入力"
+            },
+            "SignRequestSignerInputCustomValidation": {
+                "description": "Specifies the custom validation rules for a text field input by the signer. If set, this validation is mandatory.",
+                "type": "object",
+                "properties": {
+                    "validation_type": {
+                        "description": "Defines the validation format for the text input as custom. A custom regular expression is used for validation.",
+                        "type": "string",
+                        "example": "custom",
+                        "enum": [
+                            "custom"
+                        ]
+                    },
+                    "custom_regex": {
+                        "description": "Regular expression used for validation.",
+                        "type": "string",
+                        "example": "(^[a-zA-Z0-9._%+-]+)",
+                        "nullable": true
+                    },
+                    "custom_error_message": {
+                        "description": "Error message shown if input fails custom regular expression validation.",
+                        "type": "string",
+                        "example": "Please enter a valid value.",
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "validation_type",
+                    "custom_regex",
+                    "custom_error_message"
+                ],
+                "title": "Sign Request Signer Input Custom Validation"
+            },
+            "SignRequestSignerInputDateAsiaValidation": {
+                "description": "Specifies the date formatting rules used in Asia for a text field input by the signer. If set, this validation is mandatory. The date format follows `YYYY/MM/DD` pattern.",
+                "type": "object",
+                "properties": {
+                    "validation_type": {
+                        "description": "Validates that the text input uses the Asian date format `YYYY/MM/DD`.",
+                        "type": "string",
+                        "example": "date_asia",
+                        "enum": [
+                            "date_asia"
+                        ]
+                    }
+                },
+                "title": "Sign Request Signer Input Date Asia Validation"
+            },
+            "SignRequestSignerInputDateEUValidation": {
+                "description": "Specifies the date formatting rules used in Europe for a text field input by the signer. If set, this validation is mandatory. The date format follows `DD/MM/YYYY` pattern.",
+                "type": "object",
+                "properties": {
+                    "validation_type": {
+                        "description": "Validates that the text input uses the European date format `DD/MM/YYYY`.",
+                        "type": "string",
+                        "example": "date_eu",
+                        "enum": [
+                            "date_eu"
+                        ]
+                    }
+                },
+                "title": "Sign Request Signer Input Date EU Validation"
+            },
+            "SignRequestSignerInputDateISOValidation": {
+                "description": "Specifies the ISO date formatting rules for a text field input by the signer. If set, this validation is mandatory. The date format follows `YYYY-MM-DD` pattern.",
+                "type": "object",
+                "properties": {
+                    "validation_type": {
+                        "description": "Validates that the text input uses the ISO date format `YYYY-MM-DD`.",
+                        "type": "string",
+                        "example": "date_iso",
+                        "enum": [
+                            "date_iso"
+                        ]
+                    }
+                },
+                "title": "Sign Request Signer Input Date ISO Validation"
+            },
+            "SignRequestSignerInputDateUSValidation": {
+                "description": "Specifies the US date formatting rules for a text field input by the signer. If set, this validation is mandatory. The date format follows `MM/DD/YYYY` pattern.",
+                "type": "object",
+                "properties": {
+                    "validation_type": {
+                        "description": "Validates that the text input uses the US date format `MM/DD/YYYY`.",
+                        "type": "string",
+                        "example": "date_us",
+                        "enum": [
+                            "date_us"
+                        ]
+                    }
+                },
+                "title": "Sign Request Signer Input Date US Validation"
+            },
+            "SignRequestSignerInputEmailValidation": {
+                "description": "Specifies the formatting rules that signers must follow for text field inputs. If set, this validation is mandatory.",
+                "type": "object",
+                "properties": {
+                    "validation_type": {
+                        "description": "Validates that the text input is an email address.",
+                        "type": "string",
+                        "example": "email",
+                        "enum": [
+                            "email"
+                        ]
+                    }
+                },
+                "required": [
+                    "validation_type"
+                ],
+                "title": "Sign Request Signer Input Email Validation"
+            },
+            "SignRequestSignerInputNumberWithCommaValidation": {
+                "description": "Specifies the number with comma formatting rules for a text field input by the signer. If set, this validation is mandatory.",
+                "type": "object",
+                "properties": {
+                    "validation_type": {
+                        "description": "Validates that the text input uses a number format with a comma as the decimal separator (for example, 1,23).",
+                        "type": "string",
+                        "example": "number_with_comma",
+                        "enum": [
+                            "number_with_comma"
+                        ]
+                    }
+                },
+                "title": "Sign Request Signer Input Number With Comma Validation"
+            },
+            "SignRequestSignerInputNumberWithPeriodValidation": {
+                "description": "Specifies the number with period formatting rules for a text field input by the signer. If set, this validation is mandatory.",
+                "type": "object",
+                "properties": {
+                    "validation_type": {
+                        "description": "Validates that the text input uses a number format with a period as the decimal separator (for example, 1.23).",
+                        "type": "string",
+                        "example": "number_with_period",
+                        "enum": [
+                            "number_with_period"
+                        ]
+                    }
+                },
+                "title": "Sign Request Signer Input Number With Period Validation"
+            },
+            "SignRequestSignerInputSSNValidation": {
+                "description": "Specifies the validation rules for a text field input by the signer. If set, this validation is mandatory.",
+                "type": "object",
+                "properties": {
+                    "validation_type": {
+                        "description": "Validates that the text input is a Social Security Number (SSN).",
+                        "type": "string",
+                        "example": "ssn",
+                        "enum": [
+                            "ssn"
+                        ]
+                    }
+                },
+                "required": [
+                    "validation_type"
+                ],
+                "title": "Sign Request Signer Input SSN Validation"
+            },
+            "SignRequestSignerInputValidation": {
+                "description": "Specifies the formatting rules that signers must follow for text field inputs. If set, this validation is mandatory. The format can be selected from a predefined list of options (e.g., email, phone number, date) or defined using a custom regular expression.",
+                "oneOf": [
+                    {
+                        "$ref": "#/components/schemas/SignRequestSignerInputEmailValidation"
+                    },
+                    {
+                        "$ref": "#/components/schemas/SignRequestSignerInputCustomValidation"
+                    },
+                    {
+                        "$ref": "#/components/schemas/SignRequestSignerInputZIPValidation"
+                    },
+                    {
+                        "$ref": "#/components/schemas/SignRequestSignerInputZIP4Validation"
+                    },
+                    {
+                        "$ref": "#/components/schemas/SignRequestSignerInputSSNValidation"
+                    },
+                    {
+                        "$ref": "#/components/schemas/SignRequestSignerInputNumberWithPeriodValidation"
+                    },
+                    {
+                        "$ref": "#/components/schemas/SignRequestSignerInputNumberWithCommaValidation"
+                    },
+                    {
+                        "$ref": "#/components/schemas/SignRequestSignerInputDateISOValidation"
+                    },
+                    {
+                        "$ref": "#/components/schemas/SignRequestSignerInputDateUSValidation"
+                    },
+                    {
+                        "$ref": "#/components/schemas/SignRequestSignerInputDateEUValidation"
+                    },
+                    {
+                        "$ref": "#/components/schemas/SignRequestSignerInputDateAsiaValidation"
+                    }
+                ],
+                "title": "Sign Request Signer Input Validation"
+            },
+            "SignRequestSignerInputZIP4Validation": {
+                "description": "Specifies the validation rules for a text field input by the signer. If set, this validation is mandatory.",
+                "type": "object",
+                "properties": {
+                    "validation_type": {
+                        "description": "Validates that the text input is a ZIP+4 code.",
+                        "type": "string",
+                        "example": "zip_4",
+                        "enum": [
+                            "zip_4"
+                        ]
+                    }
+                },
+                "required": [
+                    "validation_type"
+                ],
+                "title": "Sign Request Signer Input ZIP 4 Validation"
+            },
+            "SignRequestSignerInputZIPValidation": {
+                "description": "Specifies the validation rules for a text field input by the signer. If set, this validation is mandatory.",
+                "type": "object",
+                "properties": {
+                    "validation_type": {
+                        "description": "Validates that the text input is a ZIP code.",
+                        "type": "string",
+                        "example": "zip",
+                        "enum": [
+                            "zip"
+                        ]
+                    }
+                },
+                "required": [
+                    "validation_type"
+                ],
+                "title": "Sign Request Signer Input ZIP Validation"
             },
             "SignRequests": {
                 "description": "任意のBox Sign APIエンドポイントからデフォルトで返される署名リクエストのStandard版の表示。",
@@ -37649,9 +37900,27 @@
                                 "nullable": true
                             },
                             "read_only": {
-                                "description": "この入力が読み取り専用 (署名者による変更不可) として定義されているかどうか。",
+                                "description": "Indicates whether this input is read-only (cannot be modified by signers).",
                                 "type": "boolean",
                                 "example": true
+                            },
+                            "validation": {
+                                "description": "Specifies the formatting rules that signers must follow for text field inputs. If set, this validation is mandatory.",
+                                "example": {
+                                    "validation_type": "email"
+                                },
+                                "anyOf": [
+                                    {
+                                        "$ref": "#/components/schemas/SignRequestSignerInputValidation"
+                                    },
+                                    {
+                                        "title": "OpenAPI 3.0 null schema type",
+                                        "description": "The definition for a null schema type in OpenAPI `3.0`.",
+                                        "type": "object",
+                                        "nullable": true,
+                                        "additionalProperties": false
+                                    }
+                                ]
                             }
                         }
                     }
