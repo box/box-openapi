@@ -14,7 +14,7 @@
       "url": "http://www.apache.org/licenses/LICENSE-2.0"
     },
     "version": "2024.0",
-    "x-box-commit-hash": "851befaf8c"
+    "x-box-commit-hash": "2e9c861c73"
   },
   "servers": [
     {
@@ -3248,6 +3248,16 @@
               "type": "string"
             },
             "example": "12345"
+          },
+          {
+            "name": "view",
+            "in": "query",
+            "description": "Taxonomy field values are returned in `API view` by default, meaning \nthe value is represented with a taxonomy node identifier. \nTo retrieve the `Hydrated view`, where taxonomy values are represented \nwith the full taxonomy node information, set this parameter to `hydrated`. \nThis is the only supported value for this parameter.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "hydrated"
           }
         ],
         "responses": {
@@ -3675,6 +3685,16 @@
               "type": "string"
             },
             "example": "properties"
+          },
+          {
+            "name": "view",
+            "in": "query",
+            "description": "Taxonomy field values are returned in `API view` by default, meaning \nthe value is represented with a taxonomy node identifier. \nTo retrieve the `Hydrated view`, where taxonomy values are represented \nwith the full taxonomy node information, set this parameter to `hydrated`. \nThis is the only supported value for this parameter.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "hydrated"
           }
         ],
         "responses": {
@@ -3789,7 +3809,7 @@
                       "example": "Aaron Levie"
                     },
                     {
-                      "description": "A value for each of the fields that are present\non the metadata template.\nFor the `global.properties` template this can be\na list of zero or more fields,\nas this template allows for any generic key-value pairs \nto be stored stored in the template."
+                      "description": "A value for each of the fields that are present\non the metadata template.\nFor the `global.properties` template this can be\na list of zero or more fields,\nas this template allows for any generic key-value pairs \nto be stored stored in the template.\nFor a taxonomy field, the value should be a list of the node identifiers\nof the selected taxonomy nodes, since taxonomy fields support multi-select.\nIf a single select taxonomy field is being set, the list should contain a \nsingle node identifier."
                     }
                   ]
                 },
@@ -6430,6 +6450,16 @@
               "nullable": false
             },
             "example": "12345"
+          },
+          {
+            "name": "view",
+            "in": "query",
+            "description": "Taxonomy field values are returned in `API view` by default, meaning \nthe value is represented with a taxonomy node identifier. \nTo retrieve the `Hydrated view`, where taxonomy values are represented \nwith the full taxonomy node information, set this parameter to `hydrated`. \nThis is the only supported value for this parameter.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "hydrated"
           }
         ],
         "responses": {
@@ -6977,7 +7007,7 @@
                       "example": "Aaron Levie"
                     },
                     {
-                      "description": "A value for each of the fields that are present on the metadata\ntemplate.\nFor the `global.properties` template this can be a list of zero\nor more fields, as this template allows for any generic key-value\npairs to be stored in the template."
+                      "description": "A value for each of the fields that are present on the metadata\ntemplate.\nFor the `global.properties` template this can be a list of zero\nor more fields, as this template allows for any generic key-value\npairs to be stored in the template.\nFor a taxonomy field, the value should be a list of the node identifiers\nof the selected taxonomy nodes, since taxonomy fields support multi-select.\nIf a single select taxonomy field is being set, the list should contain a\nsingle node identifier."
                     }
                   ]
                 },
@@ -8803,7 +8833,7 @@
                     "type": "array",
                     "items": {
                       "title": "Metadata Field (Write)",
-                      "description": "A field within a metadata template. Fields can be a basic text, date, or\nnumber field, or a list of options.",
+                      "description": "A field within a metadata template. Fields can be a basic text, date, or\nnumber field, a list of options, or a taxonomy.",
                       "required": [
                         "type",
                         "key",
@@ -8812,7 +8842,7 @@
                       "type": "object",
                       "properties": {
                         "type": {
-                          "description": "The type of field. The basic fields are a `string` field for text, a\n`float` field for numbers, and a `date` fields to present the user with a\ndate-time picker.\n\nAdditionally, metadata templates support an `enum` field for a basic list\nof items, and ` multiSelect` field for a similar list of items where the\nuser can select more than one value.",
+                          "description": "The type of field. The basic fields are a `string` field for text, a\n`float` field for numbers, and a `date` field to present the user with a\ndate-time picker.\n\nAdditionally, metadata templates support an `enum` field for a basic list\nof items, and ` multiSelect` field for a similar list of items where the\nuser can select more than one value.\n\nMetadata taxonomies are also supported as a `taxonomy` field type \nwith a specific set of additional properties, which describe its structure.",
                           "type": "string",
                           "example": "string",
                           "enum": [
@@ -8820,7 +8850,8 @@
                             "float",
                             "date",
                             "enum",
-                            "multiSelect"
+                            "multiSelect",
+                            "taxonomy"
                           ]
                         },
                         "key": {
@@ -8862,6 +8893,38 @@
                                 "type": "string",
                                 "example": "Category 1"
                               }
+                            }
+                          }
+                        },
+                        "taxonomyKey": {
+                          "description": "The unique key of the metadata taxonomy to use for this taxonomy field.\nThis property is required when the field `type` is set to `taxonomy`.",
+                          "type": "string",
+                          "example": "locationTaxonomy"
+                        },
+                        "namespace": {
+                          "description": "The namespace of the metadata taxonomy to use for this taxonomy field.\nThis property is required when the field `type` is set to `taxonomy`.",
+                          "type": "string",
+                          "example": "enterprise_123456"
+                        },
+                        "optionsRules": {
+                          "description": "An object defining additional rules for the options of the taxonomy field.\nThis property is required when the field `type` is set to `taxonomy`.",
+                          "type": "object",
+                          "properties": {
+                            "multiSelect": {
+                              "description": "Whether to allow users to select multiple values.",
+                              "type": "boolean",
+                              "example": true
+                            },
+                            "selectableLevels": {
+                              "description": "An array of integers defining which levels of the taxonomy are\nselectable by users.",
+                              "type": "array",
+                              "items": {
+                                "type": "integer"
+                              },
+                              "example": [
+                                1,
+                                2
+                              ]
                             }
                           }
                         }
@@ -25138,6 +25201,1497 @@
           "AI Studio"
         ]
       }
+    },
+    "/metadata_taxonomies": {
+      "post": {
+        "operationId": "post_metadata_taxonomies",
+        "summary": "Create metadata taxonomy",
+        "description": "Creates a new metadata taxonomy that can be used in\nmetadata templates.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "key": {
+                    "description": "The taxonomy key. If it is not provided in the request body, it will be \ngenerated from the `displayName`. The `displayName` would be converted \nto lower case, and all spaces and non-alphanumeric characters replaced \nwith underscores.",
+                    "type": "string",
+                    "example": "geography",
+                    "maxLength": 256
+                  },
+                  "displayName": {
+                    "description": "The display name of the taxonomy.",
+                    "type": "string",
+                    "example": "Geography",
+                    "maxLength": 4096
+                  },
+                  "namespace": {
+                    "description": "The namespace of the metadata taxonomy to create.",
+                    "type": "string",
+                    "example": "enterprise_123456",
+                    "maxLength": 4096
+                  }
+                },
+                "required": [
+                  "displayName",
+                  "namespace"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The schema representing the metadata taxonomy created.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MetadataTaxonomy"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Returned if the request parameters or body is not valid.\n\n* `bad_request` when the body does not contain a valid request. In many\ncases this response will include extra details on what fields are missing.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Returned when the user does not have the permission to create the metadata\ntaxonomy. This can happen for a few reasons, most commonly when the user\ndoes not have (co-)admin permissions, or the user doesn't have access to \nthe provided namespace.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        },
+        "x-box-tag": "metadata_taxonomies",
+        "tags": [
+          "Metadata taxonomies"
+        ],
+        "x-box-requires-admin": true
+      }
+    },
+    "/metadata_taxonomies/{namespace}": {
+      "get": {
+        "operationId": "get_metadata_taxonomies_id",
+        "summary": "Get metadata taxonomies for namespace",
+        "description": "Used to retrieve all metadata taxonomies in a namespace.",
+        "parameters": [
+          {
+            "name": "namespace",
+            "in": "path",
+            "description": "The namespace of the metadata taxonomy.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "enterprise_123456"
+          },
+          {
+            "name": "marker",
+            "in": "query",
+            "description": "Defines the position marker at which to begin returning results. This is\nused when paginating using marker-based pagination.\n\nThis requires `usemarker` to be set to `true`.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "The maximum number of items to return per page.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "maximum": 1000
+            },
+            "example": 1000
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns all of the metadata taxonomies within a namespace\nand their corresponding schema.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MetadataTaxonomies"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Returned when the request parameters are not valid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        },
+        "x-box-tag": "metadata_taxonomies",
+        "tags": [
+          "Metadata taxonomies"
+        ]
+      }
+    },
+    "/metadata_taxonomies/{namespace}/{taxonomy_key}": {
+      "get": {
+        "operationId": "get_metadata_taxonomies_id_id",
+        "summary": "Get metadata taxonomy by taxonomy key",
+        "description": "Used to retrieve a metadata taxonomy by taxonomy key.",
+        "parameters": [
+          {
+            "name": "namespace",
+            "in": "path",
+            "description": "The namespace of the metadata taxonomy.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "enterprise_123456"
+          },
+          {
+            "name": "taxonomy_key",
+            "in": "path",
+            "description": "The key of the metadata taxonomy.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "geography"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns the metadata taxonomy identified by the taxonomy key.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MetadataTaxonomy"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Returned when the request parameters are not valid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Returned when a taxonomy with the given `namespace` and `taxonomy_key` cannot\nbe found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        },
+        "x-box-tag": "metadata_taxonomies",
+        "tags": [
+          "Metadata taxonomies"
+        ]
+      },
+      "patch": {
+        "operationId": "patch_metadata_taxonomies_id_id",
+        "summary": "Update metadata taxonomy",
+        "description": "Updates an existing metadata taxonomy.",
+        "parameters": [
+          {
+            "name": "namespace",
+            "in": "path",
+            "description": "The namespace of the metadata taxonomy.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "enterprise_123456"
+          },
+          {
+            "name": "taxonomy_key",
+            "in": "path",
+            "description": "The key of the metadata taxonomy.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "geography"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "displayName": {
+                    "description": "The display name of the taxonomy.",
+                    "type": "string",
+                    "example": "Geography",
+                    "maxLength": 4096
+                  }
+                },
+                "required": [
+                  "displayName"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The schema representing the updated metadata taxonomy.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MetadataTaxonomy"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Returned if the request parameters or body is not valid.\n\n* `bad_request` when the body does not contain a valid request. In many\ncases this response will include extra details on what fields are missing.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Returned when the user does not have the permission to modify the metadata\ntaxonomy. This can happen for a few reasons, most commonly when the user\ndoes not have (co-)admin permissions, or the user doesn't have access to \nthe provided namespace.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        },
+        "x-box-tag": "metadata_taxonomies",
+        "tags": [
+          "Metadata taxonomies"
+        ],
+        "x-box-requires-admin": true
+      },
+      "delete": {
+        "operationId": "delete_metadata_taxonomies_id_id",
+        "summary": "Remove metadata taxonomy",
+        "description": "Delete a metadata taxonomy.\nThis deletion is permanent and cannot be reverted.",
+        "parameters": [
+          {
+            "name": "namespace",
+            "in": "path",
+            "description": "The namespace of the metadata taxonomy.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "enterprise_123456"
+          },
+          {
+            "name": "taxonomy_key",
+            "in": "path",
+            "description": "The key of the metadata taxonomy.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "geography"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Returns an empty response when the metadata taxonomy is successfully deleted."
+          },
+          "400": {
+            "description": "Returned if the request parameters or body is not valid.\n\n* `bad_request` when the body does not contain a valid request. In many\ncases this response will include extra details on what fields are missing.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Returned when the user does not have the permission to delete the metadata\ntaxonomy. This can happen for a few reasons, most commonly when the user\ndoes not have (co-)admin permissions, or the user doesn't have access to\nthe provided namespace.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Returned if the metadata taxonomy does not exist.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        },
+        "x-box-tag": "metadata_taxonomies",
+        "tags": [
+          "Metadata taxonomies"
+        ],
+        "x-box-requires-admin": true
+      }
+    },
+    "/metadata_taxonomies/{namespace}/{taxonomy_key}/levels": {
+      "post": {
+        "operationId": "post_metadata_taxonomies_id_id_levels",
+        "summary": "Create metadata taxonomy levels",
+        "description": "Creates new metadata taxonomy levels.",
+        "parameters": [
+          {
+            "name": "namespace",
+            "in": "path",
+            "description": "The namespace of the metadata taxonomy.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "enterprise_123456"
+          },
+          {
+            "name": "taxonomy_key",
+            "in": "path",
+            "description": "The key of the metadata taxonomy.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "geography"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "An array of metadata taxonomy levels to be created.",
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/MetadataTaxonomyLevel"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Returns an array of all taxonomy levels.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MetadataTaxonomyLevels"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Returned if the request parameters or body is not valid.\n\n* `bad_request` when the body does not contain a valid request. In many\ncases this response will include extra details on what fields are missing.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Returned when the user does not have the permission to modify the metadata\ntaxonomy. This can happen for a few reasons, most commonly when the user\ndoes not have (co-)admin permissions, or the user doesn't have access to \nthe provided namespace.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        },
+        "x-box-tag": "metadata_taxonomies",
+        "tags": [
+          "Metadata taxonomies"
+        ],
+        "x-box-requires-admin": true
+      }
+    },
+    "/metadata_taxonomies/{namespace}/{taxonomy_key}/levels/{level_index}": {
+      "patch": {
+        "operationId": "patch_metadata_taxonomies_id_id_levels_id",
+        "summary": "Update metadata taxonomy level",
+        "description": "Updates an existing metadata taxonomy level.",
+        "parameters": [
+          {
+            "name": "namespace",
+            "in": "path",
+            "description": "The namespace of the metadata taxonomy.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "enterprise_123456"
+          },
+          {
+            "name": "taxonomy_key",
+            "in": "path",
+            "description": "The key of the metadata taxonomy.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "geography"
+          },
+          {
+            "name": "level_index",
+            "in": "path",
+            "description": "The index of the metadata taxonomy level.",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 1
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "displayName": {
+                    "description": "The display name of the taxonomy level.",
+                    "type": "string",
+                    "example": "France"
+                  },
+                  "description": {
+                    "description": "The description of the taxonomy level.",
+                    "type": "string",
+                    "example": "French Republic"
+                  }
+                },
+                "required": [
+                  "displayName"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The updated taxonomy level.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MetadataTaxonomyLevel"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Returned if the request parameters or body is not valid.\n\n* `bad_request` when the body does not contain a valid request. In many\ncases this response will include extra details on what fields are missing.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Returned when the user does not have the permission to modify the metadata\ntaxonomy. This can happen for a few reasons, most commonly when the user\ndoes not have (co-)admin permissions, or the user doesn't have access to \nthe provided namespace.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        },
+        "x-box-tag": "metadata_taxonomies",
+        "tags": [
+          "Metadata taxonomies"
+        ],
+        "x-box-requires-admin": true
+      }
+    },
+    "/metadata_taxonomies/{namespace}/{taxonomy_key}/levels:append": {
+      "post": {
+        "operationId": "post_metadata_taxonomies_id_id_levels:append",
+        "summary": "Add metadata taxonomy level",
+        "description": "Creates a new metadata taxonomy level and appends it to the existing levels.\nIf there are no levels defined yet, this will create the first level.",
+        "parameters": [
+          {
+            "name": "namespace",
+            "in": "path",
+            "description": "The namespace of the metadata taxonomy.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "enterprise_123456"
+          },
+          {
+            "name": "taxonomy_key",
+            "in": "path",
+            "description": "The key of the metadata taxonomy.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "geography"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "displayName": {
+                    "description": "The display name of the taxonomy level.",
+                    "type": "string",
+                    "example": "France"
+                  },
+                  "description": {
+                    "description": "The description of the taxonomy level.",
+                    "type": "string",
+                    "example": "French Republic"
+                  }
+                },
+                "required": [
+                  "displayName"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Returns an array of all taxonomy levels.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MetadataTaxonomyLevels"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Returned if the request parameters or body is not valid.\n\n* `bad_request` when the body does not contain a valid request. In many\ncases this response will include extra details on what fields are missing.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Returned when the user does not have the permission to modify the metadata\ntaxonomy. This can happen for a few reasons, most commonly when the user\ndoes not have (co-)admin permissions, or the user doesn't have access to \nthe provided namespace.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        },
+        "x-box-tag": "metadata_taxonomies",
+        "tags": [
+          "Metadata taxonomies"
+        ],
+        "x-box-requires-admin": true
+      }
+    },
+    "/metadata_taxonomies/{namespace}/{taxonomy_key}/levels:trim": {
+      "post": {
+        "operationId": "post_metadata_taxonomies_id_id_levels:trim",
+        "summary": "Delete metadata taxonomy level",
+        "description": "Deletes the last level of the metadata taxonomy.",
+        "parameters": [
+          {
+            "name": "namespace",
+            "in": "path",
+            "description": "The namespace of the metadata taxonomy.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "enterprise_123456"
+          },
+          {
+            "name": "taxonomy_key",
+            "in": "path",
+            "description": "The key of the metadata taxonomy.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "geography"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns an array of all taxonomy levels.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MetadataTaxonomyLevels"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Returned if the request parameters or body is not valid.\n\n* `bad_request` when the body does not contain a valid request. In many\ncases this response will include extra details on what fields are missing.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Returned when the user does not have the permission to modify the metadata\ntaxonomy. This can happen for a few reasons, most commonly when the user\ndoes not have (co-)admin permissions, or the user doesn't have access to \nthe provided namespace.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        },
+        "x-box-tag": "metadata_taxonomies",
+        "tags": [
+          "Metadata taxonomies"
+        ],
+        "x-box-requires-admin": true
+      }
+    },
+    "/metadata_taxonomies/{namespace}/{taxonomy_key}/nodes": {
+      "get": {
+        "operationId": "get_metadata_taxonomies_id_id_nodes",
+        "summary": "List metadata taxonomy nodes",
+        "description": "Used to retrieve metadata taxonomy nodes based on the parameters specified. \nResults are sorted in lexicographic order unless a `query` parameter is passed. \nWith a `query` parameter specified, results are sorted in order of relevance.",
+        "parameters": [
+          {
+            "name": "namespace",
+            "in": "path",
+            "description": "The namespace of the metadata taxonomy.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "enterprise_123456"
+          },
+          {
+            "name": "taxonomy_key",
+            "in": "path",
+            "description": "The key of the metadata taxonomy.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "geography"
+          },
+          {
+            "name": "level",
+            "in": "query",
+            "description": "Filters results by taxonomy level. Multiple values can be provided. \nResults include nodes that match any of the specified values.",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "integer"
+              }
+            },
+            "example": [
+              1
+            ]
+          },
+          {
+            "name": "parent",
+            "in": "query",
+            "description": "Node identifier of a direct parent node. Multiple values can be provided. \nResults include nodes that match any of the specified values.",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "example": [
+              "c73a9bf3-f377-4210-9159-3df06a481905"
+            ]
+          },
+          {
+            "name": "ancestor",
+            "in": "query",
+            "description": "Node identifier of any ancestor node. Multiple values can be provided. \nResults include nodes that match any of the specified values.",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "example": [
+              "c73a9bf3-f377-4210-9159-3df06a481905",
+              "bf8b8213-be1f-4011-bd45-533c0713fa0a"
+            ]
+          },
+          {
+            "name": "query",
+            "in": "query",
+            "description": "Query text to search for the taxonomy nodes.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "France"
+          },
+          {
+            "name": "include-total-result-count",
+            "in": "query",
+            "description": "When set to `true` this provides the total number of nodes that matched the query. \nThe response will compute counts of up to 10,000 elements. Defaults to `false`.",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            },
+            "example": true
+          },
+          {
+            "name": "marker",
+            "in": "query",
+            "description": "Defines the position marker at which to begin returning results. This is\nused when paginating using marker-based pagination.\n\nThis requires `usemarker` to be set to `true`.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "The maximum number of items to return per page.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "maximum": 1000
+            },
+            "example": 1000
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns a list of the taxonomy nodes that match the specified parameters.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MetadataTaxonomyNodes"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Returned when the request parameters are not valid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        },
+        "x-box-tag": "metadata_taxonomies",
+        "tags": [
+          "Metadata taxonomies"
+        ]
+      },
+      "post": {
+        "operationId": "post_metadata_taxonomies_id_id_nodes",
+        "summary": "Create metadata taxonomy node",
+        "description": "Creates a new metadata taxonomy node.",
+        "parameters": [
+          {
+            "name": "namespace",
+            "in": "path",
+            "description": "The namespace of the metadata taxonomy.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "enterprise_123456"
+          },
+          {
+            "name": "taxonomy_key",
+            "in": "path",
+            "description": "The key of the metadata taxonomy.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "geography"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "displayName": {
+                    "description": "The display name of the taxonomy node.",
+                    "type": "string",
+                    "example": "France"
+                  },
+                  "level": {
+                    "description": "The level of the taxonomy node.",
+                    "type": "integer",
+                    "example": 1
+                  },
+                  "parentId": {
+                    "description": "The identifier of the parent taxonomy node. \nOmit this field for root-level nodes.",
+                    "type": "string",
+                    "example": "99df4513-7102-4896-8228-94635ee9d330"
+                  }
+                },
+                "required": [
+                  "displayName",
+                  "level"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The schema representing the taxonomy node created.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MetadataTaxonomyNode"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Returned if the request parameters or body is not valid.\n\n* `bad_request` when the body does not contain a valid request. In many\ncases this response will include extra details on what fields are missing.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Returned when the user does not have the permission to modify the metadata\ntaxonomy. This can happen for a few reasons, most commonly when the user\ndoes not have (co-)admin permissions, or the user doesn't have access to \nthe provided namespace.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        },
+        "x-box-tag": "metadata_taxonomies",
+        "tags": [
+          "Metadata taxonomies"
+        ],
+        "x-box-requires-admin": true
+      }
+    },
+    "/metadata_taxonomies/{namespace}/{taxonomy_key}/nodes/{node_id}": {
+      "get": {
+        "operationId": "get_metadata_taxonomies_id_id_nodes_id",
+        "summary": "Get metadata taxonomy node by ID",
+        "description": "Retrieves a metadata taxonomy node by its identifier.",
+        "parameters": [
+          {
+            "name": "namespace",
+            "in": "path",
+            "description": "The namespace of the metadata taxonomy.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "enterprise_123456"
+          },
+          {
+            "name": "taxonomy_key",
+            "in": "path",
+            "description": "The key of the metadata taxonomy.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "geography"
+          },
+          {
+            "name": "node_id",
+            "in": "path",
+            "description": "The identifier of the metadata taxonomy node.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "14d3d433-c77f-49c5-b146-9dea370f6e32"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns the metadata taxonomy node that matches the identifier.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MetadataTaxonomyNode"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Returned if any of the request parameters are not valid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Returned if the taxonomy node with the given `node_id` cannot be found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        },
+        "x-box-tag": "metadata_taxonomies",
+        "tags": [
+          "Metadata taxonomies"
+        ]
+      },
+      "patch": {
+        "operationId": "patch_metadata_taxonomies_id_id_nodes_id",
+        "summary": "Update metadata taxonomy node",
+        "description": "Updates an existing metadata taxonomy node.",
+        "parameters": [
+          {
+            "name": "namespace",
+            "in": "path",
+            "description": "The namespace of the metadata taxonomy.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "enterprise_123456"
+          },
+          {
+            "name": "taxonomy_key",
+            "in": "path",
+            "description": "The key of the metadata taxonomy.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "geography"
+          },
+          {
+            "name": "node_id",
+            "in": "path",
+            "description": "The identifier of the metadata taxonomy node.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "14d3d433-c77f-49c5-b146-9dea370f6e32"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "displayName": {
+                    "description": "The display name of the taxonomy node.",
+                    "type": "string",
+                    "example": "France"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The schema representing the updated taxonomy node.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MetadataTaxonomyNode"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Returned if the request parameters or body is not valid.\n\n* `bad_request` when the body does not contain a valid request. In many\ncases this response will include extra details on what fields are missing.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Returned when the user does not have the permission to modify the metadata\ntaxonomy. This can happen for a few reasons, most commonly when the user\ndoes not have (co-)admin permissions, or the user doesn't have access to \nthe provided namespace.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        },
+        "x-box-tag": "metadata_taxonomies",
+        "tags": [
+          "Metadata taxonomies"
+        ],
+        "x-box-requires-admin": true
+      },
+      "delete": {
+        "operationId": "delete_metadata_taxonomies_id_id_nodes_id",
+        "summary": "Remove metadata taxonomy node",
+        "description": "Delete a metadata taxonomy node.\nThis deletion is permanent and cannot be reverted.\nOnly metadata taxonomy nodes without any children can be deleted.",
+        "parameters": [
+          {
+            "name": "namespace",
+            "in": "path",
+            "description": "The namespace of the metadata taxonomy.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "enterprise_123456"
+          },
+          {
+            "name": "taxonomy_key",
+            "in": "path",
+            "description": "The key of the metadata taxonomy.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "geography"
+          },
+          {
+            "name": "node_id",
+            "in": "path",
+            "description": "The identifier of the metadata taxonomy node.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "14d3d433-c77f-49c5-b146-9dea370f6e32"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Returns an empty response when the metadata taxonomy node is successfully deleted."
+          },
+          "400": {
+            "description": "Returned if the request parameters or body is not valid.\n\n* `bad_request` when the body does not contain a valid request. In many\ncases this response will include extra details on what fields are missing.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Returned when the user does not have the permission to delete the metadata\ntaxonomy node. This can happen for a few reasons, most commonly when the user\ndoes not have (co-)admin permissions, or the user doesn't have access to\nthe provided namespace.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Returned if the metadata taxonomy node does not exist.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        },
+        "x-box-tag": "metadata_taxonomies",
+        "tags": [
+          "Metadata taxonomies"
+        ],
+        "x-box-requires-admin": true
+      }
+    },
+    "/metadata_templates/{scope}/{template_key}/fields/{field_key}/options": {
+      "get": {
+        "operationId": "get_metadata_templates_id_id_fields_id_options",
+        "summary": "List metadata template's options for taxonomy field",
+        "description": "Used to retrieve metadata taxonomy nodes which are available for the taxonomy field based \non its configuration and the parameters specified. \nResults are sorted in lexicographic order unless a `query` parameter is passed. \nWith a `query` parameter specified, results are sorted in order of relevance.",
+        "parameters": [
+          {
+            "name": "scope",
+            "in": "path",
+            "description": "The scope of the metadata template.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "global",
+                "enterprise"
+              ]
+            },
+            "example": "global"
+          },
+          {
+            "name": "template_key",
+            "in": "path",
+            "description": "The name of the metadata template.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "properties"
+          },
+          {
+            "name": "field_key",
+            "in": "path",
+            "description": "The key of the metadata taxonomy field in the template.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "geography"
+          },
+          {
+            "name": "level",
+            "in": "query",
+            "description": "Filters results by taxonomy level. Multiple values can be provided. \nResults include nodes that match any of the specified values.",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "integer"
+              }
+            },
+            "example": [
+              1
+            ]
+          },
+          {
+            "name": "parent",
+            "in": "query",
+            "description": "Node identifier of a direct parent node. Multiple values can be provided. \nResults include nodes that match any of the specified values.",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "example": [
+              "c73a9bf3-f377-4210-9159-3df06a481905"
+            ]
+          },
+          {
+            "name": "ancestor",
+            "in": "query",
+            "description": "Node identifier of any ancestor node. Multiple values can be provided. \nResults include nodes that match any of the specified values.",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "example": [
+              "c73a9bf3-f377-4210-9159-3df06a481905",
+              "bf8b8213-be1f-4011-bd45-533c0713fa0a"
+            ]
+          },
+          {
+            "name": "query",
+            "in": "query",
+            "description": "Query text to search for the taxonomy nodes.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "France"
+          },
+          {
+            "name": "include-total-result-count",
+            "in": "query",
+            "description": "When set to `true` this provides the total number of nodes that matched the query. \nThe response will compute counts of up to 10,000 elements. Defaults to `false`.",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            },
+            "example": true
+          },
+          {
+            "name": "only-selectable-options",
+            "in": "query",
+            "description": "When set to `true`, this only returns valid selectable options for this template\ntaxonomy field. Otherwise, it returns all taxonomy nodes, whether or not they are selectable.\nDefaults to `true`.",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            },
+            "example": true
+          },
+          {
+            "name": "marker",
+            "in": "query",
+            "description": "Defines the position marker at which to begin returning results. This is\nused when paginating using marker-based pagination.\n\nThis requires `usemarker` to be set to `true`.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "The maximum number of items to return per page.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "maximum": 1000
+            },
+            "example": 1000
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns a list of the taxonomy nodes that match the specified parameters.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MetadataTaxonomyNodes"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Returned when the request parameters are not valid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        },
+        "x-box-tag": "metadata_taxonomies",
+        "tags": [
+          "Metadata taxonomies"
+        ]
+      }
     }
   },
   "components": {
@@ -33814,6 +35368,257 @@
         "x-box-resource-id": "metadata_query_results",
         "x-box-tag": "search"
       },
+      "MetadataTaxonomies": {
+        "description": "A list of metadata taxonomies.",
+        "type": "object",
+        "allOf": [
+          {
+            "type": "object",
+            "description": "The part of an API response that describes marker\nbased pagination.",
+            "properties": {
+              "limit": {
+                "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
+                "type": "integer",
+                "format": "int64",
+                "example": 1000
+              },
+              "next_marker": {
+                "description": "The marker for the start of the next page of results.",
+                "type": "string",
+                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                "nullable": true
+              },
+              "prev_marker": {
+                "description": "The marker for the start of the previous page of results.",
+                "type": "string",
+                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVih",
+                "nullable": true
+              }
+            }
+          },
+          {
+            "properties": {
+              "entries": {
+                "description": "A list of metadata taxonomies.",
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/MetadataTaxonomy"
+                }
+              }
+            }
+          }
+        ],
+        "title": "Metadata taxonomies",
+        "x-box-resource-id": "metadata_taxonomies",
+        "x-box-tag": "metadata_taxonomies"
+      },
+      "MetadataTaxonomy": {
+        "description": "A taxonomy object for metadata that can be used in metadata templates.",
+        "type": "object",
+        "properties": {
+          "id": {
+            "description": "A unique identifier of the metadata taxonomy.",
+            "type": "string",
+            "example": "822227e0-47a5-921b-88a8-494760b2e6d2"
+          },
+          "key": {
+            "description": "A unique identifier of the metadata taxonomy. The identifier must be unique within \nthe namespace to which it belongs.",
+            "type": "string",
+            "example": "geography",
+            "maxLength": 256,
+            "pattern": "^[a-zA-Z_][-a-zA-Z0-9_]*$"
+          },
+          "displayName": {
+            "description": "The display name of the metadata taxonomy. This can be seen in the Box web app.",
+            "type": "string",
+            "example": "Geography",
+            "maxLength": 4096
+          },
+          "namespace": {
+            "description": "A namespace that the metadata taxonomy is associated with.",
+            "type": "string",
+            "example": "enterprise_123456",
+            "maxLength": 4096
+          },
+          "levels": {
+            "description": "Levels of the metadata taxonomy.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MetadataTaxonomyLevel"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "displayName",
+          "namespace"
+        ],
+        "title": "Metadata taxonomy",
+        "x-box-resource-id": "metadata_taxonomy",
+        "x-box-tag": "metadata_taxonomies"
+      },
+      "MetadataTaxonomyAncestor": {
+        "description": "A node object in the metadata taxonomy that represents an ancestor.",
+        "type": "object",
+        "properties": {
+          "id": {
+            "description": "A unique identifier of the metadata taxonomy node.",
+            "type": "string",
+            "example": "14d3d433-c77f-49c5-b146-9dea370f6e32"
+          },
+          "displayName": {
+            "description": "The display name of the metadata taxonomy node.",
+            "type": "string",
+            "example": "France"
+          },
+          "level": {
+            "description": "An index of the level to which the node belongs.",
+            "type": "integer",
+            "example": 2
+          }
+        },
+        "title": "Metadata taxonomy ancestor"
+      },
+      "MetadataTaxonomyLevel": {
+        "description": "A level in the metadata taxonomy represents a hierarchical category \nwithin the taxonomy structure.",
+        "type": "object",
+        "properties": {
+          "displayName": {
+            "description": "The display name of the level as it is shown to the user.",
+            "type": "string",
+            "example": "Continent"
+          },
+          "description": {
+            "description": "A description of the level.",
+            "type": "string",
+            "example": "Continent"
+          },
+          "level": {
+            "description": "An index of the level within the taxonomy. Levels are indexed starting from 1.",
+            "type": "integer",
+            "format": "int32",
+            "example": 1
+          }
+        },
+        "title": "Metadata taxonomy level",
+        "x-box-resource-id": "metadata_taxonomy_level",
+        "x-box-tag": "metadata_taxonomies"
+      },
+      "MetadataTaxonomyLevels": {
+        "description": "Levels in the metadata taxonomy represent hierarchical \ncategories within the taxonomy structure.",
+        "type": "object",
+        "allOf": [
+          {
+            "properties": {
+              "entries": {
+                "description": "An array of all taxonomy levels.",
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/MetadataTaxonomyLevel"
+                }
+              }
+            }
+          }
+        ],
+        "title": "Metadata taxonomy levels",
+        "x-box-resource-id": "metadata_taxonomy_levels",
+        "x-box-tag": "metadata_taxonomies"
+      },
+      "MetadataTaxonomyNode": {
+        "description": "A node object for metadata taxonomy that can be used in metadata templates.",
+        "type": "object",
+        "properties": {
+          "id": {
+            "description": "A unique identifier of the metadata taxonomy node.",
+            "type": "string",
+            "example": "14d3d433-c77f-49c5-b146-9dea370f6e32"
+          },
+          "displayName": {
+            "description": "The display name of the metadata taxonomy node.",
+            "type": "string",
+            "example": "France"
+          },
+          "level": {
+            "description": "An index of the level to which the node belongs.",
+            "type": "integer",
+            "example": 2
+          },
+          "parentId": {
+            "description": "The identifier of the parent node.",
+            "type": "string",
+            "example": "99df4513-7102-4896-8228-94635ee9d330"
+          },
+          "nodePath": {
+            "description": "An array of identifiers for all ancestor nodes.  \nNot returned for root-level nodes.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "99df4513-7102-4896-8228-94635ee9d330"
+            ]
+          },
+          "ancestors": {
+            "description": "An array of objects for all ancestor nodes.  \nNot returned for root-level nodes.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MetadataTaxonomyAncestor"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "displayName",
+          "level"
+        ],
+        "title": "Metadata taxonomy node",
+        "x-box-resource-id": "metadata_taxonomy_node",
+        "x-box-tag": "metadata_taxonomies"
+      },
+      "MetadataTaxonomyNodes": {
+        "description": "A list of metadata taxonomy nodes.",
+        "type": "object",
+        "allOf": [
+          {
+            "type": "object",
+            "description": "The part of an API response that describes marker\nbased pagination.",
+            "properties": {
+              "limit": {
+                "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
+                "type": "integer",
+                "format": "int64",
+                "example": 1000
+              },
+              "next_marker": {
+                "description": "The marker for the start of the next page of results.",
+                "type": "string",
+                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                "nullable": true
+              },
+              "prev_marker": {
+                "description": "The marker for the start of the previous page of results.",
+                "type": "string",
+                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVih",
+                "nullable": true
+              }
+            }
+          },
+          {
+            "properties": {
+              "entries": {
+                "description": "A list of metadata taxonomy nodes.",
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/MetadataTaxonomyNode"
+                }
+              }
+            }
+          }
+        ],
+        "title": "Metadata taxonomy nodes",
+        "x-box-resource-id": "metadata_taxonomy_nodes",
+        "x-box-tag": "metadata_taxonomies"
+      },
       "MetadataTemplate": {
         "description": "A template for metadata that can be applied to files and folders.",
         "type": "object",
@@ -41841,6 +43646,11 @@
       "name": "Metadata instances (Folders)",
       "description": "A metadata instance describes the relation between a template and a folder,\nincluding the values that are assigned for every field.",
       "x-box-tag": "folder_metadata"
+    },
+    {
+      "name": "Metadata taxonomies",
+      "description": "A metadata taxonomy is a hierarchical classification system\nthat helps organize and manage metadata\nwithin an enterprise.",
+      "x-box-tag": "metadata_taxonomies"
     },
     {
       "name": "Metadata templates",
