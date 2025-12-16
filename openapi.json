@@ -14,7 +14,7 @@
             "url": "http://www.apache.org/licenses/LICENSE-2.0"
         },
         "version": "2024.0",
-        "x-box-commit-hash": "851befaf8c"
+        "x-box-commit-hash": "2e9c861c73"
     },
     "servers": [
         {
@@ -3248,6 +3248,16 @@
                             "type": "string"
                         },
                         "example": "12345"
+                    },
+                    {
+                        "name": "view",
+                        "in": "query",
+                        "description": "Taxonomy field values are returned in `API view` by default, meaning the value is represented with a taxonomy node identifier. To retrieve the `Hydrated view`, where taxonomy values are represented with the full taxonomy node information, set this parameter to `hydrated`. This is the only supported value for this parameter.",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "hydrated"
                     }
                 ],
                 "responses": {
@@ -3675,6 +3685,16 @@
                             "type": "string"
                         },
                         "example": "properties"
+                    },
+                    {
+                        "name": "view",
+                        "in": "query",
+                        "description": "Taxonomy field values are returned in `API view` by default, meaning the value is represented with a taxonomy node identifier. To retrieve the `Hydrated view`, where taxonomy values are represented with the full taxonomy node information, set this parameter to `hydrated`. This is the only supported value for this parameter.",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "hydrated"
                     }
                 ],
                 "responses": {
@@ -3789,7 +3809,7 @@
                                             "example": "Aaron Levie"
                                         },
                                         {
-                                            "description": "メタデータテンプレートに存在する各フィールドの値。`global.properties`テンプレートの場合、汎用的なキー/値ペアをテンプレートに保存できるため、0個以上のフィールドのリストにすることができます。"
+                                            "description": "A value for each of the fields that are present on the metadata template. For the `global.properties` template this can be a list of zero or more fields, as this template allows for any generic key-value pairs to be stored stored in the template. For a taxonomy field, the value should be a list of the node identifiers of the selected taxonomy nodes, since taxonomy fields support multi-select. If a single select taxonomy field is being set, the list should contain a single node identifier."
                                         }
                                     ]
                                 },
@@ -6430,6 +6450,16 @@
                             "nullable": false
                         },
                         "example": "12345"
+                    },
+                    {
+                        "name": "view",
+                        "in": "query",
+                        "description": "Taxonomy field values are returned in `API view` by default, meaning the value is represented with a taxonomy node identifier. To retrieve the `Hydrated view`, where taxonomy values are represented with the full taxonomy node information, set this parameter to `hydrated`. This is the only supported value for this parameter.",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "hydrated"
                     }
                 ],
                 "responses": {
@@ -6977,7 +7007,7 @@
                                             "example": "Aaron Levie"
                                         },
                                         {
-                                            "description": "メタデータテンプレートに存在する各フィールドの値。`global.properties`テンプレートの場合、汎用的なキー/値ペアをテンプレートに保存できるため、0個以上のフィールドのリストにすることができます。"
+                                            "description": "A value for each of the fields that are present on the metadata template. For the `global.properties` template this can be a list of zero or more fields, as this template allows for any generic key-value pairs to be stored in the template. For a taxonomy field, the value should be a list of the node identifiers of the selected taxonomy nodes, since taxonomy fields support multi-select. If a single select taxonomy field is being set, the list should contain a single node identifier."
                                         }
                                     ]
                                 },
@@ -8803,7 +8833,7 @@
                                         "type": "array",
                                         "items": {
                                             "title": "メタデータフィールド (書き込み)",
-                                            "description": "メタデータテンプレート内のフィールド。フィールドは、基本テキスト、日付、または数値フィールドか、オプションのリストのいずれかになります。",
+                                            "description": "A field within a metadata template. Fields can be a basic text, date, or number field, a list of options, or a taxonomy.",
                                             "required": [
                                                 "type",
                                                 "key",
@@ -8812,7 +8842,7 @@
                                             "type": "object",
                                             "properties": {
                                                 "type": {
-                                                    "description": "フィールドのタイプ。基本のフィールドは、テキストを表す`string`フィールド、数値を表す`float`フィールド、およびユーザーに日時選択機能を表示するための`date`フィールドです。\n\nさらに、メタデータテンプレートは、基本の項目リストを表す`enum`フィールドのほか、ユーザーが複数の値を選択できる同様の項目リストを表す` multiSelect`フィールドをサポートしています。",
+                                                    "description": "The type of field. The basic fields are a `string` field for text, a `float` field for numbers, and a `date` field to present the user with a date-time picker.\n\nさらに、メタデータテンプレートは、基本の項目リストを表す`enum`フィールドのほか、ユーザーが複数の値を選択できる同様の項目リストを表す` multiSelect`フィールドをサポートしています。\n\nMetadata taxonomies are also supported as a `taxonomy` field type with a specific set of additional properties, which describe its structure.",
                                                     "type": "string",
                                                     "example": "string",
                                                     "enum": [
@@ -8820,7 +8850,8 @@
                                                         "float",
                                                         "date",
                                                         "enum",
-                                                        "multiSelect"
+                                                        "multiSelect",
+                                                        "taxonomy"
                                                     ]
                                                 },
                                                 "key": {
@@ -8862,6 +8893,38 @@
                                                                 "type": "string",
                                                                 "example": "Category 1"
                                                             }
+                                                        }
+                                                    }
+                                                },
+                                                "taxonomyKey": {
+                                                    "description": "The unique key of the metadata taxonomy to use for this taxonomy field. This property is required when the field `type` is set to `taxonomy`.",
+                                                    "type": "string",
+                                                    "example": "locationTaxonomy"
+                                                },
+                                                "namespace": {
+                                                    "description": "The namespace of the metadata taxonomy to use for this taxonomy field. This property is required when the field `type` is set to `taxonomy`.",
+                                                    "type": "string",
+                                                    "example": "enterprise_123456"
+                                                },
+                                                "optionsRules": {
+                                                    "description": "An object defining additional rules for the options of the taxonomy field. This property is required when the field `type` is set to `taxonomy`.",
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "multiSelect": {
+                                                            "description": "Whether to allow users to select multiple values.",
+                                                            "type": "boolean",
+                                                            "example": true
+                                                        },
+                                                        "selectableLevels": {
+                                                            "description": "An array of integers defining which levels of the taxonomy are selectable by users.",
+                                                            "type": "array",
+                                                            "items": {
+                                                                "type": "integer"
+                                                            },
+                                                            "example": [
+                                                                1,
+                                                                2
+                                                            ]
                                                         }
                                                     }
                                                 }
@@ -9963,7 +10026,7 @@
                                         "example": "2019-08-29T23:59:00-07:00"
                                     },
                                     "can_view_path": {
-                                        "description": "招待されたユーザーが招待に関連付けられているフォルダへの親パス全体を見ることができるかどうかを示します。招待されたユーザーには親フォルダ内の権限が付与されないため、自身が参加しているコラボレーションに関係しないコンテンツを閲覧することはできません。\n\nこれにより、招待されたユーザーの \\[**すべてのファイル**] ページの読み込みに必要な時間が有意に増加することに注意してください。`can_view_path`が有効になっているコラボレーションの数を1ユーザーあたり1,000に制限することをお勧めします。\n\n`can_view_path`を`true`にしてコラボレータを招待できるのは所有者と共同所有者のみ、既存のコラボレーションで`can_view_path`を更新できるのは所有者のみです。\n\n`can_view_path`は、フォルダのコラボレーションのみに使用できます。\n\nWhen you delete a folder with `can_view_path=true`, collaborators may still see the parent path. For instructions on how to remove this, see [Even though a folder invited via can_view_path is deleted, the path remains displayed](https://support.box.com/hc/en-us/articles/37472814319891-Even-though-a-folder-invited-via-can-view-path-is-deleted-the-path-remains-displayed).",
+                                        "description": "招待されたユーザーが招待に関連付けられているフォルダへの親パス全体を見ることができるかどうかを示します。招待されたユーザーには親フォルダ内の権限が付与されないため、自身が参加しているコラボレーションに関係しないコンテンツを閲覧することはできません。\n\nこれにより、招待されたユーザーの \\[**すべてのファイル**] ページの読み込みに必要な時間が有意に増加することに注意してください。`can_view_path`が有効になっているコラボレーションの数を1ユーザーあたり1,000に制限することをお勧めします。\n\n`can_view_path`を`true`にしてコラボレータを招待できるのは所有者と共同所有者のみ、既存のコラボレーションで`can_view_path`を更新できるのは所有者のみです。\n\n`can_view_path`は、フォルダのコラボレーションのみに使用できます。\n\n`can_view_path=true`のフォルダを削除しても、コラボレータには親パスが表示されたままになる場合があります。これを削除する方法については、[\\[can_view_path\\] で招待されたフォルダを削除してもパスが表示されている](https://support.box.com/hc/en-us/articles/37472814319891-Even-though-a-folder-invited-via-can-view-path-is-deleted-the-path-remains-displayed)を参照してください。",
                                         "type": "boolean",
                                         "example": true
                                     }
@@ -10246,7 +10309,7 @@
                                         "example": true
                                     },
                                     "can_view_path": {
-                                        "description": "招待されたユーザーが招待に関連付けられているフォルダへの親パス全体を見ることができるかどうかを示します。招待されたユーザーには親フォルダ内の権限が付与されないため、自身が参加しているコラボレーションに関係しないコンテンツを閲覧することはできません。\n\nこれにより、招待されたユーザーの \\[**すべてのファイル**] ページの読み込みに必要な時間が有意に増加することに注意してください。`can_view_path`が有効になっているコラボレーションの数を1ユーザーあたり1,000に制限することをお勧めします。\n\n`can_view_path`を`true`にしてコラボレータを招待できるのは所有者と共同所有者のみ、既存のコラボレーションで`can_view_path`を更新できるのは所有者のみです。\n\n`can_view_path`は、フォルダのコラボレーションのみに使用できます。\n\nWhen you delete a folder with `can_view_path=true`, collaborators may still see the parent path. For instructions on how to remove this, see [Even though a folder invited via can_view_path is deleted, the path remains displayed](https://support.box.com/hc/en-us/articles/37472814319891-Even-though-a-folder-invited-via-can-view-path-is-deleted-the-path-remains-displayed).",
+                                        "description": "招待されたユーザーが招待に関連付けられているフォルダへの親パス全体を見ることができるかどうかを示します。招待されたユーザーには親フォルダ内の権限が付与されないため、自身が参加しているコラボレーションに関係しないコンテンツを閲覧することはできません。\n\nこれにより、招待されたユーザーの \\[**すべてのファイル**] ページの読み込みに必要な時間が有意に増加することに注意してください。`can_view_path`が有効になっているコラボレーションの数を1ユーザーあたり1,000に制限することをお勧めします。\n\n`can_view_path`を`true`にしてコラボレータを招待できるのは所有者と共同所有者のみ、既存のコラボレーションで`can_view_path`を更新できるのは所有者のみです。\n\n`can_view_path`は、フォルダのコラボレーションのみに使用できます。\n\n`can_view_path=true`のフォルダを削除しても、コラボレータには親パスが表示されたままになる場合があります。これを削除する方法については、[\\[can_view_path\\] で招待されたフォルダを削除してもパスが表示されている](https://support.box.com/hc/en-us/articles/37472814319891-Even-though-a-folder-invited-via-can-view-path-is-deleted-the-path-remains-displayed)を参照してください。",
                                         "type": "boolean",
                                         "example": true
                                     },
@@ -15257,7 +15320,7 @@
             "put": {
                 "operationId": "put_users_id_folders_0",
                 "summary": "所有フォルダの移動",
-                "description": "Move all of the items (files, folders and workflows) owned by a user into another user's account.\n\n転送できるのは、ルートフォルダ (`0`) のみです。\n\nユーザー間でフォルダを移動できるのは、管理者権限を持つユーザーのみです。\n\n既存の共有リンクとフォルダレベルのコラボレーションはすべて、操作中に転送されます。個々のファイルレベルでのコラボレーションは操作中に転送されますが、元のユーザーが削除されるとこれらのコラボレーションは削除されることに注意してください。\n\nユーザーのすべてのフォルダに多数の項目がある場合、コールは非同期的に実行されます。この操作が10分以内に完了しない場合、ユーザーには200 OKのレスポンスが返され、操作は続行されます。\n\n宛先パスのいずれかの親フォルダにメタデータカスケードポリシーが適用されている場合は、メタデータカスケード操作が非同期的に開始されます。\n\n現時点では、この操作がいつ終了したのかを確認する方法はありません。\n\n宛先フォルダの名前は、`{User}'s Files and\nFolders`形式になります。この場合、`{User}`はユーザーの表示名です。\n\nこのAPIコールを行うには、アプリケーションで \\[Boxに格納されているすべてのファイルとフォルダの読み取りと書き込み] スコープを有効にしておく必要があります。\n\n転送先ユーザーが`Relay`または`Relay Lite`にアクセスできることと転送中のワークフローに関与するファイルやフォルダにアクセスできることを確認してください。\n\n操作が完了すると、管理者にメールが届きます。",
+                "description": "ユーザーが所有するすべての項目 (ファイル、フォルダ、およびワークフロー) を別のユーザーのアカウントに移動します。\n\n転送できるのは、ルートフォルダ (`0`) のみです。\n\nユーザー間でフォルダを移動できるのは、管理者権限を持つユーザーのみです。\n\n既存の共有リンクとフォルダレベルのコラボレーションはすべて、操作中に転送されます。個々のファイルレベルでのコラボレーションは操作中に転送されますが、元のユーザーが削除されるとこれらのコラボレーションは削除されることに注意してください。\n\nユーザーのすべてのフォルダに多数の項目がある場合、コールは非同期的に実行されます。この操作が10分以内に完了しない場合、ユーザーには200 OKのレスポンスが返され、操作は続行されます。\n\n宛先パスのいずれかの親フォルダにメタデータカスケードポリシーが適用されている場合は、メタデータカスケード操作が非同期的に開始されます。\n\n現時点では、この操作がいつ終了したのかを確認する方法はありません。\n\n宛先フォルダの名前は、`{User}'s Files and\nFolders`形式になります。この場合、`{User}`はユーザーの表示名です。\n\nこのAPIコールを行うには、アプリケーションで \\[Boxに格納されているすべてのファイルとフォルダの読み取りと書き込み] スコープを有効にしておく必要があります。\n\n転送先ユーザーが`Relay`または`Relay Lite`にアクセスできることと転送中のワークフローに関与するファイルやフォルダにアクセスできることを確認してください。\n\n操作が完了すると、管理者にメールが届きます。",
                 "parameters": [
                     {
                         "name": "user_id",
@@ -15338,7 +15401,7 @@
                         }
                     },
                     "403": {
-                        "description": "フォルダの所有権を別のユーザーに移管できない場合にエラーを返します。\n\n* `forbidden_by_policy`: 情報バリアの制限により所有権の移管が禁止されている場合に返されます。\n* `Cannot transfer files from/to higher privileged accounts`: You can only transfer content to or from managed users or your own account, not other co-admins or admins. Admins can transfer content between any users, including co-admins and managed users.",
+                        "description": "フォルダの所有権を別のユーザーに移管できない場合にエラーを返します。\n\n* `forbidden_by_policy`: 情報バリアの制限により所有権の移管が禁止されている場合に返されます。\n* `Cannot transfer files from/to higher privileged accounts`: コンテンツは、管理対象ユーザーまたは自身のアカウントとの間でのみ転送できますが、他の共同所有者または管理者との間では転送できません。管理者は、すべてのユーザー (共同管理者や管理対象ユーザーを含む) 間でコンテンツを転送できます。",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -20357,7 +20420,7 @@
                         }
                     },
                     "400": {
-                        "description": "Returns an error if the enterprise is missing from the request.",
+                        "description": "リクエストから企業が欠落している場合は、エラーを返します。",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -20367,7 +20430,7 @@
                         }
                     },
                     "404": {
-                        "description": "Returns an error when an incorrect or null enterprise is present in the request body.",
+                        "description": "リクエスト本文に存在する企業が誤っているかnullの場合は、エラーを返します。",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -25136,6 +25199,1497 @@
                 "x-box-tag": "ai_studio",
                 "tags": [
                     "AI Studio"
+                ]
+            }
+        },
+        "/metadata_taxonomies": {
+            "post": {
+                "operationId": "post_metadata_taxonomies",
+                "summary": "Create metadata taxonomy",
+                "description": "Creates a new metadata taxonomy that can be used in metadata templates.",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "key": {
+                                        "description": "The taxonomy key. If it is not provided in the request body, it will be generated from the `displayName`. The `displayName` would be converted to lower case, and all spaces and non-alphanumeric characters replaced with underscores.",
+                                        "type": "string",
+                                        "example": "geography",
+                                        "maxLength": 256
+                                    },
+                                    "displayName": {
+                                        "description": "The display name of the taxonomy.",
+                                        "type": "string",
+                                        "example": "Geography",
+                                        "maxLength": 4096
+                                    },
+                                    "namespace": {
+                                        "description": "The namespace of the metadata taxonomy to create.",
+                                        "type": "string",
+                                        "example": "enterprise_123456",
+                                        "maxLength": 4096
+                                    }
+                                },
+                                "required": [
+                                    "displayName",
+                                    "namespace"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "The schema representing the metadata taxonomy created.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MetadataTaxonomy"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "リクエストのパラメータまたは本文が無効な場合に返されます。\n\n* `bad_request` - 本文に有効なリクエストが含まれていない場合に返されます。多くの場合、このレスポンスには、不足しているフィールドに関する追加の詳細が含まれます。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Returned when the user does not have the permission to create the metadata taxonomy. This can happen for a few reasons, most commonly when the user does not have (co-)admin permissions, or the user doesn't have access to the provided namespace.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "予期しないクライアントエラー。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-box-tag": "metadata_taxonomies",
+                "tags": [
+                    "Metadata taxonomies"
+                ],
+                "x-box-requires-admin": true
+            }
+        },
+        "/metadata_taxonomies/{namespace}": {
+            "get": {
+                "operationId": "get_metadata_taxonomies_id",
+                "summary": "Get metadata taxonomies for namespace",
+                "description": "Used to retrieve all metadata taxonomies in a namespace.",
+                "parameters": [
+                    {
+                        "name": "namespace",
+                        "in": "path",
+                        "description": "The namespace of the metadata taxonomy.",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "enterprise_123456"
+                    },
+                    {
+                        "name": "marker",
+                        "in": "query",
+                        "description": "結果が返される開始位置のマーカー。マーカーベースのページネーションを使用している場合に使用されます。\n\nこれを使用するには、`usemarker`を`true`に設定する必要があります。",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii"
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "返す項目の1ページあたりの最大数。",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64",
+                            "maximum": 1000
+                        },
+                        "example": 1000
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns all of the metadata taxonomies within a namespace and their corresponding schema.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MetadataTaxonomies"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "リクエストパラメータが無効な場合に返されます。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "予期しないクライアントエラー。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-box-tag": "metadata_taxonomies",
+                "tags": [
+                    "Metadata taxonomies"
+                ]
+            }
+        },
+        "/metadata_taxonomies/{namespace}/{taxonomy_key}": {
+            "get": {
+                "operationId": "get_metadata_taxonomies_id_id",
+                "summary": "Get metadata taxonomy by taxonomy key",
+                "description": "Used to retrieve a metadata taxonomy by taxonomy key.",
+                "parameters": [
+                    {
+                        "name": "namespace",
+                        "in": "path",
+                        "description": "The namespace of the metadata taxonomy.",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "enterprise_123456"
+                    },
+                    {
+                        "name": "taxonomy_key",
+                        "in": "path",
+                        "description": "The key of the metadata taxonomy.",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "geography"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns the metadata taxonomy identified by the taxonomy key.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MetadataTaxonomy"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "リクエストパラメータが無効な場合に返されます。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Returned when a taxonomy with the given `namespace` and `taxonomy_key` cannot be found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "予期しないクライアントエラー。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-box-tag": "metadata_taxonomies",
+                "tags": [
+                    "Metadata taxonomies"
+                ]
+            },
+            "patch": {
+                "operationId": "patch_metadata_taxonomies_id_id",
+                "summary": "Update metadata taxonomy",
+                "description": "Updates an existing metadata taxonomy.",
+                "parameters": [
+                    {
+                        "name": "namespace",
+                        "in": "path",
+                        "description": "The namespace of the metadata taxonomy.",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "enterprise_123456"
+                    },
+                    {
+                        "name": "taxonomy_key",
+                        "in": "path",
+                        "description": "The key of the metadata taxonomy.",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "geography"
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "displayName": {
+                                        "description": "The display name of the taxonomy.",
+                                        "type": "string",
+                                        "example": "Geography",
+                                        "maxLength": 4096
+                                    }
+                                },
+                                "required": [
+                                    "displayName"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "The schema representing the updated metadata taxonomy.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MetadataTaxonomy"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "リクエストのパラメータまたは本文が無効な場合に返されます。\n\n* `bad_request` - 本文に有効なリクエストが含まれていない場合に返されます。多くの場合、このレスポンスには、不足しているフィールドに関する追加の詳細が含まれます。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Returned when the user does not have the permission to modify the metadata taxonomy. This can happen for a few reasons, most commonly when the user does not have (co-)admin permissions, or the user doesn't have access to the provided namespace.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "予期しないクライアントエラー。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-box-tag": "metadata_taxonomies",
+                "tags": [
+                    "Metadata taxonomies"
+                ],
+                "x-box-requires-admin": true
+            },
+            "delete": {
+                "operationId": "delete_metadata_taxonomies_id_id",
+                "summary": "Remove metadata taxonomy",
+                "description": "Delete a metadata taxonomy. This deletion is permanent and cannot be reverted.",
+                "parameters": [
+                    {
+                        "name": "namespace",
+                        "in": "path",
+                        "description": "The namespace of the metadata taxonomy.",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "enterprise_123456"
+                    },
+                    {
+                        "name": "taxonomy_key",
+                        "in": "path",
+                        "description": "The key of the metadata taxonomy.",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "geography"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Returns an empty response when the metadata taxonomy is successfully deleted."
+                    },
+                    "400": {
+                        "description": "リクエストのパラメータまたは本文が無効な場合に返されます。\n\n* `bad_request` - 本文に有効なリクエストが含まれていない場合に返されます。多くの場合、このレスポンスには、不足しているフィールドに関する追加の詳細が含まれます。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Returned when the user does not have the permission to delete the metadata taxonomy. This can happen for a few reasons, most commonly when the user does not have (co-)admin permissions, or the user doesn't have access to the provided namespace.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Returned if the metadata taxonomy does not exist.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "予期しないクライアントエラー。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-box-tag": "metadata_taxonomies",
+                "tags": [
+                    "Metadata taxonomies"
+                ],
+                "x-box-requires-admin": true
+            }
+        },
+        "/metadata_taxonomies/{namespace}/{taxonomy_key}/levels": {
+            "post": {
+                "operationId": "post_metadata_taxonomies_id_id_levels",
+                "summary": "Create metadata taxonomy levels",
+                "description": "Creates new metadata taxonomy levels.",
+                "parameters": [
+                    {
+                        "name": "namespace",
+                        "in": "path",
+                        "description": "The namespace of the metadata taxonomy.",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "enterprise_123456"
+                    },
+                    {
+                        "name": "taxonomy_key",
+                        "in": "path",
+                        "description": "The key of the metadata taxonomy.",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "geography"
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "description": "An array of metadata taxonomy levels to be created.",
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/MetadataTaxonomyLevel"
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Returns an array of all taxonomy levels.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MetadataTaxonomyLevels"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "リクエストのパラメータまたは本文が無効な場合に返されます。\n\n* `bad_request` - 本文に有効なリクエストが含まれていない場合に返されます。多くの場合、このレスポンスには、不足しているフィールドに関する追加の詳細が含まれます。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Returned when the user does not have the permission to modify the metadata taxonomy. This can happen for a few reasons, most commonly when the user does not have (co-)admin permissions, or the user doesn't have access to the provided namespace.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "予期しないクライアントエラー。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-box-tag": "metadata_taxonomies",
+                "tags": [
+                    "Metadata taxonomies"
+                ],
+                "x-box-requires-admin": true
+            }
+        },
+        "/metadata_taxonomies/{namespace}/{taxonomy_key}/levels/{level_index}": {
+            "patch": {
+                "operationId": "patch_metadata_taxonomies_id_id_levels_id",
+                "summary": "Update metadata taxonomy level",
+                "description": "Updates an existing metadata taxonomy level.",
+                "parameters": [
+                    {
+                        "name": "namespace",
+                        "in": "path",
+                        "description": "The namespace of the metadata taxonomy.",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "enterprise_123456"
+                    },
+                    {
+                        "name": "taxonomy_key",
+                        "in": "path",
+                        "description": "The key of the metadata taxonomy.",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "geography"
+                    },
+                    {
+                        "name": "level_index",
+                        "in": "path",
+                        "description": "The index of the metadata taxonomy level.",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 1
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "displayName": {
+                                        "description": "The display name of the taxonomy level.",
+                                        "type": "string",
+                                        "example": "France"
+                                    },
+                                    "description": {
+                                        "description": "The description of the taxonomy level.",
+                                        "type": "string",
+                                        "example": "French Republic"
+                                    }
+                                },
+                                "required": [
+                                    "displayName"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "The updated taxonomy level.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MetadataTaxonomyLevel"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "リクエストのパラメータまたは本文が無効な場合に返されます。\n\n* `bad_request` - 本文に有効なリクエストが含まれていない場合に返されます。多くの場合、このレスポンスには、不足しているフィールドに関する追加の詳細が含まれます。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Returned when the user does not have the permission to modify the metadata taxonomy. This can happen for a few reasons, most commonly when the user does not have (co-)admin permissions, or the user doesn't have access to the provided namespace.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "予期しないクライアントエラー。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-box-tag": "metadata_taxonomies",
+                "tags": [
+                    "Metadata taxonomies"
+                ],
+                "x-box-requires-admin": true
+            }
+        },
+        "/metadata_taxonomies/{namespace}/{taxonomy_key}/levels:append": {
+            "post": {
+                "operationId": "post_metadata_taxonomies_id_id_levels:append",
+                "summary": "Add metadata taxonomy level",
+                "description": "Creates a new metadata taxonomy level and appends it to the existing levels. If there are no levels defined yet, this will create the first level.",
+                "parameters": [
+                    {
+                        "name": "namespace",
+                        "in": "path",
+                        "description": "The namespace of the metadata taxonomy.",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "enterprise_123456"
+                    },
+                    {
+                        "name": "taxonomy_key",
+                        "in": "path",
+                        "description": "The key of the metadata taxonomy.",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "geography"
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "displayName": {
+                                        "description": "The display name of the taxonomy level.",
+                                        "type": "string",
+                                        "example": "France"
+                                    },
+                                    "description": {
+                                        "description": "The description of the taxonomy level.",
+                                        "type": "string",
+                                        "example": "French Republic"
+                                    }
+                                },
+                                "required": [
+                                    "displayName"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Returns an array of all taxonomy levels.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MetadataTaxonomyLevels"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "リクエストのパラメータまたは本文が無効な場合に返されます。\n\n* `bad_request` - 本文に有効なリクエストが含まれていない場合に返されます。多くの場合、このレスポンスには、不足しているフィールドに関する追加の詳細が含まれます。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Returned when the user does not have the permission to modify the metadata taxonomy. This can happen for a few reasons, most commonly when the user does not have (co-)admin permissions, or the user doesn't have access to the provided namespace.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "予期しないクライアントエラー。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-box-tag": "metadata_taxonomies",
+                "tags": [
+                    "Metadata taxonomies"
+                ],
+                "x-box-requires-admin": true
+            }
+        },
+        "/metadata_taxonomies/{namespace}/{taxonomy_key}/levels:trim": {
+            "post": {
+                "operationId": "post_metadata_taxonomies_id_id_levels:trim",
+                "summary": "Delete metadata taxonomy level",
+                "description": "Deletes the last level of the metadata taxonomy.",
+                "parameters": [
+                    {
+                        "name": "namespace",
+                        "in": "path",
+                        "description": "The namespace of the metadata taxonomy.",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "enterprise_123456"
+                    },
+                    {
+                        "name": "taxonomy_key",
+                        "in": "path",
+                        "description": "The key of the metadata taxonomy.",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "geography"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns an array of all taxonomy levels.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MetadataTaxonomyLevels"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "リクエストのパラメータまたは本文が無効な場合に返されます。\n\n* `bad_request` - 本文に有効なリクエストが含まれていない場合に返されます。多くの場合、このレスポンスには、不足しているフィールドに関する追加の詳細が含まれます。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Returned when the user does not have the permission to modify the metadata taxonomy. This can happen for a few reasons, most commonly when the user does not have (co-)admin permissions, or the user doesn't have access to the provided namespace.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "予期しないクライアントエラー。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-box-tag": "metadata_taxonomies",
+                "tags": [
+                    "Metadata taxonomies"
+                ],
+                "x-box-requires-admin": true
+            }
+        },
+        "/metadata_taxonomies/{namespace}/{taxonomy_key}/nodes": {
+            "get": {
+                "operationId": "get_metadata_taxonomies_id_id_nodes",
+                "summary": "List metadata taxonomy nodes",
+                "description": "Used to retrieve metadata taxonomy nodes based on the parameters specified. Results are sorted in lexicographic order unless a `query` parameter is passed. With a `query` parameter specified, results are sorted in order of relevance.",
+                "parameters": [
+                    {
+                        "name": "namespace",
+                        "in": "path",
+                        "description": "The namespace of the metadata taxonomy.",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "enterprise_123456"
+                    },
+                    {
+                        "name": "taxonomy_key",
+                        "in": "path",
+                        "description": "The key of the metadata taxonomy.",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "geography"
+                    },
+                    {
+                        "name": "level",
+                        "in": "query",
+                        "description": "Filters results by taxonomy level. Multiple values can be provided. Results include nodes that match any of the specified values.",
+                        "required": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "integer"
+                            }
+                        },
+                        "example": [
+                            1
+                        ]
+                    },
+                    {
+                        "name": "parent",
+                        "in": "query",
+                        "description": "Node identifier of a direct parent node. Multiple values can be provided. Results include nodes that match any of the specified values.",
+                        "required": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "example": [
+                            "c73a9bf3-f377-4210-9159-3df06a481905"
+                        ]
+                    },
+                    {
+                        "name": "ancestor",
+                        "in": "query",
+                        "description": "Node identifier of any ancestor node. Multiple values can be provided. Results include nodes that match any of the specified values.",
+                        "required": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "example": [
+                            "c73a9bf3-f377-4210-9159-3df06a481905",
+                            "bf8b8213-be1f-4011-bd45-533c0713fa0a"
+                        ]
+                    },
+                    {
+                        "name": "query",
+                        "in": "query",
+                        "description": "Query text to search for the taxonomy nodes.",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "France"
+                    },
+                    {
+                        "name": "include-total-result-count",
+                        "in": "query",
+                        "description": "When set to `true` this provides the total number of nodes that matched the query. The response will compute counts of up to 10,000 elements. Defaults to `false`.",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        },
+                        "example": true
+                    },
+                    {
+                        "name": "marker",
+                        "in": "query",
+                        "description": "結果が返される開始位置のマーカー。マーカーベースのページネーションを使用している場合に使用されます。\n\nこれを使用するには、`usemarker`を`true`に設定する必要があります。",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii"
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "返す項目の1ページあたりの最大数。",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64",
+                            "maximum": 1000
+                        },
+                        "example": 1000
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns a list of the taxonomy nodes that match the specified parameters.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MetadataTaxonomyNodes"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "リクエストパラメータが無効な場合に返されます。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "予期しないクライアントエラー。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-box-tag": "metadata_taxonomies",
+                "tags": [
+                    "Metadata taxonomies"
+                ]
+            },
+            "post": {
+                "operationId": "post_metadata_taxonomies_id_id_nodes",
+                "summary": "Create metadata taxonomy node",
+                "description": "Creates a new metadata taxonomy node.",
+                "parameters": [
+                    {
+                        "name": "namespace",
+                        "in": "path",
+                        "description": "The namespace of the metadata taxonomy.",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "enterprise_123456"
+                    },
+                    {
+                        "name": "taxonomy_key",
+                        "in": "path",
+                        "description": "The key of the metadata taxonomy.",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "geography"
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "displayName": {
+                                        "description": "The display name of the taxonomy node.",
+                                        "type": "string",
+                                        "example": "France"
+                                    },
+                                    "level": {
+                                        "description": "The level of the taxonomy node.",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "parentId": {
+                                        "description": "The identifier of the parent taxonomy node. Omit this field for root-level nodes.",
+                                        "type": "string",
+                                        "example": "99df4513-7102-4896-8228-94635ee9d330"
+                                    }
+                                },
+                                "required": [
+                                    "displayName",
+                                    "level"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "The schema representing the taxonomy node created.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MetadataTaxonomyNode"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "リクエストのパラメータまたは本文が無効な場合に返されます。\n\n* `bad_request` - 本文に有効なリクエストが含まれていない場合に返されます。多くの場合、このレスポンスには、不足しているフィールドに関する追加の詳細が含まれます。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Returned when the user does not have the permission to modify the metadata taxonomy. This can happen for a few reasons, most commonly when the user does not have (co-)admin permissions, or the user doesn't have access to the provided namespace.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "予期しないクライアントエラー。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-box-tag": "metadata_taxonomies",
+                "tags": [
+                    "Metadata taxonomies"
+                ],
+                "x-box-requires-admin": true
+            }
+        },
+        "/metadata_taxonomies/{namespace}/{taxonomy_key}/nodes/{node_id}": {
+            "get": {
+                "operationId": "get_metadata_taxonomies_id_id_nodes_id",
+                "summary": "Get metadata taxonomy node by ID",
+                "description": "Retrieves a metadata taxonomy node by its identifier.",
+                "parameters": [
+                    {
+                        "name": "namespace",
+                        "in": "path",
+                        "description": "The namespace of the metadata taxonomy.",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "enterprise_123456"
+                    },
+                    {
+                        "name": "taxonomy_key",
+                        "in": "path",
+                        "description": "The key of the metadata taxonomy.",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "geography"
+                    },
+                    {
+                        "name": "node_id",
+                        "in": "path",
+                        "description": "The identifier of the metadata taxonomy node.",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "14d3d433-c77f-49c5-b146-9dea370f6e32"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns the metadata taxonomy node that matches the identifier.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MetadataTaxonomyNode"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "リクエストパラメータのいずれかが無効な場合に返されます。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Returned if the taxonomy node with the given `node_id` cannot be found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "予期しないクライアントエラー。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-box-tag": "metadata_taxonomies",
+                "tags": [
+                    "Metadata taxonomies"
+                ]
+            },
+            "patch": {
+                "operationId": "patch_metadata_taxonomies_id_id_nodes_id",
+                "summary": "Update metadata taxonomy node",
+                "description": "Updates an existing metadata taxonomy node.",
+                "parameters": [
+                    {
+                        "name": "namespace",
+                        "in": "path",
+                        "description": "The namespace of the metadata taxonomy.",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "enterprise_123456"
+                    },
+                    {
+                        "name": "taxonomy_key",
+                        "in": "path",
+                        "description": "The key of the metadata taxonomy.",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "geography"
+                    },
+                    {
+                        "name": "node_id",
+                        "in": "path",
+                        "description": "The identifier of the metadata taxonomy node.",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "14d3d433-c77f-49c5-b146-9dea370f6e32"
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "displayName": {
+                                        "description": "The display name of the taxonomy node.",
+                                        "type": "string",
+                                        "example": "France"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "The schema representing the updated taxonomy node.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MetadataTaxonomyNode"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "リクエストのパラメータまたは本文が無効な場合に返されます。\n\n* `bad_request` - 本文に有効なリクエストが含まれていない場合に返されます。多くの場合、このレスポンスには、不足しているフィールドに関する追加の詳細が含まれます。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Returned when the user does not have the permission to modify the metadata taxonomy. This can happen for a few reasons, most commonly when the user does not have (co-)admin permissions, or the user doesn't have access to the provided namespace.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "予期しないクライアントエラー。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-box-tag": "metadata_taxonomies",
+                "tags": [
+                    "Metadata taxonomies"
+                ],
+                "x-box-requires-admin": true
+            },
+            "delete": {
+                "operationId": "delete_metadata_taxonomies_id_id_nodes_id",
+                "summary": "Remove metadata taxonomy node",
+                "description": "Delete a metadata taxonomy node. This deletion is permanent and cannot be reverted. Only metadata taxonomy nodes without any children can be deleted.",
+                "parameters": [
+                    {
+                        "name": "namespace",
+                        "in": "path",
+                        "description": "The namespace of the metadata taxonomy.",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "enterprise_123456"
+                    },
+                    {
+                        "name": "taxonomy_key",
+                        "in": "path",
+                        "description": "The key of the metadata taxonomy.",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "geography"
+                    },
+                    {
+                        "name": "node_id",
+                        "in": "path",
+                        "description": "The identifier of the metadata taxonomy node.",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "14d3d433-c77f-49c5-b146-9dea370f6e32"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Returns an empty response when the metadata taxonomy node is successfully deleted."
+                    },
+                    "400": {
+                        "description": "リクエストのパラメータまたは本文が無効な場合に返されます。\n\n* `bad_request` - 本文に有効なリクエストが含まれていない場合に返されます。多くの場合、このレスポンスには、不足しているフィールドに関する追加の詳細が含まれます。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Returned when the user does not have the permission to delete the metadata taxonomy node. This can happen for a few reasons, most commonly when the user does not have (co-)admin permissions, or the user doesn't have access to the provided namespace.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Returned if the metadata taxonomy node does not exist.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "予期しないクライアントエラー。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-box-tag": "metadata_taxonomies",
+                "tags": [
+                    "Metadata taxonomies"
+                ],
+                "x-box-requires-admin": true
+            }
+        },
+        "/metadata_templates/{scope}/{template_key}/fields/{field_key}/options": {
+            "get": {
+                "operationId": "get_metadata_templates_id_id_fields_id_options",
+                "summary": "List metadata template's options for taxonomy field",
+                "description": "Used to retrieve metadata taxonomy nodes which are available for the taxonomy field based on its configuration and the parameters specified. Results are sorted in lexicographic order unless a `query` parameter is passed. With a `query` parameter specified, results are sorted in order of relevance.",
+                "parameters": [
+                    {
+                        "name": "scope",
+                        "in": "path",
+                        "description": "メタデータテンプレートのスコープ。",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "global",
+                                "enterprise"
+                            ]
+                        },
+                        "example": "global"
+                    },
+                    {
+                        "name": "template_key",
+                        "in": "path",
+                        "description": "メタデータテンプレートの名前。",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "properties"
+                    },
+                    {
+                        "name": "field_key",
+                        "in": "path",
+                        "description": "The key of the metadata taxonomy field in the template.",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "geography"
+                    },
+                    {
+                        "name": "level",
+                        "in": "query",
+                        "description": "Filters results by taxonomy level. Multiple values can be provided. Results include nodes that match any of the specified values.",
+                        "required": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "integer"
+                            }
+                        },
+                        "example": [
+                            1
+                        ]
+                    },
+                    {
+                        "name": "parent",
+                        "in": "query",
+                        "description": "Node identifier of a direct parent node. Multiple values can be provided. Results include nodes that match any of the specified values.",
+                        "required": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "example": [
+                            "c73a9bf3-f377-4210-9159-3df06a481905"
+                        ]
+                    },
+                    {
+                        "name": "ancestor",
+                        "in": "query",
+                        "description": "Node identifier of any ancestor node. Multiple values can be provided. Results include nodes that match any of the specified values.",
+                        "required": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "example": [
+                            "c73a9bf3-f377-4210-9159-3df06a481905",
+                            "bf8b8213-be1f-4011-bd45-533c0713fa0a"
+                        ]
+                    },
+                    {
+                        "name": "query",
+                        "in": "query",
+                        "description": "Query text to search for the taxonomy nodes.",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "France"
+                    },
+                    {
+                        "name": "include-total-result-count",
+                        "in": "query",
+                        "description": "When set to `true` this provides the total number of nodes that matched the query. The response will compute counts of up to 10,000 elements. Defaults to `false`.",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        },
+                        "example": true
+                    },
+                    {
+                        "name": "only-selectable-options",
+                        "in": "query",
+                        "description": "When set to `true`, this only returns valid selectable options for this template taxonomy field. Otherwise, it returns all taxonomy nodes, whether or not they are selectable. Defaults to `true`.",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        },
+                        "example": true
+                    },
+                    {
+                        "name": "marker",
+                        "in": "query",
+                        "description": "結果が返される開始位置のマーカー。マーカーベースのページネーションを使用している場合に使用されます。\n\nこれを使用するには、`usemarker`を`true`に設定する必要があります。",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii"
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "返す項目の1ページあたりの最大数。",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64",
+                            "maximum": 1000
+                        },
+                        "example": 1000
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns a list of the taxonomy nodes that match the specified parameters.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MetadataTaxonomyNodes"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "リクエストパラメータが無効な場合に返されます。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "予期しないクライアントエラー。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-box-tag": "metadata_taxonomies",
+                "tags": [
+                    "Metadata taxonomies"
                 ]
             }
         }
@@ -33814,6 +35368,257 @@
                 "x-box-resource-id": "metadata_query_results",
                 "x-box-tag": "search"
             },
+            "MetadataTaxonomies": {
+                "description": "A list of metadata taxonomies.",
+                "type": "object",
+                "allOf": [
+                    {
+                        "type": "object",
+                        "description": "マーカーベースのページネーションについて説明しているAPIレスポンスの部分。",
+                        "properties": {
+                            "limit": {
+                                "description": "これらのエントリで使用された制限値。許容される最大値を超えていない限り、クエリパラメータの`limit`と等しくなります。最大値はAPIによって異なります。",
+                                "type": "integer",
+                                "format": "int64",
+                                "example": 1000
+                            },
+                            "next_marker": {
+                                "description": "次の検索結果ページの開始場所のマーカー。",
+                                "type": "string",
+                                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                                "nullable": true
+                            },
+                            "prev_marker": {
+                                "description": "前の検索結果ページの開始場所のマーカー。",
+                                "type": "string",
+                                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVih",
+                                "nullable": true
+                            }
+                        }
+                    },
+                    {
+                        "properties": {
+                            "entries": {
+                                "description": "A list of metadata taxonomies.",
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/MetadataTaxonomy"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "title": "Metadata taxonomies",
+                "x-box-resource-id": "metadata_taxonomies",
+                "x-box-tag": "metadata_taxonomies"
+            },
+            "MetadataTaxonomy": {
+                "description": "A taxonomy object for metadata that can be used in metadata templates.",
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "description": "A unique identifier of the metadata taxonomy.",
+                        "type": "string",
+                        "example": "822227e0-47a5-921b-88a8-494760b2e6d2"
+                    },
+                    "key": {
+                        "description": "A unique identifier of the metadata taxonomy. The identifier must be unique within the namespace to which it belongs.",
+                        "type": "string",
+                        "example": "geography",
+                        "maxLength": 256,
+                        "pattern": "^[a-zA-Z_][-a-zA-Z0-9_]*$"
+                    },
+                    "displayName": {
+                        "description": "The display name of the metadata taxonomy. This can be seen in the Box web app.",
+                        "type": "string",
+                        "example": "Geography",
+                        "maxLength": 4096
+                    },
+                    "namespace": {
+                        "description": "A namespace that the metadata taxonomy is associated with.",
+                        "type": "string",
+                        "example": "enterprise_123456",
+                        "maxLength": 4096
+                    },
+                    "levels": {
+                        "description": "Levels of the metadata taxonomy.",
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/MetadataTaxonomyLevel"
+                        }
+                    }
+                },
+                "required": [
+                    "id",
+                    "displayName",
+                    "namespace"
+                ],
+                "title": "Metadata taxonomy",
+                "x-box-resource-id": "metadata_taxonomy",
+                "x-box-tag": "metadata_taxonomies"
+            },
+            "MetadataTaxonomyAncestor": {
+                "description": "A node object in the metadata taxonomy that represents an ancestor.",
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "description": "A unique identifier of the metadata taxonomy node.",
+                        "type": "string",
+                        "example": "14d3d433-c77f-49c5-b146-9dea370f6e32"
+                    },
+                    "displayName": {
+                        "description": "The display name of the metadata taxonomy node.",
+                        "type": "string",
+                        "example": "France"
+                    },
+                    "level": {
+                        "description": "An index of the level to which the node belongs.",
+                        "type": "integer",
+                        "example": 2
+                    }
+                },
+                "title": "Metadata taxonomy ancestor"
+            },
+            "MetadataTaxonomyLevel": {
+                "description": "A level in the metadata taxonomy represents a hierarchical category within the taxonomy structure.",
+                "type": "object",
+                "properties": {
+                    "displayName": {
+                        "description": "The display name of the level as it is shown to the user.",
+                        "type": "string",
+                        "example": "Continent"
+                    },
+                    "description": {
+                        "description": "A description of the level.",
+                        "type": "string",
+                        "example": "Continent"
+                    },
+                    "level": {
+                        "description": "An index of the level within the taxonomy. Levels are indexed starting from 1.",
+                        "type": "integer",
+                        "format": "int32",
+                        "example": 1
+                    }
+                },
+                "title": "Metadata taxonomy level",
+                "x-box-resource-id": "metadata_taxonomy_level",
+                "x-box-tag": "metadata_taxonomies"
+            },
+            "MetadataTaxonomyLevels": {
+                "description": "Levels in the metadata taxonomy represent hierarchical categories within the taxonomy structure.",
+                "type": "object",
+                "allOf": [
+                    {
+                        "properties": {
+                            "entries": {
+                                "description": "An array of all taxonomy levels.",
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/MetadataTaxonomyLevel"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "title": "Metadata taxonomy levels",
+                "x-box-resource-id": "metadata_taxonomy_levels",
+                "x-box-tag": "metadata_taxonomies"
+            },
+            "MetadataTaxonomyNode": {
+                "description": "A node object for metadata taxonomy that can be used in metadata templates.",
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "description": "A unique identifier of the metadata taxonomy node.",
+                        "type": "string",
+                        "example": "14d3d433-c77f-49c5-b146-9dea370f6e32"
+                    },
+                    "displayName": {
+                        "description": "The display name of the metadata taxonomy node.",
+                        "type": "string",
+                        "example": "France"
+                    },
+                    "level": {
+                        "description": "An index of the level to which the node belongs.",
+                        "type": "integer",
+                        "example": 2
+                    },
+                    "parentId": {
+                        "description": "The identifier of the parent node.",
+                        "type": "string",
+                        "example": "99df4513-7102-4896-8228-94635ee9d330"
+                    },
+                    "nodePath": {
+                        "description": "An array of identifiers for all ancestor nodes.\\\nNot returned for root-level nodes.",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "example": [
+                            "99df4513-7102-4896-8228-94635ee9d330"
+                        ]
+                    },
+                    "ancestors": {
+                        "description": "An array of objects for all ancestor nodes.\\\nNot returned for root-level nodes.",
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/MetadataTaxonomyAncestor"
+                        }
+                    }
+                },
+                "required": [
+                    "id",
+                    "displayName",
+                    "level"
+                ],
+                "title": "Metadata taxonomy node",
+                "x-box-resource-id": "metadata_taxonomy_node",
+                "x-box-tag": "metadata_taxonomies"
+            },
+            "MetadataTaxonomyNodes": {
+                "description": "A list of metadata taxonomy nodes.",
+                "type": "object",
+                "allOf": [
+                    {
+                        "type": "object",
+                        "description": "マーカーベースのページネーションについて説明しているAPIレスポンスの部分。",
+                        "properties": {
+                            "limit": {
+                                "description": "これらのエントリで使用された制限値。許容される最大値を超えていない限り、クエリパラメータの`limit`と等しくなります。最大値はAPIによって異なります。",
+                                "type": "integer",
+                                "format": "int64",
+                                "example": 1000
+                            },
+                            "next_marker": {
+                                "description": "次の検索結果ページの開始場所のマーカー。",
+                                "type": "string",
+                                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                                "nullable": true
+                            },
+                            "prev_marker": {
+                                "description": "前の検索結果ページの開始場所のマーカー。",
+                                "type": "string",
+                                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVih",
+                                "nullable": true
+                            }
+                        }
+                    },
+                    {
+                        "properties": {
+                            "entries": {
+                                "description": "A list of metadata taxonomy nodes.",
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/MetadataTaxonomyNode"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "title": "Metadata taxonomy nodes",
+                "x-box-resource-id": "metadata_taxonomy_nodes",
+                "x-box-tag": "metadata_taxonomies"
+            },
             "MetadataTemplate": {
                 "description": "ファイルやフォルダに適用可能なメタデータのテンプレート。",
                 "type": "object",
@@ -36504,12 +38309,12 @@
                                 "example": 4
                             },
                             "read_only": {
-                                "description": "Indicates whether this input is read-only (cannot be modified by signers).",
+                                "description": "この入力が読み取り専用 (署名者による変更不可) かどうかを示します。",
                                 "type": "boolean",
                                 "example": true
                             },
                             "validation": {
-                                "description": "Specifies the formatting rules that signers must follow for text field inputs. If set, this validation is mandatory.",
+                                "description": "署名者がテキストフィールドに入力する際に従う必要のある書式設定ルールを指定します。設定した場合、この検証は必須となります。",
                                 "example": {
                                     "validation_type": "email"
                                 },
@@ -36535,11 +38340,11 @@
                 "title": "署名リクエストの署名者の入力"
             },
             "SignRequestSignerInputCustomValidation": {
-                "description": "Specifies the custom validation rules for a text field input by the signer. If set, this validation is mandatory.",
+                "description": "署名者によるテキストフィールドの入力にカスタム検証ルールを指定します。設定した場合、この検証は必須となります。",
                 "type": "object",
                 "properties": {
                     "validation_type": {
-                        "description": "Defines the validation format for the text input as custom. A custom regular expression is used for validation.",
+                        "description": "テキスト入力の検証形式をカスタムとして定義します。検証にはカスタム正規表現が使用されます。",
                         "type": "string",
                         "example": "custom",
                         "enum": [
@@ -36547,13 +38352,13 @@
                         ]
                     },
                     "custom_regex": {
-                        "description": "Regular expression used for validation.",
+                        "description": "検証に使用される正規表現。",
                         "type": "string",
                         "example": "(^[a-zA-Z0-9._%+-]+)",
                         "nullable": true
                     },
                     "custom_error_message": {
-                        "description": "Error message shown if input fails custom regular expression validation.",
+                        "description": "入力時にカスタム正規表現の検証に失敗した場合に表示されるエラーメッセージ。",
                         "type": "string",
                         "example": "Please enter a valid value.",
                         "nullable": true
@@ -36564,14 +38369,14 @@
                     "custom_regex",
                     "custom_error_message"
                 ],
-                "title": "Sign Request Signer Input Custom Validation"
+                "title": "署名リクエストの署名者入力のカスタム検証"
             },
             "SignRequestSignerInputDateAsiaValidation": {
-                "description": "Specifies the date formatting rules used in Asia for a text field input by the signer. If set, this validation is mandatory. The date format follows `YYYY/MM/DD` pattern.",
+                "description": "署名者によるテキストフィールドの入力に対して、アジアで使用されている日付の書式設定ルールを指定します。設定した場合、この検証は必須となります。日付形式は`YYYY/MM/DD`パターンに従います。",
                 "type": "object",
                 "properties": {
                     "validation_type": {
-                        "description": "Validates that the text input uses the Asian date format `YYYY/MM/DD`.",
+                        "description": "テキスト入力でアジアの日付形式`YYYY/MM/DD`が使用されていることを検証します。",
                         "type": "string",
                         "example": "date_asia",
                         "enum": [
@@ -36579,14 +38384,14 @@
                         ]
                     }
                 },
-                "title": "Sign Request Signer Input Date Asia Validation"
+                "title": "署名リクエストの署名者入力の日付 (アジア) 検証"
             },
             "SignRequestSignerInputDateEUValidation": {
-                "description": "Specifies the date formatting rules used in Europe for a text field input by the signer. If set, this validation is mandatory. The date format follows `DD/MM/YYYY` pattern.",
+                "description": "署名者によるテキストフィールドの入力に対して、欧州で使用されている日付の書式設定ルールを指定します。設定した場合、この検証は必須となります。日付形式は`DD/MM/YYYY`パターンに従います。",
                 "type": "object",
                 "properties": {
                     "validation_type": {
-                        "description": "Validates that the text input uses the European date format `DD/MM/YYYY`.",
+                        "description": "テキスト入力で欧州の日付形式`DD/MM/YYYY`が使用されていることを検証します。",
                         "type": "string",
                         "example": "date_eu",
                         "enum": [
@@ -36594,14 +38399,14 @@
                         ]
                     }
                 },
-                "title": "Sign Request Signer Input Date EU Validation"
+                "title": "署名リクエストの署名者入力の日付 (欧州) 検証"
             },
             "SignRequestSignerInputDateISOValidation": {
-                "description": "Specifies the ISO date formatting rules for a text field input by the signer. If set, this validation is mandatory. The date format follows `YYYY-MM-DD` pattern.",
+                "description": "署名者によるテキストフィールドの入力に対して、ISO日付の書式設定ルールを指定します。設定した場合、この検証は必須となります。日付形式は`YYYY-MM-DD`パターンに従います。",
                 "type": "object",
                 "properties": {
                     "validation_type": {
-                        "description": "Validates that the text input uses the ISO date format `YYYY-MM-DD`.",
+                        "description": "テキスト入力でISOの日付形式`YYYY-MM-DD`が使用されていることを検証します。",
                         "type": "string",
                         "example": "date_iso",
                         "enum": [
@@ -36609,14 +38414,14 @@
                         ]
                     }
                 },
-                "title": "Sign Request Signer Input Date ISO Validation"
+                "title": "署名リクエストの署名者入力の日付 (ISO) 検証"
             },
             "SignRequestSignerInputDateUSValidation": {
-                "description": "Specifies the US date formatting rules for a text field input by the signer. If set, this validation is mandatory. The date format follows `MM/DD/YYYY` pattern.",
+                "description": "署名者によるテキストフィールドの入力に対して、米国の日付の書式設定ルールを指定します。設定した場合、この検証は必須となります。日付形式は`MM/DD/YYYY`パターンに従います。",
                 "type": "object",
                 "properties": {
                     "validation_type": {
-                        "description": "Validates that the text input uses the US date format `MM/DD/YYYY`.",
+                        "description": "テキスト入力で米国の日付形式`MM/DD/YYYY`が使用されていることを検証します。",
                         "type": "string",
                         "example": "date_us",
                         "enum": [
@@ -36624,14 +38429,14 @@
                         ]
                     }
                 },
-                "title": "Sign Request Signer Input Date US Validation"
+                "title": "署名リクエストの署名者入力の日付 (米国) 検証"
             },
             "SignRequestSignerInputEmailValidation": {
-                "description": "Specifies the formatting rules that signers must follow for text field inputs. If set, this validation is mandatory.",
+                "description": "署名者がテキストフィールドに入力する際に従う必要のある書式設定ルールを指定します。設定した場合、この検証は必須となります。",
                 "type": "object",
                 "properties": {
                     "validation_type": {
-                        "description": "Validates that the text input is an email address.",
+                        "description": "テキスト入力がメールアドレスであることを検証します。",
                         "type": "string",
                         "example": "email",
                         "enum": [
@@ -36642,14 +38447,14 @@
                 "required": [
                     "validation_type"
                 ],
-                "title": "Sign Request Signer Input Email Validation"
+                "title": "署名リクエストの署名者入力のメール検証"
             },
             "SignRequestSignerInputNumberWithCommaValidation": {
-                "description": "Specifies the number with comma formatting rules for a text field input by the signer. If set, this validation is mandatory.",
+                "description": "署名者によるテキストフィールドの入力に対して、コンマの書式設定ルールを適用した数字を指定します。設定した場合、この検証は必須となります。",
                 "type": "object",
                 "properties": {
                     "validation_type": {
-                        "description": "Validates that the text input uses a number format with a comma as the decimal separator (for example, 1,23).",
+                        "description": "テキスト入力で、コンマを小数点区切り記号として使用する数字形式が使用されていることを検証します (例: 1,23)。",
                         "type": "string",
                         "example": "number_with_comma",
                         "enum": [
@@ -36657,14 +38462,14 @@
                         ]
                     }
                 },
-                "title": "Sign Request Signer Input Number With Comma Validation"
+                "title": "署名リクエストの署名者入力のコンマを使用した数字の検証"
             },
             "SignRequestSignerInputNumberWithPeriodValidation": {
-                "description": "Specifies the number with period formatting rules for a text field input by the signer. If set, this validation is mandatory.",
+                "description": "署名者によるテキストフィールドの入力に対して、ピリオドの書式設定ルールを適用した数字を指定します。設定した場合、この検証は必須となります。",
                 "type": "object",
                 "properties": {
                     "validation_type": {
-                        "description": "Validates that the text input uses a number format with a period as the decimal separator (for example, 1.23).",
+                        "description": "テキスト入力で、ピリオドを小数点区切り記号として使用する数字形式が使用されていることを検証します (例: 1,23)。",
                         "type": "string",
                         "example": "number_with_period",
                         "enum": [
@@ -36672,14 +38477,14 @@
                         ]
                     }
                 },
-                "title": "Sign Request Signer Input Number With Period Validation"
+                "title": "署名リクエストの署名者入力のピリオドを使用した数字の検証"
             },
             "SignRequestSignerInputSSNValidation": {
-                "description": "Specifies the validation rules for a text field input by the signer. If set, this validation is mandatory.",
+                "description": "署名者によるテキストフィールドの入力に検証ルールを指定します。設定した場合、この検証は必須となります。",
                 "type": "object",
                 "properties": {
                     "validation_type": {
-                        "description": "Validates that the text input is a Social Security Number (SSN).",
+                        "description": "テキスト入力が社会保障番号 (SSN) であることを検証します。",
                         "type": "string",
                         "example": "ssn",
                         "enum": [
@@ -36690,10 +38495,10 @@
                 "required": [
                     "validation_type"
                 ],
-                "title": "Sign Request Signer Input SSN Validation"
+                "title": "署名リクエストの署名者入力のSSN検証"
             },
             "SignRequestSignerInputValidation": {
-                "description": "Specifies the formatting rules that signers must follow for text field inputs. If set, this validation is mandatory. The format can be selected from a predefined list of options (e.g., email, phone number, date) or defined using a custom regular expression.",
+                "description": "署名者がテキストフィールドの入力で従う必要のある書式設定ルールを指定します。設定した場合、この検証は必須となります。形式は、あらかじめ定義されているオプションのリスト (例: メール、電話番号、日付) から選択するか、カスタム正規表現を使用して定義することができます。",
                 "oneOf": [
                     {
                         "$ref": "#/components/schemas/SignRequestSignerInputEmailValidation"
@@ -36729,14 +38534,14 @@
                         "$ref": "#/components/schemas/SignRequestSignerInputDateAsiaValidation"
                     }
                 ],
-                "title": "Sign Request Signer Input Validation"
+                "title": "署名リクエストの署名者入力の検証"
             },
             "SignRequestSignerInputZIP4Validation": {
-                "description": "Specifies the validation rules for a text field input by the signer. If set, this validation is mandatory.",
+                "description": "署名者によるテキストフィールドの入力に検証ルールを指定します。設定した場合、この検証は必須となります。",
                 "type": "object",
                 "properties": {
                     "validation_type": {
-                        "description": "Validates that the text input is a ZIP+4 code.",
+                        "description": "テキスト入力が郵便番号 (ZIP+4) であることを検証します。",
                         "type": "string",
                         "example": "zip_4",
                         "enum": [
@@ -36747,14 +38552,14 @@
                 "required": [
                     "validation_type"
                 ],
-                "title": "Sign Request Signer Input ZIP 4 Validation"
+                "title": "署名リクエストの署名者入力の郵便番号 (ZIP+4) 検証"
             },
             "SignRequestSignerInputZIPValidation": {
-                "description": "Specifies the validation rules for a text field input by the signer. If set, this validation is mandatory.",
+                "description": "署名者によるテキストフィールドの入力に検証ルールを指定します。設定した場合、この検証は必須となります。",
                 "type": "object",
                 "properties": {
                     "validation_type": {
-                        "description": "Validates that the text input is a ZIP code.",
+                        "description": "テキスト入力が郵便番号であることを検証します。",
                         "type": "string",
                         "example": "zip",
                         "enum": [
@@ -36765,7 +38570,7 @@
                 "required": [
                     "validation_type"
                 ],
-                "title": "Sign Request Signer Input ZIP Validation"
+                "title": "署名リクエストの署名者入力の郵便番号検証"
             },
             "SignRequests": {
                 "description": "任意のBox Sign APIエンドポイントからデフォルトで返される署名リクエストのStandard版の表示。",
@@ -37900,12 +39705,12 @@
                                 "nullable": true
                             },
                             "read_only": {
-                                "description": "Indicates whether this input is read-only (cannot be modified by signers).",
+                                "description": "この入力が読み取り専用 (署名者による変更不可) かどうかを示します。",
                                 "type": "boolean",
                                 "example": true
                             },
                             "validation": {
-                                "description": "Specifies the formatting rules that signers must follow for text field inputs. If set, this validation is mandatory.",
+                                "description": "署名者がテキストフィールドに入力する際に従う必要のある書式設定ルールを指定します。設定した場合、この検証は必須となります。",
                                 "example": {
                                     "validation_type": "email"
                                 },
@@ -41841,6 +43646,11 @@
             "name": "メタデータインスタンス (フォルダ)",
             "description": "A metadata instance describes the relation between a template and a folder,\nincluding the values that are assigned for every field.",
             "x-box-tag": "folder_metadata"
+        },
+        {
+            "name": "Metadata taxonomies",
+            "description": "A metadata taxonomy is a hierarchical classification system\nthat helps organize and manage metadata\nwithin an enterprise.",
+            "x-box-tag": "metadata_taxonomies"
         },
         {
             "name": "メタデータテンプレート",
