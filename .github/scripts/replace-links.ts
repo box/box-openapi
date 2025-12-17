@@ -103,7 +103,7 @@ function processFile(filePath: string, oldUrl: string, newUrl: string): void {
 /**
  * Main execution
  */
-function main(): void {
+export function main(): number {
   // Get command line arguments
   const args = process.argv.slice(2);
 
@@ -120,7 +120,7 @@ function main(): void {
     console.error('');
     console.error('Examples:');
     console.error('  cd .github/scripts && npm run replace-links -- "openapi" "openapi.*\\.json" "https://developer.box.com" "https://ja.developer.box.com"');
-    process.exit(1);
+    return 1;
   }
 
   const directoryPath = args[0];
@@ -137,7 +137,7 @@ function main(): void {
 
   if (filePaths.length === 0) {
     console.log('⚠️  No files found matching the pattern');
-    process.exit(0);
+    return 0;
   }
 
   console.log(`Found ${filePaths.length} matching file(s):\n`);
@@ -150,9 +150,12 @@ function main(): void {
   }
 
   console.log('\n✅ All files processed successfully!');
-  process.exit(0);
+  return 0;
 }
 
-// Run the script
-main();
+// Run if executed directly
+if (require.main === module) {
+  const exitCode = main();
+  process.exit(exitCode);
+}
 
