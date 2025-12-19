@@ -310,13 +310,32 @@ function mergeSamplesIntoSchema(
 /**
  * Write updated OpenAPI schemas back to files
  */
-function writeOpenAPISchemas(schemas: Array<{ path: string; schema: any }>): void {
+function writeOpenAPISchemas(schemas: Array<{ path: string; schema: any }>, outputPath?: string): void {
   console.log(`💾 Writing ${schemas.length} updated schema(s)...`);
 
   for (const schemaInfo of schemas) {
     const content = JSON.stringify(schemaInfo.schema, null, 2);
-    fs.writeFileSync(schemaInfo.path, content, 'utf-8');
-    console.log(`   ✓ Updated ${path.basename(schemaInfo.path)}`);
+
+    // Determine output file path
+    let outputFilePath: string;
+    if (outputPath) {
+      // If output path is provided, save files there
+      const fileName = path.basename(schemaInfo.path);
+
+      // Ensure output directory exists
+      if (!fs.existsSync(outputPath)) {
+        fs.mkdirSync(outputPath, { recursive: true });
+      }
+
+      outputFilePath = path.join(outputPath, fileName);
+      console.log(`   ✅ Writing ${fileName} to ${outputPath}`);
+    } else {
+      // Otherwise, save in place
+      outputFilePath = schemaInfo.path;
+      console.log(`   ✅ Updated ${path.basename(schemaInfo.path)}`);
+    }
+
+    fs.writeFileSync(outputFilePath, content, 'utf-8');
   }
 
   console.log('✅ All schemas updated successfully');
@@ -341,10 +360,11 @@ function cleanup(dir: string): void {
 /**
  * Main execution function
  */
-export async function main(directoryPath?: string, pattern?: string): Promise<number> {
+export async function main(directoryPath?: string, pattern?: string, outputPath?: string): Promise<number> {
   // Get command line arguments if not provided
   let dir = directoryPath;
   let pat = pattern;
+  let outPath = outputPath;
 
   if (!dir || !pat) {
     const args = process.argv.slice(2);
@@ -352,24 +372,31 @@ export async function main(directoryPath?: string, pattern?: string): Promise<nu
     if (args.length < 2) {
       console.error('❌ Error: Missing required arguments');
       console.error('');
-      console.error('Usage: cd .github/scripts && npm run add-sdk-samples -- <directory> <pattern>');
+      console.error('Usage: cd .github/scripts && npm run add-sdk-samples -- <directory> <pattern> [output]');
       console.error('');
       console.error('Arguments:');
       console.error('  <directory>  - Path to directory containing OpenAPI JSON files');
       console.error('  <pattern>    - Regex pattern to match filenames');
+      console.error('  [output]     - Optional output directory (if not provided, files are saved in place)');
       console.error('');
       console.error('Examples:');
       console.error('  cd .github/scripts && npm run add-sdk-samples -- "../../openapi" "openapi.*\\.json"');
+      console.error('  cd .github/scripts && npm run add-sdk-samples -- "../../openapi" "openapi.*\\.json" "../../output"');
       return 1;
     }
 
     dir = args[0];
     pat = args[1];
+    outPath = args[2]; // Optional third argument
   }
 
   console.log('🚀 Starting multi-SDK sample extraction...\n');
   console.log(`Searching in directory: ${dir}`);
-  console.log(`Pattern: ${pat}\n`);
+  console.log(`Pattern: ${pat}`);
+  if (outPath) {
+    console.log(`Output directory: ${outPath}`);
+  }
+  console.log();
 
   // Find matching OpenAPI files
   const openapiFiles = findMatchingFiles(dir, pat);
@@ -490,7 +517,7 @@ export async function main(directoryPath?: string, pattern?: string): Promise<nu
     }
 
     // Step 4: Write updated schemas
-    writeOpenAPISchemas(schemas);
+    writeOpenAPISchemas(schemas, outPath);
     console.log();
 
     // Summary
