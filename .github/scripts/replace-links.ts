@@ -14,7 +14,7 @@ function replaceLinks(content: string, oldUrl: string, newUrl: string): string {
 /**
  * Process a single OpenAPI file
  */
-function processFile(filePath: string, oldUrl: string, newUrl: string): void {
+function processFile(filePath: string, oldUrl: string, newUrl: string, outputPath?: string): void {
   try {
     console.log(`Processing: ${filePath}`);
 
@@ -48,10 +48,27 @@ function processFile(filePath: string, oldUrl: string, newUrl: string): void {
     // Replace links
     const updatedContent = replaceLinks(content, oldUrl, newUrl);
 
-    // Write back to file
-    fs.writeFileSync(filePath, updatedContent, 'utf-8');
+    // Determine output file path
+    let outputFilePath: string;
+    if (outputPath) {
+      // If output path is provided, save files there
+      const fileName = path.basename(filePath);
 
-    console.log(`  ✅ Replaced ${count} occurrence(s) in ${filePath}`);
+      // Ensure output directory exists
+      if (!fs.existsSync(outputPath)) {
+        fs.mkdirSync(outputPath, { recursive: true });
+      }
+
+      outputFilePath = path.join(outputPath, fileName);
+      console.log(`  ✅ Replaced ${count} occurrence(s), saved to ${outputFilePath}`);
+    } else {
+      // Otherwise, save in place
+      outputFilePath = filePath;
+      console.log(`  ✅ Replaced ${count} occurrence(s) in ${filePath}`);
+    }
+
+    // Write to file
+    fs.writeFileSync(outputFilePath, updatedContent, 'utf-8');
   } catch (e) {
     console.error(`  ❌ Error processing ${filePath}:`, (e as Error).message);
     process.exit(1);
@@ -68,16 +85,18 @@ export function main(): number {
   if (args.length < 4) {
     console.error('❌ Error: Missing required arguments');
     console.error('');
-    console.error('Usage: cd .github/scripts && npm run replace-links -- <directory> <pattern> <old_url> <new_url>');
+    console.error('Usage: cd .github/scripts && npm run replace-links -- <directory> <pattern> <old_url> <new_url> [output]');
     console.error('');
     console.error('Arguments:');
     console.error('  <directory>  - Path to directory containing JSON files');
     console.error('  <pattern>    - Regex pattern to match filenames');
     console.error('  <old_url>    - URL to replace');
     console.error('  <new_url>    - Replacement URL');
+    console.error('  [output]     - Optional output directory (if not provided, files are saved in place)');
     console.error('');
     console.error('Examples:');
-    console.error('  cd .github/scripts && npm run replace-links -- "openapi" "openapi.*\\.json" "https://developer.box.com" "https://ja.developer.box.com"');
+    console.error('  cd .github/scripts && npm run replace-links -- "../../openapi" "openapi.*\\.json" "https://developer.box.com" "https://ja.developer.box.com"');
+    console.error('  cd .github/scripts && npm run replace-links -- "../../openapi" "openapi.*\\.json" "https://developer.box.com" "https://ja.developer.box.com" "output"');
     return 1;
   }
 
@@ -85,10 +104,15 @@ export function main(): number {
   const pattern = args[1];
   const oldUrl = args[2];
   const newUrl = args[3];
+  const outputPath = args[4]; // Optional fifth argument
 
   console.log(`Replacing "${oldUrl}" with "${newUrl}"`);
   console.log(`Searching in directory: ${directoryPath}`);
-  console.log(`Pattern: ${pattern}\n`);
+  console.log(`Pattern: ${pattern}`);
+  if (outputPath) {
+    console.log(`Output directory: ${outputPath}`);
+  }
+  console.log();
 
   // Find matching files
   const filePaths = findMatchingFiles(directoryPath, pattern);
@@ -104,7 +128,7 @@ export function main(): number {
 
   // Process each file
   for (const filePath of filePaths) {
-    processFile(filePath, oldUrl, newUrl);
+    processFile(filePath, oldUrl, newUrl, outputPath);
   }
 
   console.log('\n✅ All files processed successfully!');
