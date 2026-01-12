@@ -1,0 +1,29 @@
+name: Combine OpenAPI Specs
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'openapi/*.json'
+
+jobs:
+  combine:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Prepare OpenAPI Spec — Combine
+        uses: stainless-api/upload-openapi-spec-action/prepare/combine#sam/add-redocly-action
+        with:
+          input_files: 'openapi/*.json'
+          output_path: './combined-openapi.json'
+          log_level: 'info'
+
+      - name: Upload combined spec
+        uses: actions/upload-artifact@v4
+        with:
+          name: combined-openapi-spec
+          path: combined-openapi.json
