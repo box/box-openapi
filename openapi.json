@@ -14,7 +14,7 @@
       "url": "https://www.apache.org/licenses/LICENSE-2.0"
     },
     "version": "2024.0",
-    "x-box-commit-hash": "c8490cfcb1"
+    "x-box-commit-hash": "dfe9629b78"
   },
   "servers": [
     {
@@ -3708,7 +3708,7 @@
               }
             }
           },
-          "403": {
+          "400": {
             "description": "Returned when the request parameters are not valid.",
             "content": {
               "application/json": {
@@ -5004,7 +5004,7 @@
           {
             "name": "offset",
             "in": "query",
-            "description": "The offset of the item at which to begin the response.\n\nQueries with offset parameter value\nexceeding 10000 will be rejected\nwith a 400 response.",
+            "description": "The offset of the item at which to begin the response.\n\nOffset-based pagination is not guaranteed to work reliably for high offset values and may fail for large datasets. In\nthose cases, reduce the number of items in the folder (for example, by\nrestructuring the folder into smaller subfolders) before retrying the\nrequest.",
             "required": false,
             "schema": {
               "type": "integer",
@@ -5790,7 +5790,7 @@
           {
             "name": "offset",
             "in": "query",
-            "description": "The offset of the item at which to begin the response.\n\nQueries with offset parameter value\nexceeding 10000 will be rejected\nwith a 400 response.",
+            "description": "The offset of the item at which to begin the response.\n\nOffset-based pagination is not guaranteed to work reliably for high offset values and may fail for large datasets. In\nthose cases, use marker-based pagination by setting `usemarker` to `true`.",
             "required": false,
             "schema": {
               "type": "integer",
@@ -23256,6 +23256,16 @@
             "example": "33243242"
           }
         ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SignRequestCancelRequest"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "Returns a Sign Request object.",
@@ -27509,7 +27519,7 @@
             "example": "done"
           },
           "confidence_score": {
-            "description": "The confidence score numeric values for each extracted field as a JSON dictionary. This can be empty if no field could be extracted.",
+            "description": "The confidence score levels and numeric values for each extracted field as a JSON dictionary. This can be empty if no field could be extracted.",
             "type": "object",
             "additionalProperties": {}
           },
@@ -38049,6 +38059,18 @@
         "title": "Box Sign request (Base)",
         "x-box-tag": "sign_requests"
       },
+      "SignRequestCancelRequest": {
+        "description": "Request body for cancelling a sign request.",
+        "type": "object",
+        "properties": {
+          "reason": {
+            "description": "An optional reason for cancelling the sign request.",
+            "type": "string",
+            "example": "Project cancelled"
+          }
+        },
+        "title": "Sign request cancel request"
+      },
       "SignRequestCreateRequest": {
         "description": "Creates a Box Sign request object.",
         "type": "object",
@@ -38183,6 +38205,12 @@
             "description": "If true, no emails about the sign request will be sent.",
             "type": "boolean",
             "example": false,
+            "nullable": true
+          },
+          "language": {
+            "description": "The language of the user, formatted in modified version of the\n[ISO 639-1](https://developer.box.com/guides/api-calls/language-codes) format.",
+            "type": "string",
+            "example": "en",
             "nullable": true
           }
         },
