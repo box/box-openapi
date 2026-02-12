@@ -14,7 +14,7 @@
             "url": "https://www.apache.org/licenses/LICENSE-2.0"
         },
         "version": "2024.0",
-        "x-box-commit-hash": "c8490cfcb1"
+        "x-box-commit-hash": "dfe9629b78"
     },
     "servers": [
         {
@@ -3708,7 +3708,7 @@
                             }
                         }
                     },
-                    "403": {
+                    "400": {
                         "description": "リクエストパラメータが無効な場合に返されます。",
                         "content": {
                             "application/json": {
@@ -5004,7 +5004,7 @@
                     {
                         "name": "offset",
                         "in": "query",
-                        "description": "レスポンスが開始される項目のオフセット。\n\nオフセットパラメータ値が10,000を超えているクエリは拒否され、400レスポンスが返されます。",
+                        "description": "レスポンスが開始される項目のオフセット。\n\nOffset-based pagination is not guaranteed to work reliably for high offset values and may fail for large datasets. In those cases, reduce the number of items in the folder (for example, by restructuring the folder into smaller subfolders) before retrying the request.",
                         "required": false,
                         "schema": {
                             "type": "integer",
@@ -5790,7 +5790,7 @@
                     {
                         "name": "offset",
                         "in": "query",
-                        "description": "レスポンスが開始される項目のオフセット。\n\nオフセットパラメータ値が10,000を超えているクエリは拒否され、400レスポンスが返されます。",
+                        "description": "レスポンスが開始される項目のオフセット。\n\nOffset-based pagination is not guaranteed to work reliably for high offset values and may fail for large datasets. In those cases, use marker-based pagination by setting `usemarker` to `true`.",
                         "required": false,
                         "schema": {
                             "type": "integer",
@@ -23256,6 +23256,16 @@
                         "example": "33243242"
                     }
                 ],
+                "requestBody": {
+                    "required": false,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SignRequestCancelRequest"
+                            }
+                        }
+                    }
+                },
                 "responses": {
                     "200": {
                         "description": "署名リクエストオブジェクトを返します。",
@@ -27509,7 +27519,7 @@
                         "example": "done"
                     },
                     "confidence_score": {
-                        "description": "JSON形式の辞書として抽出された各フィールドの信頼度スコアの数値。フィールドが抽出されなかった場合は空になります。",
+                        "description": "The confidence score levels and numeric values for each extracted field as a JSON dictionary. This can be empty if no field could be extracted.",
                         "type": "object",
                         "additionalProperties": {}
                     },
@@ -38049,6 +38059,18 @@
                 "title": "Box Signリクエスト (Base)",
                 "x-box-tag": "sign_requests"
             },
+            "SignRequestCancelRequest": {
+                "description": "Request body for cancelling a sign request.",
+                "type": "object",
+                "properties": {
+                    "reason": {
+                        "description": "An optional reason for cancelling the sign request.",
+                        "type": "string",
+                        "example": "Project cancelled"
+                    }
+                },
+                "title": "Sign request cancel request"
+            },
             "SignRequestCreateRequest": {
                 "description": "Box Signリクエストオブジェクトを作成します。",
                 "type": "object",
@@ -38183,6 +38205,12 @@
                         "description": "trueの場合、署名リクエストに関するメールは送信されません。",
                         "type": "boolean",
                         "example": false,
+                        "nullable": true
+                    },
+                    "language": {
+                        "description": "修正版の[ISO 639-1](https://developer.box.com/guides/api-calls/language-codes)形式で表されるユーザーの言語。",
+                        "type": "string",
+                        "example": "en",
                         "nullable": true
                     }
                 },
