@@ -14,7 +14,7 @@
             "url": "https://www.apache.org/licenses/LICENSE-2.0"
         },
         "version": "2024.0",
-        "x-box-commit-hash": "dfe9629b78"
+        "x-box-commit-hash": "3d705a6550"
     },
     "servers": [
         {
@@ -30544,6 +30544,41 @@
                 "x-box-resource-id": "event",
                 "x-box-tag": "events"
             },
+            "Events": {
+                "description": "イベントオブジェクトのリスト。",
+                "type": "object",
+                "properties": {
+                    "chunk_size": {
+                        "description": "このレスポンスで返されるイベントの数。",
+                        "type": "integer",
+                        "format": "int64",
+                        "example": 2
+                    },
+                    "next_stream_position": {
+                        "description": "次のイベントページ (チャンク) のストリーム開始位置。",
+                        "example": "1152922976252290886",
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "integer",
+                                "format": "int64"
+                            }
+                        ]
+                    },
+                    "entries": {
+                        "description": "イベントのリスト。",
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Event"
+                        }
+                    }
+                },
+                "title": "Events",
+                "x-box-resource-id": "events",
+                "x-box-tag": "events"
+            },
             "EventSource": {
                 "description": "イベントストリーム内のイベントを開始させるソースファイルまたはフォルダ。",
                 "type": "object",
@@ -30638,41 +30673,6 @@
                     }
                 ],
                 "title": "イベントソースのリソース"
-            },
-            "Events": {
-                "description": "イベントオブジェクトのリスト。",
-                "type": "object",
-                "properties": {
-                    "chunk_size": {
-                        "description": "このレスポンスで返されるイベントの数。",
-                        "type": "integer",
-                        "format": "int64",
-                        "example": 2
-                    },
-                    "next_stream_position": {
-                        "description": "次のイベントページ (チャンク) のストリーム開始位置。",
-                        "example": "1152922976252290886",
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "integer",
-                                "format": "int64"
-                            }
-                        ]
-                    },
-                    "entries": {
-                        "description": "イベントのリスト。",
-                        "type": "array",
-                        "items": {
-                            "$ref": "#/components/schemas/Event"
-                        }
-                    }
-                },
-                "title": "Events",
-                "x-box-resource-id": "events",
-                "x-box-tag": "events"
             },
             "File": {
                 "description": "任意のファイルAPIエンドポイントからデフォルトで返されるファイルのStandard版の表示。",
@@ -31890,6 +31890,116 @@
                 },
                 "title": "ファイルリクエスト (更新)"
             },
+            "Files": {
+                "description": "ファイルのリスト。",
+                "type": "object",
+                "properties": {
+                    "total_count": {
+                        "description": "ファイルの数。",
+                        "type": "integer",
+                        "format": "int64",
+                        "example": 1
+                    },
+                    "entries": {
+                        "description": "ファイルのリスト。",
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/File--Full"
+                        }
+                    }
+                },
+                "title": "Files",
+                "x-box-resource-id": "files",
+                "x-box-tag": "files"
+            },
+            "FilesOnHold": {
+                "description": "リーガルホールドポリシー割り当てにより、リーガルホールドが設定されているファイルのリスト。",
+                "type": "object",
+                "allOf": [
+                    {
+                        "type": "object",
+                        "description": "マーカーベースのページネーションについて説明しているAPIレスポンスの部分。",
+                        "properties": {
+                            "limit": {
+                                "description": "これらのエントリで使用された制限値。許容される最大値を超えていない限り、クエリパラメータの`limit`と等しくなります。最大値はAPIによって異なります。",
+                                "type": "integer",
+                                "format": "int64",
+                                "example": 1000
+                            },
+                            "next_marker": {
+                                "description": "次の検索結果ページの開始場所のマーカー。",
+                                "type": "string",
+                                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                                "nullable": true
+                            },
+                            "prev_marker": {
+                                "description": "前の検索結果ページの開始場所のマーカー。",
+                                "type": "string",
+                                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVih",
+                                "nullable": true
+                            }
+                        }
+                    },
+                    {
+                        "properties": {
+                            "entries": {
+                                "description": "ファイルのリスト。",
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/File--Mini"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "title": "リーガルホールドが設定されているファイル",
+                "x-box-resource-id": "files_on_hold",
+                "x-box-tag": "legal_hold_policy_assignments"
+            },
+            "FilesUnderRetention": {
+                "description": "リテンションの対象となるファイルのリスト。",
+                "type": "object",
+                "allOf": [
+                    {
+                        "type": "object",
+                        "description": "マーカーベースのページネーションについて説明しているAPIレスポンスの部分。",
+                        "properties": {
+                            "limit": {
+                                "description": "これらのエントリで使用された制限値。許容される最大値を超えていない限り、クエリパラメータの`limit`と等しくなります。最大値はAPIによって異なります。",
+                                "type": "integer",
+                                "format": "int64",
+                                "example": 1000
+                            },
+                            "next_marker": {
+                                "description": "次の検索結果ページの開始場所のマーカー。",
+                                "type": "string",
+                                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                                "nullable": true
+                            },
+                            "prev_marker": {
+                                "description": "前の検索結果ページの開始場所のマーカー。",
+                                "type": "string",
+                                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVih",
+                                "nullable": true
+                            }
+                        }
+                    },
+                    {
+                        "properties": {
+                            "entries": {
+                                "description": "ファイルのリスト。",
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/File--Mini"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "title": "リテンションの対象となるファイル",
+                "x-box-resource-id": "files_under_retention",
+                "x-box-tag": "retention_policy_assignments"
+            },
             "FileVersion": {
                 "description": "ファイルバージョンのStandard版の表示。",
                 "type": "object",
@@ -32385,116 +32495,6 @@
                 "title": "リーガルホールドが設定されているファイルバージョン",
                 "x-box-resource-id": "file_versions_on_hold",
                 "x-box-tag": "legal_hold_policy_assignments"
-            },
-            "Files": {
-                "description": "ファイルのリスト。",
-                "type": "object",
-                "properties": {
-                    "total_count": {
-                        "description": "ファイルの数。",
-                        "type": "integer",
-                        "format": "int64",
-                        "example": 1
-                    },
-                    "entries": {
-                        "description": "ファイルのリスト。",
-                        "type": "array",
-                        "items": {
-                            "$ref": "#/components/schemas/File--Full"
-                        }
-                    }
-                },
-                "title": "Files",
-                "x-box-resource-id": "files",
-                "x-box-tag": "files"
-            },
-            "FilesOnHold": {
-                "description": "リーガルホールドポリシー割り当てにより、リーガルホールドが設定されているファイルのリスト。",
-                "type": "object",
-                "allOf": [
-                    {
-                        "type": "object",
-                        "description": "マーカーベースのページネーションについて説明しているAPIレスポンスの部分。",
-                        "properties": {
-                            "limit": {
-                                "description": "これらのエントリで使用された制限値。許容される最大値を超えていない限り、クエリパラメータの`limit`と等しくなります。最大値はAPIによって異なります。",
-                                "type": "integer",
-                                "format": "int64",
-                                "example": 1000
-                            },
-                            "next_marker": {
-                                "description": "次の検索結果ページの開始場所のマーカー。",
-                                "type": "string",
-                                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
-                                "nullable": true
-                            },
-                            "prev_marker": {
-                                "description": "前の検索結果ページの開始場所のマーカー。",
-                                "type": "string",
-                                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVih",
-                                "nullable": true
-                            }
-                        }
-                    },
-                    {
-                        "properties": {
-                            "entries": {
-                                "description": "ファイルのリスト。",
-                                "type": "array",
-                                "items": {
-                                    "$ref": "#/components/schemas/File--Mini"
-                                }
-                            }
-                        }
-                    }
-                ],
-                "title": "リーガルホールドが設定されているファイル",
-                "x-box-resource-id": "files_on_hold",
-                "x-box-tag": "legal_hold_policy_assignments"
-            },
-            "FilesUnderRetention": {
-                "description": "リテンションの対象となるファイルのリスト。",
-                "type": "object",
-                "allOf": [
-                    {
-                        "type": "object",
-                        "description": "マーカーベースのページネーションについて説明しているAPIレスポンスの部分。",
-                        "properties": {
-                            "limit": {
-                                "description": "これらのエントリで使用された制限値。許容される最大値を超えていない限り、クエリパラメータの`limit`と等しくなります。最大値はAPIによって異なります。",
-                                "type": "integer",
-                                "format": "int64",
-                                "example": 1000
-                            },
-                            "next_marker": {
-                                "description": "次の検索結果ページの開始場所のマーカー。",
-                                "type": "string",
-                                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
-                                "nullable": true
-                            },
-                            "prev_marker": {
-                                "description": "前の検索結果ページの開始場所のマーカー。",
-                                "type": "string",
-                                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVih",
-                                "nullable": true
-                            }
-                        }
-                    },
-                    {
-                        "properties": {
-                            "entries": {
-                                "description": "ファイルのリスト。",
-                                "type": "array",
-                                "items": {
-                                    "$ref": "#/components/schemas/File--Mini"
-                                }
-                            }
-                        }
-                    }
-                ],
-                "title": "リテンションの対象となるファイル",
-                "x-box-resource-id": "files_under_retention",
-                "x-box-tag": "retention_policy_assignments"
             },
             "Folder": {
                 "description": "任意のフォルダAPIエンドポイントからデフォルトで返されるフォルダのStandard版の表示。",
@@ -34008,6 +34008,44 @@
                 ],
                 "title": "Teamsタイプの統合マッピングのマッピングされた項目スキーマ"
             },
+            "IntegrationMappings": {
+                "description": "統合マッピングオブジェクトのリスト。",
+                "type": "object",
+                "allOf": [
+                    {
+                        "type": "object",
+                        "description": "マーカーベースのページネーションについて説明しているAPIレスポンスの部分。",
+                        "properties": {
+                            "limit": {
+                                "description": "これらのエントリで使用された制限値。許容される最大値を超えていない限り、クエリパラメータの`limit`と等しくなります。最大値はAPIによって異なります。",
+                                "type": "integer",
+                                "format": "int64",
+                                "example": 1000
+                            },
+                            "next_marker": {
+                                "description": "次の検索結果ページの開始場所のマーカー。",
+                                "type": "string",
+                                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                                "nullable": true
+                            }
+                        }
+                    },
+                    {
+                        "properties": {
+                            "entries": {
+                                "description": "統合マッピングのリスト。",
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/IntegrationMapping"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "title": "Slack統合マッピング (リスト)",
+                "x-box-resource-id": "integration_mappings_slack",
+                "x-box-tag": "integration_mappings"
+            },
             "IntegrationMappingSlackCreateRequest": {
                 "description": "Slack統合マッピングオブジェクトを作成するリクエスト。",
                 "type": "object",
@@ -34052,6 +34090,26 @@
                     }
                 },
                 "title": "Slackタイプ用の統合マッピングオプション"
+            },
+            "IntegrationMappingsTeams": {
+                "description": "統合マッピングオブジェクトのリスト。",
+                "type": "object",
+                "allOf": [
+                    {
+                        "properties": {
+                            "entries": {
+                                "description": "統合マッピングのリスト。",
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/IntegrationMappingTeams"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "title": "Teams統合マッピング (リスト)",
+                "x-box-resource-id": "integration_mappings_teams",
+                "x-box-tag": "integration_mappings"
             },
             "IntegrationMappingTeams": {
                 "description": "統合マッピングオブジェクトのMicrosoft Teams固有のレプリゼンテーション。",
@@ -34151,64 +34209,6 @@
                 ],
                 "title": "Teams統合マッピングリクエストを作成",
                 "x-box-resource-id": "integration_mapping_teams_create_request"
-            },
-            "IntegrationMappings": {
-                "description": "統合マッピングオブジェクトのリスト。",
-                "type": "object",
-                "allOf": [
-                    {
-                        "type": "object",
-                        "description": "マーカーベースのページネーションについて説明しているAPIレスポンスの部分。",
-                        "properties": {
-                            "limit": {
-                                "description": "これらのエントリで使用された制限値。許容される最大値を超えていない限り、クエリパラメータの`limit`と等しくなります。最大値はAPIによって異なります。",
-                                "type": "integer",
-                                "format": "int64",
-                                "example": 1000
-                            },
-                            "next_marker": {
-                                "description": "次の検索結果ページの開始場所のマーカー。",
-                                "type": "string",
-                                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
-                                "nullable": true
-                            }
-                        }
-                    },
-                    {
-                        "properties": {
-                            "entries": {
-                                "description": "統合マッピングのリスト。",
-                                "type": "array",
-                                "items": {
-                                    "$ref": "#/components/schemas/IntegrationMapping"
-                                }
-                            }
-                        }
-                    }
-                ],
-                "title": "Slack統合マッピング (リスト)",
-                "x-box-resource-id": "integration_mappings_slack",
-                "x-box-tag": "integration_mappings"
-            },
-            "IntegrationMappingsTeams": {
-                "description": "統合マッピングオブジェクトのリスト。",
-                "type": "object",
-                "allOf": [
-                    {
-                        "properties": {
-                            "entries": {
-                                "description": "統合マッピングのリスト。",
-                                "type": "array",
-                                "items": {
-                                    "$ref": "#/components/schemas/IntegrationMappingTeams"
-                                }
-                            }
-                        }
-                    }
-                ],
-                "title": "Teams統合マッピング (リスト)",
-                "x-box-resource-id": "integration_mappings_teams",
-                "x-box-tag": "integration_mappings"
             },
             "Invite": {
                 "description": "会社へのユーザーの招待。",
@@ -35445,6 +35445,27 @@
                 "x-box-resource-id": "metadata_query_results",
                 "x-box-tag": "search"
             },
+            "Metadatas": {
+                "description": "ファイルまたはフォルダに適用されているメタデータインスタンスのリスト。",
+                "type": "object",
+                "properties": {
+                    "entries": {
+                        "description": "このファイルまたはフォルダに適用されるメタデータインスタンスのリスト。",
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Metadata"
+                        }
+                    },
+                    "limit": {
+                        "description": "結果の現在のページに使用された制限。",
+                        "type": "integer",
+                        "example": 100
+                    }
+                },
+                "title": "メタデータインスタンス",
+                "x-box-resource-id": "metadatas",
+                "x-box-tag": "file_metadata"
+            },
             "MetadataTaxonomies": {
                 "description": "メタデータ階層のリスト。",
                 "type": "object",
@@ -35915,27 +35936,6 @@
                 "title": "メタデータテンプレート",
                 "x-box-resource-id": "metadata_templates",
                 "x-box-tag": "metadata_templates"
-            },
-            "Metadatas": {
-                "description": "ファイルまたはフォルダに適用されているメタデータインスタンスのリスト。",
-                "type": "object",
-                "properties": {
-                    "entries": {
-                        "description": "このファイルまたはフォルダに適用されるメタデータインスタンスのリスト。",
-                        "type": "array",
-                        "items": {
-                            "$ref": "#/components/schemas/Metadata"
-                        }
-                    },
-                    "limit": {
-                        "description": "結果の現在のページに使用された制限。",
-                        "type": "integer",
-                        "example": 100
-                    }
-                },
-                "title": "メタデータインスタンス",
-                "x-box-resource-id": "metadatas",
-                "x-box-tag": "file_metadata"
             },
             "OAuth2Error": {
                 "description": "OAuth 2.0エラー。",
@@ -36829,52 +36829,6 @@
                 ],
                 "title": "検索結果の項目"
             },
-            "SearchResultWithSharedLink": {
-                "description": "検索クエリと一致したファイル、フォルダ、ウェブリンクの単一リスト (項目がユーザーと共有されたときに使用された共有リンクに関する追加情報を含む)。\n\nこのレスポンス形式は、`include_recent_shared_links`クエリパラメータが`true`に設定されている場合にのみ返されます。",
-                "type": "object",
-                "properties": {
-                    "accessible_via_shared_link": {
-                        "description": "ユーザーがこの項目にアクセスする際に使用する共有リンク (省略可)。この値は、ユーザーが最近共有リンクを介してファイルにアクセスした項目のみに返されます。その他すべての項目には、`null`が返されます。",
-                        "type": "string",
-                        "format": "url",
-                        "example": "https://www.box.com/s/vspke7y05sb214wjokpk"
-                    },
-                    "item": {
-                        "allOf": [
-                            {
-                                "$ref": "#/components/schemas/SearchResultWithSharedLinkItem"
-                            },
-                            {
-                                "description": "検索クエリと一致したファイル、フォルダ、またはウェブリンク。"
-                            }
-                        ]
-                    },
-                    "type": {
-                        "description": "結果の種類。値は常に`search_result`になります。",
-                        "type": "string",
-                        "example": "search_result"
-                    }
-                },
-                "title": "検索結果 (共有リンクを含む)",
-                "x-box-resource-id": "search_result_with_shared_link",
-                "x-box-tag": "search"
-            },
-            "SearchResultWithSharedLinkItem": {
-                "description": "共有リンク付きの検索結果の項目。ファイル、フォルダ、またはウェブリンクの場合があります。",
-                "type": "object",
-                "oneOf": [
-                    {
-                        "$ref": "#/components/schemas/File--Full"
-                    },
-                    {
-                        "$ref": "#/components/schemas/Folder--Full"
-                    },
-                    {
-                        "$ref": "#/components/schemas/WebLink"
-                    }
-                ],
-                "title": "検索結果の項目"
-            },
             "SearchResults": {
                 "description": "検索クエリに一致するファイル、フォルダ、およびウェブリンクのリスト。",
                 "type": "object",
@@ -36997,6 +36951,52 @@
                 "title": "検索結果 (複数の共有リンクを含む)",
                 "x-box-resource-id": "search_results_with_shared_links",
                 "x-box-tag": "search"
+            },
+            "SearchResultWithSharedLink": {
+                "description": "検索クエリと一致したファイル、フォルダ、ウェブリンクの単一リスト (項目がユーザーと共有されたときに使用された共有リンクに関する追加情報を含む)。\n\nこのレスポンス形式は、`include_recent_shared_links`クエリパラメータが`true`に設定されている場合にのみ返されます。",
+                "type": "object",
+                "properties": {
+                    "accessible_via_shared_link": {
+                        "description": "ユーザーがこの項目にアクセスする際に使用する共有リンク (省略可)。この値は、ユーザーが最近共有リンクを介してファイルにアクセスした項目のみに返されます。その他すべての項目には、`null`が返されます。",
+                        "type": "string",
+                        "format": "url",
+                        "example": "https://www.box.com/s/vspke7y05sb214wjokpk"
+                    },
+                    "item": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/SearchResultWithSharedLinkItem"
+                            },
+                            {
+                                "description": "検索クエリと一致したファイル、フォルダ、またはウェブリンク。"
+                            }
+                        ]
+                    },
+                    "type": {
+                        "description": "結果の種類。値は常に`search_result`になります。",
+                        "type": "string",
+                        "example": "search_result"
+                    }
+                },
+                "title": "検索結果 (共有リンクを含む)",
+                "x-box-resource-id": "search_result_with_shared_link",
+                "x-box-tag": "search"
+            },
+            "SearchResultWithSharedLinkItem": {
+                "description": "共有リンク付きの検索結果の項目。ファイル、フォルダ、またはウェブリンクの場合があります。",
+                "type": "object",
+                "oneOf": [
+                    {
+                        "$ref": "#/components/schemas/File--Full"
+                    },
+                    {
+                        "$ref": "#/components/schemas/Folder--Full"
+                    },
+                    {
+                        "$ref": "#/components/schemas/WebLink"
+                    }
+                ],
+                "title": "検索結果の項目"
             },
             "SessionTerminationMessage": {
                 "description": "終了ジョブステータスについて通知するメッセージ。",
@@ -37293,6 +37293,44 @@
                 "title": "Shield情報バリアレポートのリスト",
                 "x-box-resource-id": "shield_information_barrier_reports",
                 "x-box-tag": "shield_information_barrier_reports"
+            },
+            "ShieldInformationBarriers": {
+                "description": "Shield情報バリアオブジェクトのリスト。",
+                "type": "object",
+                "allOf": [
+                    {
+                        "type": "object",
+                        "description": "マーカーベースのページネーションについて説明しているAPIレスポンスの部分。",
+                        "properties": {
+                            "limit": {
+                                "description": "これらのエントリで使用された制限値。許容される最大値を超えていない限り、クエリパラメータの`limit`と等しくなります。最大値はAPIによって異なります。",
+                                "type": "integer",
+                                "format": "int64",
+                                "example": 1000
+                            },
+                            "next_marker": {
+                                "description": "次の検索結果ページの開始場所のマーカー。",
+                                "type": "string",
+                                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                                "nullable": true
+                            }
+                        }
+                    },
+                    {
+                        "properties": {
+                            "entries": {
+                                "description": "Shield情報バリアオブジェクトのリスト。",
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/ShieldInformationBarrier"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "title": "Shield情報バリアのリスト",
+                "x-box-resource-id": "shield_information_barriers",
+                "x-box-tag": "shield_information_barriers"
             },
             "ShieldInformationBarrierSegment": {
                 "description": "Shield情報バリアのセグメントオブジェクト。",
@@ -37778,44 +37816,6 @@
                 "x-box-resource-id": "shield_information_barrier_segments",
                 "x-box-tag": "shield_information_barrier_segments"
             },
-            "ShieldInformationBarriers": {
-                "description": "Shield情報バリアオブジェクトのリスト。",
-                "type": "object",
-                "allOf": [
-                    {
-                        "type": "object",
-                        "description": "マーカーベースのページネーションについて説明しているAPIレスポンスの部分。",
-                        "properties": {
-                            "limit": {
-                                "description": "これらのエントリで使用された制限値。許容される最大値を超えていない限り、クエリパラメータの`limit`と等しくなります。最大値はAPIによって異なります。",
-                                "type": "integer",
-                                "format": "int64",
-                                "example": 1000
-                            },
-                            "next_marker": {
-                                "description": "次の検索結果ページの開始場所のマーカー。",
-                                "type": "string",
-                                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
-                                "nullable": true
-                            }
-                        }
-                    },
-                    {
-                        "properties": {
-                            "entries": {
-                                "description": "Shield情報バリアオブジェクトのリスト。",
-                                "type": "array",
-                                "items": {
-                                    "$ref": "#/components/schemas/ShieldInformationBarrier"
-                                }
-                            }
-                        }
-                    }
-                ],
-                "title": "Shield情報バリアのリスト",
-                "x-box-resource-id": "shield_information_barriers",
-                "x-box-tag": "shield_information_barriers"
-            },
             "SignRequest": {
                 "description": "Box Signリクエストオブジェクト。",
                 "type": "object",
@@ -38248,6 +38248,44 @@
                 },
                 "title": "署名リクエスト事前入力タグ"
             },
+            "SignRequests": {
+                "description": "任意のBox Sign APIエンドポイントからデフォルトで返される署名リクエストのStandard版の表示。",
+                "type": "object",
+                "allOf": [
+                    {
+                        "type": "object",
+                        "description": "マーカーベースのページネーションについて説明しているAPIレスポンスの部分。",
+                        "properties": {
+                            "limit": {
+                                "description": "これらのエントリで使用された制限値。許容される最大値を超えていない限り、クエリパラメータの`limit`と等しくなります。最大値はAPIによって異なります。",
+                                "type": "integer",
+                                "format": "int64",
+                                "example": 1000
+                            },
+                            "next_marker": {
+                                "description": "次の検索結果ページの開始場所のマーカー。",
+                                "type": "string",
+                                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                                "nullable": true
+                            }
+                        }
+                    },
+                    {
+                        "properties": {
+                            "entries": {
+                                "description": "Box Signリクエストのリスト。",
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/SignRequest"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "title": "Box Signリクエスト",
+                "x-box-resource-id": "sign_requests",
+                "x-box-tag": "sign_requests"
+            },
             "SignRequestSigner": {
                 "description": "Box Signリクエストオブジェクトの本文で使用される署名者オブジェクトのスキーマ。",
                 "type": "object",
@@ -38658,44 +38696,6 @@
                     "validation_type"
                 ],
                 "title": "署名リクエストの署名者入力の郵便番号検証"
-            },
-            "SignRequests": {
-                "description": "任意のBox Sign APIエンドポイントからデフォルトで返される署名リクエストのStandard版の表示。",
-                "type": "object",
-                "allOf": [
-                    {
-                        "type": "object",
-                        "description": "マーカーベースのページネーションについて説明しているAPIレスポンスの部分。",
-                        "properties": {
-                            "limit": {
-                                "description": "これらのエントリで使用された制限値。許容される最大値を超えていない限り、クエリパラメータの`limit`と等しくなります。最大値はAPIによって異なります。",
-                                "type": "integer",
-                                "format": "int64",
-                                "example": 1000
-                            },
-                            "next_marker": {
-                                "description": "次の検索結果ページの開始場所のマーカー。",
-                                "type": "string",
-                                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
-                                "nullable": true
-                            }
-                        }
-                    },
-                    {
-                        "properties": {
-                            "entries": {
-                                "description": "Box Signリクエストのリスト。",
-                                "type": "array",
-                                "items": {
-                                    "$ref": "#/components/schemas/SignRequest"
-                                }
-                            }
-                        }
-                    }
-                ],
-                "title": "Box Signリクエスト",
-                "x-box-resource-id": "sign_requests",
-                "x-box-tag": "sign_requests"
             },
             "SignTemplate": {
                 "description": "Box Signテンプレートオブジェクト。",
@@ -39938,6 +39938,28 @@
                     "standard"
                 ]
             },
+            "TermsOfServices": {
+                "description": "サービス利用規約のリスト。",
+                "type": "object",
+                "properties": {
+                    "total_count": {
+                        "description": "オブジェクトの合計数。",
+                        "type": "integer",
+                        "format": "int64",
+                        "example": 2
+                    },
+                    "entries": {
+                        "description": "サービス利用規約オブジェクトのリスト。",
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/TermsOfService"
+                        }
+                    }
+                },
+                "title": "サービス利用規約",
+                "x-box-resource-id": "terms_of_services",
+                "x-box-tag": "terms_of_services"
+            },
             "TermsOfServiceUserStatus": {
                 "description": "サービス利用規約とユーザーの関連付け。",
                 "type": "object",
@@ -40022,28 +40044,6 @@
                 "title": "サービス利用規約のユーザーステータス",
                 "x-box-resource-id": "terms_of_services_user_statuses",
                 "x-box-tag": "terms_of_service_user_statuses"
-            },
-            "TermsOfServices": {
-                "description": "サービス利用規約のリスト。",
-                "type": "object",
-                "properties": {
-                    "total_count": {
-                        "description": "オブジェクトの合計数。",
-                        "type": "integer",
-                        "format": "int64",
-                        "example": 2
-                    },
-                    "entries": {
-                        "description": "サービス利用規約オブジェクトのリスト。",
-                        "type": "array",
-                        "items": {
-                            "$ref": "#/components/schemas/TermsOfService"
-                        }
-                    }
-                },
-                "title": "サービス利用規約",
-                "x-box-resource-id": "terms_of_services",
-                "x-box-tag": "terms_of_services"
             },
             "TimelineSkillCard": {
                 "description": "タイムラインに画像のリストを配置するBox Skillメタデータカード。",
@@ -41736,6 +41736,18 @@
                 "x-box-resource-id": "trash_web_link_restored",
                 "x-box-tag": "trashed_web_links"
             },
+            "UploadedPart": {
+                "description": "いくつかのエンドポイントで返されるように、アップロードセッションの一部としてアップロードされたファイルのチャンク。",
+                "type": "object",
+                "properties": {
+                    "part": {
+                        "$ref": "#/components/schemas/UploadPart"
+                    }
+                },
+                "title": "アップロードされたパーツ",
+                "x-box-resource-id": "uploaded_part",
+                "x-box-tag": "chunked_uploads"
+            },
             "UploadPart": {
                 "description": "アップロードセッションチャンクのレプリゼンテーション。",
                 "type": "object",
@@ -41965,18 +41977,6 @@
                 "title": "アップロードURL",
                 "x-box-resource-id": "upload_url",
                 "x-box-tag": "uploads"
-            },
-            "UploadedPart": {
-                "description": "いくつかのエンドポイントで返されるように、アップロードセッションの一部としてアップロードされたファイルのチャンク。",
-                "type": "object",
-                "properties": {
-                    "part": {
-                        "$ref": "#/components/schemas/UploadPart"
-                    }
-                },
-                "title": "アップロードされたパーツ",
-                "x-box-resource-id": "uploaded_part",
-                "x-box-tag": "chunked_uploads"
             },
             "User": {
                 "description": "任意のユーザーAPIエンドポイントからデフォルトで返されるユーザーのStandard版の表示。",
@@ -42481,6 +42481,193 @@
                 "x-box-resource-id": "watermark",
                 "x-box-tag": "file_watermarks"
             },
+            "Webhook": {
+                "description": "設定されたWebhookを表します。",
+                "type": "object",
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/Webhook--Mini"
+                    },
+                    {
+                        "properties": {
+                            "created_by": {
+                                "allOf": [
+                                    {
+                                        "$ref": "#/components/schemas/User--Mini"
+                                    },
+                                    {
+                                        "description": "Webhookを作成したユーザー。"
+                                    }
+                                ]
+                            },
+                            "created_at": {
+                                "description": "Webhookが作成された日時を示すタイムスタンプ。",
+                                "type": "string",
+                                "format": "date-time",
+                                "example": "2012-12-12T10:53:43-08:00"
+                            },
+                            "address": {
+                                "description": "このWebhookによって通知されるURL。",
+                                "type": "string",
+                                "example": "https://example.com/webhooks"
+                            },
+                            "triggers": {
+                                "description": "このWebhookがトリガーされるイベント名の配列。",
+                                "type": "array",
+                                "items": {
+                                    "title": "Webhookトリガー",
+                                    "example": "FILE.UPLOADED",
+                                    "type": "string",
+                                    "description": "このWebhookをトリガーしたイベント名。",
+                                    "enum": [
+                                        "FILE.UPLOADED",
+                                        "FILE.PREVIEWED",
+                                        "FILE.DOWNLOADED",
+                                        "FILE.TRASHED",
+                                        "FILE.DELETED",
+                                        "FILE.RESTORED",
+                                        "FILE.COPIED",
+                                        "FILE.MOVED",
+                                        "FILE.LOCKED",
+                                        "FILE.UNLOCKED",
+                                        "FILE.RENAMED",
+                                        "COMMENT.CREATED",
+                                        "COMMENT.UPDATED",
+                                        "COMMENT.DELETED",
+                                        "TASK_ASSIGNMENT.CREATED",
+                                        "TASK_ASSIGNMENT.UPDATED",
+                                        "METADATA_INSTANCE.CREATED",
+                                        "METADATA_INSTANCE.UPDATED",
+                                        "METADATA_INSTANCE.DELETED",
+                                        "FOLDER.CREATED",
+                                        "FOLDER.RENAMED",
+                                        "FOLDER.DOWNLOADED",
+                                        "FOLDER.RESTORED",
+                                        "FOLDER.DELETED",
+                                        "FOLDER.COPIED",
+                                        "FOLDER.MOVED",
+                                        "FOLDER.TRASHED",
+                                        "WEBHOOK.DELETED",
+                                        "COLLABORATION.CREATED",
+                                        "COLLABORATION.ACCEPTED",
+                                        "COLLABORATION.REJECTED",
+                                        "COLLABORATION.REMOVED",
+                                        "COLLABORATION.UPDATED",
+                                        "SHARED_LINK.DELETED",
+                                        "SHARED_LINK.CREATED",
+                                        "SHARED_LINK.UPDATED",
+                                        "SIGN_REQUEST.COMPLETED",
+                                        "SIGN_REQUEST.DECLINED",
+                                        "SIGN_REQUEST.EXPIRED",
+                                        "SIGN_REQUEST.SIGNER_EMAIL_BOUNCED",
+                                        "SIGN_REQUEST.SIGN_SIGNER_SIGNED",
+                                        "SIGN_REQUEST.SIGN_DOCUMENT_CREATED",
+                                        "SIGN_REQUEST.SIGN_ERROR_FINALIZING"
+                                    ]
+                                },
+                                "example": [
+                                    "FILE.UPLOADED"
+                                ]
+                            }
+                        }
+                    }
+                ],
+                "title": "Webhook",
+                "x-box-resource-id": "webhook",
+                "x-box-tag": "webhooks",
+                "x-box-variant": "standard"
+            },
+            "Webhook--Mini": {
+                "description": "設定されたWebhookを表します。",
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "description": "このWebhookの一意の識別子。",
+                        "type": "string",
+                        "example": "11446498"
+                    },
+                    "type": {
+                        "description": "値は常に`webhook`になります。",
+                        "type": "string",
+                        "example": "webhook",
+                        "enum": [
+                            "webhook"
+                        ]
+                    },
+                    "target": {
+                        "description": "Webhookをトリガーする項目。",
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "description": "Webhookをトリガーする項目のID。",
+                                "type": "string",
+                                "example": "1231232"
+                            },
+                            "type": {
+                                "description": "Webhookをトリガーする項目のタイプ。",
+                                "type": "string",
+                                "example": "file",
+                                "enum": [
+                                    "file",
+                                    "folder"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "title": "Webhook (Mini)",
+                "x-box-resource-id": "webhook--mini",
+                "x-box-tag": "webhooks",
+                "x-box-variant": "mini",
+                "x-box-variants": [
+                    "mini",
+                    "standard"
+                ]
+            },
+            "Webhooks": {
+                "description": "Webhookのリスト。",
+                "type": "object",
+                "allOf": [
+                    {
+                        "type": "object",
+                        "description": "マーカーベースのページネーションについて説明しているAPIレスポンスの部分。",
+                        "properties": {
+                            "limit": {
+                                "description": "これらのエントリで使用された制限値。許容される最大値を超えていない限り、クエリパラメータの`limit`と等しくなります。最大値はAPIによって異なります。",
+                                "type": "integer",
+                                "format": "int64",
+                                "example": 1000
+                            },
+                            "next_marker": {
+                                "description": "次の検索結果ページの開始場所のマーカー。",
+                                "type": "string",
+                                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                                "nullable": true
+                            },
+                            "prev_marker": {
+                                "description": "前の検索結果ページの開始場所のマーカー。",
+                                "type": "string",
+                                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVih",
+                                "nullable": true
+                            }
+                        }
+                    },
+                    {
+                        "properties": {
+                            "entries": {
+                                "description": "Webhookのリスト。",
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/Webhook--Mini"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "title": "Webhooks",
+                "x-box-resource-id": "webhooks",
+                "x-box-tag": "webhooks"
+            },
             "WebLink": {
                 "description": "ウェブリンクとは、URLを指すオブジェクトです。これらのオブジェクトはBoxウェブアプリケーション内ではブックマークとも呼ばれます。\n\nウェブリンクオブジェクトはファイルオブジェクトと同様に扱われ、通常のファイルに適用されるアクションの大部分もサポートしています。",
                 "type": "object",
@@ -42833,193 +43020,6 @@
                 "x-box-resource-id": "web_link--mini",
                 "x-box-tag": "web_links",
                 "x-box-variant": "mini"
-            },
-            "Webhook": {
-                "description": "設定されたWebhookを表します。",
-                "type": "object",
-                "allOf": [
-                    {
-                        "$ref": "#/components/schemas/Webhook--Mini"
-                    },
-                    {
-                        "properties": {
-                            "created_by": {
-                                "allOf": [
-                                    {
-                                        "$ref": "#/components/schemas/User--Mini"
-                                    },
-                                    {
-                                        "description": "Webhookを作成したユーザー。"
-                                    }
-                                ]
-                            },
-                            "created_at": {
-                                "description": "Webhookが作成された日時を示すタイムスタンプ。",
-                                "type": "string",
-                                "format": "date-time",
-                                "example": "2012-12-12T10:53:43-08:00"
-                            },
-                            "address": {
-                                "description": "このWebhookによって通知されるURL。",
-                                "type": "string",
-                                "example": "https://example.com/webhooks"
-                            },
-                            "triggers": {
-                                "description": "このWebhookがトリガーされるイベント名の配列。",
-                                "type": "array",
-                                "items": {
-                                    "title": "Webhookトリガー",
-                                    "example": "FILE.UPLOADED",
-                                    "type": "string",
-                                    "description": "このWebhookをトリガーしたイベント名。",
-                                    "enum": [
-                                        "FILE.UPLOADED",
-                                        "FILE.PREVIEWED",
-                                        "FILE.DOWNLOADED",
-                                        "FILE.TRASHED",
-                                        "FILE.DELETED",
-                                        "FILE.RESTORED",
-                                        "FILE.COPIED",
-                                        "FILE.MOVED",
-                                        "FILE.LOCKED",
-                                        "FILE.UNLOCKED",
-                                        "FILE.RENAMED",
-                                        "COMMENT.CREATED",
-                                        "COMMENT.UPDATED",
-                                        "COMMENT.DELETED",
-                                        "TASK_ASSIGNMENT.CREATED",
-                                        "TASK_ASSIGNMENT.UPDATED",
-                                        "METADATA_INSTANCE.CREATED",
-                                        "METADATA_INSTANCE.UPDATED",
-                                        "METADATA_INSTANCE.DELETED",
-                                        "FOLDER.CREATED",
-                                        "FOLDER.RENAMED",
-                                        "FOLDER.DOWNLOADED",
-                                        "FOLDER.RESTORED",
-                                        "FOLDER.DELETED",
-                                        "FOLDER.COPIED",
-                                        "FOLDER.MOVED",
-                                        "FOLDER.TRASHED",
-                                        "WEBHOOK.DELETED",
-                                        "COLLABORATION.CREATED",
-                                        "COLLABORATION.ACCEPTED",
-                                        "COLLABORATION.REJECTED",
-                                        "COLLABORATION.REMOVED",
-                                        "COLLABORATION.UPDATED",
-                                        "SHARED_LINK.DELETED",
-                                        "SHARED_LINK.CREATED",
-                                        "SHARED_LINK.UPDATED",
-                                        "SIGN_REQUEST.COMPLETED",
-                                        "SIGN_REQUEST.DECLINED",
-                                        "SIGN_REQUEST.EXPIRED",
-                                        "SIGN_REQUEST.SIGNER_EMAIL_BOUNCED",
-                                        "SIGN_REQUEST.SIGN_SIGNER_SIGNED",
-                                        "SIGN_REQUEST.SIGN_DOCUMENT_CREATED",
-                                        "SIGN_REQUEST.SIGN_ERROR_FINALIZING"
-                                    ]
-                                },
-                                "example": [
-                                    "FILE.UPLOADED"
-                                ]
-                            }
-                        }
-                    }
-                ],
-                "title": "Webhook",
-                "x-box-resource-id": "webhook",
-                "x-box-tag": "webhooks",
-                "x-box-variant": "standard"
-            },
-            "Webhook--Mini": {
-                "description": "設定されたWebhookを表します。",
-                "type": "object",
-                "properties": {
-                    "id": {
-                        "description": "このWebhookの一意の識別子。",
-                        "type": "string",
-                        "example": "11446498"
-                    },
-                    "type": {
-                        "description": "値は常に`webhook`になります。",
-                        "type": "string",
-                        "example": "webhook",
-                        "enum": [
-                            "webhook"
-                        ]
-                    },
-                    "target": {
-                        "description": "Webhookをトリガーする項目。",
-                        "type": "object",
-                        "properties": {
-                            "id": {
-                                "description": "Webhookをトリガーする項目のID。",
-                                "type": "string",
-                                "example": "1231232"
-                            },
-                            "type": {
-                                "description": "Webhookをトリガーする項目のタイプ。",
-                                "type": "string",
-                                "example": "file",
-                                "enum": [
-                                    "file",
-                                    "folder"
-                                ]
-                            }
-                        }
-                    }
-                },
-                "title": "Webhook (Mini)",
-                "x-box-resource-id": "webhook--mini",
-                "x-box-tag": "webhooks",
-                "x-box-variant": "mini",
-                "x-box-variants": [
-                    "mini",
-                    "standard"
-                ]
-            },
-            "Webhooks": {
-                "description": "Webhookのリスト。",
-                "type": "object",
-                "allOf": [
-                    {
-                        "type": "object",
-                        "description": "マーカーベースのページネーションについて説明しているAPIレスポンスの部分。",
-                        "properties": {
-                            "limit": {
-                                "description": "これらのエントリで使用された制限値。許容される最大値を超えていない限り、クエリパラメータの`limit`と等しくなります。最大値はAPIによって異なります。",
-                                "type": "integer",
-                                "format": "int64",
-                                "example": 1000
-                            },
-                            "next_marker": {
-                                "description": "次の検索結果ページの開始場所のマーカー。",
-                                "type": "string",
-                                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
-                                "nullable": true
-                            },
-                            "prev_marker": {
-                                "description": "前の検索結果ページの開始場所のマーカー。",
-                                "type": "string",
-                                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVih",
-                                "nullable": true
-                            }
-                        }
-                    },
-                    {
-                        "properties": {
-                            "entries": {
-                                "description": "Webhookのリスト。",
-                                "type": "array",
-                                "items": {
-                                    "$ref": "#/components/schemas/Webhook--Mini"
-                                }
-                            }
-                        }
-                    }
-                ],
-                "title": "Webhooks",
-                "x-box-resource-id": "webhooks",
-                "x-box-tag": "webhooks"
             },
             "Workflow": {
                 "description": "Box Relayワークフローは、名前が付けられたフローのコレクションを表すオブジェクトです。\n\nアプリケーションは、このリソースを使用するために、開発者コンソールでの`Manage Box Relay`アプリケーションスコープの使用が承認されている必要があります。",
