@@ -14,7 +14,7 @@
       "url": "https://www.apache.org/licenses/LICENSE-2.0"
     },
     "version": "2025.0",
-    "x-box-commit-hash": "3d705a6550"
+    "x-box-commit-hash": "a6c39536c4"
   },
   "servers": [
     {
@@ -2009,6 +2009,260 @@
         "x-box-tag": "hub_items",
         "tags": [
           "Box Hub Items"
+        ]
+      }
+    },
+    "/hub_document_pages": {
+      "get": {
+        "operationId": "get_hub_document_pages_v2025.0",
+        "summary": "List Hub Document Pages",
+        "description": "Retrieves a list of Hub Document Pages for the specified hub.\nIncludes both root-level pages and sub pages.",
+        "x-stability-level": "beta",
+        "parameters": [
+          {
+            "name": "hub_id",
+            "in": "query",
+            "description": "The unique identifier that represent a hub.\n\nThe ID for any hub can be determined\nby visiting this hub in the web application\nand copying the ID from the URL. For example,\nfor the URL `https://*.app.box.com/hubs/123`\nthe `hub_id` is `123`.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "12345"
+          },
+          {
+            "name": "marker",
+            "in": "query",
+            "description": "Defines the position marker at which to begin returning results. This is\nused when paginating using marker-based pagination.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "The maximum number of items to return per page.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "maximum": 1000
+            },
+            "example": 1000
+          },
+          {
+            "$ref": "#/components/parameters/BoxVersionHeader"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns a Hub Document Pages response whose `entries` array contains root-level pages and sub pages. Includes pagination when more results are available.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HubDocumentPages"
+                },
+                "examples": {
+                  "pages": {
+                    "summary": "Pages (root and sub pages)",
+                    "value": {
+                      "entries": [
+                        {
+                          "id": "d97f7c26-0d9b-42a1-a00d-6e6db9619e0f",
+                          "type": "page",
+                          "title_fragment": "This is the home page title !!"
+                        },
+                        {
+                          "id": "df6be226-6a40-429e-afd3-0e9ea73f1990",
+                          "type": "page",
+                          "parent_id": "d97f7c26-0d9b-42a1-a00d-6e6db9619e0f",
+                          "title_fragment": "This is the second page title !!"
+                        }
+                      ],
+                      "type": "document_pages",
+                      "limit": 1000,
+                      "next_marker": null
+                    }
+                  },
+                  "with_pagination": {
+                    "summary": "With next page marker",
+                    "value": {
+                      "entries": [
+                        {
+                          "id": "d97f7c26-0d9b-42a1-a00d-6e6db9619e0f",
+                          "type": "page",
+                          "title_fragment": "This is the home page title !!"
+                        }
+                      ],
+                      "type": "document_pages",
+                      "limit": 1,
+                      "next_marker": "df6be226-6a40-429e-afd3-0e9ea73f1990"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Returned when the access token provided in the Authorization header\nis not recognized or not provided.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Returned if the Box Hub is not found, or the user does not\nhave access to the Box Hub.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        },
+        "x-box-tag": "hub_document",
+        "tags": [
+          "Box Hub Document"
+        ]
+      }
+    },
+    "/hub_document_blocks": {
+      "get": {
+        "operationId": "get_hub_document_blocks_v2025.0",
+        "summary": "List Hub Document blocks for page",
+        "description": "Retrieves a sorted list of all Hub Document Blocks on a specified page in the hub document, excluding items.\nBlocks are hierarchically organized by their `parent_id`.\nBlocks are sorted in order based on user specification in the user interface.\nThe response will only include content blocks that belong to the specified page. This will not include sub pages or sub page content blocks.",
+        "x-stability-level": "beta",
+        "parameters": [
+          {
+            "name": "hub_id",
+            "in": "query",
+            "description": "The unique identifier that represent a hub.\n\nThe ID for any hub can be determined\nby visiting this hub in the web application\nand copying the ID from the URL. For example,\nfor the URL `https://*.app.box.com/hubs/123`\nthe `hub_id` is `123`.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "12345"
+          },
+          {
+            "name": "page_id",
+            "in": "query",
+            "description": "The unique identifier of a page within the Box Hub.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "d97f7c26-0d9b-42a1-a00d-6e6db9619e0f",
+            "x-stability-level": "beta"
+          },
+          {
+            "name": "marker",
+            "in": "query",
+            "description": "Defines the position marker at which to begin returning results. This is\nused when paginating using marker-based pagination.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "The maximum number of items to return per page.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "maximum": 1000
+            },
+            "example": 1000
+          },
+          {
+            "$ref": "#/components/parameters/BoxVersionHeader"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns a Hub Document Blocks response whose `entries` array contains all content blocks of the specified page, except for items.\nTo retrieve items, use the `GET /hub_items` endpoint.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HubDocumentBlocks"
+                },
+                "examples": {
+                  "blocks": {
+                    "summary": "Blocks for a page",
+                    "value": {
+                      "entries": [
+                        {
+                          "id": "c9588f08-22d7-4d17-8ca9-f1e61c98c0bd",
+                          "type": "section_title",
+                          "parent_id": "d97f7c26-0d9b-42a1-a00d-6e6db9619e0f",
+                          "fragment": "This is the section title"
+                        },
+                        {
+                          "id": "721d97d7-ac8a-4e5e-adb6-ef11af4e6d9e",
+                          "type": "item_list",
+                          "parent_id": "d97f7c26-0d9b-42a1-a00d-6e6db9619e0f"
+                        }
+                      ],
+                      "type": "document_blocks",
+                      "limit": 1000,
+                      "next_marker": null
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Returned when the access token provided in the Authorization header\nis not recognized or not provided.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Returned if the hub or page is not found, or the user does not\nhave access to the Box Hub.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        },
+        "x-box-tag": "hub_document",
+        "tags": [
+          "Box Hub Document"
         ]
       }
     },
@@ -5494,6 +5748,11 @@
                 "description": "Indicates if a shared link can be created for the Box Hub.",
                 "type": "boolean",
                 "example": true
+              },
+              "can_public_shared_link_be_created": {
+                "description": "Indicates if a public shared link can be created for the Box Hub.",
+                "type": "boolean",
+                "example": true
               }
             }
           }
@@ -5546,6 +5805,41 @@
           }
         ],
         "title": "Box Hub Accessible By"
+      },
+      "HubCalloutBoxTextBlock": {
+        "description": "A callout box block in the Box Hub Document.",
+        "type": "object",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/HubDocumentBlock"
+          },
+          {
+            "properties": {
+              "type": {
+                "description": "The type of this block. The value is always `callout_box`.",
+                "type": "string",
+                "example": "callout_box",
+                "enum": [
+                  "callout_box"
+                ]
+              },
+              "fragment": {
+                "description": "Text content of the block. Includes rich text formatting.",
+                "type": "string",
+                "example": "This is the callout box"
+              }
+            }
+          }
+        ],
+        "required": [
+          "id",
+          "type",
+          "fragment"
+        ],
+        "title": "Box Hub Callout Box Text Block",
+        "x-box-resource-id": "hub_callout_box_text_block_v2025.0",
+        "x-box-tag": "hub_document",
+        "x-stability-level": "beta"
       },
       "HubCollaboration": {
         "description": "A Box Hub collaboration object grants a user or group access \nto a Box Hub with permissions defined by a specific role.",
@@ -5834,6 +6128,220 @@
         ],
         "title": "Box Hub Create Request"
       },
+      "HubDividerBlock": {
+        "description": "A divider block in the Box Hub Document.",
+        "type": "object",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/HubDocumentBlock"
+          },
+          {
+            "properties": {
+              "type": {
+                "description": "The type of this block. The value is always `divider`.",
+                "type": "string",
+                "example": "divider",
+                "enum": [
+                  "divider"
+                ]
+              }
+            }
+          }
+        ],
+        "required": [
+          "id",
+          "type"
+        ],
+        "title": "Box Hub Divider Block",
+        "x-box-resource-id": "hub_divider_block_v2025.0",
+        "x-box-tag": "hub_document",
+        "x-stability-level": "beta"
+      },
+      "HubDocumentBlock": {
+        "description": "Base block in the Box Hub Document.",
+        "type": "object",
+        "properties": {
+          "id": {
+            "description": "The unique identifier for this block.",
+            "type": "string",
+            "example": "c9588f08-22d7-4d17-8ca9-f1e61c98c0bd"
+          },
+          "parent_id": {
+            "description": "The unique identifier of the parent block. Null for direct children of the page.",
+            "type": "string",
+            "example": "d97f7c26-0d9b-42a1-a00d-6e6db9619e0f",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "Box Hub Document Block",
+        "x-box-tag": "hub_document",
+        "x-stability-level": "beta"
+      },
+      "HubDocumentBlockEntry": {
+        "description": "A single block in a Hub Document Blocks list.\nText-bearing block types (`paragraph`, `section_title`, `callout_box`)\ninclude a `fragment` property with rich text content.",
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/HubParagraphTextBlock"
+          },
+          {
+            "$ref": "#/components/schemas/HubSectionTitleTextBlock"
+          },
+          {
+            "$ref": "#/components/schemas/HubCalloutBoxTextBlock"
+          },
+          {
+            "$ref": "#/components/schemas/HubItemListBlock"
+          },
+          {
+            "$ref": "#/components/schemas/HubDividerBlock"
+          }
+        ],
+        "title": "Box Hub Document Block Entry",
+        "x-stability-level": "beta"
+      },
+      "HubDocumentBlocks": {
+        "description": "A list of Hub Document blocks.",
+        "type": "object",
+        "allOf": [
+          {
+            "type": "object",
+            "required": [
+              "entries",
+              "type"
+            ],
+            "properties": {
+              "entries": {
+                "description": "Ordered list of blocks.",
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/HubDocumentBlockEntry"
+                }
+              },
+              "type": {
+                "description": "The value will always be `document_blocks`.",
+                "type": "string",
+                "example": "document_blocks",
+                "enum": [
+                  "document_blocks"
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "description": "The part of an API response that describes marker\nbased pagination.",
+            "properties": {
+              "limit": {
+                "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
+                "type": "integer",
+                "format": "int64",
+                "example": 1000
+              },
+              "next_marker": {
+                "description": "The marker for the start of the next page of results.",
+                "type": "string",
+                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                "nullable": true
+              }
+            }
+          }
+        ],
+        "title": "Box Hub Document Blocks",
+        "x-box-resource-id": "hub_document_blocks_v2025.0",
+        "x-box-tag": "hub_document",
+        "x-stability-level": "beta"
+      },
+      "HubDocumentPage": {
+        "description": "A Page in the Box Hub Document.",
+        "type": "object",
+        "properties": {
+          "id": {
+            "description": "The unique identifier for this page.",
+            "type": "string",
+            "example": "d97f7c26-0d9b-42a1-a00d-6e6db9619e0f"
+          },
+          "type": {
+            "description": "The type of this resource. The value is always `page`.",
+            "type": "string",
+            "example": "page"
+          },
+          "parent_id": {
+            "description": "The unique identifier of the parent page. Null for root-level pages.",
+            "type": "string",
+            "example": "d97f7c26-0d9b-42a1-a00d-6e6db9619e0f",
+            "nullable": true
+          },
+          "title_fragment": {
+            "description": "The title text of the page. Includes rich text formatting.",
+            "type": "string",
+            "example": "This is the home page title"
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "title_fragment"
+        ],
+        "title": "Box Hub Document Page",
+        "x-box-resource-id": "hub_document_page_v2025.0",
+        "x-box-tag": "hub_document",
+        "x-stability-level": "beta"
+      },
+      "HubDocumentPages": {
+        "description": "A list of Hub Document Pages.",
+        "type": "object",
+        "allOf": [
+          {
+            "type": "object",
+            "required": [
+              "entries",
+              "type"
+            ],
+            "properties": {
+              "entries": {
+                "description": "Ordered list of pages.",
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/HubDocumentPage"
+                }
+              },
+              "type": {
+                "description": "The value will always be `document_pages`.",
+                "type": "string",
+                "example": "document_pages",
+                "enum": [
+                  "document_pages"
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "description": "The part of an API response that describes marker\nbased pagination.",
+            "properties": {
+              "limit": {
+                "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
+                "type": "integer",
+                "format": "int64",
+                "example": 1000
+              },
+              "next_marker": {
+                "description": "The marker for the start of the next page of results.",
+                "type": "string",
+                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                "nullable": true
+              }
+            }
+          }
+        ],
+        "title": "Box Hub Document Pages",
+        "x-box-resource-id": "hub_document_pages_v2025.0",
+        "x-box-tag": "hub_document",
+        "x-stability-level": "beta"
+      },
       "HubItem": {
         "description": "A Box Hub Item is a Box Item that is referenced in a Box Hub.",
         "type": "object",
@@ -5867,6 +6375,35 @@
         "title": "Box Hub Item",
         "x-box-resource-id": "hub_item_v2025.0",
         "x-box-tag": "hub_items"
+      },
+      "HubItemListBlock": {
+        "description": "An item list block in the Box Hub Document.",
+        "type": "object",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/HubDocumentBlock"
+          },
+          {
+            "properties": {
+              "type": {
+                "description": "The type of this block. The value is always `item_list`.",
+                "type": "string",
+                "example": "item_list",
+                "enum": [
+                  "item_list"
+                ]
+              }
+            }
+          }
+        ],
+        "required": [
+          "id",
+          "type"
+        ],
+        "title": "Box Hub Item List Block",
+        "x-box-resource-id": "hub_item_list_block_v2025.0",
+        "x-box-tag": "hub_document",
+        "x-stability-level": "beta"
       },
       "HubItemOperation": {
         "description": "An operation to perform on a Box Hub item.",
@@ -6004,6 +6541,41 @@
         "x-box-resource-id": "hub_items_manage_response_v2025.0",
         "x-box-tag": "hub_items"
       },
+      "HubParagraphTextBlock": {
+        "description": "A paragraph block in the Box Hub Document.",
+        "type": "object",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/HubDocumentBlock"
+          },
+          {
+            "properties": {
+              "type": {
+                "description": "The type of this block. The value is always `paragraph`.",
+                "type": "string",
+                "example": "paragraph",
+                "enum": [
+                  "paragraph"
+                ]
+              },
+              "fragment": {
+                "description": "Text content of the block. Includes rich text formatting.",
+                "type": "string",
+                "example": "This is the paragraph"
+              }
+            }
+          }
+        ],
+        "required": [
+          "id",
+          "type",
+          "fragment"
+        ],
+        "title": "Box Hub Paragraph Text Block",
+        "x-box-resource-id": "hub_paragraph_text_block_v2025.0",
+        "x-box-tag": "hub_document",
+        "x-stability-level": "beta"
+      },
       "Hubs": {
         "description": "A paginated list of hubs.",
         "type": "object",
@@ -6042,6 +6614,41 @@
         "x-box-resource-id": "hubs_v2025.0",
         "x-box-tag": "hubs"
       },
+      "HubSectionTitleTextBlock": {
+        "description": "A section title block in the Box Hub Document.",
+        "type": "object",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/HubDocumentBlock"
+          },
+          {
+            "properties": {
+              "type": {
+                "description": "The type of this block. The value is always `section_title`.",
+                "type": "string",
+                "example": "section_title",
+                "enum": [
+                  "section_title"
+                ]
+              },
+              "fragment": {
+                "description": "Text content of the block. Includes rich text formatting.",
+                "type": "string",
+                "example": "This is the section title"
+              }
+            }
+          }
+        ],
+        "required": [
+          "id",
+          "type",
+          "fragment"
+        ],
+        "title": "Box Hub Section Title Text Block",
+        "x-box-resource-id": "hub_section_title_text_block_v2025.0",
+        "x-box-tag": "hub_document",
+        "x-stability-level": "beta"
+      },
       "HubUpdateRequest": {
         "description": "Request schema for updating an existing Box Hub.",
         "type": "object",
@@ -6074,6 +6681,11 @@
           },
           "can_shared_link_be_created": {
             "description": "Indicates if a shared link can be created for the Box Hub.",
+            "type": "boolean",
+            "example": true
+          },
+          "can_public_shared_link_be_created": {
+            "description": "Indicates if a public shared link can be created for the Box Hub.",
             "type": "boolean",
             "example": true
           }
@@ -6888,6 +7500,11 @@
       "name": "Box Hub Collaborations",
       "description": "A set of endpoints used to manage collaborations within a Box Hub.",
       "x-box-tag": "hub_collaborations"
+    },
+    {
+      "name": "Box Hub Document",
+      "description": "A set of endpoints used to retrieve Box Hub Document elements (pages and content blocks).",
+      "x-box-tag": "hub_document"
     },
     {
       "name": "Box Hub Items",
