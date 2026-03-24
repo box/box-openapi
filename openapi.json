@@ -14,7 +14,7 @@
       "url": "https://www.apache.org/licenses/LICENSE-2.0"
     },
     "version": "2024.0",
-    "x-box-commit-hash": "899ed3461b"
+    "x-box-commit-hash": "e965969341"
   },
   "servers": [
     {
@@ -7301,7 +7301,7 @@
       "get": {
         "operationId": "get_folders_trash_items",
         "summary": "List trashed items",
-        "description": "Retrieves the files and folders that have been moved\nto the trash.\n\nAny attribute in the full files or folders objects can be passed\nin with the `fields` parameter to retrieve those specific\nattributes that are not returned by default.\n\nThis endpoint defaults to use offset-based pagination, yet also supports\nmarker-based pagination using the `marker` parameter.",
+        "description": "Retrieves the files and folders that have been moved\nto the trash.\n\nAny attribute in the full files or folders objects can be passed\nin with the `fields` parameter to retrieve those specific\nattributes that are not returned by default.\n\nThis endpoint defaults to use offset-based pagination, yet also supports\nmarker-based pagination using the `marker` parameter.  \n\nThe number of entries returned may be less than `total_count`. For example, if a user deletes items from a shared folder and is later removed as a collaborator, those deleted items will no longer appear in this endpoint’s results, even though they are still included in `total_count`.",
         "parameters": [
           {
             "name": "fields",
@@ -34792,23 +34792,36 @@
         ]
       },
       "LegalHoldPolicyAssignedItem": {
-        "description": "The item that the legal hold policy\nis assigned to. Includes type and ID.",
+        "description": "The item that the legal hold policy is assigned to. Includes type and ID.",
         "type": "object",
-        "oneOf": [
-          {
-            "$ref": "#/components/schemas/File"
+        "properties": {
+          "type": {
+            "description": "The type of item the policy is assigned to.",
+            "type": "string",
+            "example": "folder",
+            "enum": [
+              "file",
+              "file_version",
+              "folder",
+              "user",
+              "ownership",
+              "interactions"
+            ]
           },
-          {
-            "$ref": "#/components/schemas/Folder"
-          },
-          {
-            "$ref": "#/components/schemas/WebLink"
+          "id": {
+            "description": "The ID of the item the policy is assigned to.",
+            "type": "string",
+            "example": "6564564"
           }
+        },
+        "required": [
+          "type",
+          "id"
         ],
         "title": "Legal hold policy item"
       },
       "LegalHoldPolicyAssignment": {
-        "description": "Legal Hold Assignments are used to assign Legal Hold\nPolicies to Users, Folders, Files, or File Versions.\n\nCreating a Legal Hold Assignment puts a hold\non the File-Versions that belong to the Assignment's\n'apply-to' entity.",
+        "description": "Legal Hold Assignments are used to assign Legal Hold\nPolicies to an item type of: Users, Folders, Files, File Versions, Ownership, or Interactions.\n\nCreating a Legal Hold Assignment puts a hold\non the File-Versions that belong to the Assignment's\n'apply-to' entity.",
         "type": "object",
         "allOf": [
           {
