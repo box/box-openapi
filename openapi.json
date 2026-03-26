@@ -14,7 +14,7 @@
             "url": "https://www.apache.org/licenses/LICENSE-2.0"
         },
         "version": "2024.0",
-        "x-box-commit-hash": "899ed3461b"
+        "x-box-commit-hash": "6426d9bbad"
     },
     "servers": [
         {
@@ -7301,7 +7301,7 @@
             "get": {
                 "operationId": "get_folders_trash_items",
                 "summary": "ごみ箱内の項目のリストを取得",
-                "description": "ごみ箱に移動されたファイルとフォルダを取得します。\n\n`fields`パラメータを使用して完全版のファイルオブジェクトまたはフォルダオブジェクト内の任意の属性を渡すと、デフォルトでは返されない特定の属性を取得できます。\n\nこのエンドポイントはデフォルトでオフセットベースのページネーションを使用しますが、`marker`パラメータを使用したマーカーベースのページネーションもサポートしています。",
+                "description": "ごみ箱に移動されたファイルとフォルダを取得します。\n\n`fields`パラメータを使用して完全版のファイルオブジェクトまたはフォルダオブジェクト内の任意の属性を渡すと、デフォルトでは返されない特定の属性を取得できます。\n\nこのエンドポイントはデフォルトでオフセットベースのページネーションを使用しますが、`marker`パラメータを使用したマーカーベースのページネーションもサポートしています。  \n\nThe number of entries returned may be less than `total_count`. For example, if a user deletes items from a shared folder and is later removed as a collaborator, those deleted items will no longer appear in this endpoint’s results, even though they are still included in `total_count`.",
                 "parameters": [
                     {
                         "name": "fields",
@@ -10535,7 +10535,7 @@
                                     "description",
                                     "file_content",
                                     "comments",
-                                    "tag"
+                                    "tags"
                                 ]
                             }
                         },
@@ -27471,7 +27471,7 @@
                         "example": true
                     },
                     "include_reference": {
-                        "description": "A flag to indicate whether references for every extracted field should be returned.",
+                        "description": "抽出された各フィールドの参照を返すかどうかを示すフラグ。",
                         "type": "boolean",
                         "example": true
                     },
@@ -27529,7 +27529,7 @@
                         "additionalProperties": {}
                     },
                     "reference": {
-                        "description": "The reference for each extracted field as a JSON dictionary. This can be empty if no field could be extracted.",
+                        "description": "JSON形式の辞書として抽出された各フィールドの参照。フィールドが抽出されなかった場合は空になります。",
                         "type": "object",
                         "additionalProperties": {}
                     },
@@ -34794,21 +34794,34 @@
             "LegalHoldPolicyAssignedItem": {
                 "description": "リーガルホールドポリシーが割り当てられている項目。タイプとIDを含みます。",
                 "type": "object",
-                "oneOf": [
-                    {
-                        "$ref": "#/components/schemas/File"
+                "properties": {
+                    "type": {
+                        "description": "The type of item the policy is assigned to.",
+                        "type": "string",
+                        "example": "folder",
+                        "enum": [
+                            "file",
+                            "file_version",
+                            "folder",
+                            "user",
+                            "ownership",
+                            "interactions"
+                        ]
                     },
-                    {
-                        "$ref": "#/components/schemas/Folder"
-                    },
-                    {
-                        "$ref": "#/components/schemas/WebLink"
+                    "id": {
+                        "description": "The ID of the item the policy is assigned to.",
+                        "type": "string",
+                        "example": "6564564"
                     }
+                },
+                "required": [
+                    "type",
+                    "id"
                 ],
                 "title": "リーガルホールドポリシーの項目"
             },
             "LegalHoldPolicyAssignment": {
-                "description": "リーガルホールド割り当ては、ユーザー、フォルダ、ファイル、またはファイルバージョンにリーガルホールドポリシーを割り当てる目的に使用されます。\n\nリーガルホールド割り当てを作成すると、その割り当ての「apply-to」エンティティに属するファイルバージョンにホールドが適用されます。",
+                "description": "Legal Hold Assignments are used to assign Legal Hold Policies to an item type of: Users, Folders, Files, File Versions, Ownership, or Interactions.\n\nリーガルホールド割り当てを作成すると、その割り当ての「apply-to」エンティティに属するファイルバージョンにホールドが適用されます。",
                 "type": "object",
                 "allOf": [
                     {
