@@ -14,7 +14,7 @@
       "url": "https://www.apache.org/licenses/LICENSE-2.0"
     },
     "version": "2024.0",
-    "x-box-commit-hash": "95117b97f9"
+    "x-box-commit-hash": "f6f00b0903"
   },
   "servers": [
     {
@@ -15059,7 +15059,7 @@
       "delete": {
         "operationId": "delete_users_id",
         "summary": "Delete user",
-        "description": "Deletes a user. By default, this operation fails if the user\nstill owns any content, was recently active, or recently joined the enterprise from a free account. \nTo proceed, move their owned content first, or use the `force` parameter to delete\nthe user and their files.",
+        "description": "Deletes a user. By default, this operation fails if the user\nstill owns any content. \nTo proceed, move their owned content first, or use the `force` parameter to delete\nthe user and their files.",
         "parameters": [
           {
             "name": "user_id",
@@ -15083,7 +15083,7 @@
           {
             "name": "force",
             "in": "query",
-            "description": "Specifies whether to delete the user even if they still own files,\nwere recently active, or recently joined the enterprise from a free account.",
+            "description": "Specifies whether to delete the user even if they still own files.",
             "schema": {
               "type": "boolean"
             },
@@ -18250,6 +18250,9 @@
                     "type": "boolean",
                     "example": true
                   },
+                  "max_extension_length": {
+                    "$ref": "#/components/schemas/RetentionPolicyMaxExtensionLengthRequest"
+                  },
                   "are_owners_notified": {
                     "description": "Whether owner and co-owners of a file are notified\nwhen the policy nears expiration.",
                     "type": "boolean",
@@ -18284,7 +18287,7 @@
             }
           },
           "400": {
-            "description": "Returns a `bad_request` error with the `retention_length` was\nspecified for a `infinite` retention policy, an incorrect\n`disposition_action` was set, or description exceeds maximum length of\n500 characters.",
+            "description": "Returns a `bad_request` error when the `retention_length` was\nspecified for an `indefinite` retention policy, an incorrect\n`disposition_action` was set, `max_extension_length` is not allowed for the\ngiven policy type or disposition action, or description exceeds maximum length of\n500 characters.",
             "content": {
               "application/json": {
                 "schema": {
@@ -18468,6 +18471,9 @@
                     "example": false,
                     "nullable": true
                   },
+                  "max_extension_length": {
+                    "$ref": "#/components/schemas/RetentionPolicyMaxExtensionLengthRequest"
+                  },
                   "are_owners_notified": {
                     "description": "Determines if owners and co-owners of items\nunder the policy are notified when\nthe retention duration is about to end.",
                     "type": "boolean",
@@ -18499,7 +18505,7 @@
             }
           },
           "400": {
-            "description": "Returns a `bad_request` if an incorrect\n`disposition_action` was set or description exceeds maximum length of\n500 characters.",
+            "description": "Returns a `bad_request` if an incorrect\n`disposition_action` was set, `max_extension_length` is not allowed for the\ngiven policy type or disposition action, or description exceeds maximum length of\n500 characters.",
             "content": {
               "application/json": {
                 "schema": {
@@ -27431,12 +27437,12 @@
                   "example": "Name is the first and last name from the email address"
                 },
                 "type": {
-                  "description": "The type of the field. It include but is not limited to string, float, date, enum, and multiSelect.",
+                  "description": "The type of the field. It can include but is not limited to `string`, `float`, `date`, `enum`, and `multiSelect`.",
                   "type": "string",
                   "example": "enum"
                 },
                 "options": {
-                  "description": "A list of options for this field. This is most often used in combination with the enum and multiSelect field types.",
+                  "description": "A list of options for this field. This is most often used in combination with the `enum` and `multiSelect` field types.",
                   "type": "array",
                   "items": {
                     "type": "object",
@@ -27445,7 +27451,7 @@
                     ],
                     "properties": {
                       "key": {
-                        "description": "A unique identifier for the field.",
+                        "description": "A unique identifier for the option.",
                         "type": "string",
                         "example": "First Name"
                       }
@@ -27465,16 +27471,6 @@
             "minItems": 1,
             "uniqueItems": true
           },
-          "include_confidence_score": {
-            "description": "A flag to indicate whether confidence scores for every extracted field should be returned.",
-            "type": "boolean",
-            "example": true
-          },
-          "include_reference": {
-            "description": "A flag to indicate whether references for every extracted field should be returned.",
-            "type": "boolean",
-            "example": true
-          },
           "ai_agent": {
             "allOf": [
               {
@@ -27484,6 +27480,16 @@
                 "description": "The AI agent to be used for the structured extraction. Defaults to the Standard Agent if not specified. If you want to use Enhanced Extract Agent, see [Enhanced Extract Agent](https://developer.box.com/guides/box-ai/ai-tutorials/extract-metadata-structured#enhanced-extract-agent) for details."
               }
             ]
+          },
+          "include_confidence_score": {
+            "description": "A flag to indicate whether confidence scores for every extracted field should be returned.",
+            "type": "boolean",
+            "example": true
+          },
+          "include_reference": {
+            "description": "A flag to indicate whether references for every extracted field should be returned.",
+            "type": "boolean",
+            "example": true
           }
         },
         "required": [
@@ -36638,6 +36644,9 @@
                   "permanently_delete",
                   "remove_retention"
                 ]
+              },
+              "max_extension_length": {
+                "$ref": "#/components/schemas/RetentionPolicyMaxExtensionLengthResponse"
               }
             }
           }
@@ -36786,6 +36795,50 @@
         "title": "Retention policy assignments",
         "x-box-resource-id": "retention_policy_assignments",
         "x-box-tag": "retention_policy_assignments"
+      },
+      "RetentionPolicyMaxExtensionLengthRequest": {
+        "description": "The maximum extension length of the retention date.\nThis value specifies the duration in days for which\nthe retention date of the file under policy can be extended.\nIt can be specified only for the 'finite' policy type\nwhere the disposition action is 'permanently delete',\notherwise the server will return status 400.\nIf this value is 'none', it won't be possible to extend\nthe retention.",
+        "example": "365",
+        "nullable": false,
+        "oneOf": [
+          {
+            "type": "string",
+            "enum": [
+              "none"
+            ]
+          },
+          {
+            "type": "string",
+            "pattern": "^[1-9]\\d*$",
+            "format": "int32"
+          },
+          {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 1,
+            "multipleOf": 1
+          }
+        ],
+        "title": "Retention policy max extension length (request)"
+      },
+      "RetentionPolicyMaxExtensionLengthResponse": {
+        "description": "The maximum extension length of the retention date.\nThis value specifies the duration in days for which\nthe retention date of the file under policy can be extended.\nIf the policy type is other than 'finite' or\nthe disposition action is other than 'permanently delete',\nor the maximum extension length is undefined,\nthis field will be set to 'none'.",
+        "example": "365",
+        "oneOf": [
+          {
+            "type": "string",
+            "enum": [
+              "none"
+            ]
+          },
+          {
+            "type": "string",
+            "pattern": "^[1-9]\\d*$",
+            "format": "int32",
+            "minimum": 1
+          }
+        ],
+        "title": "Retention policy max extension length (response)"
       },
       "RoleVariable": {
         "description": "Determines if the\nworkflow outcome\naffects a specific\ncollaborator role.",
