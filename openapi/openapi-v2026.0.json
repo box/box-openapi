@@ -1,0 +1,502 @@
+{
+  "openapi": "3.0.2",
+  "info": {
+    "title": "Box Platform API",
+    "description": "[Box Platform](https://developer.box.com) provides functionality to provide access to content stored within [Box](https://box.com). It provides endpoints for basic manipulation of files and folders, management of users within an enterprise, as well as more complex topics such as legal holds and retention policies.",
+    "termsOfService": "https://cloud.app.box.com/s/rmwxu64h1ipr41u49w3bbuvbsa29wku9",
+    "contact": {
+      "name": "Box, Inc",
+      "url": "https://developer.box.com",
+      "email": "devrel@box.com"
+    },
+    "license": {
+      "name": "Apache-2.0",
+      "url": "https://www.apache.org/licenses/LICENSE-2.0"
+    },
+    "version": "2026.0",
+    "x-box-commit-hash": "cd0d1b2ccf"
+  },
+  "servers": [
+    {
+      "url": "https://api.box.com/2.0",
+      "description": "Box Platform API server."
+    }
+  ],
+  "paths": {
+    "/automate_workflows": {
+      "get": {
+        "operationId": "get_automate_workflows_v2026.0",
+        "summary": "List Automate workflows defined as callable actions",
+        "description": "Returns workflow actions from Automate for a folder, using the\n`WORKFLOW` action category.",
+        "x-stability-level": "beta",
+        "parameters": [
+          {
+            "name": "folder_id",
+            "in": "query",
+            "description": "The unique identifier that represent a folder.\n\nThe ID for any folder can be determined\nby visiting this folder in the web application\nand copying the ID from the URL. For example,\nfor the URL `https://*.app.box.com/folder/123`\nthe `folder_id` is `123`.\n\nThe root folder of a Box account is\nalways represented by the ID `0`.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "nullable": false
+            },
+            "example": "12345"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "The maximum number of items to return per page.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "maximum": 1000
+            },
+            "example": 1000
+          },
+          {
+            "name": "marker",
+            "in": "query",
+            "description": "Defines the position marker at which to begin returning results. This is\nused when paginating using marker-based pagination.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii"
+          },
+          {
+            "$ref": "#/components/parameters/BoxVersionHeader"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns workflow actions that can be manually started.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AutomateWorkflows"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        },
+        "x-box-tag": "automate_workflows",
+        "tags": [
+          "Automate Workflows"
+        ]
+      }
+    },
+    "/automate_workflows/{workflow_id}/start": {
+      "post": {
+        "operationId": "post_automate_workflows_id_start_v2026.0",
+        "summary": "Start Automate workflow",
+        "description": "Starts an Automate workflow manually by using a workflow action ID and file IDs.",
+        "x-stability-level": "beta",
+        "parameters": [
+          {
+            "name": "workflow_id",
+            "in": "path",
+            "description": "The ID of the workflow.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "12345"
+          },
+          {
+            "$ref": "#/components/parameters/BoxVersionHeader"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AutomateWorkflowStartRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Starts the workflow."
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        },
+        "x-box-tag": "automate_workflows",
+        "tags": [
+          "Automate Workflows"
+        ]
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "BoxVersionHeader": {
+        "name": "box-version",
+        "in": "header",
+        "description": "Version header.",
+        "allowEmptyValue": false,
+        "required": true,
+        "schema": {
+          "type": "string",
+          "enum": [
+            "2026.0"
+          ]
+        },
+        "example": "2026.0"
+      }
+    },
+    "schemas": {
+      "AutomateWorkflowAction": {
+        "description": "An Automate action that can start a workflow.",
+        "type": "object",
+        "properties": {
+          "id": {
+            "description": "The identifier for the Automate action.",
+            "type": "string",
+            "example": "981"
+          },
+          "type": {
+            "description": "The object type for this workflow action wrapper.",
+            "type": "string",
+            "example": "workflow_action",
+            "enum": [
+              "workflow_action"
+            ]
+          },
+          "action_type": {
+            "description": "The type that defines the behavior of this action.",
+            "type": "string",
+            "example": "run_workflow",
+            "enum": [
+              "run_workflow"
+            ]
+          },
+          "description": {
+            "description": "A human-readable description of the workflow action.",
+            "type": "string",
+            "example": "Runs workflow execution for selected files"
+          },
+          "created_at": {
+            "description": "The date and time when the action was created.",
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-04-01T10:00:00.000Z"
+          },
+          "updated_at": {
+            "description": "The date and time when the action was last updated.",
+            "type": "string",
+            "format": "date-time",
+            "example": "2026-04-02T11:00:00.000Z"
+          },
+          "created_by": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/User--Mini"
+              },
+              {
+                "description": "The user that created the action."
+              }
+            ]
+          },
+          "updated_by": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/User--Mini"
+              },
+              {
+                "description": "The user that last updated the action."
+              }
+            ]
+          },
+          "workflow": {
+            "$ref": "#/components/schemas/AutomateWorkflowReference"
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "action_type",
+          "workflow"
+        ],
+        "title": "Automate Workflow Action"
+      },
+      "AutomateWorkflowReference": {
+        "description": "A reference to an Automate workflow.",
+        "type": "object",
+        "properties": {
+          "id": {
+            "description": "The identifier for the Automate workflow instance.",
+            "type": "string",
+            "example": "545"
+          },
+          "type": {
+            "description": "The object type.",
+            "type": "string",
+            "example": "workflow",
+            "enum": [
+              "workflow"
+            ]
+          },
+          "name": {
+            "description": "The display name for the Automate workflow.",
+            "type": "string",
+            "example": "Contract approval workflow"
+          }
+        },
+        "required": [
+          "id",
+          "type"
+        ],
+        "title": "Automate Workflow Reference"
+      },
+      "AutomateWorkflows": {
+        "description": "A list of Automate workflow actions.",
+        "allOf": [
+          {
+            "properties": {
+              "entries": {
+                "description": "Workflow actions available for manual start.",
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/AutomateWorkflowAction"
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "description": "The part of an API response that describes marker\nbased pagination.",
+            "properties": {
+              "limit": {
+                "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
+                "type": "integer",
+                "format": "int64",
+                "example": 1000
+              },
+              "next_marker": {
+                "description": "The marker for the start of the next page of results.",
+                "type": "string",
+                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                "nullable": true
+              }
+            }
+          }
+        ],
+        "title": "Automate Workflow Actions",
+        "x-box-resource-id": "automate_workflows_v2026.0"
+      },
+      "AutomateWorkflowStartRequest": {
+        "description": "Request body to start an Automate workflow.",
+        "type": "object",
+        "properties": {
+          "workflow_action_id": {
+            "description": "The callable action ID used to trigger the selected workflow.",
+            "type": "string",
+            "example": "981"
+          },
+          "file_ids": {
+            "description": "The files to process with the selected workflow.",
+            "type": "array",
+            "items": {
+              "type": "string",
+              "example": "123"
+            },
+            "example": [
+              "123"
+            ],
+            "minItems": 1
+          }
+        },
+        "required": [
+          "workflow_action_id",
+          "file_ids"
+        ],
+        "title": "Automate Workflow Start Request"
+      },
+      "ClientError": {
+        "description": "A generic error.",
+        "type": "object",
+        "properties": {
+          "type": {
+            "description": "The value will always be `error`.",
+            "type": "string",
+            "example": "error",
+            "enum": [
+              "error"
+            ],
+            "nullable": false
+          },
+          "status": {
+            "description": "The HTTP status of the response.",
+            "type": "integer",
+            "format": "int32",
+            "example": 400,
+            "nullable": false
+          },
+          "code": {
+            "description": "A Box-specific error code.",
+            "type": "string",
+            "example": "item_name_invalid",
+            "enum": [
+              "created",
+              "accepted",
+              "no_content",
+              "redirect",
+              "not_modified",
+              "bad_request",
+              "unauthorized",
+              "forbidden",
+              "not_found",
+              "method_not_allowed",
+              "conflict",
+              "precondition_failed",
+              "too_many_requests",
+              "internal_server_error",
+              "unavailable",
+              "item_name_invalid",
+              "insufficient_scope"
+            ]
+          },
+          "message": {
+            "description": "A short message describing the error.",
+            "type": "string",
+            "example": "Method Not Allowed",
+            "nullable": false
+          },
+          "context_info": {
+            "description": "A free-form object that contains additional context\nabout the error. The possible fields are defined on\na per-endpoint basis. `message` is only one example.",
+            "type": "object",
+            "example": {
+              "message": "Something went wrong"
+            },
+            "additionalProperties": {},
+            "nullable": true
+          },
+          "help_url": {
+            "description": "A URL that links to more information about why this error occurred.",
+            "type": "string",
+            "example": "https://developer.box.com/guides/api-calls/permissions-and-errors/common-errors/",
+            "nullable": false
+          },
+          "request_id": {
+            "description": "A unique identifier for this response, which can be used\nwhen contacting Box support.",
+            "type": "string",
+            "example": "abcdef123456",
+            "nullable": false
+          }
+        },
+        "title": "Client error",
+        "x-box-resource-id": "client_error_v2026.0"
+      },
+      "User--Base": {
+        "description": "A mini representation of a user, used when\nnested within another resource.",
+        "type": "object",
+        "properties": {
+          "id": {
+            "description": "The unique identifier for this user.",
+            "type": "string",
+            "example": "11446498"
+          },
+          "type": {
+            "description": "The value will always be `user`.",
+            "type": "string",
+            "example": "user",
+            "enum": [
+              "user"
+            ],
+            "nullable": false
+          }
+        },
+        "required": [
+          "type",
+          "id"
+        ],
+        "title": "User (Base)"
+      },
+      "User--Mini": {
+        "description": "A mini representation of a user, as can be returned when nested within other\nresources.",
+        "type": "object",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/User--Base"
+          },
+          {
+            "properties": {
+              "name": {
+                "description": "The display name of this user.",
+                "type": "string",
+                "example": "Aaron Levie",
+                "maxLength": 50
+              },
+              "login": {
+                "description": "The primary email address of this user.",
+                "type": "string",
+                "format": "email",
+                "example": "ceo@example.com"
+              }
+            }
+          }
+        ],
+        "title": "User (Mini)"
+      }
+    },
+    "securitySchemes": {
+      "OAuth2Security": {
+        "type": "oauth2",
+        "flows": {
+          "authorizationCode": {
+            "authorizationUrl": "https://account.box.com/api/oauth2/authorize",
+            "tokenUrl": "https://api.box.com/oauth2/token",
+            "scopes": {
+              "root_readonly": "Read all files and folders stored in Box",
+              "root_readwrite": "Read and write all files and folders stored in Box",
+              "manage_app_users": "Provision and manage app users",
+              "manage_managed_users": "Provision and manage managed users",
+              "manage_groups": "Manage an enterprise's groups",
+              "manage_webhook": "Create webhooks programmatically through the API",
+              "manage_enterprise_properties": "Manage enterprise properties",
+              "manage_data_retention": "Manage data retention polices",
+              "manage_legal_hold": "Manage Legal Holds"
+            }
+          }
+        }
+      }
+    }
+  },
+  "security": [
+    {
+      "OAuth2Security": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "Automate Workflows",
+      "description": "Endpoints for listing and manually starting Automate workflow actions.",
+      "x-box-tag": "automate_workflows"
+    }
+  ],
+  "externalDocs": {
+    "description": "Box Developer Documentation.",
+    "url": "https://developer.box.com"
+  }
+}
