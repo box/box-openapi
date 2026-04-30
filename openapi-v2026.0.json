@@ -1,0 +1,502 @@
+{
+    "openapi": "3.0.2",
+    "info": {
+        "title": "Box Platform API",
+        "description": "[Box Platform](https://developer.box.com)では、[Box](https://box.com)内に保存されているコンテンツへのアクセス権限を付与する機能が提供されています。また、ファイルとフォルダの基本操作、会社内のユーザーの管理、リーガルホールドやリテンションポリシーなどの複雑なトピックのためのエンドポイントも提供されています。",
+        "termsOfService": "https://cloud.app.box.com/s/rmwxu64h1ipr41u49w3bbuvbsa29wku9",
+        "contact": {
+            "name": "Box, Inc",
+            "url": "https://developer.box.com",
+            "email": "devrel@box.com"
+        },
+        "license": {
+            "name": "Apache-2.0",
+            "url": "https://www.apache.org/licenses/LICENSE-2.0"
+        },
+        "version": "2026.0",
+        "x-box-commit-hash": "cd0d1b2ccf"
+    },
+    "servers": [
+        {
+            "url": "https://api.box.com/2.0",
+            "description": "Box Platform APIサーバー。"
+        }
+    ],
+    "paths": {
+        "/automate_workflows": {
+            "get": {
+                "operationId": "get_automate_workflows_v2026.0",
+                "summary": "List Automate workflows defined as callable actions",
+                "description": "Returns workflow actions from Automate for a folder, using the `WORKFLOW` action category.",
+                "x-stability-level": "beta",
+                "parameters": [
+                    {
+                        "name": "folder_id",
+                        "in": "query",
+                        "description": "フォルダを表す一意の識別子。\n\nフォルダIDを確認するには、ウェブアプリケーションでこのフォルダにアクセスして、URLからIDをコピーします。たとえば、URLが`https://*.app.box.com/folder/123`の場合、`folder_id`は`123`です。\n\nBoxアカウントのルートフォルダは常にID `0`で表されます。",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "nullable": false
+                        },
+                        "example": "12345"
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "返す項目の1ページあたりの最大数。",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int64",
+                            "maximum": 1000
+                        },
+                        "example": 1000
+                    },
+                    {
+                        "name": "marker",
+                        "in": "query",
+                        "description": "結果が返される開始位置のマーカー。マーカーベースのページネーションを使用している場合に使用されます。",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii"
+                    },
+                    {
+                        "$ref": "#/components/parameters/BoxVersionHeader"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns workflow actions that can be manually started.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AutomateWorkflows"
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "予期しないクライアントエラー。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-box-tag": "automate_workflows",
+                "tags": [
+                    "Automate Workflows"
+                ]
+            }
+        },
+        "/automate_workflows/{workflow_id}/start": {
+            "post": {
+                "operationId": "post_automate_workflows_id_start_v2026.0",
+                "summary": "Start Automate workflow",
+                "description": "Starts an Automate workflow manually by using a workflow action ID and file IDs.",
+                "x-stability-level": "beta",
+                "parameters": [
+                    {
+                        "name": "workflow_id",
+                        "in": "path",
+                        "description": "ワークフローのID。",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "12345"
+                    },
+                    {
+                        "$ref": "#/components/parameters/BoxVersionHeader"
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AutomateWorkflowStartRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "204": {
+                        "description": "ワークフローを開始します。"
+                    },
+                    "default": {
+                        "description": "予期しないクライアントエラー。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-box-tag": "automate_workflows",
+                "tags": [
+                    "Automate Workflows"
+                ]
+            }
+        }
+    },
+    "components": {
+        "parameters": {
+            "BoxVersionHeader": {
+                "name": "box-version",
+                "in": "header",
+                "description": "Version header.",
+                "allowEmptyValue": false,
+                "required": true,
+                "schema": {
+                    "type": "string",
+                    "enum": [
+                        "2026.0"
+                    ]
+                },
+                "example": "2026.0"
+            }
+        },
+        "schemas": {
+            "AutomateWorkflowAction": {
+                "description": "An Automate action that can start a workflow.",
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "description": "The identifier for the Automate action.",
+                        "type": "string",
+                        "example": "981"
+                    },
+                    "type": {
+                        "description": "The object type for this workflow action wrapper.",
+                        "type": "string",
+                        "example": "workflow_action",
+                        "enum": [
+                            "workflow_action"
+                        ]
+                    },
+                    "action_type": {
+                        "description": "The type that defines the behavior of this action.",
+                        "type": "string",
+                        "example": "run_workflow",
+                        "enum": [
+                            "run_workflow"
+                        ]
+                    },
+                    "description": {
+                        "description": "A human-readable description of the workflow action.",
+                        "type": "string",
+                        "example": "Runs workflow execution for selected files"
+                    },
+                    "created_at": {
+                        "description": "The date and time when the action was created.",
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2026-04-01T10:00:00.000Z"
+                    },
+                    "updated_at": {
+                        "description": "The date and time when the action was last updated.",
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2026-04-02T11:00:00.000Z"
+                    },
+                    "created_by": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/User--Mini"
+                            },
+                            {
+                                "description": "The user that created the action."
+                            }
+                        ]
+                    },
+                    "updated_by": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/User--Mini"
+                            },
+                            {
+                                "description": "The user that last updated the action."
+                            }
+                        ]
+                    },
+                    "workflow": {
+                        "$ref": "#/components/schemas/AutomateWorkflowReference"
+                    }
+                },
+                "required": [
+                    "id",
+                    "type",
+                    "action_type",
+                    "workflow"
+                ],
+                "title": "Automate Workflow Action"
+            },
+            "AutomateWorkflowReference": {
+                "description": "A reference to an Automate workflow.",
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "description": "The identifier for the Automate workflow instance.",
+                        "type": "string",
+                        "example": "545"
+                    },
+                    "type": {
+                        "description": "オブジェクトタイプ。",
+                        "type": "string",
+                        "example": "workflow",
+                        "enum": [
+                            "workflow"
+                        ]
+                    },
+                    "name": {
+                        "description": "The display name for the Automate workflow.",
+                        "type": "string",
+                        "example": "Contract approval workflow"
+                    }
+                },
+                "required": [
+                    "id",
+                    "type"
+                ],
+                "title": "Automate Workflow Reference"
+            },
+            "AutomateWorkflows": {
+                "description": "A list of Automate workflow actions.",
+                "allOf": [
+                    {
+                        "properties": {
+                            "entries": {
+                                "description": "Workflow actions available for manual start.",
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/AutomateWorkflowAction"
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "type": "object",
+                        "description": "マーカーベースのページネーションについて説明しているAPIレスポンスの部分。",
+                        "properties": {
+                            "limit": {
+                                "description": "これらのエントリで使用された制限値。許容される最大値を超えていない限り、クエリパラメータの`limit`と等しくなります。最大値はAPIによって異なります。",
+                                "type": "integer",
+                                "format": "int64",
+                                "example": 1000
+                            },
+                            "next_marker": {
+                                "description": "次の検索結果ページの開始場所のマーカー。",
+                                "type": "string",
+                                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                                "nullable": true
+                            }
+                        }
+                    }
+                ],
+                "title": "Automate Workflow Actions",
+                "x-box-resource-id": "automate_workflows_v2026.0"
+            },
+            "AutomateWorkflowStartRequest": {
+                "description": "Request body to start an Automate workflow.",
+                "type": "object",
+                "properties": {
+                    "workflow_action_id": {
+                        "description": "The callable action ID used to trigger the selected workflow.",
+                        "type": "string",
+                        "example": "981"
+                    },
+                    "file_ids": {
+                        "description": "The files to process with the selected workflow.",
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "example": "123"
+                        },
+                        "example": [
+                            "123"
+                        ],
+                        "minItems": 1
+                    }
+                },
+                "required": [
+                    "workflow_action_id",
+                    "file_ids"
+                ],
+                "title": "Automate Workflow Start Request"
+            },
+            "ClientError": {
+                "description": "一般的なエラー。",
+                "type": "object",
+                "properties": {
+                    "type": {
+                        "description": "値は常に`error`になります。",
+                        "type": "string",
+                        "example": "error",
+                        "enum": [
+                            "error"
+                        ],
+                        "nullable": false
+                    },
+                    "status": {
+                        "description": "レスポンスのHTTPステータス。",
+                        "type": "integer",
+                        "format": "int32",
+                        "example": 400,
+                        "nullable": false
+                    },
+                    "code": {
+                        "description": "Box固有のエラーコード。",
+                        "type": "string",
+                        "example": "item_name_invalid",
+                        "enum": [
+                            "created",
+                            "accepted",
+                            "no_content",
+                            "redirect",
+                            "not_modified",
+                            "bad_request",
+                            "unauthorized",
+                            "forbidden",
+                            "not_found",
+                            "method_not_allowed",
+                            "conflict",
+                            "precondition_failed",
+                            "too_many_requests",
+                            "internal_server_error",
+                            "unavailable",
+                            "item_name_invalid",
+                            "insufficient_scope"
+                        ]
+                    },
+                    "message": {
+                        "description": "エラーについての短い説明メッセージ。",
+                        "type": "string",
+                        "example": "Method Not Allowed",
+                        "nullable": false
+                    },
+                    "context_info": {
+                        "description": "このエラーに関する追加コンテキストを含む自由形式のオブジェクト。使用できるフィールドは、エンドポイントごとに定義されています。`message`は唯一の例です。",
+                        "type": "object",
+                        "example": {
+                            "message": "Something went wrong"
+                        },
+                        "additionalProperties": {},
+                        "nullable": true
+                    },
+                    "help_url": {
+                        "description": "このエラーの原因に関する詳細情報にリンクされたURL。",
+                        "type": "string",
+                        "example": "https://developer.box.com/guides/api-calls/permissions-and-errors/common-errors/",
+                        "nullable": false
+                    },
+                    "request_id": {
+                        "description": "Boxサポートに連絡するときに使用できる、このレスポンスの一意の識別子。",
+                        "type": "string",
+                        "example": "abcdef123456",
+                        "nullable": false
+                    }
+                },
+                "title": "クライアントエラー",
+                "x-box-resource-id": "client_error_v2026.0"
+            },
+            "User--Base": {
+                "description": "他のリソース内にネストされたときに使用されるユーザーのMini版の表示。",
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "description": "このユーザーの一意の識別子。",
+                        "type": "string",
+                        "example": "11446498"
+                    },
+                    "type": {
+                        "description": "値は常に`user`になります。",
+                        "type": "string",
+                        "example": "user",
+                        "enum": [
+                            "user"
+                        ],
+                        "nullable": false
+                    }
+                },
+                "required": [
+                    "type",
+                    "id"
+                ],
+                "title": "ユーザー (Base)"
+            },
+            "User--Mini": {
+                "description": "他のリソース内にネストされたときに返される可能性があるユーザーのMini版の表示。",
+                "type": "object",
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/User--Base"
+                    },
+                    {
+                        "properties": {
+                            "name": {
+                                "description": "このユーザーの表示名。",
+                                "type": "string",
+                                "example": "Aaron Levie",
+                                "maxLength": 50
+                            },
+                            "login": {
+                                "description": "このユーザーのプライマリメールアドレス。",
+                                "type": "string",
+                                "format": "email",
+                                "example": "ceo@example.com"
+                            }
+                        }
+                    }
+                ],
+                "title": "ユーザー (Mini)"
+            }
+        },
+        "securitySchemes": {
+            "OAuth2Security": {
+                "type": "oauth2",
+                "flows": {
+                    "authorizationCode": {
+                        "authorizationUrl": "https://account.box.com/api/oauth2/authorize",
+                        "tokenUrl": "https://api.box.com/oauth2/token",
+                        "scopes": {
+                            "root_readonly": "Boxに格納されているすべてのファイルとフォルダの読み取り",
+                            "root_readwrite": "Boxに格納されているすべてのファイルとフォルダの読み取りと書き込み",
+                            "manage_app_users": "App Userのプロビジョニングと管理",
+                            "manage_managed_users": "管理対象ユーザーのプロビジョニングと管理",
+                            "manage_groups": "企業のグループの管理",
+                            "manage_webhook": "APIを使用したプログラムによるWebhookの作成",
+                            "manage_enterprise_properties": "Enterpriseのプロパティを管理",
+                            "manage_data_retention": "データリテンションポリシーの管理",
+                            "manage_legal_hold": "リーガルホールドの管理"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "security": [
+        {
+            "OAuth2Security": []
+        }
+    ],
+    "tags": [
+        {
+            "name": "Automate Workflows",
+            "description": "Endpoints for listing and manually starting Automate workflow actions.",
+            "x-box-tag": "automate_workflows"
+        }
+    ],
+    "externalDocs": {
+        "description": "Box Developerドキュメント。",
+        "url": "https://developer.box.com"
+    }
+}
