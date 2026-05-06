@@ -14,7 +14,7 @@
             "url": "https://www.apache.org/licenses/LICENSE-2.0"
         },
         "version": "2024.0",
-        "x-box-commit-hash": "cd0d1b2ccf"
+        "x-box-commit-hash": "a54b354d64"
     },
     "servers": [
         {
@@ -8842,7 +8842,7 @@
                                             "type": "object",
                                             "properties": {
                                                 "type": {
-                                                    "description": "フィールドのタイプ。基本のフィールドは、テキストを表す`string`フィールド、数値を表す`float`フィールド、およびユーザーに日時選択機能を表示するための`date`フィールドです。\n\nさらに、メタデータテンプレートは、基本の項目リストを表す`enum`フィールドのほか、ユーザーが複数の値を選択できる同様の項目リストを表す` multiSelect`フィールドをサポートしています。\n\nメタデータ階層は`taxonomy`フィールドタイプとしてもサポートされ、このフィールドタイプは構造を表す特定のプロパティセットを持ちます。",
+                                                    "description": "フィールドのタイプ。基本のフィールドは、テキストを表す`string`フィールド、数値を表す`float`フィールド、およびユーザーに日時選択機能を表示するための`date`フィールドです。\n\nさらに、メタデータテンプレートは、基本の項目リストを表す`enum`フィールドのほか、ユーザーが複数の値を選択できる同様の項目リストを表す`multiSelect`フィールドをサポートしています。\n\nメタデータ階層は`taxonomy`フィールドタイプとしてもサポートされ、このフィールドタイプは構造を表す特定のプロパティセットを持ちます。",
                                                     "type": "string",
                                                     "example": "string",
                                                     "enum": [
@@ -8900,6 +8900,11 @@
                                                     "description": "このメタデータ階層フィールドに使用するメタデータ階層の一意のキー。フィールド`type`を`taxonomy`に設定する場合、このプロパティは必須です。",
                                                     "type": "string",
                                                     "example": "locationTaxonomy"
+                                                },
+                                                "taxonomyId": {
+                                                    "description": "The unique ID of the metadata taxonomy to use for this taxonomy field. This property is required when the field `type` is set to `taxonomy`.",
+                                                    "type": "string",
+                                                    "example": "05ece6d7-fec4-4d3f-bfd2-36fd4dddea97"
                                                 },
                                                 "namespace": {
                                                     "description": "このメタデータ階層フィールドに使用するメタデータ階層の名前空間。フィールド`type`を`taxonomy`に設定する場合、このプロパティは必須です。",
@@ -27131,7 +27136,8 @@
                     }
                 },
                 "required": [
-                    "type"
+                    "type",
+                    "id"
                 ],
                 "title": "AIエージェントの参照",
                 "x-box-resource-id": "ai_agent_reference",
@@ -35796,7 +35802,7 @@
                             "allOf": [
                                 {
                                     "title": "メタデータフィールド (読み取り)",
-                                    "description": "メタデータテンプレート内のフィールド。フィールドは、基本テキスト、日付、または数値フィールドか、オプションのリストのいずれかになります。",
+                                    "description": "メタデータテンプレート内のフィールド。フィールドは、基本テキスト、日付、または数値フィールド、オプションのリスト、メタデータ階層のいずれかになります。",
                                     "required": [
                                         "type",
                                         "key",
@@ -35805,7 +35811,7 @@
                                     "type": "object",
                                     "properties": {
                                         "type": {
-                                            "description": "フィールドのタイプ。基本のフィールドは、テキストを表す`string`フィールド、数値を表す`float`フィールド、およびユーザーに日時選択機能を表示するための`date`フィールドです。\n\nさらに、メタデータテンプレートは、基本の項目リストを表す`enum`フィールドのほか、ユーザーが複数の値を選択できる同様の項目リストを表す` multiSelect`フィールドをサポートしています。\n\n**注**: `integer`値は非推奨です。レスポンスにはまだ存在していても、POSTリクエストでは使用できません。",
+                                            "description": "フィールドのタイプ。基本のフィールドは、テキストを表す`string`フィールド、数値を表す`float`フィールド、およびユーザーに日時選択機能を表示するための`date`フィールドです。\n\nさらに、メタデータテンプレートは、基本の項目リストを表す`enum`フィールドのほか、ユーザーが複数の値を選択できる同様の項目リストを表す`multiSelect`フィールドをサポートしています。\n\nメタデータ階層は`taxonomy`フィールドタイプとしてもサポートされ、このフィールドタイプは構造を表す特定のプロパティセットを持ちます。\n\n**注**: `integer`値は非推奨です。レスポンスにはまだ存在していても、POSTリクエストでは使用できません。",
                                             "type": "string",
                                             "example": "string",
                                             "enum": [
@@ -35814,8 +35820,8 @@
                                                 "date",
                                                 "enum",
                                                 "multiSelect",
-                                                "integer",
-                                                "taxonomy"
+                                                "taxonomy",
+                                                "integer"
                                             ]
                                         },
                                         "key": {
@@ -35857,6 +35863,43 @@
                                                         "type": "string",
                                                         "example": "Category 1"
                                                     }
+                                                }
+                                            }
+                                        },
+                                        "taxonomyKey": {
+                                            "description": "このメタデータ階層フィールドに使用するメタデータ階層の一意のキー。フィールド`type`を`taxonomy`に設定する場合、このプロパティは必須です。",
+                                            "type": "string",
+                                            "example": "locationTaxonomy"
+                                        },
+                                        "taxonomyId": {
+                                            "description": "The unique ID of the metadata taxonomy to use for this taxonomy field. This property is required when the field `type` is set to `taxonomy`.",
+                                            "type": "string",
+                                            "example": "05ece6d7-fec4-4d3f-bfd2-36fd4dddea97"
+                                        },
+                                        "namespace": {
+                                            "description": "このメタデータ階層フィールドに使用するメタデータ階層の名前空間。フィールド`type`を`taxonomy`に設定する場合、このプロパティは必須です。",
+                                            "type": "string",
+                                            "example": "enterprise_123456"
+                                        },
+                                        "optionsRules": {
+                                            "description": "メタデータ階層フィールドのオプションの追加ルールを定義するオブジェクト。フィールド`type`を`taxonomy`に設定する場合、このプロパティは必須です。",
+                                            "type": "object",
+                                            "properties": {
+                                                "multiSelect": {
+                                                    "description": "ユーザーに複数の値の選択を許可するかどうか。",
+                                                    "type": "boolean",
+                                                    "example": true
+                                                },
+                                                "selectableLevels": {
+                                                    "description": "ユーザーが選択可能なメタデータ階層のレベルを定義する整数の配列。",
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "integer"
+                                                    },
+                                                    "example": [
+                                                        1,
+                                                        2
+                                                    ]
                                                 }
                                             }
                                         }
