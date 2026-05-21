@@ -14,7 +14,7 @@
             "url": "https://www.apache.org/licenses/LICENSE-2.0"
         },
         "version": "2026.0",
-        "x-box-commit-hash": "2372c8c189"
+        "x-box-commit-hash": "76f2bd2673"
     },
     "servers": [
         {
@@ -144,6 +144,144 @@
                 "x-box-tag": "automate_workflows",
                 "tags": [
                     "Automateワークフロー"
+                ]
+            }
+        },
+        "/notes/convert": {
+            "post": {
+                "operationId": "post_notes_convert_v2026.0",
+                "summary": "Convert content to Box Note",
+                "description": "Creates a Box Note (`.boxnote` file) from supported source content. See the `content_format` field for supported formats.",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/BoxVersionHeader"
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/NotesConvertRequestBody"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "The note was created successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotesConvertResponse"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Returned when the request body is malformed, fails schema validation, or required fields are missing. A missing or unknown parent folder is not indicated with this status (see `404`).",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "`Authorization`ヘッダーで指定されているアクセストークンが認識されないか、指定されていない場合に返されます。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Returned when the authenticated user does not have permission to create a file in the parent folder.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Returned when the parent folder does not exist, or the user does not have access to it.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Returned when a preflight check fails (for example, a name conflict).",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "413": {
+                        "description": "Returned when the request payload is too large.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Returned when the content could not be converted to a note.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "予期しないサーバーエラーが発生した場合に返されます。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "501": {
+                        "description": "Returned when this operation is not implemented or not yet available on the server (for example, while routing to the Notes service is still being enabled).",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "予期しないクライアントエラーが発生した場合に返されます。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-box-tag": "convert_markdown_to_box_note",
+                "tags": [
+                    "Convert to Box note"
                 ]
             }
         }
@@ -408,6 +546,97 @@
                 "title": "クライアントエラー",
                 "x-box-resource-id": "client_error_v2026.0"
             },
+            "FolderReference": {
+                "description": "フォルダの参照。",
+                "type": "object",
+                "properties": {
+                    "type": {
+                        "description": "値は常に`folder`になります。",
+                        "type": "string",
+                        "example": "folder",
+                        "enum": [
+                            "folder"
+                        ],
+                        "nullable": false
+                    },
+                    "id": {
+                        "description": "フォルダのID。",
+                        "type": "string",
+                        "example": "42037322"
+                    }
+                },
+                "required": [
+                    "type",
+                    "id"
+                ],
+                "title": "フォルダの参照"
+            },
+            "NotesConvertRequestBody": {
+                "description": "Request body for converting source content into a Box Note file.",
+                "type": "object",
+                "properties": {
+                    "content": {
+                        "description": "The content to convert to a note. See the `content_format` field for supported formats.",
+                        "example": "# My note\\n\\nHello from Markdown.",
+                        "maxLength": 1048576,
+                        "type": "string"
+                    },
+                    "content_format": {
+                        "description": "Format of the content to convert.",
+                        "type": "string",
+                        "example": "markdown",
+                        "enum": [
+                            "markdown"
+                        ]
+                    },
+                    "parent": {
+                        "$ref": "#/components/schemas/FolderReference"
+                    },
+                    "name": {
+                        "description": "The name for the created note. The `.boxnote` extension is appended automatically.",
+                        "type": "string",
+                        "example": "Quarterly plan",
+                        "maxLength": 247,
+                        "minLength": 1
+                    }
+                },
+                "additionalProperties": false,
+                "required": [
+                    "content",
+                    "content_format",
+                    "parent",
+                    "name"
+                ],
+                "title": "Notes convert request body",
+                "x-box-tag": "convert_markdown_to_box_note"
+            },
+            "NotesConvertResponse": {
+                "description": "Identifies the created Box Note file.",
+                "type": "object",
+                "properties": {
+                    "type": {
+                        "description": "The Box resource type; always `file` for a Box file.",
+                        "type": "string",
+                        "example": "file",
+                        "enum": [
+                            "file"
+                        ]
+                    },
+                    "id": {
+                        "description": "Box file ID of the created `.boxnote` file.",
+                        "type": "string",
+                        "example": "1234567890"
+                    }
+                },
+                "additionalProperties": false,
+                "required": [
+                    "type",
+                    "id"
+                ],
+                "title": "Notes convert response",
+                "x-box-resource-id": "notes_convert_created_file_v2026.0",
+                "x-box-tag": "convert_markdown_to_box_note"
+            },
             "User--Base": {
                 "description": "他のリソース内にネストされたときに使用されるユーザーのMini版の表示。",
                 "type": "object",
@@ -493,6 +722,11 @@
             "name": "Automateワークフロー",
             "description": "Endpoints for listing and manually starting Automate workflow actions.",
             "x-box-tag": "automate_workflows"
+        },
+        {
+            "name": "Convert to Box note",
+            "description": "Create Box Notes from supported source content (for example Markdown).",
+            "x-box-tag": "convert_markdown_to_box_note"
         }
     ],
     "externalDocs": {
