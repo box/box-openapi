@@ -14,7 +14,7 @@
       "url": "https://www.apache.org/licenses/LICENSE-2.0"
     },
     "version": "2024.0",
-    "x-box-commit-hash": "b72238dc05"
+    "x-box-commit-hash": "fb2083851f"
   },
   "servers": [
     {
@@ -10209,7 +10209,7 @@
       "post": {
         "operationId": "post_collaborations",
         "summary": "Create collaboration",
-        "description": "Adds a collaboration for a single user or a single group to a file\nor folder.\n\nCollaborations can be created using email address, user IDs, or a\ngroup IDs.\n\nIf a collaboration is being created with a group, access to\nthis endpoint is dependent on the group's ability to be invited.\n\nIf collaboration is in `pending` status, the following fields\nare redacted:\n- `login` and `name` are hidden if a collaboration was created\nusing `user_id`,\n-  `name` is hidden if a collaboration was created using `login`.",
+        "description": "Adds a collaboration for a single user or a single group to a file\nor folder.\n\nCollaborations can be created using email address, user IDs, or a\ngroup IDs.\n\nIf a collaboration is being created with a group, access to\nthis endpoint is dependent on the group's ability to be invited.\n\nIf collaboration is in `pending` status, field `name` is redacted when:\n- a collaboration was created using `user_id`,\n- a collaboration was created using `login`.",
         "parameters": [
           {
             "name": "fields",
@@ -27365,6 +27365,21 @@
         ],
         "title": "AI metadata freeform extraction request agent"
       },
+      "AiExtractFieldOption": {
+        "description": "An option for an AI extract field.",
+        "type": "object",
+        "properties": {
+          "key": {
+            "description": "A unique identifier for the option.",
+            "type": "string",
+            "example": "First Name"
+          }
+        },
+        "required": [
+          "key"
+        ],
+        "title": "AI Extract Field Option"
+      },
       "AiExtractResponse": {
         "description": "AI extract response.\nThe content of this response may vary depending on\nthe requested configuration.",
         "type": "object",
@@ -27443,7 +27458,7 @@
                   "example": "Name is the first and last name from the email address"
                 },
                 "type": {
-                  "description": "The type of the field. It can include but is not limited to `string`, `float`, `date`, `enum`, and `multiSelect`.",
+                  "description": "The type of the field. It can include but is not limited to `string`, `float`, `date`, `enum`, `multiSelect`,`taxonomy`, `struct`, and `table`.",
                   "type": "string",
                   "example": "enum"
                 },
@@ -27471,6 +27486,37 @@
                       "key": "Last Name"
                     }
                   ]
+                },
+                "fields": {
+                  "description": "The nested fields for this field. Used with `struct` and `table` field types to define the nested structure.",
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AiExtractSubField"
+                  }
+                },
+                "taxonomy_key": {
+                  "description": "The identifier for a taxonomy, which corresponds to the `key` of the taxonomy source. Required if using `taxonomy` type field.",
+                  "type": "string",
+                  "example": "certification_taxonomy"
+                },
+                "namespace": {
+                  "description": "The namespace of the taxonomy source. Required if using `taxonomy` type field from an existing taxonomy.",
+                  "type": "string",
+                  "example": "enterprise_123"
+                },
+                "options_rules": {
+                  "example": {
+                    "multiSelect": false,
+                    "selectableLevels": [
+                      1,
+                      2
+                    ]
+                  },
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/AiOptionsRules"
+                    }
+                  ]
                 }
               }
             },
@@ -27496,6 +27542,26 @@
             "description": "A flag to indicate whether references for every extracted field should be returned.",
             "type": "boolean",
             "example": true
+          },
+          "taxonomy_sources": {
+            "description": "The taxonomy sources to be used for the structured extraction. They can either be an existing file or a taxonomy.\nFor your request to work, `fields` must also be provided. `taxonomy_sources` is not supported with `metadata_template`.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AiTaxonomySource"
+            },
+            "example": [
+              {
+                "type": "taxonomy",
+                "taxonomy_key": "certification_taxonomy",
+                "namespace": "enterprise_123"
+              },
+              {
+                "type": "file",
+                "taxonomy_key": "industry_taxonomy",
+                "id": "1234567890"
+              }
+            ],
+            "uniqueItems": true
           }
         },
         "required": [
@@ -27556,6 +27622,48 @@
         "title": "AI extract structured response",
         "x-box-resource-id": "ai_extract_structured_response",
         "x-box-tag": "ai"
+      },
+      "AiExtractSubField": {
+        "description": "A nested field definition for structured and table field types used in AI extraction.",
+        "type": "object",
+        "properties": {
+          "key": {
+            "description": "A unique identifier for the nested field.",
+            "type": "string",
+            "example": "street_name"
+          },
+          "description": {
+            "description": "A description of the nested field.",
+            "type": "string",
+            "example": "The street name of the address."
+          },
+          "displayName": {
+            "description": "The display name of the nested field.",
+            "type": "string",
+            "example": "Street Name"
+          },
+          "prompt": {
+            "description": "Context about the nested field that may include how to find and how to format it.",
+            "type": "string",
+            "example": "The street name from the address section"
+          },
+          "type": {
+            "description": "The type of the nested field. Allowed types include `string`, `float`, `date`, `number`, `text`, `boolean`, `enum` and `multiSelect`.",
+            "type": "string",
+            "example": "string"
+          },
+          "options": {
+            "description": "A list of options for this nested field. Used with `enum` and `multiSelect` types.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AiExtractFieldOption"
+            }
+          }
+        },
+        "required": [
+          "key"
+        ],
+        "title": "AI Extract Structured Nested Field"
       },
       "AiItem--Base": {
         "description": "The item to be processed by the LLM.",
@@ -27863,6 +27971,27 @@
         "title": "AI agents list",
         "x-box-resource-id": "ai_multiple_agent_response",
         "x-box-tag": "ai_studio"
+      },
+      "AiOptionsRules": {
+        "description": "An object for a `taxonomy` type template field containing configuration for taxonomy options. Required if using `taxonomy` type field.",
+        "type": "object",
+        "properties": {
+          "multi_select": {
+            "description": "Indicates whether the field is a multi-select field.\nIf true, the field can have multiple values.",
+            "type": "boolean",
+            "example": true
+          },
+          "selectable_levels": {
+            "description": "The selectable levels for the field.\nThis is used to limit the levels of the taxonomy that can be selected.",
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "description": "The level of the taxonomy that can be selected.",
+              "example": 1
+            }
+          }
+        },
+        "title": "AI Options Rules"
       },
       "AiResponse": {
         "description": "AI response.",
@@ -28594,6 +28723,69 @@
         "x-box-resource-id": "ai_studio_agent_text_gen_response",
         "x-box-tag": "ai_studio"
       },
+      "AiTaxonomyFileReference": {
+        "description": "A taxonomy `.csv` file to be used for the structured extraction. For your request to work, `fields` must also be provided.",
+        "type": "object",
+        "properties": {
+          "type": {
+            "description": "The type of the taxonomy source.",
+            "type": "string",
+            "example": "file",
+            "enum": [
+              "file"
+            ]
+          },
+          "taxonomy_key": {
+            "description": "The identifier for a taxonomy, which corresponds to the `taxonomy_key` of the taxonomy source.",
+            "type": "string",
+            "example": "certification_taxonomy"
+          },
+          "id": {
+            "description": "The ID of the taxonomy source. Required if the type is `file` and unsupported if the type is `taxonomy`.",
+            "type": "string",
+            "example": "1234567890"
+          }
+        },
+        "title": "AI Taxonomy File Reference"
+      },
+      "AiTaxonomyReference": {
+        "description": "A taxonomy source to be used for the structured extraction. For your request to work, `fields` must also be provided.",
+        "type": "object",
+        "properties": {
+          "type": {
+            "description": "The type of the taxonomy source.",
+            "type": "string",
+            "example": "taxonomy",
+            "enum": [
+              "taxonomy"
+            ]
+          },
+          "taxonomy_key": {
+            "description": "The identifier for a taxonomy, which corresponds to the `taxonomy_key` of the taxonomy source.",
+            "type": "string",
+            "example": "certification_taxonomy"
+          },
+          "namespace": {
+            "description": "The namespace of the taxonomy source.",
+            "type": "string",
+            "example": "enterprise_123"
+          }
+        },
+        "title": "AI Taxonomy Reference"
+      },
+      "AiTaxonomySource": {
+        "description": "A taxonomy source to be used for the structured extraction. It can either be an existing CSV file or a taxonomy.",
+        "type": "object",
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/AiTaxonomyReference"
+          },
+          {
+            "$ref": "#/components/schemas/AiTaxonomyFileReference"
+          }
+        ],
+        "title": "AI Taxonomy Source"
+      },
       "AiTextGen": {
         "description": "AI text gen request object.",
         "type": "object",
@@ -29229,7 +29421,7 @@
             "example": true
           },
           "status": {
-            "description": "The status of the collaboration invitation. If the status\nis `pending`, `login` and `name` return an empty string.",
+            "description": "The status of the collaboration invitation. If the status\nis `pending`, `name` returns an empty string.",
             "type": "string",
             "example": "accepted",
             "enum": [
@@ -42302,15 +42494,13 @@
                 "description": "The display name of this user. If the collaboration status is `pending`, an empty string is returned.",
                 "type": "string",
                 "example": "Aaron Levie",
-                "maxLength": 50,
-                "nullable": false
+                "maxLength": 50
               },
               "login": {
-                "description": "The primary email address of this user. If the collaboration status is `pending`, an empty string is returned.",
+                "description": "The primary email address of this user. If the collaboration status is `pending`, a login value is returned.",
                 "type": "string",
                 "format": "email",
-                "example": "ceo@example.com",
-                "nullable": false
+                "example": "ceo@example.com"
               },
               "is_active": {
                 "description": "If set to `false`, the user is either deactivated or deleted.",
