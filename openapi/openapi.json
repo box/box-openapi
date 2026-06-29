@@ -14,7 +14,7 @@
       "url": "https://www.apache.org/licenses/LICENSE-2.0"
     },
     "version": "2024.0",
-    "x-box-commit-hash": "3c99cfad90"
+    "x-box-commit-hash": "056413ec44"
   },
   "servers": [
     {
@@ -24575,7 +24575,7 @@
       "post": {
         "operationId": "post_ai_ask",
         "summary": "Ask question",
-        "description": "Sends an AI request to supported LLMs and returns an answer specifically focused on the user's question given the provided context.",
+        "description": "Sends an AI request to supported LLMs and returns an answer specifically focused on the user's question given the provided context.\n\nYou can ask a question about a single file, several files, or the entire contents of a Box Hub. To search across and ask questions about everything in a Box Hub, send a single item with `type` set to `hubs` and the Hub's ID as the `id`. Box AI answers the question using the indexed content of all files in that Hub.\n\nAsking questions about a Box Hub requires Box AI for Hubs to be enabled in the Admin Console before the Hub is created, so that its content is indexed.",
         "x-stability-level": "stable",
         "requestBody": {
           "content": {
@@ -27228,7 +27228,7 @@
             "example": "What is the value provided by public APIs based on this document?"
           },
           "items": {
-            "description": "The items to be processed by the LLM, often files.",
+            "description": "The items to be processed by the LLM, often files.\nTo search across and ask questions about the contents of a Box Hub,\npass a single item with `type` set to `hubs`. See the item `type`\nproperty for details.",
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/AiItemAsk"
@@ -27722,12 +27722,12 @@
         "type": "object",
         "properties": {
           "id": {
-            "description": "The ID of the file.",
+            "description": "The ID of the file, or the ID of the Box Hub when `type` is `hubs`.",
             "type": "string",
             "example": "123"
           },
           "type": {
-            "description": "The type of the item. A `hubs` item must be used as a single item.",
+            "description": "The type of the item. Use `file` to ask a question about a file, or `hubs` to\nsearch across and ask a question about the entire contents of a Box Hub.\nA `hubs` item must be the only item in the request.",
             "type": "string",
             "example": "file",
             "enum": [
@@ -38452,6 +38452,12 @@
             "type": "string",
             "example": "Box",
             "nullable": true
+          },
+          "request_flow": {
+            "description": "The flow type of the sign request. Values can include `standard` or `cfr11`.\nWhen not specified during creation, a default is chosen based on admin settings.",
+            "type": "string",
+            "example": "standard",
+            "nullable": true
           }
         },
         "title": "Box Sign request (Base)",
@@ -38853,6 +38859,18 @@
                     "additionalProperties": false
                   }
                 ]
+              },
+              "reason": {
+                "description": "The reason for the signer's input, applicable to signature or initial content types\nin a `cfr11` request flow. The value is `null` when not applicable.",
+                "type": "string",
+                "example": "I read and approve this document",
+                "nullable": true
+              },
+              "is_validated": {
+                "description": "Indicates whether the signer's input has been validated through re-authentication.\nApplicable only for signature or initial content types in a `cfr11` request flow.\nThe value is `null` for standard request flows or non-applicable input types.",
+                "type": "boolean",
+                "example": true,
+                "nullable": true
               }
             }
           }
@@ -39314,6 +39332,12 @@
                     "nullable": true
                   }
                 }
+              },
+              "request_flow": {
+                "description": "The sign flow of sign requests created from the template. Values can include `standard` or `cfr11`.",
+                "type": "string",
+                "example": "standard",
+                "nullable": true
               }
             }
           }
