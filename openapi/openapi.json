@@ -14,7 +14,7 @@
       "url": "https://www.apache.org/licenses/LICENSE-2.0"
     },
     "version": "2024.0",
-    "x-box-commit-hash": "5a03ed238f"
+    "x-box-commit-hash": "92c221bf9d"
   },
   "servers": [
     {
@@ -31889,6 +31889,49 @@
                 "type": "boolean",
                 "example": true,
                 "nullable": false
+              },
+              "collections": {
+                "description": "The collections that this file belongs to.\n\nFor more information, see the\n[collections guide](https://developer.box.com/guides/collections).",
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Collection"
+                }
+              },
+              "is_download_available": {
+                "description": "Whether the file's binary content is eligible to be downloaded.\n\nThis is a content-level flag and does not reflect whether the\ncurrent user is authorized to download the file. Use\n`permissions.can_download`, when available, for that.",
+                "type": "boolean",
+                "example": true
+              },
+              "download_url": {
+                "description": "A pre-authorized, expiring URL for directly downloading the file's\ncontent. Requires authentication and is valid only for the current\nsession.\n\nThis field is only returned for files, not folders or web links.",
+                "type": "string",
+                "format": "url",
+                "example": "https://dl.boxcloud.com/d/1/example_token/download"
+              },
+              "authenticated_download_url": {
+                "description": "A stable API URL for the file content endpoint,\n`/2.0/files/{id}/content`. Unlike `download_url`, authorization is\nevaluated when the URL is requested with a valid access token.\n\nThis field is only returned for files, not folders or web links.",
+                "type": "string",
+                "format": "url",
+                "example": "https://api.box.com/2.0/files/12345/content"
+              },
+              "allowed_shared_link_access_levels": {
+                "description": "The shared link access levels the authenticated user is allowed to\nuse when creating or updating a shared link for this file.\n\nThe list depends on item policy and user authorization, so it may be\nnarrower than the levels available to the owner. An empty array means\nno access level is available to this user.",
+                "type": "array",
+                "items": {
+                  "title": "Shared link access level",
+                  "type": "string",
+                  "description": "The access level for a shared link.",
+                  "example": "open",
+                  "enum": [
+                    "open",
+                    "company",
+                    "collaborators"
+                  ]
+                },
+                "example": [
+                  "open"
+                ],
+                "nullable": false
               }
             }
           }
@@ -33394,10 +33437,13 @@
                 ]
               },
               "allowed_shared_link_access_levels": {
-                "description": "A list of access levels that are available\nfor this folder.\n\nFor some folders, like the root folder, this will always\nbe an empty list as sharing is not allowed at that level.",
+                "description": "The shared link access levels the authenticated user is allowed to\nuse when creating or updating a shared link for this folder.\n\nThe list depends on item policy and user authorization. For some\nfolders, like the root folder, this is always empty as sharing is\nnot allowed at that level.",
                 "type": "array",
                 "items": {
+                  "title": "Shared link access level",
                   "type": "string",
+                  "description": "The access level for a shared link.",
+                  "example": "open",
                   "enum": [
                     "open",
                     "company",
@@ -33509,6 +33555,13 @@
                 "type": "boolean",
                 "example": true,
                 "nullable": false
+              },
+              "collections": {
+                "description": "The collections that this folder belongs to.\n\nFor more information, see the\n[collections guide](https://developer.box.com/guides/collections).",
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Collection"
+                }
               }
             }
           }
@@ -43355,6 +43408,32 @@
                   "trashed",
                   "deleted"
                 ]
+              },
+              "collections": {
+                "description": "The collections that this web link belongs to.\n\nFor more information, see the\n[collections guide](https://developer.box.com/guides/collections).",
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Collection"
+                }
+              },
+              "allowed_shared_link_access_levels": {
+                "description": "The shared link access levels the authenticated user is allowed to\nuse when creating or updating a shared link for this web link.\n\nThe list depends on item policy and user authorization, so it may be\nnarrower than the levels available to the owner. An empty array means\nno access level is available to this user.",
+                "type": "array",
+                "items": {
+                  "title": "Shared link access level",
+                  "type": "string",
+                  "description": "The access level for a shared link.",
+                  "example": "open",
+                  "enum": [
+                    "open",
+                    "company",
+                    "collaborators"
+                  ]
+                },
+                "example": [
+                  "open"
+                ],
+                "nullable": false
               }
             }
           }
