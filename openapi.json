@@ -14,7 +14,7 @@
             "url": "https://www.apache.org/licenses/LICENSE-2.0"
         },
         "version": "2024.0",
-        "x-box-commit-hash": "226ef4b324"
+        "x-box-commit-hash": "92c221bf9d"
     },
     "servers": [
         {
@@ -31889,6 +31889,49 @@
                                 "type": "boolean",
                                 "example": true,
                                 "nullable": false
+                            },
+                            "collections": {
+                                "description": "The collections that this file belongs to.\n\nFor more information, see the [collections guide](https://developer.box.com/guides/collections).",
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/Collection"
+                                }
+                            },
+                            "is_download_available": {
+                                "description": "Whether the file's binary content is eligible to be downloaded.\n\nThis is a content-level flag and does not reflect whether the current user is authorized to download the file. Use `permissions.can_download`, when available, for that.",
+                                "type": "boolean",
+                                "example": true
+                            },
+                            "download_url": {
+                                "description": "A pre-authorized, expiring URL for directly downloading the file's content. Requires authentication and is valid only for the current session.\n\nThis field is only returned for files, not folders or web links.",
+                                "type": "string",
+                                "format": "url",
+                                "example": "https://dl.boxcloud.com/d/1/example_token/download"
+                            },
+                            "authenticated_download_url": {
+                                "description": "A stable API URL for the file content endpoint, `/2.0/files/{id}/content`. Unlike `download_url`, authorization is evaluated when the URL is requested with a valid access token.\n\nThis field is only returned for files, not folders or web links.",
+                                "type": "string",
+                                "format": "url",
+                                "example": "https://api.box.com/2.0/files/12345/content"
+                            },
+                            "allowed_shared_link_access_levels": {
+                                "description": "The shared link access levels the authenticated user is allowed to use when creating or updating a shared link for this file.\n\nThe list depends on item policy and user authorization, so it may be narrower than the levels available to the owner. An empty array means no access level is available to this user.",
+                                "type": "array",
+                                "items": {
+                                    "title": "Shared link access level",
+                                    "type": "string",
+                                    "description": "The access level for a shared link.",
+                                    "example": "open",
+                                    "enum": [
+                                        "open",
+                                        "company",
+                                        "collaborators"
+                                    ]
+                                },
+                                "example": [
+                                    "open"
+                                ],
+                                "nullable": false
                             }
                         }
                     }
@@ -33394,10 +33437,13 @@
                                 ]
                             },
                             "allowed_shared_link_access_levels": {
-                                "description": "このフォルダで使用できるアクセスレベルのリスト。\n\nルートフォルダなどの一部のフォルダでは共有が許可されていないため、このリストは常に空になります。",
+                                "description": "The shared link access levels the authenticated user is allowed to use when creating or updating a shared link for this folder.\n\nThe list depends on item policy and user authorization. For some folders, like the root folder, this is always empty as sharing is not allowed at that level.",
                                 "type": "array",
                                 "items": {
+                                    "title": "Shared link access level",
                                     "type": "string",
+                                    "description": "The access level for a shared link.",
+                                    "example": "open",
                                     "enum": [
                                         "open",
                                         "company",
@@ -33509,6 +33555,13 @@
                                 "type": "boolean",
                                 "example": true,
                                 "nullable": false
+                            },
+                            "collections": {
+                                "description": "The collections that this folder belongs to.\n\nFor more information, see the [collections guide](https://developer.box.com/guides/collections).",
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/Collection"
+                                }
                             }
                         }
                     }
@@ -43355,6 +43408,32 @@
                                     "trashed",
                                     "deleted"
                                 ]
+                            },
+                            "collections": {
+                                "description": "The collections that this web link belongs to.\n\nFor more information, see the [collections guide](https://developer.box.com/guides/collections).",
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/Collection"
+                                }
+                            },
+                            "allowed_shared_link_access_levels": {
+                                "description": "The shared link access levels the authenticated user is allowed to use when creating or updating a shared link for this web link.\n\nThe list depends on item policy and user authorization, so it may be narrower than the levels available to the owner. An empty array means no access level is available to this user.",
+                                "type": "array",
+                                "items": {
+                                    "title": "Shared link access level",
+                                    "type": "string",
+                                    "description": "The access level for a shared link.",
+                                    "example": "open",
+                                    "enum": [
+                                        "open",
+                                        "company",
+                                        "collaborators"
+                                    ]
+                                },
+                                "example": [
+                                    "open"
+                                ],
+                                "nullable": false
                             }
                         }
                     }
@@ -43968,6 +44047,7 @@
         "securitySchemes": {
             "OAuth2Security": {
                 "type": "oauth2",
+                "description": "The access token received from the authorization server in the OAuth 2.0 flow.",
                 "flows": {
                     "authorizationCode": {
                         "authorizationUrl": "https://account.box.com/api/oauth2/authorize",
