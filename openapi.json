@@ -14,7 +14,7 @@
             "url": "https://www.apache.org/licenses/LICENSE-2.0"
         },
         "version": "2024.0",
-        "x-box-commit-hash": "d788b2a817"
+        "x-box-commit-hash": "21e370b9bd"
     },
     "servers": [
         {
@@ -1997,6 +1997,83 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/UploadParts"
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "予期しないクライアントエラー。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-box-tag": "chunked_uploads",
+                "servers": [
+                    {
+                        "url": "https://{box-upload-server}/api/2.0",
+                        "description": "ファイルアップロードに使用するサーバー。",
+                        "variables": {
+                            "box-upload-server": {
+                                "description": "The server for the upload session.",
+                                "default": "upload.box.com"
+                            }
+                        }
+                    }
+                ],
+                "tags": [
+                    "アップロード (分割)"
+                ],
+                "x-box-enable-explorer": false
+            }
+        },
+        "/files/upload_sessions/{upload_session_id}/plan": {
+            "post": {
+                "operationId": "post_files_upload_sessions_id_plan",
+                "summary": "Plan upload session",
+                "description": "Plan an upload session by checking which parts already exist on the server. This endpoint allows clients to optimize uploads by skipping parts that have already been uploaded (cache hits) and only uploading missing parts.\n\n実際のエンドポイントURLは[`Create upload session`](e://post-files-upload-sessions)および[`Get upload session`](e://get-files-upload-sessions-id)エンドポイントが返します。",
+                "parameters": [
+                    {
+                        "name": "upload_session_id",
+                        "in": "path",
+                        "description": "アップロードセッションのID。",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "D5E3F7A"
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UploadSessionPlanRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Returns information about which parts already exist (hits) and which parts need to be uploaded (misses).",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UploadSessionPlanResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Returns an error if the upload session cannot be found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
                                 }
                             }
                         }
@@ -39209,6 +39286,9 @@
                         "$ref": "#/components/schemas/SignRequestSignerInputZIP4Validation"
                     },
                     {
+                        "$ref": "#/components/schemas/SignRequestSignerInputZIPJPValidation"
+                    },
+                    {
                         "$ref": "#/components/schemas/SignRequestSignerInputSSNValidation"
                     },
                     {
@@ -39249,6 +39329,24 @@
                     "validation_type"
                 ],
                 "title": "署名リクエストの署名者入力の郵便番号 (ZIP+4) 検証"
+            },
+            "SignRequestSignerInputZIPJPValidation": {
+                "description": "署名者によるテキストフィールドの入力に検証ルールを指定します。設定した場合、この検証は必須となります。",
+                "type": "object",
+                "properties": {
+                    "validation_type": {
+                        "description": "Validates that the text input is a Japanese ZIP code.",
+                        "type": "string",
+                        "example": "zip_jp",
+                        "enum": [
+                            "zip_jp"
+                        ]
+                    }
+                },
+                "required": [
+                    "validation_type"
+                ],
+                "title": "Sign Request Signer Input ZIP JP Validation"
             },
             "SignRequestSignerInputZIPValidation": {
                 "description": "署名者によるテキストフィールドの入力に検証ルールを指定します。設定した場合、この検証は必須となります。",
@@ -42378,6 +42476,74 @@
                     "standard"
                 ]
             },
+            "UploadPartPlan": {
+                "description": "Represents a planned upload part with `SHA-512` hash for upload session planning.",
+                "type": "object",
+                "properties": {
+                    "offset": {
+                        "description": "ファイル内のチャンクのオフセット (バイト数)。ファイル内のチャンクの位置の下限です。",
+                        "type": "integer",
+                        "format": "int64",
+                        "example": 0
+                    },
+                    "size": {
+                        "description": "チャンクのサイズ (バイト単位)。",
+                        "type": "integer",
+                        "format": "int64",
+                        "example": 8388608
+                    },
+                    "sha512": {
+                        "description": "The `SHA-512` hash of the chunk.",
+                        "type": "string",
+                        "example": "1f40fc92da241694750979ee6cf582f2d5d7c8b5d9c7f3b8a6e5d4c3b2a1f0e9d8c7b6a5f4e3d2c1b0a9f8e7d6c5b4a3f2e1d0c9b8a7f6e5d4c3b2a1"
+                    }
+                },
+                "required": [
+                    "offset",
+                    "size",
+                    "sha512"
+                ],
+                "title": "Upload part plan",
+                "x-box-resource-id": "upload_part_plan",
+                "x-box-tag": "chunked_uploads"
+            },
+            "UploadPartPlanHit": {
+                "description": "Represents a planned upload part that already exists on the server (cache hit).",
+                "type": "object",
+                "properties": {
+                    "offset": {
+                        "description": "ファイル内のチャンクのオフセット (バイト数)。ファイル内のチャンクの位置の下限です。",
+                        "type": "integer",
+                        "format": "int64",
+                        "example": 0
+                    },
+                    "size": {
+                        "description": "チャンクのサイズ (バイト単位)。",
+                        "type": "integer",
+                        "format": "int64",
+                        "example": 8388608
+                    },
+                    "sha512": {
+                        "description": "The `SHA-512` hash of the chunk.",
+                        "type": "string",
+                        "example": "1f40fc92da241694750979ee6cf582f2d5d7c8b5d9c7f3b8a6e5d4c3b2a1f0e9d8c7b6a5f4e3d2c1b0a9f8e7d6c5b4a3f2e1d0c9b8a7f6e5d4c3b2a1"
+                    },
+                    "part_id": {
+                        "description": "チャンクの一意のID。",
+                        "type": "string",
+                        "example": "BFDF5379"
+                    }
+                },
+                "required": [
+                    "offset",
+                    "size",
+                    "sha512",
+                    "part_id"
+                ],
+                "title": "Upload part plan hit",
+                "x-box-resource-id": "upload_part_plan_hit",
+                "x-box-tag": "chunked_uploads"
+            },
             "UploadParts": {
                 "description": "アップロードセッションのアップロード済みチャンクのリスト。",
                 "type": "object",
@@ -42494,6 +42660,11 @@
                                 "description": "分割アップロードセッションに使用されるエンドポイントのリスト。",
                                 "type": "object",
                                 "properties": {
+                                    "plan": {
+                                        "description": "The URL used to plan the upload session by checking which parts already exist on the server.",
+                                        "type": "string",
+                                        "example": "https://{box-upload-server}/api/2.0/files/upload_sessions/F971964745A5CD0C001BBE4E58196BFD/plan"
+                                    },
                                     "upload_part": {
                                         "description": "パーツのアップロード先のURL。",
                                         "type": "string",
@@ -42534,6 +42705,86 @@
                 },
                 "title": "アップロードセッション",
                 "x-box-resource-id": "upload_session",
+                "x-box-tag": "chunked_uploads"
+            },
+            "UploadSessionPlanRequest": {
+                "description": "Request body for planning an upload session. This allows checking which parts already exist on the server before uploading.",
+                "type": "object",
+                "properties": {
+                    "parts": {
+                        "description": "The list of parts to check for existence.",
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/UploadPartPlan"
+                        },
+                        "example": [
+                            {
+                                "offset": 0,
+                                "size": 8388608,
+                                "sha512": "1f40fc92da241694750979ee6cf582f2..."
+                            },
+                            {
+                                "offset": 8388608,
+                                "size": 8388608,
+                                "sha512": "b109f3bbbc244eb82441917ed06d618b..."
+                            }
+                        ],
+                        "minItems": 1
+                    }
+                },
+                "required": [
+                    "parts"
+                ],
+                "title": "Upload session plan request",
+                "x-box-resource-id": "upload_session_plan_request",
+                "x-box-tag": "chunked_uploads"
+            },
+            "UploadSessionPlanResponse": {
+                "description": "Response from planning an upload session. Contains information about which parts already exist (hits) and which need to be uploaded (misses).",
+                "type": "object",
+                "properties": {
+                    "upload_session_id": {
+                        "description": "The unique identifier for this upload session.",
+                        "type": "string",
+                        "example": "F971964745A5CD0C001BBE4E58196BFD"
+                    },
+                    "hits": {
+                        "description": "Parts that already exist on the server and do not need to be uploaded again.",
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/UploadPartPlanHit"
+                        },
+                        "example": [
+                            {
+                                "offset": 0,
+                                "size": 8388608,
+                                "sha512": "1f40fc92da241694750979ee6cf582f2...",
+                                "part_id": "BFDF5379"
+                            }
+                        ]
+                    },
+                    "misses": {
+                        "description": "Parts that do not exist on the server and need to be uploaded.",
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/UploadPartPlan"
+                        },
+                        "example": [
+                            {
+                                "offset": 8388608,
+                                "size": 8388608,
+                                "sha512": "b109f3bbbc244eb82441917ed06d618b..."
+                            }
+                        ]
+                    }
+                },
+                "required": [
+                    "upload_session_id",
+                    "hits",
+                    "misses"
+                ],
+                "title": "Upload session plan response",
+                "x-box-resource-id": "upload_session_plan_response",
                 "x-box-tag": "chunked_uploads"
             },
             "UploadUrl": {
