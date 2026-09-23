@@ -2573,7 +2573,7 @@
       "get": {
         "operationId": "get_files_id_collaborations",
         "summary": "List file collaborations",
-        "description": "Retrieves a list of pending and active collaborations for a\nfile. This returns all the users that have access to the file\nor have been invited to the file.",
+        "description": "Retrieves a list of pending and active collaborations for a\nfile. This returns all the users that have access to the file\nor have been invited to the file.\n\n**Nested `item` is mini.** Each collaboration's `item` is returned as a [File (Mini)](https://developer.box.com/reference/resources/file--mini), [Folder (Mini)](https://developer.box.com/reference/resources/folder--mini), or [Web Link (Mini)](https://developer.box.com/reference/resources/web-link--mini) (`type`, `id`, `etag`, `sequence_id`, `name`, and for files `sha1` / `file_version`). The `fields` query parameter selects attributes on the **collaboration** object. It does not expand nested `item` fields such as `owned_by`. To load owner information, call [GET /files/:id](https://developer.box.com/reference/get-files-id) or [GET /folders/:id](https://developer.box.com/reference/get-folders-id) with `fields=owned_by`. See [Request extra fields](https://developer.box.com/guides/api-calls/request-extra-fields).",
         "parameters": [
           {
             "name": "file_id",
@@ -2588,7 +2588,7 @@
           {
             "name": "fields",
             "in": "query",
-            "description": "A comma-separated list of attributes to include in the\nresponse. This can be used to request fields that are\nnot normally returned in a standard response.\n\nBe aware that specifying this parameter will have the\neffect that none of the standard fields are returned in\nthe response unless explicitly specified, instead only\nfields for the mini representation are returned, additional\nto the fields requested.",
+            "description": "A comma-separated list of attributes to include in the\nresponse. This can be used to request fields that are\nnot normally returned in a standard response.\n\nBe aware that specifying this parameter will have the\neffect that none of the standard fields are returned in\nthe response unless explicitly specified, instead only\nfields for the mini representation are returned, additional\nto the fields requested.\n\n`fields` selects attributes on each **collaboration** object. It cannot expand nested `item` fields (for example `owned_by` or `item.owned_by`). Nested `item` is always the mini representation.",
             "required": false,
             "schema": {
               "type": "array",
@@ -2618,7 +2618,7 @@
           {
             "name": "marker",
             "in": "query",
-            "description": "Defines the position marker at which to begin returning results. This is\nused when paginating using marker-based pagination.\n\nThis requires `usemarker` to be set to `true`.",
+            "description": "Defines the position marker at which to begin returning results. This endpoint uses marker-based pagination only. There is no `usemarker` parameter. Omit `marker`, or pass an empty string, to start at the first page. Use `next_marker` from the previous response for subsequent pages.",
             "required": false,
             "schema": {
               "type": "string"
@@ -6316,7 +6316,7 @@
       "get": {
         "operationId": "get_folders_id_collaborations",
         "summary": "List folder collaborations",
-        "description": "Retrieves a list of pending and active collaborations for a\nfolder. This returns all the users that have access to the folder\nor have been invited to the folder.",
+        "description": "Retrieves a list of pending and active collaborations for a\nfolder. This returns all the users that have access to the folder\nor have been invited to the folder.\n\n**Nested `item` is mini.** Each collaboration's `item` is returned as a [File (Mini)](https://developer.box.com/reference/resources/file--mini), [Folder (Mini)](https://developer.box.com/reference/resources/folder--mini), or [Web Link (Mini)](https://developer.box.com/reference/resources/web-link--mini) (`type`, `id`, `etag`, `sequence_id`, `name`, and for files `sha1` / `file_version`). The `fields` query parameter selects attributes on the **collaboration** object. It does not expand nested `item` fields such as `owned_by`. To load owner information, call [GET /files/:id](https://developer.box.com/reference/get-files-id) or [GET /folders/:id](https://developer.box.com/reference/get-folders-id) with `fields=owned_by`. See [Request extra fields](https://developer.box.com/guides/api-calls/request-extra-fields).",
         "parameters": [
           {
             "name": "folder_id",
@@ -6332,7 +6332,7 @@
           {
             "name": "fields",
             "in": "query",
-            "description": "A comma-separated list of attributes to include in the\nresponse. This can be used to request fields that are\nnot normally returned in a standard response.\n\nBe aware that specifying this parameter will have the\neffect that none of the standard fields are returned in\nthe response unless explicitly specified, instead only\nfields for the mini representation are returned, additional\nto the fields requested.",
+            "description": "A comma-separated list of attributes to include in the\nresponse. This can be used to request fields that are\nnot normally returned in a standard response.\n\nBe aware that specifying this parameter will have the\neffect that none of the standard fields are returned in\nthe response unless explicitly specified, instead only\nfields for the mini representation are returned, additional\nto the fields requested.\n\n`fields` selects attributes on each **collaboration** object. It cannot expand nested `item` fields (for example `owned_by` or `item.owned_by`). Nested `item` is always the mini representation.",
             "required": false,
             "schema": {
               "type": "array",
@@ -6362,7 +6362,7 @@
           {
             "name": "marker",
             "in": "query",
-            "description": "Defines the position marker at which to begin returning results. This is\nused when paginating using marker-based pagination.\n\nThis requires `usemarker` to be set to `true`.",
+            "description": "Defines the position marker at which to begin returning results. This endpoint defaults to offset-based pagination (`total_count`). There is no `usemarker` parameter. Pass `marker` as an empty string to switch to marker-based pagination for the first page, then use `next_marker` from the previous response for subsequent pages.",
             "required": false,
             "schema": {
               "type": "string"
@@ -29565,7 +29565,7 @@
                 "$ref": "#/components/schemas/CollaborationItem"
               },
               {
-                "description": "The file or folder to which access is granted. The field is\n`null` when the collaboration `status` is `pending` or the\ncollaboration is created on an app item (see `app_item` field)."
+                "description": "The file, folder, or web link to which access is granted. Always a mini representation (`type`, `id`, `etag`, `sequence_id`, `name`, and for files `sha1` / `file_version`). The field is `null` when the collaboration `status` is `pending` or the collaboration is created on an app item (see `app_item` field). Nested `item` cannot be expanded with `fields`; fetch the item by ID to request additional fields such as `owned_by`. See [Request extra fields](https://developer.box.com/guides/api-calls/request-extra-fields)."
               }
             ],
             "nullable": true
@@ -29991,17 +29991,17 @@
         "x-box-tag": "collaboration_allowlist_exempt_targets"
       },
       "CollaborationItem": {
-        "description": "A collaboration item.",
+        "description": "The file, folder, or web link a collaboration is granted on. Always a mini representation: [File (Mini)](https://developer.box.com/reference/resources/file--mini), [Folder (Mini)](https://developer.box.com/reference/resources/folder--mini), or [Web Link (Mini)](https://developer.box.com/reference/resources/web-link--mini). Cannot be expanded with the `fields` query parameter.",
         "type": "object",
         "oneOf": [
           {
-            "$ref": "#/components/schemas/File"
+            "$ref": "#/components/schemas/File--Mini"
           },
           {
-            "$ref": "#/components/schemas/Folder"
+            "$ref": "#/components/schemas/Folder--Mini"
           },
           {
-            "$ref": "#/components/schemas/WebLink"
+            "$ref": "#/components/schemas/WebLink--Mini"
           }
         ],
         "title": "Collaboration item"
