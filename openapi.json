@@ -14,7 +14,7 @@
       "url": "https://www.apache.org/licenses/LICENSE-2.0"
     },
     "version": "2024.0",
-    "x-box-commit-hash": "cae48740aa"
+    "x-box-commit-hash": "56657ab895"
   },
   "servers": [
     {
@@ -1800,7 +1800,7 @@
           {
             "name": "digest",
             "in": "header",
-            "description": "The [RFC3230][1] message digest of the chunk uploaded.\n\nOnly SHA1 is supported. The SHA1 digest must be base64\nencoded. The format of this header is as\n`sha=BASE64_ENCODED_DIGEST`.\n\nTo get the value for the `SHA` digest, use the\nopenSSL command to encode the file part:\n`openssl sha1 -binary <FILE_PART_NAME> | base64`.\n\n[1]: https://tools.ietf.org/html/rfc3230",
+            "description": "The [RFC3230][1] message digest of the chunk uploaded.\n\n`SHA-1` and `SHA-512` ([RFC5843][2]) are supported. The digest must be base64\nencoded. The format of this header is as\n`sha=BASE64_ENCODED_DIGEST` for `SHA-1`, or\n`sha-512=BASE64_ENCODED_DIGEST` for `SHA-512`.\n\nTo get the value for the digest, use the\nopenSSL command to encode the file part:\n`openssl sha1 -binary <FILE_PART_NAME> | base64` for `SHA-1`, or\n`openssl sha512 -binary <FILE_PART_NAME> | base64` for `SHA-512`.\n\n[1]: https://tools.ietf.org/html/rfc3230\n[2]: https://tools.ietf.org/html/rfc5843",
             "required": true,
             "schema": {
               "type": "string"
@@ -1831,7 +1831,7 @@
         },
         "responses": {
           "200": {
-            "description": "Chunk has been uploaded successfully.",
+            "description": "Chunk has been uploaded successfully.\n\nThe response always includes `sha512`. It also includes\n`sha1` if the `Digest` header used `SHA-1`.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1992,7 +1992,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Returns a list of parts that have been uploaded.",
+            "description": "Returns a list of parts that have been uploaded.\n\nEach part includes the hash type used to upload it. Parts\nuploaded with a `SHA-512` `Digest` header don't include `sha1`.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2035,7 +2035,7 @@
       "post": {
         "operationId": "post_files_upload_sessions_id_plan",
         "summary": "Plan upload session",
-        "description": "Plan an upload session by checking which parts already exist on the server.\nThis endpoint allows clients to optimize uploads by skipping parts that\nhave already been uploaded (cache hits) and only uploading missing parts.\n\nThe actual endpoint URL is returned by the [`Create upload session`](e://post-files-upload-sessions)\nand [`Get upload session`](e://get-files-upload-sessions-id) endpoints.",
+        "description": "Plan an upload session by checking which parts already exist on the server.\nThis endpoint allows clients to optimize uploads by skipping parts that\nhave already been uploaded (cache hits) and only uploading missing parts.\n\nThe actual endpoint URL is returned by the [`Create upload session`](https://developer.box.com/reference/post-files-upload-sessions)\nand [`Get upload session`](https://developer.box.com/reference/get-files-upload-sessions-id) endpoints.",
         "parameters": [
           {
             "name": "upload_session_id",
@@ -2127,7 +2127,7 @@
           {
             "name": "digest",
             "in": "header",
-            "description": "The [RFC3230][1] message digest of the whole file.\n\nOnly SHA1 is supported. The SHA1 digest must be Base64\nencoded. The format of this header is as\n`sha=BASE64_ENCODED_DIGEST`.\n\n[1]: https://tools.ietf.org/html/rfc3230",
+            "description": "The [RFC3230][1] message digest of the whole file.\n\nOnly SHA1 is supported. The SHA1 digest must be Base64\nencoded. The format of this header is as\n`sha=BASE64_ENCODED_DIGEST`.\n\n`SHA-512` is not supported for the whole-file digest, even if\nthe parts were uploaded with `SHA-512` digests.\n\n[1]: https://tools.ietf.org/html/rfc3230",
             "required": true,
             "schema": {
               "type": "string"
@@ -2162,7 +2162,7 @@
                 "type": "object",
                 "properties": {
                   "parts": {
-                    "description": "The list details for the uploaded parts.",
+                    "description": "The list details for the uploaded parts.\n\nEach entry can include `sha1` or `sha512`. Include `sha512`\non every entry or on none of them. A request where only\nsome entries include `sha512` is rejected.\n\nInclude parts that the server already has, returned as\n`hits` by the [`Plan upload session`](https://developer.box.com/reference/post-files-upload-sessions-id-plan)\nendpoint. Use the `part_id`, `offset`, and `size` from the\nplan response. If the other entries include `sha512`,\ninclude the `sha512` value from the plan response.\nOtherwise, leave the hash out of these entries.",
                     "type": "array",
                     "items": {
                       "$ref": "#/components/schemas/UploadPart"
@@ -2194,6 +2194,16 @@
                 "description": "Indicates the number of seconds the client should wait before\nattempting their commit request again.",
                 "schema": {
                   "type": "integer"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Returns an error if the request body is not valid.\n\n* `invalid_parts_field` - Only some entries in `parts` include\n  `sha512`. Include `sha512` on every entry or on none of them.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
                 }
               }
             }
@@ -9671,7 +9681,7 @@
       "post": {
         "operationId": "post_metadata_queries_execute_read",
         "summary": "Query files/folders by metadata",
-        "description": "Create a search using SQL-like syntax to return items that match specific\nmetadata.\n\nBy default, this endpoint returns only the most basic info about the items for\nwhich the query matches. To get additional fields for each item, including any\nof the metadata, use the `fields` attribute in the query.",
+        "description": "For new integrations, use the [v2026.0 Query API](https://developer.box.com/reference/v2026.0/query-resources).\nThis is the latest version of the Query API, with advanced capabilities including multi-template queries and\nQuery Insights, and is the API we will continue to enhance with new Query capabilities.\n\nCreate a search using SQL-like syntax to return items that match specific\nmetadata.\n\nBy default, this endpoint returns only the most basic info about the items for\nwhich the query matches. To get additional fields for each item, including any\nof the metadata, use the `fields` attribute in the query.",
         "requestBody": {
           "content": {
             "application/json": {
@@ -24973,6 +24983,16 @@
               }
             }
           },
+          "422": {
+            "description": "The extraction request could not be processed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
           "500": {
             "description": "An unexpected server error.",
             "content": {
@@ -25022,6 +25042,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/AiExtractStructuredResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The extraction request could not be processed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
                 }
               }
             }
@@ -29514,6 +29544,7 @@
               "method_not_allowed",
               "conflict",
               "precondition_failed",
+              "unprocessable_entity",
               "too_many_requests",
               "internal_server_error",
               "unavailable",
@@ -42442,6 +42473,11 @@
                 "description": "The SHA1 hash of the chunk.",
                 "type": "string",
                 "example": "134b65991ed521fcfe4724b7d814ab8ded5185dc"
+              },
+              "sha512": {
+                "description": "The `SHA-512` hash of the chunk, as a hex string\nof 128 lower case characters.",
+                "type": "string",
+                "example": "ae78a0ca28abffe70ac9aba830556cd6eb3fcf1501dbd9b2d7a5f45992c00812cb07b51bbd0a9174e2295671c0e86f30354afa91d281d4fbee6a323a483d6383"
               }
             }
           }
@@ -42499,9 +42535,9 @@
             "example": 8388608
           },
           "sha512": {
-            "description": "The `SHA-512` hash of the chunk.",
+            "description": "The `SHA-512` hash of the chunk, as a hex string\nof 128 lower case characters.",
             "type": "string",
-            "example": "1f40fc92da241694750979ee6cf582f2d5d7c8b5d9c7f3b8a6e5d4c3b2a1f0e9d8c7b6a5f4e3d2c1b0a9f8e7d6c5b4a3f2e1d0c9b8a7f6e5d4c3b2a1"
+            "example": "ae78a0ca28abffe70ac9aba830556cd6eb3fcf1501dbd9b2d7a5f45992c00812cb07b51bbd0a9174e2295671c0e86f30354afa91d281d4fbee6a323a483d6383"
           }
         },
         "required": [
@@ -42530,9 +42566,9 @@
             "example": 8388608
           },
           "sha512": {
-            "description": "The `SHA-512` hash of the chunk.",
+            "description": "The `SHA-512` hash of the chunk, as a hex string\nof 128 lower case characters.",
             "type": "string",
-            "example": "1f40fc92da241694750979ee6cf582f2d5d7c8b5d9c7f3b8a6e5d4c3b2a1f0e9d8c7b6a5f4e3d2c1b0a9f8e7d6c5b4a3f2e1d0c9b8a7f6e5d4c3b2a1"
+            "example": "ae78a0ca28abffe70ac9aba830556cd6eb3fcf1501dbd9b2d7a5f45992c00812cb07b51bbd0a9174e2295671c0e86f30354afa91d281d4fbee6a323a483d6383"
           },
           "part_id": {
             "description": "The unique ID of the chunk.",
@@ -42727,12 +42763,12 @@
               {
                 "offset": 0,
                 "size": 8388608,
-                "sha512": "1f40fc92da241694750979ee6cf582f2..."
+                "sha512": "ae78a0ca28abffe70ac9aba830556cd6eb3fcf1501dbd9b2d7a5f45992c00812cb07b51bbd0a9174e2295671c0e86f30354afa91d281d4fbee6a323a483d6383"
               },
               {
                 "offset": 8388608,
                 "size": 8388608,
-                "sha512": "b109f3bbbc244eb82441917ed06d618b..."
+                "sha512": "588fde2156e1d8b23c9ca88ed3bed7bd1270e6ba0bb5b97b294ea1498952d7fd505e406097638514df92e9c5fecd0e73bd872499fcd7ea18eeb18567d0e09020"
               }
             ],
             "minItems": 1
@@ -42764,7 +42800,7 @@
               {
                 "offset": 0,
                 "size": 8388608,
-                "sha512": "1f40fc92da241694750979ee6cf582f2...",
+                "sha512": "ae78a0ca28abffe70ac9aba830556cd6eb3fcf1501dbd9b2d7a5f45992c00812cb07b51bbd0a9174e2295671c0e86f30354afa91d281d4fbee6a323a483d6383",
                 "part_id": "BFDF5379"
               }
             ]
@@ -42779,7 +42815,7 @@
               {
                 "offset": 8388608,
                 "size": 8388608,
-                "sha512": "b109f3bbbc244eb82441917ed06d618b..."
+                "sha512": "588fde2156e1d8b23c9ca88ed3bed7bd1270e6ba0bb5b97b294ea1498952d7fd505e406097638514df92e9c5fecd0e73bd872499fcd7ea18eeb18567d0e09020"
               }
             ]
           }
