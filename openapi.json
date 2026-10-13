@@ -14,7 +14,7 @@
             "url": "https://www.apache.org/licenses/LICENSE-2.0"
         },
         "version": "2024.0",
-        "x-box-commit-hash": "cae48740aa"
+        "x-box-commit-hash": "56657ab895"
     },
     "servers": [
         {
@@ -1800,7 +1800,7 @@
                     {
                         "name": "digest",
                         "in": "header",
-                        "description": "分割アップロードの[RFC3230][1]メッセージのダイジェスト。\n\nサポートされているのはSHA1のみです。SHA1ダイジェストはbase64でエンコードされている必要があります。このヘッダーの形式は、`sha=BASE64_ENCODED_DIGEST`です。\n\n`SHA`ダイジェストの値を取得するには、openSSLコマンドを使用して、ファイルのパーツをエンコードします: `openssl sha1 -binary <FILE_PART_NAME> | base64`。\n\n[1]: https://tools.ietf.org/html/rfc3230",
+                        "description": "分割アップロードの[RFC3230][1]メッセージのダイジェスト。\n\n`SHA-1` and `SHA-512` ([RFC5843][2]) are supported. The digest must be base64 encoded. The format of this header is as `sha=BASE64_ENCODED_DIGEST` for `SHA-1`, or `sha-512=BASE64_ENCODED_DIGEST` for `SHA-512`.\n\nTo get the value for the digest, use the openSSL command to encode the file part: `openssl sha1 -binary <FILE_PART_NAME> | base64` for `SHA-1`, or `openssl sha512 -binary <FILE_PART_NAME> | base64` for `SHA-512`.\n\n[1]: https://tools.ietf.org/html/rfc3230\n\n[2]: https://tools.ietf.org/html/rfc5843",
                         "required": true,
                         "schema": {
                             "type": "string"
@@ -1831,7 +1831,7 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "チャンクは正常にアップロードされました。",
+                        "description": "チャンクは正常にアップロードされました。\n\nThe response always includes `sha512`. It also includes `sha1` if the `Digest` header used `SHA-1`.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -1992,7 +1992,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "アップロードされたパーツのリストを返します。",
+                        "description": "アップロードされたパーツのリストを返します。\n\nEach part includes the hash type used to upload it. Parts uploaded with a `SHA-512` `Digest` header don't include `sha1`.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -2035,7 +2035,7 @@
             "post": {
                 "operationId": "post_files_upload_sessions_id_plan",
                 "summary": "アップロードセッションを計画",
-                "description": "サーバー上にすでに存在するパーツを確認することで、アップロードセッションを計画します。このエンドポイントを使用すると、クライアントは、すでにアップロード済みのパーツ (キャッシュヒット) をスキップして、不足しているパーツのみをアップロードすることにより、アップロードを最適化できます。\n\n実際のエンドポイントURLは[`Create upload session`](e://post-files-upload-sessions)および[`Get upload session`](e://get-files-upload-sessions-id)エンドポイントが返します。",
+                "description": "サーバー上にすでに存在するパーツを確認することで、アップロードセッションを計画します。このエンドポイントを使用すると、クライアントは、すでにアップロード済みのパーツ (キャッシュヒット) をスキップして、不足しているパーツのみをアップロードすることにより、アップロードを最適化できます。\n\n実際のエンドポイントURLは[`Create upload session`](https://developer.box.com/reference/post-files-upload-sessions)および[`Get upload session`](https://developer.box.com/reference/get-files-upload-sessions-id)エンドポイントが返します。",
                 "parameters": [
                     {
                         "name": "upload_session_id",
@@ -2127,7 +2127,7 @@
                     {
                         "name": "digest",
                         "in": "header",
-                        "description": "ファイル全体の[RFC3230][1]メッセージのダイジェスト。\n\nサポートされているのはSHA1のみです。SHA1ダイジェストはBase64でエンコードされている必要があります。このヘッダーの形式は、`sha=BASE64_ENCODED_DIGEST`です。\n\n[1]: https://tools.ietf.org/html/rfc3230",
+                        "description": "ファイル全体の[RFC3230][1]メッセージのダイジェスト。\n\nサポートされているのはSHA1のみです。SHA1ダイジェストはBase64でエンコードされている必要があります。このヘッダーの形式は、`sha=BASE64_ENCODED_DIGEST`です。\n\n`SHA-512` is not supported for the whole-file digest, even if the parts were uploaded with `SHA-512` digests.\n\n[1]: https://tools.ietf.org/html/rfc3230",
                         "required": true,
                         "schema": {
                             "type": "string"
@@ -2162,7 +2162,7 @@
                                 "type": "object",
                                 "properties": {
                                     "parts": {
-                                        "description": "アップロードされたパーツのリストの詳細。",
+                                        "description": "アップロードされたパーツのリストの詳細。\n\nEach entry can include `sha1` or `sha512`. Include `sha512` on every entry or on none of them. A request where only some entries include `sha512` is rejected.\n\nInclude parts that the server already has, returned as `hits` by the [`Plan upload session`](https://developer.box.com/reference/post-files-upload-sessions-id-plan) endpoint. Use the `part_id`, `offset`, and `size` from the plan response. If the other entries include `sha512`, include the `sha512` value from the plan response. Otherwise, leave the hash out of these entries.",
                                         "type": "array",
                                         "items": {
                                             "$ref": "#/components/schemas/UploadPart"
@@ -2194,6 +2194,16 @@
                                 "description": "コミットリクエストの再試行までクライアントが待機する秒数を示します。",
                                 "schema": {
                                     "type": "integer"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Returns an error if the request body is not valid.\n\n* `invalid_parts_field` - Only some entries in `parts` include `sha512`. Include `sha512` on every entry or on none of them.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
                                 }
                             }
                         }
@@ -9671,7 +9681,7 @@
             "post": {
                 "operationId": "post_metadata_queries_execute_read",
                 "summary": "メタデータによるファイル/フォルダに対するクエリ",
-                "description": "SQLに似た構文で特定のメタデータと一致する項目を返す検索を作成します。\n\nデフォルトでは、このエンドポイントによって、クエリに一致する項目に関する最も基本的な情報のみが返されます。各項目のその他のフィールド (メタデータのいずれかを含む) を取得するには、クエリで`fields`属性を使用します。",
+                "description": "For new integrations, use the [v2026.0 Query API](https://developer.box.com/reference/v2026.0/query-resources). This is the latest version of the Query API, with advanced capabilities including multi-template queries and Query Insights, and is the API we will continue to enhance with new Query capabilities.\n\nSQLに似た構文で特定のメタデータと一致する項目を返す検索を作成します。\n\nデフォルトでは、このエンドポイントによって、クエリに一致する項目に関する最も基本的な情報のみが返されます。各項目のその他のフィールド (メタデータのいずれかを含む) を取得するには、クエリで`fields`属性を使用します。",
                 "requestBody": {
                     "content": {
                         "application/json": {
@@ -24973,6 +24983,16 @@
                             }
                         }
                     },
+                    "422": {
+                        "description": "The extraction request could not be processed.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
                     "500": {
                         "description": "予期しないサーバーエラー。",
                         "content": {
@@ -25022,6 +25042,16 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/AiExtractStructuredResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "The extraction request could not be processed.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
                                 }
                             }
                         }
@@ -29514,6 +29544,7 @@
                             "method_not_allowed",
                             "conflict",
                             "precondition_failed",
+                            "unprocessable_entity",
                             "too_many_requests",
                             "internal_server_error",
                             "unavailable",
@@ -42442,6 +42473,11 @@
                                 "description": "チャンクのSHA1ハッシュ。",
                                 "type": "string",
                                 "example": "134b65991ed521fcfe4724b7d814ab8ded5185dc"
+                            },
+                            "sha512": {
+                                "description": "The `SHA-512` hash of the chunk, as a hex string of 128 lower case characters.",
+                                "type": "string",
+                                "example": "ae78a0ca28abffe70ac9aba830556cd6eb3fcf1501dbd9b2d7a5f45992c00812cb07b51bbd0a9174e2295671c0e86f30354afa91d281d4fbee6a323a483d6383"
                             }
                         }
                     }
@@ -42499,9 +42535,9 @@
                         "example": 8388608
                     },
                     "sha512": {
-                        "description": "チャンクの`SHA-512`ハッシュ。",
+                        "description": "The `SHA-512` hash of the chunk, as a hex string of 128 lower case characters.",
                         "type": "string",
-                        "example": "1f40fc92da241694750979ee6cf582f2d5d7c8b5d9c7f3b8a6e5d4c3b2a1f0e9d8c7b6a5f4e3d2c1b0a9f8e7d6c5b4a3f2e1d0c9b8a7f6e5d4c3b2a1"
+                        "example": "ae78a0ca28abffe70ac9aba830556cd6eb3fcf1501dbd9b2d7a5f45992c00812cb07b51bbd0a9174e2295671c0e86f30354afa91d281d4fbee6a323a483d6383"
                     }
                 },
                 "required": [
@@ -42530,9 +42566,9 @@
                         "example": 8388608
                     },
                     "sha512": {
-                        "description": "チャンクの`SHA-512`ハッシュ。",
+                        "description": "The `SHA-512` hash of the chunk, as a hex string of 128 lower case characters.",
                         "type": "string",
-                        "example": "1f40fc92da241694750979ee6cf582f2d5d7c8b5d9c7f3b8a6e5d4c3b2a1f0e9d8c7b6a5f4e3d2c1b0a9f8e7d6c5b4a3f2e1d0c9b8a7f6e5d4c3b2a1"
+                        "example": "ae78a0ca28abffe70ac9aba830556cd6eb3fcf1501dbd9b2d7a5f45992c00812cb07b51bbd0a9174e2295671c0e86f30354afa91d281d4fbee6a323a483d6383"
                     },
                     "part_id": {
                         "description": "チャンクの一意のID。",
@@ -42727,12 +42763,12 @@
                             {
                                 "offset": 0,
                                 "size": 8388608,
-                                "sha512": "1f40fc92da241694750979ee6cf582f2..."
+                                "sha512": "ae78a0ca28abffe70ac9aba830556cd6eb3fcf1501dbd9b2d7a5f45992c00812cb07b51bbd0a9174e2295671c0e86f30354afa91d281d4fbee6a323a483d6383"
                             },
                             {
                                 "offset": 8388608,
                                 "size": 8388608,
-                                "sha512": "b109f3bbbc244eb82441917ed06d618b..."
+                                "sha512": "588fde2156e1d8b23c9ca88ed3bed7bd1270e6ba0bb5b97b294ea1498952d7fd505e406097638514df92e9c5fecd0e73bd872499fcd7ea18eeb18567d0e09020"
                             }
                         ],
                         "minItems": 1
@@ -42764,7 +42800,7 @@
                             {
                                 "offset": 0,
                                 "size": 8388608,
-                                "sha512": "1f40fc92da241694750979ee6cf582f2...",
+                                "sha512": "ae78a0ca28abffe70ac9aba830556cd6eb3fcf1501dbd9b2d7a5f45992c00812cb07b51bbd0a9174e2295671c0e86f30354afa91d281d4fbee6a323a483d6383",
                                 "part_id": "BFDF5379"
                             }
                         ]
@@ -42779,7 +42815,7 @@
                             {
                                 "offset": 8388608,
                                 "size": 8388608,
-                                "sha512": "b109f3bbbc244eb82441917ed06d618b..."
+                                "sha512": "588fde2156e1d8b23c9ca88ed3bed7bd1270e6ba0bb5b97b294ea1498952d7fd505e406097638514df92e9c5fecd0e73bd872499fcd7ea18eeb18567d0e09020"
                             }
                         ]
                     }
