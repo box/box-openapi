@@ -14,7 +14,7 @@
       "url": "https://www.apache.org/licenses/LICENSE-2.0"
     },
     "version": "2026.0",
-    "x-box-commit-hash": "56657ab895"
+    "x-box-commit-hash": "53bdced3cd"
   },
   "servers": [
     {
@@ -283,7 +283,371 @@
         },
         "x-box-tag": "notes",
         "tags": [
-          "Convert to Box note"
+          "Convert to Box Note"
+        ]
+      }
+    },
+    "/document_splits": {
+      "post": {
+        "operationId": "post_document_splits_v2026.0",
+        "summary": "Create Document Split job",
+        "description": "Initiates a Document Split job for the supplied source file. The job runs\nasynchronously; clients can poll the returned job ID to track progress.\n\nAll split-specific input lives under `split_input`. When\n`split_input.split_type` is `manual`, provide\n`split_input.split_definition` (continuous page ranges; `version` may be\nomitted or `v_1`). When `split_input.split_type` is `page_selection`,\nprovide `split_input.page_selection` (non-linear page segments; `version`\nmay be omitted or `v_2`). `split_input.prompt` must not be provided for\neither of those variants. When `split_input.split_type` is `smart`,\n`split_input.prompt` is required and neither\n`split_input.split_definition` nor `split_input.page_selection` must be\nprovided.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/BoxVersionHeader"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DocumentSplitCreateRequest"
+              },
+              "examples": {
+                "manual": {
+                  "summary": "Manual split request",
+                  "value": {
+                    "source_file_id": "12345",
+                    "destination_folder_id": "14047816008",
+                    "input_source": "api",
+                    "split_input": {
+                      "split_type": "manual",
+                      "split_definition": [
+                        {
+                          "start": 1,
+                          "end": 5
+                        },
+                        {
+                          "start": 6,
+                          "end": 14
+                        }
+                      ]
+                    }
+                  }
+                },
+                "page_selection": {
+                  "summary": "Page selection split request",
+                  "value": {
+                    "source_file_id": "12345",
+                    "destination_folder_id": "14047816008",
+                    "input_source": "api",
+                    "split_input": {
+                      "split_type": "page_selection",
+                      "version": "v_2",
+                      "page_selection": [
+                        {
+                          "name": "exhibits",
+                          "segments": [
+                            {
+                              "type": "single_page",
+                              "page": 4
+                            },
+                            {
+                              "type": "single_page",
+                              "page": 8
+                            },
+                            {
+                              "type": "single_page",
+                              "page": 12
+                            }
+                          ]
+                        },
+                        {
+                          "name": "signatures",
+                          "segments": [
+                            {
+                              "type": "page_range",
+                              "start": 6,
+                              "end": 8
+                            },
+                            {
+                              "type": "single_page",
+                              "page": 15
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                },
+                "smart": {
+                  "summary": "Smart split request",
+                  "value": {
+                    "source_file_id": "12345",
+                    "destination_folder_id": "14047816008",
+                    "input_source": "api",
+                    "split_input": {
+                      "split_type": "smart",
+                      "prompt": "Split this contract into one file per signed section."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "The Document Split job was accepted for processing. Returns a reference\nto the newly created job.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentSplitCreateResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Returned when the request body is malformed or required fields are\nmissing.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Returned when the access token provided in the `Authorization` header\nis not recognized or not provided.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Returned when the authenticated user does not have access to the\nDocument Generation feature.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Returned when the source file or destination folder cannot be found\nor the user does not have access to it.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Returned when the user has sent too many requests in a given amount of\ntime.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        },
+        "x-box-tag": "document_split",
+        "tags": [
+          "Document Split"
+        ]
+      },
+      "get": {
+        "operationId": "get_document_splits_v2026.0",
+        "summary": "List Document Split jobs",
+        "description": "Returns a paginated list of Document Split jobs accessible to the\nauthenticated user.",
+        "parameters": [
+          {
+            "name": "marker",
+            "in": "query",
+            "description": "Defines the position marker at which to begin returning results. This is\nused when paginating using marker-based pagination.\n\nThis requires `usemarker` to be set to `true`.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "The maximum number of items to return per page.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "maximum": 1000
+            },
+            "example": 1000
+          },
+          {
+            "$ref": "#/components/parameters/BoxVersionHeader"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns a paginated list of Document Split jobs.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentSplits"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Returned when the user has passed in a malformed `marker` or `limit`\nvalue.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Returned when the access token provided in the `Authorization` header\nis not recognized or not provided.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Returned when the authenticated user does not have access to the\nDocument Generation feature.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Returned when the user has sent too many requests in a given amount of\ntime.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        },
+        "x-box-tag": "document_split",
+        "tags": [
+          "Document Split"
+        ]
+      }
+    },
+    "/document_splits/{document_split_id}": {
+      "get": {
+        "operationId": "get_document_splits_id_v2026.0",
+        "summary": "Get Document Split job by ID",
+        "description": "Returns details for a single Document Split job identified by its ID,\nincluding the current status, the input definition, and any output files\nproduced by the job.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/BoxVersionHeader"
+          },
+          {
+            "name": "document_split_id",
+            "in": "path",
+            "description": "The unique identifier for the Document Split job.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "1748426"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns the Document Split job.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentSplit"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Returned when the access token provided in the `Authorization` header\nis not recognized or not provided.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Returned when the authenticated user does not have access to the\nDocument Generation feature.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Returned when the Document Split job is not found or the user does not\nhave access to it.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Returned when the user has sent too many requests in a given amount of\ntime.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected client error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
+                }
+              }
+            }
+          }
+        },
+        "x-box-tag": "document_split",
+        "tags": [
+          "Document Split"
         ]
       }
     },
@@ -763,6 +1127,718 @@
         },
         "title": "Client error",
         "x-box-resource-id": "client_error_v2026.0"
+      },
+      "DocumentFailures": {
+        "description": "Errors and warnings that occurred during a document job.",
+        "type": "object",
+        "properties": {
+          "errors": {
+            "description": "A list of errors that occurred during the document job.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "The source file could not be processed."
+            ]
+          },
+          "warnings": {
+            "description": "A list of warnings that occurred during the document job.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "Some pages were skipped because they were blank."
+            ]
+          }
+        },
+        "required": [
+          "errors",
+          "warnings"
+        ],
+        "title": "Document failures"
+      },
+      "DocumentSplit": {
+        "description": "A standard representation of a Document Split job. The job represents a\nrequest to split a paginated source document into multiple files based on\neither a manual set of page ranges, a non-linear page selection, or a\nsmart prompt-driven analysis.",
+        "type": "object",
+        "properties": {
+          "id": {
+            "description": "The unique identifier for the Document Split job.",
+            "type": "string",
+            "example": "1748426"
+          },
+          "type": {
+            "description": "The value will always be `document_split`.",
+            "type": "string",
+            "example": "document_split",
+            "enum": [
+              "document_split"
+            ]
+          },
+          "source_file": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FileReference"
+              },
+              {
+                "description": "The file to split."
+              }
+            ]
+          },
+          "status": {
+            "description": "The current state of the Document Split job.",
+            "type": "string",
+            "example": "submitted",
+            "enum": [
+              "submitted",
+              "completed",
+              "failed",
+              "completed_with_error"
+            ]
+          },
+          "split_input": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DocumentSplitCreateRequestType"
+              },
+              {
+                "description": "The caller-supplied input that was used to perform the split. The\nshape mirrors the request: for a `manual` split, `split_input`\ncontains `split_type` and `split_definition`; for a `page_selection`\nsplit, `split_input` contains `split_type` and `page_selection`; for\na `smart` split, `split_input` contains `split_type` and the\ncaller-supplied `prompt`. For smart splits, the page ranges that Box\nproduced are exposed under `output.split_definition`."
+              }
+            ]
+          },
+          "output": {
+            "description": "The result of the Document Split job. `null` until the job has produced\noutput.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/DocumentSplitOutput"
+              },
+              {
+                "title": "OpenAPI 3.0 null schema type",
+                "description": "The definition for a null schema type in OpenAPI `3.0`.",
+                "type": "object",
+                "nullable": true,
+                "additionalProperties": false
+              }
+            ]
+          },
+          "destination_folder": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FolderReference"
+              },
+              {
+                "description": "The folder that received the generated files."
+              }
+            ]
+          },
+          "input_source": {
+            "description": "The system that initiated the request, used for analytics and\ntraceability.",
+            "type": "string",
+            "example": "api",
+            "enum": [
+              "api",
+              "box",
+              "relay",
+              "salesforce"
+            ]
+          },
+          "created_at": {
+            "description": "When the Document Split job was created.",
+            "type": "string",
+            "format": "date-time",
+            "example": "2023-10-26T15:30:00Z"
+          },
+          "created_by": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/User--Mini"
+              },
+              {
+                "description": "The user who created the Document Split job."
+              }
+            ]
+          },
+          "enterprise": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EnterpriseReference"
+              },
+              {
+                "description": "The enterprise that owns the Document Split job."
+              }
+            ]
+          },
+          "failures": {
+            "description": "Errors and warnings that occurred during the document split. `null` when\nno failures were recorded.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/DocumentSplitFailures"
+              },
+              {
+                "title": "OpenAPI 3.0 null schema type",
+                "description": "The definition for a null schema type in OpenAPI `3.0`.",
+                "type": "object",
+                "nullable": true,
+                "additionalProperties": false
+              }
+            ]
+          },
+          "external_id": {
+            "description": "An optional identifier supplied by the caller when the Document Split\njob was created. Returned for correlation only. It is not a Box\nresource ID, is not required to be unique, and cannot be used to\nlook up the job.",
+            "type": "string",
+            "example": "invoice-48291",
+            "maxLength": 255
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "source_file",
+          "destination_folder",
+          "status",
+          "split_input",
+          "input_source"
+        ],
+        "title": "Document Split",
+        "x-box-resource-id": "document_split_v2026.0",
+        "x-box-tag": "document_split"
+      },
+      "DocumentSplitCreateRequest": {
+        "description": "The request body for creating a Document Split job. The `split_input`\nproperty carries the caller-supplied input that determines how the split\nis performed.",
+        "type": "object",
+        "properties": {
+          "source_file_id": {
+            "description": "The ID of the source file to split.",
+            "type": "string",
+            "example": "12345"
+          },
+          "destination_folder_id": {
+            "description": "The ID of the folder where the resulting files will be uploaded.",
+            "type": "string",
+            "example": "14047816008"
+          },
+          "input_source": {
+            "description": "The system that initiated the request, used for analytics and\ntraceability.",
+            "type": "string",
+            "example": "api",
+            "enum": [
+              "api",
+              "box",
+              "relay",
+              "salesforce"
+            ]
+          },
+          "split_input": {
+            "$ref": "#/components/schemas/DocumentSplitCreateRequestType"
+          },
+          "external_id": {
+            "description": "An optional identifier supplied by the caller for this Document Split job.\nThe value is returned on job responses for correlation only. It is not\na Box resource ID, is not required to be unique, and cannot be used to\nlook up the job.",
+            "type": "string",
+            "example": "invoice-48291",
+            "maxLength": 255
+          }
+        },
+        "required": [
+          "source_file_id",
+          "destination_folder_id",
+          "input_source",
+          "split_input"
+        ],
+        "title": "Document Split create request",
+        "x-box-resource-id": "document_split_create_request_v2026.0",
+        "x-box-tag": "document_split"
+      },
+      "DocumentSplitCreateRequestManual": {
+        "description": "Validation rules for creating a Document Split job using caller-supplied page\nranges.",
+        "type": "object",
+        "properties": {
+          "split_type": {
+            "description": "Discriminator. Must be `manual` for this variant.",
+            "type": "string",
+            "example": "manual",
+            "enum": [
+              "manual"
+            ]
+          },
+          "version": {
+            "description": "The version of the manual split input format. Omitted or `v_1` is the\nlegacy `split_definition` format. Existing clients may omit this field.",
+            "type": "string",
+            "example": "v_1",
+            "enum": [
+              "v_1"
+            ]
+          },
+          "split_definition": {
+            "description": "Page ranges that define the split. Each entry produces one output file\ncontaining the inclusive page range `[start, end]`.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DocumentSplitPageRange"
+            },
+            "example": [
+              {
+                "start": 1,
+                "end": 5
+              },
+              {
+                "start": 6,
+                "end": 14
+              }
+            ],
+            "minItems": 1
+          }
+        },
+        "not": {
+          "anyOf": [
+            {
+              "required": [
+                "prompt"
+              ]
+            },
+            {
+              "required": [
+                "page_selection"
+              ]
+            }
+          ]
+        },
+        "required": [
+          "split_type",
+          "split_definition"
+        ],
+        "title": "Document Split manual create request",
+        "x-box-tag": "document_split"
+      },
+      "DocumentSplitCreateRequestPageSelection": {
+        "description": "Validation rules for creating a Document Split job using non-linear page\nselections. Each item produces one output file from the declared page\nsegments.",
+        "type": "object",
+        "properties": {
+          "split_type": {
+            "description": "Discriminator. Must be `page_selection` for this variant.",
+            "type": "string",
+            "example": "page_selection",
+            "enum": [
+              "page_selection"
+            ]
+          },
+          "version": {
+            "description": "The version of the page selection input format. Optional. When provided\nmust be `v_2`.",
+            "type": "string",
+            "example": "v_2",
+            "enum": [
+              "v_2"
+            ]
+          },
+          "page_selection": {
+            "$ref": "#/components/schemas/DocumentSplitPageSelection"
+          }
+        },
+        "not": {
+          "anyOf": [
+            {
+              "required": [
+                "prompt"
+              ]
+            },
+            {
+              "required": [
+                "split_definition"
+              ]
+            }
+          ]
+        },
+        "required": [
+          "split_type",
+          "page_selection"
+        ],
+        "title": "Document Split page selection create request",
+        "x-box-tag": "document_split"
+      },
+      "DocumentSplitCreateRequestSmart": {
+        "description": "Validation rules for creating a Document Split job using Box-generated page\nranges guided by a caller-supplied prompt.",
+        "type": "object",
+        "properties": {
+          "split_type": {
+            "description": "Discriminator. Must be `smart` for this variant.",
+            "type": "string",
+            "example": "smart",
+            "enum": [
+              "smart"
+            ]
+          },
+          "prompt": {
+            "description": "A natural language prompt that guides automatic page range detection.",
+            "type": "string",
+            "example": "Split this contract into one file per signed section.",
+            "minLength": 1
+          }
+        },
+        "not": {
+          "anyOf": [
+            {
+              "required": [
+                "split_definition"
+              ]
+            },
+            {
+              "required": [
+                "page_selection"
+              ]
+            }
+          ]
+        },
+        "required": [
+          "split_type",
+          "prompt"
+        ],
+        "title": "Document Split smart create request",
+        "x-box-tag": "document_split"
+      },
+      "DocumentSplitCreateRequestType": {
+        "description": "Validation rules for the supported Document Split create request types.",
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/DocumentSplitCreateRequestManual"
+          },
+          {
+            "$ref": "#/components/schemas/DocumentSplitCreateRequestPageSelection"
+          },
+          {
+            "$ref": "#/components/schemas/DocumentSplitCreateRequestSmart"
+          }
+        ],
+        "title": "Document Split create request type",
+        "x-box-tag": "document_split"
+      },
+      "DocumentSplitCreateResponse": {
+        "description": "A reference to a newly created Document Split job. Returned when a Document\nSplit job is accepted for asynchronous processing. Clients can poll the\nfull job representation using this ID.",
+        "type": "object",
+        "properties": {
+          "type": {
+            "description": "The value will always be `document_split`.",
+            "type": "string",
+            "example": "document_split",
+            "enum": [
+              "document_split"
+            ]
+          },
+          "id": {
+            "description": "The unique identifier of the created Document Split job.",
+            "type": "string",
+            "example": "1748426"
+          }
+        },
+        "required": [
+          "type",
+          "id"
+        ],
+        "title": "Document Split create response",
+        "x-box-resource-id": "document_split_create_response_v2026.0",
+        "x-box-tag": "document_split"
+      },
+      "DocumentSplitFailures": {
+        "description": "Errors and warnings that occurred during a Document Split job.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/DocumentFailures"
+          }
+        ],
+        "title": "Document Split failures",
+        "x-box-resource-id": "document_split_failures_v2026.0",
+        "x-box-tag": "document_split"
+      },
+      "DocumentSplitOutput": {
+        "description": "The set of files produced by a completed Document Split job.",
+        "type": "object",
+        "properties": {
+          "generated_files": {
+            "description": "References to the files that were created by the split.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FileReference"
+            }
+          },
+          "split_definition": {
+            "description": "The page ranges that Box produced for a `smart` split. Each entry\ncorresponds to one generated file with the inclusive page range\n`[start, end]`. Omitted or `null` for `manual` splits, where the\ncaller-supplied ranges are available in `split_input.split_definition`.\nOmitted for `page_selection` splits, where the caller-supplied page\nlayout is available in `split_input.page_selection`.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DocumentSplitPageRange"
+            },
+            "example": [
+              {
+                "start": 1,
+                "end": 10
+              },
+              {
+                "start": 11,
+                "end": 25
+              }
+            ],
+            "nullable": true
+          }
+        },
+        "title": "Document Split output",
+        "x-box-resource-id": "document_split_output_v2026.0",
+        "x-box-tag": "document_split"
+      },
+      "DocumentSplitPageRange": {
+        "description": "An inclusive page range used to define one slice of a manual Document Split job.",
+        "type": "object",
+        "properties": {
+          "start": {
+            "description": "The first page (inclusive) included in this slice.",
+            "type": "integer",
+            "format": "int32",
+            "example": 1,
+            "minimum": 1
+          },
+          "end": {
+            "description": "The last page (inclusive) included in this slice.",
+            "type": "integer",
+            "format": "int32",
+            "example": 10,
+            "minimum": 1
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "start",
+          "end"
+        ],
+        "title": "Document Split page range",
+        "x-box-tag": "document_split"
+      },
+      "DocumentSplitPageSelection": {
+        "description": "Defines a non-sequential page selection for a Document Split job. Each item\nin the array produces one output PDF assembled from the declared page\nsegments.",
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/DocumentSplitPageSelectionItem"
+        },
+        "example": [
+          {
+            "name": "exhibits",
+            "segments": [
+              {
+                "type": "single_page",
+                "page": 4
+              },
+              {
+                "type": "single_page",
+                "page": 8
+              },
+              {
+                "type": "page_range",
+                "start": 6,
+                "end": 8
+              }
+            ]
+          }
+        ],
+        "minItems": 1,
+        "title": "Document Split page selection",
+        "x-box-tag": "document_split"
+      },
+      "DocumentSplitPageSelectionItem": {
+        "description": "A single output file definition within a page selection request. Each item\nproduces one PDF containing the pages specified by its segments array.",
+        "type": "object",
+        "properties": {
+          "name": {
+            "description": "Optional name for the output file (without extension). When omitted the\nsystem generates a sequential name based on the source file name.",
+            "type": "string",
+            "example": "exhibits",
+            "minLength": 1
+          },
+          "segments": {
+            "description": "An ordered list of page segments to include in this output file. Each\nsegment specifies either a single page or a contiguous page range.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DocumentSplitPageSelectionSegment"
+            },
+            "example": [
+              {
+                "type": "single_page",
+                "page": 4
+              },
+              {
+                "type": "page_range",
+                "start": 6,
+                "end": 8
+              }
+            ],
+            "minItems": 1
+          }
+        },
+        "required": [
+          "segments"
+        ],
+        "title": "Document Split page selection item",
+        "x-box-tag": "document_split"
+      },
+      "DocumentSplitPageSelectionPageRange": {
+        "description": "A page selection segment that includes an inclusive page range from the\nsource document.",
+        "type": "object",
+        "properties": {
+          "type": {
+            "description": "Discriminator. Must be `page_range` for this variant.",
+            "type": "string",
+            "example": "page_range",
+            "enum": [
+              "page_range"
+            ]
+          },
+          "start": {
+            "description": "The first page (inclusive) included in this segment.",
+            "type": "integer",
+            "format": "int32",
+            "example": 6,
+            "minimum": 1
+          },
+          "end": {
+            "description": "The last page (inclusive) included in this segment.",
+            "type": "integer",
+            "format": "int32",
+            "example": 8,
+            "minimum": 1
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "type",
+          "start",
+          "end"
+        ],
+        "title": "Document Split page selection page range",
+        "x-box-tag": "document_split"
+      },
+      "DocumentSplitPageSelectionSegment": {
+        "description": "A single page segment within a page selection item. The `type` field\nidentifies whether the segment is a single page or an inclusive page range.",
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/DocumentSplitPageSelectionSinglePage"
+          },
+          {
+            "$ref": "#/components/schemas/DocumentSplitPageSelectionPageRange"
+          }
+        ],
+        "title": "Document Split page selection segment",
+        "x-box-tag": "document_split"
+      },
+      "DocumentSplitPageSelectionSinglePage": {
+        "description": "A page selection segment that includes a single page from the source\ndocument.",
+        "type": "object",
+        "properties": {
+          "type": {
+            "description": "Discriminator. Must be `single_page` for this variant.",
+            "type": "string",
+            "example": "single_page",
+            "enum": [
+              "single_page"
+            ]
+          },
+          "page": {
+            "description": "A single page number to include.",
+            "type": "integer",
+            "format": "int32",
+            "example": 4,
+            "minimum": 1
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "type",
+          "page"
+        ],
+        "title": "Document Split page selection single page",
+        "x-box-tag": "document_split"
+      },
+      "DocumentSplits": {
+        "description": "A paginated list of Document Split jobs.",
+        "type": "object",
+        "allOf": [
+          {
+            "properties": {
+              "entries": {
+                "description": "A list of Document Split jobs.",
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/DocumentSplit"
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "description": "The part of an API response that describes marker\nbased pagination.",
+            "properties": {
+              "limit": {
+                "description": "The limit that was used for these entries. This will be the same as the\n`limit` query parameter unless that value exceeded the maximum value\nallowed. The maximum value varies by API.",
+                "type": "integer",
+                "format": "int64",
+                "example": 1000
+              },
+              "next_marker": {
+                "description": "The marker for the start of the next page of results.",
+                "type": "string",
+                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                "nullable": true
+              }
+            }
+          }
+        ],
+        "title": "Document Splits",
+        "x-box-resource-id": "document_splits_v2026.0",
+        "x-box-tag": "document_split"
+      },
+      "EnterpriseReference": {
+        "description": "A reference to an enterprise, used when\nnested within another resource.",
+        "type": "object",
+        "properties": {
+          "id": {
+            "description": "The unique identifier for this enterprise.",
+            "type": "string",
+            "example": "1910967"
+          },
+          "type": {
+            "description": "The value will always be `enterprise`.",
+            "type": "string",
+            "example": "enterprise",
+            "enum": [
+              "enterprise"
+            ],
+            "nullable": false
+          }
+        },
+        "required": [
+          "type",
+          "id"
+        ],
+        "title": "Enterprise reference"
+      },
+      "FileReference": {
+        "description": "File reference.",
+        "type": "object",
+        "properties": {
+          "type": {
+            "description": "The value will always be `file`.",
+            "type": "string",
+            "example": "file",
+            "enum": [
+              "file"
+            ],
+            "nullable": false
+          },
+          "id": {
+            "description": "ID of the file.",
+            "type": "string",
+            "example": "42037322",
+            "nullable": false
+          }
+        },
+        "required": [
+          "type",
+          "id"
+        ],
+        "title": "File reference"
       },
       "FolderReference": {
         "description": "Folder reference.",
@@ -1518,9 +2594,14 @@
       "x-box-tag": "automate_workflows"
     },
     {
-      "name": "Convert to Box note",
+      "name": "Convert to Box Note",
       "description": "Create Box Notes from supported source content (for example Markdown).",
       "x-box-tag": "notes"
+    },
+    {
+      "name": "Document Split",
+      "description": "A set of endpoints used to split a paginated source document into multiple\nfiles based on user-defined or AI-generated page ranges.",
+      "x-box-tag": "document_split"
     },
     {
       "name": "Query",
