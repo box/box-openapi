@@ -687,7 +687,7 @@
                                                                 "$ref": "#/components/schemas/SharedLinkOtpWritable"
                                                             },
                                                             {
-                                                                "description": "One-time-passcode (OTP) settings for the shared link."
+                                                                "description": "共有リンクのワンタイムパスコード (OTP) 設定。"
                                                             }
                                                         ]
                                                     }
@@ -1810,7 +1810,7 @@
                     {
                         "name": "digest",
                         "in": "header",
-                        "description": "分割アップロードの[RFC3230][1]メッセージのダイジェスト。\n\n`SHA-1` and `SHA-512` ([RFC5843][2]) are supported. The digest must be base64 encoded. The format of this header is as `sha=BASE64_ENCODED_DIGEST` for `SHA-1`, or `sha-512=BASE64_ENCODED_DIGEST` for `SHA-512`.\n\nTo get the value for the digest, use the openSSL command to encode the file part: `openssl sha1 -binary <FILE_PART_NAME> | base64` for `SHA-1`, or `openssl sha512 -binary <FILE_PART_NAME> | base64` for `SHA-512`.\n\n[1]: https://tools.ietf.org/html/rfc3230\n\n[2]: https://tools.ietf.org/html/rfc5843",
+                        "description": "分割アップロードの[RFC3230][1]メッセージのダイジェスト。\n\n`SHA-1`および`SHA-512` ([RFC5843][2]) がサポートされます。ダイジェストはbase64でエンコードされている必要があります。このヘッダーの形式は、`SHA-1`に対しては`sha=BASE64_ENCODED_DIGEST`、`SHA-512`に対しては`sha-512=BASE64_ENCODED_DIGEST`です。\n\nダイジェストの値を取得するには、openSSLコマンドを使用して、ファイルのパーツをエンコードします (`SHA-1`に対しては`openssl sha1 -binary <FILE_PART_NAME> | base64`、`SHA-512`に対しては`openssl sha512 -binary <FILE_PART_NAME> | base64`)。\n\n[1]: https://tools.ietf.org/html/rfc3230\n\n[2]: https://tools.ietf.org/html/rfc5843",
                         "required": true,
                         "schema": {
                             "type": "string"
@@ -1841,7 +1841,7 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "チャンクは正常にアップロードされました。\n\nThe response always includes `sha512`. It also includes `sha1` if the `Digest` header used `SHA-1`.",
+                        "description": "チャンクは正常にアップロードされました。\n\nレスポンスには常に`sha512`が含まれます。`Digest`ヘッダーに`SHA-1`が使用されている場合は、`sha1`も含まれます。",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -2002,7 +2002,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "アップロードされたパーツのリストを返します。\n\nEach part includes the hash type used to upload it. Parts uploaded with a `SHA-512` `Digest` header don't include `sha1`.",
+                        "description": "アップロードされたパーツのリストを返します。\n\n各パーツに、それをアップロードするために使用するハッシュタイプが含まれています。`SHA-512` `Digest`ヘッダーによってアップロードされたパーツには、`sha1`は含まれません。",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -2137,7 +2137,7 @@
                     {
                         "name": "digest",
                         "in": "header",
-                        "description": "ファイル全体の[RFC3230][1]メッセージのダイジェスト。\n\nサポートされているのはSHA1のみです。SHA1ダイジェストはBase64でエンコードされている必要があります。このヘッダーの形式は、`sha=BASE64_ENCODED_DIGEST`です。\n\n`SHA-512` is not supported for the whole-file digest, even if the parts were uploaded with `SHA-512` digests.\n\n[1]: https://tools.ietf.org/html/rfc3230",
+                        "description": "ファイル全体の[RFC3230][1]メッセージのダイジェスト。\n\nサポートされているのはSHA1のみです。SHA1ダイジェストはBase64でエンコードされている必要があります。このヘッダーの形式は、`sha=BASE64_ENCODED_DIGEST`です。\n\nパーツが`SHA-512`ダイジェストとともにアップロードされた場合であっても、`SHA-512`はファイル全体のダイジェストに対してはサポートされません。\n\n[1]: https://tools.ietf.org/html/rfc3230",
                         "required": true,
                         "schema": {
                             "type": "string"
@@ -2172,7 +2172,7 @@
                                 "type": "object",
                                 "properties": {
                                     "parts": {
-                                        "description": "アップロードされたパーツのリストの詳細。\n\nEach entry can include `sha1` or `sha512`. Include `sha512` on every entry or on none of them. A request where only some entries include `sha512` is rejected.\n\nInclude parts that the server already has, returned as `hits` by the [`Plan upload session`](https://developer.box.com/reference/post-files-upload-sessions-id-plan) endpoint. Use the `part_id`, `offset`, and `size` from the plan response. If the other entries include `sha512`, include the `sha512` value from the plan response. Otherwise, leave the hash out of these entries.",
+                                        "description": "アップロードされたパーツのリストの詳細。\n\n各エントリに`sha1`または`sha512`を含めることができます。`sha512`はすべてのエントリに含めるか、またはどのエントリにも含めないでください。一部のエントリにのみ`sha512`を含むリクエストは、拒否されます。\n\n[`Plan upload session`](https://developer.box.com/reference/post-files-upload-sessions-id-plan)エンドポイントによって`hits`として返された、サーバーにすでに存在するパーツを含めます。planレスポンスからの`part_id`、`offset`、および`size`を使用します。他のエントリに`sha512`が含まれている場合は、planレスポンスから`sha512`の値を含めます。それ以外の場合、これらのエントリにはハッシュを含めません。",
                                         "type": "array",
                                         "items": {
                                             "$ref": "#/components/schemas/UploadPart"
@@ -2209,7 +2209,7 @@
                         }
                     },
                     "400": {
-                        "description": "Returns an error if the request body is not valid.\n\n* `invalid_parts_field` - Only some entries in `parts` include `sha512`. Include `sha512` on every entry or on none of them.",
+                        "description": "リクエスト本文が無効な場合にエラーを返します。\n\n* `invalid_parts_field` - `parts`の一部のエントリにのみ`sha512`が含まれます。`sha512`はすべてのエントリに含めるか、またはどのエントリにも含めないでください。",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -5468,7 +5468,7 @@
                                                                 "$ref": "#/components/schemas/SharedLinkOtpWritable"
                                                             },
                                                             {
-                                                                "description": "One-time-passcode (OTP) settings for the shared link."
+                                                                "description": "共有リンクのワンタイムパスコード (OTP) 設定。"
                                                             }
                                                         ]
                                                     }
@@ -9701,7 +9701,7 @@
             "post": {
                 "operationId": "post_metadata_queries_execute_read",
                 "summary": "メタデータによるファイル/フォルダに対するクエリ",
-                "description": "For new integrations, use the [v2026.0 Query API](https://developer.box.com/reference/v2026.0/query-resources). This is the latest version of the Query API, with advanced capabilities including multi-template queries and Query Insights, and is the API we will continue to enhance with new Query capabilities.\n\nSQLに似た構文で特定のメタデータと一致する項目を返す検索を作成します。\n\nデフォルトでは、このエンドポイントによって、クエリに一致する項目に関する最も基本的な情報のみが返されます。各項目のその他のフィールド (メタデータのいずれかを含む) を取得するには、クエリで`fields`属性を使用します。",
+                "description": "新しい統合には、[クエリAPI v2026.0](https://developer.box.com/reference/v2026.0/query-resources)を使用します。これはクエリAPIの最新バージョンであり、マルチテンプレートクエリやクエリインサイトなどの高度な機能を備え、今後も引き続き新しいクエリ機能によって拡張されていきます。\n\nSQLに似た構文で特定のメタデータと一致する項目を返す検索を作成します。\n\nデフォルトでは、このエンドポイントによって、クエリに一致する項目に関する最も基本的な情報のみが返されます。各項目のその他のフィールド (メタデータのいずれかを含む) を取得するには、クエリで`fields`属性を使用します。",
                 "requestBody": {
                     "content": {
                         "application/json": {
@@ -11905,7 +11905,7 @@
                                                         "$ref": "#/components/schemas/SharedLinkOtpWritable"
                                                     },
                                                     {
-                                                        "description": "One-time-passcode (OTP) settings for the shared link."
+                                                        "description": "共有リンクのワンタイムパスコード (OTP) 設定。"
                                                     }
                                                 ]
                                             }
@@ -12125,7 +12125,7 @@
                                                         "$ref": "#/components/schemas/SharedLinkOtpWritable"
                                                     },
                                                     {
-                                                        "description": "One-time-passcode (OTP) settings for the shared link."
+                                                        "description": "共有リンクのワンタイムパスコード (OTP) 設定。"
                                                     }
                                                 ]
                                             }
@@ -12670,7 +12670,7 @@
                                                         "$ref": "#/components/schemas/SharedLinkOtpWritable"
                                                     },
                                                     {
-                                                        "description": "One-time-passcode (OTP) settings for the shared link."
+                                                        "description": "共有リンクのワンタイムパスコード (OTP) 設定。"
                                                     }
                                                 ]
                                             }
@@ -12890,7 +12890,7 @@
                                                         "$ref": "#/components/schemas/SharedLinkOtpWritable"
                                                     },
                                                     {
-                                                        "description": "One-time-passcode (OTP) settings for the shared link."
+                                                        "description": "共有リンクのワンタイムパスコード (OTP) 設定。"
                                                     }
                                                 ]
                                             }
@@ -13506,7 +13506,7 @@
                                                         "$ref": "#/components/schemas/SharedLinkOtpWritable"
                                                     },
                                                     {
-                                                        "description": "One-time-passcode (OTP) settings for the shared link."
+                                                        "description": "共有リンクのワンタイムパスコード (OTP) 設定。"
                                                     }
                                                 ]
                                             }
@@ -13982,7 +13982,7 @@
                                                         "$ref": "#/components/schemas/SharedLinkOtpWritable"
                                                     },
                                                     {
-                                                        "description": "One-time-passcode (OTP) settings for the shared link."
+                                                        "description": "共有リンクのワンタイムパスコード (OTP) 設定。"
                                                     }
                                                 ]
                                             }
@@ -14202,7 +14202,7 @@
                                                         "$ref": "#/components/schemas/SharedLinkOtpWritable"
                                                     },
                                                     {
-                                                        "description": "One-time-passcode (OTP) settings for the shared link."
+                                                        "description": "共有リンクのワンタイムパスコード (OTP) 設定。"
                                                     }
                                                 ]
                                             }
@@ -15289,7 +15289,7 @@
             "delete": {
                 "operationId": "delete_users_id",
                 "summary": "ユーザーを削除",
-                "description": "ユーザーを削除します。デフォルトでは、ユーザーがまだコンテンツを所有している場合、この操作は失敗します。続行するには、最初にユーザーが所有するコンテンツを移動するか、`force`パラメータを使用してユーザーとそのユーザーが所有するファイルを削除します。\n\nIf the enterprise has a retention policy, including a retired one, or a legal hold that is not fully released, you can't delete a user who owns content, even with `force`. Transfer the user's content first by using the [Transfer owned folders](https://developer.box.com/reference/put-users-id-folders-0) endpoint.",
+                "description": "ユーザーを削除します。デフォルトでは、ユーザーがまだコンテンツを所有している場合、この操作は失敗します。続行するには、最初にユーザーが所有するコンテンツを移動するか、`force`パラメータを使用してユーザーとそのユーザーが所有するファイルを削除します。\n\n企業がリテンションポリシーを設定している場合、それが廃止済みであっても、または完全には解除されていないリーガルホールドであったとしても、コンテンツを所有しているユーザーを削除することはできません。`force`を使用した場合も同様です。まずは[所有フォルダの移動](https://developer.box.com/reference/put-users-id-folders-0)エンドポイントを使用して、そのユーザーのコンテンツを移動してください。",
                 "parameters": [
                     {
                         "name": "user_id",
@@ -15313,7 +15313,7 @@
                     {
                         "name": "force",
                         "in": "query",
-                        "description": "まだファイルを所有している場合でも、ユーザーを削除するかどうかを指定します。\n\nIf the user owns content and the enterprise has a retention policy, including a retired one, or a legal hold that is not fully released, setting `force` to `true` doesn't delete the user. The request returns a `403` error, and you must transfer the user's content before deleting the user.",
+                        "description": "まだファイルを所有している場合でも、ユーザーを削除するかどうかを指定します。\n\nユーザーがコンテンツを所有していて、企業がリテンションポリシー (廃止済みの場合を含む) を設定しているか、完全には解除されていないリーガルホールドがある場合には、`force`を`true`に設定してもユーザーが削除されません。リクエストの結果、`403`エラーが返されます。ユーザーを削除するにはそのユーザーのコンテンツを移動する必要があります。",
                         "schema": {
                             "type": "boolean"
                         },
@@ -15325,7 +15325,7 @@
                         "description": "ユーザーを削除して空のレスポンスを返します。"
                     },
                     "403": {
-                        "description": "Returns an error if the user can't be deleted.\n\n* `forbidden` with the message `User cannot be deleted due to retention policies. Please transfer user content first` when the user owns content and the enterprise has a retention policy, including a retired one, or a legal hold that is not fully released. This applies even if none of the policies apply to the user's content, and even when `force` is set to `true`. Transfer the user's content by using the [Transfer owned folders](https://developer.box.com/reference/put-users-id-folders-0) endpoint, then try again.",
+                        "description": "ユーザーを削除できない場合、エラーを返します。\n\n* ユーザーがコンテンツを所有していて、企業がリテンションポリシー (廃止済みの場合を含む) を設定しているか、完全には解除されていないリーガルホールドがある場合には、`forbidden`とメッセージ`User cannot be deleted due to retention policies. Please transfer user content first`が表示されます。これは、そのユーザーのコンテンツに適用されるポリシーがない場合や、`force`が`true`に設定されている場合でも同様です。[所有フォルダの移動](https://developer.box.com/reference/put-users-id-folders-0)エンドポイントを使用して、そのユーザーのコンテンツを移動してから、再試行してください。",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -25111,7 +25111,7 @@
                         }
                     },
                     "422": {
-                        "description": "The extraction request could not be processed.",
+                        "description": "抽出リクエストを処理できませんでした。",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -25174,7 +25174,7 @@
                         }
                     },
                     "422": {
-                        "description": "The extraction request could not be processed.",
+                        "description": "抽出リクエストを処理できませんでした。",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -31586,20 +31586,20 @@
                                             "one_time_passcode": {
                                                 "allOf": [
                                                     {
-                                                        "title": "Shared link OTP settings",
-                                                        "description": "One-time-passcode (OTP) settings for a shared link. When OTP enforcement is enabled, anonymous users must verify their identity via a one-time-passcode emailed to them before the shared link will grant access.\n\nOTP can only be used with shared links that have an `access` level of `open`. Password protection and OTP cannot be enabled at the same time.",
+                                                        "title": "共有リンクのOTP設定",
+                                                        "description": "共有リンクのワンタイムパスコード (OTP) 設定。OTPの適用が有効になっている場合、匿名ユーザーが共有リンクにアクセスするには、メールで送られてきたワンタイムパスコードを使って認証を受ける必要があります。\n\nOTPは、`access`レベルの`open`が含まれる共有リンクに対してのみ使用できます。パスワード保護とOTPを同時に有効にすることはできません。",
                                                         "type": "object",
                                                         "required": [
                                                             "mode"
                                                         ],
                                                         "properties": {
                                                             "mode": {
-                                                                "description": "The current OTP enforcement mode for the shared link.\n\n* `none` - OTP enforcement is turned off. The shared link is accessible without any one-time-passcode verification.\n* `open` - Any anonymous recipient can request a one-time-passcode to any email address and access the shared link after verifying it. Collaborators and registered Box users access the link without being prompted.\n* `allowlist` - Anonymous recipients can request a one-time-passcode only when they enter an email that matches an entry on the `allowlist`.",
+                                                                "description": "共有リンクの現在のOTP適用モード。\n\n* `none` - OTPの適用がオフです。共有リンクは、ワンタイムパスコードの検証なしでアクセスできます。\n* `open` - すべての匿名受信者が任意のメールアドレスについてワンタイムパスコードをリクエストでき、検証を受けた後で共有リンクにアクセスできます。コラボレータと登録Boxユーザーは、手続き不要でリンクにアクセスできます。\n* `allowlist` - 匿名の受信者は、`allowlist`のエントリと一致するメールアドレスを入力した場合にのみ、ワンタイムパスコードをリクエストできます。",
                                                                 "type": "string",
                                                                 "example": "allowlist"
                                                             },
                                                             "allowlist": {
-                                                                "description": "The list of email and domain entries that are permitted to access the shared link when `mode` is `allowlist`. Anonymous users whose email matches an entry can request and verify a one-time-passcode.\n\nBecause the entries carry recipient email addresses and the identity of the user who added them, this field is only returned to users with owner, co-owner, or editor access on the item. For viewer collaborators and below the field is omitted.\n\nAn allowlist contains at most 1000 entries, matching the limit enforced when setting the allowlist on a shared link.",
+                                                                "description": "`mode`が`allowlist`のとき、共有リンクへのアクセスが許可されるメールエントリおよびドメインエントリのリスト。匿名ユーザーのメールアドレスがこの中のエントリと一致している場合、ワンタイムパスコードをリクエストして認証を受けることができます。\n\nこのエントリには受信者メールアドレスとそれを追加したユーザーの認証情報が含まれるため、このフィールドが返されるのはこの項目に対する所有者、共同所有者、編集者のいずれかのアクセス権を持つユーザーのみとなります。権限がビューアー以下のコラボレータに対しては、このフィールドは省略されます。\n\n1つの許可リストに最大1,000個のエントリを含めることができますが、共有リンクに許可リストを設定したときに適用した制限が適用されます。",
                                                                 "type": "array",
                                                                 "items": {
                                                                     "$ref": "#/components/schemas/SharedLinkOtpAllowlistEntry"
@@ -31629,7 +31629,7 @@
                                                         }
                                                     },
                                                     {
-                                                        "description": "The one-time-passcode (OTP) settings for this shared link.\n\nThis field is always present. For links where OTP does not apply (for example, shared links whose `access` is not `open`), the object is returned with `mode` set to `none`."
+                                                        "description": "この共有リンクのワンタイムパスコード (OTP) 設定。\n\nこのフィールドは常に表示されます。OTPが適用されないリンク (`access`が`open`ではない共有リンクなど) の場合、`mode`が`none`に設定された状態でオブジェクトが返されます。"
                                                     }
                                                 ],
                                                 "nullable": false
@@ -33510,20 +33510,20 @@
                                             "one_time_passcode": {
                                                 "allOf": [
                                                     {
-                                                        "title": "Shared link OTP settings",
-                                                        "description": "One-time-passcode (OTP) settings for a shared link. When OTP enforcement is enabled, anonymous users must verify their identity via a one-time-passcode emailed to them before the shared link will grant access.\n\nOTP can only be used with shared links that have an `access` level of `open`. Password protection and OTP cannot be enabled at the same time.",
+                                                        "title": "共有リンクのOTP設定",
+                                                        "description": "共有リンクのワンタイムパスコード (OTP) 設定。OTPの適用が有効になっている場合、匿名ユーザーが共有リンクにアクセスするには、メールで送られてきたワンタイムパスコードを使って認証を受ける必要があります。\n\nOTPは、`access`レベルの`open`が含まれる共有リンクに対してのみ使用できます。パスワード保護とOTPを同時に有効にすることはできません。",
                                                         "type": "object",
                                                         "required": [
                                                             "mode"
                                                         ],
                                                         "properties": {
                                                             "mode": {
-                                                                "description": "The current OTP enforcement mode for the shared link.\n\n* `none` - OTP enforcement is turned off. The shared link is accessible without any one-time-passcode verification.\n* `open` - Any anonymous recipient can request a one-time-passcode to any email address and access the shared link after verifying it. Collaborators and registered Box users access the link without being prompted.\n* `allowlist` - Anonymous recipients can request a one-time-passcode only when they enter an email that matches an entry on the `allowlist`.",
+                                                                "description": "共有リンクの現在のOTP適用モード。\n\n* `none` - OTPの適用がオフです。共有リンクは、ワンタイムパスコードの検証なしでアクセスできます。\n* `open` - すべての匿名受信者が任意のメールアドレスについてワンタイムパスコードをリクエストでき、検証を受けた後で共有リンクにアクセスできます。コラボレータと登録Boxユーザーは、手続き不要でリンクにアクセスできます。\n* `allowlist` - 匿名の受信者は、`allowlist`のエントリと一致するメールアドレスを入力した場合にのみ、ワンタイムパスコードをリクエストできます。",
                                                                 "type": "string",
                                                                 "example": "allowlist"
                                                             },
                                                             "allowlist": {
-                                                                "description": "The list of email and domain entries that are permitted to access the shared link when `mode` is `allowlist`. Anonymous users whose email matches an entry can request and verify a one-time-passcode.\n\nBecause the entries carry recipient email addresses and the identity of the user who added them, this field is only returned to users with owner, co-owner, or editor access on the item. For viewer collaborators and below the field is omitted.\n\nAn allowlist contains at most 1000 entries, matching the limit enforced when setting the allowlist on a shared link.",
+                                                                "description": "`mode`が`allowlist`のとき、共有リンクへのアクセスが許可されるメールエントリおよびドメインエントリのリスト。匿名ユーザーのメールアドレスがこの中のエントリと一致している場合、ワンタイムパスコードをリクエストして認証を受けることができます。\n\nこのエントリには受信者メールアドレスとそれを追加したユーザーの認証情報が含まれるため、このフィールドが返されるのはこの項目に対する所有者、共同所有者、編集者のいずれかのアクセス権を持つユーザーのみとなります。権限がビューアー以下のコラボレータに対しては、このフィールドは省略されます。\n\n1つの許可リストに最大1,000個のエントリを含めることができますが、共有リンクに許可リストを設定したときに適用した制限が適用されます。",
                                                                 "type": "array",
                                                                 "items": {
                                                                     "$ref": "#/components/schemas/SharedLinkOtpAllowlistEntry"
@@ -33553,7 +33553,7 @@
                                                         }
                                                     },
                                                     {
-                                                        "description": "The one-time-passcode (OTP) settings for this shared link.\n\nThis field is always present. For links where OTP does not apply (for example, shared links whose `access` is not `open`), the object is returned with `mode` set to `none`."
+                                                        "description": "この共有リンクのワンタイムパスコード (OTP) 設定。\n\nこのフィールドは常に表示されます。OTPが適用されないリンク (`access`が`open`ではない共有リンクなど) の場合、`mode`が`none`に設定された状態でオブジェクトが返されます。"
                                                     }
                                                 ],
                                                 "nullable": false
@@ -35345,7 +35345,7 @@
                         ]
                     },
                     "entries": {
-                        "description": "A list of entries in the metadata card.",
+                        "description": "メタデータカード内のエントリのリスト。",
                         "type": "array",
                         "items": {
                             "type": "object",
@@ -37903,11 +37903,11 @@
                 "x-box-tag": "session_termination"
             },
             "SharedLinkOtpAllowlistEntry": {
-                "description": "An entry on the OTP allowlist for a shared link. The entry can match either a specific email address or every email address that belongs to a domain.",
+                "description": "共有リンクのOTP許可リストのエントリ。このエントリは、特定のメールアドレスと一致するか、特定のドメインに属する全メールアドレスと一致します。",
                 "type": "object",
                 "properties": {
                     "type": {
-                        "description": "The kind of allowlist entry.\n\n* `email` - The entry matches a single email address.\n* `domain` - The entry matches every email address under the given domain.",
+                        "description": "許可リストのエントリの種類。\n\n* `email` - エントリは単一のメールアドレスと一致します。\n* `domain` - エントリは指定されたドメイン配下の全メールアドレスと一致します。",
                         "type": "string",
                         "example": "email",
                         "enum": [
@@ -37916,12 +37916,12 @@
                         ]
                     },
                     "value": {
-                        "description": "The value of the allowlist entry.\n\n* For `email` entries, the full email address (must contain `@`).\n* For `domain` entries, the bare domain (e.g. `example.com`).",
+                        "description": "許可リストのエントリの値。\n\n* `email`エントリについては、完全なメールアドレスです (必ず`@`を含む)。\n* `domain`エントリについては、ベアドメインです (`example.com`など)。",
                         "type": "string",
                         "example": "alice@example.com"
                     },
                     "created_at": {
-                        "description": "The date and time when the allowlist entry was added.",
+                        "description": "許可リストのエントリが追加された日時。",
                         "type": "string",
                         "format": "date-time",
                         "example": "2026-05-19T12:00:00Z"
@@ -37932,7 +37932,7 @@
                                 "$ref": "#/components/schemas/User--Base"
                             },
                             {
-                                "description": "User who added this entry."
+                                "description": "このエントリを追加したユーザー。"
                             }
                         ]
                     }
@@ -37943,14 +37943,14 @@
                     "created_at",
                     "created_by"
                 ],
-                "title": "Shared link OTP allowlist entry"
+                "title": "共有リンクのOTP許可リストのエントリ"
             },
             "SharedLinkOtpAllowlistEntryWritable": {
-                "description": "An entry used to write the OTP allowlist for a shared link. The entry can match either a specific email address or every email address that belongs to a domain.",
+                "description": "共有リンクのOTP許可リストの作成に使用されるエントリ。このエントリは、特定のメールアドレスと一致するか、特定のドメインに属する全メールアドレスと一致します。",
                 "type": "object",
                 "properties": {
                     "type": {
-                        "description": "The kind of allowlist entry.\n\n* `email` - The entry matches a single email address.\n* `domain` - The entry matches every email address under the given domain.",
+                        "description": "許可リストのエントリの種類。\n\n* `email` - エントリは単一のメールアドレスと一致します。\n* `domain` - エントリは指定されたドメイン配下の全メールアドレスと一致します。",
                         "type": "string",
                         "example": "email",
                         "enum": [
@@ -37959,7 +37959,7 @@
                         ]
                     },
                     "value": {
-                        "description": "The value of the allowlist entry.\n\n* For `email` entries, the full email address (must contain `@`).\n* For `domain` entries, the bare domain (e.g. `example.com`).",
+                        "description": "許可リストのエントリの値。\n\n* `email`エントリについては、完全なメールアドレスです (必ず`@`を含む)。\n* `domain`エントリについては、ベアドメインです (`example.com`など)。",
                         "type": "string",
                         "example": "alice@example.com"
                     }
@@ -37968,10 +37968,10 @@
                     "type",
                     "value"
                 ],
-                "title": "Shared link OTP allowlist entry (Write)"
+                "title": "共有リンクのOTP許可リストのエントリ (書き込み)"
             },
             "SharedLinkOtpWritable": {
-                "description": "One-time-passcode (OTP) settings for a shared link. When OTP enforcement is enabled, anonymous users must verify their identity via a one-time-passcode emailed to them before the shared link will grant access.\n\nOTP can only be used with shared links that have an `access` level of `open`. Password protection and OTP cannot be enabled at the same time.",
+                "description": "共有リンクのワンタイムパスコード (OTP) 設定。OTPの適用が有効になっている場合、匿名ユーザーが共有リンクにアクセスするには、メールで送られてきたワンタイムパスコードを使って認証を受ける必要があります。\n\nOTPは、`access`レベルの`open`が含まれる共有リンクに対してのみ使用できます。パスワード保護とOTPを同時に有効にすることはできません。",
                 "oneOf": [
                     {
                         "$ref": "#/components/schemas/SharedLinkOtpWritableNone"
@@ -37983,14 +37983,14 @@
                         "$ref": "#/components/schemas/SharedLinkOtpWritableAllowlist"
                     }
                 ],
-                "title": "Shared link OTP settings (Write)"
+                "title": "共有リンクのOTP設定 (書き込み)"
             },
             "SharedLinkOtpWritableAllowlist": {
-                "description": "Anonymous recipients can request a one-time-passcode only when they enter an email that matches an entry on the `allowlist`.",
+                "description": "匿名の受信者は、`allowlist`のエントリと一致するメールアドレスを入力した場合にのみ、ワンタイムパスコードをリクエストできます。",
                 "type": "object",
                 "properties": {
                     "mode": {
-                        "description": "Set to `allowlist` to restrict OTP requests to emails matching an entry on the `allowlist`.",
+                        "description": "`allowlist`に設定すると、`allowlist`のエントリと一致するメールアドレスのみに、OTPリクエストが限定されます。",
                         "type": "string",
                         "example": "allowlist",
                         "enum": [
@@ -37998,7 +37998,7 @@
                         ]
                     },
                     "allowlist": {
-                        "description": "The list of email and domain entries that are permitted to access the shared link when `mode` is `allowlist`. Anonymous users whose email matches an entry can request and verify a one-time-passcode.\n\nProviding this field replaces the entire existing allowlist; passing an empty array clears all entries. Required when `mode` is `allowlist`.",
+                        "description": "`mode`が`allowlist`のとき、共有リンクへのアクセスが許可されるメールエントリおよびドメインエントリのリスト。匿名ユーザーのメールアドレスがこの中のエントリと一致している場合、ワンタイムパスコードをリクエストして認証を受けることができます。\n\nこのフィールドを指定すると、既存の許可リストが丸ごと置き換えられ、空の配列が渡されて全エントリがクリアされます。`mode`が`allowlist`の場合、必須です。",
                         "type": "array",
                         "items": {
                             "$ref": "#/components/schemas/SharedLinkOtpAllowlistEntryWritable"
@@ -38020,14 +38020,14 @@
                     "mode",
                     "allowlist"
                 ],
-                "title": "OTP allowlist"
+                "title": "OTP許可リスト"
             },
             "SharedLinkOtpWritableNone": {
-                "description": "One-time-passcode (OTP) enforcement is turned off. The shared link is accessible without any one-time-passcode verification.",
+                "description": "ワンタイムパスコード (OTP) の適用がオフです。共有リンクは、ワンタイムパスコードの検証なしでアクセスできます。",
                 "type": "object",
                 "properties": {
                     "mode": {
-                        "description": "Set to `none` to disable OTP enforcement for the shared link.",
+                        "description": "`none`に設定すると、共有リンクのOTPの適用が無効になります。",
                         "type": "string",
                         "example": "none",
                         "enum": [
@@ -38038,14 +38038,14 @@
                 "required": [
                     "mode"
                 ],
-                "title": "OTP turned off"
+                "title": "OTPオフ"
             },
             "SharedLinkOtpWritableOpen": {
-                "description": "Any anonymous recipient can request a one-time-passcode to any email address and access the shared link after verifying it. Collaborators and registered Box users access the link without being prompted.",
+                "description": "すべての匿名受信者が任意のメールアドレスに対してワンタイムパスコードをリクエストでき、検証を受けた後で共有リンクにアクセスできます。コラボレータと登録Boxユーザーは、手続き不要でリンクにアクセスできます。",
                 "type": "object",
                 "properties": {
                     "mode": {
-                        "description": "Set to `open` to allow any anonymous recipient to request a one-time-passcode to any email address.",
+                        "description": "`open`に設定すると、すべての匿名受信者が任意のメールアドレスに対してワンタイムパスコードをリクエストできます。",
                         "type": "string",
                         "example": "open",
                         "enum": [
@@ -38056,7 +38056,7 @@
                 "required": [
                     "mode"
                 ],
-                "title": "OTP open"
+                "title": "OTPオープン"
             },
             "ShieldInformationBarrier": {
                 "description": "Shield情報バリアオブジェクトのStandard版の表示。",
@@ -41418,7 +41418,7 @@
                         "example": 1000
                     },
                     "entries": {
-                        "description": "A list of entries for the card. This represents the individual entries of the transcription.",
+                        "description": "カードのエントリのリスト。これは、書き起こしの個々のエントリを表します。",
                         "type": "array",
                         "items": {
                             "type": "object",
@@ -42862,7 +42862,7 @@
                                 "example": "134b65991ed521fcfe4724b7d814ab8ded5185dc"
                             },
                             "sha512": {
-                                "description": "The `SHA-512` hash of the chunk, as a hex string of 128 lower case characters.",
+                                "description": "チャンクの`SHA-512`ハッシュ。128個の英小文字からなる16進文字列です。",
                                 "type": "string",
                                 "example": "ae78a0ca28abffe70ac9aba830556cd6eb3fcf1501dbd9b2d7a5f45992c00812cb07b51bbd0a9174e2295671c0e86f30354afa91d281d4fbee6a323a483d6383"
                             }
@@ -42922,7 +42922,7 @@
                         "example": 8388608
                     },
                     "sha512": {
-                        "description": "The `SHA-512` hash of the chunk, as a hex string of 128 lower case characters.",
+                        "description": "チャンクの`SHA-512`ハッシュ。128個の英小文字からなる16進文字列です。",
                         "type": "string",
                         "example": "ae78a0ca28abffe70ac9aba830556cd6eb3fcf1501dbd9b2d7a5f45992c00812cb07b51bbd0a9174e2295671c0e86f30354afa91d281d4fbee6a323a483d6383"
                     }
@@ -42953,7 +42953,7 @@
                         "example": 8388608
                     },
                     "sha512": {
-                        "description": "The `SHA-512` hash of the chunk, as a hex string of 128 lower case characters.",
+                        "description": "チャンクの`SHA-512`ハッシュ。128個の英小文字からなる16進文字列です。",
                         "type": "string",
                         "example": "ae78a0ca28abffe70ac9aba830556cd6eb3fcf1501dbd9b2d7a5f45992c00812cb07b51bbd0a9174e2295671c0e86f30354afa91d281d4fbee6a323a483d6383"
                     },
@@ -43065,7 +43065,7 @@
                         "example": "2012-12-12T10:53:43-08:00"
                     },
                     "part_size": {
-                        "description": "The size in bytes that must be used for all parts of the upload.\n\n最後の部分のみ、これより小さいサイズを使用できます。",
+                        "description": "アップロードのすべての部分で使用する必要があるサイズ (バイト単位)。\n\n最後の部分のみ、これより小さいサイズを使用できます。",
                         "type": "integer",
                         "format": "int64",
                         "example": 1024
@@ -43077,7 +43077,7 @@
                         "example": 1000
                     },
                     "num_parts_processed": {
-                        "description": "アップロードが完了し、サーバーで処理されたパーツの数。値は`0`から始まります。\n\nWhen committing a file, inspecting this property can provide insight if all parts have been uploaded correctly.",
+                        "description": "アップロードが完了し、サーバーで処理されたパーツの数。値は`0`から始まります。\n\nファイルをコミットするときにこのプロパティを調べることで、すべてのパーツが正しくアップロードされているかどうかを確認できます。",
                         "type": "integer",
                         "format": "int32",
                         "example": 455
@@ -44180,20 +44180,20 @@
                                             "one_time_passcode": {
                                                 "allOf": [
                                                     {
-                                                        "title": "Shared link OTP settings",
-                                                        "description": "One-time-passcode (OTP) settings for a shared link. When OTP enforcement is enabled, anonymous users must verify their identity via a one-time-passcode emailed to them before the shared link will grant access.\n\nOTP can only be used with shared links that have an `access` level of `open`. Password protection and OTP cannot be enabled at the same time.",
+                                                        "title": "共有リンクのOTP設定",
+                                                        "description": "共有リンクのワンタイムパスコード (OTP) 設定。OTPの適用が有効になっている場合、匿名ユーザーが共有リンクにアクセスするには、メールで送られてきたワンタイムパスコードを使って認証を受ける必要があります。\n\nOTPは、`access`レベルの`open`が含まれる共有リンクに対してのみ使用できます。パスワード保護とOTPを同時に有効にすることはできません。",
                                                         "type": "object",
                                                         "required": [
                                                             "mode"
                                                         ],
                                                         "properties": {
                                                             "mode": {
-                                                                "description": "The current OTP enforcement mode for the shared link.\n\n* `none` - OTP enforcement is turned off. The shared link is accessible without any one-time-passcode verification.\n* `open` - Any anonymous recipient can request a one-time-passcode to any email address and access the shared link after verifying it. Collaborators and registered Box users access the link without being prompted.\n* `allowlist` - Anonymous recipients can request a one-time-passcode only when they enter an email that matches an entry on the `allowlist`.",
+                                                                "description": "共有リンクの現在のOTP適用モード。\n\n* `none` - OTPの適用がオフです。共有リンクは、ワンタイムパスコードの検証なしでアクセスできます。\n* `open` - すべての匿名受信者が任意のメールアドレスについてワンタイムパスコードをリクエストでき、検証を受けた後で共有リンクにアクセスできます。コラボレータと登録Boxユーザーは、手続き不要でリンクにアクセスできます。\n* `allowlist` - 匿名の受信者は、`allowlist`のエントリと一致するメールアドレスを入力した場合にのみ、ワンタイムパスコードをリクエストできます。",
                                                                 "type": "string",
                                                                 "example": "allowlist"
                                                             },
                                                             "allowlist": {
-                                                                "description": "The list of email and domain entries that are permitted to access the shared link when `mode` is `allowlist`. Anonymous users whose email matches an entry can request and verify a one-time-passcode.\n\nBecause the entries carry recipient email addresses and the identity of the user who added them, this field is only returned to users with owner, co-owner, or editor access on the item. For viewer collaborators and below the field is omitted.\n\nAn allowlist contains at most 1000 entries, matching the limit enforced when setting the allowlist on a shared link.",
+                                                                "description": "`mode`が`allowlist`のとき、共有リンクへのアクセスが許可されるメールエントリおよびドメインエントリのリスト。匿名ユーザーのメールアドレスがこの中のエントリと一致している場合、ワンタイムパスコードをリクエストして認証を受けることができます。\n\nこのエントリには受信者メールアドレスとそれを追加したユーザーの認証情報が含まれるため、このフィールドが返されるのはこの項目に対する所有者、共同所有者、編集者のいずれかのアクセス権を持つユーザーのみとなります。権限がビューアー以下のコラボレータに対しては、このフィールドは省略されます。\n\n1つの許可リストに最大1,000個のエントリを含めることができますが、共有リンクに許可リストを設定したときに適用した制限が適用されます。",
                                                                 "type": "array",
                                                                 "items": {
                                                                     "$ref": "#/components/schemas/SharedLinkOtpAllowlistEntry"
@@ -44223,7 +44223,7 @@
                                                         }
                                                     },
                                                     {
-                                                        "description": "The one-time-passcode (OTP) settings for this shared link.\n\nThis field is always present. For links where OTP does not apply (for example, shared links whose `access` is not `open`), the object is returned with `mode` set to `none`."
+                                                        "description": "この共有リンクのワンタイムパスコード (OTP) 設定。\n\nこのフィールドは常に表示されます。OTPが適用されないリンク (`access`が`open`ではない共有リンクなど) の場合、`mode`が`none`に設定された状態でオブジェクトが返されます。"
                                                     }
                                                 ],
                                                 "nullable": false
