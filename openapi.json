@@ -14,7 +14,7 @@
       "url": "https://www.apache.org/licenses/LICENSE-2.0"
     },
     "version": "2024.0",
-    "x-box-commit-hash": "0274a35f73"
+    "x-box-commit-hash": "e34422e289"
   },
   "servers": [
     {
@@ -19787,7 +19787,8 @@
                 "folder",
                 "user",
                 "ownership",
-                "interactions"
+                "interactions",
+                "metadata_template"
               ]
             },
             "example": "file"
@@ -19873,7 +19874,7 @@
       "post": {
         "operationId": "post_legal_hold_policy_assignments",
         "summary": "Assign legal hold policy",
-        "description": "Assign a legal hold to an item type of: file, file version, folder, user, ownership, or interactions.",
+        "description": "Assign a legal hold to an item type of: file, file version, folder, user, ownership, interactions, or metadata template.",
         "requestBody": {
           "content": {
             "application/json": {
@@ -19899,7 +19900,8 @@
                           "folder",
                           "user",
                           "ownership",
-                          "interactions"
+                          "interactions",
+                          "metadata_template"
                         ]
                       },
                       "id": {
@@ -19912,6 +19914,13 @@
                       "type",
                       "id"
                     ]
+                  },
+                  "filter_fields": {
+                    "description": "List of metadata template field filters. Only required when `assign_to.type` is `metadata_template`.",
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/LegalHoldPolicyAssignmentFilterField"
+                    }
                   }
                 },
                 "required": [
@@ -35493,6 +35502,12 @@
                     "type": "integer",
                     "format": "int64",
                     "example": 6
+                  },
+                  "metadata_template": {
+                    "description": "The number of metadata templates this policy is applied to.",
+                    "type": "integer",
+                    "format": "int64",
+                    "example": 1
                   }
                 }
               },
@@ -35595,7 +35610,8 @@
               "folder",
               "user",
               "ownership",
-              "interactions"
+              "interactions",
+              "metadata_template"
             ]
           },
           "id": {
@@ -35611,7 +35627,7 @@
         "title": "Legal hold policy item"
       },
       "LegalHoldPolicyAssignment": {
-        "description": "Legal Hold Assignments are used to assign Legal Hold\nPolicies to an item type of: Users, Folders, Files, File Versions, Ownership, or Interactions.\n\nCreating a Legal Hold Assignment puts a hold\non the File-Versions that belong to the Assignment's\n'apply-to' entity.",
+        "description": "Legal Hold Assignments are used to assign Legal Hold\nPolicies to an item type of: Users, Folders, Files, File Versions, Ownership, Interactions, or Metadata Templates.\n\nCreating a Legal Hold Assignment puts a hold\non the File-Versions that belong to the Assignment's\n'apply-to' entity.",
         "type": "object",
         "allOf": [
           {
@@ -35660,6 +35676,13 @@
                 "type": "string",
                 "format": "date-time",
                 "example": "2012-12-12T10:53:43-08:00"
+              },
+              "filter_fields": {
+                "description": "List of metadata template field filters. Only present when `assigned_to.type` is `metadata_template`.",
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/LegalHoldPolicyAssignmentFilterField"
+                }
               }
             }
           }
@@ -35694,6 +35717,27 @@
           "base",
           "standard"
         ]
+      },
+      "LegalHoldPolicyAssignmentFilterField": {
+        "description": "A metadata template field filter for a legal hold policy assignment.",
+        "type": "object",
+        "properties": {
+          "field": {
+            "description": "The ID of the metadata template field to filter on.",
+            "type": "string",
+            "example": "a0f4ee4e-1dc1-4h90-a8a9-aef55fc681d4"
+          },
+          "value": {
+            "description": "The value of the metadata template field to filter on.",
+            "type": "string",
+            "example": "0c27b756-0p87-4fe0-a43a-59fb661ccc4e"
+          }
+        },
+        "required": [
+          "field",
+          "value"
+        ],
+        "title": "Legal hold policy assignment filter field"
       },
       "LegalHoldPolicyAssignments": {
         "description": "A list of legal hold policies assignments.",
