@@ -14,7 +14,7 @@
             "url": "https://www.apache.org/licenses/LICENSE-2.0"
         },
         "version": "2024.0",
-        "x-box-commit-hash": "0274a35f73"
+        "x-box-commit-hash": "e34422e289"
     },
     "servers": [
         {
@@ -19787,7 +19787,8 @@
                                 "folder",
                                 "user",
                                 "ownership",
-                                "interactions"
+                                "interactions",
+                                "metadata_template"
                             ]
                         },
                         "example": "file"
@@ -19873,7 +19874,7 @@
             "post": {
                 "operationId": "post_legal_hold_policy_assignments",
                 "summary": "リーガルホールドポリシーを割り当て",
-                "description": "file、file_version、folder、user、ownership、またはinteractionsの項目タイプにリーガルホールドを割り当てます。",
+                "description": "Assign a legal hold to an item type of: file, file version, folder, user, ownership, interactions, or metadata template.",
                 "requestBody": {
                     "content": {
                         "application/json": {
@@ -19899,7 +19900,8 @@
                                                     "folder",
                                                     "user",
                                                     "ownership",
-                                                    "interactions"
+                                                    "interactions",
+                                                    "metadata_template"
                                                 ]
                                             },
                                             "id": {
@@ -19912,6 +19914,13 @@
                                             "type",
                                             "id"
                                         ]
+                                    },
+                                    "filter_fields": {
+                                        "description": "List of metadata template field filters. Only required when `assign_to.type` is `metadata_template`.",
+                                        "type": "array",
+                                        "items": {
+                                            "$ref": "#/components/schemas/LegalHoldPolicyAssignmentFilterField"
+                                        }
                                     }
                                 },
                                 "required": [
@@ -35493,6 +35502,12 @@
                                         "type": "integer",
                                         "format": "int64",
                                         "example": 6
+                                    },
+                                    "metadata_template": {
+                                        "description": "The number of metadata templates this policy is applied to.",
+                                        "type": "integer",
+                                        "format": "int64",
+                                        "example": 1
                                     }
                                 }
                             },
@@ -35595,7 +35610,8 @@
                             "folder",
                             "user",
                             "ownership",
-                            "interactions"
+                            "interactions",
+                            "metadata_template"
                         ]
                     },
                     "id": {
@@ -35611,7 +35627,7 @@
                 "title": "リーガルホールドポリシーの項目"
             },
             "LegalHoldPolicyAssignment": {
-                "description": "リーガルホールド割り当ては、ユーザー、フォルダ、ファイル、ファイルバージョン、所有権、操作にリーガルホールドポリシーを割り当てる目的に使用されます。\n\nリーガルホールド割り当てを作成すると、その割り当ての「apply-to」エンティティに属するファイルバージョンにホールドが適用されます。",
+                "description": "Legal Hold Assignments are used to assign Legal Hold Policies to an item type of: Users, Folders, Files, File Versions, Ownership, Interactions, or Metadata Templates.\n\nリーガルホールド割り当てを作成すると、その割り当ての「apply-to」エンティティに属するファイルバージョンにホールドが適用されます。",
                 "type": "object",
                 "allOf": [
                     {
@@ -35660,6 +35676,13 @@
                                 "type": "string",
                                 "format": "date-time",
                                 "example": "2012-12-12T10:53:43-08:00"
+                            },
+                            "filter_fields": {
+                                "description": "List of metadata template field filters. Only present when `assigned_to.type` is `metadata_template`.",
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/LegalHoldPolicyAssignmentFilterField"
+                                }
                             }
                         }
                     }
@@ -35694,6 +35717,27 @@
                     "base",
                     "standard"
                 ]
+            },
+            "LegalHoldPolicyAssignmentFilterField": {
+                "description": "A metadata template field filter for a legal hold policy assignment.",
+                "type": "object",
+                "properties": {
+                    "field": {
+                        "description": "The ID of the metadata template field to filter on.",
+                        "type": "string",
+                        "example": "a0f4ee4e-1dc1-4h90-a8a9-aef55fc681d4"
+                    },
+                    "value": {
+                        "description": "The value of the metadata template field to filter on.",
+                        "type": "string",
+                        "example": "0c27b756-0p87-4fe0-a43a-59fb661ccc4e"
+                    }
+                },
+                "required": [
+                    "field",
+                    "value"
+                ],
+                "title": "Legal hold policy assignment filter field"
             },
             "LegalHoldPolicyAssignments": {
                 "description": "リーガルホールドポリシー割り当てのリスト。",
@@ -39269,7 +39313,7 @@
                         "nullable": true
                     },
                     "suppress_notifications": {
-                        "description": "If true, no emails about the sign request are sent. The `embed_url_external_user_id` parameter is required when using `suppress_notifications` for a signer.",
+                        "description": "trueの場合、署名リクエストに関するメールは送信されません。`embed_url_external_user_id`パラメータは、署名者に`suppress_notifications`を使用する場合に必須です。",
                         "type": "boolean",
                         "example": false,
                         "nullable": true
