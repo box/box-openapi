@@ -14,7 +14,7 @@
             "url": "https://www.apache.org/licenses/LICENSE-2.0"
         },
         "version": "2024.0",
-        "x-box-commit-hash": "e34422e289"
+        "x-box-commit-hash": "d1f2984418"
     },
     "servers": [
         {
@@ -39323,6 +39323,24 @@
                         "type": "string",
                         "example": "en",
                         "nullable": true
+                    },
+                    "verification_method": {
+                        "description": "The verification method for the signer.",
+                        "example": {
+                            "type": "login"
+                        },
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/SignRequestSignerVerificationMethod"
+                            },
+                            {
+                                "title": "OpenAPI 3.0 null schema type",
+                                "description": "The definition for a null schema type in OpenAPI `3.0`.",
+                                "type": "object",
+                                "nullable": true,
+                                "additionalProperties": false
+                            }
+                        ]
                     }
                 },
                 "title": "Box Signリクエストオブジェクトを作成するための署名者フィールド。"
@@ -39840,6 +39858,81 @@
                     "validation_type"
                 ],
                 "title": "署名リクエストの署名者入力の郵便番号検証"
+            },
+            "SignRequestSignerVerificationMethod": {
+                "description": "A verification method for a signer in a Sign Request. This property can be used instead of the `login_required` and `verification_phone_number` properties. If this property is used, the `login_required` and `verification_phone_number` properties will be ignored.",
+                "oneOf": [
+                    {
+                        "$ref": "#/components/schemas/SignRequestSignerVerificationMethodLogin"
+                    },
+                    {
+                        "$ref": "#/components/schemas/SignRequestSignerVerificationMethodPhoneSMS"
+                    },
+                    {
+                        "$ref": "#/components/schemas/SignRequestSignerVerificationMethodCacPiv"
+                    }
+                ],
+                "title": "Verification method for Sign Request Signer"
+            },
+            "SignRequestSignerVerificationMethodCacPiv": {
+                "description": "The verification method to be used when user has to verify themselves using a CAC/PIV smart-card.",
+                "type": "object",
+                "properties": {
+                    "type": {
+                        "description": "The type of verification method.",
+                        "type": "string",
+                        "example": "cac_piv",
+                        "enum": [
+                            "cac_piv"
+                        ]
+                    }
+                },
+                "required": [
+                    "type"
+                ],
+                "title": "CAC/PIV Signer Verification Method"
+            },
+            "SignRequestSignerVerificationMethodLogin": {
+                "description": "When used as a verification method the signer will need to log in to a Box account before signing the request. If the signer does not have an existing account, they will have the option to create a free Box account.",
+                "type": "object",
+                "properties": {
+                    "type": {
+                        "description": "The type of verification method.",
+                        "type": "string",
+                        "example": "login",
+                        "enum": [
+                            "login"
+                        ]
+                    }
+                },
+                "required": [
+                    "type"
+                ],
+                "title": "Login Signer Verification Method"
+            },
+            "SignRequestSignerVerificationMethodPhoneSMS": {
+                "description": "When used as a verification method, prior to signing the document, the signer will have to verify themselves using two-factor authentication by receiving an SMS message on their phone.",
+                "type": "object",
+                "properties": {
+                    "type": {
+                        "description": "The type of verification method.",
+                        "type": "string",
+                        "example": "phone",
+                        "enum": [
+                            "phone"
+                        ]
+                    },
+                    "phone_number": {
+                        "description": "The phone number to where the message will be sent.",
+                        "type": "string",
+                        "example": "+316314578901"
+                    }
+                },
+                "required": [
+                    "type",
+                    "phone_number"
+                ],
+                "title": "Phone SMS Signer Verification Method"
             },
             "SignTemplate": {
                 "description": "Box Signテンプレートオブジェクト。",
@@ -40820,6 +40913,24 @@
                         "type": "boolean",
                         "example": true,
                         "nullable": true
+                    },
+                    "verification_method": {
+                        "description": "The verification method for the signer.",
+                        "example": {
+                            "type": "login"
+                        },
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/TemplateSignerVerificationMethod"
+                            },
+                            {
+                                "title": "OpenAPI 3.0 null schema type",
+                                "description": "The definition for a null schema type in OpenAPI `3.0`.",
+                                "type": "object",
+                                "nullable": true,
+                                "additionalProperties": false
+                            }
+                        ]
                     }
                 },
                 "title": "テンプレートの署名者フィールド"
@@ -40972,6 +41083,75 @@
                     "page_index"
                 ],
                 "title": "テンプレートの署名者の入力"
+            },
+            "TemplateSignerVerificationMethod": {
+                "description": "A verification method for a signer in a Sign Request Template. This property can be used instead of the `login_required`, `is_phone_number_required` properties. If this property is used, the `login_required` and `is_phone_number_required` properties will be ignored.",
+                "oneOf": [
+                    {
+                        "$ref": "#/components/schemas/TemplateSignerVerificationMethodLogin"
+                    },
+                    {
+                        "$ref": "#/components/schemas/TemplateSignerVerificationMethodPhoneSMS"
+                    },
+                    {
+                        "$ref": "#/components/schemas/TemplateSignerVerificationMethodCacPiv"
+                    }
+                ],
+                "title": "Verification method for Sign Request Template Signer"
+            },
+            "TemplateSignerVerificationMethodCacPiv": {
+                "description": "The verification method to be used when user has to verify themselves using a CAC/PIV smart-card.",
+                "type": "object",
+                "properties": {
+                    "type": {
+                        "description": "The type of verification method.",
+                        "type": "string",
+                        "example": "cac_piv",
+                        "enum": [
+                            "cac_piv"
+                        ]
+                    }
+                },
+                "required": [
+                    "type"
+                ],
+                "title": "Template Signer CAC/PIV Verification Method"
+            },
+            "TemplateSignerVerificationMethodLogin": {
+                "description": "When used as a verification method the signer will need to log in to a Box account before signing the request. If the signer does not have an existing account, they will have the option to create a free Box account.",
+                "type": "object",
+                "properties": {
+                    "type": {
+                        "description": "The type of verification method.",
+                        "type": "string",
+                        "example": "login",
+                        "enum": [
+                            "login"
+                        ]
+                    }
+                },
+                "required": [
+                    "type"
+                ],
+                "title": "Template Signer Login Verification Method"
+            },
+            "TemplateSignerVerificationMethodPhoneSMS": {
+                "description": "When used as a verification method, prior to signing the document, the signer will have to verify themselves using two-factor authentication by receiving an SMS message on their phone.",
+                "type": "object",
+                "properties": {
+                    "type": {
+                        "description": "The type of verification method.",
+                        "type": "string",
+                        "example": "phone",
+                        "enum": [
+                            "phone"
+                        ]
+                    }
+                },
+                "required": [
+                    "type"
+                ],
+                "title": "Template Signer Phone SMS Verification Method"
             },
             "TermsOfService": {
                 "description": "1つのサービス利用規約に該当するとみなされるルートレベルのレコード。",
