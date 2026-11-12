@@ -14,7 +14,7 @@
       "url": "https://www.apache.org/licenses/LICENSE-2.0"
     },
     "version": "2024.0",
-    "x-box-commit-hash": "d1f2984418"
+    "x-box-commit-hash": "d2ea9c9954"
   },
   "servers": [
     {
@@ -15895,7 +15895,7 @@
       "post": {
         "operationId": "post_invites",
         "summary": "Create user invite",
-        "description": "Invites an existing external user to join an enterprise.\n\nThe existing user can not be part of another enterprise and\nmust already have a Box account. Once invited, the user will receive an\nemail and are prompted to accept the invitation within the\nBox web application.\n\nThis method requires the \"Manage An Enterprise\" scope enabled for\nthe application, which can be enabled within the developer console.",
+        "description": "Invites an existing external user to join an enterprise.\n\nThe user must already have a Box account and cannot be\npart of another enterprise. Once invited, the user receives\nan email and is prompted to accept the invitation in\nthe Box web application.\n\nIf `is_auto_roll_in_enabled` is set to `true`, the user does not have to\naccept the invitation and is added to the enterprise automatically after\n14 days. Only unmanaged users can be invited this way. An unmanaged user\nis a free user whose email domain matches one of the enterprise's\ndomains. Availability depends on the enterprise's plan.\n\nThis method requires the \"Manage An Enterprise\" scope enabled for\nthe application, which can be enabled within the developer console.",
         "parameters": [
           {
             "name": "fields",
@@ -15949,6 +15949,12 @@
                     "required": [
                       "id"
                     ]
+                  },
+                  "is_auto_roll_in_enabled": {
+                    "description": "If set to `true`, the user is added to the enterprise\nautomatically after 14 days instead of having to accept the\ninvite. Only unmanaged users can be invited this way.\nAvailability depends on the enterprise's plan.",
+                    "type": "boolean",
+                    "example": true,
+                    "default": false
                   }
                 },
                 "required": [
@@ -15966,6 +15972,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Invite"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Returns `bad_request` when `is_auto_roll_in_enabled` is not a boolean,\nor when it is `true` and the user does not qualify for automatic\nroll-in.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientError"
                 }
               }
             }
@@ -35083,6 +35099,18 @@
             "type": "string",
             "format": "date-time",
             "example": "2012-12-12T10:53:43-08:00"
+          },
+          "auto_roll_in_at": {
+            "description": "The date and time when the user is added to the enterprise\nautomatically, or `null` if the user has to accept the invite.",
+            "type": "string",
+            "format": "date-time",
+            "example": "2012-12-26T00:00:00-08:00",
+            "nullable": true
+          },
+          "is_auto_roll_in": {
+            "description": "Whether the user is added to the enterprise automatically, without\nhaving to accept the invite. When `true`, `auto_roll_in_at` contains\nthe date and time of the roll-in.",
+            "type": "boolean",
+            "example": true
           }
         },
         "required": [
