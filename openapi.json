@@ -14,7 +14,7 @@
             "url": "https://www.apache.org/licenses/LICENSE-2.0"
         },
         "version": "2024.0",
-        "x-box-commit-hash": "d1f2984418"
+        "x-box-commit-hash": "d2ea9c9954"
     },
     "servers": [
         {
@@ -15895,7 +15895,7 @@
             "post": {
                 "operationId": "post_invites",
                 "summary": "ユーザー招待を作成",
-                "description": "既存の外部ユーザーを会社に招待します。\n\nすでに他の会社に所属しているユーザーや、Boxアカウントを持たないユーザーを招待することはできません。招待されたユーザーには、Boxウェブアプリケーションで招待を承認するように促すメールが届きます。\n\nこの方法を使用する場合は、対象アプリケーションに対して「Enterpriseの管理」スコープを有効にする必要があります。これは、開発者コンソールから有効にできます。",
+                "description": "既存の外部ユーザーを会社に招待します。\n\nThe user must already have a Box account and cannot be part of another enterprise. Once invited, the user receives an email and is prompted to accept the invitation in the Box web application.\n\nIf `is_auto_roll_in_enabled` is set to `true`, the user does not have to accept the invitation and is added to the enterprise automatically after 14 days. Only unmanaged users can be invited this way. An unmanaged user is a free user whose email domain matches one of the enterprise's domains. Availability depends on the enterprise's plan.\n\nこの方法を使用する場合は、対象アプリケーションに対して「Enterpriseの管理」スコープを有効にする必要があります。これは、開発者コンソールから有効にできます。",
                 "parameters": [
                     {
                         "name": "fields",
@@ -15949,6 +15949,12 @@
                                         "required": [
                                             "id"
                                         ]
+                                    },
+                                    "is_auto_roll_in_enabled": {
+                                        "description": "If set to `true`, the user is added to the enterprise automatically after 14 days instead of having to accept the invite. Only unmanaged users can be invited this way. Availability depends on the enterprise's plan.",
+                                        "type": "boolean",
+                                        "example": true,
+                                        "default": false
                                     }
                                 },
                                 "required": [
@@ -15966,6 +15972,16 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/Invite"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Returns `bad_request` when `is_auto_roll_in_enabled` is not a boolean, or when it is `true` and the user does not qualify for automatic roll-in.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
                                 }
                             }
                         }
@@ -35083,6 +35099,18 @@
                         "type": "string",
                         "format": "date-time",
                         "example": "2012-12-12T10:53:43-08:00"
+                    },
+                    "auto_roll_in_at": {
+                        "description": "The date and time when the user is added to the enterprise automatically, or `null` if the user has to accept the invite.",
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2012-12-26T00:00:00-08:00",
+                        "nullable": true
+                    },
+                    "is_auto_roll_in": {
+                        "description": "Whether the user is added to the enterprise automatically, without having to accept the invite. When `true`, `auto_roll_in_at` contains the date and time of the roll-in.",
+                        "type": "boolean",
+                        "example": true
                     }
                 },
                 "required": [
