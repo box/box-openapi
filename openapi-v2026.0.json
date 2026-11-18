@@ -14,7 +14,7 @@
             "url": "https://www.apache.org/licenses/LICENSE-2.0"
         },
         "version": "2026.0",
-        "x-box-commit-hash": "02deafa4b0"
+        "x-box-commit-hash": "d3324c11ac"
     },
     "servers": [
         {
@@ -4990,6 +4990,258 @@
                     "Shuttle"
                 ]
             }
+        },
+        "/ai_sessions": {
+            "get": {
+                "operationId": "get_ai_sessions_v2026.0",
+                "summary": "List AI sessions",
+                "description": "Returns a marker-paginated list of the AI sessions that the authenticated user can read and that were created through the Box public API. Entries are ordered by `sort` and `direction`, defaulting to `updated_at` descending so the most recently active session appears first.\n\nThe access token must have both the `ai.readwrite` and `root_readwrite` scopes.\n\nA page may contain fewer than `limit` entries while further pages remain. Treat a non-null `next_marker` as the only signal that more results exist.",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/BoxVersionHeader"
+                    },
+                    {
+                        "name": "source",
+                        "in": "query",
+                        "description": "Restricts the list to AI sessions with this origin. The only supported value is `api`.",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "api"
+                            ]
+                        },
+                        "example": "api"
+                    },
+                    {
+                        "name": "marker",
+                        "in": "query",
+                        "description": "The position marker at which to begin returning results, as returned in `next_marker` by the previous page. Omit it for the first page. All other parameters must match the request that returned the marker.",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii"
+                    },
+                    {
+                        "name": "sort",
+                        "in": "query",
+                        "description": "The field to sort results by. Possible values are `created_at`, `updated_at`, and `name`. Default is `updated_at`, which advances on each turn of session activity.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "updated_at",
+                            "enum": [
+                                "created_at",
+                                "updated_at",
+                                "name"
+                            ]
+                        },
+                        "example": "updated_at"
+                    },
+                    {
+                        "name": "direction",
+                        "in": "query",
+                        "description": "The direction to sort results in, either ascending (`asc`) or descending (`desc`). Default is `desc`.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "desc",
+                            "enum": [
+                                "asc",
+                                "desc"
+                            ]
+                        },
+                        "example": "desc"
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "The maximum number of AI sessions to return per page. The maximum is `100`; larger values are treated as `100`. The server may return fewer entries than requested.",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "format": "int32",
+                            "default": 100,
+                            "minimum": 1
+                        },
+                        "example": 100
+                    },
+                    {
+                        "name": "client_ids",
+                        "in": "query",
+                        "description": "A comma-separated list of OAuth client IDs. Restricts the list to AI sessions created by any of these applications. Client IDs that match no application are ignored, so the response is an empty list if none of them match. Empty entries are ignored, and an empty value is treated as if the parameter were not provided.",
+                        "required": false,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "example": [
+                            "ly1nj6n11vionaie65emwzk575hnnmrk"
+                        ],
+                        "explode": false
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns a paginated list of AI sessions.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AiSessions"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Returned with the `bad_request` code when `source` is missing, or when `source`, `marker`, `sort`, `direction`, or `limit` holds an unsupported value.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "`Authorization`ヘッダーで指定されているアクセストークンが認識されないか、指定されていない場合に返されます。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Returned with the `insufficient_scope` code when the access token does not have both the `ai.readwrite` and `root_readwrite` scopes.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Returned with the `too_many_requests` code when the user has sent too many requests in a given amount of time.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "予期しないクライアントエラー。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-box-tag": "ai_sessions",
+                "tags": [
+                    "AI Sessions"
+                ]
+            }
+        },
+        "/ai_sessions/{ai_session_id}": {
+            "delete": {
+                "operationId": "delete_ai_sessions_id_v2026.0",
+                "summary": "Delete AI session",
+                "description": "Deletes an AI session created through the Box public API, together with its agent tasks. The session's agent-generated files and uploaded files are moved to the trash. Files attached as sources from elsewhere in Box are not affected. Deleting a session does not stop a running task or notify the agent.\n\nThe access token must have both the `ai.readwrite` and `root_readwrite` scopes.",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/BoxVersionHeader"
+                    },
+                    {
+                        "name": "ai_session_id",
+                        "in": "path",
+                        "description": "The unique identifier of the AI session. This is the same value returned as `id` by the list endpoint and used as the A2A `contextId`.",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "23489723"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Returns an empty response when the AI session was successfully deleted."
+                    },
+                    "400": {
+                        "description": "Returned with the `bad_request` code when `ai_session_id` is empty or malformed.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "`Authorization`ヘッダーで指定されているアクセストークンが認識されないか、指定されていない場合に返されます。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Returned with the `insufficient_scope` code when the access token does not have both the `ai.readwrite` and `root_readwrite` scopes, or with the `forbidden` code when the user can read the AI session but is not permitted to delete it.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Returned with the `not_found` code when the AI session does not exist, is not visible to the user, was not created through the Box public API, or was already deleted.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Returned with the `too_many_requests` code when the user has sent too many requests in a given amount of time.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "予期しないクライアントエラー。",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ClientError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-box-tag": "ai_sessions",
+                "tags": [
+                    "AI Sessions"
+                ]
+            }
         }
     },
     "components": {
@@ -5010,6 +5262,134 @@
             }
         },
         "schemas": {
+            "AiSession": {
+                "description": "A standard representation of an AI session. An AI session holds the conversation state for a series of interactions with a Box AI agent. Its `id` is the A2A context identifier for that conversation.",
+                "type": "object",
+                "properties": {
+                    "type": {
+                        "description": "値は常に`ai_session`になります。",
+                        "type": "string",
+                        "example": "ai_session",
+                        "enum": [
+                            "ai_session"
+                        ]
+                    },
+                    "id": {
+                        "description": "The unique identifier for the AI session. This is also the A2A `contextId` for the conversation. Treat the value as opaque.",
+                        "type": "string",
+                        "example": "23489723"
+                    },
+                    "name": {
+                        "description": "The display name of the AI session. Sessions created through the A2A API are named automatically. The value is `null` only when no name was recorded.",
+                        "type": "string",
+                        "example": "a2a-126bda90-ae78-4c81-b55f-c7ed9b678a8f",
+                        "nullable": true
+                    },
+                    "source": {
+                        "description": "The origin of the AI session. Currently always `api`. New values may be added, so clients must tolerate values they do not recognize.",
+                        "type": "string",
+                        "example": "api",
+                        "enum": [
+                            "api"
+                        ]
+                    },
+                    "client_id": {
+                        "description": "The OAuth client ID of the application that created the AI session, as shown in the Developer Console. The value is `null` if the application is not known.",
+                        "type": "string",
+                        "example": "ly1nj6n11vionaie65emwzk575hnnmrk",
+                        "nullable": true
+                    },
+                    "created_by": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/User--Base"
+                            },
+                            {
+                                "description": "The user who created the AI session."
+                            }
+                        ]
+                    },
+                    "updated_by": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/User--Base"
+                            },
+                            {
+                                "description": "The user whose action last updated the AI session."
+                            }
+                        ]
+                    },
+                    "created_at": {
+                        "description": "The date and time when the AI session was created.",
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2026-09-01T10:30:00Z"
+                    },
+                    "updated_at": {
+                        "description": "The date and time when the AI session was last updated. It advances on each turn of session activity, so it also serves as the most recently used ordering.",
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2026-09-18T14:22:00Z"
+                    }
+                },
+                "required": [
+                    "type",
+                    "id",
+                    "name",
+                    "source",
+                    "client_id",
+                    "created_by",
+                    "updated_by",
+                    "created_at",
+                    "updated_at"
+                ],
+                "title": "AI session",
+                "x-box-resource-id": "ai_session_v2026.0",
+                "x-box-tag": "ai_sessions"
+            },
+            "AiSessions": {
+                "description": "A paginated list of AI sessions.",
+                "type": "object",
+                "allOf": [
+                    {
+                        "required": [
+                            "entries",
+                            "limit",
+                            "next_marker"
+                        ],
+                        "properties": {
+                            "entries": {
+                                "description": "A list of AI sessions. The list is empty when there are no results.",
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/AiSession"
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "type": "object",
+                        "description": "マーカーベースのページネーションについて説明しているAPIレスポンスの部分。",
+                        "properties": {
+                            "limit": {
+                                "description": "これらのエントリで使用された制限値。許容される最大値を超えていない限り、クエリパラメータの`limit`と等しくなります。最大値はAPIによって異なります。",
+                                "type": "integer",
+                                "format": "int64",
+                                "example": 1000
+                            },
+                            "next_marker": {
+                                "description": "次の検索結果ページの開始場所のマーカー。",
+                                "type": "string",
+                                "example": "JV9IRGZmieiBasejOG9yDCRNgd2ymoZIbjsxbJMjIs3kioVii",
+                                "nullable": true
+                            }
+                        }
+                    }
+                ],
+                "title": "AI sessions",
+                "x-box-resource-id": "ai_sessions_v2026.0",
+                "x-box-tag": "ai_sessions"
+            },
             "AutomateWorkflowAction": {
                 "description": "ワークフローを開始できるAutomateのアクション。",
                 "type": "object",
@@ -9546,6 +9926,11 @@
         }
     ],
     "tags": [
+        {
+            "name": "AI Sessions",
+            "description": "Endpoints for listing and deleting AI sessions, which hold the conversation state for interactions with Box AI agents.",
+            "x-box-tag": "ai_sessions"
+        },
         {
             "name": "Automateワークフロー",
             "description": "Automateワークフローのアクションをリストアップして手動で開始するためのエンドポイント。",
